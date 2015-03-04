@@ -23,20 +23,24 @@ out fData
 
 void main()
 {
+	mat4 viewProjectionMatrix = gl_ProjectionMatrix * gl_ViewMatrix;
+
 	frag.normal = vec3(0.0, 0.0, -1.0);
 
 	for (int i=0; i<gl_PositionIn.length(); i++)
 	{
-		gl_Position = gl_ModelViewProjectionMatrix * (gl_PositionIn[i] + vec4(1.0, -1.0, 0.0, 1.0));
+	//gl_ModelViewProjectionMatrix
+
+		gl_Position = gl_ProjectionMatrix * (gl_PositionIn[i] + vec4(1.0, -1.0, 0.0, 1.0));
 		EmitVertex();
 
-		gl_Position = gl_ModelViewProjectionMatrix * (gl_PositionIn[i] + vec4(-1.0, -1.0, 0.0, 1.0));
+		gl_Position = gl_ProjectionMatrix * (gl_PositionIn[i] + vec4(-1.0, -1.0, 0.0, 1.0));
 		EmitVertex();
 
-		gl_Position = gl_ModelViewProjectionMatrix * (gl_PositionIn[i] + vec4(1.0, 1.0, 0.0, 1.0));
+		gl_Position = gl_ProjectionMatrix * (gl_PositionIn[i] + vec4(1.0, 1.0, 0.0, 1.0));
 		EmitVertex();
 
-		gl_Position = gl_ModelViewProjectionMatrix * (gl_PositionIn[i] + vec4(-1.0, 1.0, 0.0, 1.0));
+		gl_Position = gl_ProjectionMatrix * (gl_PositionIn[i] + vec4(-1.0, 1.0, 0.0, 1.0));
 		EmitVertex();
 
 		EndPrimitive();

@@ -15,6 +15,7 @@ out vData
 void main()
 {
     vertex.normal = normalize(gl_NormalMatrix * gl_Normal);
-    //gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; // ftransform();
+    //gl_Position = gl_ModelViewMatrix * gl_Vertex; // ftransform();
 	gl_Position = ftransform();
+	//gl_Position = gl_Vertex;
 }
