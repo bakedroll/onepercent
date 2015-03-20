@@ -7,7 +7,7 @@ using namespace osg;
 
 namespace onep
 {
-	class GlobeModel : public Geometry
+	class GlobeModel : public Group
 	{
 	public:
 		GlobeModel();
