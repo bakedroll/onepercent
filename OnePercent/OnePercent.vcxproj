@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\SDK\OpenSceneGraph-3.2.1\include;E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\SDK\OpenSceneGraph-3.2.1\include;C:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -86,7 +86,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\globe.frag" />
-    <None Include="shader\globe.geom" />
     <None Include="shader\globe.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
