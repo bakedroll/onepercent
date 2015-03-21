@@ -1,7 +1,7 @@
 varying vec3 N;
 varying vec3 v;
 
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 1
 
 void main (void) 
 { 

@@ -37,7 +37,7 @@ int GameApplication::run()
 	group->getStateSet()->setMode(GL_DEPTH_TEST, StateAttribute::ON);
 	group->getStateSet()->setMode(GL_LIGHTING, StateAttribute::ON);
 
-	group->getStateSet()->setMode(GL_LIGHT0 , StateAttribute::ON);
+	group->getStateSet()->setMode(GL_LIGHT0 , StateAttribute::OFF);
 	group->getStateSet()->setMode(GL_LIGHT1, StateAttribute::ON);
 
 	ref_ptr<Light> light1 = new Light();
@@ -53,12 +53,11 @@ int GameApplication::run()
 	light1->setPosition(Vec4(0.0, 0.0, 0.0, 1.0));
 
 	ls1->setLight(light1);
-	//ls->setLocalStateSetModes(StateAttribute::ON);
 
 	light2->setLightNum(1);
 	light2->setDiffuse(Vec4(1.0, 1.0, 1.0, 1.0));
 	light2->setSpecular(Vec4(1.0, 1.0, 1.0, 1.0));
-	light2->setAmbient(Vec4(0.0, 0.0, 0.0, 1.0));
+	light2->setAmbient(Vec4(0.3, 0.3, 0.3, 1.0));
 	light2->setPosition(Vec4(-1.0, -0.5, 0.0, 0.0));
 
 	ls2->setLight(light2);
@@ -67,7 +66,7 @@ int GameApplication::run()
 	transform->setPosition(Vec3(5, 3, 0));
 	transform->addChild(ls1);
 
-	group->addChild(transform);
+	//group->addChild(transform);
 	group->addChild(ls2);
 
 	viewer.setSceneData(group);
