@@ -54,9 +54,6 @@
     <None Include="shader\globe.frag">
       <Filter>shader</Filter>
     </None>
-    <None Include="shader\globe.geom">
-      <Filter>shader</Filter>
-    </None>
     <None Include="shader\globe.vert">
       <Filter>shader</Filter>
     </None>
