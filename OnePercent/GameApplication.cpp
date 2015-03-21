@@ -6,6 +6,7 @@
 #include "GlobeViewer.h"
 
 #include <osg/PositionAttitudeTransform>
+#include <osg/LightModel>
 
 using namespace onep;
 using namespace osg;
@@ -20,18 +21,6 @@ int GameApplication::run()
 	group->addChild(globe);
 
 
-	/*ref_ptr<Geode> box_geode = new Geode();
-	ref_ptr<Geode> globe_geode = new Geode();
-
-	ref_ptr<ShapeDrawable> box = new ShapeDrawable(new Box(Vec3(3.0, 0, 0), 1, 1, 1));
-	ref_ptr<GlobeModel> globe = new GlobeModel();
-
-	box_geode->addDrawable(box);
-	globe_geode->addDrawable(globe);
-
-	group->addChild(box_geode);
-	group->addChild(globe_geode);*/
-
 	group->getOrCreateStateSet()->setMode(GL_CULL_FACE, StateAttribute::ON);
 	group->getStateSet()->setMode(GL_NORMALIZE, StateAttribute::ON);
 	group->getStateSet()->setMode(GL_DEPTH_TEST, StateAttribute::ON);
@@ -39,6 +28,10 @@ int GameApplication::run()
 
 	group->getStateSet()->setMode(GL_LIGHT0 , StateAttribute::OFF);
 	group->getStateSet()->setMode(GL_LIGHT1, StateAttribute::ON);
+
+	ref_ptr<LightModel> lightmodel = new LightModel();
+	lightmodel->setAmbientIntensity(Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	group->getStateSet()->setAttributeAndModes(lightmodel, StateAttribute::ON);
 
 	ref_ptr<Light> light1 = new Light();
 	ref_ptr<LightSource> ls1 = new LightSource();
@@ -57,7 +50,7 @@ int GameApplication::run()
 	light2->setLightNum(1);
 	light2->setDiffuse(Vec4(1.0, 1.0, 1.0, 1.0));
 	light2->setSpecular(Vec4(1.0, 1.0, 1.0, 1.0));
-	light2->setAmbient(Vec4(0.3, 0.3, 0.3, 1.0));
+	light2->setAmbient(Vec4(0.0, 0.0, 0.0, 1.0));
 	light2->setPosition(Vec4(-1.0, -0.5, 0.0, 0.0));
 
 	ls2->setLight(light2);
@@ -71,15 +64,13 @@ int GameApplication::run()
 
 	viewer.setSceneData(group);
 
-	ref_ptr<Follower> follower = new Follower();
-	//viewer.setCamera(follower);
+	/*ref_ptr<Follower> follower = new Follower();
+	viewer.setCamera(follower);
 
 	follower->setPosition(Vec3(0, -4, 0));
 	follower->updateLookAtMatrix();
 
-	//viewer.setCameraManipulator(new osgGA::TrackballManipulator());
-
-	/*while (!viewer.done())
+	while (!viewer.done())
 	{
 		viewer.frame();
 	}*/

@@ -87,19 +87,14 @@ ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
 	ref_ptr<Vec3Array> normals = new Vec3Array();
 	ref_ptr<Vec2Array> texcoords = new Vec2Array();
 	ref_ptr<DrawElementsUInt> triangles = new DrawElementsUInt(PrimitiveSet::TRIANGLES, 0);
-	
-	// north
-	vertices->push_back(Vec3(0.0, 0.0, radius));
-	normals->push_back(Vec3(0.0, 0.0, 1.0));
-	texcoords->push_back(Vec2(0.5, 1.0));
-
-	// south
-	vertices->push_back(Vec3(0.0, 0.0, -radius));
-	normals->push_back(Vec3(0.0, 0.0, -1.0));
-	texcoords->push_back(Vec2(0.5, 0.0));
 
 	for (int slice = 0; slice < slices + 1; slice++)
 	{
+		// north
+		vertices->push_back(Vec3(0.0, 0.0, radius));
+		normals->push_back(Vec3(0.0, 0.0, 1.0));
+		texcoords->push_back(Vec2((double)slice / (double)slices, 1.0));
+
 		for (int stack = 1; stack < stacks; stack++)
 		{
 			Vec3 point(0.0, 0.0, 1.0);
@@ -113,14 +108,21 @@ ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
 			normals->push_back(point);
 			texcoords->push_back(Vec2((double)slice / (double)slices, 1.0 - (double)stack / (double)stacks));
 		}
+
+		// south
+		vertices->push_back(Vec3(0.0, 0.0, -radius));
+		normals->push_back(Vec3(0.0, 0.0, -1.0));
+		texcoords->push_back(Vec2((double)slice / (double)slices, 0.0));
 	}
 
 	for (int slice = 0; slice < slices; slice++)
 	{
-		int slice_i = 2 + ((stacks - 1) * slice);
-		int next_slice_i = 2 + ((stacks - 1) * (slice + 1));
+		int north = ((stacks + 1) * slice);
+		int south = north + stacks;
+		int slice_i = north + 1;
+		int next_slice_i = ((stacks + 1) * (slice + 1)) + 1;
 
-		triangles->push_back(0);
+		triangles->push_back(north);
 		triangles->push_back(slice_i);
 		triangles->push_back(next_slice_i);
 
@@ -135,7 +137,7 @@ ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
 			triangles->push_back(next_slice_i + stack + 1);
 		}
 
-		triangles->push_back(1);
+		triangles->push_back(south);
 		triangles->push_back(next_slice_i + stacks - 2);
 		triangles->push_back(slice_i + stacks - 2);
 	}
