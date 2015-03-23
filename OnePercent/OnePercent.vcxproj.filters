@@ -49,6 +49,9 @@
     <ClInclude Include="GlobeViewer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RotationCallback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\globe.frag">

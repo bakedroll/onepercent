@@ -83,6 +83,7 @@
     <ClInclude Include="GlobeModel.h" />
     <ClInclude Include="GlobeViewer.h" />
     <ClInclude Include="Helper.h" />
+    <ClInclude Include="RotationCallback.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\globe.frag" />
