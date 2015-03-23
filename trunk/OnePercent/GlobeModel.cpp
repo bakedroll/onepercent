@@ -9,21 +9,26 @@
 #include <osg/Texture2D>
 
 #include <osgDB/ReadFile>
+#include <osg/PositionAttitudeTransform>
 
 using namespace onep;
 
 GlobeModel::GlobeModel()
 {
+	ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
+	transform->setAttitude(getQuatFromEuler(0.0, 23.5 * C_PI / 180.0, 0.0));
+
 	ref_ptr<Node> node = createMesh(24, 48);
 
 	ref_ptr<StateSet> ss = createStateSet();
-	//ss->setAttribute(createShader());
+	ss->setAttribute(createShader());
 
 	setStateSet(ss);
 
 	generateTangentAndBinormal(node);
 
-	addChild(node);
+	addChild(transform);
+	transform->addChild(node);
 }
 
 ref_ptr<StateSet> GlobeModel::createStateSet()
@@ -32,29 +37,18 @@ ref_ptr<StateSet> GlobeModel::createStateSet()
 
 	ref_ptr<Material> material = new Material();
 	material->setAmbient(Material::FRONT_AND_BACK, Vec4f(0.1, 0.1, 0.1, 1.0));
-	material->setDiffuse(Material::FRONT_AND_BACK, Vec4f(0.0, 0.5, 1.0, 1.0));
-	material->setSpecular(Material::FRONT_AND_BACK, Vec4f(1.0, 1.0, 1.0, 1.0));
-	material->setShininess(Material::FRONT_AND_BACK, 64);
+	material->setDiffuse(Material::FRONT_AND_BACK, Vec4f(1.0, 1.0, 1.0, 1.0));
+	material->setSpecular(Material::FRONT_AND_BACK, Vec4f(0.5, 0.5, 0.5, 1.0));
+	material->setShininess(Material::FRONT_AND_BACK, 32);
 	material->setEmission(Material::FRONT_AND_BACK, Vec4f(0.0, 0.0, 0.0, 1.0));
 
 	stateSet->setAttribute(material);
 
-	ref_ptr<Texture2D> normalmap_texture = new Texture2D();
-	normalmap_texture->setDataVariance(osg::Object::DYNAMIC);
-	normalmap_texture->setWrap(Texture::WRAP_S, Texture::CLAMP_TO_EDGE);
-	normalmap_texture->setFilter(Texture::MIN_FILTER, Texture::LINEAR);
-	normalmap_texture->setFilter(Texture::MAG_FILTER, Texture::LINEAR_MIPMAP_LINEAR);
-	normalmap_texture->setMaxAnisotropy(8);
+	loadTextures(stateSet, "./data/earth/surface/3_no_ice_clouds_8k.jpg", 0, "colormap");
+	loadTextures(stateSet, "./data/earth/surface/water_8k.png", 1, "specmap");
+	loadTextures(stateSet, "./data/earth/surface/5_night_8k.jpg", 2, "nightmap");
+	loadTextures(stateSet, "./data/earth/surface/cities_8k.png", 3, "citymap");
 
-	ref_ptr<osg::Image> normalmap_image = osgDB::readImageFile("./data/earth/normal/without_ocean.jpg");
-	if (!normalmap_image)
-	{
-		return stateSet;
-	}
-
-	normalmap_texture->setImage(normalmap_image);
-
-	stateSet->setTextureAttributeAndModes(0, normalmap_texture, StateAttribute::ON);
 
 	return stateSet;
 }
@@ -76,6 +70,31 @@ ref_ptr<Program> GlobeModel::createShader()
 	pgm->addBindAttribLocation("binormal", 7);
 
 	return pgm;
+}
+
+void GlobeModel::loadTextures(ref_ptr<StateSet> stateSet, char* filename, int tex_layer, char* uniform_name)
+{
+	ref_ptr<Texture2D> texture = new Texture2D();
+	texture->setDataVariance(osg::Object::DYNAMIC);
+	texture->setWrap(Texture::WRAP_S, Texture::CLAMP_TO_EDGE);
+	texture->setFilter(Texture::MIN_FILTER, Texture::LINEAR);
+	texture->setFilter(Texture::MAG_FILTER, Texture::LINEAR_MIPMAP_LINEAR);
+	texture->setMaxAnisotropy(8);
+
+	ref_ptr<Image> image = osgDB::readImageFile(filename);
+	if (!image)
+	{
+		return;
+	}
+
+	texture->setImage(image);
+
+	ref_ptr<Uniform> uniform = new Uniform(Uniform::SAMPLER_2D, uniform_name);
+	uniform->set(tex_layer);
+
+	stateSet->setTextureAttributeAndModes(tex_layer, texture, StateAttribute::ON);
+	stateSet->addUniform(uniform);
+
 }
 
 ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
