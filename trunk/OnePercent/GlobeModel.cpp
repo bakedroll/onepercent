@@ -44,7 +44,8 @@ ref_ptr<StateSet> GlobeModel::createStateSet()
 	loadTextures(stateSet, "./data/earth/surface/water_8k.png", 1, "specmap");
 	loadTextures(stateSet, "./data/earth/surface/5_night_8k.jpg", 2, "nightmap");
 	loadTextures(stateSet, "./data/earth/surface/cities_8k.png", 3, "citymap");
-	loadTextures(stateSet, "./data/earth/normal/with_ocean.jpg", 4, "normalmap");
+	loadTextures(stateSet, "./data/earth/normal/with_ocean_fixed.jpg", 4, "normalmap");
+	loadTextures(stateSet, "./data/earth/relief/relief.png", 5, "reliefmap");
 
 
 	return stateSet;
@@ -74,6 +75,7 @@ void GlobeModel::loadTextures(ref_ptr<StateSet> stateSet, char* filename, int te
 	ref_ptr<Texture2D> texture = new Texture2D();
 	texture->setDataVariance(osg::Object::DYNAMIC);
 	texture->setWrap(Texture::WRAP_S, Texture::CLAMP_TO_EDGE);
+	texture->setWrap(Texture::WRAP_T, Texture::CLAMP_TO_EDGE);
 	texture->setFilter(Texture::MIN_FILTER, Texture::LINEAR);
 	texture->setFilter(Texture::MAG_FILTER, Texture::LINEAR_MIPMAP_LINEAR);
 	texture->setMaxAnisotropy(8);
