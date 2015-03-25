@@ -40,16 +40,21 @@ int GameApplication::run()
 	ref_ptr<Light> light1 = new Light();
 	ref_ptr<LightSource> ls1 = new LightSource();
 
-	//ref_ptr<Light> light2 = new Light();
-	//ref_ptr<LightSource> ls2 = new LightSource();
 
-	/*light1->setLightNum(0);
-	light1->setDiffuse(Vec4(1.0, 0.7, 0.3, 1.0));
-	light1->setSpecular(Vec4(1.0, 1.0, 1.0, 1.0));
-	light1->setAmbient(Vec4(0.0, 0.0, 0.0, 1.0));
-	light1->setPosition(Vec4(0.0, 0.0, 0.0, 1.0));
 
-	ls1->setLight(light1);*/
+	/*ref_ptr<Light> light2 = new Light();
+	ref_ptr<LightSource> ls2 = new LightSource();
+
+	light2->setLightNum(1);
+	light2->setDiffuse(Vec4(1.0, 0.7, 0.3, 1.0));
+	light2->setSpecular(Vec4(1.0, 1.0, 1.0, 1.0));
+	light2->setAmbient(Vec4(0.0, 0.0, 0.0, 1.0));
+	light2->setPosition(Vec4(10.0, 5.0, 0.0, 1.0));
+
+	ls2->setLight(light2);
+	group->addChild(ls2);*/
+
+
 
 	light1->setLightNum(0);
 	light1->setDiffuse(Vec4(1.0, 1.0, 1.0, 1.0));
