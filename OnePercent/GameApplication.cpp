@@ -1,9 +1,10 @@
 #include "GameApplication.h"
 
 #include "GlobeModel.h"
-
+#include "Helper.h"
 #include "Follower.h"
 #include "GlobeViewer.h"
+#include "UpdateCallback.h"
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/LightModel>
@@ -17,8 +18,11 @@ int GameApplication::run()
 
 	ref_ptr<Group> group = new Group();
 
+	ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
 	ref_ptr<GlobeModel> globe = new GlobeModel();
-	group->addChild(globe);
+
+	transform->addChild(globe);
+	group->addChild(transform);
 
 
 	group->getOrCreateStateSet()->setMode(GL_CULL_FACE, StateAttribute::ON);
@@ -51,16 +55,16 @@ int GameApplication::run()
 	light1->setDiffuse(Vec4(1.0, 1.0, 1.0, 1.0));
 	light1->setSpecular(Vec4(1.0, 1.0, 1.0, 1.0));
 	light1->setAmbient(Vec4(0.0, 0.0, 0.0, 1.0));
-	light1->setPosition(Vec4(-1.0, -0.5, 0.0, 0.0));
+	light1->setPosition(Vec4(getVec3FromEuler(0.0, -23.5 * C_PI / 180.0, C_PI / 2.0), 0.0));
 
 	ls1->setLight(light1);
 
-	/*ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
-	transform->setPosition(Vec3(5, 3, 0));
-	transform->addChild(ls1);
-
-	//group->addChild(transform);*/
 	group->addChild(ls1);
+
+	ref_ptr<UpdateCallback> update_callback = new UpdateCallback();
+	update_callback->setGlobeTransform(transform);
+
+	group->setUpdateCallback(update_callback);
 
 	viewer.setSceneData(group);
 
@@ -76,6 +80,8 @@ int GameApplication::run()
 	}*/
 
 	viewer.setUpViewInWindow(10, 50, 1280, 768);
+
+	viewer.getCamera()->setClearColor(Vec4(0.0, 0.0, 0.0, 1.0));
 
 	viewer.run();
 

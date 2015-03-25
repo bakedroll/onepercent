@@ -47,7 +47,7 @@ void main (void)
 
       // calculate Specular Term:
       vec4 Ispec = gl_FrontLightProduct[i].specular 
-             * pow(max(dot(R,E),0.0),0.3*gl_FrontMaterial.shininess) * texture2D(specmap, gl_TexCoord[0].st);
+             * pow(max(dot(R,E),0.0),0.3*gl_FrontMaterial.shininess) * (texture2D(specmap, gl_TexCoord[0].st) * 0.8 + vec4(0.2, 0.2, 0.2, 0.0));
       Ispec = clamp(Ispec, 0.0, 1.0); 
 
 	  finalColor += Iamb + Idiff + Ispec;

@@ -32,6 +32,9 @@
     <ClCompile Include="GlobeViewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UpdateCallback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameApplication.h">
@@ -49,7 +52,7 @@
     <ClInclude Include="GlobeViewer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RotationCallback.h">
+    <ClInclude Include="UpdateCallback.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

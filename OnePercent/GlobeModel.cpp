@@ -15,10 +15,7 @@ using namespace onep;
 
 GlobeModel::GlobeModel()
 {
-	ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
-	transform->setAttitude(getQuatFromEuler(0.0, 23.5 * C_PI / 180.0, 0.0));
-
-	ref_ptr<Node> node = createMesh(24, 48);
+	ref_ptr<Node> node = createMesh(48, 96);
 
 	ref_ptr<StateSet> ss = createStateSet();
 	ss->setAttribute(createShader());
@@ -27,8 +24,7 @@ GlobeModel::GlobeModel()
 
 	generateTangentAndBinormal(node);
 
-	addChild(transform);
-	transform->addChild(node);
+	addChild(node);
 }
 
 ref_ptr<StateSet> GlobeModel::createStateSet()
@@ -116,12 +112,7 @@ ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
 
 		for (int stack = 1; stack < stacks; stack++)
 		{
-			Vec3 point(0.0, 0.0, 1.0);
-
-			double pitch = (double)stack * (C_PI / (double)stacks);
-			double yaw = (double)slice * (2.0 * C_PI / (double)slices);
-
-			rotateVector(&point, onep::getQuatFromEuler(pitch, 0.0, yaw));
+			Vec3 point = getVec3FromEuler((double)stack * (C_PI / (double)stacks), 0.0, (double)slice * (2.0 * C_PI / (double)slices), Vec3(0.0, 0.0, 1.0));
 
 			vertices->push_back(point * radius);
 			normals->push_back(point);

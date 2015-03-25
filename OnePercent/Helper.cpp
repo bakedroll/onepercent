@@ -47,6 +47,13 @@ Quat onep::getQuatFromEuler(double pitch, double roll, double yaw)
 	return q;
 }
 
+Vec3 onep::getVec3FromEuler(double pitch, double roll, double yaw, Vec3 origin)
+{
+	rotateVector(&origin, onep::getQuatFromEuler(pitch, roll, yaw));
+
+	return origin;
+}
+
 void onep::generateTangentAndBinormal(Node* node)
 {
 	ref_ptr<Group> group = node->asGroup();
