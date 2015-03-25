@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\SDK\OpenSceneGraph-3.2.1\include;C:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\SDK\OpenSceneGraph-3.2.1\include;E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -76,6 +76,7 @@
     <ClCompile Include="GlobeViewer.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="UpdateCallback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Follower.h" />
@@ -83,7 +84,7 @@
     <ClInclude Include="GlobeModel.h" />
     <ClInclude Include="GlobeViewer.h" />
     <ClInclude Include="Helper.h" />
-    <ClInclude Include="RotationCallback.h" />
+    <ClInclude Include="UpdateCallback.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\globe.frag" />
