@@ -1,45 +1,32 @@
-varying vec3 N;
-varying vec3 v;
+#define MAX_LIGHTS 1
+
+varying vec3 lightVec[MAX_LIGHTS];
+varying vec3 halfVec[MAX_LIGHTS];
 
 uniform sampler2D colormap;
 uniform sampler2D specmap;
 uniform sampler2D nightmap;
 uniform sampler2D citymap;
-
-#define MAX_LIGHTS 1
+uniform sampler2D normalmap;
 
 void main (void) 
 { 
+	// lookup normal from normal map, move from [0,1] to  [-1, 1] range, normalize
+	vec3 normal = 2.0 * texture2D (normalmap, gl_TexCoord[0].st).rgb - 1.0;
+	normal = normalize(normal);
+
    vec4 finalColor = vec4(0.0, 0.0, 0.0, 1.0);
    
    for (int i=0;i<MAX_LIGHTS;i++)
    {
-      vec3 L;
 	  float ndotl, edge;
-	  
-	  if (gl_LightSource[i].position.w == 1.0)
-	  {
-		L = normalize(gl_LightSource[i].position.xyz - v);
-	  }
-	  else
-	  {
-		L = normalize(gl_LightSource[i].position.xyz);
-	  }
-
-      vec3 E = normalize(-v); // we are in Eye Coordinates, so EyePos is (0,0,0) 
-      vec3 R = normalize(-reflect(L,N)); 
-   
-
 
       //calculate Ambient Term: 
       vec4 Iamb = gl_FrontLightProduct[i].ambient;
 
       //calculate Diffuse Term:
-	  ndotl = dot(N,L);
+	  ndotl = dot(lightVec[i], normal);
 
-      //vec4 Idiff = gl_FrontLightProduct[i].diffuse * max(ndotl, 0.0);
-      //Idiff = clamp(Idiff, 0.0, 1.0);
-   
 	  ndotl = clamp(ndotl, -1.0, 1.0);
 	  edge = (clamp(ndotl * 3.0, -1.0, 1.0) + 1.0) * 0.5;
 
@@ -47,12 +34,12 @@ void main (void)
 
       // calculate Specular Term:
       vec4 Ispec = gl_FrontLightProduct[i].specular 
-             * pow(max(dot(R,E),0.0),0.3*gl_FrontMaterial.shininess) * (texture2D(specmap, gl_TexCoord[0].st) * 0.8 + vec4(0.2, 0.2, 0.2, 0.0));
+             * pow(max(dot(halfVec[i], normal),0.0), 0.3*gl_FrontMaterial.shininess) * (texture2D(specmap, gl_TexCoord[0].st) * 0.5 + vec4(0.5, 0.5, 0.5, 0.0));
+
       Ispec = clamp(Ispec, 0.0, 1.0); 
 
 	  finalColor += Iamb + Idiff + Ispec;
    }
    
-   // write Total Color: 
    gl_FragColor = gl_FrontLightModelProduct.sceneColor + finalColor + gl_FrontMaterial.emission;
 }
