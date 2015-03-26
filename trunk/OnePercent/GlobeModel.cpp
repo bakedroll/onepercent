@@ -46,7 +46,7 @@ ref_ptr<StateSet> GlobeModel::createStateSet()
 	material->setAmbient(Material::FRONT_AND_BACK, Vec4f(0.1, 0.1, 0.1, 1.0));
 	material->setDiffuse(Material::FRONT_AND_BACK, Vec4f(1.0, 1.0, 1.0, 1.0));
 	material->setSpecular(Material::FRONT_AND_BACK, Vec4f(0.5, 0.5, 0.5, 1.0));
-	material->setShininess(Material::FRONT_AND_BACK, 32);
+	material->setShininess(Material::FRONT_AND_BACK, 16);
 	material->setEmission(Material::FRONT_AND_BACK, Vec4f(0.0, 0.0, 0.0, 1.0));
 
 	stateSet->setAttribute(material);
