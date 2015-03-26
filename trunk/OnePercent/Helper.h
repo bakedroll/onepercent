@@ -5,7 +5,7 @@
 
 using namespace osg;
 
-#define C_PI 3.14159265359
+#define C_PI 3.14159265359f
 
 namespace onep
 {

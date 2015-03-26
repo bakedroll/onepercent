@@ -26,7 +26,7 @@ void UpdateCallback::operator()(Node* node, NodeVisitor* nv)
 	m_lastSimTime = time;
 
 
-	m_globe_angle = fmodf(m_globe_angle + (float)time_diff * 0.1f, (C_PI * 2.0));
+	m_globe_angle = fmodf(m_globe_angle + (float)time_diff * 0.1f, (C_PI * 2.0f));
 	m_globeTransform->setAttitude(getQuatFromEuler(0.0, 0.0, m_globe_angle));
 
 	traverse(node, nv);
