@@ -15,16 +15,27 @@ using namespace onep;
 
 GlobeModel::GlobeModel()
 {
-	ref_ptr<Node> node = createMesh(48, 96);
+	ref_ptr<Node> earth = createMesh(48, 96, 6371);
+	ref_ptr<Node> atmosphere = createMesh(48, 96, 6385);
 
 	ref_ptr<StateSet> ss = createStateSet();
 	ss->setAttribute(createShader());
 
-	setStateSet(ss);
+	earth->setStateSet(ss);
+	generateTangentAndBinormal(earth);
 
-	generateTangentAndBinormal(node);
 
-	addChild(node);
+	ref_ptr<Material> material = new Material();
+	material->setAlpha(Material::FRONT_AND_BACK, 0.8f);
+
+
+	atmosphere->getOrCreateStateSet()->setMode(GL_BLEND, StateAttribute::ON);
+	atmosphere->getStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
+	atmosphere->getStateSet()->setAttribute(material);
+
+
+	addChild(earth);
+	// addChild(atmosphere);
 }
 
 ref_ptr<StateSet> GlobeModel::createStateSet()
@@ -76,8 +87,8 @@ void GlobeModel::loadTextures(ref_ptr<StateSet> stateSet, char* filename, int te
 	texture->setDataVariance(osg::Object::DYNAMIC);
 	texture->setWrap(Texture::WRAP_S, Texture::CLAMP_TO_EDGE);
 	texture->setWrap(Texture::WRAP_T, Texture::CLAMP_TO_EDGE);
-	texture->setFilter(Texture::MIN_FILTER, Texture::LINEAR);
-	texture->setFilter(Texture::MAG_FILTER, Texture::LINEAR_MIPMAP_LINEAR);
+	texture->setFilter(Texture::MIN_FILTER, Texture::LINEAR_MIPMAP_LINEAR);
+	texture->setFilter(Texture::MAG_FILTER, Texture::LINEAR);
 	texture->setMaxAnisotropy(8);
 
 	ref_ptr<Image> image = osgDB::readImageFile(filename);
@@ -108,12 +119,7 @@ ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
 
 	for (int slice = 0; slice < slices + 1; slice++)
 	{
-		// north
-		vertices->push_back(Vec3(0.0, 0.0, radius));
-		normals->push_back(Vec3(0.0, 0.0, 1.0));
-		texcoords->push_back(Vec2((double)slice / (double)slices, 1.0));
-
-		for (int stack = 1; stack < stacks; stack++)
+		for (int stack = 0; stack < stacks + 1; stack++)
 		{
 			Vec3 point = getVec3FromEuler((double)stack * (C_PI / (double)stacks), 0.0, (double)slice * (2.0 * C_PI / (double)slices), Vec3(0.0, 0.0, 1.0));
 
@@ -121,11 +127,6 @@ ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
 			normals->push_back(point);
 			texcoords->push_back(Vec2((double)slice / (double)slices, 1.0 - (double)stack / (double)stacks));
 		}
-
-		// south
-		vertices->push_back(Vec3(0.0, 0.0, -radius));
-		normals->push_back(Vec3(0.0, 0.0, -1.0));
-		texcoords->push_back(Vec2((double)slice / (double)slices, 0.0));
 	}
 
 	for (int slice = 0; slice < slices; slice++)
