@@ -1,6 +1,7 @@
 Textures:
 
 http://www.shadedrelief.com/natural3/index.html
+http://paulbourke.net/miscellaneous/starfield/
 
 Terrain LOD:
 
