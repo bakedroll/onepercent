@@ -5,7 +5,7 @@ varying vec3 E;
 varying vec3 lightVec[MAX_LIGHTS];
 
 uniform sampler2D colormap;
-uniform sampler2D specreliefcitiesmap;
+uniform sampler2D specreliefcitiesboundariesmap;
 uniform sampler2D nightmap;
 uniform sampler2D normalmap;
 
@@ -14,11 +14,12 @@ void main (void)
 	vec4 finalColor = vec4(0.0, 0.0, 0.0, 1.0);
 
 	vec4 colormap_color = texture2D(colormap, gl_TexCoord[0].st);
-	vec4 specreliefcitiesmap_color = texture2D(specreliefcitiesmap, gl_TexCoord[0].st);
+	vec4 specreliefcitiesboundariesmap_color = texture2D(specreliefcitiesboundariesmap, gl_TexCoord[0].st);
 	vec3 normal = 2.0 * texture2D (normalmap, gl_TexCoord[0].st).rgb - 1.0;
-	vec4 nightmap_color = texture2D(nightmap, gl_TexCoord[0].st) + specreliefcitiesmap_color.b;
+	vec4 nightmap_color = texture2D(nightmap, gl_TexCoord[0].st) + specreliefcitiesboundariesmap_color.b;
 
-	float ocean_depth = clamp(1.0 - specreliefcitiesmap_color.r + specreliefcitiesmap_color.g + 0.7, 0.0, 1.0);
+	float ocean_depth = clamp(1.0 - specreliefcitiesboundariesmap_color.r + specreliefcitiesboundariesmap_color.g + 0.7, 0.0, 1.0);
+	vec4 boundaries_color = vec4(specreliefcitiesboundariesmap_color.a);
 
 	normal = normalize(normal);
 
@@ -37,12 +38,12 @@ void main (void)
 		ndotl = clamp(ndotl, -1.0, 1.0);
 		edge = clamp(ndotl * 3.0, -1.0, 1.0) * 0.5 + 0.5;
 
-		vec4 Idiff = ocean_depth * colormap_color * edge  +  ocean_depth * nightmap_color * (1.0 - edge);
+		vec4 Idiff = ocean_depth * colormap_color * edge  +  ocean_depth * nightmap_color * (1.0 - edge) + boundaries_color;
 
 		// SPECULAR
 		vec4 Ispec = gl_FrontLightProduct[i].specular 
 			* pow(max(dot(R, -E), 0.0), 0.3 * gl_FrontMaterial.shininess)
-			* (specreliefcitiesmap_color.r * 0.8 + 0.2);
+			* (specreliefcitiesboundariesmap_color.r * 0.8 + 0.2);
 			//* specmap_color;
 
 		Ispec = clamp(Ispec, 0.0, 1.0); 

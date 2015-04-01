@@ -1,6 +1,6 @@
 ﻿Merge:
 
-0 ../../../../OnePercent/data/earth/surface/water_16k.png ../../../../OnePercent/data/earth/relief/relief_16k.png ../../../../OnePercent/data/earth/surface/cities_16k.png ../../../../OnePercent/data/earth/surface/specular_relief_cities_16k.png
+0 ../../../../OnePercent/data/earth/surface/water_8k.png ../../../../OnePercent/data/earth/relief/relief_8k.png ../../../../OnePercent/data/earth/surface/cities_8k.png ../../../../OnePercent/data/earth/surface/boundaries_9k.png ../../../../OnePercent/data/earth/surface/specular_relief_cities_boundaries_8k.png
 
 Subdivide:
 
