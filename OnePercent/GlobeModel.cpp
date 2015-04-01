@@ -53,9 +53,8 @@ ref_ptr<StateSet> GlobeModel::createStateSet()
 
 	loadTextures(stateSet, "./data/earth/surface/4_no_ice_clouds_mts_8k.jpg", 0, "colormap");
 	loadTextures(stateSet, "./data/earth/surface/5_night_8k.jpg", 1, "nightmap");
-	loadTextures(stateSet, "./data/earth/surface/specular_relief_cities_8k.png", 2, "specreliefcitiesmap");
-	//loadTextures(stateSet, "./data/earth/normal/with_ocean_fixed.jpg", 3, "normalmap");
-	loadTextures(stateSet, "./data/earth/normal/EarthNormal.png", 3, "normalmap");
+	loadTextures(stateSet, "./data/earth/surface/specular_relief_cities_boundaries_8k.png", 2, "specreliefcitiesboundariesmap");
+	loadTextures(stateSet, "./data/earth/normal/normal_8k.png", 3, "normalmap");
 
 
 	return stateSet;

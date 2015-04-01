@@ -18,23 +18,24 @@ namespace ImageHelper
             Exit();
         }
 
-        private static void MergeImages(string redFile, string greenFile, string blueFile, string resultFile)
+        private static void MergeImages(string redFile, string greenFile, string blueFile, string alphaFile, string resultFile)
         {
             var redBitmap = new Bitmap(redFile);
             var greenBitmap = new Bitmap(greenFile);
             var blueBitmap = new Bitmap(blueFile);
+            var alphaBitmap = new Bitmap(alphaFile);
 
             var width = Math.Min(redBitmap.Width, greenBitmap.Width);
             var height = Math.Min(redBitmap.Height, greenBitmap.Height);
 
-            var resultBitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            var resultBitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
 
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
                     resultBitmap.SetPixel(x, y, Color.FromArgb(
-                        255,
+                        alphaBitmap.GetPixel(x, y).R,
                         redBitmap.GetPixel(x, y).R,
                         greenBitmap.GetPixel(x, y).G,
                         blueBitmap.GetPixel(x, y).B));
@@ -92,7 +93,7 @@ namespace ImageHelper
                 switch (command)
                 {
                     case 0:
-                        MergeImages(args[1], args[2], args[3], args[4]);
+                        MergeImages(args[1], args[2], args[3], args[4], args[5]);
                         break;
                     case 1:
                         SubdivideImage(args[1], Int32.Parse(args[2]), Int32.Parse(args[3]), args[4]);
