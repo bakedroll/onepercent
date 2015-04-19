@@ -11,15 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\GameException.h" />
-    <ClInclude Include="include\GameApplication.h" />
-    <ClInclude Include="include\GameSettings.h" />
-    <ClInclude Include="include\Helper.h" />
-    <ClInclude Include="include\GameState.h" />
-    <ClInclude Include="include\UpdateStateCallback.h" />
-    <ClInclude Include="include\World.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\GameException.cpp" />
     <ClCompile Include="src\GameApplication.cpp" />
     <ClCompile Include="src\GameSettings.cpp" />
@@ -27,6 +18,15 @@
     <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\UpdateStateCallback.cpp" />
     <ClCompile Include="src\World.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\osgGaming\GameApplication.h" />
+    <ClInclude Include="include\osgGaming\GameException.h" />
+    <ClInclude Include="include\osgGaming\GameSettings.h" />
+    <ClInclude Include="include\osgGaming\GameState.h" />
+    <ClInclude Include="include\osgGaming\Helper.h" />
+    <ClInclude Include="include\osgGaming\UpdateStateCallback.h" />
+    <ClInclude Include="include\osgGaming\World.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A73F05F2-DB1B-4366-A6E7-E063F2A12925}</ProjectGuid>
@@ -57,7 +57,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(ProjectDir)include\osgGaming;$(IncludePath)</IncludePath>
     <LibraryPath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)lib\</OutDir>
   </PropertyGroup>
