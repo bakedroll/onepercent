@@ -17,6 +17,7 @@
     <ClCompile Include="src\GameSettings.cpp" />
     <ClCompile Include="src\Helper.cpp" />
     <ClCompile Include="src\GameState.cpp" />
+    <ClCompile Include="src\Hud.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -26,6 +27,7 @@
     <ClInclude Include="include\osgGaming\GameSettings.h" />
     <ClInclude Include="include\osgGaming\GameState.h" />
     <ClInclude Include="include\osgGaming\Helper.h" />
+    <ClInclude Include="include\osgGaming\Hud.h" />
     <ClInclude Include="include\osgGaming\World.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

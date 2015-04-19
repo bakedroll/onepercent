@@ -8,6 +8,7 @@
 #include <osgViewer/Viewer>
 
 #include <vector>
+#include <future>
 
 namespace osgGaming
 {
@@ -39,5 +40,8 @@ namespace osgGaming
 
 		bool _gameEnded;
 		bool _isLoading;
+		bool _resetTimeDiff;
+
+		std::future<void> _loadingThreadFuture;
 	};
 }

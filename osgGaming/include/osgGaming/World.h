@@ -1,5 +1,7 @@
 #pragma once
 
+#include <osgGaming/Hud.h>
+
 #include <map>
 
 #include <osg/Referenced>
@@ -23,6 +25,7 @@ namespace osgGaming
 		osg::ref_ptr<osg::Group> getRootNode();
 		osg::ref_ptr<osg::StateSet> getGlobalStateSet();
 		osg::ref_ptr<osg::LightModel> getGlobalLightModel();
+		osg::ref_ptr<Hud> getHud();
 
 		void setLightEnabled(int lightNum, bool enabled);
 		osg::ref_ptr<osg::Light> getLight(int lightNum);
@@ -35,5 +38,7 @@ namespace osgGaming
 		osg::ref_ptr<osg::LightModel> _globalLightModel;
 
 		LightSourceDictionary _lightSources;
+
+		osg::ref_ptr<Hud> _hud;
 	};
 }
