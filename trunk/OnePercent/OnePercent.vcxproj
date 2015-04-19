@@ -70,6 +70,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="Follower.cpp" />
     <ClCompile Include="GameApplication.cpp" />
     <ClCompile Include="GlobeModel.cpp" />
@@ -79,6 +80,7 @@
     <ClCompile Include="UpdateCallback.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EventManager.h" />
     <ClInclude Include="Follower.h" />
     <ClInclude Include="GameApplication.h" />
     <ClInclude Include="GlobeModel.h" />

@@ -15,8 +15,8 @@ using namespace onep;
 
 GlobeModel::GlobeModel()
 {
-	ref_ptr<Node> earth = createMesh(48, 96, 6371);
-	ref_ptr<Node> atmosphere = createMesh(48, 96, 6385);
+	ref_ptr<Node> earth = createPlanetGeode(0);
+	//ref_ptr<Node> atmosphere = createMesh(48, 96, 6385);
 
 	ref_ptr<StateSet> ss = createStateSet();
 	ss->setAttribute(createShader());
@@ -25,17 +25,84 @@ GlobeModel::GlobeModel()
 	generateTangentAndBinormal(earth);
 
 
-	ref_ptr<Material> material = new Material();
-	material->setAlpha(Material::FRONT_AND_BACK, 0.8f);
+	//ref_ptr<Material> material = new Material();
+	//material->setAlpha(Material::FRONT_AND_BACK, 0.8f);
 
 
-	atmosphere->getOrCreateStateSet()->setMode(GL_BLEND, StateAttribute::ON);
-	atmosphere->getStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
-	atmosphere->getStateSet()->setAttribute(material);
+	//atmosphere->getOrCreateStateSet()->setMode(GL_BLEND, StateAttribute::ON);
+	//atmosphere->getStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
+	//atmosphere->getStateSet()->setAttribute(material);
 
 
 	addChild(earth);
 	// addChild(atmosphere);
+}
+
+ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
+{
+	ref_ptr<Geode> geode = new Geode();
+
+	int sphereStacks = 48;
+	int sphereSlices = 96;
+	int sphereRadius = 6371;
+
+	char* resolutionLevel0;
+	char* resolutionLevel1;
+	int n, m;
+
+	switch (textureResolution)
+	{
+	default:
+	case 0:
+		n = 2;
+		m = 1;
+		resolutionLevel0 = "8k";
+		resolutionLevel1 = "8k";
+		break;
+	case 1:
+		n = 4;
+		m = 2;
+		resolutionLevel0 = "16k";
+		resolutionLevel1 = "8k_4x2";
+		break;
+	};
+
+	int stacksPerSegment = sphereStacks / m;
+	int slicesPerSegment = sphereSlices / n;
+
+	for (int y = 0; y < m; y++)
+	{
+		for (int x = 0; x < n; x++)
+		{
+			ref_ptr<Geometry> geo = createSphereSegmentMesh(
+				sphereStacks, sphereSlices, sphereRadius,
+				y * stacksPerSegment,
+				(y + 1) * stacksPerSegment - 1,
+				x * slicesPerSegment,
+				(x + 1) * slicesPerSegment - 1);
+
+			ref_ptr<StateSet> stateSet = geo->getOrCreateStateSet();
+
+			char colormap_file[128];
+			char nightmap_file[128];
+			char specreliefcitiesboundariesmap_file[128];
+			char normalmap_file[128];
+
+			sprintf(colormap_file, "./data/earth/color/%s/%dx%d.png", resolutionLevel0, x, y);
+			sprintf(nightmap_file, "./data/earth/night/%s/%dx%d.png", resolutionLevel0, x, y);
+			sprintf(specreliefcitiesboundariesmap_file, "./data/earth/specular_relief_cities/%s/%dx%d.png", resolutionLevel1, x, y);
+			sprintf(normalmap_file, "./data/earth/normal/%s/%dx%d.png", resolutionLevel1, x, y);
+
+			loadTexture(stateSet, colormap_file, 0, "colormap");
+			loadTexture(stateSet, nightmap_file, 1, "nightmap");
+			loadTexture(stateSet, specreliefcitiesboundariesmap_file, 2, "specreliefcitiesboundariesmap");
+			loadTexture(stateSet, normalmap_file, 3, "normalmap");
+
+			geode->addDrawable(geo);
+		}
+	}
+
+	return geode;
 }
 
 ref_ptr<StateSet> GlobeModel::createStateSet()
@@ -50,12 +117,6 @@ ref_ptr<StateSet> GlobeModel::createStateSet()
 	material->setEmission(Material::FRONT_AND_BACK, Vec4f(0.0, 0.0, 0.0, 1.0));
 
 	stateSet->setAttribute(material);
-
-	loadTextures(stateSet, "./data/earth/surface/4_no_ice_clouds_mts_8k.jpg", 0, "colormap");
-	loadTextures(stateSet, "./data/earth/surface/5_night_8k.jpg", 1, "nightmap");
-	loadTextures(stateSet, "./data/earth/surface/specular_relief_cities_boundaries_8k.png", 2, "specreliefcitiesboundariesmap");
-	loadTextures(stateSet, "./data/earth/normal/normal_8k.png", 3, "normalmap");
-
 
 	return stateSet;
 }
@@ -79,7 +140,7 @@ ref_ptr<Program> GlobeModel::createShader()
 	return pgm;
 }
 
-void GlobeModel::loadTextures(ref_ptr<StateSet> stateSet, char* filename, int tex_layer, char* uniform_name)
+void GlobeModel::loadTexture(ref_ptr<StateSet> stateSet, string filename, int tex_layer, string uniform_name)
 {
 	ref_ptr<Texture2D> texture = new Texture2D();
 	texture->setDataVariance(osg::Object::DYNAMIC);
@@ -102,12 +163,10 @@ void GlobeModel::loadTextures(ref_ptr<StateSet> stateSet, char* filename, int te
 
 	stateSet->setTextureAttributeAndModes(tex_layer, texture, StateAttribute::ON);
 	stateSet->addUniform(uniform);
-
 }
 
-ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
+ref_ptr<Geometry> GlobeModel::createSphereSegmentMesh(int stacks, int slices, double radius, int firstStack, int lastStack, int firstSlice, int lastSlice)
 {
-	ref_ptr<Geode> geode = new Geode();
 	ref_ptr<Geometry> geometry = new Geometry();
 
 	ref_ptr<Vec3Array> vertices = new Vec3Array();
@@ -115,43 +174,55 @@ ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
 	ref_ptr<Vec2Array> texcoords = new Vec2Array();
 	ref_ptr<DrawElementsUInt> triangles = new DrawElementsUInt(PrimitiveSet::TRIANGLES, 0);
 
-	for (int slice = 0; slice < slices + 1; slice++)
+	for (int slice = firstSlice; slice <= lastSlice + 1; slice++)
 	{
-		for (int stack = 0; stack < stacks + 1; stack++)
+		for (int stack = firstStack; stack <= lastStack + 1; stack++)
 		{
 			Vec3 point = getVec3FromEuler((double)stack * (C_PI / (double)stacks), 0.0, (double)slice * (2.0 * C_PI / (double)slices), Vec3(0.0, 0.0, 1.0));
 
 			vertices->push_back(point * radius);
 			normals->push_back(point);
-			texcoords->push_back(Vec2((double)slice / (double)slices, 1.0 - (double)stack / (double)stacks));
+
+			double u = (double)(slice - firstSlice) / (double)(lastSlice - firstSlice + 1);
+			double v = (double)(stack - firstStack) / (double)(lastStack - firstStack + 1);
+
+			texcoords->push_back(Vec2(u, 1.0 - v));
 		}
 	}
 
-	for (int slice = 0; slice < slices; slice++)
+	int nSlices = lastSlice - firstSlice + 1;
+	int nStacks = lastStack - firstStack + 1;
+
+	for (int slice = 0; slice < nSlices; slice++)
 	{
-		int north = ((stacks + 1) * slice);
-		int south = north + stacks;
-		int slice_i = north + 1;
-		int next_slice_i = ((stacks + 1) * (slice + 1)) + 1;
+		int slice_i = (nStacks + 1) * slice;
+		int next_slice_i = slice_i + nStacks + 1;
 
-		triangles->push_back(north);
-		triangles->push_back(slice_i);
-		triangles->push_back(next_slice_i);
-
-		for (int stack = 0; stack < stacks-2; stack++)
+		for (int stack = 0; stack < nStacks; stack++)
 		{
-			triangles->push_back(slice_i + stack);
-			triangles->push_back(slice_i + stack + 1);
-			triangles->push_back(next_slice_i + stack);
+			if (stack == 0 && firstStack == 0)
+			{
+				triangles->push_back(slice_i);
+				triangles->push_back(slice_i + 1);
+				triangles->push_back(next_slice_i + 1);
+			}
+			else if (stack == nStacks - 1 && lastStack == stacks - 1)
+			{
+				triangles->push_back(slice_i + nStacks);
+				triangles->push_back(next_slice_i + nStacks - 1);
+				triangles->push_back(slice_i + nStacks - 1);
+			}
+			else
+			{
+				triangles->push_back(slice_i + stack);
+				triangles->push_back(slice_i + stack + 1);
+				triangles->push_back(next_slice_i + stack);
 
-			triangles->push_back(next_slice_i + stack);
-			triangles->push_back(slice_i + stack + 1);
-			triangles->push_back(next_slice_i + stack + 1);
+				triangles->push_back(next_slice_i + stack);
+				triangles->push_back(slice_i + stack + 1);
+				triangles->push_back(next_slice_i + stack + 1);
+			}
 		}
-
-		triangles->push_back(south);
-		triangles->push_back(next_slice_i + stacks - 2);
-		triangles->push_back(slice_i + stacks - 2);
 	}
 	
 	ref_ptr<Vec4Array> colors = new Vec4Array();
@@ -163,7 +234,5 @@ ref_ptr<Geode> GlobeModel::createMesh(int stacks, int slices, double radius)
 	geometry->setColorArray(colors, Array::BIND_OVERALL);
 	geometry->addPrimitiveSet(triangles);
 
-	geode->addDrawable(geometry);
-
-	return geode;
+	return geometry;
 }

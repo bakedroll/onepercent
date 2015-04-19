@@ -64,7 +64,7 @@ namespace ImageHelper
             {
                 for (int x = 0; x < cols; x++)
                 {
-                    var outputBitmap = new Bitmap(pwidth, pheight, PixelFormat.Format24bppRgb);
+                    var outputBitmap = new Bitmap(pwidth, pheight, inputBitmap.PixelFormat);
 
                     for (int py = 0; py < pheight; py++)
                     {
