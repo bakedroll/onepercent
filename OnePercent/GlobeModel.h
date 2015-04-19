@@ -3,7 +3,10 @@
 #include <osg/Geometry>
 #include <osg/Program>
 
+#include <string.h>
+
 using namespace osg;
+using namespace std;
 
 namespace onep
 {
@@ -13,9 +16,11 @@ namespace onep
 		GlobeModel();
 
 	private:
+		ref_ptr<Geode> createPlanetGeode(int textureResolution);
+
 		ref_ptr<StateSet> createStateSet();
 		ref_ptr<Program> createShader();
-		void loadTextures(ref_ptr<StateSet> stateSet, char* filename, int tex_layer, char* uniform_name);
-		ref_ptr<Geode> createMesh(int stacks = 12, int slices = 24, double radius = 1.0);
+		void loadTexture(ref_ptr<StateSet> stateSet, string filename, int tex_layer, string uniform_name);
+		ref_ptr<Geometry> createSphereSegmentMesh(int stacks, int slices, double radius, int firstStack, int lastStack, int firstSlice, int lastSlice);
 	};
 }

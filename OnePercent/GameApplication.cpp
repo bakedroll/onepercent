@@ -5,6 +5,7 @@
 #include "Follower.h"
 #include "GlobeViewer.h"
 #include "UpdateCallback.h"
+#include "EventManager.h"
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/LightModel>
@@ -84,9 +85,12 @@ int GameApplication::run()
 		viewer.frame();
 	}*/
 
+
+
 	viewer.setUpViewInWindow(10, 50, 1280, 768);
 
 	viewer.getCamera()->setClearColor(Vec4(0.0, 0.0, 0.0, 1.0));
+	viewer.addEventHandler(new EventManager());
 
 	viewer.run();
 
