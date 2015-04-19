@@ -27,6 +27,11 @@ namespace osgGaming
 	class GameState : public osg::Referenced
 	{
 	public:
+		GameState();
+
+		bool isInitialized();
+		void setInitialized();
+
 		virtual void initialize(osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings);
 		virtual StateEvent* update(double frameTime, osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings);
 
@@ -37,5 +42,8 @@ namespace osgGaming
 		StateEvent* stateEvent_pop();
 		StateEvent* stateEvent_replace(osg::ref_ptr<GameState> state);
 		StateEvent* stateEvent_endGame();
+
+	private:
+		bool _initialized;
 	};
 }

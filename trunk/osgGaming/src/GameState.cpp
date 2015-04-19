@@ -3,6 +3,23 @@
 using namespace osgGaming;
 using namespace osg;
 
+GameState::GameState()
+	: Referenced(),
+	  _initialized(false)
+{
+
+}
+
+bool GameState::isInitialized()
+{
+	return _initialized;
+}
+
+void GameState::setInitialized()
+{
+	_initialized = true;
+}
+
 void GameState::initialize(osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings)
 {
 

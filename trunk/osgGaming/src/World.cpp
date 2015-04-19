@@ -8,6 +8,9 @@ using namespace osgGaming;
 World::World()
 {
 	_rootNode = new Group();
+	_hud = new Hud();
+
+	_rootNode->addChild(_hud->getProjection());
 
 	initializeStateSet();
 }
@@ -25,6 +28,11 @@ ref_ptr<StateSet> World::getGlobalStateSet()
 ref_ptr<LightModel> World::getGlobalLightModel()
 {
 	return _globalLightModel;
+}
+
+osg::ref_ptr<Hud> World::getHud()
+{
+	return _hud;
 }
 
 void World::setLightEnabled(int lightNum, bool enabled)
