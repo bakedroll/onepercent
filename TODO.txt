@@ -5,5 +5,4 @@
 
 - engine:
 	- file system
-	- exception handling
 	- logging
