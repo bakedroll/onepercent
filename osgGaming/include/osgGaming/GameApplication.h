@@ -2,17 +2,23 @@
 
 #include <osgGaming/World.h>
 #include <osgGaming/GameSettings.h>
-#include <osgGaming/UpdateStateCallback.h>
 #include <osgGaming/GameState.h>
 
+#include <osg/NodeCallback>
 #include <osgViewer/Viewer>
+
+#include <vector>
 
 namespace osgGaming
 {
-	class GameApplication
+	typedef std::vector<osg::ref_ptr<GameState>> GameStateList;
+
+	class GameApplication : public osg::NodeCallback
 	{
 	public:
 		GameApplication();
+
+		virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
 
 		void setWorld(osg::ref_ptr<World> world);
 		void setWorldLoading(osg::ref_ptr<World> world);
@@ -21,11 +27,17 @@ namespace osgGaming
 		int run(osg::ref_ptr<GameState> initialState);
 
 	private:
+		double _lastSimulationTime;
+
+		GameStateList _stateStack;
+
 		osgViewer::Viewer _viewer;
 
 		osg::ref_ptr<World> _world;
 		osg::ref_ptr<World> _worldLoading;
 		osg::ref_ptr<GameSettings> _gameSettings;
-		osg::ref_ptr<UpdateStateCallback> _updateStateCallback;
+
+		bool _gameEnded;
+		bool _isLoading;
 	};
 }

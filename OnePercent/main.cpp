@@ -9,12 +9,12 @@ using namespace osg;
 
 int main(int argc, char** argv)
 {
-	GameApplication app;
+	ref_ptr<GameApplication> app = new GameApplication();
 
 	ref_ptr<GlobeOverviewWorld> world = new GlobeOverviewWorld();
 	world->initialize();
 
-	app.setWorld(world);
+	app->setWorld(world);
 
-	return app.run(new GlobeOverviewState());
+	return app->run(new GlobeOverviewState());
 }
