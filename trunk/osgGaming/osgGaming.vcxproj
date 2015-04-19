@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="src\GameException.cpp" />
     <ClCompile Include="src\GameApplication.cpp" />
+    <ClCompile Include="src\GameLoadingState.cpp" />
     <ClCompile Include="src\GameSettings.cpp" />
     <ClCompile Include="src\Helper.cpp" />
     <ClCompile Include="src\GameState.cpp" />
@@ -22,6 +23,7 @@
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h" />
     <ClInclude Include="include\osgGaming\GameException.h" />
+    <ClInclude Include="include\osgGaming\GameLoadingState.h" />
     <ClInclude Include="include\osgGaming\GameSettings.h" />
     <ClInclude Include="include\osgGaming\GameState.h" />
     <ClInclude Include="include\osgGaming\Helper.h" />
@@ -57,9 +59,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(ProjectDir)include\osgGaming;$(IncludePath)</IncludePath>
+    <IncludePath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <LibraryPath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)lib\</OutDir>
+    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

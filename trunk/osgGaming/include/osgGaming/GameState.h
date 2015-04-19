@@ -1,7 +1,7 @@
 #pragma once
 
-#include "World.h"
-#include "GameSettings.h"
+#include "osgGaming/World.h"
+#include "osgGaming/GameSettings.h"
 
 #include <osg/Referenced>
 #include <osg/ref_ptr>
@@ -27,7 +27,10 @@ namespace osgGaming
 	class GameState : public osg::Referenced
 	{
 	public:
+		virtual void initialize(osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings);
 		virtual StateEvent* update(double frameTime, osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings);
+
+		virtual bool isLoadingState();
 
 	protected:
 		StateEvent* stateEvent_push(osg::ref_ptr<GameState> state);

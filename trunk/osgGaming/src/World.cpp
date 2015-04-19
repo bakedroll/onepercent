@@ -1,5 +1,5 @@
-#include "World.h"
-#include "Helper.h"
+#include <osgGaming/World.h>
+#include <osgGaming/Helper.h>
 
 using namespace std;
 using namespace osg;
@@ -20,6 +20,11 @@ ref_ptr<Group> World::getRootNode()
 ref_ptr<StateSet> World::getGlobalStateSet()
 {
 	return _globalStateSet;
+}
+
+ref_ptr<LightModel> World::getGlobalLightModel()
+{
+	return _globalLightModel;
 }
 
 void World::setLightEnabled(int lightNum, bool enabled)
@@ -57,7 +62,6 @@ void World::initializeStateSet()
 	_globalStateSet = new StateSet();
 
 	_globalLightModel = new LightModel();
-	_globalLightModel->setAmbientIntensity(Vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	_globalStateSet->setMode(GL_CULL_FACE, StateAttribute::ON);
 	_globalStateSet->setMode(GL_NORMALIZE, StateAttribute::ON);

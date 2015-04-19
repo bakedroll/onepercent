@@ -1,9 +1,9 @@
 #pragma once
 
-#include "World.h"
-#include "GameSettings.h"
-#include "UpdateStateCallback.h"
-#include "GameState.h"
+#include <osgGaming/World.h>
+#include <osgGaming/GameSettings.h>
+#include <osgGaming/UpdateStateCallback.h>
+#include <osgGaming/GameState.h>
 
 #include <osgViewer/Viewer>
 
@@ -15,6 +15,7 @@ namespace osgGaming
 		GameApplication();
 
 		void setWorld(osg::ref_ptr<World> world);
+		void setWorldLoading(osg::ref_ptr<World> world);
 		void setGameSettings(osg::ref_ptr<GameSettings> settings);
 
 		int run(osg::ref_ptr<GameState> initialState);
@@ -23,6 +24,7 @@ namespace osgGaming
 		osgViewer::Viewer _viewer;
 
 		osg::ref_ptr<World> _world;
+		osg::ref_ptr<World> _worldLoading;
 		osg::ref_ptr<GameSettings> _gameSettings;
 		osg::ref_ptr<UpdateStateCallback> _updateStateCallback;
 	};

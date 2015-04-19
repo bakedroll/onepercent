@@ -1,4 +1,4 @@
-#include "GameException.h"
+#include <osgGaming/GameException.h>
 
 using namespace osgGaming;
 
