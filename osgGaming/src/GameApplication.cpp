@@ -1,12 +1,13 @@
-#include "GameApplication.h"
-#include "Helper.h"
-#include "GameException.h"
+#include <osgGaming/GameApplication.h>
+#include <osgGaming/Helper.h>
+#include <osgGaming/GameException.h>
 
 #include <osgViewer/Viewer>
 #include <osg/PositionAttitudeTransform>
 #include <osg/LightModel>
 
 using namespace osgGaming;
+using namespace osgViewer;
 using namespace osg;
 using namespace std;
 
@@ -26,6 +27,11 @@ void GameApplication::setWorld(ref_ptr<World> world)
 	_world = world;
 }
 
+void GameApplication::setWorldLoading(osg::ref_ptr<World> world)
+{
+	_worldLoading = world;
+}
+
 void GameApplication::setGameSettings(osg::ref_ptr<GameSettings> settings)
 {
 	settings->load();
@@ -42,12 +48,17 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 			setWorld(new World());
 		}
 
+		if (!_worldLoading.valid())
+		{
+			setWorldLoading(new World());
+		}
+
 		if (!_gameSettings.valid())
 		{
 			setGameSettings(new GameSettings());
 		}
 
-		_updateStateCallback = new UpdateStateCallback(initialState, _world, _gameSettings);
+		_updateStateCallback = new UpdateStateCallback(initialState, &_viewer, _world, _worldLoading, _gameSettings);
 
 		_world->getRootNode()->setUpdateCallback(_updateStateCallback);
 
@@ -57,7 +68,7 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 
 			GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(0), screenWidth, screenHeight);
 
-			Vec2d windowResolution = _gameSettings->getWindowResolution();
+			Vec2i windowResolution = _gameSettings->getWindowResolution();
 
 			_viewer.setUpViewInWindow(
 				screenWidth / 2 - windowResolution.x() / 2,
@@ -76,11 +87,13 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 		follower->setPosition(Vec3(0, -4, 0));
 		follower->updateLookAtMatrix(); */
 
-		_viewer.realize();
+		/*_viewer.realize();
 		while (!_viewer.done() && !_updateStateCallback->gameEnded())
 		{
 			_viewer.frame();
-		}
+		}*/
+
+		_viewer.run();
 
 		return 0;
 	}

@@ -1,11 +1,21 @@
-#include "GameState.h"
+#include <osgGaming/GameState.h>
 
 using namespace osgGaming;
 using namespace osg;
 
+void GameState::initialize(osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings)
+{
+
+}
+
 StateEvent* GameState::update(double frameTime, ref_ptr<World> world, ref_ptr<GameSettings> settings)
 {
 	return NULL;
+}
+
+bool GameState::isLoadingState()
+{
+	return false;
 }
 
 StateEvent* GameState::stateEvent_push(ref_ptr<GameState> state)

@@ -1,20 +1,28 @@
-#include "UpdateStateCallback.h"
+#include <osgGaming/UpdateStateCallback.h>
 
 #include <osg/NodeVisitor>
 
+using namespace osgViewer;
 using namespace osgGaming;
 using namespace osg;
 
 UpdateStateCallback::UpdateStateCallback(
 	osg::ref_ptr<GameState> initialState,
+	osg::ref_ptr<Viewer> viewer,
 	osg::ref_ptr<World> world,
+	osg::ref_ptr<World> worldLoading,
 	osg::ref_ptr<GameSettings> settings)
 		: NodeCallback(),
+		  _viewer(viewer),
 		  _world(world),
+		  _worldLoading(worldLoading),
 		  _gameSettings(settings),
 		  _lastSimulationTime(0.0),
-		  _gameEnded(false)
+		  _gameEnded(false),
+		  _isLoading(false)
 {
+	initialState->initialize(_world, _gameSettings);
+
 	_stateStack.push_back(initialState);
 }
 
@@ -34,16 +42,42 @@ void UpdateStateCallback::operator() (Node* node, NodeVisitor* nv)
 	{
 		GameStateList::iterator it = _stateStack.end() - 1;
 
-		StateEvent* e = (*it)->update(time_diff, _world, _gameSettings);
-
-		if (e != NULL)
+		if (!_isLoading && (*it)->isLoadingState())
 		{
-			if (e->type == END_GAME)
+			_isLoading = true;
+			
+		}
+
+		StateEvent* se;
+		if (_isLoading)
+		{
+			se = (*it)->update(time_diff, _worldLoading, _gameSettings);
+		}
+		else
+		{
+			se = (*it)->update(time_diff, _world, _gameSettings);
+		}
+
+		if (se != NULL)
+		{
+			switch (se->type)
 			{
+			case POP:
+				popState();
+				break;
+			case PUSH:
+				pushState(se->referencedState);
+				break;
+			case REPLACE:
+				popState();
+				pushState(se->referencedState);
+				break;
+			case END_GAME:
 				_gameEnded = true;
+				break;
 			}
 
-			delete e;
+			delete se;
 		}
 	}
 	else
@@ -57,4 +91,14 @@ void UpdateStateCallback::operator() (Node* node, NodeVisitor* nv)
 bool UpdateStateCallback::gameEnded()
 {
 	return _gameEnded;
+}
+
+void UpdateStateCallback::popState()
+{
+	_stateStack.pop_back();
+}
+
+void UpdateStateCallback::pushState(osg::ref_ptr<GameState> state)
+{
+	_stateStack.push_back(state);
 }

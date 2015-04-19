@@ -1,4 +1,4 @@
-#include "Helper.h"
+#include <osgGaming/Helper.h>
 
 #include <osg/Geode>
 #include <osgUtil/TangentSpaceGenerator>

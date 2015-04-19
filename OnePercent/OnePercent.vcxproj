@@ -51,7 +51,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>osgd.lib;osgViewerd.lib;osgUtild.lib;osgGAd.lib;osgDBd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>osgd.lib;osgViewerd.lib;osgUtild.lib;osgGAd.lib;osgDBd.lib;osgGamingd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -70,27 +70,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="Follower.cpp" />
-    <ClCompile Include="GameApplication.cpp" />
     <ClCompile Include="GlobeModel.cpp" />
-    <ClCompile Include="GlobeViewer.cpp" />
-    <ClCompile Include="Helper.cpp" />
+    <ClCompile Include="GlobeOverviewState.cpp" />
+    <ClCompile Include="GlobeOverviewWorld.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="UpdateCallback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\globe.frag" />
     <None Include="shader\globe.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EventManager.h" />
     <ClInclude Include="Follower.h" />
-    <ClInclude Include="GameApplication.h" />
     <ClInclude Include="GlobeModel.h" />
-    <ClInclude Include="GlobeViewer.h" />
-    <ClInclude Include="Helper.h" />
-    <ClInclude Include="UpdateCallback.h" />
+    <ClInclude Include="GlobeOverviewState.h" />
+    <ClInclude Include="GlobeOverviewWorld.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,8 +1,10 @@
 #include "Follower.h"
 
-#include "Helper.h"
+#include <osgGaming/Helper.h>
 
 using namespace onep;
+using namespace osg;
+using namespace osgGaming;
 
 Follower::Follower()
 	: Camera()

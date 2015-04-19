@@ -17,25 +17,16 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameApplication.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GlobeModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Follower.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Helper.cpp">
+    <ClCompile Include="GlobeOverviewState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GlobeViewer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UpdateCallback.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EventManager.cpp">
+    <ClCompile Include="GlobeOverviewWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -48,25 +39,16 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EventManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Follower.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GameApplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GlobeModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GlobeViewer.h">
+    <ClInclude Include="GlobeOverviewState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Helper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UpdateCallback.h">
+    <ClInclude Include="GlobeOverviewWorld.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,4 @@
-#include "GameSettings.h"
+#include <osgGaming/GameSettings.h>
 
 using namespace osgGaming;
 using namespace osg;
@@ -6,7 +6,7 @@ using namespace osg;
 GameSettings::GameSettings()
 	: Referenced(),
 	_fullscreenEnabled(false),
-	_windowResolution(Vec2d(1280, 768))
+	_windowResolution(Vec2i(1280, 768))
 {
 
 }
@@ -16,7 +16,7 @@ void GameSettings::setFullscreenEnabled(bool enabled)
 	_fullscreenEnabled = enabled;
 }
 
-void GameSettings::setWindowResolution(Vec2d resolution)
+void GameSettings::setWindowResolution(Vec2i resolution)
 {
 	_windowResolution = resolution;
 }
@@ -26,7 +26,7 @@ bool GameSettings::getFullscreenEnabled()
 	return _fullscreenEnabled;
 }
 
-Vec2d GameSettings::getWindowResolution()
+Vec2i GameSettings::getWindowResolution()
 {
 	return _windowResolution;
 }

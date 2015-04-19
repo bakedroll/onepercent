@@ -1,7 +1,5 @@
 #include "GlobeModel.h"
 
-#include "Helper.h"
-
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include <osg/Material>
@@ -11,7 +9,12 @@
 #include <osgDB/ReadFile>
 #include <osg/PositionAttitudeTransform>
 
+#include <osgGaming/Helper.h>
+
 using namespace onep;
+using namespace osg;
+using namespace osgGaming;
+using namespace std;
 
 GlobeModel::GlobeModel()
 {

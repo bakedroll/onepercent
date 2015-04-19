@@ -22,6 +22,7 @@ namespace osgGaming
 
 		osg::ref_ptr<osg::Group> getRootNode();
 		osg::ref_ptr<osg::StateSet> getGlobalStateSet();
+		osg::ref_ptr<osg::LightModel> getGlobalLightModel();
 
 		void setLightEnabled(int lightNum, bool enabled);
 		osg::ref_ptr<osg::Light> getLight(int lightNum);
