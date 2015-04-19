@@ -12,23 +12,90 @@ using namespace osg;
 using namespace std;
 
 GameApplication::GameApplication()
+	: NodeCallback(),
+	  _lastSimulationTime(0.0),
+	  _gameEnded(false),
+	  _isLoading(false)
 {
+
+}
+
+void GameApplication::operator() (Node* node, NodeVisitor* nv)
+{
+	double time = nv->getFrameStamp()->getSimulationTime();
+	double time_diff = 0.0;
+
+	if (_lastSimulationTime > 0.0)
+	{
+		time_diff = time - _lastSimulationTime;
+	}
+
+	_lastSimulationTime = time;
+
+	if (!_stateStack.empty())
+	{
+		GameStateList::iterator it = _stateStack.end() - 1;
+
+		if (!_isLoading && (*it)->isLoadingState())
+		{
+			_isLoading = true;
+
+			_viewer.setSceneData(_worldLoading->getRootNode());
+		}
+
+		StateEvent* se;
+		if (_isLoading)
+		{
+			se = (*it)->update(time_diff, _worldLoading, _gameSettings);
+		}
+		else
+		{
+			se = (*it)->update(time_diff, _world, _gameSettings);
+		}
+
+		if (se != NULL)
+		{
+			switch (se->type)
+			{
+			case POP:
+				_stateStack.pop_back();
+				break;
+			case PUSH:
+				_stateStack.push_back(se->referencedState);
+				break;
+			case REPLACE:
+				_stateStack.pop_back();
+				_stateStack.push_back(se->referencedState);
+				break;
+			case END_GAME:
+				_gameEnded = true;
+				break;
+			}
+
+			delete se;
+		}
+	}
+	else
+	{
+		_gameEnded = true;
+	}
+
+	traverse(node, nv);
 }
 
 void GameApplication::setWorld(ref_ptr<World> world)
 {
 	_viewer.setSceneData(world->getRootNode());
 
-	if (_updateStateCallback.valid())
-	{
-		world->getRootNode()->setUpdateCallback(_updateStateCallback);
-	}
+	world->getRootNode()->setUpdateCallback(this);
 
 	_world = world;
 }
 
 void GameApplication::setWorldLoading(osg::ref_ptr<World> world)
 {
+	world->getRootNode()->setUpdateCallback(this);
+
 	_worldLoading = world;
 }
 
@@ -58,9 +125,8 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 			setGameSettings(new GameSettings());
 		}
 
-		_updateStateCallback = new UpdateStateCallback(initialState, &_viewer, _world, _worldLoading, _gameSettings);
-
-		_world->getRootNode()->setUpdateCallback(_updateStateCallback);
+		initialState->initialize(_world, _gameSettings);
+		_stateStack.push_back(initialState);
 
 		if (!_gameSettings->getFullscreenEnabled())
 		{
