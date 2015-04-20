@@ -2,8 +2,8 @@
 #include <osgGaming/Helper.h>
 #include <osgGaming/GameException.h>
 #include <osgGaming/GameLoadingState.h>
+#include <osgGaming/TransformableCameraManipulator.h>
 
-#include <osgViewer/Viewer>
 #include <osg/PositionAttitudeTransform>
 #include <osg/LightModel>
 
@@ -57,7 +57,8 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 				if (!_isLoading)
 				{
 					_isLoading = true;
-					_viewer.setSceneData(_worldLoading->getRootNode());
+
+					attachWorld(_worldLoading);
 				}
 
 				ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
@@ -68,8 +69,9 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 				if (_isLoading)
 				{
 					_isLoading = false;
-					_viewer.setSceneData(_world->getRootNode());
 					_resetTimeDiff = true;
+					
+					attachWorld(_world);
 				}
 			}
 		}
@@ -83,8 +85,7 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 			{
 				ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
 
-				_stateStack.pop_back();
-				_stateStack.push_back(loadingState->getNextState());
+				replaceState(loadingState->getNextState());
 			}
 		}
 		else if (se != NULL)
@@ -92,14 +93,13 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 			switch (se->type)
 			{
 			case POP:
-				_stateStack.pop_back();
+				popState();
 				break;
 			case PUSH:
-				_stateStack.push_back(se->referencedState);
+				pushState(se->referencedState);
 				break;
 			case REPLACE:
-				_stateStack.pop_back();
-				_stateStack.push_back(se->referencedState);
+				replaceState(se->referencedState);
 				break;
 			case END_GAME:
 				_gameEnded = true;
@@ -115,29 +115,6 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 	}
 
 	traverse(node, nv);
-}
-
-void GameApplication::setWorld(ref_ptr<World> world)
-{
-	_viewer.setSceneData(world->getRootNode());
-
-	world->getRootNode()->setUpdateCallback(this);
-
-	_world = world;
-}
-
-void GameApplication::setWorldLoading(osg::ref_ptr<World> world)
-{
-	world->getRootNode()->setUpdateCallback(this);
-
-	_worldLoading = world;
-}
-
-void GameApplication::setGameSettings(osg::ref_ptr<GameSettings> settings)
-{
-	settings->load();
-
-	_gameSettings = settings;
 }
 
 int GameApplication::run(ref_ptr<GameState> initialState)
@@ -161,12 +138,15 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 
 		_stateStack.push_back(initialState);
 
+		_inputManager = new InputManager(_world, _worldLoading);
+		_inputManager->setCurrentState(initialState);
+
+		unsigned int screenWidth, screenHeight;
+		unsigned int width, height;
+		GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(0), screenWidth, screenHeight);
+
 		if (!_gameSettings->getFullscreenEnabled())
 		{
-			unsigned int screenWidth, screenHeight;
-
-			GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(0), screenWidth, screenHeight);
-
 			Vec2i windowResolution = _gameSettings->getWindowResolution();
 
 			_viewer.setUpViewInWindow(
@@ -174,25 +154,32 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 				screenHeight / 2 - windowResolution.y() / 2,
 				windowResolution.x(),
 				windowResolution.y());
+
+			width = windowResolution.x();
+			height = windowResolution.y();
+
+			ViewerBase::Windows windows;
+			_viewer.getWindows(windows);
+			_inputManager->setGraphicsWindow(*windows.begin());
+		}
+		else
+		{
+			width = screenWidth;
+			height = screenHeight;
 		}
 
-		// TODO: Camera
-		_viewer.getCamera()->setClearColor(Vec4(0.0, 0.0, 0.0, 1.0));
+		_inputManager->updateResolution(width, height);
 
-		/*
-		ref_ptr<Follower> follower = new Follower();
-		viewer.setCamera(follower);
+		attachWorld(_world);
 
-		follower->setPosition(Vec3(0, -4, 0));
-		follower->updateLookAtMatrix(); */
+		_viewer.addEventHandler(_inputManager);
+		_viewer.setKeyEventSetsDone(0);
 
-		/*_viewer.realize();
-		while (!_viewer.done() && !_updateStateCallback->gameEnded())
+		_viewer.realize();
+		while (!_viewer.done() && !_gameEnded)
 		{
 			_viewer.frame();
-		}*/
-
-		_viewer.run();
+		}
 
 		return 0;
 	}
@@ -206,4 +193,49 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 	}
 
 	return -1;
+}
+
+void GameApplication::setWorld(osg::ref_ptr<World> world)
+{
+	world->getRootNode()->setUpdateCallback(this);
+
+	_world = world;
+}
+
+void GameApplication::setWorldLoading(osg::ref_ptr<World> world)
+{
+	world->getRootNode()->setUpdateCallback(this);
+
+	_worldLoading = world;
+}
+
+void GameApplication::setGameSettings(osg::ref_ptr<GameSettings> settings)
+{
+	settings->load();
+
+	_gameSettings = settings;
+}
+
+void GameApplication::attachWorld(osg::ref_ptr<World> world)
+{
+	_viewer.setSceneData(world->getRootNode());
+	_viewer.setCameraManipulator(world->getCameraManipulator());
+}
+
+void GameApplication::popState()
+{
+	_stateStack.pop_back();
+	_inputManager->setCurrentState(*(_stateStack.end() - 1));
+}
+
+void GameApplication::pushState(osg::ref_ptr<GameState> state)
+{
+	_stateStack.push_back(state);
+	_inputManager->setCurrentState(state);
+}
+
+void GameApplication::replaceState(osg::ref_ptr<GameState> state)
+{
+	_stateStack.pop_back();
+	pushState(state);
 }

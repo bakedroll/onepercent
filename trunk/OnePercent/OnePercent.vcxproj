@@ -70,7 +70,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Follower.cpp" />
     <ClCompile Include="GlobeModel.cpp" />
     <ClCompile Include="GlobeOverviewState.cpp" />
     <ClCompile Include="GlobeOverviewWorld.cpp" />
@@ -82,7 +81,6 @@
     <None Include="shader\globe.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Follower.h" />
     <ClInclude Include="GlobeModel.h" />
     <ClInclude Include="GlobeOverviewState.h" />
     <ClInclude Include="GlobeOverviewWorld.h" />

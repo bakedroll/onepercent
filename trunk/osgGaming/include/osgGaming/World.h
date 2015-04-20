@@ -1,6 +1,7 @@
 #pragma once
 
 #include <osgGaming/Hud.h>
+#include <osgGaming/TransformableCameraManipulator.h>
 
 #include <map>
 
@@ -26,6 +27,7 @@ namespace osgGaming
 		osg::ref_ptr<osg::StateSet> getGlobalStateSet();
 		osg::ref_ptr<osg::LightModel> getGlobalLightModel();
 		osg::ref_ptr<Hud> getHud();
+		osg::ref_ptr<TransformableCameraManipulator> getCameraManipulator();
 
 		void setLightEnabled(int lightNum, bool enabled);
 		osg::ref_ptr<osg::Light> getLight(int lightNum);
@@ -40,5 +42,6 @@ namespace osgGaming
 		LightSourceDictionary _lightSources;
 
 		osg::ref_ptr<Hud> _hud;
+		osg::ref_ptr<TransformableCameraManipulator> _cameraManipulator;
 	};
 }

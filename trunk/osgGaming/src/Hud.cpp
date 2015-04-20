@@ -77,7 +77,6 @@ Hud::Hud()
 	modelViewMatrix->addChild(_geode);
 
 	_projection = new Projection();
-	_projection->setMatrix(Matrix::ortho2D(0, 1280, 0, 768));
 	_projection->addChild(modelViewMatrix);
 }
 
@@ -89,4 +88,9 @@ ref_ptr<Projection> Hud::getProjection()
 ref_ptr<Geode> Hud::getGeode()
 {
 	return _geode;
+}
+
+void Hud::updateResolution(unsigned int width, unsigned int height)
+{
+	_projection->setMatrix(Matrix::ortho2D(0, width, 0, height));
 }

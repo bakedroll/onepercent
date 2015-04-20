@@ -35,6 +35,11 @@ bool GameState::isLoadingState()
 	return false;
 }
 
+void GameState::onKeyDownEvent(int key)
+{
+
+}
+
 StateEvent* GameState::stateEvent_push(ref_ptr<GameState> state)
 {
 	StateEvent* e = new StateEvent();
