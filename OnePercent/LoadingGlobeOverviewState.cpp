@@ -66,4 +66,6 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	light->setSpecular(Vec4(1.0, 1.0, 1.0, 1.0));
 	light->setAmbient(Vec4(0.0, 0.0, 0.0, 1.0));
 	light->setPosition(Vec4(getVec3FromEuler(0.0, -23.5 * C_PI / 180.0, C_PI / 2.0), 0.0));
+
+	globeWorld->getCameraManipulator()->setPosition(Vec3(0.0, -28.0, 0.0));
 }

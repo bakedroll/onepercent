@@ -10,8 +10,8 @@ TransformableCameraManipulator::TransformableCameraManipulator()
 	_updateClearColor(true),
 	_updateProjectionMatrix(false),
 	_projectionAngle(45.0),
-	_projectionNear(1.0),
-	_projectionFar(20000.0),
+	_projectionNear(0.2),
+	_projectionFar(200.0),
 	_projectionRatio(0.0),
 	_clearColor(Vec4(0.0, 0.0, 0.0, 1.0))
 {
@@ -34,6 +34,7 @@ void TransformableCameraManipulator::updateCamera(osg::Camera &camera)
 	up -= _position;
 
 	camera.setViewMatrixAsLookAt(eye, center, up);
+	_viewMatrix = camera.getViewMatrix();
 
 	if (_updateProjectionMatrix)
 	{
@@ -42,6 +43,8 @@ void TransformableCameraManipulator::updateCamera(osg::Camera &camera)
 			_projectionRatio,
 			_projectionNear,
 			_projectionFar);
+
+		_projectionMatrix = camera.getProjectionMatrix();
 
 		_updateProjectionMatrix = false;
 	}
@@ -74,9 +77,11 @@ void TransformableCameraManipulator::setByInverseMatrix(const Matrixd &matrix)
 
 }
 
-void TransformableCameraManipulator::updateProjectionRatio(double ratio)
+void TransformableCameraManipulator::updateResolution(Vec2f resolution)
 {
-	_projectionRatio = ratio;
+	_resolution = resolution;
+
+	_projectionRatio = _resolution.x() / _resolution.y();
 	_updateProjectionMatrix = true;
 }
 
@@ -86,12 +91,21 @@ void TransformableCameraManipulator::updateClearColor(Vec4 clearColor)
 	_updateClearColor = true;
 }
 
-/*void Follower::move(Vec3f vec)
+void TransformableCameraManipulator::getPickVector(float x, float y, osg::Vec3f& point, osg::Vec3f& direction)
 {
-transformVector(&vec, &m_transformation);
-m_position = vec;
-m_transformation.setTrans(m_position);
-}*/
+	float mappedX = (x * 2.0f) / _resolution.x() - 1.0f;
+	float mappedY = (y * 2.0f) / _resolution.y() - 1.0f;
+
+	Vec3f near(mappedX, mappedY, -1.0f);
+	Vec3f far(mappedX, mappedY, 1.0f);
+
+	Matrixd mat = Matrix::inverse(_viewMatrix * _projectionMatrix);
+
+	point = near * mat;
+	direction = (far * mat) - point;
+
+	direction.normalize();
+}
 
 Vec3f TransformableCameraManipulator::getPosition()
 {

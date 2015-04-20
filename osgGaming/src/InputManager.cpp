@@ -22,7 +22,16 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter&)
 	
 		if (_currentState.valid())
 		{
-			_currentState->onKeyDownEvent(ea.getKey());
+			_currentState->onKeyHitEvent(ea.getKey());
+		}
+
+		return true;
+
+	case GUIEventAdapter::PUSH:
+
+		if (_currentState.valid())
+		{
+			_currentState->onMouseHitEvent(ea.getButton(), ea.getX(), ea.getY());
 		}
 
 		return true;
@@ -46,11 +55,6 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter&)
 	return false;
 }
 
-void InputManager::accept(GUIEventHandlerVisitor& v)
-{
-	v.visit(*this);
-}
-
 void InputManager::setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow)
 {
 	_graphicsWindow = graphicsWindow;
@@ -63,10 +67,8 @@ void InputManager::setCurrentState(osg::ref_ptr<GameState> state)
 
 void InputManager::updateResolution(unsigned int width, unsigned int height)
 {
-	double ratio = (double)width / (double)height;
-
-	_world->getCameraManipulator()->updateProjectionRatio(ratio);
-	_worldLoading->getCameraManipulator()->updateProjectionRatio(ratio);
+	_world->getCameraManipulator()->updateResolution(Vec2f(width, height));
+	_worldLoading->getCameraManipulator()->updateResolution(Vec2f(width, height));
 
 	_world->getHud()->updateResolution(width, height);
 	_worldLoading->getHud()->updateResolution(width, height);

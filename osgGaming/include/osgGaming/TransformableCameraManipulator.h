@@ -9,13 +9,13 @@ namespace osgGaming
 	public:
 		TransformableCameraManipulator();
 
-		virtual void updateCamera(osg::Camera &camera);
+		virtual void updateCamera(osg::Camera &camera) override;
 
-		virtual osg::Matrixd getMatrix() const;
-		virtual osg::Matrixd getInverseMatrix() const;
+		virtual osg::Matrixd getMatrix() const override;
+		virtual osg::Matrixd getInverseMatrix() const override;
 
-		virtual void setByMatrix(const osg::Matrixd &matrix);
-		virtual void setByInverseMatrix(const osg::Matrixd &matrix);
+		virtual void setByMatrix(const osg::Matrixd &matrix) override;
+		virtual void setByInverseMatrix(const osg::Matrixd &matrix) override;
 
 		osg::Vec3f getPosition();
 		osg::Quat getAttitude();
@@ -23,15 +23,17 @@ namespace osgGaming
 		void setPosition(osg::Vec3f position);
 		void setAttitude(osg::Quat rotation);
 
-		//void move(Vec3f vec);
-
-		void updateProjectionRatio(double ratio);
+		void updateResolution(osg::Vec2f resolution);
 		void updateClearColor(osg::Vec4 clearColor);
+
+		void getPickVector(float x, float y, osg::Vec3f& point, osg::Vec3f& direction);
 
 	private:
 		osg::Vec3f _position;
 		osg::Quat _attitude;
 		osg::Vec4 _clearColor;
+
+		osg::Vec2f _resolution;
 
 		double _projectionAngle;
 		double _projectionNear;
@@ -42,5 +44,8 @@ namespace osgGaming
 		bool _updateClearColor;
 
 		osg::Matrixd _transformation;
+
+		osg::Matrixd _viewMatrix;
+		osg::Matrixd _projectionMatrix;
 	};
 }

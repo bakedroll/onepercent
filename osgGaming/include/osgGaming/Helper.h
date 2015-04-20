@@ -15,6 +15,8 @@ namespace osgGaming
 	osg::Quat getQuatFromEuler(double pitch, double roll, double yaw);
 	osg::Vec3 getVec3FromEuler(double pitch, double roll, double yaw, osg::Vec3 origin = osg::Vec3(0.0, 1.0, 0.0));
 
+	bool sphereLineIntersection(osg::Vec3f sphereCenter, float sphereRadius, osg::Vec3f lineOrigin, osg::Vec3f lineDirectionNornalized, osg::Vec3f& result);
+
 	void generateTangentAndBinormal(osg::Node* node);
 
 

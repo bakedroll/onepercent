@@ -12,10 +12,10 @@ namespace onep
 	public:
 		LoadingGlobeOverviewState(osg::ref_ptr<osgGaming::GameState> nextState);
 
-		virtual void initialize(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::GameSettings> settings);
-		virtual osgGaming::StateEvent* update(double frameTime, osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::GameSettings> settings);
+		virtual void initialize(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::GameSettings> settings) override;
+		virtual osgGaming::StateEvent* update(double frameTime, osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::GameSettings> settings) override;
 
-		virtual void load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::GameSettings> settings);
+		virtual void load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::GameSettings> settings) override;
 
 	private:
 		double _elapsedTime;
