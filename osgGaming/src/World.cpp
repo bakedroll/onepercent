@@ -9,6 +9,7 @@ World::World()
 {
 	_rootNode = new Group();
 	_hud = new Hud();
+	_cameraManipulator = new TransformableCameraManipulator();
 
 	_rootNode->addChild(_hud->getProjection());
 
@@ -33,6 +34,11 @@ ref_ptr<LightModel> World::getGlobalLightModel()
 osg::ref_ptr<Hud> World::getHud()
 {
 	return _hud;
+}
+
+ref_ptr<TransformableCameraManipulator> World::getCameraManipulator()
+{
+	return _cameraManipulator;
 }
 
 void World::setLightEnabled(int lightNum, bool enabled)

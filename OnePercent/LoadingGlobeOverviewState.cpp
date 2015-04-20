@@ -21,7 +21,7 @@ void LoadingGlobeOverviewState::initialize(osg::ref_ptr<World> world, osg::ref_p
 {
 	_loadingText = new osgText::Text();
 	_loadingText->setCharacterSize(25);
-	// textOne->setFont("C:/WINDOWS/Fonts/impact.ttf");
+	_loadingText->setFont("./data/fonts/coolvetica rg.ttf");
 	_loadingText->setText("");
 	_loadingText->setAxisAlignment(osgText::Text::SCREEN);
 	_loadingText->setAlignment(osgText::TextBase::LEFT_BOTTOM);

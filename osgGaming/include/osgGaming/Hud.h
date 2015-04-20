@@ -16,6 +16,8 @@ namespace osgGaming
 		// TODO: remove later
 		osg::ref_ptr<osg::Geode> getGeode();
 
+		void updateResolution(unsigned int width, unsigned int height);
+
 	private:
 		osg::ref_ptr<osg::Projection> _projection;
 		osg::ref_ptr<osg::Geode> _geode;

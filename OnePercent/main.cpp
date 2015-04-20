@@ -11,7 +11,7 @@ using namespace osg;
 int main(int argc, char** argv)
 {
 	ref_ptr<GameApplication> app = new GameApplication();
-	app->setWorld(new GlobeOverviewWorld());
+	app->setWorld<GlobeOverviewWorld>();
 
 	return app->run(new LoadingGlobeOverviewState(new GlobeOverviewState()));
 }

@@ -20,9 +20,6 @@
     <ClCompile Include="GlobeModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Follower.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GlobeOverviewState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,9 +39,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Follower.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GlobeModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>

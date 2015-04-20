@@ -21,5 +21,12 @@ StateEvent* GlobeOverviewState::update(double frameTime, ref_ptr<World> world, r
 	_globeAngle = fmodf(_globeAngle + (float)frameTime * 0.1f, (C_PI * 2.0f));
 	globeWorld->getGlobeTransform()->setAttitude(getQuatFromEuler(0.0, 0.0, _globeAngle));
 
+	globeWorld->getCameraManipulator()->setPosition(Vec3(0.0, -14000.0, 0.0));
+
 	return 0;
+}
+
+void GlobeOverviewState::onKeyDownEvent(int key)
+{
+	printf("Pressed key: %c\n", key);
 }
