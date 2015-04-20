@@ -56,6 +56,33 @@ Vec3 osgGaming::getVec3FromEuler(double pitch, double roll, double yaw, Vec3 ori
 	return origin;
 }
 
+bool osgGaming::sphereLineIntersection(Vec3f sphereCenter, float sphereRadius, Vec3f lineOrigin, Vec3f lineDirectionNornalized, Vec3f& result)
+{
+	float a = lineDirectionNornalized * lineDirectionNornalized;
+	float b = lineDirectionNornalized * ((lineOrigin - sphereCenter) * 2.0f);
+	float c = (sphereCenter * sphereCenter) + (lineOrigin * lineOrigin) - 2.0f * (lineOrigin * sphereCenter) - sphereRadius * sphereRadius;
+	float D = b * b + (-4.0f) * a * c;
+
+	if (D < 0)
+	{
+		return false;
+	}
+
+	D = sqrtf(D);
+
+	float t = (-0.5f) * (b + D) / a;
+	if (t > 0.0f)
+	{
+		result = lineOrigin + lineDirectionNornalized * t;
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void osgGaming::generateTangentAndBinormal(Node* node)
 {
 	ref_ptr<Group> group = node->asGroup();

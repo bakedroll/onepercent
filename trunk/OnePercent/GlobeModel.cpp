@@ -47,7 +47,7 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 
 	int sphereStacks = 48;
 	int sphereSlices = 96;
-	int sphereRadius = 6371;
+	double sphereRadius = 6.371;
 
 	char* resolutionLevel0;
 	char* resolutionLevel1;

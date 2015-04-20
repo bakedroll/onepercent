@@ -11,7 +11,7 @@ namespace osgGaming
 
 		virtual void load(osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings);
 
-		virtual bool isLoadingState();
+		virtual bool isLoadingState() override;
 
 		osg::ref_ptr<GameState> getNextState();
 

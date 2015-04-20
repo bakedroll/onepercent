@@ -20,7 +20,7 @@ namespace osgGaming
 	public:
 		GameApplication();
 
-		virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+		virtual void operator() (osg::Node* node, osg::NodeVisitor* nv) override;
 
 		template<class WorldType>
 		void setWorld() { setWorld(new WorldType()); }

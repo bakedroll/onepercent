@@ -35,7 +35,12 @@ bool GameState::isLoadingState()
 	return false;
 }
 
-void GameState::onKeyDownEvent(int key)
+void GameState::onKeyHitEvent(int key)
+{
+
+}
+
+void GameState::onMouseHitEvent(int button, float x, float y)
 {
 
 }

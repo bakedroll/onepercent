@@ -37,7 +37,8 @@ namespace osgGaming
 
 		virtual bool isLoadingState();
 
-		virtual void onKeyDownEvent(int key);
+		virtual void onKeyHitEvent(int key);
+		virtual void onMouseHitEvent(int button, float x, float y);
 
 	protected:
 		StateEvent* stateEvent_push(osg::ref_ptr<GameState> state);
