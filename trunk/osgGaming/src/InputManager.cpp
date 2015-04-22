@@ -9,9 +9,13 @@ InputManager::InputManager(ref_ptr<World> world, ref_ptr<World> worldLoading)
 	  _world(world),
 	  _worldLoading(worldLoading),
 	  _resolutionWidth(0),
-	  _resolutionHeight(0)
+	  _resolutionHeight(0),
+	  _mouseDragging(0)
 {
-
+	for (int i = 0; i < _NUM_MOUSE_BUTTONS; i++)
+	{
+		_mousePressed[i] = false;
+	}
 }
 
 bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter&)
@@ -20,19 +24,37 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter&)
 	{
 	case GUIEventAdapter::KEYDOWN:
 	
-		if (_currentState.valid())
-		{
-			_currentState->onKeyHitEvent(ea.getKey());
-		}
+		_currentState->onKeyPressedEvent(ea.getKey());
+
+		return true;
+
+	case GUIEventAdapter::KEYUP:
+
+		_currentState->onKeyReleasedEvent(ea.getKey());
 
 		return true;
 
 	case GUIEventAdapter::PUSH:
+	case GUIEventAdapter::DOUBLECLICK:
 
-		if (_currentState.valid())
+		_mousePressed[log_x_2(ea.getButton())] = true;
+
+		_currentState->onMousePressedEvent(ea.getButton(), ea.getX(), ea.getY());
+
+		return true;
+
+	case GUIEventAdapter::RELEASE:
+
+		_mousePressed[log_x_2(ea.getButton())] = false;
+
+		if (_mouseDragging == ea.getButton())
 		{
-			_currentState->onMouseHitEvent(ea.getButton(), ea.getX(), ea.getY());
+			_currentState->onDragEndEvent(_mouseDragging, _dragOrigin, Vec2f(ea.getX(), ea.getY()));
+
+			_mouseDragging = 0;
 		}
+
+		_currentState->onMouseReleasedEvent(ea.getButton(), ea.getX(), ea.getY());
 
 		return true;
 	
@@ -50,6 +72,32 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter&)
 		}
 
 		return true;
+
+	case GUIEventAdapter::DRAG:
+	case GUIEventAdapter::MOVE:
+
+		_currentState->onMouseMoveEvent(ea.getX(), ea.getY());
+
+		if (_mouseDragging == 0)
+		{
+			int pressed = mousePressed();
+
+			if (pressed != -1)
+			{
+				_mouseDragging = 1 << pressed;
+				_dragOrigin = Vec2f(ea.getX(), ea.getY());
+
+				_currentState->onDragBeginEvent(_mouseDragging, _dragOrigin);
+			}
+		}
+
+		if (_mouseDragging != 0)
+		{
+			_currentState->onDragEvent(_mouseDragging, _dragOrigin, Vec2f(ea.getX(), ea.getY()));
+		}
+
+		return true;
+
 	}
 
 	return false;
@@ -75,4 +123,20 @@ void InputManager::updateResolution(unsigned int width, unsigned int height)
 
 	_resolutionWidth = width;
 	_resolutionHeight = height;
+}
+
+int InputManager::mousePressed()
+{
+	for (int i = 0; i < _NUM_MOUSE_BUTTONS; i++)
+	{
+		if (_mousePressed[i] == true)
+			return i;
+	}
+
+	return -1;
+}
+
+unsigned int InputManager::log_x_2(int x)
+{
+	return int(log((double)x) / log(2.0));
 }

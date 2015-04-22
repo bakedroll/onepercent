@@ -5,7 +5,8 @@ using namespace osg;
 
 GameState::GameState()
 	: Referenced(),
-	  _initialized(false)
+	  _initialized(false),
+	  _stateEvent(NULL)
 {
 
 }
@@ -27,7 +28,7 @@ void GameState::initialize(osg::ref_ptr<World> world, osg::ref_ptr<GameSettings>
 
 StateEvent* GameState::update(double frameTime, ref_ptr<World> world, ref_ptr<GameSettings> settings)
 {
-	return NULL;
+	return stateEvent_default();
 }
 
 bool GameState::isLoadingState()
@@ -35,46 +36,101 @@ bool GameState::isLoadingState()
 	return false;
 }
 
-void GameState::onKeyHitEvent(int key)
+void GameState::onKeyPressedEvent(int key)
 {
 
 }
 
-void GameState::onMouseHitEvent(int button, float x, float y)
+void GameState::onKeyReleasedEvent(int key)
+{
+
+}
+
+void GameState::onMousePressedEvent(int button, float x, float y)
+{
+
+}
+
+void GameState::onMouseReleasedEvent(int button, float x, float y)
+{
+
+}
+
+void GameState::onMouseMoveEvent(float x, float y)
+{
+
+}
+
+void GameState::onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position)
+{
+
+}
+
+void GameState::onDragBeginEvent(int button, osg::Vec2f origin)
+{
+
+}
+
+void GameState::onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position)
 {
 
 }
 
 StateEvent* GameState::stateEvent_push(ref_ptr<GameState> state)
 {
-	StateEvent* e = new StateEvent();
-	e->type = PUSH;
-	e->referencedState = state;
+	if (_stateEvent != NULL)
+	{
+		return _stateEvent;
+	}
 
-	return e;
+	_stateEvent = new StateEvent();
+	_stateEvent->type = PUSH;
+	_stateEvent->referencedState = state;
+
+	return _stateEvent;
 }
 
 StateEvent* GameState::stateEvent_pop()
 {
-	StateEvent* e = new StateEvent();
-	e->type = POP;
+	if (_stateEvent != NULL)
+	{
+		return _stateEvent;
+	}
 
-	return e;
+	_stateEvent = new StateEvent();
+	_stateEvent->type = POP;
+
+	return _stateEvent;
 }
 
 StateEvent* GameState::stateEvent_replace(ref_ptr<GameState> state)
 {
-	StateEvent* e = new StateEvent();
-	e->type = REPLACE;
-	e->referencedState = state;
+	if (_stateEvent != NULL)
+	{
+		return _stateEvent;
+	}
 
-	return e;
+	_stateEvent = new StateEvent();
+	_stateEvent->type = REPLACE;
+	_stateEvent->referencedState = state;
+
+	return _stateEvent;
 }
 
 StateEvent* GameState::stateEvent_endGame()
 {
-	StateEvent* e = new StateEvent();
-	e->type = END_GAME;
+	if (_stateEvent != NULL)
+	{
+		return _stateEvent;
+	}
 
-	return e;
+	_stateEvent = new StateEvent();
+	_stateEvent->type = END_GAME;
+
+	return _stateEvent;
+}
+
+StateEvent* GameState::stateEvent_default()
+{
+	return _stateEvent;
 }

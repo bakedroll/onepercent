@@ -31,6 +31,8 @@ namespace osgGaming
 		template<class SettingsType>
 		void setGameSettings() { setGameSettings(new SettingsType()); }
 
+		osg::ref_ptr<GameSettings> getGameSettings();
+
 		int run(osg::ref_ptr<GameState> initialState);
 
 	private:

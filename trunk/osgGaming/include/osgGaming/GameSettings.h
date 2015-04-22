@@ -12,10 +12,11 @@ namespace osgGaming
 
 		void setFullscreenEnabled(bool enabled);
 		void setWindowResolution(osg::Vec2i resolution);
+		void setScreenNum(unsigned int screenNum);
 
 		bool getFullscreenEnabled();
 		osg::Vec2i getWindowResolution();
-
+		unsigned int getScreenNum();
 
 		void load();
 		void save();
@@ -23,6 +24,7 @@ namespace osgGaming
 	private:
 		bool _fullscreenEnabled;
 		osg::Vec2i _windowResolution;
+		unsigned int _screenNum;
 
 		bool _isLoaded;
 	};

@@ -9,7 +9,7 @@ TransformableCameraManipulator::TransformableCameraManipulator()
 	: osgGA::CameraManipulator(),
 	_updateClearColor(true),
 	_updateProjectionMatrix(false),
-	_projectionAngle(45.0),
+	_projectionAngle(30.0),
 	_projectionNear(0.2),
 	_projectionFar(200.0),
 	_projectionRatio(0.0),
@@ -91,7 +91,7 @@ void TransformableCameraManipulator::updateClearColor(Vec4 clearColor)
 	_updateClearColor = true;
 }
 
-void TransformableCameraManipulator::getPickVector(float x, float y, osg::Vec3f& point, osg::Vec3f& direction)
+void TransformableCameraManipulator::getPickRay(float x, float y, osg::Vec3f& point, osg::Vec3f& direction)
 {
 	float mappedX = (x * 2.0f) / _resolution.x() - 1.0f;
 	float mappedY = (y * 2.0f) / _resolution.y() - 1.0f;

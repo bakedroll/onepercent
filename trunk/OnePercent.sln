@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OnePercent", "OnePercent\OnePercent.vcxproj", "{76B146B7-D5C8-407B-B695-506B840511AF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A73F05F2-DB1B-4366-A6E7-E063F2A12925} = {A73F05F2-DB1B-4366-A6E7-E063F2A12925}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageHelper", "ImageHelper\ImageHelper.csproj", "{EA902058-3C89-42BD-A9B2-FFFBCA5CCAB0}"
 EndProject

@@ -26,7 +26,7 @@ namespace osgGaming
 		void updateResolution(osg::Vec2f resolution);
 		void updateClearColor(osg::Vec4 clearColor);
 
-		void getPickVector(float x, float y, osg::Vec3f& point, osg::Vec3f& direction);
+		void getPickRay(float x, float y, osg::Vec3f& point, osg::Vec3f& direction);
 
 	private:
 		osg::Vec3f _position;
