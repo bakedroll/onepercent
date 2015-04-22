@@ -10,6 +10,10 @@ namespace onep
 	class GlobeModel : public osg::Group
 	{
 	public:
+		static const double EARTH_RADIUS;
+		static const int SPHERE_STACKS;
+		static const int SPHERE_SLICES;
+
 		GlobeModel();
 
 	private:

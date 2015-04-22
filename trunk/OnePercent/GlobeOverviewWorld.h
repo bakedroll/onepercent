@@ -9,12 +9,14 @@ namespace onep
 	class GlobeOverviewWorld : public osgGaming::World
 	{
 	public:
-		osg::ref_ptr<osg::PositionAttitudeTransform> getGlobeTransform();
+		GlobeOverviewWorld();
+
+		osg::Vec2f getTimeOfYearAndDay();
 		
-		void setGlobeTransform(osg::ref_ptr<osg::PositionAttitudeTransform> transform);
+		void setTimeOfYearAndDay(osg::Vec2f timeOfYearAndDay);
 
 	private:
-		osg::ref_ptr<osg::PositionAttitudeTransform> _globeTransform;
+		osg::Vec2f _timeOfYearAndDay;
 
 	};
 }

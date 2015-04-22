@@ -4,6 +4,7 @@
 #include <osgUtil/TangentSpaceGenerator>
 
 using namespace osg;
+using namespace std;
 
 // Z  Y
 // | /
@@ -47,6 +48,16 @@ Quat osgGaming::getQuatFromEuler(double pitch, double roll, double yaw)
 	q[3] = c1c2*c3 - s1s2*s3;
 
 	return q;
+}
+
+Matrix osgGaming::getMatrixFromEuler(double pitch, double roll, double yaw)
+{
+	Quat quat = getQuatFromEuler(pitch, roll, yaw);
+
+	Matrix mat = Matrix::identity();
+	mat.setRotate(quat);
+
+	return mat;
 }
 
 Vec3 osgGaming::getVec3FromEuler(double pitch, double roll, double yaw, Vec3 origin)

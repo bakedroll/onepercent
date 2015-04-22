@@ -21,12 +21,12 @@ void GameState::setInitialized()
 	_initialized = true;
 }
 
-void GameState::initialize(osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings)
+void GameState::initialize()
 {
 
 }
 
-StateEvent* GameState::update(double frameTime, ref_ptr<World> world, ref_ptr<GameSettings> settings)
+StateEvent* GameState::update()
 {
 	return stateEvent_default();
 }
@@ -61,19 +61,64 @@ void GameState::onMouseMoveEvent(float x, float y)
 
 }
 
-void GameState::onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position)
+void GameState::onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion)
 {
 
 }
 
-void GameState::onDragBeginEvent(int button, osg::Vec2f origin)
+void GameState::onDragEvent(int button, Vec2f origin, Vec2f position, osg::Vec2f change)
 {
 
 }
 
-void GameState::onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position)
+void GameState::onDragBeginEvent(int button, Vec2f origin)
 {
 
+}
+
+void GameState::onDragEndEvent(int button, Vec2f origin, Vec2f position)
+{
+
+}
+
+double GameState::getSimulationTime()
+{
+	return _simulationTime;
+}
+
+double GameState::getFrameTime()
+{
+	return _frameTime;
+}
+
+ref_ptr<World> GameState::getWorld()
+{
+	return _world;
+}
+
+ref_ptr<GameSettings> GameState::getGameSettings()
+{
+	return _gameSettings;
+}
+
+void GameState::setSimulationTime(double simulationTime)
+{
+	_simulationTime = simulationTime;
+}
+
+void GameState::setFrameTime(double frameTime)
+{
+	_frameTime = frameTime;
+}
+
+void GameState::setWorld(ref_ptr<World> world)
+{
+	_world = world;
+}
+
+void GameState::setGameSettings(ref_ptr<GameSettings> settings)
+{
+	_gameSettings = settings;
 }
 
 StateEvent* GameState::stateEvent_push(ref_ptr<GameState> state)
