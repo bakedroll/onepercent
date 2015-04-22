@@ -20,6 +20,12 @@ namespace osgGaming
 		void updateResolution(unsigned int width, unsigned int height);
 
 	private:
+		int mousePressed();
+
+		unsigned int log_x_2(int x);
+
+		static const unsigned int _NUM_MOUSE_BUTTONS = 3;
+
 		osg::ref_ptr<World> _world;
 		osg::ref_ptr<World> _worldLoading;
 
@@ -28,5 +34,9 @@ namespace osgGaming
 
 		unsigned int _resolutionWidth;
 		unsigned int _resolutionHeight;
+
+		bool _mousePressed[_NUM_MOUSE_BUTTONS];
+		int _mouseDragging;
+		osg::Vec2f _dragOrigin;
 	};
 }

@@ -1,4 +1,5 @@
 - HDR
+- antialiasing
 - atmospheric scattering
 - clouds
 - background

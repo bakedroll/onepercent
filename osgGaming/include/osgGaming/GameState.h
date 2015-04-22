@@ -37,8 +37,17 @@ namespace osgGaming
 
 		virtual bool isLoadingState();
 
-		virtual void onKeyHitEvent(int key);
-		virtual void onMouseHitEvent(int button, float x, float y);
+		virtual void onKeyPressedEvent(int key);
+		virtual void onKeyReleasedEvent(int key);
+
+		virtual void onMousePressedEvent(int button, float x, float y);
+		virtual void onMouseReleasedEvent(int button, float x, float y);
+
+		virtual void onMouseMoveEvent(float x, float y);
+
+		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position);
+		virtual void onDragBeginEvent(int button, osg::Vec2f origin);
+		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position);
 
 	protected:
 		StateEvent* stateEvent_push(osg::ref_ptr<GameState> state);
@@ -46,7 +55,11 @@ namespace osgGaming
 		StateEvent* stateEvent_replace(osg::ref_ptr<GameState> state);
 		StateEvent* stateEvent_endGame();
 
+		StateEvent* stateEvent_default();
+
 	private:
 		bool _initialized;
+
+		StateEvent* _stateEvent;
 	};
 }

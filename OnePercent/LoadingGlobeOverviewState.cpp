@@ -43,7 +43,7 @@ StateEvent* LoadingGlobeOverviewState::update(double frameTime, osg::ref_ptr<Wor
 		
 	_loadingText->setText(loadingTextString);
 
-	return 0;
+	return stateEvent_default();
 }
 
 void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings> settings)

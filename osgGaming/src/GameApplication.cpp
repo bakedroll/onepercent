@@ -117,6 +117,16 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 	traverse(node, nv);
 }
 
+ref_ptr<GameSettings> GameApplication::getGameSettings()
+{
+	if (!_gameSettings.valid())
+	{
+		setGameSettings(new GameSettings());
+	}
+
+	return _gameSettings;
+}
+
 int GameApplication::run(ref_ptr<GameState> initialState)
 {
 	try
@@ -143,7 +153,7 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 
 		unsigned int screenWidth, screenHeight;
 		unsigned int width, height;
-		GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(0), screenWidth, screenHeight);
+		GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(_gameSettings->getScreenNum()), screenWidth, screenHeight);
 
 		if (!_gameSettings->getFullscreenEnabled())
 		{
@@ -153,7 +163,8 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 				screenWidth / 2 - windowResolution.x() / 2,
 				screenHeight / 2 - windowResolution.y() / 2,
 				windowResolution.x(),
-				windowResolution.y());
+				windowResolution.y(),
+				_gameSettings->getScreenNum());
 
 			width = windowResolution.x();
 			height = windowResolution.y();
@@ -169,6 +180,9 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 		}
 
 		_inputManager->updateResolution(width, height);
+
+		double a, b, c, d;
+		_viewer.getCamera()->getProjectionMatrixAsPerspective(a, b, c, d);
 
 		attachWorld(_world);
 
@@ -225,6 +239,12 @@ void GameApplication::attachWorld(osg::ref_ptr<World> world)
 void GameApplication::popState()
 {
 	_stateStack.pop_back();
+
+	if (_stateStack.size() == 0)
+	{
+		return;
+	}
+	
 	_inputManager->setCurrentState(*(_stateStack.end() - 1));
 }
 

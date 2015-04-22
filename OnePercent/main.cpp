@@ -13,5 +13,7 @@ int main(int argc, char** argv)
 	ref_ptr<GameApplication> app = new GameApplication();
 	app->setWorld<GlobeOverviewWorld>();
 
+	//app->getGameSettings()->setScreenNum(1);
+
 	return app->run(new LoadingGlobeOverviewState(new GlobeOverviewState()));
 }

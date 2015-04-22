@@ -10,8 +10,7 @@ using namespace osgGaming;
 
 GlobeOverviewState::GlobeOverviewState()
 	: GameState(),
-	  _globeAngle(0.0),
-	  _exitGame(false)
+	  _globeAngle(0.0)
 {
 
 }
@@ -26,27 +25,21 @@ StateEvent* GlobeOverviewState::update(double frameTime, ref_ptr<World> world, r
 	_globeAngle = fmodf(_globeAngle + (float)frameTime * 0.1f, (C_PI * 2.0f));
 	_globeWorld->getGlobeTransform()->setAttitude(getQuatFromEuler(0.0, 0.0, _globeAngle));
 
-	if (_exitGame)
-	{
-		return stateEvent_endGame();
-	}
-
-	return 0;
+	return stateEvent_default();
 }
 
-void GlobeOverviewState::onKeyHitEvent(int key)
+void GlobeOverviewState::onKeyPressedEvent(int key)
 {
 	if (key == GUIEventAdapter::KEY_Escape)
 	{
-		_exitGame = true;
+		stateEvent_pop();
 	}
 }
 
-void GlobeOverviewState::onMouseHitEvent(int button, float x, float y)
+void GlobeOverviewState::onMousePressedEvent(int button, float x, float y)
 {
 	Vec3f point, direction;
-
-	_globeWorld->getCameraManipulator()->getPickVector(x, y, point, direction);
+	_globeWorld->getCameraManipulator()->getPickRay(x, y, point, direction);
 
 	printf("Pressed mouse button: %d at %f, %f; Point: %f, %f, %f; Direction: %f, %f, %f\n", button, x, y,
 		point.x(), point.y(), point.z(),
@@ -57,4 +50,12 @@ void GlobeOverviewState::onMouseHitEvent(int button, float x, float y)
 	{
 		printf("INTERSECTION\n");
 	}
+}
+
+void GlobeOverviewState::onDragEvent(int button, Vec2f origin, Vec2f position)
+{
+	printf("onDragEvent - button: %d; origin: %f, %f; position: %f, %f\n",
+		button,
+		origin.x(), origin.y(),
+		position.x(), position.y());
 }
