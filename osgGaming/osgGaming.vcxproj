@@ -23,6 +23,7 @@
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\osgGaming\Animation.h" />
     <ClInclude Include="include\osgGaming\GameApplication.h" />
     <ClInclude Include="include\osgGaming\GameException.h" />
     <ClInclude Include="include\osgGaming\GameLoadingState.h" />

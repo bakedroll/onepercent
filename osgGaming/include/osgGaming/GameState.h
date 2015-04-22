@@ -32,8 +32,8 @@ namespace osgGaming
 		bool isInitialized();
 		void setInitialized();
 
-		virtual void initialize(osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings);
-		virtual StateEvent* update(double frameTime, osg::ref_ptr<World> world, osg::ref_ptr<GameSettings> settings);
+		virtual void initialize();
+		virtual StateEvent* update();
 
 		virtual bool isLoadingState();
 
@@ -45,9 +45,21 @@ namespace osgGaming
 
 		virtual void onMouseMoveEvent(float x, float y);
 
-		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position);
+		virtual void onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion);
+
+		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change);
 		virtual void onDragBeginEvent(int button, osg::Vec2f origin);
 		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position);
+
+		double getSimulationTime();
+		double getFrameTime();
+		osg::ref_ptr<World> getWorld();
+		osg::ref_ptr<GameSettings> getGameSettings();
+
+		void setSimulationTime(double simulationTime);
+		void setFrameTime(double frameTime);
+		void setWorld(osg::ref_ptr<World> world);
+		void setGameSettings(osg::ref_ptr<GameSettings> settings);
 
 	protected:
 		StateEvent* stateEvent_push(osg::ref_ptr<GameState> state);
@@ -61,5 +73,10 @@ namespace osgGaming
 		bool _initialized;
 
 		StateEvent* _stateEvent;
+
+		double _simulationTime;
+		double _frameTime;
+		osg::ref_ptr<World> _world;
+		osg::ref_ptr<GameSettings> _gameSettings;
 	};
 }

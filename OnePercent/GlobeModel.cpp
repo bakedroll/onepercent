@@ -16,6 +16,10 @@ using namespace osg;
 using namespace osgGaming;
 using namespace std;
 
+const double GlobeModel::EARTH_RADIUS = 6.371;
+const int GlobeModel::SPHERE_STACKS = 48;
+const int GlobeModel::SPHERE_SLICES = 96;
+
 GlobeModel::GlobeModel()
 {
 	ref_ptr<Node> earth = createPlanetGeode(0);
@@ -45,10 +49,6 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 {
 	ref_ptr<Geode> geode = new Geode();
 
-	int sphereStacks = 48;
-	int sphereSlices = 96;
-	double sphereRadius = 6.371;
-
 	char* resolutionLevel0;
 	char* resolutionLevel1;
 	int n, m;
@@ -70,15 +70,15 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 		break;
 	};
 
-	int stacksPerSegment = sphereStacks / m;
-	int slicesPerSegment = sphereSlices / n;
+	int stacksPerSegment = SPHERE_STACKS / m;
+	int slicesPerSegment = SPHERE_SLICES / n;
 
 	for (int y = 0; y < m; y++)
 	{
 		for (int x = 0; x < n; x++)
 		{
 			ref_ptr<Geometry> geo = createSphereSegmentMesh(
-				sphereStacks, sphereSlices, sphereRadius,
+				SPHERE_STACKS, SPHERE_SLICES, EARTH_RADIUS,
 				y * stacksPerSegment,
 				(y + 1) * stacksPerSegment - 1,
 				x * slicesPerSegment,

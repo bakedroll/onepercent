@@ -1,6 +1,7 @@
 #include <osgGaming/InputManager.h>
 
 using namespace osgGaming;
+using namespace osgViewer;
 using namespace osgGA;
 using namespace osg;
 
@@ -18,7 +19,7 @@ InputManager::InputManager(ref_ptr<World> world, ref_ptr<World> worldLoading)
 	}
 }
 
-bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter&)
+bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 {
 	switch (ea.getEventType())
 	{
@@ -86,6 +87,7 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter&)
 			{
 				_mouseDragging = 1 << pressed;
 				_dragOrigin = Vec2f(ea.getX(), ea.getY());
+				_lastDragPosition = _dragOrigin;
 
 				_currentState->onDragBeginEvent(_mouseDragging, _dragOrigin);
 			}
@@ -93,9 +95,18 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter&)
 
 		if (_mouseDragging != 0)
 		{
-			_currentState->onDragEvent(_mouseDragging, _dragOrigin, Vec2f(ea.getX(), ea.getY()));
+			Vec2f position(ea.getX(), ea.getY());
+
+			_currentState->onDragEvent(_mouseDragging, _dragOrigin, position, position - _lastDragPosition);
+
+			_lastDragPosition = position;
 		}
 
+		return true;
+
+	case GUIEventAdapter::SCROLL:
+
+		_currentState->onScrollEvent(ea.getScrollingMotion());
 		return true;
 
 	}
@@ -103,7 +114,7 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter&)
 	return false;
 }
 
-void InputManager::setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow)
+void InputManager::setGraphicsWindow(ref_ptr<GraphicsWindow> graphicsWindow)
 {
 	_graphicsWindow = graphicsWindow;
 }

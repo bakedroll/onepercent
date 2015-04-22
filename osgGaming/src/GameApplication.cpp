@@ -45,11 +45,15 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 	{
 		ref_ptr<GameState> state = *(_stateStack.end() - 1);
 
-		ref_ptr<World> currentWorld = state->isLoadingState() ? _worldLoading : _world;
+		state->setSimulationTime(time);
+		state->setFrameTime(time_diff);
 
 		if (!state->isInitialized())
 		{
-			state->initialize(currentWorld, _gameSettings);
+			state->setWorld(state->isLoadingState() ? _worldLoading : _world);
+			state->setGameSettings(_gameSettings);
+
+			state->initialize();
 			state->setInitialized();
 
 			if (state->isLoadingState())
@@ -77,7 +81,7 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 		}
 
 		// Update state
-		StateEvent* se = state->update(time_diff, currentWorld, _gameSettings);
+		StateEvent* se = state->update();
 
 		if (_isLoading)
 		{

@@ -12,7 +12,7 @@ namespace osgGaming
 	public:
 		InputManager(osg::ref_ptr<World> world, osg::ref_ptr<World> worldLoading);
 
-		virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter&) override;
+		virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
 
 		void setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow);
 		void setCurrentState(osg::ref_ptr<GameState> state);
@@ -38,5 +38,6 @@ namespace osgGaming
 		bool _mousePressed[_NUM_MOUSE_BUTTONS];
 		int _mouseDragging;
 		osg::Vec2f _dragOrigin;
+		osg::Vec2f _lastDragPosition;
 	};
 }
