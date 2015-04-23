@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\FpsTextCallback.cpp" />
     <ClCompile Include="src\GameException.cpp" />
     <ClCompile Include="src\GameApplication.cpp" />
     <ClCompile Include="src\GameLoadingState.cpp" />
@@ -19,11 +20,18 @@
     <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\Hud.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\ResourceManager.cpp" />
     <ClCompile Include="src\TransformableCameraManipulator.cpp" />
+    <ClCompile Include="src\UIElement.cpp" />
+    <ClCompile Include="src\UIGrid.cpp" />
+    <ClCompile Include="src\UIStackPanel.cpp" />
+    <ClCompile Include="src\UIText.cpp" />
+    <ClCompile Include="src\UIUpdateVisitor.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\Animation.h" />
+    <ClInclude Include="include\osgGaming\FpsTextCallback.h" />
     <ClInclude Include="include\osgGaming\GameApplication.h" />
     <ClInclude Include="include\osgGaming\GameException.h" />
     <ClInclude Include="include\osgGaming\GameLoadingState.h" />
@@ -32,7 +40,13 @@
     <ClInclude Include="include\osgGaming\Helper.h" />
     <ClInclude Include="include\osgGaming\Hud.h" />
     <ClInclude Include="include\osgGaming\InputManager.h" />
+    <ClInclude Include="include\osgGaming\ResourceManager.h" />
     <ClInclude Include="include\osgGaming\TransformableCameraManipulator.h" />
+    <ClInclude Include="include\osgGaming\UIElement.h" />
+    <ClInclude Include="include\osgGaming\UIGrid.h" />
+    <ClInclude Include="include\osgGaming\UIStackPanel.h" />
+    <ClInclude Include="include\osgGaming\UIText.h" />
+    <ClInclude Include="include\osgGaming\UIUpdateVisitor.h" />
     <ClInclude Include="include\osgGaming\World.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

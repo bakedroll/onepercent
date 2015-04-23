@@ -60,21 +60,29 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	{
 		stateEvent_pop();
 	}
+	else if (key == GUIEventAdapter::KEY_0)
+	{
+		printf("bla\n");
+		getGameSettings()->setFullscreenEnabled(!getGameSettings()->getFullscreenEnabled());
+	}
 }
 
 void GlobeOverviewState::onMousePressedEvent(int button, float x, float y)
 {
-	Vec3f point, direction;
-	getWorld()->getCameraManipulator()->getPickRay(x, y, point, direction);
-
-	/*printf("Pressed mouse button: %d at %f, %f; Point: %f, %f, %f; Direction: %f, %f, %f\n", button, x, y,
-		point.x(), point.y(), point.z(),
-		direction.x(), direction.y(), direction.z());*/
-
-	Vec3f pickResult;
-	if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), 6.371f, point, direction, pickResult))
+	if (button == GUIEventAdapter::LEFT_MOUSE_BUTTON)
 	{
-		// printf("INTERSECTION\n");
+		Vec3f point, direction;
+		getWorld()->getCameraManipulator()->getPickRay(x, y, point, direction);
+
+		/*printf("Pressed mouse button: %d at %f, %f; Point: %f, %f, %f; Direction: %f, %f, %f\n", button, x, y,
+			point.x(), point.y(), point.z(),
+			direction.x(), direction.y(), direction.z());*/
+
+		Vec3f pickResult;
+		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), 6.371f, point, direction, pickResult))
+		{
+			printf("INTERSECTION at %f, %f, %f\n", pickResult.x(), pickResult.y(), pickResult.z());
+		}
 	}
 }
 

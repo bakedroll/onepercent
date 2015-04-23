@@ -54,7 +54,7 @@ Matrix osgGaming::getMatrixFromEuler(double pitch, double roll, double yaw)
 {
 	Quat quat = getQuatFromEuler(pitch, roll, yaw);
 
-	Matrix mat = Matrix::identity();
+	Matrix mat;
 	mat.setRotate(quat);
 
 	return mat;

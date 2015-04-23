@@ -1,14 +1,17 @@
 #include <osgGaming/Hud.h>
+#include <osgGaming/FpsTextCallback.h>
+#include <osgGaming/UIGrid.h>
+#include <osgGaming/UIUpdateVisitor.h>
 
 #include <osg/MatrixTransform>
-#include <osgText/Text>
 
 using namespace osgGaming;
 using namespace osgText;
 using namespace osg;
 
 Hud::Hud()
-	: Referenced()
+	: Referenced(),
+	_fpsEnabled(false)
 {
 	/*osg::Geometry* HUDBackgroundGeometry = new osg::Geometry();
 
@@ -57,27 +60,19 @@ Hud::Hud()
 	stateSet->setRenderBinDetails(11, "RenderBin");
 
 
-
-	/*osgText::Text* textOne = new osgText::Text();
-	textOne->setCharacterSize(25);
-	// textOne->setFont("C:/WINDOWS/Fonts/impact.ttf");
-	textOne->setText("Not so good");
-	textOne->setAxisAlignment(osgText::Text::SCREEN);
-	textOne->setPosition(osg::Vec3(360, 165, -1.5));
-	textOne->setColor(osg::Vec4(199, 77, 15, 1));*/
-
-
 	_geode = new Geode();
-	_geode->setStateSet(stateSet);
-	//hudGeode->addDrawable(textOne);
+
+	_rootUIElement = new UIGrid();
 
 	ref_ptr<MatrixTransform> modelViewMatrix = new MatrixTransform();
 	modelViewMatrix->setMatrix(Matrix::identity());
 	modelViewMatrix->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
 	modelViewMatrix->addChild(_geode);
+	modelViewMatrix->addChild(_rootUIElement);
 
 	_projection = new Projection();
 	_projection->addChild(modelViewMatrix);
+	_projection->setStateSet(stateSet);
 }
 
 ref_ptr<Projection> Hud::getProjection()
@@ -90,7 +85,64 @@ ref_ptr<Geode> Hud::getGeode()
 	return _geode;
 }
 
+ref_ptr<UIElement> Hud::getRootUIElement()
+{
+	return _rootUIElement;
+}
+
 void Hud::updateResolution(unsigned int width, unsigned int height)
 {
-	_projection->setMatrix(Matrix::ortho2D(0, width, 0, height));
+	_projection->setMatrix(Matrix::ortho2D(0.0, (double)width - 1.0, 1.0, (double)height - 1.0));
+
+	_resolution = Vec2f((float)width, (float)height);
+
+	updateUIElements();
+}
+
+void Hud::updateUIElements()
+{
+	_rootUIElement->setOrigin(Vec2f(0.0f, 0.0f));
+	_rootUIElement->setSize(_resolution);
+
+	UIUpdateVisitor updateVisitor;
+	_rootUIElement->accept(updateVisitor);
+}
+
+void Hud::setFpsEnabled(bool enabled)
+{
+	if (enabled == _fpsEnabled)
+	{
+		return;
+	}
+
+	_fpsEnabled = enabled;
+
+	if (!_fpsText.valid())
+	{
+		_fpsText = new osgText::Text();
+		_fpsText->setCharacterSize(25);
+		_fpsText->setFont("./data/fonts/coolvetica rg.ttf");
+		_fpsText->setText("");
+		_fpsText->setAxisAlignment(osgText::Text::SCREEN);
+		_fpsText->setAlignment(osgText::TextBase::LEFT_BOTTOM);
+		_fpsText->setPosition(osg::Vec3(10, 10, -1.5));
+		_fpsText->setColor(osg::Vec4(199, 77, 15, 1));
+		_fpsText->setDataVariance(osg::Object::DYNAMIC);
+		_fpsText->setUpdateCallback(new FpsTextCallback());
+	}
+
+	if (_fpsEnabled == true)
+	{
+		_geode->addDrawable(_fpsText);
+	}
+	else
+	{
+		_geode->removeDrawable(_fpsText);
+	}
+}
+
+void Hud::setRootUIElement(osg::ref_ptr<UIElement> element)
+{
+	_rootUIElement = element;
+	updateUIElements();
 }

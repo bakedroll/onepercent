@@ -4,6 +4,9 @@
 
 #include <osg/PositionAttitudeTransform>
 #include <osgGaming/Helper.h>
+#include <osgGaming/UIStackPanel.h>
+#include <osgGaming/UIGrid.h>
+#include <osgGaming/UIText.h>
 
 using namespace onep;
 using namespace osg;
@@ -45,9 +48,46 @@ StateEvent* LoadingGlobeOverviewState::update()
 
 void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings> settings)
 {
-	ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
+	// ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
 	ref_ptr<GlobeModel> globe = new GlobeModel();
 
-	globeWorld->getRootNode()->addChild(globe);
+	world->getRootNode()->addChild(globe);
+	world->getHud()->setFpsEnabled(true);
+
+
+
+	ref_ptr<UIElement> root = world->getHud()->getRootUIElement();
+
+	ref_ptr<UIGrid> grid = new UIGrid();
+	ref_ptr<UIText> first = new UIText();
+	ref_ptr<UIText> second = new UIText();
+	ref_ptr<UIText> third = new UIText();
+
+	first->setText("Text1");
+	second->setText("Text2");
+	third->setText("Text3");
+
+	first->setPadding(20.0f);
+	first->setHorizontalAlignment(UIText::RIGHT);
+
+
+	grid->setMargin(10.0f);
+	grid->setPadding(10.0f);
+	grid->setNumColumns(2);
+	grid->setNumRows(2);
+
+	root->addChild(grid);
+	grid->addChild(first);
+	grid->addChild(second);
+	grid->addChild(third);
+
+
+	root->getVisualGroup();
+	grid->getVisualGroup();
+	first->getVisualGroup();
+	second->getVisualGroup();
+	third->getVisualGroup();
+
+	world->getHud()->updateUIElements();
 }
