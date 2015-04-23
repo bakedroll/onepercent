@@ -153,6 +153,7 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 		_stateStack.push_back(initialState);
 
 		_inputManager = new InputManager(_world, _worldLoading);
+
 		_inputManager->setCurrentState(initialState);
 
 		unsigned int screenWidth, screenHeight;
@@ -175,6 +176,7 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 
 			ViewerBase::Windows windows;
 			_viewer.getWindows(windows);
+
 			_inputManager->setGraphicsWindow(*windows.begin());
 		}
 		else
@@ -184,9 +186,6 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 		}
 
 		_inputManager->updateResolution(width, height);
-
-		double a, b, c, d;
-		_viewer.getCamera()->getProjectionMatrixAsPerspective(a, b, c, d);
 
 		attachWorld(_world);
 
