@@ -13,7 +13,8 @@ UIElement::UIElement()
 	  _padding(0.0f, 0.0f, 0.0f, 0.0f),
 	  _margin(0.0f, 0.0f, 0.0f, 0.0f),
 	  _horizontalAlignment(H_STRETCH),
-	  _verticalAlignment(V_STRETCH)
+	  _verticalAlignment(V_STRETCH),
+	  _calculatedContentSize(false)
 	
 {
 
@@ -27,6 +28,13 @@ Vec2f UIElement::getOrigin()
 Vec2f UIElement::getSize()
 {
 	return _size;
+}
+
+Vec2f UIElement::getContentSize()
+{
+	return _size - Vec2f(
+		_margin.x() + _margin.z() + _padding.x() + _padding.z(),
+		_margin.y() + _margin.w() + _padding.y() + _padding.w());
 }
 
 float UIElement::getWidth()
@@ -65,6 +73,24 @@ void UIElement::getOriginSizeForChildInArea(unsigned int i, Vec2f area, Vec2f& o
 {
 	origin = Vec2f(0.0f, 0.0f);
 	size = area;
+}
+
+Vec2f UIElement::getMinContentSize()
+{
+	if (_calculatedContentSize == false)
+	{
+		_minContentSize = calculateMinContentSize();
+		_calculatedContentSize = true;
+	}
+
+	return _minContentSize;
+}
+
+Vec2f UIElement::getMinSize()
+{
+	return getMinContentSize() + Vec2f(
+		_margin.x() + _margin.z() + _padding.x() + _padding.z(),
+		_margin.y() + _margin.w() + _padding.y() + _padding.w());
 }
 
 UIElement::UIElementList UIElement::getUIChildren()
@@ -157,6 +183,13 @@ void UIElement::setVerticalAlignment(UIElement::VerticalAlignment alignment)
 	_verticalAlignment = alignment;
 }
 
+void UIElement::resetMinContentSize()
+{
+	_calculatedContentSize = false;
+
+	resetChildrenMinContentSize();
+}
+
 void UIElement::updatedContentOriginSize(Vec2f origin, Vec2f size)
 {
 
@@ -207,6 +240,16 @@ ref_ptr<Group> UIElement::getVisualGroup()
 	}
 
 	return _visualGroup;
+}
+
+Vec2f UIElement::calculateMinContentSize()
+{
+	return Vec2f(0.0f, 0.0f);
+}
+
+void UIElement::resetChildrenMinContentSize()
+{
+
 }
 
 void UIElement::updateVisualGroup()

@@ -10,8 +10,7 @@ UIText::UIText()
 	: UIElement(),
 	  _text(""),
 	  _fontSize(25),
-	  _horizontalAlignment(LEFT),
-	  _verticalAlignment(TOP)
+	  _alignment(TextBase::LEFT_TOP)
 {
 	ref_ptr<Geode> geode = new Geode();
 
@@ -20,6 +19,7 @@ UIText::UIText()
 	_textNode->setFont("./data/fonts/coolvetica rg.ttf");
 	_textNode->setText(_text);
 	_textNode->setAxisAlignment(osgText::Text::SCREEN);
+	_textNode->setDrawMode(osgText::Text::TEXT | osgText::Text::BOUNDINGBOX);
 	_textNode->setColor(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	_textNode->setDataVariance(osg::Object::DYNAMIC);
 
@@ -39,91 +39,55 @@ void UIText::setFontSize(int size)
 	_textNode->setCharacterSize(size);
 }
 
-void UIText::setHorizontalAlignment(HorizontalAlignment alignment)
+void UIText::setTextAlignment(TextBase::AlignmentType alignment)
 {
-	_horizontalAlignment = alignment;
-}
-
-void UIText::setVerticalAlignment(VerticalAlignment alignment)
-{
-	_verticalAlignment = alignment;
+	_alignment = alignment;
 }
 
 void UIText::updatedContentOriginSize(Vec2f origin, Vec2f size)
 {
 	Vec2f position;
 
-	switch (_horizontalAlignment)
+	if (_alignment == TextBase::LEFT_BOTTOM || _alignment == TextBase::LEFT_CENTER || _alignment == TextBase::LEFT_TOP)
 	{
-	case LEFT:
 		position.x() = origin.x();
-		break;
-	case RIGHT:
+	}
+	else if (_alignment == TextBase::RIGHT_BOTTOM || _alignment == TextBase::RIGHT_CENTER || _alignment == TextBase::RIGHT_TOP)
+	{
 		position.x() = origin.x() + size.x();
-		break;
-	case CENTER:
+	}
+	else if (_alignment == TextBase::CENTER_BOTTOM || _alignment == TextBase::CENTER_CENTER || _alignment == TextBase::CENTER_TOP)
+	{
 		position.x() = origin.x() + size.x() / 2.0f;
-		break;
 	}
 
-	switch (_verticalAlignment)
+	if (_alignment == TextBase::LEFT_TOP || _alignment == TextBase::CENTER_TOP || _alignment == TextBase::RIGHT_TOP)
 	{
-	case TOP:
 		position.y() = origin.y() + size.y();
-		break;
-	case BOTTOM:
+	}
+	else if (_alignment == TextBase::LEFT_BOTTOM || _alignment == TextBase::CENTER_BOTTOM || _alignment == TextBase::RIGHT_BOTTOM)
+	{
 		position.y() = origin.y();
-		break;
-	case MIDDLE:
+	}
+	else if (_alignment == TextBase::LEFT_CENTER || _alignment == TextBase::CENTER_CENTER || _alignment == TextBase::RIGHT_CENTER)
+	{
 		position.y() = origin.y() + size.y() / 2.0f;
-		break;
 	}
 
-	if (_verticalAlignment == TOP)
-	{
-		if (_horizontalAlignment == LEFT)
-		{
-			_textNode->setAlignment(TextBase::LEFT_TOP);
-		}
-		else if (_horizontalAlignment == CENTER)
-		{
-			_textNode->setAlignment(TextBase::CENTER_TOP);
-		}
-		else if (_horizontalAlignment == RIGHT)
-		{
-			_textNode->setAlignment(TextBase::RIGHT_TOP);
-		}
-	}
-	else if (_verticalAlignment == MIDDLE)
-	{
-		if (_horizontalAlignment == LEFT)
-		{
-			_textNode->setAlignment(TextBase::LEFT_CENTER);
-		}
-		else if (_horizontalAlignment == CENTER)
-		{
-			_textNode->setAlignment(TextBase::CENTER_CENTER);
-		}
-		else if (_horizontalAlignment == RIGHT)
-		{
-			_textNode->setAlignment(TextBase::RIGHT_CENTER);
-		}
-	}
-	else if (_verticalAlignment == BOTTOM)
-	{
-		if (_horizontalAlignment == LEFT)
-		{
-			_textNode->setAlignment(TextBase::LEFT_BOTTOM);
-		}
-		else if (_horizontalAlignment == CENTER)
-		{
-			_textNode->setAlignment(TextBase::CENTER_BOTTOM);
-		}
-		else if (_horizontalAlignment == RIGHT)
-		{
-			_textNode->setAlignment(TextBase::RIGHT_BOTTOM);
-		}
-	}
+	_textNode->setAlignment(_alignment);
+	_textNode->setPosition(Vec3(position.x(), position.y(), 0.0f));
+}
 
-	_textNode->setPosition(osg::Vec3(position.x(), position.y(), 0.0f));
+Vec2f UIText::calculateMinContentSize()
+{
+	//_textNode->getTextureGlyphQuadMap();
+
+	BoundingBox bb = _textNode->getBound();
+
+	//float cheight =_textNode->getCharacterHeight();
+
+	float width = bb.xMax() - bb.xMin();
+	float height = bb.yMax() - bb.yMin();
+
+	return Vec2f(width, height);
 }

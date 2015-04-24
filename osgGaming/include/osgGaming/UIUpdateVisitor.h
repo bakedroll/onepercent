@@ -15,5 +15,6 @@ namespace osgGaming
 	private:
 		void getOriginSizeInArea(osg::ref_ptr<UIElement> element, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size);
 
+		bool _traversedFirst;
 	};
 }
