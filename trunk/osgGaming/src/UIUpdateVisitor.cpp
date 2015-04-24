@@ -1,10 +1,14 @@
 #include <osgGaming/UIUpdateVisitor.h>
 
+#include <math.h>
+
 using namespace osg;
 using namespace osgGaming;
+using namespace std;
 
 UIUpdateVisitor::UIUpdateVisitor()
-	: NodeVisitor(TRAVERSE_ALL_CHILDREN)
+	: NodeVisitor(TRAVERSE_ALL_CHILDREN),
+	  _traversedFirst(false)
 {
 
 }
@@ -17,18 +21,33 @@ void UIUpdateVisitor::apply(osg::Node &node)
 	{
 		UIElement::UIElementList children = uiElement->getUIChildren();
 
-		Vec2f contentSize = uiElement->getSize();
-		Vec2f contentOrigin = uiElement->getOrigin();
+		if (_traversedFirst == false)
+		{
+			uiElement->resetMinContentSize();
+			_traversedFirst = true;
+		}
+
+		Vec2f size = uiElement->getSize();
+		Vec2f contentSize = uiElement->getContentSize();
 		Vec4f margin = uiElement->getMargin();
 		Vec4f padding = uiElement->getPadding();
 
-		contentSize.x() -= (margin.x() + margin.z() + padding.x() + padding.z());
-		contentSize.y() -= (margin.y() + margin.w() + padding.y() + padding.w());
-
 		Vec2f shift(margin.x() + padding.x(), margin.w() + padding.w());
 
-		contentOrigin += shift;
+		Vec2f minContentSize = uiElement->getMinContentSize();
+		if (minContentSize.x() > contentSize.x() || minContentSize.y() > contentSize.y())
+		{
+			Vec2f add(fmaxf(0.0f, minContentSize.x() - contentSize.x()), fmaxf(0.0f, minContentSize.y() - contentSize.y()));
 
+			contentSize += add;
+			size += add;
+
+			//contentSize.x() = fmaxf(contentSize.x(), minContentSize.x());
+			//contentSize.y() = fmaxf(contentSize.y(), minContentSize.y());
+
+			uiElement->setSize(size);
+		}
+		
 		uiElement->updatedContentOriginSize(shift, contentSize);
 
 		for (unsigned int i = 0; i < children.size(); i++)

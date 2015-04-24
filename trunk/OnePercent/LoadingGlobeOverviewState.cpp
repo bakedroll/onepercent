@@ -69,7 +69,7 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	third->setText("Text3");
 
 	first->setPadding(20.0f);
-	first->setHorizontalAlignment(UIText::RIGHT);
+	first->setTextAlignment(osgText::TextBase::RIGHT_TOP);
 
 
 	grid->setMargin(10.0f);

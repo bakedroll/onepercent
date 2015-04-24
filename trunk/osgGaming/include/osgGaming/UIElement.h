@@ -31,6 +31,7 @@ namespace osgGaming
 
 		osg::Vec2f getOrigin();
 		osg::Vec2f getSize();
+		osg::Vec2f getContentSize();
 
 		float getWidth();
 		float getHeight();
@@ -42,6 +43,8 @@ namespace osgGaming
 		VerticalAlignment getVerticalAlignment();
 
 		virtual void getOriginSizeForChildInArea(unsigned int i, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size);
+		osg::Vec2f getMinContentSize();
+		osg::Vec2f getMinSize();
 
 		UIElementList getUIChildren();
 		unsigned int getNumUIChildren();
@@ -61,16 +64,24 @@ namespace osgGaming
 		void setHorizontalAlignment(HorizontalAlignment alignment);
 		void setVerticalAlignment(VerticalAlignment alignment);
 
+		void resetMinContentSize();
+
 		virtual void updatedContentOriginSize(osg::Vec2f origin, osg::Vec2f size);
 
 	//protected:
 		osg::ref_ptr<osg::Group> getVisualGroup();
+	protected:
+		virtual osg::Vec2f calculateMinContentSize();
+		virtual void resetChildrenMinContentSize();
 
 	private:
 		void updateVisualGroup();
 
 		osg::Vec2f _origin;
 		osg::Vec2f _size;
+
+		osg::Vec2f _minContentSize;
+		bool _calculatedContentSize;
 
 		float _width;
 		float _height;
