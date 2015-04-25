@@ -42,9 +42,6 @@ void UIUpdateVisitor::apply(osg::Node &node)
 			contentSize += add;
 			size += add;
 
-			//contentSize.x() = fmaxf(contentSize.x(), minContentSize.x());
-			//contentSize.y() = fmaxf(contentSize.y(), minContentSize.y());
-
 			uiElement->setSize(size);
 		}
 		
