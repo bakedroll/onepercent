@@ -78,9 +78,9 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	grid->setNumRows(2);
 
 	root->addChild(grid);
-	grid->addChild(first, 0, 0);
-	grid->addChild(second, 1, 0);
-	grid->addChild(third, 0, 1);
+	grid->addChild(first, ColRow(0, 0));
+	grid->addChild(second, ColRow(1, 0));
+	grid->addChild(third, ColRow(0, 1));
 
 
 	root->getVisualGroup();

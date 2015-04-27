@@ -1,4 +1,5 @@
 #include <osgGaming/UIElement.h>
+#include <osgGaming/GameException.h>
 
 #include <osg/Geometry>
 #include <osg/Geode>
@@ -14,10 +15,30 @@ UIElement::UIElement()
 	  _margin(0.0f, 0.0f, 0.0f, 0.0f),
 	  _horizontalAlignment(H_STRETCH),
 	  _verticalAlignment(V_STRETCH),
-	  _calculatedContentSize(false)
+	  _calculatedMinContentSize(false)
 	
 {
 
+}
+
+bool UIElement::addChild(Node* child)
+{
+	throw GameException("Invalid operation: UIElement::addChild()");
+}
+
+bool UIElement::insertChild(unsigned int index, Node* child)
+{
+	throw GameException("Invalid operation: UIElement::insertChild()");
+}
+
+bool UIElement::replaceChild(Node* origChild, Node* newChild)
+{
+	throw GameException("Invalid operation: UIElement::replaceChild()");
+}
+
+bool UIElement::setChild(unsigned int i, Node *node)
+{
+	throw GameException("Invalid operation: UIElement::setChild()");
 }
 
 Vec2f UIElement::getOrigin()
@@ -69,18 +90,12 @@ UIElement::VerticalAlignment UIElement::getVerticalAlignment()
 	return _verticalAlignment;
 }
 
-void UIElement::getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, Vec2f area, Vec2f& origin, Vec2f& size)
-{
-	origin = Vec2f(0.0f, 0.0f);
-	size = area;
-}
-
 Vec2f UIElement::getMinContentSize()
 {
-	if (_calculatedContentSize == false)
+	if (_calculatedMinContentSize == false)
 	{
 		_minContentSize = calculateMinContentSize();
-		_calculatedContentSize = true;
+		_calculatedMinContentSize = true;
 	}
 
 	return _minContentSize;
@@ -91,40 +106,6 @@ Vec2f UIElement::getMinSize()
 	return getMinContentSize() + Vec2f(
 		_margin.x() + _margin.z() + _padding.x() + _padding.z(),
 		_margin.y() + _margin.w() + _padding.y() + _padding.w());
-}
-
-UIElement::UIElementList UIElement::getUIChildren()
-{
-	UIElement::UIElementList elements;
-
-	unsigned int num = getNumChildren();
-	for (unsigned int i = 0; i < num; i++)
-	{
-		ref_ptr<UIElement> element = dynamic_cast<UIElement*>(getChild(i));
-		if (element.valid())
-		{
-			elements.push_back(element);
-		}
-	}
-
-	return elements;
-}
-
-unsigned int UIElement::getNumUIChildren()
-{
-	unsigned int result = 0;
-
-	unsigned int num = getNumChildren();
-	for (unsigned int i = 0; i < num; i++)
-	{
-		ref_ptr<UIElement> element = dynamic_cast<UIElement*>(getChild(i));
-		if (element.valid())
-		{
-			result++;
-		}
-	}
-
-	return result;
 }
 
 void UIElement::setOrigin(Vec2f origin)
@@ -185,14 +166,9 @@ void UIElement::setVerticalAlignment(UIElement::VerticalAlignment alignment)
 
 void UIElement::resetMinContentSize()
 {
-	_calculatedContentSize = false;
+	_calculatedMinContentSize = false;
 
-	resetChildrenMinContentSize();
-}
-
-void UIElement::updatedContentOriginSize(Vec2f origin, Vec2f size)
-{
-
+	onResetMinContentSize();
 }
 
 ref_ptr<Group> UIElement::getVisualGroup()
@@ -234,7 +210,7 @@ ref_ptr<Group> UIElement::getVisualGroup()
 		_visualGroup->addChild(geode);
 		geode->addDrawable(geo);
 
-		addChild(_visualGroup);
+		MatrixTransform::addChild(_visualGroup);
 
 		updateVisualGroup();
 	}
@@ -244,10 +220,10 @@ ref_ptr<Group> UIElement::getVisualGroup()
 
 Vec2f UIElement::calculateMinContentSize()
 {
-	return Vec2f(0.0f, 0.0f);
+	return Vec2f(_width, _height);
 }
 
-void UIElement::resetChildrenMinContentSize()
+void UIElement::onResetMinContentSize()
 {
 
 }
