@@ -78,8 +78,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)lib\</OutDir>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>

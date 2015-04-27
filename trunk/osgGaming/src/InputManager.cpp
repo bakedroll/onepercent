@@ -64,7 +64,7 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 		if (_graphicsWindow.valid())
 		{
 			int newWidth = _graphicsWindow->getTraits()->width;
-			int newHeight= _graphicsWindow->getTraits()->height;
+			int newHeight = _graphicsWindow->getTraits()->height;
 
 			if (newWidth != _resolutionWidth || newHeight != _resolutionHeight)
 			{
@@ -126,11 +126,11 @@ void InputManager::setCurrentState(osg::ref_ptr<GameState> state)
 
 void InputManager::updateResolution(unsigned int width, unsigned int height)
 {
-	_world->getCameraManipulator()->updateResolution(Vec2f(width, height));
-	_worldLoading->getCameraManipulator()->updateResolution(Vec2f(width, height));
-
 	_world->getHud()->updateResolution(width, height);
 	_worldLoading->getHud()->updateResolution(width, height);
+
+	_world->getCameraManipulator()->updateResolution(Vec2f(width, height));
+	_worldLoading->getCameraManipulator()->updateResolution(Vec2f(width, height));
 
 	_resolutionWidth = width;
 	_resolutionHeight = height;

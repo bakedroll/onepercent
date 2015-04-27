@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(SolutionDir)osgGaming\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(SolutionDir)\osgGaming\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(SolutionDir)osgGaming\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(SolutionDir)\osgGaming\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

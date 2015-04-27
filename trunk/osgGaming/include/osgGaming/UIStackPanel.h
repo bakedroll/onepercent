@@ -15,7 +15,7 @@ namespace osgGaming
 
 		UIStackPanel();
 
-		virtual void getOriginSizeForChildInArea(unsigned int i, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override;
+		virtual void getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override;
 
 		void setSpacing(float spacing);
 		void setOrientation(Orientation orientation);

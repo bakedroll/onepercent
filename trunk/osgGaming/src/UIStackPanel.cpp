@@ -10,8 +10,10 @@ UIStackPanel::UIStackPanel()
 
 }
 
-void UIStackPanel::getOriginSizeForChildInArea(unsigned int i, Vec2f area, Vec2f& origin, Vec2f& size)
+void UIStackPanel::getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, Vec2f area, Vec2f& origin, Vec2f& size)
 {
+	int i = 0;
+
 	float num = (float)getNumUIChildren();
 
 	switch (_orientation)

@@ -11,7 +11,7 @@ using namespace osgGaming;
 
 const float GlobeOverviewState::_MIN_CAMERA_DISTANCE = 9.0f;
 const float GlobeOverviewState::_MAX_CAMERA_DISTANCE = 100.0f;
-const float GlobeOverviewState::_MAX_CAMERA_LONGITUDE = C_PI / 2.0f * 0.8f;
+const float GlobeOverviewState::_MAX_CAMERA_LONGITUDE = C_PI / 2.0f * 0.9f;
 const float GlobeOverviewState::_CAMERA_ZOOM_SPEED = 0.85f;
 const float GlobeOverviewState::_CAMERA_ZOOM_SPEED_FACTOR = 3.0f;
 const float GlobeOverviewState::_CAMERA_SCROLL_SPEED = 0.003f;

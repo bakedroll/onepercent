@@ -42,7 +42,7 @@ namespace osgGaming
 		HorizontalAlignment getHorizontalAlignment();
 		VerticalAlignment getVerticalAlignment();
 
-		virtual void getOriginSizeForChildInArea(unsigned int i, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size);
+		virtual void getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size);
 		osg::Vec2f getMinContentSize();
 		osg::Vec2f getMinSize();
 
