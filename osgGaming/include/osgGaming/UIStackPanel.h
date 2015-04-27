@@ -1,10 +1,11 @@
 #pragma once
 
-#include <osgGaming/UIElement.h>
+#include <osgGaming/UIContainerElement.h>
+#include <osgGaming/UICells.h>
 
 namespace osgGaming
 {
-	class UIStackPanel : public UIElement
+	class UIStackPanel : public UIContainerElement<int>
 	{
 	public:
 		typedef enum _orientation
@@ -15,14 +16,22 @@ namespace osgGaming
 
 		UIStackPanel();
 
-		virtual void getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override;
+		virtual void getOriginSizeForLocationInArea(int location, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override;
 
 		void setSpacing(float spacing);
 		void setOrientation(Orientation orientation);
+
+		void setNumCells(int num);
+
+	protected:
+		virtual osg::Vec2f calculateMinContentSize() override;
 
 	private:
 		float _spacing;
 		Orientation _orientation;
 
+		int _numCells;
+
+		osg::ref_ptr<UICells> _cells;
 	};
 }

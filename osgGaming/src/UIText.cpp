@@ -7,7 +7,7 @@ using namespace osgText;
 using namespace osg;
 
 UIText::UIText()
-	: UIElement(),
+	: UIVisualElement(),
 	  _text(""),
 	  _fontSize(25),
 	  _alignment(TextBase::LEFT_TOP)
@@ -23,7 +23,7 @@ UIText::UIText()
 	_textNode->setColor(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	_textNode->setDataVariance(osg::Object::DYNAMIC);
 
-	addChild(geode);
+	MatrixTransform::addChild(geode);
 	geode->addDrawable(_textNode);
 }
 

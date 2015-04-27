@@ -4,37 +4,31 @@ using namespace osgGaming;
 using namespace osg;
 
 UIStackPanel::UIStackPanel()
-	: UIElement(),
+	: UIContainerElement(),
 	  _spacing(5.0f)
 {
-
+	_cells = new UICells();
 }
 
-void UIStackPanel::getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, Vec2f area, Vec2f& origin, Vec2f& size)
+void UIStackPanel::getOriginSizeForLocationInArea(int location, Vec2f area, Vec2f& origin, Vec2f& size)
 {
-	int i = 0;
-
-	float num = (float)getNumUIChildren();
-
 	switch (_orientation)
 	{
 	case HORIZONTAL:
 
-		size.x() = (area.x() - ((num - 1.0f) * _spacing)) / num;
-		size.y() = area.y();
+		_cells->getActualOriginSize(location, area.x(), _spacing, origin.x(), size.x());
 
-		origin.x() = i * (size.x() + _spacing);
+		size.y() = area.y();
 		origin.y() = 0.0f;
 
 		break;
 
 	case VERTICAL:
 
-		size.x() = area.x();
-		size.y() = (area.y() - ((num - 1.0f) * _spacing)) / num;
+		_cells->getActualOriginSize(location, area.y(), _spacing, origin.y(), size.y());
 
+		size.x() = area.x();
 		origin.x() = 0.0f;
-		origin.y() = i * (size.y() + _spacing);
 
 		break;
 
@@ -49,4 +43,43 @@ void UIStackPanel::setSpacing(float spacing)
 void UIStackPanel::setOrientation(Orientation orientation)
 {
 	_orientation = orientation;
+}
+
+void UIStackPanel::setNumCells(int num)
+{
+	_numCells = num;
+}
+
+Vec2f UIStackPanel::calculateMinContentSize()
+{
+	_cells->setNumCells(_numCells);
+
+	UIElementList children = getUIChildren();
+
+	float minLaneSize = 0.0f;
+	for (UIElementList::iterator it = children.begin(); it != children.end(); ++it)
+	{
+		ref_ptr<UIElement> child = *it;
+
+		int loc = getLocationOfChild(child);
+		Vec2f minSize = child->getMinSize();
+
+		_cells->expandCell(loc, _orientation == HORIZONTAL ? minSize.x() : minSize.y());
+		minLaneSize = fmaxf(minLaneSize, _orientation == HORIZONTAL ? minSize.y() : minSize.x());
+	}
+
+
+	float minContentOrientationSize = ((float)(_numCells - 1) * _spacing);
+
+	for (int i = 0; i < _numCells; i++)
+	{
+		float size;
+		_cells->getMinSize(i, size);
+
+		minContentOrientationSize += size;
+	}
+
+	return _orientation == HORIZONTAL ?
+		Vec2f(minContentOrientationSize, minLaneSize) :
+		Vec2f(minLaneSize, minContentOrientationSize);
 }

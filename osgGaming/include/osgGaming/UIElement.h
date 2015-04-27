@@ -9,8 +9,6 @@ namespace osgGaming
 	class UIElement : public osg::MatrixTransform
 	{
 	public:
-		typedef std::vector<osg::ref_ptr<UIElement>> UIElementList;
-
 		typedef enum _horizontalAlignment
 		{
 			LEFT,
@@ -29,6 +27,11 @@ namespace osgGaming
 
 		UIElement();
 
+		virtual bool addChild(Node* child) override;
+		virtual bool insertChild(unsigned int index, Node* child) override;
+		virtual bool replaceChild(Node* origChild, Node* newChild) override;
+		virtual bool setChild(unsigned int i, Node *node) override;
+
 		osg::Vec2f getOrigin();
 		osg::Vec2f getSize();
 		osg::Vec2f getContentSize();
@@ -42,12 +45,8 @@ namespace osgGaming
 		HorizontalAlignment getHorizontalAlignment();
 		VerticalAlignment getVerticalAlignment();
 
-		virtual void getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size);
 		osg::Vec2f getMinContentSize();
 		osg::Vec2f getMinSize();
-
-		UIElementList getUIChildren();
-		unsigned int getNumUIChildren();
 
 		void setOrigin(osg::Vec2f origin);
 		void setSize(osg::Vec2f size);
@@ -66,13 +65,12 @@ namespace osgGaming
 
 		void resetMinContentSize();
 
-		virtual void updatedContentOriginSize(osg::Vec2f origin, osg::Vec2f size);
-
 	//protected:
 		osg::ref_ptr<osg::Group> getVisualGroup();
 	protected:
 		virtual osg::Vec2f calculateMinContentSize();
-		virtual void resetChildrenMinContentSize();
+
+		virtual void onResetMinContentSize();
 
 	private:
 		void updateVisualGroup();
@@ -81,7 +79,7 @@ namespace osgGaming
 		osg::Vec2f _size;
 
 		osg::Vec2f _minContentSize;
-		bool _calculatedContentSize;
+		bool _calculatedMinContentSize;
 
 		float _width;
 		float _height;

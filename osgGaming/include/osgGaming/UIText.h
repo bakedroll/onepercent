@@ -1,6 +1,6 @@
 #pragma once
 
-#include <osgGaming/UIElement.h>
+#include <osgGaming/UIVisualElement.h>
 
 #include <osgText/Text>
 
@@ -8,7 +8,7 @@
 
 namespace osgGaming
 {
-	class UIText : public UIElement
+	class UIText : public UIVisualElement
 	{
 	public:
 		UIText();

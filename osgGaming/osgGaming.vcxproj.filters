@@ -66,6 +66,15 @@
     <ClCompile Include="src\UIStackPanel.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="src\UIVisualElement.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UICells.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIContainerElementBase.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h">
@@ -120,6 +129,18 @@
       <Filter>Header Files\UI</Filter>
     </ClInclude>
     <ClInclude Include="include\osgGaming\UIStackPanel.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\UIVisualElement.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\UIContainerElement.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\UICells.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\UIContainerElementBase.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
   </ItemGroup>

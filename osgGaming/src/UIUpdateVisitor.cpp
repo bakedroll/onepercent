@@ -1,4 +1,6 @@
 #include <osgGaming/UIUpdateVisitor.h>
+#include <osgGaming/UIVisualElement.h>
+#include <osgGaming/UIContainerElement.h>
 
 #include <math.h>
 
@@ -19,8 +21,6 @@ void UIUpdateVisitor::apply(osg::Node &node)
 
 	if (uiElement.valid())
 	{
-		UIElement::UIElementList children = uiElement->getUIChildren();
-
 		if (_traversedFirst == false)
 		{
 			uiElement->resetMinContentSize();
@@ -44,22 +44,32 @@ void UIUpdateVisitor::apply(osg::Node &node)
 
 			uiElement->setSize(size);
 		}
-		
-		uiElement->updatedContentOriginSize(shift, contentSize);
 
-		for (UIElement::UIElementList::iterator it = children.begin(); it != children.end(); ++it)
+		ref_ptr<UIVisualElement> uiVisualElement = dynamic_cast<UIVisualElement*>(&node);
+		if (uiVisualElement.valid())
 		{
-			Vec2f childFrameOrigin, childFrameSize, childOrigin, childSize;
+			uiVisualElement->updatedContentOriginSize(shift, contentSize);
+		}
 
-			uiElement->getOriginSizeForChildInArea(*it, contentSize, childFrameOrigin, childFrameSize);
+		ref_ptr<UIContainerElementBase> uiContainerElement = dynamic_cast<UIContainerElementBase*>(&node);
+		if (uiContainerElement.valid())
+		{
+			UIContainerElementBase::UIElementList children = uiContainerElement->getUIChildren();
 
-			getOriginSizeInArea(*it, childFrameSize, childOrigin, childSize);
+			for (UIContainerElementBase::UIElementList::iterator it = children.begin(); it != children.end(); ++it)
+			{
+				Vec2f childFrameOrigin, childFrameSize, childOrigin, childSize;
 
-			childFrameOrigin.x() += (childOrigin.x() + margin.x() + padding.x());
-			childFrameOrigin.y() += (childOrigin.y() + margin.w() + padding.w());
+				uiContainerElement->getOriginSizeForChildInArea(*it, contentSize, childFrameOrigin, childFrameSize);
 
-			(*it)->setOrigin(childFrameOrigin);
-			(*it)->setSize(childSize);
+				getOriginSizeInArea(*it, childFrameSize, childOrigin, childSize);
+
+				childFrameOrigin.x() += (childOrigin.x() + margin.x() + padding.x());
+				childFrameOrigin.y() += (childOrigin.y() + margin.w() + padding.w());
+
+				(*it)->setOrigin(childFrameOrigin);
+				(*it)->setSize(childSize);
+			}
 		}
 	}
 
