@@ -95,6 +95,10 @@ Vec2f UIElement::getMinContentSize()
 	if (_calculatedMinContentSize == false)
 	{
 		_minContentSize = calculateMinContentSize();
+
+		_minContentSize.x() = fmaxf(_minContentSize.x(), _width);
+		_minContentSize.y() = fmaxf(_minContentSize.y(), _height);
+
 		_calculatedMinContentSize = true;
 	}
 
@@ -220,7 +224,7 @@ ref_ptr<Group> UIElement::getVisualGroup()
 
 Vec2f UIElement::calculateMinContentSize()
 {
-	return Vec2f(_width, _height);
+	return Vec2f(0.0f, 0.0f);
 }
 
 void UIElement::onResetMinContentSize()
