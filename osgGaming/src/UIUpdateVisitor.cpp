@@ -47,21 +47,19 @@ void UIUpdateVisitor::apply(osg::Node &node)
 		
 		uiElement->updatedContentOriginSize(shift, contentSize);
 
-		for (unsigned int i = 0; i < children.size(); i++)
+		for (UIElement::UIElementList::iterator it = children.begin(); it != children.end(); ++it)
 		{
-			ref_ptr<UIElement> child = children.at(i).get();
-
 			Vec2f childFrameOrigin, childFrameSize, childOrigin, childSize;
 
-			uiElement->getOriginSizeForChildInArea(i, contentSize, childFrameOrigin, childFrameSize);
+			uiElement->getOriginSizeForChildInArea(*it, contentSize, childFrameOrigin, childFrameSize);
 
-			getOriginSizeInArea(child, childFrameSize, childOrigin, childSize);
+			getOriginSizeInArea(*it, childFrameSize, childOrigin, childSize);
 
 			childFrameOrigin.x() += (childOrigin.x() + margin.x() + padding.x());
 			childFrameOrigin.y() += (childOrigin.y() + margin.w() + padding.w());
 
-			child->setOrigin(childFrameOrigin);
-			child->setSize(childSize);
+			(*it)->setOrigin(childFrameOrigin);
+			(*it)->setSize(childSize);
 		}
 	}
 

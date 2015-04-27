@@ -189,6 +189,9 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 
 		attachWorld(_world);
 
+		//_world->getRootNode()->setEventCallback(_inputManager);
+		//_worldLoading->getRootNode()->setEventCallback(_inputManager);
+
 		_viewer.addEventHandler(_inputManager);
 		_viewer.setKeyEventSetsDone(0);
 

@@ -69,7 +69,7 @@ UIElement::VerticalAlignment UIElement::getVerticalAlignment()
 	return _verticalAlignment;
 }
 
-void UIElement::getOriginSizeForChildInArea(unsigned int i, Vec2f area, Vec2f& origin, Vec2f& size)
+void UIElement::getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, Vec2f area, Vec2f& origin, Vec2f& size)
 {
 	origin = Vec2f(0.0f, 0.0f);
 	size = area;

@@ -11,37 +11,71 @@ UIGrid::UIGrid()
 	  _numColumns(1),
 	  _numRows(1),
 	  _spacing(5.0f),
-	  _calculatedContentSizeArray(false)
+	  _calculatedMinSizeArray(false),
+	  _calculatedActualSizeArray(false)
 {
 
 }
 
 UIGrid::~UIGrid()
 {
-	if (_calculatedContentSizeArray == true)
+	if (_calculatedMinSizeArray == true)
 	{
-		delete[] _minColumnSizeArray;
-		delete[] _minRowSizeArray;
+		delete[] _rows;
+		delete[] _columns;
 	}
 }
 
-void UIGrid::getOriginSizeForChildInArea(unsigned int i, Vec2f area, Vec2f& origin, Vec2f& size)
+bool UIGrid::addChild(Node* node)
 {
-	int row = i / _numColumns;
-	int col = i % _numColumns;
+	return addChild(node, 0, 0);
+}
 
-	if (row >= _numRows)
+bool UIGrid::addChild(Node* node, int col, int row)
+{
+	ref_ptr<UIElement> uiElement = dynamic_cast<UIElement*>(node);
+	if (uiElement.valid())
+	{
+		ChildRowColMap::iterator it = _childRowColMap.find(uiElement);
+
+		if (it != _childRowColMap.end())
+		{
+			// TODO: Exception
+			printf("Inconsistent state\n");
+		}
+
+		RowCol rowCol;
+		rowCol.col = col;
+		rowCol.row = row;
+
+		_childRowColMap.insert(ChildRowColMap::value_type(uiElement, rowCol));
+	}
+
+	return MatrixTransform::addChild(node);
+}
+
+void UIGrid::getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, Vec2f area, Vec2f& origin, Vec2f& size)
+{
+
+	//int row = i / _numColumns;
+	//int col = i % _numColumns;
+
+	RowCol rowCol = _childRowColMap.find(child)->second;
+
+	actualOriginSizeAt(rowCol.col, rowCol.row, area, origin, size);
+
+	/*if (rowCol.row >= _numRows)
 	{
 		// TODO: Exception
-		row = _numRows-1;
-		col = _numColumns-1;
+		rowCol.row = _numRows - 1;
+		rowCol.col = _numColumns - 1;
 	}
 
 	size.x() = (area.x() - ((float)(_numColumns - 1) * _spacing)) / (float)_numColumns;
 	size.y() = (area.y() - ((float)(_numRows - 1) * _spacing)) / (float)_numRows;
 
-	origin.x() = (float)col * (size.x() + _spacing);
-	origin.y() = (float)row * (size.y() + _spacing);
+	origin.x() = (float)rowCol.col * (size.x() + _spacing);
+	origin.y() = (float)rowCol.row * (size.y() + _spacing);*/
 }
 
 void UIGrid::setNumColumns(int columns)
@@ -66,12 +100,12 @@ Vec2f UIGrid::calculateMinContentSize()
 
 	for (int c = 0; c < _numColumns; c++)
 	{
-		minContentWidth += minContentSizeAt(c, 0).x();
+		minContentWidth += minSizeAt(c, 0).x();
 	}
 
 	for (int r = 0; r < _numRows; r++)
 	{
-		minContentHeight += minContentSizeAt(0, r).y();
+		minContentHeight += minSizeAt(0, r).y();
 	}
 
 	return Vec2f(minContentWidth, minContentHeight);
@@ -86,67 +120,154 @@ void UIGrid::resetChildrenMinContentSize()
 		(*it)->resetMinContentSize();
 	}
 
-	if (_calculatedContentSizeArray == true)
+	if (_calculatedMinSizeArray == true)
 	{
-		delete[] _minColumnSizeArray;
-		delete[] _minRowSizeArray;
-		_calculatedContentSizeArray = false;
+		delete[] _rows;
+		delete[] _columns;
+		_calculatedMinSizeArray = false;
 	}
+
+	_calculatedActualSizeArray = false;
 }
 
-Vec2f UIGrid::minContentSizeAt(int col, int row)
+void UIGrid::cellsAt(int col, int row, Cell& colCell, Cell& rowCell)
 {
-	if (_calculatedContentSizeArray == false)
+	if (_calculatedMinSizeArray == false)
 	{
-		calculateContentSizeArray();
-		_calculatedContentSizeArray = true;
+		calculateMinSizeArray();
+		_calculatedMinSizeArray = true;
 	}
 
-	return Vec2f(_minColumnSizeArray[col], _minRowSizeArray[row]);
-}
+	colCell = _columns[col];
+	rowCell = _rows[row];
 
-void UIGrid::calculateContentSizeArray()
-{
-	UIElementList children = getUIChildren();
-
-	int numChildren = min((int)children.size(), _numColumns * _numRows);
-
-	Vec2f* contentSizeArray = new Vec2f[numChildren];
-
-	for (int i = 0; i < numChildren; i++)
+	/*for (int c = 0; c < _numRows; c++)
 	{
-		Vec4f margin = children[i]->getMargin();
-		Vec4f padding = children[i]->getPadding();
-
-		contentSizeArray[i] = children[i]->getMinSize();
-	}
-
-	_minColumnSizeArray = new float[_numColumns];
-	_minRowSizeArray = new float[_numRows];
-
-	for (int c = 0; c < _numColumns; c++)
-	{
-		_minColumnSizeArray[c] = 0.0f;
-
-		for (int r = 0; r < _numRows; r++)
+		if (_columns[c].position == col)
 		{
-			int array_i = c * _numColumns + r;
-			if (array_i < numChildren)
-				_minColumnSizeArray[c] = fmaxf(_minColumnSizeArray[c], contentSizeArray[array_i].x());
+			colCell = _columns[c];
+			break;
 		}
 	}
 
 	for (int r = 0; r < _numRows; r++)
 	{
-		_minRowSizeArray[r] = 0.0f;
-
-		for (int c = 0; c < _numColumns; c++)
+		if (_rows[r].position == row)
 		{
-			int array_i = c * _numColumns + r;
-			if (array_i < numChildren)
-				_minRowSizeArray[r] = fmaxf(_minRowSizeArray[r], contentSizeArray[array_i].y());
+			rowCell = _rows[r];
+			break;
 		}
+	}*/
+}
+
+Vec2f UIGrid::minSizeAt(int col, int row)
+{
+	Cell colCell, rowCell;
+	cellsAt(col, row, colCell, rowCell);
+
+	return Vec2f(colCell.minSize, rowCell.minSize);
+}
+
+void UIGrid::actualOriginSizeAt(int col, int row, Vec2f area, Vec2f& origin, Vec2f& size)
+{
+	if (_calculatedActualSizeArray == false)
+	{
+		calculateActualSizeArray(area);
+		_calculatedActualSizeArray = true;
 	}
 
-	delete[] contentSizeArray;
+	Cell colCell, rowCell;
+	cellsAt(col, row, colCell, rowCell);
+
+	origin = Vec2f(colCell.actualOrigin, rowCell.actualOrigin);
+	size = Vec2f(colCell.actualSize, rowCell.actualSize);
+}
+
+void UIGrid::calculateMinSizeArray()
+{
+	_rows = new Cell[_numRows];
+	_columns = new Cell[_numColumns];
+
+	for (int r = 0; r < _numRows; r++)
+	{
+		_rows[r].minSize = 0.0f;
+		_rows[r].index = r;
+	}
+
+	for (int c = 0; c < _numColumns; c++)
+	{
+		_columns[c].minSize = 0.0f;
+		_columns[c].index = c;
+	}
+
+	UIElementList children = getUIChildren();
+
+	for (UIElementList::iterator it = children.begin(); it != children.end(); ++it)
+	{
+		ref_ptr<UIElement> child = *it;
+
+		RowCol rowCol = _childRowColMap.find(child)->second;
+		Vec2f minSize = child->getMinSize();
+
+		_columns[rowCol.col].minSize = fmaxf(_columns[rowCol.col].minSize, minSize.x());
+		_rows[rowCol.row].minSize = fmaxf(_rows[rowCol.row].minSize, minSize.y());
+	}
+}
+
+void UIGrid::calculateActualSizeArray(Vec2f area)
+{
+	vector<Cell> columns(_columns, _columns + _numColumns);
+	vector<Cell> rows(_rows, _rows + _numRows);
+
+	sort(columns.begin(), columns.end(), compareCells);
+	sort(rows.begin(), rows.end(), compareCells);
+
+	
+
+
+	float remainingColSize = area.x();
+	int currentColIndex = 0;
+	for (vector<Cell>::iterator it = columns.begin(); it != columns.end(); ++it)
+	{
+		float avColSize = (remainingColSize - ((float)(_numColumns - currentColIndex - 1) * _spacing))
+			/ (float)(_numColumns - currentColIndex);
+
+		_columns[it->index].actualSize = fmaxf(_columns[it->index].minSize, avColSize);
+
+		remainingColSize -= (_columns[it->index].actualSize + _spacing);
+		currentColIndex++;
+	}
+
+	float colOrigin = 0.0f;
+	for (int c = 0; c < _numColumns; c++)
+	{
+		_columns[c].actualOrigin = colOrigin;
+		colOrigin += (_columns[c].actualSize + _spacing);
+	}
+
+
+	float remainingRowSize = area.y();
+	int currentRowIndex = 0;
+	for (vector<Cell>::iterator it = rows.begin(); it != rows.end(); ++it)
+	{
+		float avRowSize = (remainingRowSize - ((float)(_numRows - currentRowIndex - 1) * _spacing))
+			/ (float)(_numRows - currentRowIndex);
+
+		_rows[it->index].actualSize = fmaxf(_rows[it->index].minSize, avRowSize);
+
+		remainingRowSize -= (_rows[it->index].actualSize + _spacing);
+		currentRowIndex++;
+	}
+
+	float rowOrigin = 0.0f;
+	for (int r = 0; r < _numRows; r++)
+	{
+		_rows[r].actualOrigin = rowOrigin;
+		rowOrigin += (_rows[r].actualSize + _spacing);
+	}
+}
+
+bool UIGrid::compareCells(Cell i, Cell j)
+{
+	return i.minSize > j.minSize;
 }
