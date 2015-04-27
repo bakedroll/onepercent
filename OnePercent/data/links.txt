@@ -12,3 +12,8 @@ http://prideout.net/blog/?p=48
 http://gamedev.stackexchange.com/questions/43741/how-do-you-turn-a-cube-into-a-sphere
 
 http://www.vertexasylum.com/downloads/cdlod/cdlod_latest.pdf
+
+
+
+Quelle zur Zusammenfassung der Ländergrenzen:
+http://www.luventicus.org/karten/europa/kontinentaleseuropa.html
