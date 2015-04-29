@@ -38,7 +38,7 @@ namespace osgGaming
 			return osg::MatrixTransform::addChild(node);
 		}
 
-		virtual void getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override
+		virtual void getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override final
 		{
 			UILocationType location = _childLocationMap.find(child)->second;
 

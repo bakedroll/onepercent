@@ -28,9 +28,9 @@ namespace osgGaming
 		UIElement();
 
 		virtual bool addChild(Node* child) override;
-		virtual bool insertChild(unsigned int index, Node* child) override;
-		virtual bool replaceChild(Node* origChild, Node* newChild) override;
-		virtual bool setChild(unsigned int i, Node *node) override;
+		virtual bool insertChild(unsigned int index, Node* child) override final;
+		virtual bool replaceChild(Node* origChild, Node* newChild) override final;
+		virtual bool setChild(unsigned int i, Node *node) override final;
 
 		osg::Vec2f getOrigin();
 		osg::Vec2f getSize();
