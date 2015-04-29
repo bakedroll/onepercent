@@ -8,6 +8,13 @@ UIStackPanel::UIStackPanel()
 	  _spacing(5.0f)
 {
 	_cells = new UICells();
+
+	_cells->setNumCells(1);
+}
+
+ref_ptr<UICells> UIStackPanel::getCells()
+{
+	return _cells;
 }
 
 void UIStackPanel::getOriginSizeForLocationInArea(int location, Vec2f area, Vec2f& origin, Vec2f& size)
@@ -45,14 +52,9 @@ void UIStackPanel::setOrientation(Orientation orientation)
 	_orientation = orientation;
 }
 
-void UIStackPanel::setNumCells(int num)
-{
-	_numCells = num;
-}
-
 Vec2f UIStackPanel::calculateMinContentSize()
 {
-	_cells->setNumCells(_numCells);
+	_cells->reset();
 
 	UIElementList children = getUIChildren();
 
@@ -69,9 +71,9 @@ Vec2f UIStackPanel::calculateMinContentSize()
 	}
 
 
-	float minContentOrientationSize = ((float)(_numCells - 1) * _spacing);
+	float minContentOrientationSize = ((float)(_cells->getNumCells() - 1) * _spacing);
 
-	for (int i = 0; i < _numCells; i++)
+	for (int i = 0; i < _cells->getNumCells(); i++)
 	{
 		float size;
 		_cells->getMinSize(i, size);

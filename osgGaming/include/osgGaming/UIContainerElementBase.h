@@ -19,7 +19,7 @@ namespace osgGaming
 		virtual void getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) = 0;
 
 	protected:
-		virtual void onResetMinContentSize() override;
+		virtual void onResetMinContentSize() override final;
 
 	};
 }

@@ -22,12 +22,13 @@ ColRow::_colRow(int c, int r)
 
 UIGrid::UIGrid()
 	: UIContainerElement(),
-	  _numColumns(1),
-	  _numRows(1),
 	  _spacing(5.0f)
 {
 	_columns = new UICells();
 	_rows = new UICells();
+
+	_columns->setNumCells(1);
+	_rows->setNumCells(1);
 }
 
 void UIGrid::getOriginSizeForLocationInArea(ColRow location, Vec2f area, Vec2f& origin, Vec2f& size)
@@ -36,25 +37,25 @@ void UIGrid::getOriginSizeForLocationInArea(ColRow location, Vec2f area, Vec2f& 
 	_rows->getActualOriginSize(location.row, area.y(), _spacing, origin.y(), size.y());
 }
 
-void UIGrid::setNumColumns(int columns)
-{
-	_numColumns = columns;
-}
-
-void UIGrid::setNumRows(int rows)
-{
-	_numRows = rows;
-}
-
 void UIGrid::setSpacing(float spacing)
 {
 	_spacing = spacing;
 }
 
+ref_ptr<UICells> UIGrid::getRows()
+{
+	return _rows;
+}
+
+ref_ptr<UICells> UIGrid::getColumns()
+{
+	return _columns;
+}
+
 Vec2f UIGrid::calculateMinContentSize()
 {
-	_columns->setNumCells(_numColumns);
-	_rows->setNumCells(_numRows);
+	_columns->reset();
+	_rows->reset();
 
 	UIElementList children = getUIChildren();
 
@@ -70,10 +71,10 @@ Vec2f UIGrid::calculateMinContentSize()
 	}
 
 
-	float minContentWidth = ((float)(_numColumns - 1) * _spacing);
-	float minContentHeight = ((float)(_numRows - 1) * _spacing);
+	float minContentWidth = ((float)(_columns->getNumCells() - 1) * _spacing);
+	float minContentHeight = ((float)(_rows->getNumCells() - 1) * _spacing);
 
-	for (int c = 0; c < _numColumns; c++)
+	for (int c = 0; c < _columns->getNumCells(); c++)
 	{
 		float size;
 		_columns->getMinSize(c, size);
@@ -81,7 +82,7 @@ Vec2f UIGrid::calculateMinContentSize()
 		minContentWidth += size;
 	}
 
-	for (int r = 0; r < _numRows; r++)
+	for (int r = 0; r < _rows->getNumCells(); r++)
 	{
 		float size;
 		_rows->getMinSize(r, size);

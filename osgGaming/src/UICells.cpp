@@ -46,7 +46,23 @@ void UICells::setNumCells(int num)
 		_cells[i].minSize = 0.0f;
 		_cells[i].actualSize = 0.0f;
 		_cells[i].actualOrigin = 0.0f;
+		_cells[i].sizePolicy = AUTO;
 	}
+}
+
+void UICells::setSizePolicy(int cell, SizePolicy sizePolicy)
+{
+	_cells[cell].sizePolicy = sizePolicy;
+}
+
+int UICells::getNumCells()
+{
+	return _numCells;
+}
+
+UICells::SizePolicy UICells::getSizePolicy(int cell)
+{
+	return _cells[cell].sizePolicy;
 }
 
 void UICells::getMinSize(int index, float& minSize)
@@ -66,6 +82,18 @@ void UICells::getActualOriginSize(int index, float totalSize, float spacing, flo
 	size = _cells[index].actualSize;
 }
 
+void UICells::reset()
+{
+	_calculatedActualSize = false;
+
+	for (int i = 0; i < _numCells; i++)
+	{
+		_cells[i].minSize = 0.0f;
+		_cells[i].actualSize = 0.0f;
+		_cells[i].actualOrigin = 0.0f;
+	}
+}
+
 void UICells::calculateActualSize(float totalSize, float spacing)
 {
 	vector<Cell> cells(_cells, _cells + _numCells);
@@ -76,10 +104,17 @@ void UICells::calculateActualSize(float totalSize, float spacing)
 	int currentIndex = 0;
 	for (vector<Cell>::iterator it = cells.begin(); it != cells.end(); ++it)
 	{
-		float avSize = (remainingSize - ((float)(_numCells - currentIndex - 1) * spacing))
-			/ (float)(_numCells - currentIndex);
+		if (_cells[it->index].sizePolicy == AUTO)
+		{
+			float avSize = (remainingSize - ((float)(_numCells - currentIndex - 1) * spacing))
+				/ (float)(_numCells - currentIndex);
 
-		_cells[it->index].actualSize = fmaxf(_cells[it->index].minSize, avSize);
+			_cells[it->index].actualSize = fmaxf(_cells[it->index].minSize, avSize);
+		}
+		else if (_cells[it->index].sizePolicy == CONTENT)
+		{
+			_cells[it->index].actualSize = _cells[it->index].minSize;
+		}
 
 		remainingSize -= (_cells[it->index].actualSize + spacing);
 		currentIndex++;
@@ -96,5 +131,10 @@ void UICells::calculateActualSize(float totalSize, float spacing)
 
 bool UICells::compareCells(Cell i, Cell j)
 {
+	if (i.sizePolicy != j.sizePolicy)
+	{
+		return i.sizePolicy == CONTENT;
+	}
+
 	return i.minSize > j.minSize;
 }

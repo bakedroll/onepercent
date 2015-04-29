@@ -23,18 +23,15 @@ namespace osgGaming
 
 		virtual void getOriginSizeForLocationInArea(ColRow location, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override;
 
-		void setNumColumns(int columns);
-		void setNumRows(int rows);
-
 		void setSpacing(float spacing);
+
+		osg::ref_ptr<UICells> getRows();
+		osg::ref_ptr<UICells> getColumns();
 
 	protected:
 		virtual osg::Vec2f calculateMinContentSize() override;
 
 	private:
-		int _numColumns;
-		int _numRows;
-
 		float _spacing;
 
 		osg::ref_ptr<UICells> _rows;

@@ -74,8 +74,11 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 
 	grid->setMargin(10.0f);
 	grid->setPadding(10.0f);
-	grid->setNumColumns(2);
-	grid->setNumRows(2);
+
+	grid->getColumns()->setNumCells(3);
+	grid->getRows()->setNumCells(2);
+
+	grid->getColumns()->setSizePolicy(1, UICells::CONTENT);
 
 	root->addChild(grid);
 	grid->addChild(first, ColRow(0, 0));
