@@ -63,10 +63,12 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 					_isLoading = true;
 
 					attachWorld(_worldLoading);
+
+					_inputManager->updateResolution();
 				}
 
 				ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
-				_loadingThreadFuture = async(launch::async, &GameLoadingState::load, loadingState, _world, _gameSettings);
+				_loadingThreadFuture = async(launch::async, &GameLoadingState::loading_thread, loadingState, _world, _gameSettings);
 			}
 			else
 			{
@@ -76,6 +78,8 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 					_resetTimeDiff = true;
 					
 					attachWorld(_world);
+
+					_inputManager->updateResolution();
 				}
 			}
 		}
@@ -152,8 +156,8 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 
 		_stateStack.push_back(initialState);
 
-		_inputManager = new InputManager(_world, _worldLoading);
-
+		_inputManager = new InputManager();
+		_inputManager->setCurrentWorld(_world);
 		_inputManager->setCurrentState(initialState);
 
 		unsigned int screenWidth, screenHeight;
@@ -240,6 +244,8 @@ void GameApplication::attachWorld(osg::ref_ptr<World> world)
 {
 	_viewer.setSceneData(world->getRootNode());
 	_viewer.setCameraManipulator(world->getCameraManipulator());
+
+	_inputManager->setCurrentWorld(world);
 }
 
 void GameApplication::popState()

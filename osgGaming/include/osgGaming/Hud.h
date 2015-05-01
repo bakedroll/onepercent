@@ -1,6 +1,7 @@
 #pragma once
 
 #include <osgGaming/UIElement.h>
+#include <osgGaming/UserInteractionModel.h>
 
 #include <osg/Referenced>
 #include <osg/Projection>
@@ -13,13 +14,17 @@ namespace osgGaming
 	class Hud : public osg::Referenced
 	{
 	public:
+		typedef std::vector<UserInteractionModel*> UIMList;
+
 		Hud();
 
 		osg::ref_ptr<osg::Projection> getProjection();
 
 		// TODO: remove later
 		osg::ref_ptr<osg::Geode> getGeode();
+
 		osg::ref_ptr<UIElement> getRootUIElement();
+		UIMList getUserInteractionModels();
 
 		void updateResolution(unsigned int width, unsigned int height);
 		void updateUIElements();
@@ -28,8 +33,11 @@ namespace osgGaming
 
 		void setRootUIElement(osg::ref_ptr<UIElement> element);
 
-	private:
+		void registerUserInteractionModel(UserInteractionModel* model);
 
+		bool anyUserInteractionModelHovered();
+
+	private:
 		osg::ref_ptr<osg::Projection> _projection;
 		osg::ref_ptr<osg::Geode> _geode;
 
@@ -39,5 +47,7 @@ namespace osgGaming
 		bool _fpsEnabled;
 
 		osg::Vec2f _resolution;
+
+		UIMList _uimList;
 	};
 }

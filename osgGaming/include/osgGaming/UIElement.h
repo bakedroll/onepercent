@@ -33,6 +33,7 @@ namespace osgGaming
 		virtual bool setChild(unsigned int i, Node *node) override final;
 
 		osg::Vec2f getOrigin();
+		osg::Vec2f getAbsoluteOrigin();
 		osg::Vec2f getSize();
 		osg::Vec2f getContentSize();
 
@@ -49,6 +50,7 @@ namespace osgGaming
 		osg::Vec2f getMinSize();
 
 		void setOrigin(osg::Vec2f origin);
+		void setAbsoluteOrigin(osg::Vec2f origin);
 		void setSize(osg::Vec2f size);
 
 		void setWidth(float width);
@@ -75,6 +77,7 @@ namespace osgGaming
 	private:
 		void updateVisualGroup();
 
+		osg::Vec2f _absoluteOrigin;
 		osg::Vec2f _origin;
 		osg::Vec2f _size;
 

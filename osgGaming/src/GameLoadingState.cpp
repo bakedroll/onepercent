@@ -10,9 +10,9 @@ GameLoadingState::GameLoadingState(ref_ptr<GameState> nextState)
 
 }
 
-void GameLoadingState::load(osg::ref_ptr<World> world, ref_ptr<GameSettings> settings)
+void GameLoadingState::loading_thread(ref_ptr<World> world, ref_ptr<GameSettings> settings)
 {
-
+	load(world, settings);
 }
 
 bool GameLoadingState::isLoadingState()

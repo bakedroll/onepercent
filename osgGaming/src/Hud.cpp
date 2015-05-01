@@ -90,6 +90,11 @@ ref_ptr<UIElement> Hud::getRootUIElement()
 	return _rootUIElement;
 }
 
+Hud::UIMList Hud::getUserInteractionModels()
+{
+	return _uimList;
+}
+
 void Hud::updateResolution(unsigned int width, unsigned int height)
 {
 	_projection->setMatrix(Matrix::ortho2D(0.0, (double)width - 1.0, 1.0, (double)height - 1.0));
@@ -101,7 +106,10 @@ void Hud::updateResolution(unsigned int width, unsigned int height)
 
 void Hud::updateUIElements()
 {
-	_rootUIElement->setOrigin(Vec2f(0.0f, 0.0f));
+	Vec2f origin(0.0f, 0.0f);
+
+	_rootUIElement->setAbsoluteOrigin(origin);
+	_rootUIElement->setOrigin(origin);
 	_rootUIElement->setSize(_resolution);
 
 	UIUpdateVisitor updateVisitor;
@@ -145,4 +153,22 @@ void Hud::setRootUIElement(osg::ref_ptr<UIElement> element)
 {
 	_rootUIElement = element;
 	updateUIElements();
+}
+
+void Hud::registerUserInteractionModel(UserInteractionModel* model)
+{
+	_uimList.push_back(model);
+}
+
+bool Hud::anyUserInteractionModelHovered()
+{
+	for (UIMList::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
+	{
+		if ((*it)->getHovered())
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

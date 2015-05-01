@@ -67,6 +67,7 @@ void UIUpdateVisitor::apply(osg::Node &node)
 				childFrameOrigin.x() += (childOrigin.x() + margin.x() + padding.x());
 				childFrameOrigin.y() += (childOrigin.y() + margin.w() + padding.w());
 
+				(*it)->setAbsoluteOrigin(uiElement->getAbsoluteOrigin() + childFrameOrigin);
 				(*it)->setOrigin(childFrameOrigin);
 				(*it)->setSize(childSize);
 			}
