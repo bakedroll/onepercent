@@ -49,8 +49,6 @@ StateEvent* LoadingGlobeOverviewState::update()
 
 void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings> settings)
 {
-	// ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
-
 	ref_ptr<GlobeModel> globe = new GlobeModel();
 
 	world->getRootNode()->addChild(globe);

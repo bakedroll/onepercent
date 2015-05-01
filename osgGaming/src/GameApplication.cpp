@@ -87,6 +87,19 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 		{
 			if (_loadingThreadFuture.wait_for(chrono::milliseconds(0)) == future_status::ready)
 			{
+				try
+				{
+					_loadingThreadFuture.get();
+				}
+				catch (GameException& e)
+				{
+					throw e;
+				}
+				catch (std::exception& e)
+				{
+					throw e;
+				}
+
 				ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
 
 				replaceState(loadingState->getNextState());
@@ -205,7 +218,7 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 	}
 	catch (GameException& e)
 	{
-		printf("Exception: %s\n", e.getMessage());
+		printf("Exception: %s\n", e.getMessage().data());
 	}
 	catch (exception& e)
 	{
