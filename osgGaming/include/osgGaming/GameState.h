@@ -1,7 +1,8 @@
 #pragma once
 
-#include "osgGaming/World.h"
-#include "osgGaming/GameSettings.h"
+#include <osgGaming/World.h>
+#include <osgGaming/GameSettings.h>
+#include <osgGaming/UserInteractionModel.h>
 
 #include <osg/Referenced>
 #include <osg/ref_ptr>
@@ -50,6 +51,8 @@ namespace osgGaming
 		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change);
 		virtual void onDragBeginEvent(int button, osg::Vec2f origin);
 		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position);
+
+		virtual void onUIMClickedEvent(UserInteractionModel* model);
 
 		double getSimulationTime();
 		double getFrameTime();

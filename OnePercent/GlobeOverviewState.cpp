@@ -119,3 +119,8 @@ void GlobeOverviewState::onDragEvent(int button, Vec2f origin, Vec2f position, o
 		_cameraLatLongAnimation->beginAnimation(_cameraLatLong, getSimulationTime());
 	}
 }
+
+void GlobeOverviewState::onUIMClickedEvent(UserInteractionModel* model)
+{
+	printf("Clicked UIM: %s\n", model->getUIMName().data());
+}

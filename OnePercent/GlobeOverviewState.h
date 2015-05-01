@@ -4,6 +4,7 @@
 
 #include <osgGaming/GameState.h>
 #include <osgGaming/Animation.h>
+#include <osgGaming/UserInteractionModel.h>
 
 namespace onep
 {
@@ -21,6 +22,8 @@ namespace onep
 		virtual void onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion) override;
 
 		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change) override;
+
+		virtual void onUIMClickedEvent(osgGaming::UserInteractionModel* model) override;
 
 	private:
 		static const float _MIN_CAMERA_DISTANCE;

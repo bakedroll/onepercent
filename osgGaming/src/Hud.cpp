@@ -13,45 +13,6 @@ Hud::Hud()
 	: Referenced(),
 	_fpsEnabled(false)
 {
-	/*osg::Geometry* HUDBackgroundGeometry = new osg::Geometry();
-
-	osg::Vec3Array* HUDBackgroundVertices = new osg::Vec3Array;
-	HUDBackgroundVertices->push_back(osg::Vec3(0, 0, -1));
-	HUDBackgroundVertices->push_back(osg::Vec3(1024, 0, -1));
-	HUDBackgroundVertices->push_back(osg::Vec3(1024, 200, -1));
-	HUDBackgroundVertices->push_back(osg::Vec3(0, 200, -1));
-
-	osg::DrawElementsUInt* HUDBackgroundIndices =
-		new osg::DrawElementsUInt(osg::PrimitiveSet::POLYGON, 0);
-	HUDBackgroundIndices->push_back(0);
-	HUDBackgroundIndices->push_back(1);
-	HUDBackgroundIndices->push_back(2);
-	HUDBackgroundIndices->push_back(3);
-
-	osg::Vec4Array* HUDcolors = new osg::Vec4Array;
-	HUDcolors->push_back(osg::Vec4(0.8f, 0.8f, 0.8f, 0.8f));
-
-	osg::Vec2Array* texcoords = new osg::Vec2Array(4);
-	(*texcoords)[0].set(0.0f, 0.0f);
-	(*texcoords)[1].set(1.0f, 0.0f);
-	(*texcoords)[2].set(1.0f, 1.0f);
-	(*texcoords)[3].set(0.0f, 1.0f);
-
-	HUDBackgroundGeometry->setTexCoordArray(0, texcoords);
-
-	osg::Vec3Array* HUDnormals = new osg::Vec3Array;
-	HUDnormals->push_back(osg::Vec3(0.0f, 0.0f, 1.0f));
-	HUDBackgroundGeometry->setNormalArray(HUDnormals);
-	HUDBackgroundGeometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
-	HUDBackgroundGeometry->addPrimitiveSet(HUDBackgroundIndices);
-	HUDBackgroundGeometry->setVertexArray(HUDBackgroundVertices);
-	HUDBackgroundGeometry->setColorArray(HUDcolors);
-	HUDBackgroundGeometry->setColorBinding(osg::Geometry::BIND_OVERALL);
-
-	hudGeode->addDrawable(HUDBackgroundGeometry);*/
-
-
-	// Create and set up a state set using the texture from above:
 	ref_ptr<StateSet> stateSet = new StateSet();
 	stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
 	stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
@@ -171,4 +132,12 @@ bool Hud::anyUserInteractionModelHovered()
 	}
 
 	return false;
+}
+
+void Hud::resetUserInteractionModel()
+{
+	for (UIMList::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
+	{
+		(*it)->setHovered(false);
+	}
 }
