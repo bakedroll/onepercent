@@ -7,6 +7,7 @@
 #include <osgGaming/UIStackPanel.h>
 #include <osgGaming/UIGrid.h>
 #include <osgGaming/UIText.h>
+#include <osgGaming/UIButton.h>
 
 using namespace onep;
 using namespace osg;
@@ -36,7 +37,7 @@ void LoadingGlobeOverviewState::initialize()
 
 StateEvent* LoadingGlobeOverviewState::update()
 {
-	int dotCount = (int)(getSimulationTime() * 4.0) % 4;
+	int dotCount = (int)(getSimulationTime() * 10.0) % 4;
 	string loadingTextString = "Loading";
 	for (int i = 0; i < dotCount; i++)
 		loadingTextString += ".";
@@ -63,6 +64,11 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	ref_ptr<UIText> first = new UIText();
 	ref_ptr<UIText> second = new UIText();
 	ref_ptr<UIText> third = new UIText();
+	ref_ptr<UIStackPanel> stackPanel = new UIStackPanel();
+	ref_ptr<UIButton> button1 = new UIButton();
+	ref_ptr<UIButton> button2 = new UIButton();
+
+
 
 	first->setText("Text1");
 	second->setText("Text2");
@@ -71,6 +77,10 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	first->setPadding(20.0f);
 	first->setTextAlignment(osgText::TextBase::RIGHT_TOP);
 
+	stackPanel->getCells()->setNumCells(2);
+	
+	stackPanel->addChild(button1, 0);
+	stackPanel->addChild(button2, 1);
 
 	grid->setMargin(10.0f);
 	grid->setPadding(10.0f);
@@ -84,6 +94,7 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	grid->addChild(first, ColRow(0, 0));
 	grid->addChild(second, ColRow(1, 0));
 	grid->addChild(third, ColRow(0, 1));
+	grid->addChild(stackPanel, ColRow(2, 0));
 
 
 	root->getVisualGroup();
@@ -92,5 +103,12 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	second->getVisualGroup();
 	third->getVisualGroup();
 
+	world->getHud()->registerUserInteractionModel(button1);
+	world->getHud()->registerUserInteractionModel(button2);
+
+
 	world->getHud()->updateUIElements();
+	Vec2f origin = button1->getAbsoluteOrigin();
+
+	return;
 }

@@ -9,8 +9,8 @@ using namespace osgGaming;
 
 UIElement::UIElement()
 	: MatrixTransform(),
-	  _width(100.0f),
-	  _height(100.0f),
+	  _width(/*10*/0.0f),
+	  _height(/*10*/0.0f),
 	  _padding(0.0f, 0.0f, 0.0f, 0.0f),
 	  _margin(0.0f, 0.0f, 0.0f, 0.0f),
 	  _horizontalAlignment(H_STRETCH),
@@ -44,6 +44,11 @@ bool UIElement::setChild(unsigned int i, Node *node)
 Vec2f UIElement::getOrigin()
 {
 	return _origin;
+}
+
+Vec2f UIElement::getAbsoluteOrigin()
+{
+	return _absoluteOrigin;
 }
 
 Vec2f UIElement::getSize()
@@ -118,6 +123,11 @@ void UIElement::setOrigin(Vec2f origin)
 
 	Matrix mat = Matrix::translate(_origin.x(), _origin.y(), 0.0f);
 	setMatrix(mat);
+}
+
+void UIElement::setAbsoluteOrigin(Vec2f origin)
+{
+	_absoluteOrigin = origin;
 }
 
 void UIElement::setSize(Vec2f size)

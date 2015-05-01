@@ -67,6 +67,12 @@ Vec3 osgGaming::getVec3FromEuler(double pitch, double roll, double yaw, Vec3 ori
 	return origin;
 }
 
+bool osgGaming::pointInRect(Vec2f point, Vec2f leftbottom, Vec2f righttop)
+{
+	return (point.x() >= leftbottom.x() && point.y() >= leftbottom.y()
+		&& point.x() <= righttop.x() && point.y() <= righttop.y());
+}
+
 bool osgGaming::sphereLineIntersection(Vec3f sphereCenter, float sphereRadius, Vec3f lineOrigin, Vec3f lineDirectionNornalized, Vec3f& result)
 {
 	float a = lineDirectionNornalized * lineDirectionNornalized;

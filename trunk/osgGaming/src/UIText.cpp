@@ -19,7 +19,7 @@ UIText::UIText()
 	_textNode->setFont("./data/fonts/coolvetica rg.ttf");
 	_textNode->setText(_text);
 	_textNode->setAxisAlignment(osgText::Text::SCREEN);
-	_textNode->setDrawMode(osgText::Text::TEXT | osgText::Text::BOUNDINGBOX);
+	_textNode->setDrawMode(osgText::Text::TEXT /*| osgText::Text::BOUNDINGBOX*/);
 	_textNode->setColor(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	_textNode->setDataVariance(osg::Object::DYNAMIC);
 

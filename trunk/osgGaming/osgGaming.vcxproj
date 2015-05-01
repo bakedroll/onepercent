@@ -22,6 +22,7 @@
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\ResourceManager.cpp" />
     <ClCompile Include="src\TransformableCameraManipulator.cpp" />
+    <ClCompile Include="src\UIButton.cpp" />
     <ClCompile Include="src\UICells.cpp" />
     <ClCompile Include="src\UIContainerElementBase.cpp" />
     <ClCompile Include="src\UIElement.cpp" />
@@ -30,6 +31,7 @@
     <ClCompile Include="src\UIText.cpp" />
     <ClCompile Include="src\UIUpdateVisitor.cpp" />
     <ClCompile Include="src\UIVisualElement.cpp" />
+    <ClCompile Include="src\UserInteractionModel.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +47,7 @@
     <ClInclude Include="include\osgGaming\InputManager.h" />
     <ClInclude Include="include\osgGaming\ResourceManager.h" />
     <ClInclude Include="include\osgGaming\TransformableCameraManipulator.h" />
+    <ClInclude Include="include\osgGaming\UIButton.h" />
     <ClInclude Include="include\osgGaming\UICells.h" />
     <ClInclude Include="include\osgGaming\UIContainerElement.h" />
     <ClInclude Include="include\osgGaming\UIContainerElementBase.h" />
@@ -54,6 +57,7 @@
     <ClInclude Include="include\osgGaming\UIText.h" />
     <ClInclude Include="include\osgGaming\UIUpdateVisitor.h" />
     <ClInclude Include="include\osgGaming\UIVisualElement.h" />
+    <ClInclude Include="include\osgGaming\UserInteractionModel.h" />
     <ClInclude Include="include\osgGaming\World.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
