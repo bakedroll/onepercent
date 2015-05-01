@@ -38,18 +38,24 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	case GUIEventAdapter::PUSH:
 	case GUIEventAdapter::DOUBLECLICK:
 
-		_mousePressed[log_x_2(ea.getButton())] = true;
-
 		if (_currentWorld->getHud()->anyUserInteractionModelHovered())
 		{
-			return false;
+			Hud::UIMList uimList = _currentWorld->getHud()->getUserInteractionModels();
+			for (Hud::UIMList::iterator it = uimList.begin(); it != uimList.end(); ++it)
+			{
+				if ((*it)->getHovered())
+				{
+					_currentState->onUIMClickedEvent(*it);
+				}
+			}
 		}
 		else
 		{
+			_mousePressed[log_x_2(ea.getButton())] = true;
 			_currentState->onMousePressedEvent(ea.getButton(), ea.getX(), ea.getY());
-
-			return true;
 		}
+
+		return true;
 
 	case GUIEventAdapter::RELEASE:
 
@@ -88,11 +94,13 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	case GUIEventAdapter::DRAG:
 	case GUIEventAdapter::MOVE:
 
-		_currentState->onMouseMoveEvent(ea.getX(), ea.getY());
+		_mousePosition = Vec2f(ea.getX(), ea.getY());
+
+		_currentState->onMouseMoveEvent(_mousePosition.x(), _mousePosition.y());
 
 		if (_mouseDragging == 0)
 		{
-			handleUserInteractionMove(ea.getX(), ea.getY());
+			handleUserInteractionMove(_mousePosition.x(), _mousePosition.y());
 		}
 
 		if (_mouseDragging == 0 && !_currentWorld->getHud()->anyUserInteractionModelHovered())
@@ -102,7 +110,7 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 			if (pressed != -1)
 			{
 				_mouseDragging = 1 << pressed;
-				_dragOrigin = Vec2f(ea.getX(), ea.getY());
+				_dragOrigin = _mousePosition;
 				_lastDragPosition = _dragOrigin;
 
 				_currentState->onDragBeginEvent(_mouseDragging, _dragOrigin);
@@ -111,11 +119,9 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 
 		if (_mouseDragging != 0)
 		{
-			Vec2f position(ea.getX(), ea.getY());
+			_currentState->onDragEvent(_mouseDragging, _dragOrigin, _mousePosition, _mousePosition - _lastDragPosition);
 
-			_currentState->onDragEvent(_mouseDragging, _dragOrigin, position, position - _lastDragPosition);
-
-			_lastDragPosition = position;
+			_lastDragPosition = _mousePosition;
 		}
 
 		return true;
@@ -143,6 +149,9 @@ void InputManager::setCurrentState(osg::ref_ptr<GameState> state)
 void InputManager::setCurrentWorld(ref_ptr<World> world)
 {
 	_currentWorld = world;
+
+	_currentWorld->getHud()->resetUserInteractionModel();
+	handleUserInteractionMove(_mousePosition.x(), _mousePosition.y());
 }
 
 void InputManager::updateResolution()

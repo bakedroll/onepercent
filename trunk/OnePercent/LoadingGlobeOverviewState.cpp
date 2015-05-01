@@ -68,7 +68,8 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	ref_ptr<UIButton> button1 = new UIButton();
 	ref_ptr<UIButton> button2 = new UIButton();
 
-
+	button1->setUIMName("button1");
+	button2->setUIMName("button2");
 
 	first->setText("Text1");
 	second->setText("Text2");

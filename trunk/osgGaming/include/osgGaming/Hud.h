@@ -36,6 +36,7 @@ namespace osgGaming
 		void registerUserInteractionModel(UserInteractionModel* model);
 
 		bool anyUserInteractionModelHovered();
+		void resetUserInteractionModel();
 
 	private:
 		osg::ref_ptr<osg::Projection> _projection;

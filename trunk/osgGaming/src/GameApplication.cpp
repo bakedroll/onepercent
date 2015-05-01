@@ -63,8 +63,6 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 					_isLoading = true;
 
 					attachWorld(_worldLoading);
-
-					_inputManager->updateResolution();
 				}
 
 				ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
@@ -78,8 +76,6 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 					_resetTimeDiff = true;
 					
 					attachWorld(_world);
-
-					_inputManager->updateResolution();
 				}
 			}
 		}
@@ -246,6 +242,7 @@ void GameApplication::attachWorld(osg::ref_ptr<World> world)
 	_viewer.setCameraManipulator(world->getCameraManipulator());
 
 	_inputManager->setCurrentWorld(world);
+	_inputManager->updateResolution();
 }
 
 void GameApplication::popState()

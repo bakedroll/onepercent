@@ -42,5 +42,7 @@ namespace osgGaming
 		int _mouseDragging;
 		osg::Vec2f _dragOrigin;
 		osg::Vec2f _lastDragPosition;
+
+		osg::Vec2f _mousePosition;
 	};
 }

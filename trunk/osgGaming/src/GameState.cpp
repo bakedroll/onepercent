@@ -81,6 +81,11 @@ void GameState::onDragEndEvent(int button, Vec2f origin, Vec2f position)
 
 }
 
+void GameState::onUIMClickedEvent(UserInteractionModel* model)
+{
+
+}
+
 double GameState::getSimulationTime()
 {
 	return _simulationTime;
