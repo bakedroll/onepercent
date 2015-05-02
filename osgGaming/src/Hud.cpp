@@ -2,6 +2,8 @@
 #include <osgGaming/FpsTextCallback.h>
 #include <osgGaming/UIGrid.h>
 #include <osgGaming/UIUpdateVisitor.h>
+#include <osgGaming/ResourceManager.h>
+#include <osgGaming/Helper.h>
 
 #include <osg/MatrixTransform>
 
@@ -88,14 +90,9 @@ void Hud::setFpsEnabled(bool enabled)
 
 	if (!_fpsText.valid())
 	{
-		_fpsText = new osgText::Text();
-		_fpsText->setCharacterSize(25);
-		_fpsText->setFont("./data/fonts/coolvetica rg.ttf");
-		_fpsText->setText("");
-		_fpsText->setAxisAlignment(osgText::Text::SCREEN);
+		_fpsText = createTextNode("", 25, ResourceManager::getInstance()->loadDefaultFont());
 		_fpsText->setAlignment(osgText::TextBase::LEFT_BOTTOM);
 		_fpsText->setPosition(osg::Vec3(10, 10, -1.5));
-		_fpsText->setColor(osg::Vec4(199, 77, 15, 1));
 		_fpsText->setDataVariance(osg::Object::DYNAMIC);
 		_fpsText->setUpdateCallback(new FpsTextCallback());
 	}

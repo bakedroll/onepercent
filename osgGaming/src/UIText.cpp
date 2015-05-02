@@ -1,4 +1,6 @@
 #include <osgGaming/UIText.h>
+#include <osgGaming/ResourceManager.h>
+#include <osgGaming/Helper.h>
 
 #include <osg/Geode>
 
@@ -14,14 +16,7 @@ UIText::UIText()
 {
 	ref_ptr<Geode> geode = new Geode();
 
-	_textNode = new Text();
-	_textNode->setCharacterSize(_fontSize);
-	_textNode->setFont("./data/fonts/coolvetica rg.ttf");
-	_textNode->setText(_text);
-	_textNode->setAxisAlignment(osgText::Text::SCREEN);
-	_textNode->setDrawMode(osgText::Text::TEXT /*| osgText::Text::BOUNDINGBOX*/);
-	_textNode->setColor(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	_textNode->setDataVariance(osg::Object::DYNAMIC);
+	_textNode = createTextNode(_text, _fontSize, ResourceManager::getInstance()->loadDefaultFont());
 
 	MatrixTransform::addChild(geode);
 	geode->addDrawable(_textNode);

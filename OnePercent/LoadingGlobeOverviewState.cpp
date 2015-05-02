@@ -77,6 +77,7 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	first->setTextAlignment(osgText::TextBase::RIGHT_TOP);
 
 	stackPanel->getCells()->setNumCells(2);
+	stackPanel->setVerticalAlignment(UIElement::BOTTOM);
 	
 	stackPanel->addChild(button1, 0);
 	stackPanel->addChild(button2, 1);
@@ -101,13 +102,7 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	first->getVisualGroup();
 	second->getVisualGroup();
 	third->getVisualGroup();
-
+	
 	world->getHud()->registerUserInteractionModel(button1);
 	world->getHud()->registerUserInteractionModel(button2);
-
-
-	world->getHud()->updateUIElements();
-	Vec2f origin = button1->getAbsoluteOrigin();
-
-	return;
 }

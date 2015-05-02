@@ -1,9 +1,12 @@
 #include <osgGaming/Helper.h>
 
+#include <algorithm>
+
 #include <osg/Geode>
 #include <osgUtil/TangentSpaceGenerator>
 
 using namespace osg;
+using namespace osgText;
 using namespace std;
 
 // Z  Y
@@ -140,4 +143,29 @@ void osgGaming::generateTangentAndBinormal(Node* node)
 StateAttribute::GLModeValue osgGaming::glModeValueFromBool(bool on)
 {
 	return on ? StateAttribute::ON : StateAttribute::OFF;
+}
+
+string osgGaming::lowerString(string str)
+{
+	transform(str.begin(), str.end(), str.begin(), tolower);
+	return str;
+}
+
+ref_ptr<Text> osgGaming::createTextNode(string text, float characterSize, ref_ptr<Font> font)
+{
+	ref_ptr<Text> textNode = new Text();
+
+	if (font.valid())
+	{
+		textNode->setFont(font);
+	}
+
+	textNode->setCharacterSize(characterSize);
+	textNode->setText(text);
+	textNode->setAxisAlignment(osgText::Text::SCREEN);
+	textNode->setDrawMode(osgText::Text::TEXT);
+	textNode->setColor(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	textNode->setDataVariance(osg::Object::DYNAMIC);
+
+	return textNode;
 }

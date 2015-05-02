@@ -40,12 +40,15 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 
 		if (_currentWorld->getHud()->anyUserInteractionModelHovered())
 		{
-			Hud::UIMList uimList = _currentWorld->getHud()->getUserInteractionModels();
-			for (Hud::UIMList::iterator it = uimList.begin(); it != uimList.end(); ++it)
+			if (ea.getButton() == GUIEventAdapter::LEFT_MOUSE_BUTTON)
 			{
-				if ((*it)->getHovered())
+				Hud::UIMList uimList = _currentWorld->getHud()->getUserInteractionModels();
+				for (Hud::UIMList::iterator it = uimList.begin(); it != uimList.end(); ++it)
 				{
-					_currentState->onUIMClickedEvent(*it);
+					if ((*it)->getHovered())
+					{
+						_currentState->onUIMClickedEvent(*it);
+					}
 				}
 			}
 		}
