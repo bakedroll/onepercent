@@ -1,4 +1,5 @@
 #include <osgGaming/GameApplication.h>
+#include <osgGaming/ResourceManager.h>
 
 #include "LoadingGlobeOverviewState.h"
 #include "GlobeOverviewState.h"
@@ -10,6 +11,8 @@ using namespace osg;
 
 int main(int argc, char** argv)
 {
+	ResourceManager::getInstance()->setDefaultFontResourceKey("./data/fonts/coolvetica rg.ttf");
+
 	ref_ptr<GameApplication> app = new GameApplication();
 	app->setWorld<GlobeOverviewWorld>();
 

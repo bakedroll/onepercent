@@ -4,6 +4,7 @@
 #include <osg/Matrix>
 
 #include <osg/StateAttribute>
+#include <osgText/Text>
 
 #define C_PI 3.14159265359f
 
@@ -28,6 +29,8 @@ namespace osgGaming
 
 	void generateTangentAndBinormal(osg::Node* node);
 
-
 	osg::StateAttribute::GLModeValue glModeValueFromBool(bool on);
+	std::string lowerString(std::string str);
+
+	osg::ref_ptr<osgText::Text> createTextNode(std::string text, float characterSize, osg::ref_ptr<osgText::Font> font = NULL);
 }

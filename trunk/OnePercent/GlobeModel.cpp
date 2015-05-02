@@ -9,6 +9,7 @@
 #include <osgDB/ReadFile>
 #include <osg/PositionAttitudeTransform>
 
+#include <osgGaming/ResourceManager.h>
 #include <osgGaming/Helper.h>
 
 using namespace onep;
@@ -128,11 +129,8 @@ ref_ptr<Program> GlobeModel::createShader()
 {
 	ref_ptr<Program> pgm = new Program();
 
-	ref_ptr<Shader> vert_shader = new Shader(Shader::VERTEX);
-	ref_ptr<Shader> frag_shader = new Shader(Shader::FRAGMENT);
-
-	vert_shader->loadShaderSourceFromFile("./shader/globe.vert");
-	frag_shader->loadShaderSourceFromFile("./shader/globe.frag");
+	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./shader/globe.vert", Shader::VERTEX);
+	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./shader/globe.frag", Shader::FRAGMENT);
 
 	pgm->addShader(vert_shader);
 	pgm->addShader(frag_shader);
@@ -153,8 +151,8 @@ void GlobeModel::loadTexture(ref_ptr<StateSet> stateSet, string filename, int te
 	texture->setFilter(Texture::MAG_FILTER, Texture::LINEAR);
 	texture->setMaxAnisotropy(8);
 
-	ref_ptr<Image> image = osgDB::readImageFile(filename);
-	if (!image)
+	ref_ptr<Image> image = ResourceManager::getInstance()->loadImage(filename);
+	if (!image.valid())
 	{
 		return;
 	}

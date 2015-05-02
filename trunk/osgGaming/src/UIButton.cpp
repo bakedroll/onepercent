@@ -10,6 +10,9 @@ UIButton::UIButton()
 	: UIVisualElement(),
 	  UserInteractionModel()
 {
+	setWidth(100.0f);
+	setHeight(36.0f);
+
 	ref_ptr<Geode> geode = new Geode();
 	ref_ptr<Geometry> geo = new Geometry();
 
