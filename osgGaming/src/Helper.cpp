@@ -70,6 +70,26 @@ Vec3 osgGaming::getVec3FromEuler(double pitch, double roll, double yaw, Vec3 ori
 	return origin;
 }
 
+Vec2f osgGaming::getTextSize(ref_ptr<Text> text)
+{
+	BoundingBox bb;
+
+	Text::TextureGlyphQuadMap glyphs = text->getTextureGlyphQuadMap();
+	for (Text::TextureGlyphQuadMap::iterator it = glyphs.begin(); it != glyphs.end(); ++it)
+	{
+		Text::GlyphQuads::Coords2 quads = it->second.getCoords();
+		for (Text::GlyphQuads::Coords2::iterator qit = quads.begin(); qit != quads.end(); ++qit)
+		{
+			bb.expandBy(qit->x(), qit->y(), 0.0f);
+		}
+	}
+
+	float width = bb.xMax() - bb.xMin();
+	float height = bb.yMax() - bb.yMin();
+
+	return Vec2f(width, height);
+}
+
 bool osgGaming::pointInRect(Vec2f point, Vec2f leftbottom, Vec2f righttop)
 {
 	return (point.x() >= leftbottom.x() && point.y() >= leftbottom.y()
