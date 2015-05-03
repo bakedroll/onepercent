@@ -13,6 +13,12 @@
     <Filter Include="Source Files\UI">
       <UniqueIdentifier>{28b1cda7-587b-46f5-ad94-b931d39b64d3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Resources">
+      <UniqueIdentifier>{52bc078c-430a-4657-b503-5a9d1f38bfca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Resources">
+      <UniqueIdentifier>{f26ba47f-2e2b-46b6-9b72-6ff647a00d05}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameApplication.cpp">
@@ -48,9 +54,6 @@
     <ClCompile Include="src\FpsTextCallback.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ResourceManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\UIElement.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
@@ -80,6 +83,18 @@
     </ClCompile>
     <ClCompile Include="src\UserInteractionModel.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PackageResourceLoader.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ResourceManager.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FileResourceLoader.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextResource.cpp">
+      <Filter>Source Files\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -119,9 +134,6 @@
     <ClInclude Include="include\osgGaming\FpsTextCallback.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\osgGaming\ResourceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\osgGaming\UIElement.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
@@ -154,6 +166,21 @@
     </ClInclude>
     <ClInclude Include="include\osgGaming\UserInteractionModel.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\FileResourceLoader.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\PackageResourceLoader.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\ResourceLoader.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\ResourceManager.h">
+      <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\TextResource.h">
+      <Filter>Header Files\Resources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
