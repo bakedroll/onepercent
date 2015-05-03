@@ -1,17 +1,26 @@
 #include <osgGaming/UIButton.h>
+#include <osgGaming/ResourceManager.h>
+#include <osgGaming/Helper.h>
 
 #include <osg/Geode>
 #include <osg/Geometry>
+#include <osgText/Glyph>
 
 using namespace osgGaming;
 using namespace osg;
+using namespace std;
+using namespace osgText;
 
 UIButton::UIButton()
 	: UIVisualElement(),
-	  UserInteractionModel()
+	  UserInteractionModel(),
+	  _fontSize(18.0),
+	  _text("")
 {
-	setWidth(100.0f);
-	setHeight(36.0f);
+	//setWidth(100.0f);
+	//setHeight(26.0f);
+
+	setPadding(6.0f);
 
 	ref_ptr<Geode> geode = new Geode();
 	ref_ptr<Geometry> geo = new Geometry();
@@ -54,6 +63,27 @@ UIButton::UIButton()
 	geode->getOrCreateStateSet()->setAttributeAndModes(_material, StateAttribute::ON);
 
 	getVisualGroup()->addChild(geode);
+
+
+	ref_ptr<Geode> textGeode = new Geode();
+
+	_textNode = createTextNode(_text, _fontSize, ResourceManager::getInstance()->loadDefaultFont());
+	_textNode->setAlignment(osgText::TextBase::CENTER_CENTER);
+
+	MatrixTransform::addChild(textGeode);
+	textGeode->addDrawable(_textNode);
+}
+
+void UIButton::setFontSize(float fontSize)
+{
+	_fontSize = fontSize;
+	_textNode->setCharacterSize(fontSize);
+}
+
+void UIButton::setText(string text)
+{
+	_text = text;
+	_textNode->setText(text);
 }
 
 void UIButton::onMouseEnter()
@@ -68,6 +98,19 @@ void UIButton::onMouseLeave()
 
 void UIButton::getAbsoluteOriginSize(osg::Vec2f& origin, osg::Vec2f& size)
 {
+	Vec4f margin = getMargin();
+
 	origin = getAbsoluteOrigin();
-	size = getContentSize();
+	size = getSize() - Vec2f(margin.x() + margin.z(), margin.y() + margin.w());
+}
+
+void UIButton::updatedContentOriginSize(Vec2f origin, Vec2f size)
+{
+	Vec2f position = origin + size / 2.0f;
+	_textNode->setPosition(Vec3f(position.x(), position.y(), 0.0f));
+}
+
+Vec2f UIButton::calculateMinContentSize()
+{
+	return getTextSize(_textNode);
 }

@@ -75,14 +75,5 @@ void UIText::updatedContentOriginSize(Vec2f origin, Vec2f size)
 
 Vec2f UIText::calculateMinContentSize()
 {
-	//_textNode->getTextureGlyphQuadMap();
-
-	BoundingBox bb = _textNode->getBound();
-
-	//float cheight =_textNode->getCharacterHeight();
-
-	float width = bb.xMax() - bb.xMin();
-	float height = bb.yMax() - bb.yMin();
-
-	return Vec2f(width, height);
+	return getTextSize(_textNode);
 }

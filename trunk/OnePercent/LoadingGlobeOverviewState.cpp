@@ -12,6 +12,7 @@
 using namespace onep;
 using namespace osg;
 using namespace osgGaming;
+using namespace osgText;
 using namespace std;
 
 LoadingGlobeOverviewState::LoadingGlobeOverviewState(ref_ptr<GameState> nextState)
@@ -22,17 +23,13 @@ LoadingGlobeOverviewState::LoadingGlobeOverviewState(ref_ptr<GameState> nextStat
 
 void LoadingGlobeOverviewState::initialize()
 {
-	_loadingText = new osgText::Text();
-	_loadingText->setCharacterSize(25);
-	_loadingText->setFont("./data/fonts/coolvetica rg.ttf");
-	_loadingText->setText("");
-	_loadingText->setAxisAlignment(osgText::Text::SCREEN);
-	_loadingText->setAlignment(osgText::TextBase::LEFT_BOTTOM);
-	_loadingText->setPosition(osg::Vec3(10, 10, -1.5));
-	_loadingText->setColor(osg::Vec4(199, 77, 15, 1));
-	_loadingText->setDataVariance(osg::Object::DYNAMIC);
+	_loadingText = new UIText();
+	_loadingText->setText("Loading");
+	_loadingText->setFontSize(25);
+	_loadingText->setVerticalAlignment(UIElement::BOTTOM);
+	_loadingText->setMargin(10.0f);
 
-	getWorld()->getHud()->getGeode()->addDrawable(_loadingText);
+	getWorld()->getHud()->getRootUIElement()->addChild(_loadingText);
 }
 
 StateEvent* LoadingGlobeOverviewState::update()
@@ -54,8 +51,6 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	world->getRootNode()->addChild(globe);
 	world->getHud()->setFpsEnabled(true);
 
-
-
 	ref_ptr<UIElement> root = world->getHud()->getRootUIElement();
 
 	ref_ptr<UIGrid> grid = new UIGrid();
@@ -68,6 +63,8 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 
 	button1->setUIMName("button1");
 	button2->setUIMName("button2");
+	button1->setText("button 1");
+	button2->setText("button 2");
 
 	first->setText("Text1");
 	second->setText("Text2");
