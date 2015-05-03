@@ -1,5 +1,6 @@
 #include <osgGaming/GameApplication.h>
 #include <osgGaming/ResourceManager.h>
+#include <osgGaming/PackageResourceLoader.h>
 
 #include "LoadingGlobeOverviewState.h"
 #include "GlobeOverviewState.h"
@@ -11,6 +12,11 @@ using namespace osg;
 
 int main(int argc, char** argv)
 {
+	/*ref_ptr<PackageResourceLoader> resourceLoader = new PackageResourceLoader();
+	resourceLoader->registerPackage("./GameData/Data.pak");
+	resourceLoader->registerPackage("./GameData/Shader.pak");
+
+	ResourceManager::getInstance()->setResourceLoader(resourceLoader);*/
 	ResourceManager::getInstance()->setDefaultFontResourceKey("./data/fonts/coolvetica rg.ttf");
 
 	ref_ptr<GameApplication> app = new GameApplication();

@@ -9,6 +9,8 @@
 #include <osgGaming/UIText.h>
 #include <osgGaming/UIButton.h>
 
+#include <osgGaming/PackageResourceLoader.h>
+
 using namespace onep;
 using namespace osg;
 using namespace osgGaming;

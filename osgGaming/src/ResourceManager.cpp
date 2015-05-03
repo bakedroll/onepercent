@@ -1,14 +1,14 @@
 #include <osgGaming/ResourceManager.h>
-
+#include <osgGaming/TextResource.h>
 #include <osgGaming/Helper.h>
 
 #include <osgDB/ReadFile>
 #include <osgDB/FileNameUtils>
 
 using namespace osg;
+using namespace osgDB;
 using namespace std;
 using namespace osgGaming;
-using namespace osgDB;
 using namespace osgText;
 
 ref_ptr<ResourceManager> ResourceManager::getInstance()
@@ -21,6 +21,11 @@ ref_ptr<ResourceManager> ResourceManager::getInstance()
 	return _instance;
 }
 
+string ResourceManager::loadText(string resourceKey)
+{
+	return static_cast<TextResource*>(loadObject(resourceKey, TEXT).get())->text;
+}
+
 ref_ptr<Image> ResourceManager::loadImage(string resourceKey)
 {
 	return static_cast<Image*>(loadObject(resourceKey).get());
@@ -31,20 +36,9 @@ ref_ptr<Font> ResourceManager::loadFont(string resourceKey)
 	return static_cast<Font*>(loadObject(resourceKey).get());
 }
 
-ref_ptr<Shader> ResourceManager::loadShader(string resourceKey, osg::Shader::Type type)
+ref_ptr<Shader> ResourceManager::loadShader(string resourceKey, Shader::Type type)
 {
-	ref_ptr<Object> obj = getCacheItem(resourceKey);
-	if (obj.valid())
-	{
-		return static_cast<Shader*>(obj.get());
-	}
-
-	ref_ptr<Shader> shader = new Shader(type);
-	shader->loadShaderSourceFromFile(resourceKey);
-
-	storeCacheItem(resourceKey, shader);
-
-	return shader;
+	return static_cast<Shader*>(loadObject(resourceKey, SHADER, type).get());
 }
 
 ref_ptr<Font> ResourceManager::loadDefaultFont()
@@ -62,6 +56,11 @@ void ResourceManager::setDefaultFontResourceKey(string resourceKey)
 	_defaultFontResourceKey = resourceKey;
 }
 
+void ResourceManager::setResourceLoader(ref_ptr<ResourceLoader> loader)
+{
+	_resourceLoader = loader;
+}
+
 ResourceManager::ResourceManager()
 	: Referenced(),
 	  _defaultFontResourceKey("")
@@ -71,7 +70,30 @@ ResourceManager::ResourceManager()
 
 ref_ptr<ResourceManager> ResourceManager::_instance = NULL;
 
-ref_ptr<Object> ResourceManager::loadObject(string resourceKey)
+ref_ptr<ResourceLoader> ResourceManager::resourceLoader()
+{
+	if (!_resourceLoader.valid())
+	{
+		_resourceLoader = new FileResourceLoader();
+	}
+
+	return _resourceLoader;
+}
+
+string ResourceManager::loadTextFromStream(std::ifstream& stream, long long length)
+{
+	char* buffer = new char[length + 1];
+	stream.read(buffer, length);
+	buffer[length] = '\0';
+
+	string text = string(buffer);
+
+	delete[] buffer;
+
+	return text;
+}
+
+ref_ptr<Object> ResourceManager::loadObject(string resourceKey, ResourceType type, Shader::Type shaderType)
 {
 	ref_ptr<Object> obj = getCacheItem(resourceKey);
 	if (obj.valid())
@@ -79,10 +101,35 @@ ref_ptr<Object> ResourceManager::loadObject(string resourceKey)
 		return obj;
 	}
 
-	ref_ptr<ReaderWriter> rw = Registry::instance()->getReaderWriterForExtension(getLowerCaseFileExtension(resourceKey));
-	ReaderWriter::ReadResult res = rw->readObject(resourceKey);
+	std::ifstream stream;
+	long long length;
+	resourceLoader()->getResourceStream(resourceKey, stream, length);
 
-	obj = res.getObject();
+	if (type == DETECT)
+	{
+		ref_ptr<ReaderWriter> rw = Registry::instance()->getReaderWriterForExtension(getLowerCaseFileExtension(resourceKey));
+		ReaderWriter::ReadResult res = rw->readObject(stream);
+
+		obj = res.getObject();
+	}
+	else if (type == TEXT)
+	{
+		ref_ptr<TextResource> textRes = new TextResource();
+		textRes->text = loadTextFromStream(stream, length);
+
+		obj = textRes;
+	}
+	else if (type == SHADER)
+	{
+		ref_ptr<Shader> shader = new Shader(shaderType);
+		string source = loadTextFromStream(stream, length);
+
+		shader->setShaderSource(source);
+
+		obj = shader;
+	}
+
+	stream.close();
 
 	storeCacheItem(resourceKey, obj);
 
