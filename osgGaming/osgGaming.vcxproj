@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CameraAlignedQuad.cpp" />
     <ClCompile Include="src\FileResourceLoader.cpp" />
     <ClCompile Include="src\FpsTextCallback.cpp" />
     <ClCompile Include="src\GameException.cpp" />
@@ -39,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\Animation.h" />
+    <ClInclude Include="include\osgGaming\CameraAlignedQuad.h" />
     <ClInclude Include="include\osgGaming\FileResourceLoader.h" />
     <ClInclude Include="include\osgGaming\FpsTextCallback.h" />
     <ClInclude Include="include\osgGaming\GameApplication.h" />

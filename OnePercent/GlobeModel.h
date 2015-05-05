@@ -24,16 +24,15 @@ namespace onep
 		static const double SUN_DISTANCE;
 		static const double SUN_RADIUS_PM2;
 
-		GlobeModel();
+		GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);
 
-		void updateScatteringGeometry(osg::ref_ptr<osgGaming::TransformableCameraManipulator> cameraManipulator);
 		void updateLightDirection(osg::Vec3f direction);
 		void updateClouds(double simTime);
 
 	private:
 		void makeEarthModel();
 		void makeCloudsModel();
-		void makeAtmosphericScattering();
+		void makeAtmosphericScattering(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);
 
 		osg::ref_ptr<osg::Geode> createPlanetGeode(int textureResolution);
 		osg::ref_ptr<osg::Geode> createCloudsGeode();
@@ -41,7 +40,6 @@ namespace onep
 		void loadTexture(osg::ref_ptr<osg::StateSet> stateSet, std::string filename, int tex_layer, std::string uniform_name);
 		osg::ref_ptr<osg::Geometry> createSphereSegmentMesh(int stacks, int slices, double radius, int firstStack, int lastStack, int firstSlice, int lastSlice);
 
-		osg::ref_ptr<osg::Geometry> _scatteringGeometry;
 		osg::ref_ptr<osg::Uniform> _scatteringLightDirUniform;
 		osg::ref_ptr<osg::Uniform> _scatteringLightPosrUniform;
 

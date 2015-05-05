@@ -14,6 +14,7 @@
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/Helper.h>
+#include <osgGaming/CameraAlignedQuad.h>
 
 using namespace onep;
 using namespace osg;
@@ -31,41 +32,11 @@ const int GlobeModel::SPHERE_SLICES = 192;
 const double GlobeModel::SUN_DISTANCE = 149600.0;
 const double GlobeModel::SUN_RADIUS_PM2 = pow(695.8f, -2.0f);
 
-GlobeModel::GlobeModel()
+GlobeModel::GlobeModel(osg::ref_ptr<TransformableCameraManipulator> tcm)
 {
 	makeEarthModel();
 	makeCloudsModel();
-	makeAtmosphericScattering();
-}
-
-void GlobeModel::updateScatteringGeometry(ref_ptr<TransformableCameraManipulator> cameraManipulator)
-{
-	ref_ptr<Vec3Array> verts = static_cast<Vec3Array*>(_scatteringGeometry->getVertexArray());
-	ref_ptr<Vec3Array> normals = static_cast<Vec3Array*>(_scatteringGeometry->getNormalArray());
-
-	Vec3f v[4];
-	v[0] = Vec3f(-1.0f, -1.0f, -1.0f);
-	v[1] = Vec3f(-1.0f, 1.0f, -1.0f);
-	v[2] = Vec3f(1.0f, 1.0f, -1.0f);
-	v[3] = Vec3f(1.0f, - 1.0f, -1.0f);
-
-	Vec3f normal(0.0f, 0.0f, 1.0f);
-
-	Matrixd mat = Matrix::inverse(cameraManipulator->getViewMatrix() * cameraManipulator->getProjectionMatrix());
-
-	for (int i = 0; i < 4; i++)
-	{
-		Vec3f v_res = v[i] * mat;
-		verts->at(i).set(v_res);
-
-		Vec3f n = ((v[i] + normal) * mat) - v_res;
-		n.normalize();
-		normals->at(i).set(n);
-	}
-
-	normals->dirty();
-	verts->dirty();
-	_scatteringGeometry->dirtyBound();
+	makeAtmosphericScattering(tcm);
 }
 
 void GlobeModel::updateLightDirection(osg::Vec3f direction)
@@ -158,52 +129,14 @@ void GlobeModel::makeCloudsModel()
 	addChild(_cloudsTransform);
 }
 
-void GlobeModel::makeAtmosphericScattering()
+void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<TransformableCameraManipulator> tcm)
 {
-	// scattering stateset
-	ref_ptr<StateSet> stateSet = new StateSet();
+	// atmospheric scattering geometry
+	ref_ptr<CameraAlignedQuad> caq = new CameraAlignedQuad();
 
-	stateSet->setMode(GL_BLEND, StateAttribute::ON);
-	stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
-	stateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
-	stateSet->setAttributeAndModes(new BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), StateAttribute::ON);
+	// shader
+	ref_ptr<StateSet> stateSet = caq->getOrCreateStateSet();
 
-	stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-	stateSet->setRenderBinDetails(10, "RenderBin");
-
-	// scattering geometry
-	ref_ptr<Geode> geode = new Geode();
-
-	_scatteringGeometry = new Geometry();
-	_scatteringGeometry->setUseVertexBufferObjects(true);
-
-	ref_ptr<Vec3Array> verts = new Vec3Array(4);
-	verts->setDataVariance(DYNAMIC);
-	_scatteringGeometry->setVertexArray(verts);
-
-	ref_ptr<Vec3Array> normals = new Vec3Array(4);
-	normals->setDataVariance(DYNAMIC);
-	_scatteringGeometry->setNormalArray(normals);
-	_scatteringGeometry->setNormalBinding(Geometry::BIND_PER_VERTEX);
-
-	ref_ptr<Vec4Array> colors = new Vec4Array();
-	colors->push_back(Vec4(-1.0f, -1.0f, 0.0f, 1.0f));
-	colors->push_back(Vec4(-1.0f, 1.0f, 0.0f, 1.0f));
-	colors->push_back(Vec4(1.0f, 1.0f, 0.0f, 1.0f));
-	colors->push_back(Vec4(1.0f, -1.0f, 0.0f, 1.0f));
-	_scatteringGeometry->setColorArray(colors);
-	_scatteringGeometry->setColorBinding(Geometry::BIND_PER_VERTEX);
-
-	ref_ptr<DrawElementsUInt> indices = new DrawElementsUInt(PrimitiveSet::POLYGON, 0);
-	indices->push_back(3);
-	indices->push_back(2);
-	indices->push_back(1);
-	indices->push_back(0);
-	_scatteringGeometry->addPrimitiveSet(indices);
-
-	geode->addDrawable(_scatteringGeometry);
-
-	// atmospheric scattering shader
 	ref_ptr<Program> pgm = new Program();
 
 	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./shader/atmosphere.vert", Shader::VERTEX);
@@ -236,9 +169,8 @@ void GlobeModel::makeAtmosphericScattering()
 
 	stateSet->setAttribute(pgm, StateAttribute::ON);
 
-	geode->setStateSet(stateSet);
-
-	addChild(geode);
+	addChild(caq);
+	tcm->addCameraAlignedQuad(caq);
 }
 
 ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
