@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	resourceLoader->registerPackage("./GameData/Shader.pak");
 
 	ResourceManager::getInstance()->setResourceLoader(resourceLoader);*/
-	ResourceManager::getInstance()->setDefaultFontResourceKey("./data/fonts/coolvetica rg.ttf");
+	ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 
 	ref_ptr<GameApplication> app = new GameApplication();
 	app->setWorld<GlobeOverviewWorld>();

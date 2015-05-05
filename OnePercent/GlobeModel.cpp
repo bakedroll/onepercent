@@ -74,8 +74,8 @@ void GlobeModel::makeEarthModel()
 	// shader
 	ref_ptr<Program> pgm = new Program();
 
-	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./shader/globe.vert", Shader::VERTEX);
-	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./shader/globe.frag", Shader::FRAGMENT);
+	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/globe.vert", Shader::VERTEX);
+	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/globe.frag", Shader::FRAGMENT);
 
 	pgm->addShader(vert_shader);
 	pgm->addShader(frag_shader);
@@ -115,8 +115,8 @@ void GlobeModel::makeCloudsModel()
 	// shader
 	ref_ptr<Program> pgm = new Program();
 
-	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./shader/clouds.vert", Shader::VERTEX);
-	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./shader/clouds.frag", Shader::FRAGMENT);
+	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/clouds.vert", Shader::VERTEX);
+	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/clouds.frag", Shader::FRAGMENT);
 
 	pgm->addShader(vert_shader);
 	pgm->addShader(frag_shader);
@@ -139,8 +139,8 @@ void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<TransformableCameraManip
 
 	ref_ptr<Program> pgm = new Program();
 
-	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./shader/atmosphere.vert", Shader::VERTEX);
-	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./shader/atmosphere.frag", Shader::FRAGMENT);
+	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.vert", Shader::VERTEX);
+	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.frag", Shader::FRAGMENT);
 
 	pgm->addShader(vert_shader);
 	pgm->addShader(frag_shader);
@@ -219,10 +219,10 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 			char specreliefcitiesboundariesmap_file[128];
 			char normalmap_file[128];
 
-			sprintf(colormap_file, "./data/earth/color/%s/%dx%d.png", resolutionLevel0, x, y);
-			sprintf(nightmap_file, "./data/earth/night/%s/%dx%d.png", resolutionLevel0, x, y);
-			sprintf(specreliefcitiesboundariesmap_file, "./data/earth/specular_relief_cities/%s/%dx%d.png", resolutionLevel1, x, y);
-			sprintf(normalmap_file, "./data/earth/normal/%s/%dx%d.png", resolutionLevel1, x, y);
+			sprintf(colormap_file, "./GameData/textures/earth/color/%s/%dx%d.png", resolutionLevel0, x, y);
+			sprintf(nightmap_file, "./GameData/textures/earth/night/%s/%dx%d.png", resolutionLevel0, x, y);
+			sprintf(specreliefcitiesboundariesmap_file, "./GameData/textures/earth/specular_relief_cities/%s/%dx%d.png", resolutionLevel1, x, y);
+			sprintf(normalmap_file, "./GameData/textures/earth/normal/%s/%dx%d.png", resolutionLevel1, x, y);
 
 			loadTexture(stateSet, colormap_file, 0, "colormap");
 			loadTexture(stateSet, nightmap_file, 1, "nightmap");
@@ -260,7 +260,7 @@ ref_ptr<Geode> GlobeModel::createCloudsGeode()
 			ref_ptr<StateSet> stateSet = geo->getOrCreateStateSet();
 
 			char colormap_file[128];
-			sprintf(colormap_file, "./data/earth/clouds/8k/%dx%d.png", x, y);
+			sprintf(colormap_file, "./GameData/textures/earth/clouds/8k/%dx%d.png", x, y);
 			loadTexture(stateSet, colormap_file, 0, "colormap");
 
 			geode->addDrawable(geo);
