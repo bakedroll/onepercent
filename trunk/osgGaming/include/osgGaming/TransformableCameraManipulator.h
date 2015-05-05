@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+
+#include <osgGaming/CameraAlignedQuad.h>
+
 #include <osgGA/CameraManipulator>
 
 namespace osgGaming
@@ -17,6 +21,9 @@ namespace osgGaming
 		virtual void setByMatrix(const osg::Matrixd &matrix) override;
 		virtual void setByInverseMatrix(const osg::Matrixd &matrix) override;
 
+		void addCameraAlignedQuad(osg::ref_ptr<CameraAlignedQuad> caq);
+		void removeCameraAlignedQuad(osg::ref_ptr<CameraAlignedQuad> caq);
+
 		osg::Vec3f getPosition();
 		osg::Quat getAttitude();
 
@@ -33,7 +40,10 @@ namespace osgGaming
 		void getPickRay(float x, float y, osg::Vec3f& point, osg::Vec3f& direction);
 
 	private:
+		typedef std::vector<osg::ref_ptr<CameraAlignedQuad>> CameraAlignedQuadList;
+
 		void updateViewMatrix();
+		void updateCameraAlignedQuads();
 
 		osg::Vec3f _position;
 		osg::Quat _attitude;
@@ -53,5 +63,12 @@ namespace osgGaming
 
 		osg::Matrixd _viewMatrix;
 		osg::Matrixd _projectionMatrix;
+
+		CameraAlignedQuadList _cameraAlignedQuads;
+
+		osg::Vec3f _v[4];
+		osg::Vec3f _n;
+		osg::Vec3f _v_res[4];
+		osg::Vec3f _n_res[4];
 	};
 }

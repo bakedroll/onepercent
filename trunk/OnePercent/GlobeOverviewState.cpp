@@ -60,8 +60,6 @@ StateEvent* GlobeOverviewState::update()
 	yearDay.y() = fmodf(yearDay.y() + getFrameTime() * _TIME_SPEED, 1.0);
 
 	_globeWorld->setTimeOfYearAndDay(yearDay);
-	_globeWorld->getGlobeModel()->updateScatteringGeometry(getWorld()->getCameraManipulator());
-
 
 	_globeWorld->getGlobeModel()->updateClouds(getSimulationTime());
 
