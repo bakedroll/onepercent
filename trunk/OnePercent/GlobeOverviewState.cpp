@@ -15,16 +15,19 @@ const float GlobeOverviewState::_MAX_CAMERA_LONGITUDE = C_PI / 2.0f * 0.9f;
 const float GlobeOverviewState::_CAMERA_ZOOM_SPEED = 0.85f;
 const float GlobeOverviewState::_CAMERA_ZOOM_SPEED_FACTOR = 3.0f;
 const float GlobeOverviewState::_CAMERA_SCROLL_SPEED = 0.003f;
+const float GlobeOverviewState::_CAMERA_ROTATION_SPEED = 0.003;
 const float GlobeOverviewState::_DAYS_IN_YEAR = 356.0f;
 const float GlobeOverviewState::_TIME_SPEED = 0.02f;
 
 GlobeOverviewState::GlobeOverviewState()
 	: GameState(),
 	  _cameraLatLong(Vec2f(0.0f, 0.0f)),
-	  _cameraDistance(28.0f)
+	  _cameraDistance(28.0f),
+	  _cameraViewAngle(Vec2f(0.0f, 0.0f))
 {
 	_cameraLatLongAnimation = new Animation<Vec2f>(_cameraLatLong, 0.5, CIRCLE_OUT);
 	_cameraDistanceAnimation = new Animation<float>(_cameraDistance, 0.5, CIRCLE_OUT);
+	_cameraViewAngleAnimation = new Animation<Vec2f>(_cameraViewAngle, 0.5, CIRCLE_OUT);
 }
 
 void GlobeOverviewState::initialize()
@@ -36,12 +39,19 @@ StateEvent* GlobeOverviewState::update()
 {
 	// update camera position
 	Vec2f latLong = _cameraLatLongAnimation->getValue(getSimulationTime());
+	Vec2f viewAngle = _cameraViewAngleAnimation->getValue(getSimulationTime());
 
 	getWorld()->getCameraManipulator()->setPosition(
 		getVec3FromEuler(latLong.x(), 0.0, latLong.y())
 			* _cameraDistanceAnimation->getValue(getSimulationTime()));
 
-	getWorld()->getCameraManipulator()->setAttitude(getQuatFromEuler(-latLong.x(), 0.0, fmodf(latLong.y() + C_PI, C_PI * 2.0f)));
+	// update camera attitude
+	Matrix latLongMat = Matrix::rotate(getQuatFromEuler(-latLong.x(), 0.0f, fmodf(latLong.y() + C_PI, C_PI * 2.0f)));
+	Matrix viewAngleMat = Matrix::rotate(getQuatFromEuler(viewAngle.y(), viewAngle.x(), 0.0f));
+
+	Matrix mat = viewAngleMat * latLongMat;
+
+	getWorld()->getCameraManipulator()->setAttitude(mat.getRotate());
 
 	// update light direction
 	Vec2f yearDay = _globeWorld->getTimeOfYearAndDay();
@@ -50,6 +60,8 @@ StateEvent* GlobeOverviewState::update()
 	yearDay.y() = fmodf(yearDay.y() + getFrameTime() * _TIME_SPEED, 1.0);
 
 	_globeWorld->setTimeOfYearAndDay(yearDay);
+	
+	_globeWorld->getGlobeModel()->updateScatteringGeometry(getWorld()->getCameraManipulator());
 
 	return stateEvent_default();
 }
@@ -60,11 +72,11 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	{
 		stateEvent_pop();
 	}
-	else if (key == GUIEventAdapter::KEY_0)
+	/*else if (key == GUIEventAdapter::KEY_0)
 	{
 		printf("bla\n");
 		getGameSettings()->setFullscreenEnabled(!getGameSettings()->getFullscreenEnabled());
-	}
+	}*/
 }
 
 void GlobeOverviewState::onMousePressedEvent(int button, float x, float y)
@@ -117,6 +129,30 @@ void GlobeOverviewState::onDragEvent(int button, Vec2f origin, Vec2f position, o
 			_cameraLatLong.y() - change.x() * _CAMERA_SCROLL_SPEED);
 
 		_cameraLatLongAnimation->beginAnimation(_cameraLatLong, getSimulationTime());
+	}
+	else if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
+	{
+		//float clamp_to = 1.0f - ((_cameraDistance - _MIN_CAMERA_DISTANCE) / (_MAX_CAMERA_DISTANCE - _MIN_CAMERA_DISTANCE));
+		//clamp_to *= clamp_to * clamp_to;
+		//clamp_to *= C_PI * 0.6f / 2.0f;
+
+		float clamp_to = atan(GlobeModel::EARTH_RADIUS * 1.3 / _cameraDistance); // +(15.0f * C_PI / 180.0f);
+
+		_cameraViewAngle.set(
+			_cameraViewAngle.x() + change.x() * _CAMERA_ROTATION_SPEED,
+			clamp(_cameraViewAngle.y() + change.y() * _CAMERA_ROTATION_SPEED, 0.0f, clamp_to));
+
+		_cameraViewAngleAnimation->beginAnimation(_cameraViewAngle, getSimulationTime());
+	}
+}
+
+void GlobeOverviewState::onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position)
+{
+	if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
+	{
+		_cameraViewAngle.set(0.0f, 0.0f);
+
+		_cameraViewAngleAnimation->beginAnimation(_cameraViewAngle, getSimulationTime());
 	}
 }
 

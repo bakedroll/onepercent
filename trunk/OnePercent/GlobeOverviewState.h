@@ -22,6 +22,7 @@ namespace onep
 		virtual void onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion) override;
 
 		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change) override;
+		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position) override;
 
 		virtual void onUIMClickedEvent(osgGaming::UserInteractionModel* model) override;
 
@@ -32,6 +33,7 @@ namespace onep
 		static const float _CAMERA_ZOOM_SPEED;
 		static const float _CAMERA_ZOOM_SPEED_FACTOR;
 		static const float _CAMERA_SCROLL_SPEED;
+		static const float _CAMERA_ROTATION_SPEED;
 		static const float _DAYS_IN_YEAR;
 		static const float _TIME_SPEED;
 
@@ -39,8 +41,10 @@ namespace onep
 
 		osg::ref_ptr<osgGaming::Animation<osg::Vec2f>> _cameraLatLongAnimation;
 		osg::ref_ptr<osgGaming::Animation<float>> _cameraDistanceAnimation;
+		osg::ref_ptr<osgGaming::Animation<osg::Vec2f>> _cameraViewAngleAnimation;
 
 		osg::Vec2f _cameraLatLong;
+		osg::Vec2f _cameraViewAngle;
 		float _cameraDistance;
 
 	};

@@ -2,6 +2,7 @@
 
 #include <osg/Vec3>
 #include <osg/Matrix>
+#include <osg/Geometry>
 
 #include <osg/StateAttribute>
 #include <osgText/Text>
@@ -10,6 +11,13 @@
 
 namespace osgGaming
 {
+	typedef enum _quadOrientation
+	{
+		XY,
+		XZ,
+		YZ
+	} QuadOrientation;
+
 	template <typename T>
 	T clamp(const T& n, const T& lower, const T& upper)
 	{
@@ -35,4 +43,5 @@ namespace osgGaming
 	std::string lowerString(std::string str);
 
 	osg::ref_ptr<osgText::Text> createTextNode(std::string text, float characterSize, osg::ref_ptr<osgText::Font> font = NULL);
+	osg::ref_ptr<osg::Geometry> createQuadGeometry(float left, float right, float bottom, float top, float z = 0.0f, QuadOrientation orientation = XZ, bool flipped = false);
 }

@@ -48,12 +48,18 @@ StateEvent* LoadingGlobeOverviewState::update()
 
 void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings> settings)
 {
+	ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
+
 	ref_ptr<GlobeModel> globe = new GlobeModel();
+	globeWorld->setGlobeModel(globe);
 
 	world->getRootNode()->addChild(globe);
 	world->getHud()->setFpsEnabled(true);
 
-	ref_ptr<UIElement> root = world->getHud()->getRootUIElement();
+
+
+	// ##################
+	/*ref_ptr<UIElement> root = world->getHud()->getRootUIElement();
 
 	ref_ptr<UIGrid> grid = new UIGrid();
 	ref_ptr<UIText> first = new UIText();
@@ -103,5 +109,6 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	third->getVisualGroup();
 	
 	world->getHud()->registerUserInteractionModel(button1);
-	world->getHud()->registerUserInteractionModel(button2);
+	world->getHud()->registerUserInteractionModel(button2);*/
+	// #############
 }

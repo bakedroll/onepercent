@@ -8,7 +8,7 @@ using namespace osg;
 TransformableCameraManipulator::TransformableCameraManipulator()
 	: osgGA::CameraManipulator(),
 	_updateClearColor(true),
-	_updateProjectionMatrix(false),
+	_updateViewMatrix(true),
 	_projectionAngle(30.0),
 	_projectionNear(0.2),
 	_projectionFar(200.0),
@@ -20,34 +20,13 @@ TransformableCameraManipulator::TransformableCameraManipulator()
 
 void TransformableCameraManipulator::updateCamera(osg::Camera &camera)
 {
-	Vec3 eye(0.0f, 0.0f, 0.0f);
-	Vec3 center(0.0f, 1.0f, 0.0f);
-	Vec3 up(0.0f, 0.0f, 1.0f);
-
-	_transformation.setRotate(_attitude);
-	_transformation.setTrans(_position);
-
-	transformVector(&eye, &_transformation);
-	transformVector(&center, &_transformation);
-	transformVector(&up, &_transformation);
-
-	up -= _position;
-
-	camera.setViewMatrixAsLookAt(eye, center, up);
-	_viewMatrix = camera.getViewMatrix();
-
-	if (_updateProjectionMatrix)
+	if (_updateViewMatrix)
 	{
-		camera.setProjectionMatrixAsPerspective(
-			_projectionAngle,
-			_projectionRatio,
-			_projectionNear,
-			_projectionFar);
-
-		_projectionMatrix = camera.getProjectionMatrix();
-
-		_updateProjectionMatrix = false;
+		updateViewMatrix();
 	}
+
+	camera.setViewMatrix(_viewMatrix);
+	camera.setProjectionMatrix(_projectionMatrix);
 
 	if (_updateClearColor)
 	{
@@ -80,9 +59,13 @@ void TransformableCameraManipulator::setByInverseMatrix(const Matrixd &matrix)
 void TransformableCameraManipulator::updateResolution(Vec2f resolution)
 {
 	_resolution = resolution;
-
 	_projectionRatio = _resolution.x() / _resolution.y();
-	_updateProjectionMatrix = true;
+
+	_projectionMatrix = Matrix::perspective(
+		_projectionAngle,
+		_projectionRatio,
+		_projectionNear,
+		_projectionFar);
 }
 
 void TransformableCameraManipulator::updateClearColor(Vec4 clearColor)
@@ -107,6 +90,26 @@ void TransformableCameraManipulator::getPickRay(float x, float y, osg::Vec3f& po
 	direction.normalize();
 }
 
+void TransformableCameraManipulator::updateViewMatrix()
+{
+	Vec3 eye(0.0f, 0.0f, 0.0f);
+	Vec3 center(0.0f, 1.0f, 0.0f);
+	Vec3 up(0.0f, 0.0f, 1.0f);
+
+	_transformation.setRotate(_attitude);
+	_transformation.setTrans(_position);
+
+	transformVector(&eye, &_transformation);
+	transformVector(&center, &_transformation);
+	transformVector(&up, &_transformation);
+
+	up -= _position;
+
+	_viewMatrix = Matrix::lookAt(eye, center, up);
+
+	_updateViewMatrix = false;
+}
+
 Vec3f TransformableCameraManipulator::getPosition()
 {
 	return _position;
@@ -117,12 +120,36 @@ Quat TransformableCameraManipulator::getAttitude()
 	return _attitude;
 }
 
+Matrix TransformableCameraManipulator::getViewMatrix()
+{
+	if (_updateViewMatrix)
+	{
+		updateViewMatrix();
+	}
+
+	return _viewMatrix;
+}
+
+Matrix TransformableCameraManipulator::getProjectionMatrix()
+{
+	return _projectionMatrix;
+}
+
+double TransformableCameraManipulator::getProjectionRatio()
+{
+	return _projectionRatio;
+}
+
 void TransformableCameraManipulator::setPosition(Vec3f position)
 {
 	_position = position;
+
+	_updateViewMatrix = true;
 }
 
 void TransformableCameraManipulator::setAttitude(Quat attitude)
 {
 	_attitude = attitude;
+
+	_updateViewMatrix = true;
 }
