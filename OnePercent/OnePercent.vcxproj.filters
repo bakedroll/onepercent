@@ -43,6 +43,12 @@
     <None Include="shader\atmosphere.vert">
       <Filter>shader</Filter>
     </None>
+    <None Include="shader\clouds.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\clouds.vert">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GlobeModel.h">
