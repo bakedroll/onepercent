@@ -4,4 +4,4 @@
 
 Subdivide:
 
-1 ../../../../OnePercent/data/earth/surface/color_16k.png 4 2 ../../../../OnePercent/data/earth/color/16k/
+1 ../../../../OnePercent/data/earth/clouds/fair_clouds_8k.jpg 2 1 ../../../../OnePercent/data/earth/clouds/8k/

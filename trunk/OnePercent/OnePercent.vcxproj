@@ -80,6 +80,8 @@
   <ItemGroup>
     <None Include="shader\atmosphere.frag" />
     <None Include="shader\atmosphere.vert" />
+    <None Include="shader\clouds.frag" />
+    <None Include="shader\clouds.vert" />
     <None Include="shader\globe.frag" />
     <None Include="shader\globe.vert" />
   </ItemGroup>

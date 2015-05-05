@@ -21,6 +21,7 @@ using namespace osgGaming;
 using namespace std;
 
 const double GlobeModel::EARTH_RADIUS = 6.371;
+const double GlobeModel::CLOUDS_HEIGHT = 0.004;
 const double GlobeModel::ATMOSPHERE_HEIGHT = 0.06;
 const double GlobeModel::SCATTERING_DEPTH = 0.25;
 const double GlobeModel::SCATTERING_INTENSITY = 0.8;
@@ -75,6 +76,12 @@ void GlobeModel::updateLightDirection(osg::Vec3f direction)
 	_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), SUN_RADIUS_PM2));
 }
 
+void GlobeModel::updateClouds(double simTime)
+{
+	Quat quat = getQuatFromEuler(0.0, 0.0, fmodf(simTime * 0.003f, 2.0f * C_PI));
+	_cloudsTransform->setAttitude(quat);
+}
+
 void GlobeModel::makeEarthModel()
 {
 	// planet geometry
@@ -114,19 +121,41 @@ void GlobeModel::makeEarthModel()
 
 void GlobeModel::makeCloudsModel()
 {
-	ref_ptr<Geode> atmosphere_geode = new Geode();
-	ref_ptr<Geometry> atmosphere = createSphereSegmentMesh(SPHERE_STACKS, SPHERE_SLICES, EARTH_RADIUS + ATMOSPHERE_HEIGHT, 0, SPHERE_STACKS - 1, 0, SPHERE_SLICES - 1);
+	// geometry
+	_cloudsTransform = new PositionAttitudeTransform();
+
+	ref_ptr<Geode> atmosphere_geode = createCloudsGeode();
+
+	// stateset
+	ref_ptr<StateSet> stateSet = new StateSet();
 
 	ref_ptr<Material> material = new Material();
-	material->setAlpha(Material::FRONT_AND_BACK, 0.8f);
+	material->setAmbient(Material::FRONT_AND_BACK, Vec4f(0.2, 0.2, 0.2, 1.0));
+	material->setDiffuse(Material::FRONT_AND_BACK, Vec4f(1.0, 1.0, 1.0, 1.0));
+	material->setSpecular(Material::FRONT_AND_BACK, Vec4f(0.2, 0.2, 0.2, 1.0));
+	material->setShininess(Material::FRONT_AND_BACK, 32);
+	material->setEmission(Material::FRONT_AND_BACK, Vec4f(0.0, 0.0, 0.0, 1.0));
 
-	atmosphere->getOrCreateStateSet()->setMode(GL_BLEND, StateAttribute::ON);
-	atmosphere->getStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
-	atmosphere->getStateSet()->setAttribute(material);
+	stateSet->setMode(GL_BLEND, StateAttribute::ON);
+	stateSet->setRenderingHint(StateSet::TRANSPARENT_BIN);
+	stateSet->setRenderBinDetails(0, "RenderBin");
+	stateSet->setAttribute(material);
 
-	atmosphere_geode->addDrawable(atmosphere);
+	// shader
+	ref_ptr<Program> pgm = new Program();
 
-	//addChild(atmosphere_geode);
+	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./shader/clouds.vert", Shader::VERTEX);
+	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./shader/clouds.frag", Shader::FRAGMENT);
+
+	pgm->addShader(vert_shader);
+	pgm->addShader(frag_shader);
+
+	stateSet->setAttribute(pgm, StateAttribute::ON);
+
+	atmosphere_geode->setStateSet(stateSet);
+
+	_cloudsTransform->addChild(atmosphere_geode);
+	addChild(_cloudsTransform);
 }
 
 void GlobeModel::makeAtmosphericScattering()
@@ -137,7 +166,6 @@ void GlobeModel::makeAtmosphericScattering()
 	stateSet->setMode(GL_BLEND, StateAttribute::ON);
 	stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
 	stateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
-	stateSet->setMode(GL_CULL_FACE, StateAttribute::OFF);
 	stateSet->setAttributeAndModes(new BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), StateAttribute::ON);
 
 	stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
@@ -268,6 +296,40 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 			loadTexture(stateSet, nightmap_file, 1, "nightmap");
 			loadTexture(stateSet, specreliefcitiesboundariesmap_file, 2, "specreliefcitiesboundariesmap");
 			loadTexture(stateSet, normalmap_file, 3, "normalmap");
+
+			geode->addDrawable(geo);
+		}
+	}
+
+	return geode;
+}
+
+ref_ptr<Geode> GlobeModel::createCloudsGeode()
+{
+	ref_ptr<Geode> geode = new Geode();
+
+	int n = 2;
+	int m = 1;
+
+	int stacksPerSegment = SPHERE_STACKS / m;
+	int slicesPerSegment = SPHERE_SLICES / n;
+
+	for (int y = 0; y < m; y++)
+	{
+		for (int x = 0; x < n; x++)
+		{
+			ref_ptr<Geometry> geo = createSphereSegmentMesh(
+				SPHERE_STACKS, SPHERE_SLICES, EARTH_RADIUS + CLOUDS_HEIGHT,
+				y * stacksPerSegment,
+				(y + 1) * stacksPerSegment - 1,
+				x * slicesPerSegment,
+				(x + 1) * slicesPerSegment - 1);
+
+			ref_ptr<StateSet> stateSet = geo->getOrCreateStateSet();
+
+			char colormap_file[128];
+			sprintf(colormap_file, "./data/earth/clouds/8k/%dx%d.png", x, y);
+			loadTexture(stateSet, colormap_file, 0, "colormap");
 
 			geode->addDrawable(geo);
 		}
