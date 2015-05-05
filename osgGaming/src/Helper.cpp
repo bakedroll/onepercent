@@ -189,3 +189,77 @@ ref_ptr<Text> osgGaming::createTextNode(string text, float characterSize, ref_pt
 
 	return textNode;
 }
+
+ref_ptr<Geometry> osgGaming::createQuadGeometry(float left, float right, float bottom, float top, float z, QuadOrientation orientation, bool flipped)
+{
+	ref_ptr<Geometry> geo = new Geometry();
+
+	ref_ptr<Vec3Array> verts = new Vec3Array();
+	ref_ptr<Vec3Array> normals = new Vec3Array();
+
+	float normal = flipped ? 1.0f : -1.0f;
+
+	switch (orientation)
+	{
+	case XY:
+		verts->push_back(Vec3(left, bottom, z));
+		verts->push_back(Vec3(left, top, z));
+		verts->push_back(Vec3(right, top, z));
+		verts->push_back(Vec3(right, bottom, z));
+
+		normals->push_back(Vec3(0.0f, 0.0f, normal));
+		break;
+	case XZ:
+		verts->push_back(Vec3(left, z, bottom));
+		verts->push_back(Vec3(right, z, bottom));
+		verts->push_back(Vec3(right, z, top));
+		verts->push_back(Vec3(left, z, top));
+
+		normals->push_back(Vec3(0.0f, normal, 0.0f));
+		break;
+	case YZ:
+		verts->push_back(Vec3(z, left, bottom));
+		verts->push_back(Vec3(z, left, top));
+		verts->push_back(Vec3(z, right, top));
+		verts->push_back(Vec3(z, right, bottom));
+
+		normals->push_back(Vec3(normal, 0.0f, 0.0f));
+		break;
+	}
+
+	ref_ptr<DrawElementsUInt> indices = new DrawElementsUInt(PrimitiveSet::POLYGON, 0);
+
+	if (flipped)
+	{
+		indices->push_back(3);
+		indices->push_back(2);
+		indices->push_back(1);
+		indices->push_back(0);
+	}
+	else
+	{
+		indices->push_back(0);
+		indices->push_back(1);
+		indices->push_back(2);
+		indices->push_back(3);
+	}
+
+	//ref_ptr<Vec4Array> colors = new Vec4Array();
+	//colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	ref_ptr<Vec2Array> texcoords = new Vec2Array();
+	texcoords->push_back(Vec2(0.0f, 0.0f));
+	texcoords->push_back(Vec2(1.0f, 0.0f));
+	texcoords->push_back(Vec2(1.0f, 1.0f));
+	texcoords->push_back(Vec2(0.0f, 1.0f));
+
+	geo->setTexCoordArray(0, texcoords);
+	geo->addPrimitiveSet(indices);
+	geo->setVertexArray(verts);
+	geo->setNormalArray(normals);
+	geo->setNormalBinding(Geometry::BIND_OVERALL);
+	//geo->setColorArray(colors);
+	//geo->setColorBinding(osg::Geometry::BIND_OVERALL);
+
+	return geo;
+}

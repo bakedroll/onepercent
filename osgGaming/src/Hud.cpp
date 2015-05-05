@@ -16,10 +16,10 @@ Hud::Hud()
 	_fpsEnabled(false)
 {
 	ref_ptr<StateSet> stateSet = new StateSet();
-	stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-	stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-	stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-	stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+	stateSet->setMode(GL_BLEND, StateAttribute::ON);
+	stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
+	stateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
+	stateSet->setRenderingHint(StateSet::TRANSPARENT_BIN);
 	stateSet->setRenderBinDetails(11, "RenderBin");
 
 

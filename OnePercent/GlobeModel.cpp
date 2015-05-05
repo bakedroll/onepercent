@@ -5,6 +5,9 @@
 #include <osg/Material>
 #include <osg/Point>
 #include <osg/Texture2D>
+#include <osg/MatrixTransform>
+#include <osg/Projection>
+#include <osg/BlendFunc>
 
 #include <osgDB/ReadFile>
 #include <osg/PositionAttitudeTransform>
@@ -18,32 +21,196 @@ using namespace osgGaming;
 using namespace std;
 
 const double GlobeModel::EARTH_RADIUS = 6.371;
-const int GlobeModel::SPHERE_STACKS = 48;
-const int GlobeModel::SPHERE_SLICES = 96;
+const double GlobeModel::ATMOSPHERE_HEIGHT = 0.06;
+const double GlobeModel::SCATTERING_DEPTH = 0.25;
+const double GlobeModel::SCATTERING_INTENSITY = 0.8;
+const Vec4f GlobeModel::ATMOSPHERE_COLOR = Vec4f(0.1981f, 0.4656f, 0.8625f, 0.75f);
+const int GlobeModel::SPHERE_STACKS = 96;
+const int GlobeModel::SPHERE_SLICES = 192;
+const double GlobeModel::SUN_DISTANCE = 149600.0;
+const double GlobeModel::SUN_RADIUS_PM2 = pow(695.8f, -2.0f);
 
 GlobeModel::GlobeModel()
 {
+	makeEarthModel();
+	makeCloudsModel();
+	makeAtmosphericScattering();
+}
+
+void GlobeModel::updateScatteringGeometry(ref_ptr<TransformableCameraManipulator> cameraManipulator)
+{
+	ref_ptr<Vec3Array> verts = static_cast<Vec3Array*>(_scatteringGeometry->getVertexArray());
+	ref_ptr<Vec3Array> normals = static_cast<Vec3Array*>(_scatteringGeometry->getNormalArray());
+
+	Vec3f v[4];
+	v[0] = Vec3f(-1.0f, -1.0f, -1.0f);
+	v[1] = Vec3f(-1.0f, 1.0f, -1.0f);
+	v[2] = Vec3f(1.0f, 1.0f, -1.0f);
+	v[3] = Vec3f(1.0f, - 1.0f, -1.0f);
+
+	Vec3f normal(0.0f, 0.0f, 1.0f);
+
+	Matrixd mat = Matrix::inverse(cameraManipulator->getViewMatrix() * cameraManipulator->getProjectionMatrix());
+
+	for (int i = 0; i < 4; i++)
+	{
+		Vec3f v_res = v[i] * mat;
+		verts->at(i).set(v_res);
+
+		Vec3f n = ((v[i] + normal) * mat) - v_res;
+		n.normalize();
+		normals->at(i).set(n);
+	}
+
+	normals->dirty();
+	verts->dirty();
+	_scatteringGeometry->dirtyBound();
+}
+
+void GlobeModel::updateLightDirection(osg::Vec3f direction)
+{
+	_scatteringLightDirUniform->setElement(0, direction);
+	Vec3f position = -direction * SUN_DISTANCE;
+
+	_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), SUN_RADIUS_PM2));
+}
+
+void GlobeModel::makeEarthModel()
+{
+	// planet geometry
 	ref_ptr<Node> earth = createPlanetGeode(0);
-	//ref_ptr<Node> atmosphere = createMesh(48, 96, 6385);
-
-	ref_ptr<StateSet> ss = createStateSet();
-	ss->setAttribute(createShader());
-
-	earth->setStateSet(ss);
 	generateTangentAndBinormal(earth);
 
+	// stateset
+	ref_ptr<StateSet> stateSet = new StateSet();
 
-	//ref_ptr<Material> material = new Material();
-	//material->setAlpha(Material::FRONT_AND_BACK, 0.8f);
+	ref_ptr<Material> material = new Material();
+	material->setAmbient(Material::FRONT_AND_BACK, Vec4f(0.1, 0.1, 0.1, 1.0));
+	material->setDiffuse(Material::FRONT_AND_BACK, Vec4f(1.0, 1.0, 1.0, 1.0));
+	material->setSpecular(Material::FRONT_AND_BACK, Vec4f(0.5, 0.5, 0.5, 1.0));
+	material->setShininess(Material::FRONT_AND_BACK, 16);
+	material->setEmission(Material::FRONT_AND_BACK, Vec4f(0.0, 0.0, 0.0, 1.0));
 
+	stateSet->setAttribute(material);
 
-	//atmosphere->getOrCreateStateSet()->setMode(GL_BLEND, StateAttribute::ON);
-	//atmosphere->getStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
-	//atmosphere->getStateSet()->setAttribute(material);
+	// shader
+	ref_ptr<Program> pgm = new Program();
 
+	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./shader/globe.vert", Shader::VERTEX);
+	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./shader/globe.frag", Shader::FRAGMENT);
+
+	pgm->addShader(vert_shader);
+	pgm->addShader(frag_shader);
+
+	pgm->addBindAttribLocation("tangent", 6);
+	pgm->addBindAttribLocation("binormal", 7);
+
+	stateSet->setAttribute(pgm, StateAttribute::ON);
+
+	earth->setStateSet(stateSet);
 
 	addChild(earth);
-	// addChild(atmosphere);
+}
+
+void GlobeModel::makeCloudsModel()
+{
+	ref_ptr<Geode> atmosphere_geode = new Geode();
+	ref_ptr<Geometry> atmosphere = createSphereSegmentMesh(SPHERE_STACKS, SPHERE_SLICES, EARTH_RADIUS + ATMOSPHERE_HEIGHT, 0, SPHERE_STACKS - 1, 0, SPHERE_SLICES - 1);
+
+	ref_ptr<Material> material = new Material();
+	material->setAlpha(Material::FRONT_AND_BACK, 0.8f);
+
+	atmosphere->getOrCreateStateSet()->setMode(GL_BLEND, StateAttribute::ON);
+	atmosphere->getStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
+	atmosphere->getStateSet()->setAttribute(material);
+
+	atmosphere_geode->addDrawable(atmosphere);
+
+	//addChild(atmosphere_geode);
+}
+
+void GlobeModel::makeAtmosphericScattering()
+{
+	// scattering stateset
+	ref_ptr<StateSet> stateSet = new StateSet();
+
+	stateSet->setMode(GL_BLEND, StateAttribute::ON);
+	stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
+	stateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
+	stateSet->setMode(GL_CULL_FACE, StateAttribute::OFF);
+	stateSet->setAttributeAndModes(new BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), StateAttribute::ON);
+
+	stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+	stateSet->setRenderBinDetails(10, "RenderBin");
+
+	// scattering geometry
+	ref_ptr<Geode> geode = new Geode();
+
+	_scatteringGeometry = new Geometry();
+	_scatteringGeometry->setUseVertexBufferObjects(true);
+
+	ref_ptr<Vec3Array> verts = new Vec3Array(4);
+	verts->setDataVariance(DYNAMIC);
+	_scatteringGeometry->setVertexArray(verts);
+
+	ref_ptr<Vec3Array> normals = new Vec3Array(4);
+	normals->setDataVariance(DYNAMIC);
+	_scatteringGeometry->setNormalArray(normals);
+	_scatteringGeometry->setNormalBinding(Geometry::BIND_PER_VERTEX);
+
+	ref_ptr<Vec4Array> colors = new Vec4Array();
+	colors->push_back(Vec4(-1.0f, -1.0f, 0.0f, 1.0f));
+	colors->push_back(Vec4(-1.0f, 1.0f, 0.0f, 1.0f));
+	colors->push_back(Vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	colors->push_back(Vec4(1.0f, -1.0f, 0.0f, 1.0f));
+	_scatteringGeometry->setColorArray(colors);
+	_scatteringGeometry->setColorBinding(Geometry::BIND_PER_VERTEX);
+
+	ref_ptr<DrawElementsUInt> indices = new DrawElementsUInt(PrimitiveSet::POLYGON, 0);
+	indices->push_back(3);
+	indices->push_back(2);
+	indices->push_back(1);
+	indices->push_back(0);
+	_scatteringGeometry->addPrimitiveSet(indices);
+
+	geode->addDrawable(_scatteringGeometry);
+
+	// atmospheric scattering shader
+	ref_ptr<Program> pgm = new Program();
+
+	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./shader/atmosphere.vert", Shader::VERTEX);
+	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./shader/atmosphere.frag", Shader::FRAGMENT);
+
+	pgm->addShader(vert_shader);
+	pgm->addShader(frag_shader);
+
+	double earth_rad = pow(EARTH_RADIUS * 0.9999, -2.0f);
+	double atmos_rad = pow(EARTH_RADIUS + ATMOSPHERE_HEIGHT, -2.0f);
+
+	stateSet->addUniform(new Uniform("planet_r", Vec3f(earth_rad, earth_rad, earth_rad)));
+	stateSet->addUniform(new Uniform("planet_R", Vec3f(atmos_rad, atmos_rad, atmos_rad)));
+	stateSet->addUniform(new Uniform("planet_h", (float)ATMOSPHERE_HEIGHT));
+	stateSet->addUniform(new Uniform("view_depth", (float)SCATTERING_DEPTH));
+
+	_scatteringLightDirUniform = new Uniform(Uniform::FLOAT_VEC3, "light_dir", 1);
+	ref_ptr<Uniform> light_col_uniform = new Uniform(Uniform::FLOAT_VEC3, "light_col", 1);
+	_scatteringLightPosrUniform = new Uniform(Uniform::FLOAT_VEC4, "light_posr", 1);
+
+	//light_col_uniform->setElement(0, Vec3f(1.0f, 1.0f, 1.0f));
+	light_col_uniform->setElement(0, Vec3f(0.0f, 0.0f, 0.0f));
+
+	stateSet->addUniform(new Uniform("lights", 1));
+	stateSet->addUniform(_scatteringLightDirUniform);
+	stateSet->addUniform(light_col_uniform);
+	stateSet->addUniform(_scatteringLightPosrUniform);
+
+	stateSet->addUniform(new Uniform("B0", ATMOSPHERE_COLOR * SCATTERING_INTENSITY));
+
+	stateSet->setAttribute(pgm, StateAttribute::ON);
+
+	geode->setStateSet(stateSet);
+
+	addChild(geode);
 }
 
 ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
@@ -107,38 +274,6 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 	}
 
 	return geode;
-}
-
-ref_ptr<StateSet> GlobeModel::createStateSet()
-{
-	ref_ptr<StateSet> stateSet = new StateSet();
-
-	ref_ptr<Material> material = new Material();
-	material->setAmbient(Material::FRONT_AND_BACK, Vec4f(0.1, 0.1, 0.1, 1.0));
-	material->setDiffuse(Material::FRONT_AND_BACK, Vec4f(1.0, 1.0, 1.0, 1.0));
-	material->setSpecular(Material::FRONT_AND_BACK, Vec4f(0.5, 0.5, 0.5, 1.0));
-	material->setShininess(Material::FRONT_AND_BACK, 16);
-	material->setEmission(Material::FRONT_AND_BACK, Vec4f(0.0, 0.0, 0.0, 1.0));
-
-	stateSet->setAttribute(material);
-
-	return stateSet;
-}
-
-ref_ptr<Program> GlobeModel::createShader()
-{
-	ref_ptr<Program> pgm = new Program();
-
-	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./shader/globe.vert", Shader::VERTEX);
-	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./shader/globe.frag", Shader::FRAGMENT);
-
-	pgm->addShader(vert_shader);
-	pgm->addShader(frag_shader);
-
-	pgm->addBindAttribLocation("tangent", 6);
-	pgm->addBindAttribLocation("binormal", 7);
-
-	return pgm;
 }
 
 void GlobeModel::loadTexture(ref_ptr<StateSet> stateSet, string filename, int tex_layer, string uniform_name)

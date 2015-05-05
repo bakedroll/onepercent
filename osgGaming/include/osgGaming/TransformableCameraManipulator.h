@@ -20,6 +20,10 @@ namespace osgGaming
 		osg::Vec3f getPosition();
 		osg::Quat getAttitude();
 
+		osg::Matrix getViewMatrix();
+		osg::Matrix getProjectionMatrix();
+		double getProjectionRatio();
+
 		void setPosition(osg::Vec3f position);
 		void setAttitude(osg::Quat rotation);
 
@@ -29,6 +33,8 @@ namespace osgGaming
 		void getPickRay(float x, float y, osg::Vec3f& point, osg::Vec3f& direction);
 
 	private:
+		void updateViewMatrix();
+
 		osg::Vec3f _position;
 		osg::Quat _attitude;
 		osg::Vec4 _clearColor;
@@ -40,7 +46,7 @@ namespace osgGaming
 		double _projectionFar;
 		double _projectionRatio;
 
-		bool _updateProjectionMatrix;
+		bool _updateViewMatrix;
 		bool _updateClearColor;
 
 		osg::Matrixd _transformation;

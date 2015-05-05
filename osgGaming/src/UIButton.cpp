@@ -23,7 +23,7 @@ UIButton::UIButton()
 	setPadding(6.0f);
 
 	ref_ptr<Geode> geode = new Geode();
-	ref_ptr<Geometry> geo = new Geometry();
+	ref_ptr<Geometry> geo = createQuadGeometry(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, XY, true); /*new Geometry();
 
 	ref_ptr<Vec3Array> verts = new Vec3Array();
 	verts->push_back(Vec3(0.0f, 0.0f, -1.0f));
@@ -51,6 +51,8 @@ UIButton::UIButton()
 	geo->setVertexArray(verts);
 	//geo->setColorArray(colors);
 	//geo->setColorBinding(osg::Geometry::BIND_OVERALL);
+
+	*/
 
 	geode->addDrawable(geo);
 
