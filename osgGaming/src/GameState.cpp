@@ -21,7 +21,7 @@ void GameState::setInitialized()
 	_initialized = true;
 }
 
-void GameState::initialize()
+void GameState::initialize(float resolutionWidth, float resolutionHeight)
 {
 
 }
@@ -82,6 +82,11 @@ void GameState::onDragEndEvent(int button, Vec2f origin, Vec2f position)
 }
 
 void GameState::onUIMClickedEvent(UserInteractionModel* model)
+{
+
+}
+
+void GameState::onResizeEvent(float width, float height)
 {
 
 }

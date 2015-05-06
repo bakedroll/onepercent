@@ -1,6 +1,5 @@
 #include <osgGaming/CameraAlignedQuad.h>
 
-#include <osg/BlendFunc>
 #include <osg/Geometry>
 
 using namespace osgGaming;
@@ -35,7 +34,6 @@ void CameraAlignedQuad::makeQuad(int renderBin)
 	stateSet->setMode(GL_BLEND, StateAttribute::ON);
 	stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
 	stateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
-	stateSet->setAttributeAndModes(new BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), StateAttribute::ON);
 
 	stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 	stateSet->setRenderBinDetails(renderBin, "RenderBin");

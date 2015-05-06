@@ -21,6 +21,9 @@ namespace osgGaming
 		void updateResolution();
 		void updateResolution(unsigned int width, unsigned int height);
 
+		float getResolutionWidth();
+		float getResolutionHeight();
+
 	private:
 		int mousePressed();
 

@@ -52,11 +52,17 @@ void GlobeOverviewWorld::setTimeOfYearAndDay(Vec2f timeOfYearAndDay)
 {
 	_timeOfYearAndDay = timeOfYearAndDay;
 
+	// printf("Year: %f, Day: %f\n", _timeOfYearAndDay.x(), _timeOfYearAndDay.y());
+
 	Matrix yearMat = getMatrixFromEuler(sin(_timeOfYearAndDay.x() * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);
 	Matrix dayMat = getMatrixFromEuler(0.0f, 0.0f, _timeOfYearAndDay.y() * 2.0f * C_PI);
 
-	Vec4f direction = dayMat * yearMat * Vec4(0.0f, 1.0f, 0.0f, 0.0f);
+	Matrix yearDayMat = dayMat * yearMat;
+
+	Vec4f direction = yearDayMat * Vec4(0.0f, -1.0f, 0.0f, 0.0f);
 
 	getLight(0)->setPosition(direction);
 	_globeModel->updateLightDirection(Vec3f(direction.x(), direction.y(), direction.z()));
+
+	//_backgroundModel->setAttitude(yearDayMat.getRotate());
 }

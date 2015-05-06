@@ -109,6 +109,7 @@ void GlobeModel::makeCloudsModel()
 	material->setEmission(Material::FRONT_AND_BACK, Vec4f(0.0, 0.0, 0.0, 1.0));
 
 	stateSet->setMode(GL_BLEND, StateAttribute::ON);
+	stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
 	stateSet->setRenderingHint(StateSet::TRANSPARENT_BIN);
 	stateSet->setRenderBinDetails(0, "RenderBin");
 	stateSet->setAttribute(material);
@@ -137,6 +138,7 @@ void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<TransformableCameraManip
 
 	// shader
 	ref_ptr<StateSet> stateSet = caq->getOrCreateStateSet();
+	stateSet->setAttributeAndModes(new BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), StateAttribute::ON);
 
 	ref_ptr<Program> pgm = new Program();
 

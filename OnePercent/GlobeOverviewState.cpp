@@ -31,9 +31,11 @@ GlobeOverviewState::GlobeOverviewState()
 	_cameraViewAngleAnimation = new Animation<Vec2f>(_cameraViewAngle, 0.5, CIRCLE_OUT);
 }
 
-void GlobeOverviewState::initialize()
+void GlobeOverviewState::initialize(float resolutionWidth, float resolutionHeight)
 {
 	_globeWorld = static_cast<GlobeOverviewWorld*>(getWorld().get());
+
+	_globeWorld->getBackgroundModel()->updateResolutionHeight(resolutionHeight);
 }
 
 StateEvent* GlobeOverviewState::update()
@@ -47,7 +49,7 @@ StateEvent* GlobeOverviewState::update()
 
 	getWorld()->getCameraManipulator()->setPosition(position);
 
-	_globeWorld->getBackgroundModel()->setPosition(position);
+	_globeWorld->getBackgroundModel()->getTransform()->setPosition(position);
 
 	// update camera attitude
 	Matrix latLongMat = Matrix::rotate(getQuatFromEuler(-latLong.x(), 0.0f, fmodf(latLong.y() + C_PI, C_PI * 2.0f)));
@@ -58,12 +60,15 @@ StateEvent* GlobeOverviewState::update()
 	getWorld()->getCameraManipulator()->setAttitude(mat.getRotate());
 
 	// update light direction
-	Vec2f yearDay = _globeWorld->getTimeOfYearAndDay();
+	Vec2f yearDay; // = _globeWorld->getTimeOfYearAndDay();
 
-	yearDay.x() = fmodf(yearDay.x() + getFrameTime() * _TIME_SPEED / _DAYS_IN_YEAR, 1.0);
+	yearDay.x() = fmodf(getSimulationTime() * 0.1f, 1.0);
+
+	//yearDay.x() = fmodf(yearDay.x() + getFrameTime() * _TIME_SPEED / _DAYS_IN_YEAR, 1.0);
 	yearDay.y() = fmodf(yearDay.y() + getFrameTime() * _TIME_SPEED, 1.0);
 
-	_globeWorld->setTimeOfYearAndDay(yearDay);
+	//_globeWorld->setTimeOfYearAndDay(yearDay);
+	_globeWorld->setTimeOfYearAndDay(Vec2f(yearDay.x(), 0.0f));
 
 	_globeWorld->getGlobeModel()->updateClouds(getSimulationTime());
 
