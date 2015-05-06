@@ -3,6 +3,8 @@
 #include "GlobeOverviewWorld.h"
 
 #include <osg/PositionAttitudeTransform>
+#include <osg/StateSet>
+#include <osg/Program>
 #include <osgGaming/Helper.h>
 #include <osgGaming/UIStackPanel.h>
 #include <osgGaming/UIGrid.h>
@@ -10,6 +12,8 @@
 #include <osgGaming/UIButton.h>
 
 #include <osgGaming/PackageResourceLoader.h>
+#include <osgGaming/ResourceManager.h>
+#include <osgGaming/TextureFactory.h>
 
 using namespace onep;
 using namespace osg;
@@ -57,10 +61,38 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	world->getHud()->setFpsEnabled(true);
 
 
-	//ref_ptr<CameraAlignedQuad> caq = new CameraAlignedQuad(-1);
+	ref_ptr<CameraAlignedQuad> caq = new CameraAlignedQuad(-1);
 	
-	//world->getRootNode()->addChild(caq);
-	//world->getCameraManipulator()->addCameraAlignedQuad(caq);
+	world->getRootNode()->addChild(caq);
+	world->getCameraManipulator()->addCameraAlignedQuad(caq);
+
+	// shader
+	ref_ptr<StateSet> stateSet = caq->getOrCreateStateSet();
+
+	ref_ptr<Program> pgm = new Program();
+
+	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/stars.vert", Shader::VERTEX);
+	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/stars.frag", Shader::FRAGMENT);
+
+	pgm->addShader(vert_shader);
+	pgm->addShader(frag_shader);
+
+	stateSet->setAttribute(pgm, StateAttribute::ON);
+
+	TextureFactory::make()
+		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/stars/8k/0x0.png"))
+		->texLayer(0)
+		->uniform(stateSet, "colormap_0x0")
+		->assign(stateSet)
+		->build();
+
+	TextureFactory::make()
+		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/stars/8k/1x0.png"))
+		->texLayer(1)
+		->uniform(stateSet, "colormap_1x0")
+		->assign(stateSet)
+		->build();
+
 
 
 	// ##################

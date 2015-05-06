@@ -31,26 +31,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\globe.frag">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="shader\globe.vert">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="shader\atmosphere.frag">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="shader\atmosphere.vert">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="shader\clouds.frag">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="shader\clouds.vert">
-      <Filter>shader</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="GlobeModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,5 +43,31 @@
     <ClInclude Include="LoadingGlobeOverviewState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GameData\shaders\atmosphere.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="GameData\shaders\atmosphere.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="GameData\shaders\clouds.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="GameData\shaders\clouds.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="GameData\shaders\globe.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="GameData\shaders\globe.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="GameData\shaders\stars.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="GameData\shaders\stars.vert">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -99,6 +99,9 @@
     <ClCompile Include="src\CameraAlignedQuad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\TextureFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h">
@@ -186,6 +189,9 @@
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
     <ClInclude Include="include\osgGaming\CameraAlignedQuad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\TextureFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,6 +15,7 @@
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/Helper.h>
 #include <osgGaming/CameraAlignedQuad.h>
+#include <osgGaming/TextureFactory.h>
 
 using namespace onep;
 using namespace osg;
@@ -224,10 +225,33 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 			sprintf(specreliefcitiesboundariesmap_file, "./GameData/textures/earth/specular_relief_cities/%s/%dx%d.png", resolutionLevel1, x, y);
 			sprintf(normalmap_file, "./GameData/textures/earth/normal/%s/%dx%d.png", resolutionLevel1, x, y);
 
-			loadTexture(stateSet, colormap_file, 0, "colormap");
-			loadTexture(stateSet, nightmap_file, 1, "nightmap");
-			loadTexture(stateSet, specreliefcitiesboundariesmap_file, 2, "specreliefcitiesboundariesmap");
-			loadTexture(stateSet, normalmap_file, 3, "normalmap");
+			TextureFactory::make()
+				->image(ResourceManager::getInstance()->loadImage(colormap_file))
+				->texLayer(0)
+				->uniform(stateSet, "colormap")
+				->assign(stateSet)
+				->build();
+
+			TextureFactory::make()
+				->image(ResourceManager::getInstance()->loadImage(nightmap_file))
+				->texLayer(1)
+				->uniform(stateSet, "nightmap")
+				->assign(stateSet)
+				->build();
+
+			TextureFactory::make()
+				->image(ResourceManager::getInstance()->loadImage(specreliefcitiesboundariesmap_file))
+				->texLayer(2)
+				->uniform(stateSet, "specreliefcitiesboundariesmap")
+				->assign(stateSet)
+				->build();
+
+			TextureFactory::make()
+				->image(ResourceManager::getInstance()->loadImage(normalmap_file))
+				->texLayer(3)
+				->uniform(stateSet, "normalmap")
+				->assign(stateSet)
+				->build();
 
 			geode->addDrawable(geo);
 		}
@@ -261,38 +285,19 @@ ref_ptr<Geode> GlobeModel::createCloudsGeode()
 
 			char colormap_file[128];
 			sprintf(colormap_file, "./GameData/textures/earth/clouds/8k/%dx%d.png", x, y);
-			loadTexture(stateSet, colormap_file, 0, "colormap");
+
+			TextureFactory::make()
+				->image(ResourceManager::getInstance()->loadImage(colormap_file))
+				->texLayer(0)
+				->uniform(stateSet, "colormap")
+				->assign(stateSet)
+				->build();
 
 			geode->addDrawable(geo);
 		}
 	}
 
 	return geode;
-}
-
-void GlobeModel::loadTexture(ref_ptr<StateSet> stateSet, string filename, int tex_layer, string uniform_name)
-{
-	ref_ptr<Texture2D> texture = new Texture2D();
-	texture->setDataVariance(osg::Object::DYNAMIC);
-	texture->setWrap(Texture::WRAP_S, Texture::CLAMP_TO_EDGE);
-	texture->setWrap(Texture::WRAP_T, Texture::CLAMP_TO_EDGE);
-	texture->setFilter(Texture::MIN_FILTER, Texture::LINEAR_MIPMAP_LINEAR);
-	texture->setFilter(Texture::MAG_FILTER, Texture::LINEAR);
-	texture->setMaxAnisotropy(8);
-
-	ref_ptr<Image> image = ResourceManager::getInstance()->loadImage(filename);
-	if (!image.valid())
-	{
-		return;
-	}
-
-	texture->setImage(image);
-
-	ref_ptr<Uniform> uniform = new Uniform(Uniform::SAMPLER_2D, uniform_name);
-	uniform->set(tex_layer);
-
-	stateSet->setTextureAttributeAndModes(tex_layer, texture, StateAttribute::ON);
-	stateSet->addUniform(uniform);
 }
 
 ref_ptr<Geometry> GlobeModel::createSphereSegmentMesh(int stacks, int slices, double radius, int firstStack, int lastStack, int firstSlice, int lastSlice)
