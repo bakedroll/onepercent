@@ -1,5 +1,6 @@
 #include "GlobeOverviewWorld.h"
 #include "GlobeModel.h"
+#include "BackgroundModel.h"
 
 #include <osgGaming/Helper.h>
 
@@ -22,9 +23,14 @@ GlobeOverviewWorld::GlobeOverviewWorld()
 	light->setAmbient(Vec4(0.0, 0.0, 0.0, 1.0));
 }
 
-osg::ref_ptr<GlobeModel> GlobeOverviewWorld::getGlobeModel()
+ref_ptr<GlobeModel> GlobeOverviewWorld::getGlobeModel()
 {
 	return _globeModel;
+}
+
+ref_ptr<BackgroundModel> GlobeOverviewWorld::getBackgroundModel()
+{
+	return _backgroundModel;
 }
 
 Vec2f GlobeOverviewWorld::getTimeOfYearAndDay()
@@ -35,6 +41,11 @@ Vec2f GlobeOverviewWorld::getTimeOfYearAndDay()
 void GlobeOverviewWorld::setGlobeModel(osg::ref_ptr<GlobeModel> globeModel)
 {
 	_globeModel = globeModel;
+}
+
+void GlobeOverviewWorld::setBackgroundModel(ref_ptr<BackgroundModel> backgroundModel)
+{
+	_backgroundModel = backgroundModel;
 }
 
 void GlobeOverviewWorld::setTimeOfYearAndDay(Vec2f timeOfYearAndDay)

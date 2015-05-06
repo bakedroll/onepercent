@@ -1,6 +1,7 @@
 #include "GlobeOverviewState.h"
 #include "GlobeOverviewWorld.h"
 #include "GlobeModel.h"
+#include "BackgroundModel.h"
 
 #include <osgGaming/Helper.h>
 
@@ -41,9 +42,12 @@ StateEvent* GlobeOverviewState::update()
 	Vec2f latLong = _cameraLatLongAnimation->getValue(getSimulationTime());
 	Vec2f viewAngle = _cameraViewAngleAnimation->getValue(getSimulationTime());
 
-	getWorld()->getCameraManipulator()->setPosition(
-		getVec3FromEuler(latLong.x(), 0.0, latLong.y())
-			* _cameraDistanceAnimation->getValue(getSimulationTime()));
+	Vec3f position = getVec3FromEuler(latLong.x(), 0.0, latLong.y())
+		* _cameraDistanceAnimation->getValue(getSimulationTime());
+
+	getWorld()->getCameraManipulator()->setPosition(position);
+
+	_globeWorld->getBackgroundModel()->setPosition(position);
 
 	// update camera attitude
 	Matrix latLongMat = Matrix::rotate(getQuatFromEuler(-latLong.x(), 0.0f, fmodf(latLong.y() + C_PI, C_PI * 2.0f)));

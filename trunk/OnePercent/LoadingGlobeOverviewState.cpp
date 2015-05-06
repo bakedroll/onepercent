@@ -1,6 +1,7 @@
 #include "LoadingGlobeOverviewState.h"
 #include "GlobeModel.h"
 #include "GlobeOverviewWorld.h"
+#include "BackgroundModel.h"
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/StateSet>
@@ -56,12 +57,15 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 
 	ref_ptr<GlobeModel> globe = new GlobeModel(world->getCameraManipulator());
 	globeWorld->setGlobeModel(globe);
-
 	world->getRootNode()->addChild(globe);
+
+	ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel("./GameData/data/stars.bin");
+	globeWorld->setBackgroundModel(backgroundModel);
+	world->getRootNode()->addChild(backgroundModel);
+
 	world->getHud()->setFpsEnabled(true);
 
-
-	ref_ptr<CameraAlignedQuad> caq = new CameraAlignedQuad(-1);
+	/*ref_ptr<CameraAlignedQuad> caq = new CameraAlignedQuad(-1);
 	
 	world->getRootNode()->addChild(caq);
 	world->getCameraManipulator()->addCameraAlignedQuad(caq);
@@ -91,7 +95,7 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 		->texLayer(1)
 		->uniform(stateSet, "colormap_1x0")
 		->assign(stateSet)
-		->build();
+		->build();*/
 
 
 
