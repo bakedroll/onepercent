@@ -78,18 +78,20 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\atmosphere.frag" />
-    <None Include="shader\atmosphere.vert" />
-    <None Include="shader\clouds.frag" />
-    <None Include="shader\clouds.vert" />
-    <None Include="shader\globe.frag" />
-    <None Include="shader\globe.vert" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="GlobeModel.h" />
     <ClInclude Include="GlobeOverviewState.h" />
     <ClInclude Include="GlobeOverviewWorld.h" />
     <ClInclude Include="LoadingGlobeOverviewState.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GameData\shaders\atmosphere.frag" />
+    <None Include="GameData\shaders\atmosphere.vert" />
+    <None Include="GameData\shaders\clouds.frag" />
+    <None Include="GameData\shaders\clouds.vert" />
+    <None Include="GameData\shaders\globe.frag" />
+    <None Include="GameData\shaders\globe.vert" />
+    <None Include="GameData\shaders\stars.frag" />
+    <None Include="GameData\shaders\stars.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
