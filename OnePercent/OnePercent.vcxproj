@@ -71,6 +71,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BackgroundModel.cpp" />
     <ClCompile Include="GlobeModel.cpp" />
     <ClCompile Include="GlobeOverviewState.cpp" />
     <ClCompile Include="GlobeOverviewWorld.cpp" />
@@ -78,6 +79,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BackgroundModel.h" />
     <ClInclude Include="GlobeModel.h" />
     <ClInclude Include="GlobeOverviewState.h" />
     <ClInclude Include="GlobeOverviewWorld.h" />

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 
 namespace ImageHelper
 {
@@ -98,6 +101,9 @@ namespace ImageHelper
                     case 1:
                         SubdivideImage(args[1], Int32.Parse(args[2]), Int32.Parse(args[3]), args[4]);
                         break;
+                    case 2:
+                        ConvertStarsMap(args[1], args[2]);
+                        break;
                 }
             }
             catch (Exception e)
@@ -107,6 +113,29 @@ namespace ImageHelper
             }
 
             Exit();
+        }
+
+        private static void ConvertStarsMap(string catalogFile, string binFilename)
+        {
+            var catalogLines = File.ReadAllLines(catalogFile);
+            var binFile = File.Create(binFilename);
+            using (var writer = new BinaryWriter(binFile))
+            {
+
+                writer.Write(catalogLines.Length);
+
+                foreach (var cLine in catalogLines)
+                {
+                    var values = cLine.Split(' ').Where(x => !x.Equals(string.Empty)).ToArray();
+
+                    writer.Write(float.Parse(values[3], CultureInfo.InvariantCulture));
+                    writer.Write(float.Parse(values[4], CultureInfo.InvariantCulture));
+                    writer.Write(float.Parse(values[5], CultureInfo.InvariantCulture));
+                    writer.Write(float.Parse(values[2], CultureInfo.InvariantCulture));
+                }
+
+            }
+            binFile.Close();
         }
     }
 }

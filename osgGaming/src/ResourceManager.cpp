@@ -1,6 +1,8 @@
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/TextResource.h>
 #include <osgGaming/Helper.h>
+#include <osgGaming/BinaryResource.h>
+#include <osgGaming/GameException.h>
 
 #include <osgDB/ReadFile>
 #include <osgDB/FileNameUtils>
@@ -24,6 +26,11 @@ ref_ptr<ResourceManager> ResourceManager::getInstance()
 string ResourceManager::loadText(string resourceKey)
 {
 	return static_cast<TextResource*>(loadObject(resourceKey, TEXT).get())->text;
+}
+
+char* ResourceManager::loadBinary(std::string resourceKey)
+{
+	return static_cast<BinaryResource*>(loadObject(resourceKey, BINARY).get())->getBytes();
 }
 
 ref_ptr<Image> ResourceManager::loadImage(string resourceKey)
@@ -61,6 +68,22 @@ void ResourceManager::setResourceLoader(ref_ptr<ResourceLoader> loader)
 	_resourceLoader = loader;
 }
 
+void ResourceManager::clearCacheResource(string resourceKey)
+{
+	ResourceDictionary::iterator it = _cache.find(lowerString(resourceKey));
+	if (it == _cache.end())
+	{
+		throw GameException("Clear cache resource: resource key '" + resourceKey + "' not found");
+	}
+
+	_cache.erase(it);
+}
+
+void ResourceManager::clearCache()
+{
+	_cache.clear();
+}
+
 ResourceManager::ResourceManager()
 	: Referenced(),
 	  _defaultFontResourceKey("")
@@ -78,6 +101,14 @@ ref_ptr<ResourceLoader> ResourceManager::resourceLoader()
 	}
 
 	return _resourceLoader;
+}
+
+char* ResourceManager::loadBytesFromStream(std::ifstream& stream, long long length)
+{
+	char* buffer = new char[length];
+	stream.read(buffer, length);
+
+	return buffer;
 }
 
 string ResourceManager::loadTextFromStream(std::ifstream& stream, long long length)
@@ -118,6 +149,13 @@ ref_ptr<Object> ResourceManager::loadObject(string resourceKey, ResourceType typ
 		textRes->text = loadTextFromStream(stream, length);
 
 		obj = textRes;
+	}
+	else if (type == BINARY)
+	{
+		ref_ptr<BinaryResource> binRes = new BinaryResource();
+		binRes->setBytes(loadBytesFromStream(stream, length));
+
+		obj = binRes;
 	}
 	else if (type == SHADER)
 	{
