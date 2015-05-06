@@ -33,7 +33,7 @@ namespace osgGaming
 		bool isInitialized();
 		void setInitialized();
 
-		virtual void initialize();
+		virtual void initialize(float resolutionWidth, float resolutionHeight);
 		virtual StateEvent* update();
 
 		virtual bool isLoadingState();
@@ -53,6 +53,8 @@ namespace osgGaming
 		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position);
 
 		virtual void onUIMClickedEvent(UserInteractionModel* model);
+
+		virtual void onResizeEvent(float width, float height);
 
 		double getSimulationTime();
 		double getFrameTime();

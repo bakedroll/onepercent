@@ -28,7 +28,7 @@ LoadingGlobeOverviewState::LoadingGlobeOverviewState(ref_ptr<GameState> nextStat
 
 }
 
-void LoadingGlobeOverviewState::initialize()
+void LoadingGlobeOverviewState::initialize(float resolutionWidth, float resolutionHeight)
 {
 	_loadingText = new UIText();
 	_loadingText->setText("Loading");
@@ -61,7 +61,7 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 
 	ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel("./GameData/data/stars.bin");
 	globeWorld->setBackgroundModel(backgroundModel);
-	world->getRootNode()->addChild(backgroundModel);
+	world->getRootNode()->addChild(backgroundModel->getTransform());
 
 	world->getHud()->setFpsEnabled(true);
 

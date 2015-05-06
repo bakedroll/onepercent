@@ -53,7 +53,7 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 			state->setWorld(state->isLoadingState() ? _worldLoading : _world);
 			state->setGameSettings(_gameSettings);
 
-			state->initialize();
+			state->initialize(_inputManager->getResolutionWidth(), _inputManager->getResolutionHeight());
 			state->setInitialized();
 
 			if (state->isLoadingState())

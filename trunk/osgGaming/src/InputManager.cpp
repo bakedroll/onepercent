@@ -86,9 +86,12 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 			int newWidth = _graphicsWindow->getTraits()->width;
 			int newHeight = _graphicsWindow->getTraits()->height;
 
+			float w = ea.getWindowWidth();
+
 			if (newWidth != _resolutionWidth || newHeight != _resolutionHeight)
 			{
 				updateResolution(newWidth, newHeight);
+				_currentState->onResizeEvent(newWidth, newHeight);
 			}
 		}
 
@@ -169,6 +172,16 @@ void InputManager::updateResolution(unsigned int width, unsigned int height)
 	_resolutionHeight = height;
 
 	updateResolution();
+}
+
+float InputManager::getResolutionWidth()
+{
+	return _resolutionWidth;
+}
+
+float InputManager::getResolutionHeight()
+{
+	return _resolutionHeight;
 }
 
 int InputManager::mousePressed()

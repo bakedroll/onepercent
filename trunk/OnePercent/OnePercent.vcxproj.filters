@@ -69,10 +69,10 @@
     <None Include="GameData\shaders\globe.vert">
       <Filter>shader</Filter>
     </None>
-    <None Include="GameData\shaders\stars.frag">
+    <None Include="GameData\shaders\star.frag">
       <Filter>shader</Filter>
     </None>
-    <None Include="GameData\shaders\stars.vert">
+    <None Include="GameData\shaders\star.vert">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>
