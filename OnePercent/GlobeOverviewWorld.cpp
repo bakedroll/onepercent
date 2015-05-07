@@ -48,21 +48,40 @@ void GlobeOverviewWorld::setBackgroundModel(ref_ptr<BackgroundModel> backgroundM
 	_backgroundModel = backgroundModel;
 }
 
-void GlobeOverviewWorld::setTimeOfYearAndDay(Vec2f timeOfYearAndDay)
+Vec3f GlobeOverviewWorld::setTimeOfYearAndDay(Vec2f timeOfYearAndDay)
 {
 	_timeOfYearAndDay = timeOfYearAndDay;
 
-	// printf("Year: %f, Day: %f\n", _timeOfYearAndDay.x(), _timeOfYearAndDay.y());
-
-	Matrix yearMat = getMatrixFromEuler(sin(_timeOfYearAndDay.x() * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);
+	Matrix yearMat = getMatrixFromEuler(0.0f, 0.0f, -_timeOfYearAndDay.x() * 2.0f * C_PI) *
+		getMatrixFromEuler(-sin(_timeOfYearAndDay.x() * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);
 	Matrix dayMat = getMatrixFromEuler(0.0f, 0.0f, _timeOfYearAndDay.y() * 2.0f * C_PI);
 
 	Matrix yearDayMat = dayMat * yearMat;
 
-	Vec4f direction = yearDayMat * Vec4(0.0f, -1.0f, 0.0f, 0.0f);
+	Vec3f direction = yearDayMat * Vec3f(0.0f, 1.0f, 0.0f);
 
-	getLight(0)->setPosition(direction);
-	_globeModel->updateLightDirection(Vec3f(direction.x(), direction.y(), direction.z()));
+	getLight(0)->setPosition(Vec4f(direction, 0.0f));
+	_globeModel->updateLightDirection(direction);
 
-	//_backgroundModel->setAttitude(yearDayMat.getRotate());
+	_backgroundModel->getTransform()->setAttitude(Matrix::inverse(dayMat).getRotate());
+	_backgroundModel->getSunTransform()->setAttitude(Matrix::inverse(yearMat).getRotate());
+
+	return direction;
+}
+
+void GlobeOverviewWorld::updateSun(Vec3f sunDirection)
+{
+	Vec3f look = getCameraManipulator()->getLookDirection();
+	// look to sun
+	if (look * sunDirection < 0.0f)
+	{
+		float range = 0.2f;
+
+		float dist = pointLineDistance(getCameraManipulator()->getPosition(), sunDirection, Vec3f(0.0f, 0.0f, 0.0f));
+		float scale = clamp<float>(dist - GlobeModel::EARTH_RADIUS, 0.0f, range);
+		scale /= range;
+		scale *= 1.5f;
+
+		_backgroundModel->getSunGlowTransform()->setScale(Vec3f(scale, scale, scale));
+	}
 }

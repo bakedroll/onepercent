@@ -31,6 +31,8 @@ namespace osgGaming
 		osg::Matrix getProjectionMatrix();
 		double getProjectionRatio();
 
+		osg::Vec3f getLookDirection();
+
 		void setPosition(osg::Vec3f position);
 		void setAttitude(osg::Quat rotation);
 
@@ -47,7 +49,8 @@ namespace osgGaming
 
 		osg::Vec3f _position;
 		osg::Quat _attitude;
-		osg::Vec4 _clearColor;
+		osg::Vec4f _clearColor;
+		osg::Vec3f _look;
 
 		osg::Vec2f _resolution;
 

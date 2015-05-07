@@ -18,7 +18,7 @@ const float GlobeOverviewState::_CAMERA_ZOOM_SPEED_FACTOR = 3.0f;
 const float GlobeOverviewState::_CAMERA_SCROLL_SPEED = 0.003f;
 const float GlobeOverviewState::_CAMERA_ROTATION_SPEED = 0.003;
 const float GlobeOverviewState::_DAYS_IN_YEAR = 356.0f;
-const float GlobeOverviewState::_TIME_SPEED = 0.02f;
+const float GlobeOverviewState::_TIME_SPEED = 0.004f;
 
 GlobeOverviewState::GlobeOverviewState()
 	: GameState(),
@@ -59,17 +59,18 @@ StateEvent* GlobeOverviewState::update()
 
 	getWorld()->getCameraManipulator()->setAttitude(mat.getRotate());
 
-	// update light direction
-	Vec2f yearDay; // = _globeWorld->getTimeOfYearAndDay();
+	// update visual time of year and day
+	Vec2f yearDay;
 
-	yearDay.x() = fmodf(getSimulationTime() * 0.1f, 1.0);
+	yearDay.x() = fmodf(getSimulationTime() * _TIME_SPEED / _DAYS_IN_YEAR, 1.0);
+	yearDay.y() = fmodf(getSimulationTime() * _TIME_SPEED, 1.0);
 
-	//yearDay.x() = fmodf(yearDay.x() + getFrameTime() * _TIME_SPEED / _DAYS_IN_YEAR, 1.0);
-	yearDay.y() = fmodf(yearDay.y() + getFrameTime() * _TIME_SPEED, 1.0);
+	Vec3f lightDirection = _globeWorld->setTimeOfYearAndDay(yearDay);
 
-	//_globeWorld->setTimeOfYearAndDay(yearDay);
-	_globeWorld->setTimeOfYearAndDay(Vec2f(yearDay.x(), 0.0f));
+	// update sun
+	_globeWorld->updateSun(lightDirection);
 
+	// update clouds
 	_globeWorld->getGlobeModel()->updateClouds(getSimulationTime());
 
 	return stateEvent_default();
