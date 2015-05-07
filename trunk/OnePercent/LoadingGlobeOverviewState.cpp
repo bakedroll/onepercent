@@ -59,7 +59,7 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	globeWorld->setGlobeModel(globe);
 	world->getRootNode()->addChild(globe);
 
-	ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel("./GameData/data/stars.bin");
+	ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel();
 	globeWorld->setBackgroundModel(backgroundModel);
 	world->getRootNode()->addChild(backgroundModel->getTransform());
 

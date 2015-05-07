@@ -36,6 +36,7 @@ namespace osgGaming
 	bool pointInRect(osg::Vec2f point, osg::Vec2f leftbottom, osg::Vec2f righttop);
 
 	bool sphereLineIntersection(osg::Vec3f sphereCenter, float sphereRadius, osg::Vec3f lineOrigin, osg::Vec3f lineDirectionNornalized, osg::Vec3f& result);
+	float pointLineDistance(osg::Vec3f origin, osg::Vec3 direction, osg::Vec3f point);
 
 	void generateTangentAndBinormal(osg::Node* node);
 

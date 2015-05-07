@@ -18,7 +18,9 @@ namespace onep
 		
 		void setGlobeModel(osg::ref_ptr<GlobeModel> globeModel);
 		void setBackgroundModel(osg::ref_ptr<BackgroundModel> backgroundModel);
-		void setTimeOfYearAndDay(osg::Vec2f timeOfYearAndDay);
+		osg::Vec3f setTimeOfYearAndDay(osg::Vec2f timeOfYearAndDay);
+
+		void updateSun(osg::Vec3f sunDirection);
 
 	private:
 		osg::Vec2f _timeOfYearAndDay;

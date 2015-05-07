@@ -127,6 +127,8 @@ void TransformableCameraManipulator::updateViewMatrix()
 	transformVector(&center, &_transformation);
 	transformVector(&up, &_transformation);
 
+	_look = center;
+
 	up -= _position;
 
 	_viewMatrix = Matrix::lookAt(eye, center, up);
@@ -195,6 +197,11 @@ Matrix TransformableCameraManipulator::getProjectionMatrix()
 double TransformableCameraManipulator::getProjectionRatio()
 {
 	return _projectionRatio;
+}
+
+Vec3f TransformableCameraManipulator::getLookDirection()
+{
+	return _look;
 }
 
 void TransformableCameraManipulator::setPosition(Vec3f position)

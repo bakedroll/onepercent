@@ -6,8 +6,11 @@
 #include <osg/PointSprite>
 #include <osg/BlendFunc>
 #include <osg/BlendEquation>
+#include <osg/Billboard>
 
 #include <osgGaming/ResourceManager.h>
+#include <osgGaming/TextureFactory.h>
+#include <osgGaming/Helper.h>
 
 #include <fstream>
 
@@ -17,10 +20,11 @@ using namespace osg;
 using namespace std;
 using namespace osgGA;
 
-BackgroundModel::BackgroundModel(string starsFilename)
+BackgroundModel::BackgroundModel()
 	: osgGA::GUIEventHandler()
 {
-	makeStars(starsFilename);
+	makeStars();
+	makeSun();
 
 	_transform->addEventCallback(this);
 }
@@ -28,6 +32,16 @@ BackgroundModel::BackgroundModel(string starsFilename)
 ref_ptr<PositionAttitudeTransform> BackgroundModel::getTransform()
 {
 	return _transform;
+}
+
+ref_ptr<PositionAttitudeTransform> BackgroundModel::getSunTransform()
+{
+	return _sunTransform;
+}
+
+ref_ptr<PositionAttitudeTransform> BackgroundModel::getSunGlowTransform()
+{
+	return _sunGlowTransform;
 }
 
 void BackgroundModel::updateResolutionHeight(float height)
@@ -49,14 +63,17 @@ bool BackgroundModel::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	return false;
 }
 
-void BackgroundModel::makeStars(string starsFilename)
+void BackgroundModel::makeStars()
 {
+	string starsFilename = "./GameData/data/stars.bin";
+
 	char* bytes = ResourceManager::getInstance()->loadBinary(starsFilename);
 
 	_transform = new PositionAttitudeTransform();
 
 	ref_ptr<Geode> geode = new Geode();
 	ref_ptr<Geometry> geo = new Geometry();
+	ref_ptr<StateSet> globStateSet = new StateSet();
 	ref_ptr<StateSet> stateSet = new StateSet();
 
 	ref_ptr<Vec3Array> verts = new Vec3Array();
@@ -83,7 +100,7 @@ void BackgroundModel::makeStars(string starsFilename)
 		memcpy(&size, &bytes[position], sizeof(float));
 		position += sizeof(float);
 
-		verts->push_back(Vec3f(z, x, y) * 10.0f);
+		verts->push_back(Vec3f(x, -z, -y) * 10.0f);
 		colors->push_back(Vec4f(size / 8.0f, 0.0f, 0.0f, 1.0f));
 	}
 
@@ -93,12 +110,12 @@ void BackgroundModel::makeStars(string starsFilename)
 
 	stateSet->setAttribute(_point);
 	stateSet->setTextureAttributeAndModes(0, pointSprite, StateAttribute::ON);
-	stateSet->setAttributeAndModes(blendEquation, StateAttribute::ON);
-	stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
-	stateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
-	stateSet->setMode(GL_BLEND, StateAttribute::ON);
-	stateSet->setAttributeAndModes(new BlendFunc(GL_ONE, GL_ONE), StateAttribute::ON);
-	stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+
+	globStateSet->setAttributeAndModes(blendEquation, StateAttribute::ON);
+	globStateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
+	globStateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
+	globStateSet->setMode(GL_BLEND, StateAttribute::ON);
+	globStateSet->setAttributeAndModes(new BlendFunc(GL_ONE, GL_ONE), StateAttribute::ON);
 	stateSet->setRenderBinDetails(-10, "RenderBin");
 
 	// shader
@@ -113,6 +130,7 @@ void BackgroundModel::makeStars(string starsFilename)
 	stateSet->setAttribute(pgm, StateAttribute::ON);
 	// ###
 
+	_transform->setStateSet(globStateSet);
 	geode->setStateSet(stateSet);
 
 	geo->setVertexArray(verts);
@@ -124,4 +142,38 @@ void BackgroundModel::makeStars(string starsFilename)
 	_transform->addChild(geode);
 
 	ResourceManager::getInstance()->clearCacheResource(starsFilename);
+}
+
+void BackgroundModel::makeSun()
+{
+	ref_ptr<Billboard> sunBillboard = new Billboard();
+	_sunTransform = new PositionAttitudeTransform();
+	_sunGlowTransform = new PositionAttitudeTransform();
+	ref_ptr<PositionAttitudeTransform> sunPosTransform = new PositionAttitudeTransform();
+	ref_ptr<StateSet> stateSet = new StateSet();
+
+	sunBillboard->setMode(Billboard::Mode::POINT_ROT_EYE);
+	sunBillboard->setNormal(Vec3(0.0f, -1.0f, 0.0f));
+
+	ref_ptr<Geometry> geo = createQuadGeometry(-1.0f, 1.0f, -1.0f, 1.0f);
+
+	sunPosTransform->setPosition(Vec3f(0.0f, 9.0f, 0.0f));
+	sunPosTransform->setScale(Vec3f(0.3f, 0.3f, 0.3f));
+
+	TextureFactory::make()
+		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/sun.png"))
+		->assign(stateSet)
+		->build();
+
+	sunBillboard->getOrCreateStateSet()->setRenderBinDetails(-10, "RenderBin");
+	_sunGlowTransform->getOrCreateStateSet()->setRenderBinDetails(10, "RenderBin");
+
+	sunPosTransform->setStateSet(stateSet);
+
+	_transform->addChild(_sunTransform);
+	_sunTransform->addChild(sunPosTransform);
+	sunPosTransform->addChild(sunBillboard);
+	sunPosTransform->addChild(_sunGlowTransform);
+	_sunGlowTransform->addChild(sunBillboard);
+	sunBillboard->addDrawable(geo);
 }

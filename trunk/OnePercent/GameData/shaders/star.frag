@@ -27,7 +27,7 @@ void main (void)
 	vec3 color_vh = vec3(0.4, 0.6 * size, 0.6 * size) * size;
 
 	vec3 result = color_c * distance_c + color_vh * distance_h + color_vh * distance_v;
-	result *= 0.8;
+	result *= 0.6;
 
 	gl_FragColor = vec4(result, 1.0);
 }
