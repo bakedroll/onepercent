@@ -52,6 +52,8 @@ void GlobeModel::updateClouds(double simTime)
 {
 	Quat quat = getQuatFromEuler(0.0, 0.0, fmodf(simTime * 0.003f, 2.0f * C_PI));
 	_cloudsTransform->setAttitude(quat);
+
+	_uniformTime->set((float)simTime * 0.2f);
 }
 
 void GlobeModel::makeEarthModel()
@@ -123,7 +125,10 @@ void GlobeModel::makeCloudsModel()
 	pgm->addShader(vert_shader);
 	pgm->addShader(frag_shader);
 
+	_uniformTime = new Uniform("time", 0.0f);
+
 	stateSet->setAttribute(pgm, StateAttribute::ON);
+	stateSet->addUniform(_uniformTime);
 
 	atmosphere_geode->setStateSet(stateSet);
 

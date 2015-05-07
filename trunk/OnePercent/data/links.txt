@@ -13,6 +13,10 @@ http://gamedev.stackexchange.com/questions/43741/how-do-you-turn-a-cube-into-a-s
 
 http://www.vertexasylum.com/downloads/cdlod/cdlod_latest.pdf
 
+Noise3D:
+
+https://github.com/ashima/webgl-noise/blob/master/src/noise3D.glsl
+
 
 
 Quelle zur Zusammenfassung der Ländergrenzen:

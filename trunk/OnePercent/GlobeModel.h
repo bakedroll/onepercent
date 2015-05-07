@@ -43,5 +43,6 @@ namespace onep
 		osg::ref_ptr<osg::Uniform> _scatteringLightPosrUniform;
 
 		osg::ref_ptr<osg::PositionAttitudeTransform> _cloudsTransform;
+		osg::ref_ptr<osg::Uniform> _uniformTime;
 	};
 }

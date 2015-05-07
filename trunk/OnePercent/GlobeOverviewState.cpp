@@ -142,11 +142,7 @@ void GlobeOverviewState::onDragEvent(int button, Vec2f origin, Vec2f position, o
 	}
 	else if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
 	{
-		//float clamp_to = 1.0f - ((_cameraDistance - _MIN_CAMERA_DISTANCE) / (_MAX_CAMERA_DISTANCE - _MIN_CAMERA_DISTANCE));
-		//clamp_to *= clamp_to * clamp_to;
-		//clamp_to *= C_PI * 0.6f / 2.0f;
-
-		float clamp_to = atan(GlobeModel::EARTH_RADIUS * 1.3 / _cameraDistance); // +(15.0f * C_PI / 180.0f);
+		float clamp_to = atan(GlobeModel::EARTH_RADIUS * 1.3 / _cameraDistance);
 
 		_cameraViewAngle.set(
 			_cameraViewAngle.x() + change.x() * _CAMERA_ROTATION_SPEED,
