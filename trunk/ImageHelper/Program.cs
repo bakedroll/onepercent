@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -10,6 +11,24 @@ namespace ImageHelper
 {
     class Program
     {
+        private struct CountryInfo
+        {
+            public Color ColorId;
+            public float PopulationMio;
+            public int Bip;
+            public string Name;
+            public byte Id;
+
+            public CountryInfo(string name, int bip, float populationMio, Color colorId, byte id) : this()
+            {
+                Name = name;
+                Bip = bip;
+                PopulationMio = populationMio;
+                ColorId = colorId;
+                Id = id;
+            }
+        }
+
         private static void Exit()
         {
             Console.Write("Press any key to exit... ");
@@ -106,7 +125,7 @@ namespace ImageHelper
             binFile.Close();
         }
 
-        private static void ConvertCountriesMap(string tableFilename, string mapFilename, string binFilename)
+        private static void ConvertCountriesMap(string tableFilename, string mapFilename, string greyscaleFilename, string binFilename)
         {
             var countriesBitmap = new Bitmap(mapFilename);
 
@@ -115,14 +134,21 @@ namespace ImageHelper
 
             var asen = new UTF8Encoding();
 
+            var resultBitmap = new Bitmap(countriesBitmap.Width, countriesBitmap.Height, PixelFormat.Format32bppArgb);
+            var countries = new List<CountryInfo>();
+
             using (var writer = new BinaryWriter(binFile))
             {
 
                 writer.Write(tableLines.Length);
 
+                byte counter = 0;
                 foreach (var tLine in tableLines)
                 {
                     var values = tLine.Split('\t').Where(x => !x.Equals(string.Empty)).ToArray();
+
+                    countries.Add(new CountryInfo(values[1], int.Parse(values[4]), float.Parse(values[3]), ColorTranslator.FromHtml("#" + values[2]), counter));
+                    counter++;
 
                     var encoded = asen.GetBytes(values[1]);
                     var color = ColorTranslator.FromHtml("#" + values[2]);
@@ -148,9 +174,22 @@ namespace ImageHelper
                         writer.Write(color.R);
                         writer.Write(color.G);
                         writer.Write(color.B);
+
+                        var col = Color.White;
+                        foreach (var info in countries)
+                        {
+                            if (info.ColorId == color)
+                            {
+                                col = Color.FromArgb(info.Id, info.Id, info.Id);
+                            }
+                        }
+
+                        resultBitmap.SetPixel(x, y, col);
                     }
                 }
             }
+
+            resultBitmap.Save(greyscaleFilename, ImageFormat.Png);
             binFile.Close();
         }
 
@@ -177,7 +216,7 @@ namespace ImageHelper
                         ConvertStarsMap(args[1], args[2]);
                         break;
                     case 3:
-                        ConvertCountriesMap(args[1], args[2], args[3]);
+                        ConvertCountriesMap(args[1], args[2], args[3], args[4]);
                         break;
                 }
             }
