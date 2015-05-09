@@ -1,6 +1,7 @@
 #include "Simulation.h"
 
 #include <osgGaming/ResourceManager.h>
+#include <osgGaming/ByteStream.h>
 #include <osg/Image>
 
 using namespace osgGaming;
@@ -19,45 +20,21 @@ void Simulation::loadCountries()
 
 	char* bytes = ResourceManager::getInstance()->loadBinary(countriesBinFilename);
 
-	int ncountries;
-	int mapWidth, mapHeight;
+	ByteStream stream(bytes);
 
-	memcpy(&ncountries, bytes, sizeof(int));
-
-	int position = sizeof(int);
+	int ncountries = stream.read<int>();
 
 	for (int i = 0; i < ncountries; i++)
 	{
-		string name;
-		float population;
-		int name_length, bip;
-		unsigned char r, g, b;
-
-		memcpy(&name_length, &bytes[position], sizeof(int));
-		position += sizeof(int);
-
-		char* name_p = new char[name_length + 1];
-
-		memcpy(&name_p[0], &bytes[position], name_length);
-		name_p[name_length] = '\0';
-		name = string(name_p);
-
-		position += name_length;
-
-		memcpy(&population, &bytes[position], sizeof(float));
-		position += sizeof(float);
-
-		memcpy(&bip, &bytes[position], sizeof(int));
-		position += sizeof(int);
-
-		memcpy(&r, &bytes[position], sizeof(unsigned char));
-		position += sizeof(unsigned char);
-
-		memcpy(&g, &bytes[position], sizeof(unsigned char));
-		position += sizeof(unsigned char);
-
-		memcpy(&b, &bytes[position], sizeof(unsigned char));
-		position += sizeof(unsigned char);
+		int name_length = stream.read<int>();
+		char* name_p = stream.readString(name_length);
+		string name = string(name_p);
+		
+		float population = stream.read<float>();
+		int bip = stream.read<int>();
+		unsigned char r = stream.read<unsigned char>();
+		unsigned char g = stream.read<unsigned char>();
+		unsigned char b = stream.read<unsigned char>();
 
 		ref_ptr<Country> country = new Country(name, Vec3i((int)r, (int)g, (int)b), population, bip);
 		_countries.push_back(country);
@@ -65,13 +42,10 @@ void Simulation::loadCountries()
 		delete[] name_p;
 	}
 
-	memcpy(&mapWidth, &bytes[position], sizeof(int));
-	position += sizeof(int);
+	int mapWidth = stream.read<int>();
+	int mapHeight = stream.read<int>();
 
-	memcpy(&mapHeight, &bytes[position], sizeof(int));
-	position += sizeof(int);
-
-	_countriesMap = new CountriesMap(mapWidth, mapHeight, (unsigned char*)&bytes[position]);
+	_countriesMap = new CountriesMap(mapWidth, mapHeight, (unsigned char*)&bytes[stream.getPos()]);
 
 	ResourceManager::getInstance()->clearCacheResource(countriesBinFilename);
 }

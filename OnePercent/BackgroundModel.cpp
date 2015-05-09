@@ -11,6 +11,7 @@
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/TextureFactory.h>
 #include <osgGaming/Helper.h>
+#include <osgGaming/ByteStream.h>
 
 #include <fstream>
 
@@ -79,26 +80,16 @@ void BackgroundModel::makeStars()
 	ref_ptr<Vec3Array> verts = new Vec3Array();
 	ref_ptr<Vec4Array> colors = new Vec4Array();
 
-	int nstars;
-	memcpy(&nstars, bytes, sizeof(int));
+	ByteStream stream(bytes);
 
-	int position = sizeof(int);
+	int nstars = stream.read<int>();
 
 	for (int i = 0; i < nstars; i++)
 	{
-		float size, x, y, z;
-
-		memcpy(&x, &bytes[position], sizeof(float));
-		position += sizeof(float);
-
-		memcpy(&y, &bytes[position], sizeof(float));
-		position += sizeof(float);
-
-		memcpy(&z, &bytes[position], sizeof(float));
-		position += sizeof(float);
-
-		memcpy(&size, &bytes[position], sizeof(float));
-		position += sizeof(float);
+		float x = stream.read<float>();
+		float y = stream.read<float>();
+		float z = stream.read<float>();
+		float size = stream.read<float>();
 
 		verts->push_back(Vec3f(x, -z, -y) * 10.0f);
 		colors->push_back(Vec4f(size / 8.0f, 0.0f, 0.0f, 1.0f));
