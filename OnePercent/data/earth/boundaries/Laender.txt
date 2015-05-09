@@ -1,0 +1,114 @@
+1	Brasilien	f8006f	194,30	2242854		
+2	USA	5d0662	318,90	16799700		
+3	Kannada	660000	35,16	1825096		
+4	Grönland	06620c	0,56	37400		
+5	China	fcff00	1381,30	9181377		
+6	Australien	bb4ca0	22,00	1505277		
+7	Mongolei	6e6f8a	2,90	11516		
+8	Kasachstan	9fc9eb	17,04	220347		
+9	Norwegen	c28400	5,08	511252		
+10	Russland	e02000	143,50	2118006		
+11	Schweden	32c51d	9,59	557938		
+12	Finnland	c31dc5	5,44	256922		
+13	Deutschland	8d5300	80,62	3635959	79,90%	
+14	Frankreich	e10094	63,60	2737361	93,40%	
+15	Spanien	a37436	47,27	1358687	93,70%	
+16	Portugal	077d76	10,46	219972	127,80%	
+17	Großbritannien	729204	64,10	2535761	91,10%	
+18	Italien	864ac9	59,83	2071955	133,00%	
+19	Schweiz	e57575	8,21	650814		
+20	Österreich	6f9692	8,47	415366	75,70%	
+21	Benelux	33d3ac	28,09	1366405		Niederlande, Belgien, Luxemburg
+22	Dänemark	485e23	5,52	330958		
+23	Irland	c3ff5f	4,60	217884		
+24	Polen	ad809e	38,53	516128		
+25	Tschechien	adb89e	10,52	198312		
+26	Weißrussland	9ce23c	9,50	71710		
+27	Litauen	1a62a0	2,96	47560		
+28	Lettland	ce7662	2,01	30953		
+29	Estland	994d40	1,32	24484		
+30	Ukraine	2c6da5	45.43	177834		
+31	Rumänien	5d02c3	20,10	189659		
+32	Türkei	a4a32c	75,60	827209		
+33	Balkanstaaten	e0bb29	38,26	437307		"Griechenland 10,8 , Montenegro 0,66, Albanien 2,8, Bulgarien 7,2, Kroatien 4,3, Bosnien 3,8, Serbien 6,9, Kosovo 1,8"
+34	Marokko	967c12	32,60	105101		
+35	Algerien	3b6481	37,40	206095		
+36	Tunesien	562a8c	10,80	47439		
+37	Libyen	6f48ee	6,50	67622		
+38	Ägypten	418536	82,30	271427		
+39	Zypern	9a4c00	1,20	21827		
+40	Südafrika	ff7e00	51,10	350779		
+41	Arabische Halbinsel 	3619a1	65,50	1293446		Saudi Arabien, Jemen, Oman, Bahrain, Vereinigte arabische Emirate
+42	Slowakei	9b883a	5,40	95805		
+43	Ungarn	67641b	9,90	132426		
+44	Moldawien	5529fa	3,10	7935		
+45	Iraq	735454	33,42	229327		
+46	Iran	772020	77,45	366259		
+47	Palästina	3f609d	12,84	291500		
+48	Syrien	0eb4b6	19,00	5100		
+49	Indien	7d0eb6	1252,00	1870651		
+50	Pakistan	dd56bf	182,10	238737		
+51	Afghanistan	9d5faf	33,40	20735		
+52	Nepal	56497d	30,90	19341		
+53	Zentralasien	d2938d	47,80	112767		Turkmenistan, Usbekistan, Kirgistan, Tadschikistan
+54	Sri Lanka	754536	21,20	65833		
+55	Kasachstan	9fc9ec	16,80	220347		
+56	Japan	daa49b	127,60	4901532		
+57	Namibia	548551	2,40	12318		
+58	Botswana	6dc97c	1,90	14837		
+59	Simbabwe	458873	12,60	12951		
+60	Mosambik	6dc14f	23,70	15329		
+61	Tansania	70c4b5	47,70	32536		
+62	Angola	676eb2	20,90	121704		
+63	Kongo	12617e	73,30	43781		
+64	Kamerun	915dd2	20,90	27957		
+65	Gabun	9d3f97	1,60	19228		
+66	Sambia	751a65	13,70	22416		
+67	Kenia	bea338	43,90	45082		
+68	Malawi	0a5134	15,90	3814		
+69	Madagaskar	a19777	21,90	11210		
+70	Somalia	e37933	10,10	600		
+71	Äthiopien	93790f	87,00	48145		
+72	Sudan	0a4950	38,30	70127		
+73	Tschad	32906c	11,80	13411		
+74	Niger	a1ce67	16,30	7359		
+75	Mali	8dec11	16,00	11070		
+76	Mauretanien	8b981a	3,60	4187		
+77	Senegal	c97a09	13,10	15154		
+78	Guinea	6a10b7	11,50	6282		
+79	Sierra Leone	be46bf	6,10	4788		
+80	Liberia	f321f6	4,20	1933		
+81	Elfenbeinküste	8028ae	20,60	28288		
+82	Ghana	cc2f84	25,50	44223		
+83	Benin	565ca9	9,40	8310		
+84	Burkina Faso	682e45	17,50	12247		
+85	Nigeria	1aab24	152,20	286470		
+86	Zentralafrik. REP	176b1f	4,60	1538		
+87	Uganda	568a50	35,60	23053		
+88	Mexiko	588e12	116,10	1258544		
+89	Kolumbien	509d97	47,40	381822		
+90	Mittelamerika	2f6a3d	75,40	217288		Guatemala 15 , El Salvador 6,3, Honduras 8,4, Nicaragua 6, Costa Rica 4,5, Panama 3,6, Kuba 11,2, Dom. REP 10,1, Haiti 10,3
+91	Venezuela	0e6a4d	28,86	373978		
+92	Ecuador	982e5d	14,90	94144		
+93	Peru	8b0865	30,10	206542		
+94	Chile	1883ce	17,40	276975		
+95	Argentinien	001cee	40,80	488213		
+96	Uruguay	8a1ae0	3,40	56345		
+97	Bolivien	b3224e	10,80	29802		
+98	Paraguay	ab4b88	6,70	28333		
+99	Indonesien	9b5736	241,00	870275		
+100	Papua-Neuguinea	c86d24	7,00	15973		
+101	Salomonen	1694c9	0,60	1097		zu klein?
+102	Neuseeland	b31e4f	4,40	181330		
+103	Bangladesch	1694c9	152,90	141275		
+104	Bhutan	a11c8d	0,70	1985		
+105	Myanmar	bf0b20	54,60	56408		
+106	Thailand	c34d90	69,90	387156		
+107	Malaysia	6e2589	29,00	312433		
+108	Kambodscha	461757	15,00	15659		
+109	Vietnam	0d6a65	89,00	170565		
+110	Laos	225009	6,50	10002		
+111	Taiwan	6c3b20	23,30	37700		
+112	Philippinen	f45109	92,30	272018		
+113	Nordkorea	855252	24,60	1800		
+114	Südkorea	c08765	48,90	31200		

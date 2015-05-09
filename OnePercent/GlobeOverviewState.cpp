@@ -7,6 +7,7 @@
 
 using namespace onep;
 using namespace osg;
+using namespace std;
 using namespace osgGA;
 using namespace osgGaming;
 
@@ -96,14 +97,14 @@ void GlobeOverviewState::onMousePressedEvent(int button, float x, float y)
 		Vec3f point, direction;
 		getWorld()->getCameraManipulator()->getPickRay(x, y, point, direction);
 
-		/*printf("Pressed mouse button: %d at %f, %f; Point: %f, %f, %f; Direction: %f, %f, %f\n", button, x, y,
-			point.x(), point.y(), point.z(),
-			direction.x(), direction.y(), direction.z());*/
-
 		Vec3f pickResult;
 		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), 6.371f, point, direction, pickResult))
 		{
-			printf("INTERSECTION at %f, %f, %f\n", pickResult.x(), pickResult.y(), pickResult.z());
+			Vec2f polar = getPolarFromCartesian(pickResult);
+			Vec3i color = _globeWorld->getSimulation()->getCountryColor(polar);
+			string country_name = _globeWorld->getSimulation()->getCountryName(polar);
+
+			printf("INTERSECTION at %f, %f, %f Polar: %f, %f Color: %d, %d, %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), color.x(), color.y(), color.z(), country_name.data());
 		}
 	}
 }

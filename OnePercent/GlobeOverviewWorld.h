@@ -2,6 +2,7 @@
 
 #include "GlobeModel.h"
 #include "BackgroundModel.h"
+#include "Simulation.h"
 
 #include <osgGaming/World.h>
 
@@ -14,6 +15,8 @@ namespace onep
 
 		osg::ref_ptr<GlobeModel> getGlobeModel();
 		osg::ref_ptr<BackgroundModel> getBackgroundModel();
+		osg::ref_ptr<Simulation> getSimulation();
+
 		osg::Vec2f getTimeOfYearAndDay();
 		
 		void setGlobeModel(osg::ref_ptr<GlobeModel> globeModel);
@@ -27,5 +30,7 @@ namespace onep
 
 		osg::ref_ptr<GlobeModel> _globeModel;
 		osg::ref_ptr<BackgroundModel> _backgroundModel;
+
+		osg::ref_ptr<Simulation> _simulation;
 	};
 }

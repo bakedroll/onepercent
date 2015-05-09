@@ -72,18 +72,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BackgroundModel.cpp" />
+    <ClCompile Include="CountriesMap.cpp" />
+    <ClCompile Include="Country.cpp" />
     <ClCompile Include="GlobeModel.cpp" />
     <ClCompile Include="GlobeOverviewState.cpp" />
     <ClCompile Include="GlobeOverviewWorld.cpp" />
     <ClCompile Include="LoadingGlobeOverviewState.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Simulation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BackgroundModel.h" />
+    <ClInclude Include="CountriesMap.h" />
+    <ClInclude Include="Country.h" />
     <ClInclude Include="GlobeModel.h" />
     <ClInclude Include="GlobeOverviewState.h" />
     <ClInclude Include="GlobeOverviewWorld.h" />
     <ClInclude Include="LoadingGlobeOverviewState.h" />
+    <ClInclude Include="Simulation.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GameData\shaders\atmosphere.frag" />

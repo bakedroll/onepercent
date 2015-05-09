@@ -55,6 +55,10 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 {
 	ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
+
+	globeWorld->getSimulation()->loadCountries();
+
+
 	ref_ptr<GlobeModel> globe = new GlobeModel(world->getCameraManipulator());
 	globeWorld->setGlobeModel(globe);
 	world->getRootNode()->addChild(globe);
