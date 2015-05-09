@@ -12,6 +12,8 @@ GlobeOverviewWorld::GlobeOverviewWorld()
 	: World(),
 	 _timeOfYearAndDay(0.0f, 0.0f)
 {
+	_simulation = new Simulation();
+
 	getGlobalLightModel()->setAmbientIntensity(Vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	setLightEnabled(0, true);
@@ -31,6 +33,11 @@ ref_ptr<GlobeModel> GlobeOverviewWorld::getGlobeModel()
 ref_ptr<BackgroundModel> GlobeOverviewWorld::getBackgroundModel()
 {
 	return _backgroundModel;
+}
+
+ref_ptr<Simulation> GlobeOverviewWorld::getSimulation()
+{
+	return _simulation;
 }
 
 Vec2f GlobeOverviewWorld::getTimeOfYearAndDay()

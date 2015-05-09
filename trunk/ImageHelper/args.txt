@@ -5,3 +5,7 @@
 Subdivide:
 
 1 ../../../../OnePercent/data/earth/clouds/clouds.png 2 1 ../../../../OnePercent/data/earth/clouds/8k/
+
+convert countries map:
+
+3 ../../../../OnePercent/data/earth/boundaries/Laender.txt ../../../../OnePercent/data/earth/boundaries/countries_polar_map.png ../../../../OnePercent/GameData/data/countries.dat

@@ -4,6 +4,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace ImageHelper
 {
@@ -82,6 +83,77 @@ namespace ImageHelper
             }
         }
 
+        private static void ConvertStarsMap(string catalogFilename, string binFilename)
+        {
+            var catalogLines = File.ReadAllLines(catalogFilename);
+            var binFile = File.Create(binFilename);
+            using (var writer = new BinaryWriter(binFile))
+            {
+
+                writer.Write(catalogLines.Length);
+
+                foreach (var cLine in catalogLines)
+                {
+                    var values = cLine.Split(' ').Where(x => !x.Equals(string.Empty)).ToArray();
+
+                    writer.Write(float.Parse(values[3], CultureInfo.InvariantCulture));
+                    writer.Write(float.Parse(values[4], CultureInfo.InvariantCulture));
+                    writer.Write(float.Parse(values[5], CultureInfo.InvariantCulture));
+                    writer.Write(float.Parse(values[2], CultureInfo.InvariantCulture));
+                }
+
+            }
+            binFile.Close();
+        }
+
+        private static void ConvertCountriesMap(string tableFilename, string mapFilename, string binFilename)
+        {
+            var countriesBitmap = new Bitmap(mapFilename);
+
+            var tableLines = File.ReadAllLines(tableFilename);
+            var binFile = File.Create(binFilename);
+
+            var asen = new UTF8Encoding();
+
+            using (var writer = new BinaryWriter(binFile))
+            {
+
+                writer.Write(tableLines.Length);
+
+                foreach (var tLine in tableLines)
+                {
+                    var values = tLine.Split('\t').Where(x => !x.Equals(string.Empty)).ToArray();
+
+                    var encoded = asen.GetBytes(values[1]);
+                    var color = ColorTranslator.FromHtml("#" + values[2]);
+
+                    writer.Write(encoded.Length);
+                    writer.Write(encoded);
+                    writer.Write(float.Parse(values[3]));
+                    writer.Write(int.Parse(values[4]));
+                    writer.Write(color.R);
+                    writer.Write(color.G);
+                    writer.Write(color.B);
+                }
+
+                writer.Write(countriesBitmap.Width);
+                writer.Write(countriesBitmap.Height);
+
+                for (int y = 0; y < countriesBitmap.Height; y++)
+                {
+                    for (int x = 0; x < countriesBitmap.Width; x++)
+                    {
+                        var color = countriesBitmap.GetPixel(x, y);
+
+                        writer.Write(color.R);
+                        writer.Write(color.G);
+                        writer.Write(color.B);
+                    }
+                }
+            }
+            binFile.Close();
+        }
+
         static void Main(string[] args)
         {
             if (args.Length < 1)
@@ -104,6 +176,9 @@ namespace ImageHelper
                     case 2:
                         ConvertStarsMap(args[1], args[2]);
                         break;
+                    case 3:
+                        ConvertCountriesMap(args[1], args[2], args[3]);
+                        break;
                 }
             }
             catch (Exception e)
@@ -113,29 +188,6 @@ namespace ImageHelper
             }
 
             Exit();
-        }
-
-        private static void ConvertStarsMap(string catalogFile, string binFilename)
-        {
-            var catalogLines = File.ReadAllLines(catalogFile);
-            var binFile = File.Create(binFilename);
-            using (var writer = new BinaryWriter(binFile))
-            {
-
-                writer.Write(catalogLines.Length);
-
-                foreach (var cLine in catalogLines)
-                {
-                    var values = cLine.Split(' ').Where(x => !x.Equals(string.Empty)).ToArray();
-
-                    writer.Write(float.Parse(values[3], CultureInfo.InvariantCulture));
-                    writer.Write(float.Parse(values[4], CultureInfo.InvariantCulture));
-                    writer.Write(float.Parse(values[5], CultureInfo.InvariantCulture));
-                    writer.Write(float.Parse(values[2], CultureInfo.InvariantCulture));
-                }
-
-            }
-            binFile.Close();
         }
     }
 }

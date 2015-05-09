@@ -29,7 +29,9 @@ namespace osgGaming
 
 	osg::Quat getQuatFromEuler(double pitch, double roll, double yaw);
 	osg::Matrix getMatrixFromEuler(double pitch, double roll, double yaw);
-	osg::Vec3 getVec3FromEuler(double pitch, double roll, double yaw, osg::Vec3 origin = osg::Vec3(0.0, 1.0, 0.0));
+	osg::Vec3f getVec3FromEuler(double pitch, double roll, double yaw, osg::Vec3 origin = osg::Vec3(0.0, 1.0, 0.0));
+
+	osg::Vec2f getPolarFromCartesian(osg::Vec3f cartesian);
 
 	osg::Vec2f getTextSize(osg::ref_ptr<osgText::Text> text);
 

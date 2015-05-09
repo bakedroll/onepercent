@@ -1,6 +1,7 @@
 #include <osgGaming/Helper.h>
 
 #include <algorithm>
+#include <math.h>
 
 #include <osg/Geode>
 #include <osgUtil/TangentSpaceGenerator>
@@ -63,11 +64,22 @@ Matrix osgGaming::getMatrixFromEuler(double pitch, double roll, double yaw)
 	return mat;
 }
 
-Vec3 osgGaming::getVec3FromEuler(double pitch, double roll, double yaw, Vec3 origin)
+Vec3f osgGaming::getVec3FromEuler(double pitch, double roll, double yaw, Vec3 origin)
 {
 	rotateVector(&origin, osgGaming::getQuatFromEuler(pitch, roll, yaw));
 
 	return origin;
+}
+
+Vec2f osgGaming::getPolarFromCartesian(Vec3f cartesian)
+{
+	Vec2f result;
+
+	result.x() = (atan2(-cartesian.x(), cartesian.y()) + C_PI) / (2.0f * C_PI);
+	float xyLen = sqrt(cartesian.x() * cartesian.x() + cartesian.y() * cartesian.y());
+	result.y() = (atan2(-cartesian.z(), xyLen) + C_PI / 2.0f) / C_PI;
+
+	return result;
 }
 
 Vec2f osgGaming::getTextSize(ref_ptr<Text> text)

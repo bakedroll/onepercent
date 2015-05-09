@@ -32,6 +32,15 @@
     <ClCompile Include="BackgroundModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Simulation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Country.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CountriesMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GlobeModel.h">
@@ -47,6 +56,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BackgroundModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Simulation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Country.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CountriesMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
