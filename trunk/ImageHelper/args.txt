@@ -4,7 +4,7 @@
 
 Subdivide:
 
-1 ../../../../OnePercent/data/earth/clouds/clouds.png 2 1 ../../../../OnePercent/data/earth/clouds/8k/
+1 ../../../../OnePercent/data/earth/boundaries/countries_polar_greyscale_map_8192x4096.png 2 1 ../../../../OnePercent/data/earth/countries/8k/
 
 convert countries map:
 
