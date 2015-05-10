@@ -156,6 +156,11 @@ void BackgroundModel::makeSun()
 		->assign(stateSet)
 		->build();
 
+	TextureFactory::make()
+		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/sun_blend.png"))
+		->assign(_sunGlowTransform->getOrCreateStateSet())
+		->build();
+
 	sunBillboard->getOrCreateStateSet()->setRenderBinDetails(-10, "RenderBin");
 	_sunGlowTransform->getOrCreateStateSet()->setRenderBinDetails(10, "RenderBin");
 
