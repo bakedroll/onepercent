@@ -18,7 +18,7 @@ namespace onep
 
 		void loadCountries();
 
-		osg::Vec3i getCountryColor(osg::Vec2f coord);
+		unsigned char getCountryId(osg::Vec2f coord);
 		std::string getCountryName(osg::Vec2f coord);
 
 	private:

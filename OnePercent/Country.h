@@ -10,16 +10,16 @@ namespace onep
 	class Country : public osg::Referenced
 	{
 	public:
-		Country(std::string name, osg::Vec3i color, float population, int bip);
+		Country(std::string name, unsigned char id, float population, int bip);
 
 		std::string getCountryName();
-		osg::Vec3i getColor();
+		unsigned char getId();
 
 	private:
 		std::string _name;
 
 		float _populationInMio;
 		int _bipInMio;
-		osg::Vec3i _color;
+		unsigned char _id;
 	};
 }

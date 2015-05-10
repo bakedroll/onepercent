@@ -13,20 +13,22 @@ namespace ImageHelper
     {
         private struct CountryInfo
         {
-            public Color ColorId;
-            public float PopulationMio;
-            public int Bip;
-            public string Name;
-            public byte Id;
+            public readonly Color ColorId;
+            public readonly byte Id;
 
-            public CountryInfo(string name, int bip, float populationMio, Color colorId, byte id) : this()
+            public CountryInfo(Color colorId, byte id) : this()
             {
-                Name = name;
-                Bip = bip;
-                PopulationMio = populationMio;
                 ColorId = colorId;
                 Id = id;
             }
+        }
+
+        public static void ClearCurrentConsoleLine()
+        {
+            var currentLineCursor = Console.CursorTop;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, currentLineCursor);
         }
 
         private static void Exit()
@@ -35,9 +37,13 @@ namespace ImageHelper
             Console.ReadKey();
         }
 
-        private static void Error(string message)
+        private static void Error(string message, string stackTrace = null)
         {
             Console.WriteLine("Error: {0}", message);
+
+            if (stackTrace != null)
+                Console.WriteLine("StackTrace: {0}", stackTrace);
+
             Exit();
         }
 
@@ -125,21 +131,27 @@ namespace ImageHelper
             binFile.Close();
         }
 
-        private static void ConvertCountriesMap(string tableFilename, string mapFilename, string greyscaleFilename, string binFilename)
+        private static void ConvertCountriesMap(string tableFilename, string mapFilename, string greyscaleFilename, int newWidth, int newHeight, string binFilename)
         {
             var countriesBitmap = new Bitmap(mapFilename);
 
+            Console.WriteLine("Reading table file {0}", tableFilename);
+
             var tableLines = File.ReadAllLines(tableFilename);
+
+            Console.WriteLine("Writing bin file {0}", binFilename);
+
             var binFile = File.Create(binFilename);
+
+            Console.WriteLine("Processing data...");
 
             var asen = new UTF8Encoding();
 
-            var resultBitmap = new Bitmap(countriesBitmap.Width, countriesBitmap.Height, PixelFormat.Format32bppArgb);
+            var resultBitmap = new Bitmap(newWidth, newHeight, PixelFormat.Format32bppArgb);
             var countries = new List<CountryInfo>();
 
             using (var writer = new BinaryWriter(binFile))
             {
-
                 writer.Write(tableLines.Length);
 
                 byte counter = 0;
@@ -147,48 +159,57 @@ namespace ImageHelper
                 {
                     var values = tLine.Split('\t').Where(x => !x.Equals(string.Empty)).ToArray();
 
-                    countries.Add(new CountryInfo(values[1], int.Parse(values[4]), float.Parse(values[3]), ColorTranslator.FromHtml("#" + values[2]), counter));
-                    counter++;
+                    countries.Add(new CountryInfo(ColorTranslator.FromHtml("#" + values[2]), counter));
 
                     var encoded = asen.GetBytes(values[1]);
-                    var color = ColorTranslator.FromHtml("#" + values[2]);
 
                     writer.Write(encoded.Length);
                     writer.Write(encoded);
                     writer.Write(float.Parse(values[3]));
                     writer.Write(int.Parse(values[4]));
-                    writer.Write(color.R);
-                    writer.Write(color.G);
-                    writer.Write(color.B);
+                    writer.Write(counter);
+
+                    counter++;
                 }
 
-                writer.Write(countriesBitmap.Width);
-                writer.Write(countriesBitmap.Height);
+                int oldWidth = countriesBitmap.Width;
+                int oldHeight = countriesBitmap.Height;
 
-                for (int y = 0; y < countriesBitmap.Height; y++)
+                writer.Write(newWidth);
+                writer.Write(newHeight);
+
+                int percentCounter = 0;
+                Console.WriteLine("0%");
+                for (int y = 0; y < newHeight; y++)
                 {
-                    for (int x = 0; x < countriesBitmap.Width; x++)
+                    for (int x = 0; x < newWidth; x++)
                     {
-                        var color = countriesBitmap.GetPixel(x, y);
-
-                        writer.Write(color.R);
-                        writer.Write(color.G);
-                        writer.Write(color.B);
+                        var color = countriesBitmap.GetPixel((oldWidth * x) / newWidth, (oldHeight * y) / newHeight);
 
                         var col = Color.White;
+                        byte id = 255;
                         foreach (var info in countries)
                         {
                             if (info.ColorId == color)
                             {
-                                col = Color.FromArgb(info.Id, info.Id, info.Id);
+                                id = info.Id;
+                                col = Color.FromArgb(id, id, id);
                             }
                         }
 
+                        writer.Write(id);
                         resultBitmap.SetPixel(x, y, col);
                     }
+
+                    Console.SetCursorPosition(0, Console.CursorTop - 1);
+                    ClearCurrentConsoleLine();
+
+                    percentCounter++;
+                    Console.WriteLine("{0}%", percentCounter * 100 / newHeight);
                 }
             }
 
+            Console.WriteLine("Saving {0}", greyscaleFilename);
             resultBitmap.Save(greyscaleFilename, ImageFormat.Png);
             binFile.Close();
         }
@@ -216,13 +237,23 @@ namespace ImageHelper
                         ConvertStarsMap(args[1], args[2]);
                         break;
                     case 3:
-                        ConvertCountriesMap(args[1], args[2], args[3], args[4]);
+                        ConvertCountriesMap(args[1], args[2], args[3], Int32.Parse(args[4]), Int32.Parse(args[5]), args[6]);
                         break;
                 }
             }
             catch (Exception e)
             {
-                Error(e.Message);
+                var ex = e;
+                string message = string.Empty;
+                while (ex != null)
+                {
+                    message += string.Format("{0} ==> ", ex.Message);
+
+                    ex = ex.InnerException;
+                }
+
+
+                Error(message, e.StackTrace);
                 return;
             }
 

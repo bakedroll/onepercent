@@ -1,0 +1,1 @@
+start "" "..\..\..\..\ImageHelper\bin\x64\Debug\ImageHelper.exe" 3 ./Laender.txt ./boundries_8k.png ./countries_polar_greyscale_map_2048x1024.png 2048 1024 ../../../GameData/data/countries.dat
