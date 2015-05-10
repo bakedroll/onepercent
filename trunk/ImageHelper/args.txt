@@ -8,4 +8,4 @@ Subdivide:
 
 convert countries map:
 
-3 ../../../../OnePercent/data/earth/boundaries/Laender.txt ../../../../OnePercent/data/earth/boundaries/countries_polar_map.png ../../../../OnePercent/data/earth/boundaries/countries_polar_greyscale_map.png ../../../../OnePercent/GameData/data/countries.dat
+3 ../../../../OnePercent/data/earth/boundaries/Laender.txt ../../../../OnePercent/data/earth/boundaries/boundries_8k.png ../../../../OnePercent/data/earth/boundaries/countries_polar_greyscale_map_2048x1024.png 2048 1024 ../../../../OnePercent/GameData/data/countries.dat

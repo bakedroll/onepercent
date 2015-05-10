@@ -14,7 +14,7 @@ namespace onep
 
 		osg::Vec2i getSize();
 
-		osg::Vec3i getDataAt(int x, int y);
+		unsigned char getDataAt(int x, int y);
 
 	private:
 		int _width;

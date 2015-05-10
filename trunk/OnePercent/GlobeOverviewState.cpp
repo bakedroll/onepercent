@@ -101,10 +101,10 @@ void GlobeOverviewState::onMousePressedEvent(int button, float x, float y)
 		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), 6.371f, point, direction, pickResult))
 		{
 			Vec2f polar = getPolarFromCartesian(pickResult);
-			Vec3i color = _globeWorld->getSimulation()->getCountryColor(polar);
+			unsigned char id = _globeWorld->getSimulation()->getCountryId(polar);
 			string country_name = _globeWorld->getSimulation()->getCountryName(polar);
 
-			printf("INTERSECTION at %f, %f, %f Polar: %f, %f Color: %d, %d, %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), color.x(), color.y(), color.z(), country_name.data());
+			printf("INTERSECTION at %f, %f, %f Polar: %f, %f Id: %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), (int)id, country_name.data());
 		}
 	}
 }

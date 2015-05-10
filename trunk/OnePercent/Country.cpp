@@ -4,10 +4,10 @@ using namespace onep;
 using namespace osg;
 using namespace std;
 
-Country::Country(string name, Vec3i color, float population, int bip)
+Country::Country(string name, unsigned char id, float population, int bip)
 	: Referenced(),
 	  _name(name),
-	  _color(color),
+	  _id(id),
 	  _populationInMio(population),
 	  _bipInMio(bip)
 {
@@ -19,7 +19,7 @@ string Country::getCountryName()
 	return _name;
 }
 
-Vec3i Country::getColor()
+unsigned char Country::getId()
 {
-	return _color;
+	return _id;
 }
