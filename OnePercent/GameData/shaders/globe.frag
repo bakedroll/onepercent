@@ -20,20 +20,39 @@ void main (void)
 	vec4 specreliefcitiesboundariesmap_color = texture2D(specreliefcitiesboundariesmap, gl_TexCoord[0].st);
 	vec3 normal = 2.0 * texture2D (normalmap, gl_TexCoord[0].st).rgb - 1.0;
 	vec4 nightmap_color = texture2D(nightmap, gl_TexCoord[0].st) + specreliefcitiesboundariesmap_color.b;
-	float country_id = texture2D(countriesmap, gl_TexCoord[0].st).r;
 
 	float ocean_depth = clamp(1.0 - specreliefcitiesboundariesmap_color.r + specreliefcitiesboundariesmap_color.g + 0.7, 0.0, 1.0);
 	vec4 boundaries_color = vec4(specreliefcitiesboundariesmap_color.a);
 
+	// red overlay for selected country (smoothed)
 	vec4 country_selected_color;
-	if (selected_country_id != 255 && int(country_id * 255.0) == selected_country_id)
-	{
-		country_selected_color = vec4(1.0, 0.5, 0.5, 1.0);
-	}
-	else
+	if (selected_country_id == 255)
 	{
 		country_selected_color = vec4(1.0, 1.0, 1.0, 1.0);
 	}
+	else
+	{
+		country_selected_color = vec4(0.0, 0.0, 0.0, 0.0);
+
+		for (int y = -2; y <= 2; y++)
+		{
+			for (int x = -2; x <= 2; x++)
+			{
+				vec2 coords = gl_TexCoord[0].st + vec2(x / 4096.0, y / 4096.0);
+
+				if (int(texture2D(countriesmap, coords).r * 255.0) == selected_country_id)
+				{
+					country_selected_color += vec4(1.0, 0.5, 0.5, 1.0);
+				}
+				else
+				{
+					country_selected_color += vec4(1.0, 1.0, 1.0, 1.0);
+				}
+			}
+		}
+		country_selected_color /= 25.0;
+	}
+
 
 	normal = normalize(normal);
 
