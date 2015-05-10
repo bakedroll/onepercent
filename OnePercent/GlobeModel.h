@@ -29,6 +29,8 @@ namespace onep
 		void updateLightDirection(osg::Vec3f direction);
 		void updateClouds(double simTime);
 
+		void setSelectedCountry(int countryId);
+
 	private:
 		void makeEarthModel();
 		void makeCloudsModel();
@@ -41,6 +43,8 @@ namespace onep
 
 		osg::ref_ptr<osg::Uniform> _scatteringLightDirUniform;
 		osg::ref_ptr<osg::Uniform> _scatteringLightPosrUniform;
+
+		osg::ref_ptr<osg::Uniform> _uniformSelectedCountry;
 
 		osg::ref_ptr<osg::PositionAttitudeTransform> _cloudsTransform;
 		osg::ref_ptr<osg::Uniform> _uniformTime;

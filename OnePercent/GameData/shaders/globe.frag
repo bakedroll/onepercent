@@ -8,6 +8,9 @@ uniform sampler2D colormap;
 uniform sampler2D specreliefcitiesboundariesmap;
 uniform sampler2D nightmap;
 uniform sampler2D normalmap;
+uniform sampler2D countriesmap;
+
+uniform int selected_country_id;
 
 void main (void) 
 { 
@@ -17,9 +20,20 @@ void main (void)
 	vec4 specreliefcitiesboundariesmap_color = texture2D(specreliefcitiesboundariesmap, gl_TexCoord[0].st);
 	vec3 normal = 2.0 * texture2D (normalmap, gl_TexCoord[0].st).rgb - 1.0;
 	vec4 nightmap_color = texture2D(nightmap, gl_TexCoord[0].st) + specreliefcitiesboundariesmap_color.b;
+	float country_id = texture2D(countriesmap, gl_TexCoord[0].st).r;
 
 	float ocean_depth = clamp(1.0 - specreliefcitiesboundariesmap_color.r + specreliefcitiesboundariesmap_color.g + 0.7, 0.0, 1.0);
 	vec4 boundaries_color = vec4(specreliefcitiesboundariesmap_color.a);
+
+	vec4 country_selected_color;
+	if (selected_country_id != 255 && int(country_id * 255.0) == selected_country_id)
+	{
+		country_selected_color = vec4(1.0, 0.5, 0.5, 1.0);
+	}
+	else
+	{
+		country_selected_color = vec4(1.0, 1.0, 1.0, 1.0);
+	}
 
 	normal = normalize(normal);
 
@@ -38,7 +52,8 @@ void main (void)
 		ndotl = clamp(ndotl, -1.0, 1.0);
 		edge = clamp(ndotl * 3.0, -1.0, 1.0) * 0.5 + 0.5;
 
-		vec4 Idiff = ocean_depth * colormap_color * edge  +  ocean_depth * nightmap_color * (1.0 - edge) + boundaries_color;
+		// vec4 Idiff = ocean_depth * colormap_color * edge  +  ocean_depth * nightmap_color * (1.0 - edge) + boundaries_color;
+		vec4 Idiff = ocean_depth * country_selected_color * (colormap_color * edge  +  nightmap_color * (1.0 - edge)) + boundaries_color;
 
 		// SPECULAR
 		vec4 Ispec = gl_FrontLightProduct[i].specular 
@@ -51,5 +66,6 @@ void main (void)
 		finalColor += Iamb + Idiff + Ispec;
 	}
    
+
 	gl_FragColor = gl_FrontLightModelProduct.sceneColor + finalColor + gl_FrontMaterial.emission;
 }

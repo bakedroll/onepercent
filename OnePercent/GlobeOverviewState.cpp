@@ -104,6 +104,8 @@ void GlobeOverviewState::onMousePressedEvent(int button, float x, float y)
 			unsigned char id = _globeWorld->getSimulation()->getCountryId(polar);
 			string country_name = _globeWorld->getSimulation()->getCountryName(polar);
 
+			_globeWorld->getGlobeModel()->setSelectedCountry((int)id);
+
 			printf("INTERSECTION at %f, %f, %f Polar: %f, %f Id: %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), (int)id, country_name.data());
 		}
 	}

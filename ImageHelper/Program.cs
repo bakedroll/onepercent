@@ -11,18 +11,6 @@ namespace ImageHelper
 {
     class Program
     {
-        private struct CountryInfo
-        {
-            public readonly Color ColorId;
-            public readonly byte Id;
-
-            public CountryInfo(Color colorId, byte id) : this()
-            {
-                ColorId = colorId;
-                Id = id;
-            }
-        }
-
         public static void ClearCurrentConsoleLine()
         {
             var currentLineCursor = Console.CursorTop;
@@ -148,7 +136,8 @@ namespace ImageHelper
             var asen = new UTF8Encoding();
 
             var resultBitmap = new Bitmap(newWidth, newHeight, PixelFormat.Format32bppArgb);
-            var countries = new List<CountryInfo>();
+
+            var countries = new Dictionary<Color, byte>();
 
             using (var writer = new BinaryWriter(binFile))
             {
@@ -159,7 +148,16 @@ namespace ImageHelper
                 {
                     var values = tLine.Split('\t').Where(x => !x.Equals(string.Empty)).ToArray();
 
-                    countries.Add(new CountryInfo(ColorTranslator.FromHtml("#" + values[2]), counter));
+                    var color = ColorTranslator.FromHtml("#" + values[2]);
+
+                    if (countries.ContainsKey(color))
+                    {
+                        Console.WriteLine("Warning: Color #{0} already exists ({1})", values[2], values[1]);
+                    }
+                    else
+                    {
+                        countries.Add(color, counter);
+                    }
 
                     var encoded = asen.GetBytes(values[1]);
 
@@ -186,15 +184,18 @@ namespace ImageHelper
                     {
                         var color = countriesBitmap.GetPixel((oldWidth * x) / newWidth, (oldHeight * y) / newHeight);
 
-                        var col = Color.White;
-                        byte id = 255;
-                        foreach (var info in countries)
+                        Color col;
+                        byte id;
+
+                        if (countries.ContainsKey(color))
                         {
-                            if (info.ColorId == color)
-                            {
-                                id = info.Id;
-                                col = Color.FromArgb(id, id, id);
-                            }
+                            countries.TryGetValue(color, out id);
+                            col = Color.FromArgb(id, id, id);
+                        }
+                        else
+                        {
+                            col = Color.White;
+                            id = 255;
                         }
 
                         writer.Write(id);

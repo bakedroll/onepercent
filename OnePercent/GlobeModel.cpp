@@ -56,6 +56,11 @@ void GlobeModel::updateClouds(double simTime)
 	_uniformTime->set((float)simTime * 0.2f);
 }
 
+void GlobeModel::setSelectedCountry(int countryId)
+{
+	_uniformSelectedCountry->set(countryId);
+}
+
 void GlobeModel::makeEarthModel()
 {
 	// planet geometry
@@ -87,6 +92,9 @@ void GlobeModel::makeEarthModel()
 	pgm->addBindAttribLocation("binormal", 7);
 
 	stateSet->setAttribute(pgm, StateAttribute::ON);
+
+	_uniformSelectedCountry = new Uniform("selected_country_id", 255);
+	stateSet->addUniform(_uniformSelectedCountry);
 
 	earth->setStateSet(stateSet);
 
@@ -226,11 +234,13 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 			char nightmap_file[128];
 			char specreliefcitiesboundariesmap_file[128];
 			char normalmap_file[128];
+			char countriesmap_file[128];
 
 			sprintf(colormap_file, "./GameData/textures/earth/color/%s/%dx%d.png", resolutionLevel0, x, y);
 			sprintf(nightmap_file, "./GameData/textures/earth/night/%s/%dx%d.png", resolutionLevel0, x, y);
 			sprintf(specreliefcitiesboundariesmap_file, "./GameData/textures/earth/specular_relief_cities/%s/%dx%d.png", resolutionLevel1, x, y);
 			sprintf(normalmap_file, "./GameData/textures/earth/normal/%s/%dx%d.png", resolutionLevel1, x, y);
+			sprintf(countriesmap_file, "./GameData/textures/earth/countries/%s/%dx%d.png", resolutionLevel0, x, y);
 
 			TextureFactory::make()
 				->image(ResourceManager::getInstance()->loadImage(colormap_file))
@@ -257,6 +267,13 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 				->image(ResourceManager::getInstance()->loadImage(normalmap_file))
 				->texLayer(3)
 				->uniform(stateSet, "normalmap")
+				->assign(stateSet)
+				->build();
+
+			TextureFactory::make()
+				->image(ResourceManager::getInstance()->loadImage(countriesmap_file))
+				->texLayer(4)
+				->uniform(stateSet, "countriesmap")
 				->assign(stateSet)
 				->build();
 
