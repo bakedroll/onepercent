@@ -98,7 +98,7 @@ void GlobeOverviewState::onMousePressedEvent(int button, float x, float y)
 		getWorld()->getCameraManipulator()->getPickRay(x, y, point, direction);
 
 		Vec3f pickResult;
-		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), 6.371f, point, direction, pickResult))
+		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), GlobeModel::EARTH_RADIUS, point, direction, pickResult))
 		{
 			Vec2f polar = getPolarFromCartesian(pickResult);
 			unsigned char id = _globeWorld->getSimulation()->getCountryId(polar);
