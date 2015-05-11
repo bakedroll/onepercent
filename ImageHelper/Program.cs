@@ -11,7 +11,7 @@ namespace ImageHelper
 {
     class Program
     {
-        private static int PressKeyOnExit = 1;
+        private static int _pressKeyOnExit = 1;
 
         public static void ClearCurrentConsoleLine()
         {
@@ -23,7 +23,7 @@ namespace ImageHelper
 
         private static void Exit()
         {
-            if (PressKeyOnExit == 1)
+            if (_pressKeyOnExit == 1)
             {
                 Console.Write("Press any key to exit... ");
                 Console.ReadKey();
@@ -280,7 +280,7 @@ namespace ImageHelper
             try
             {
                 var command = Int32.Parse(args[0]);
-                PressKeyOnExit = Int32.Parse(args[1]);
+                _pressKeyOnExit = Int32.Parse(args[1]);
                 switch (command)
                 {
                     case 0:
