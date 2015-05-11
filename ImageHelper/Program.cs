@@ -11,6 +11,8 @@ namespace ImageHelper
 {
     class Program
     {
+        private static int PressKeyOnExit = 1;
+
         public static void ClearCurrentConsoleLine()
         {
             var currentLineCursor = Console.CursorTop;
@@ -21,8 +23,11 @@ namespace ImageHelper
 
         private static void Exit()
         {
-            Console.Write("Press any key to exit... ");
-            Console.ReadKey();
+            if (PressKeyOnExit == 1)
+            {
+                Console.Write("Press any key to exit... ");
+                Console.ReadKey();
+            }
         }
 
         private static void Error(string message, string stackTrace = null)
@@ -64,6 +69,8 @@ namespace ImageHelper
 
         private static void SubdivideImage(string filename, int cols, int rows, string outputdir)
         {
+            Console.WriteLine("Reading image file {0}", filename);
+
             var inputBitmap = new Bitmap(filename);
 
             var width = inputBitmap.Width;
@@ -71,6 +78,7 @@ namespace ImageHelper
 
             if ((width % cols != 0) && (height % rows != 0))
             {
+                Console.WriteLine("Error: Wrong size");
                 return;
             }
 
@@ -83,15 +91,27 @@ namespace ImageHelper
                 {
                     var outputBitmap = new Bitmap(pwidth, pheight, inputBitmap.PixelFormat);
 
+                    Console.WriteLine("Step {0}/{1}", y * cols + x + 1, rows * cols);
+
+                    int percentCounter = 0;
+                    Console.WriteLine("0%");
                     for (int py = 0; py < pheight; py++)
                     {
                         for (int px = 0; px < pwidth; px++)
                         {
                             outputBitmap.SetPixel(px, py, inputBitmap.GetPixel(x*pwidth + px, y*pheight + py));
                         }
+
+                        Console.SetCursorPosition(0, Console.CursorTop - 1);
+                        ClearCurrentConsoleLine();
+
+                        percentCounter++;
+                        Console.WriteLine("{0}%", percentCounter * 100 / pheight);
                     }
 
-                    outputBitmap.Save(string.Format("{0}{1}x{2}.png", outputdir, x, y), ImageFormat.Png);
+                    var outputFilename = string.Format("{0}{1}x{2}.png", outputdir, x, y);
+                    Console.WriteLine("Saving {0}", outputFilename);
+                    outputBitmap.Save(outputFilename, ImageFormat.Png);
                 }
             }
         }
@@ -119,8 +139,10 @@ namespace ImageHelper
             binFile.Close();
         }
 
-        private static void ConvertCountriesMap(string tableFilename, string mapFilename, string greyscaleFilename, int newWidth, int newHeight, string binFilename)
+        private static void ConvertCountriesMap(string tableFilename, string mapFilename, string greyscaleFilename, int newWidth, int newHeight, int newWidthMap, int newHeightMap, string binFilename)
         {
+            Console.WriteLine("Reading map file {0}", mapFilename);
+
             var countriesBitmap = new Bitmap(mapFilename);
 
             Console.WriteLine("Reading table file {0}", tableFilename);
@@ -135,9 +157,11 @@ namespace ImageHelper
 
             var asen = new UTF8Encoding();
 
-            var resultBitmap = new Bitmap(newWidth, newHeight, PixelFormat.Format32bppArgb);
-
             var countries = new Dictionary<Color, byte>();
+            int percentCounter;
+
+            int oldWidth = countriesBitmap.Width;
+            int oldHeight = countriesBitmap.Height;
 
             using (var writer = new BinaryWriter(binFile))
             {
@@ -170,36 +194,30 @@ namespace ImageHelper
                     counter++;
                 }
 
-                int oldWidth = countriesBitmap.Width;
-                int oldHeight = countriesBitmap.Height;
-
                 writer.Write(newWidth);
                 writer.Write(newHeight);
 
-                int percentCounter = 0;
+                percentCounter = 0;
                 Console.WriteLine("0%");
+
                 for (int y = 0; y < newHeight; y++)
                 {
                     for (int x = 0; x < newWidth; x++)
                     {
                         var color = countriesBitmap.GetPixel((oldWidth * x) / newWidth, (oldHeight * y) / newHeight);
 
-                        Color col;
                         byte id;
 
                         if (countries.ContainsKey(color))
                         {
                             countries.TryGetValue(color, out id);
-                            col = Color.FromArgb(id, id, id);
                         }
                         else
                         {
-                            col = Color.White;
                             id = 255;
                         }
 
                         writer.Write(id);
-                        resultBitmap.SetPixel(x, y, col);
                     }
 
                     Console.SetCursorPosition(0, Console.CursorTop - 1);
@@ -208,6 +226,42 @@ namespace ImageHelper
                     percentCounter++;
                     Console.WriteLine("{0}%", percentCounter * 100 / newHeight);
                 }
+            }
+
+            var resultBitmap = new Bitmap(newWidthMap, newHeightMap, PixelFormat.Format32bppArgb);
+
+            Console.WriteLine("Processing country map...");
+
+            percentCounter = 0;
+
+            Console.WriteLine("0%");
+            for (int y = 0; y < newHeightMap; y++)
+            {
+                for (int x = 0; x < newWidthMap; x++)
+                {
+                    var color = countriesBitmap.GetPixel((oldWidth * x) / newWidthMap, (oldHeight * y) / newHeightMap);
+
+                    Color col;
+
+                    if (countries.ContainsKey(color))
+                    {
+                        byte id;
+                        countries.TryGetValue(color, out id);
+                        col = Color.FromArgb(id, id, id);
+                    }
+                    else
+                    {
+                        col = Color.White;
+                    }
+
+                    resultBitmap.SetPixel(x, y, col);
+                }
+
+                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                ClearCurrentConsoleLine();
+
+                percentCounter++;
+                Console.WriteLine("{0}%", percentCounter * 100 / newHeightMap);
             }
 
             Console.WriteLine("Saving {0}", greyscaleFilename);
@@ -226,19 +280,20 @@ namespace ImageHelper
             try
             {
                 var command = Int32.Parse(args[0]);
+                PressKeyOnExit = Int32.Parse(args[1]);
                 switch (command)
                 {
                     case 0:
-                        MergeImages(args[1], args[2], args[3], args[4], args[5]);
+                        MergeImages(args[2], args[3], args[4], args[5], args[6]);
                         break;
                     case 1:
-                        SubdivideImage(args[1], Int32.Parse(args[2]), Int32.Parse(args[3]), args[4]);
+                        SubdivideImage(args[2], Int32.Parse(args[3]), Int32.Parse(args[4]), args[5]);
                         break;
                     case 2:
-                        ConvertStarsMap(args[1], args[2]);
+                        ConvertStarsMap(args[2], args[3]);
                         break;
                     case 3:
-                        ConvertCountriesMap(args[1], args[2], args[3], Int32.Parse(args[4]), Int32.Parse(args[5]), args[6]);
+                        ConvertCountriesMap(args[2], args[3], args[4], Int32.Parse(args[5]), Int32.Parse(args[6]), Int32.Parse(args[7]), Int32.Parse(args[8]), args[9]);
                         break;
                 }
             }
