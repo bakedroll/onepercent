@@ -51,6 +51,7 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 		if (!state->isInitialized())
 		{
 			state->setWorld(state->isLoadingState() ? _worldLoading : _world);
+			state->setViewer(&_viewer);
 			state->setGameSettings(_gameSettings);
 
 			state->initialize(_inputManager->getResolutionWidth(), _inputManager->getResolutionHeight());
@@ -187,10 +188,7 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 			width = windowResolution.x();
 			height = windowResolution.y();
 
-			ViewerBase::Windows windows;
-			_viewer.getWindows(windows);
-
-			_inputManager->setGraphicsWindow(*windows.begin());
+			_inputManager->setViewer(&_viewer);
 		}
 		else
 		{
@@ -202,11 +200,9 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 
 		attachWorld(_world);
 
-		//_world->getRootNode()->setEventCallback(_inputManager);
-		//_worldLoading->getRootNode()->setEventCallback(_inputManager);
-
 		_viewer.addEventHandler(_inputManager);
 		_viewer.setKeyEventSetsDone(0);
+		_viewer.getRootGroup()->setUpdateCallback(this);
 
 		_viewer.realize();
 		while (!_viewer.done() && !_gameEnded)
@@ -230,15 +226,11 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 
 void GameApplication::setWorld(osg::ref_ptr<World> world)
 {
-	world->getRootNode()->setUpdateCallback(this);
-
 	_world = world;
 }
 
 void GameApplication::setWorldLoading(osg::ref_ptr<World> world)
 {
-	world->getRootNode()->setUpdateCallback(this);
-
 	_worldLoading = world;
 }
 

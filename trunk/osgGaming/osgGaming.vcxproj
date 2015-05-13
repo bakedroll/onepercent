@@ -25,6 +25,7 @@
     <ClCompile Include="src\Hud.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\PackageResourceLoader.cpp" />
+    <ClCompile Include="src\PostProcessingEffect.cpp" />
     <ClCompile Include="src\ResourceManager.cpp" />
     <ClCompile Include="src\TextResource.cpp" />
     <ClCompile Include="src\TextureFactory.cpp" />
@@ -39,6 +40,7 @@
     <ClCompile Include="src\UIUpdateVisitor.cpp" />
     <ClCompile Include="src\UIVisualElement.cpp" />
     <ClCompile Include="src\UserInteractionModel.cpp" />
+    <ClCompile Include="src\Viewer.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +59,7 @@
     <ClInclude Include="include\osgGaming\Hud.h" />
     <ClInclude Include="include\osgGaming\InputManager.h" />
     <ClInclude Include="include\osgGaming\PackageResourceLoader.h" />
+    <ClInclude Include="include\osgGaming\PostProcessingEffect.h" />
     <ClInclude Include="include\osgGaming\ResourceLoader.h" />
     <ClInclude Include="include\osgGaming\ResourceManager.h" />
     <ClInclude Include="include\osgGaming\TextResource.h" />
@@ -73,6 +76,7 @@
     <ClInclude Include="include\osgGaming\UIUpdateVisitor.h" />
     <ClInclude Include="include\osgGaming\UIVisualElement.h" />
     <ClInclude Include="include\osgGaming\UserInteractionModel.h" />
+    <ClInclude Include="include\osgGaming\Viewer.h" />
     <ClInclude Include="include\osgGaming\World.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

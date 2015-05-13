@@ -51,7 +51,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>osgd.lib;osgViewerd.lib;osgUtild.lib;osgGAd.lib;osgDBd.lib;osgTextd.lib;osgGamingd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>osgd.lib;osgViewerd.lib;osgUtild.lib;osgGAd.lib;osgDBd.lib;osgTextd.lib;osgPPUd.lib;osgGamingd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/FORCE:multiple %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>

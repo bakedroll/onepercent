@@ -4,9 +4,9 @@
 #include <osgGaming/GameSettings.h>
 #include <osgGaming/GameState.h>
 #include <osgGaming/InputManager.h>
+#include <osgGaming/Viewer.h>
 
 #include <osg/NodeCallback>
-#include <osgViewer/Viewer>
 
 #include <vector>
 #include <future>
@@ -50,7 +50,7 @@ namespace osgGaming
 
 		GameStateList _stateStack;
 
-		osgViewer::Viewer _viewer;
+		Viewer _viewer;
 
 		osg::ref_ptr<InputManager> _inputManager;
 

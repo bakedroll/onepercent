@@ -106,6 +106,11 @@ ref_ptr<World> GameState::getWorld()
 	return _world;
 }
 
+ref_ptr<Viewer> GameState::getViewer()
+{
+	return _viewer;
+}
+
 ref_ptr<GameSettings> GameState::getGameSettings()
 {
 	return _gameSettings;
@@ -124,6 +129,11 @@ void GameState::setFrameTime(double frameTime)
 void GameState::setWorld(ref_ptr<World> world)
 {
 	_world = world;
+}
+
+void GameState::setViewer(ref_ptr<Viewer> viewer)
+{
+	_viewer = viewer;
 }
 
 void GameState::setGameSettings(ref_ptr<GameSettings> settings)
