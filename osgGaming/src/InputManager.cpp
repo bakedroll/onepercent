@@ -24,20 +24,20 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	switch (ea.getEventType())
 	{
 	case GUIEventAdapter::KEYDOWN:
-	
+	{
 		_currentState->onKeyPressedEvent(ea.getKey());
 
 		return true;
-
+	}
 	case GUIEventAdapter::KEYUP:
-
+	{
 		_currentState->onKeyReleasedEvent(ea.getKey());
 
 		return true;
-
+	}
 	case GUIEventAdapter::PUSH:
 	case GUIEventAdapter::DOUBLECLICK:
-
+	{
 		if (_currentWorld->getHud()->anyUserInteractionModelHovered())
 		{
 			if (ea.getButton() == GUIEventAdapter::LEFT_MOUSE_BUTTON)
@@ -59,9 +59,9 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 		}
 
 		return true;
-
+	}
 	case GUIEventAdapter::RELEASE:
-
+	{
 		_mousePressed[log_x_2(ea.getButton())] = false;
 
 		if (_mouseDragging == ea.getButton())
@@ -78,13 +78,18 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 		}
 
 		return true;
-	
+	}
 	case GUIEventAdapter::RESIZE:
+	{
+		ViewerBase::Windows windows;
+		_viewer->getWindows(windows);
 
-		if (_graphicsWindow.valid())
+		ref_ptr<GraphicsWindow> graphicsWindow = *windows.begin();
+
+		if (graphicsWindow.valid())
 		{
-			int newWidth = _graphicsWindow->getTraits()->width;
-			int newHeight = _graphicsWindow->getTraits()->height;
+			int newWidth = graphicsWindow->getTraits()->width;
+			int newHeight = graphicsWindow->getTraits()->height;
 
 			float w = ea.getWindowWidth();
 
@@ -96,10 +101,10 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 		}
 
 		return true;
-
+	}
 	case GUIEventAdapter::DRAG:
 	case GUIEventAdapter::MOVE:
-
+	{
 		_mousePosition = Vec2f(ea.getX(), ea.getY());
 
 		_currentState->onMouseMoveEvent(_mousePosition.x(), _mousePosition.y());
@@ -131,20 +136,20 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 		}
 
 		return true;
-
+	}
 	case GUIEventAdapter::SCROLL:
-
+	{
 		_currentState->onScrollEvent(ea.getScrollingMotion());
 		return true;
-
+	}
 	}
 
 	return false;
 }
 
-void InputManager::setGraphicsWindow(ref_ptr<GraphicsWindow> graphicsWindow)
+void InputManager::setViewer(ref_ptr<osgGaming::Viewer> viewer)
 {
-	_graphicsWindow = graphicsWindow;
+	_viewer = viewer;
 }
 
 void InputManager::setCurrentState(osg::ref_ptr<GameState> state)

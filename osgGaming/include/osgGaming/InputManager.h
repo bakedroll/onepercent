@@ -3,7 +3,7 @@
 #include <osgGaming/GameState.h>
 #include <osgGaming/World.h>
 #include <osgGA/GUIEventHandler>
-#include <osgViewer/Viewer>
+#include <osgGaming/Viewer.h>
 
 namespace osgGaming
 {
@@ -14,7 +14,7 @@ namespace osgGaming
 
 		virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
 
-		void setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow);
+		void setViewer(osg::ref_ptr<osgGaming::Viewer> viewer);
 		void setCurrentState(osg::ref_ptr<GameState> state);
 		void setCurrentWorld(osg::ref_ptr<World> world);
 
@@ -35,7 +35,7 @@ namespace osgGaming
 
 		osg::ref_ptr<World> _currentWorld;
 
-		osg::ref_ptr<osgViewer::GraphicsWindow> _graphicsWindow;
+		osg::ref_ptr<osgGaming::Viewer> _viewer;
 		osg::ref_ptr<GameState> _currentState;
 
 		unsigned int _resolutionWidth;

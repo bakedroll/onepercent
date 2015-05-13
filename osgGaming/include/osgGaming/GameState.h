@@ -3,6 +3,7 @@
 #include <osgGaming/World.h>
 #include <osgGaming/GameSettings.h>
 #include <osgGaming/UserInteractionModel.h>
+#include <osgGaming/Viewer.h>
 
 #include <osg/Referenced>
 #include <osg/ref_ptr>
@@ -59,11 +60,13 @@ namespace osgGaming
 		double getSimulationTime();
 		double getFrameTime();
 		osg::ref_ptr<World> getWorld();
+		osg::ref_ptr<Viewer> getViewer();
 		osg::ref_ptr<GameSettings> getGameSettings();
 
 		void setSimulationTime(double simulationTime);
 		void setFrameTime(double frameTime);
 		void setWorld(osg::ref_ptr<World> world);
+		void setViewer(osg::ref_ptr<Viewer> viewer);
 		void setGameSettings(osg::ref_ptr<GameSettings> settings);
 
 	protected:
@@ -82,6 +85,7 @@ namespace osgGaming
 		double _simulationTime;
 		double _frameTime;
 		osg::ref_ptr<World> _world;
+		osg::ref_ptr<Viewer> _viewer;
 		osg::ref_ptr<GameSettings> _gameSettings;
 	};
 }

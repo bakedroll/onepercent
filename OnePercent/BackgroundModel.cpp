@@ -148,6 +148,11 @@ void BackgroundModel::makeSun()
 
 	ref_ptr<Geometry> geo = createQuadGeometry(-1.0f, 1.0f, -1.0f, 1.0f);
 
+	ref_ptr<Vec4Array> colors = new Vec4Array();
+	colors->push_back(Vec4f(1.0, 1.0, 1.0, 1.0));
+	geo->setColorArray(colors);
+	geo->setColorBinding(Geometry::BIND_OVERALL);
+
 	sunPosTransform->setPosition(Vec3f(0.0f, 9.0f, 0.0f));
 	sunPosTransform->setScale(Vec3f(0.3f, 0.3f, 0.3f));
 

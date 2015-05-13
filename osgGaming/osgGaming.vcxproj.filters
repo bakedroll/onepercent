@@ -19,6 +19,12 @@
     <Filter Include="Source Files\Resources">
       <UniqueIdentifier>{f26ba47f-2e2b-46b6-9b72-6ff647a00d05}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\PPU">
+      <UniqueIdentifier>{b1602186-a60f-43d9-a071-53755c573aae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\PPU">
+      <UniqueIdentifier>{da6da027-d54f-4943-9de7-8915855db0c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameApplication.cpp">
@@ -107,6 +113,12 @@
     </ClCompile>
     <ClCompile Include="src\ByteStream.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Viewer.cpp">
+      <Filter>Source Files\PPU</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PostProcessingEffect.cpp">
+      <Filter>Source Files\PPU</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +217,12 @@
     </ClInclude>
     <ClInclude Include="include\osgGaming\ByteStream.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\Viewer.h">
+      <Filter>Header Files\PPU</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\PostProcessingEffect.h">
+      <Filter>Header Files\PPU</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

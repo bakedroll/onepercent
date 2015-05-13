@@ -262,8 +262,8 @@ ref_ptr<Geometry> osgGaming::createQuadGeometry(float left, float right, float b
 		indices->push_back(3);
 	}
 
-	ref_ptr<Vec4Array> colors = new Vec4Array();
-	colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	//ref_ptr<Vec4Array> colors = new Vec4Array();
+	//colors->push_back(color);
 
 	ref_ptr<Vec2Array> texcoords = new Vec2Array();
 	texcoords->push_back(Vec2(0.0f, 0.0f));
@@ -276,8 +276,8 @@ ref_ptr<Geometry> osgGaming::createQuadGeometry(float left, float right, float b
 	geo->setVertexArray(verts);
 	geo->setNormalArray(normals);
 	geo->setNormalBinding(Geometry::BIND_OVERALL);
-	geo->setColorArray(colors);
-	geo->setColorBinding(osg::Geometry::BIND_OVERALL);
+	//geo->setColorArray(colors);
+	//geo->setColorBinding(osg::Geometry::BIND_OVERALL);
 
 	return geo;
 }
