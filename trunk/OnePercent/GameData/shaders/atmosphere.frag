@@ -1,4 +1,5 @@
 #extension GL_ARB_gpu_shader_fp64 : enable
+#extension GL_ARB_shader_precision : enable
 
 double abs(double x)
 {
@@ -8,6 +9,11 @@ double abs(double x)
 	}
 
 	return x;
+}
+
+double sqrt(double x)
+{
+	return double(sqrt(float(x)));
 }
 
 varying vec3 pixel_nor;

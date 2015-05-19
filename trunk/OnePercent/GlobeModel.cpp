@@ -99,6 +99,21 @@ void GlobeModel::makeEarthModel()
 	earth->setStateSet(stateSet);
 
 	addChild(earth);
+
+
+
+	ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
+	ref_ptr<Geode> geode = new Geode();
+
+	ref_ptr<Geometry> geo = createSphereSegmentMesh(24, 48, 1.738, 0, 23, 0, 47);
+	geo->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
+
+	geode->addDrawable(geo);
+	transform->addChild(geode);
+
+	transform->setPosition(Vec3f(384.4f, 0.0f, 0.0f));
+
+	addChild(transform);
 }
 
 void GlobeModel::makeCloudsModel()
