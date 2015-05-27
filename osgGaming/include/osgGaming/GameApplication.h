@@ -5,8 +5,7 @@
 #include <osgGaming/GameState.h>
 #include <osgGaming/InputManager.h>
 #include <osgGaming/Viewer.h>
-
-#include <osg/NodeCallback>
+#include <osgGaming/SimulationCallback.h>
 
 #include <vector>
 #include <future>
@@ -15,12 +14,12 @@ namespace osgGaming
 {
 	typedef std::vector<osg::ref_ptr<GameState>> GameStateList;
 
-	class GameApplication : public osg::NodeCallback
+	class GameApplication : public SimulationCallback
 	{
 	public:
 		GameApplication();
 
-		virtual void operator() (osg::Node* node, osg::NodeVisitor* nv) override;
+		virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override;
 
 		template<class WorldType>
 		void setWorld() { setWorld(new WorldType()); }
@@ -46,8 +45,6 @@ namespace osgGaming
 		void pushState(osg::ref_ptr<GameState> state);
 		void replaceState(osg::ref_ptr<GameState> state);
 
-		double _lastSimulationTime;
-
 		GameStateList _stateStack;
 
 		Viewer _viewer;
@@ -60,7 +57,6 @@ namespace osgGaming
 
 		bool _gameEnded;
 		bool _isLoading;
-		bool _resetTimeDiff;
 
 		std::future<void> _loadingThreadFuture;
 	};

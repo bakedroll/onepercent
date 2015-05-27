@@ -8,6 +8,8 @@
 #include <osgPPU/Processor.h>
 #include <osgPPU/Unit.h>
 
+#include <osgGaming/PostProcessingEffect.h>
+
 namespace osgGaming
 {
 	class Viewer : public osgViewer::Viewer
@@ -20,6 +22,8 @@ namespace osgGaming
 
 		osg::ref_ptr<osg::Group> getRootGroup();
 
+		void addPostProcessingEffect(osg::ref_ptr<PostProcessingEffect> ppe);
+
 	private:
 		typedef struct _renderTexture
 		{
@@ -28,8 +32,12 @@ namespace osgGaming
 		} RenderTexture;
 
 		typedef std::map<osg::Camera::BufferComponent, RenderTexture> RenderTextureDictionary;
+		typedef std::vector<osg::ref_ptr<PostProcessingEffect>> PostProcessingEffectList;
 
 		osg::ref_ptr<osgPPU::Unit> bypassUnit(osg::Camera::BufferComponent bufferComponent);
+		osg::ref_ptr<osgPPU::Unit> lastUnit();
+
+		osg::ref_ptr<osgPPU::Unit> unitForType(PostProcessingEffect::UnitType type);
 
 		void initializePPU();
 
@@ -40,9 +48,12 @@ namespace osgGaming
 
 		osg::ref_ptr<osgPPU::Processor> _processor;
 		osg::ref_ptr<osg::Group> _ppGroup;
-		osg::ref_ptr<osgPPU::Unit> _outputUnit;
+		//osg::ref_ptr<osgPPU::Unit> _outputUnit;
+
+		osg::ref_ptr<osgPPU::Unit> _lastUnit;
 
 		bool _ppuInitialized;
 		RenderTextureDictionary _renderTextures;
+		PostProcessingEffectList _ppeList;
 	};
 }

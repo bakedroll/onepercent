@@ -36,7 +36,7 @@ namespace osgGaming
 		void setPosition(osg::Vec3f position);
 		void setAttitude(osg::Quat rotation);
 
-		void updateResolution(osg::Vec2f resolution);
+		void updateResolution(float width, float height);
 		void updateClearColor(osg::Vec4 clearColor);
 
 		void getPickRay(float x, float y, osg::Vec3f& point, osg::Vec3f& direction);

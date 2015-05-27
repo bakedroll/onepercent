@@ -87,7 +87,7 @@ void GlobeOverviewWorld::updateSun(Vec3f sunDirection)
 		float dist = pointLineDistance(getCameraManipulator()->getPosition(), sunDirection, Vec3f(0.0f, 0.0f, 0.0f));
 		float scale = clamp<float>(dist - GlobeModel::EARTH_RADIUS, 0.0f, range);
 		scale /= range;
-		scale *= 3.0f;
+		scale *= 2.5f;
 
 		_backgroundModel->getSunGlowTransform()->setScale(Vec3f(scale, scale, scale));
 	}

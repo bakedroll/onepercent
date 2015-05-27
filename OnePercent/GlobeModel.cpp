@@ -102,18 +102,24 @@ void GlobeModel::makeEarthModel()
 
 
 
-	ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
+	/*ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
 	ref_ptr<Geode> geode = new Geode();
 
-	ref_ptr<Geometry> geo = createSphereSegmentMesh(24, 48, 1.738, 0, 23, 0, 47);
-	geo->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
+	ref_ptr<Geometry> geo = createSphereSegmentMesh(24, 48, 10.738, 0, 23, 0, 47);
+	//geo->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
 
 	geode->addDrawable(geo);
 	transform->addChild(geode);
 
 	transform->setPosition(Vec3f(384.4f, 0.0f, 0.0f));
 
-	addChild(transform);
+	TextureFactory::make()
+		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/moon/color_1k.png"))
+		->texLayer(0)
+		->assign(geo->getOrCreateStateSet())
+		->build();
+
+	addChild(transform);*/
 }
 
 void GlobeModel::makeCloudsModel()

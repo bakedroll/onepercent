@@ -16,6 +16,8 @@
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/TextureFactory.h>
 
+#include <osgGaming/HighDynamicRangeEffect.h>
+
 using namespace onep;
 using namespace osg;
 using namespace osgGaming;
@@ -37,6 +39,8 @@ void LoadingGlobeOverviewState::initialize(float resolutionWidth, float resoluti
 	_loadingText->setMargin(10.0f);
 
 	getWorld()->getHud()->getRootUIElement()->addChild(_loadingText);
+
+	// getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect());
 }
 
 StateEvent* LoadingGlobeOverviewState::update()

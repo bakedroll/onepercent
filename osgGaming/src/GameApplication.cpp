@@ -16,37 +16,21 @@ using namespace osg;
 using namespace std;
 
 GameApplication::GameApplication()
-	: NodeCallback(),
-	  _lastSimulationTime(0.0),
+	: SimulationCallback(),
 	  _gameEnded(false),
-	  _isLoading(false),
-	  _resetTimeDiff(false)
+	  _isLoading(false)
 {
 
 }
 
-void GameApplication::operator() (Node* node, NodeVisitor* nv)
+void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
 {
-	double time = nv->getFrameStamp()->getSimulationTime();
-	double time_diff = 0.0;
-
-	if (_resetTimeDiff == true)
-	{
-		_resetTimeDiff = false;
-	}
-	else if (_lastSimulationTime > 0.0)
-	{
-		time_diff = time - _lastSimulationTime;
-	}
-
-	_lastSimulationTime = time;
-
 	if (!_stateStack.empty())
 	{
 		ref_ptr<GameState> state = *(_stateStack.end() - 1);
 
-		state->setSimulationTime(time);
-		state->setFrameTime(time_diff);
+		state->setSimulationTime(simTime);
+		state->setFrameTime(timeDiff);
 
 		if (!state->isInitialized())
 		{
@@ -74,7 +58,7 @@ void GameApplication::operator() (Node* node, NodeVisitor* nv)
 				if (_isLoading)
 				{
 					_isLoading = false;
-					_resetTimeDiff = true;
+					resetTimeDiff();
 					
 					attachWorld(_world);
 				}
