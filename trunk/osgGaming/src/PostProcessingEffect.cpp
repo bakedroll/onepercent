@@ -18,8 +18,8 @@ void PostProcessingEffect::initialize()
 	}
 }
 
-PostProcessingEffect::InitialUnitList PostProcessingEffect::getInitialUnits()
+PostProcessingEffect::InputToUniformList PostProcessingEffect::getInputToUniform()
 {
-	InitialUnitList units;
-	return units;
+	InputToUniformList list;
+	return list;
 }

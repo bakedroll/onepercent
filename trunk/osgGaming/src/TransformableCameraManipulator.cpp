@@ -80,9 +80,9 @@ void TransformableCameraManipulator::removeCameraAlignedQuad(ref_ptr<CameraAlign
 	}
 }
 
-void TransformableCameraManipulator::updateResolution(Vec2f resolution)
+void TransformableCameraManipulator::updateResolution(float width, float height)
 {
-	_resolution = resolution;
+	_resolution = Vec2f(width, height);
 	_projectionRatio = _resolution.x() / _resolution.y();
 
 	_projectionMatrix = Matrix::perspective(

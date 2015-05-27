@@ -120,6 +120,15 @@
     <ClCompile Include="src\PostProcessingEffect.cpp">
       <Filter>Source Files\PPU</Filter>
     </ClCompile>
+    <ClCompile Include="src\HighDynamicRangeEffect.cpp">
+      <Filter>Source Files\PPU</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SimulationCallback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StaticResources.cpp">
+      <Filter>Source Files\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h">
@@ -223,6 +232,15 @@
     </ClInclude>
     <ClInclude Include="include\osgGaming\PostProcessingEffect.h">
       <Filter>Header Files\PPU</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\HighDynamicRangeEffect.h">
+      <Filter>Header Files\PPU</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\SimulationCallback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\StaticResources.h">
+      <Filter>Header Files\Resources</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

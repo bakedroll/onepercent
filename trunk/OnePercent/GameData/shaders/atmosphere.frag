@@ -10,12 +10,12 @@ double abs(double x)
 
 	return x;
 }
-
+/*
 double sqrt(double x)
 {
 	return double(sqrt(float(x)));
 }
-
+*/
 varying vec3 pixel_nor;
 varying vec4 pixel_pos;
 varying vec4 pixel_scr;
