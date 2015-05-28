@@ -3,7 +3,6 @@
 #include <osg/Projection>
 #include <osgViewer/Renderer>
 
-#include <osgPPU/UnitInOut.h>
 #include <osgPPU/UnitBypass.h>
 #include <osgPPU/UnitDepthbufferBypass.h>
 #include <osgPPU/Camera.h>
@@ -110,37 +109,57 @@ void Viewer::setHud(ref_ptr<Hud> hud)
 	}
 }
 
-void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe)
+void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe, bool enabled)
 {
-	initializePPU();
-
-	ppe->initialize();
-
-	ref_ptr<osgPPU::Unit> unitOut = new UnitInOut();
-	unitOut->setInputTextureIndexForViewportReference(-1);
-	_hudStateSet->setTextureAttributeAndModes(0, unitOut->getOrCreateOutputTexture(0), StateAttribute::ON);
-
-
-	PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
-	for (PostProcessingEffect::InitialUnitList::iterator it = initialUnits.begin(); it != initialUnits.end(); ++it)
+	if (enabled)
 	{
-		unitForType(it->type)->addChild(it->unit);
+		resetPostProcessingEffects();
 	}
 
-	PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
-	for (PostProcessingEffect::InputToUniformList::iterator it = inputToUniformList.begin(); it != inputToUniformList.end(); ++it)
+	PostProcessingState pps;
+	pps.effect = ppe;
+	pps.enabled = enabled;
+
+	_ppeDictionary.insert(PostProcessingStateDictionary::value_type((void*)ppe.get(), pps));
+
+	if (enabled)
 	{
-		it->unit->setInputToUniform(unitForType(it->type), it->name, true);
+		setupPostProcessingEffects();
+	}
+}
+
+void Viewer::setPostProcessingEffectEnabled(ref_ptr<PostProcessingEffect> ppe, bool enabled)
+{
+	PostProcessingStateDictionary::iterator it = _ppeDictionary.find((void*)ppe.get());
+
+	if (it->second.enabled == enabled)
+	{
+		return;
 	}
 
-	_lastUnit = ppe->getResultUnit();
+	resetPostProcessingEffects();
 
+	it->second.enabled = enabled;
 
-	_lastUnit->addChild(unitOut);
+	setupPostProcessingEffects();
 
-	// _processor->dirtyUnitSubgraph();
+}
 
-	_ppeList.push_back(ppe);
+void Viewer::setPostProcessingEffectEnabled(unsigned int index, bool enabled)
+{
+	setPostProcessingEffectEnabled((PostProcessingEffect*)postProcessingEffect(index), enabled);
+}
+
+bool Viewer::getPostProcessingEffectEnabled(ref_ptr<PostProcessingEffect> ppe)
+{
+	PostProcessingStateDictionary::iterator it = _ppeDictionary.find((void*)ppe.get());
+
+	return it->second.enabled;
+}
+
+bool Viewer::getPostProcessingEffectEnabled(unsigned int index)
+{
+	return getPostProcessingEffectEnabled((PostProcessingEffect*)postProcessingEffect(index));
 }
 
 void Viewer::initialize()
@@ -178,6 +197,83 @@ void Viewer::initialize()
 	_hudCamera->addChild(_hudSwitch);
 
 	_ppGroup->addChild(_hudCamera);
+}
+
+void Viewer::resetPostProcessingEffects()
+{
+	initializePPU();
+
+	_lastUnit = lastUnit(true);
+
+	for (PostProcessingStateDictionary::iterator it = _ppeDictionary.begin(); it != _ppeDictionary.end(); ++it)
+	{
+		if (!it->second.enabled)
+		{
+			continue;
+		}
+
+		ref_ptr<PostProcessingEffect> ppe = it->second.effect;
+
+		PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
+		for (PostProcessingEffect::InitialUnitList::iterator it = initialUnits.begin(); it != initialUnits.end(); ++it)
+		{
+			unitForType(it->type)->removeChild(it->unit);
+		}
+
+		PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
+		for (PostProcessingEffect::InputToUniformList::iterator it = inputToUniformList.begin(); it != inputToUniformList.end(); ++it)
+		{
+			unitForType(it->type)->removeChild(it->unit);
+
+			//it->unit->setInputToUniform(unitForType(it->type), it->name, false);
+		}
+
+		_lastUnit = ppe->getResultUnit();
+	}
+
+	if (_unitOutput.valid())
+	{
+		_lastUnit->removeChild(_unitOutput);
+	}
+
+	_unitOutput = new UnitInOut();
+	_unitOutput->setInputTextureIndexForViewportReference(-1);
+	_hudStateSet->setTextureAttributeAndModes(0, _unitOutput->getOrCreateOutputTexture(0), StateAttribute::ON);
+}
+
+void Viewer::setupPostProcessingEffects()
+{
+	_lastUnit = lastUnit(true);
+
+	for (PostProcessingStateDictionary::iterator it = _ppeDictionary.begin(); it != _ppeDictionary.end(); ++it)
+	{
+		if (!it->second.enabled)
+		{
+			continue;
+		}
+
+		ref_ptr<PostProcessingEffect> ppe = it->second.effect;
+
+		ppe->initialize();
+
+		PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
+		for (PostProcessingEffect::InitialUnitList::iterator it = initialUnits.begin(); it != initialUnits.end(); ++it)
+		{
+			unitForType(it->type)->addChild(it->unit);
+		}
+
+		PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
+		for (PostProcessingEffect::InputToUniformList::iterator it = inputToUniformList.begin(); it != inputToUniformList.end(); ++it)
+		{
+			it->unit->setInputToUniform(unitForType(it->type), it->name, true);
+		}
+
+		_lastUnit = ppe->getResultUnit();
+	}
+
+	_lastUnit->addChild(_unitOutput);
+
+	_processor->dirtyUnitSubgraph();
 }
 
 Viewer::RenderTexture Viewer::renderTexture(osg::Camera::BufferComponent bufferComponent, bool recreate)
@@ -272,9 +368,9 @@ ref_ptr<Unit> Viewer::bypassUnit(osg::Camera::BufferComponent bufferComponent)
 	return rt.bypassUnit;
 }
 
-ref_ptr<osgPPU::Unit> Viewer::lastUnit()
+ref_ptr<osgPPU::Unit> Viewer::lastUnit(bool reset)
 {
-	if (!_lastUnit.valid())
+	if (!_lastUnit.valid() || reset)
 	{
 		_lastUnit = bypassUnit(osg::Camera::COLOR_BUFFER);
 	}
@@ -306,6 +402,23 @@ ref_ptr<osgPPU::Unit> Viewer::unitForType(PostProcessingEffect::UnitType type)
 	}
 
 	return unit;
+}
+
+void* Viewer::postProcessingEffect(unsigned int index)
+{
+	unsigned int c = 0;
+
+	for (PostProcessingStateDictionary::iterator it = _ppeDictionary.begin(); it != _ppeDictionary.end(); ++it)
+	{
+		if (c == index)
+		{
+			return it->first;
+		}
+
+		c++;
+	}
+
+	return NULL;
 }
 
 void Viewer::initializePPU()

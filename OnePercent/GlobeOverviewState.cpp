@@ -83,6 +83,20 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	{
 		stateEvent_pop();
 	}
+	else if (key == GUIEventAdapter::KEY_H)
+	{
+		bool enabled = !getViewer()->getPostProcessingEffectEnabled(0);
+		printf("HDR: %s\n", enabled ? "enabled" : "disabled");
+
+		getViewer()->setPostProcessingEffectEnabled(0, enabled);
+	}
+	else if (key == GUIEventAdapter::KEY_D)
+	{
+		bool enabled = !getViewer()->getPostProcessingEffectEnabled(1);
+		printf("DOF: %s\n", enabled ? "enabled" : "disabled");
+
+		getViewer()->setPostProcessingEffectEnabled(1, enabled);
+	}
 	/*else if (key == GUIEventAdapter::KEY_0)
 	{
 		printf("bla\n");

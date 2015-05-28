@@ -41,12 +41,12 @@ void LoadingGlobeOverviewState::initialize(float resolutionWidth, float resoluti
 
 	getWorld()->getHud()->getRootUIElement()->addChild(_loadingText);
 
-	//getViewer()->setClampColorEnabled(true);
-	//getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect());
+	getViewer()->setClampColorEnabled(true);
+	getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect(), false);
 
-	//getViewer()->addPostProcessingEffect(new DepthOfFieldEffect(
-	//	(float)getWorld()->getCameraManipulator()->getProjectionNear(),
-	//	(float)getWorld()->getCameraManipulator()->getProjectionFar()));
+	getViewer()->addPostProcessingEffect(new DepthOfFieldEffect(
+		(float)getWorld()->getCameraManipulator()->getProjectionNear(),
+		(float)getWorld()->getCameraManipulator()->getProjectionFar()), false);
 }
 
 StateEvent* LoadingGlobeOverviewState::update()
