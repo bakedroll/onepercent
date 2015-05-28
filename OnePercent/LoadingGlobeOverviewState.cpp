@@ -17,6 +17,7 @@
 #include <osgGaming/TextureFactory.h>
 
 #include <osgGaming/HighDynamicRangeEffect.h>
+#include <osgGaming/DepthOfFieldEffect.h>
 
 using namespace onep;
 using namespace osg;
@@ -40,8 +41,12 @@ void LoadingGlobeOverviewState::initialize(float resolutionWidth, float resoluti
 
 	getWorld()->getHud()->getRootUIElement()->addChild(_loadingText);
 
-	// getViewer()->setClampColorEnabled(true);
-	// getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect());
+	//getViewer()->setClampColorEnabled(true);
+	//getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect());
+
+	//getViewer()->addPostProcessingEffect(new DepthOfFieldEffect(
+	//	(float)getWorld()->getCameraManipulator()->getProjectionNear(),
+	//	(float)getWorld()->getCameraManipulator()->getProjectionFar()));
 }
 
 StateEvent* LoadingGlobeOverviewState::update()

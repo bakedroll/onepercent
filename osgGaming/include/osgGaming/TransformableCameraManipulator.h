@@ -31,6 +31,10 @@ namespace osgGaming
 		osg::Matrix getProjectionMatrix();
 		double getProjectionRatio();
 
+		// TODO: deprecated - move near far to viewer
+		double getProjectionNear();
+		double getProjectionFar();
+
 		osg::Vec3f getLookDirection();
 
 		void setPosition(osg::Vec3f position);

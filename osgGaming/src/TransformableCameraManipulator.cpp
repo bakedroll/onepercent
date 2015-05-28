@@ -10,8 +10,8 @@ TransformableCameraManipulator::TransformableCameraManipulator()
 	_updateClearColor(true),
 	_updateViewMatrix(true),
 	_projectionAngle(30.0),
-	_projectionNear(0.2),
-	_projectionFar(200.0),
+	_projectionNear(1.0),
+	_projectionFar(100.0),
 	_projectionRatio(0.0),
 	_clearColor(Vec4(0.0, 0.0, 0.0, 1.0))
 {
@@ -197,6 +197,16 @@ Matrix TransformableCameraManipulator::getProjectionMatrix()
 double TransformableCameraManipulator::getProjectionRatio()
 {
 	return _projectionRatio;
+}
+
+double TransformableCameraManipulator::getProjectionNear()
+{
+	return _projectionNear;
+}
+
+double TransformableCameraManipulator::getProjectionFar()
+{
+	return _projectionFar;
 }
 
 Vec3f TransformableCameraManipulator::getLookDirection()
