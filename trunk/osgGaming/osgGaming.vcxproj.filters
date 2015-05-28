@@ -129,6 +129,9 @@
     <ClCompile Include="src\StaticResources.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="src\DepthOfFieldEffect.cpp">
+      <Filter>Source Files\PPU</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h">
@@ -241,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="include\osgGaming\StaticResources.h">
       <Filter>Header Files\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\DepthOfFieldEffect.h">
+      <Filter>Header Files\PPU</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

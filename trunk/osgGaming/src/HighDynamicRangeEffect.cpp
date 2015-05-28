@@ -12,6 +12,7 @@ using namespace osg;
 
 HighDynamicRangeEffect::HighDynamicRangeEffect()
 	: PostProcessingEffect(),
+	  SimulationCallback(),
 	  _midGrey(5.0f),
 	  _hdrBlurSigma(4.0f),
 	  _hdrBlurRadius(7.0f),

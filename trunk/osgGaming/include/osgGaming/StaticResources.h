@@ -8,6 +8,7 @@ namespace osgGaming
 	{
 	public:
 		static const std::string ShaderBrightpassFp;
+		static const std::string ShaderDepthOfFieldFp;
 		static const std::string ShaderGaussConvolution1dxFp;
 		static const std::string ShaderGaussConvolution1dyFp;
 		static const std::string ShaderGaussConvolutionVp;
