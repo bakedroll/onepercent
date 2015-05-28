@@ -1,8 +1,5 @@
 #include <osgGaming/Viewer.h>
 
-#include <osg/ClampColor>
-#include <osg/Switch>
-
 #include <osgPPU/UnitOut.h>
 #include <osgPPU/UnitBypass.h>
 #include <osgPPU/UnitDepthbufferBypass.h>
@@ -17,17 +14,7 @@ Viewer::Viewer()
 	  _resolutionKnown(false),
 	  _ppuInitialized(false)
 {
-	_ppGroup = new Group();
-
-	ref_ptr<ClampColor> clamp = new ClampColor();
-	clamp->setClampVertexColor(GL_FALSE);
-	clamp->setClampFragmentColor(GL_FALSE);
-	clamp->setClampReadColor(GL_FALSE);
-	_ppGroup->getOrCreateStateSet()->setAttribute(clamp, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
-
-	osgViewer::Viewer::setSceneData(_ppGroup);
-
-
+	initialize();
 }
 
 void Viewer::updateResolution(float width, float height)
@@ -63,6 +50,19 @@ void Viewer::setSceneData(Node* node)
 	}
 }
 
+void Viewer::setClampColorEnabled(bool enabled)
+{
+	if (!_clampColor.valid())
+	{
+		_clampColor = new ClampColor();
+		_clampColor->setClampVertexColor(GL_FALSE);
+		_clampColor->setClampFragmentColor(GL_FALSE);
+		_clampColor->setClampReadColor(GL_FALSE);
+	}
+
+	_ppGroup->getOrCreateStateSet()->setAttribute(_clampColor, enabled ? StateAttribute::ON : StateAttribute::OFF);
+}
+
 ref_ptr<Group> Viewer::getRootGroup()
 {
 	return _ppGroup;
@@ -77,23 +77,23 @@ void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe)
 	ref_ptr<osgPPU::Unit> unitOut = new UnitOut();
 	unitOut->setInputTextureIndexForViewportReference(-1);
 
-	PostProcessingEffect::SwitchList switchList;
+	//PostProcessingEffect::SwitchList switchList;
 
 	PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
 	for (PostProcessingEffect::InitialUnitList::iterator it = initialUnits.begin(); it != initialUnits.end(); ++it)
 	{
-		ref_ptr<Switch> s = new Switch();
+		//ref_ptr<Switch> s = new Switch();
 
 		unitForType(it->type)->addChild(it->unit);
 		//unitForType(it->type)->addChild(s);
-		s->addChild(it->unit, true);
+		//s->addChild(it->unit, true);
 
-		if (it->type == PostProcessingEffect::ONGOING_COLOR)
-		{
-			s->addChild(unitOut, false);
-		}
+		//if (it->type == PostProcessingEffect::ONGOING_COLOR)
+		//{
+		//	s->addChild(unitOut, false);
+		//}
 
-		switchList.push_back(s);
+		//switchList.push_back(s);
 	}
 
 	PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
@@ -110,6 +110,17 @@ void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe)
 	// _processor->dirtyUnitSubgraph();
 
 	_ppeList.push_back(ppe);
+}
+
+void Viewer::initialize()
+{
+	_ppGroup = new Group();
+
+	osgViewer::Viewer::setSceneData(_ppGroup);
+
+	//osg::ref_ptr<osg::Camera> camera = getCamera();
+
+	//camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::FRAME_BUFFER);
 }
 
 ref_ptr<Unit> Viewer::bypassUnit(osg::Camera::BufferComponent bufferComponent)
