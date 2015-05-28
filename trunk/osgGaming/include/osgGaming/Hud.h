@@ -43,6 +43,7 @@ namespace osgGaming
 		osg::ref_ptr<osg::Geode> _geode;
 
 		osg::ref_ptr<UIElement> _rootUIElement;
+		osg::ref_ptr<osg::MatrixTransform> _matrixTransform;
 
 		osg::ref_ptr<osgText::Text> _fpsText;
 		bool _fpsEnabled;

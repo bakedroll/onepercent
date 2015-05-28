@@ -34,7 +34,6 @@ namespace osgGaming
 
 		typedef std::vector<InitialUnit> InitialUnitList;
 		typedef std::vector<InputToUniform> InputToUniformList;
-		//typedef std::vector<osg::ref_ptr<osg::Switch>> SwitchList;
 
 		PostProcessingEffect();
 
