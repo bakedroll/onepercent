@@ -167,8 +167,8 @@ void InputManager::setCurrentWorld(ref_ptr<World> world)
 
 void InputManager::updateResolution()
 {
-	_currentWorld->getHud()->updateResolution(_resolutionWidth, _resolutionHeight);
 	_currentWorld->getCameraManipulator()->updateResolution(_resolutionWidth, _resolutionHeight);
+	_currentWorld->getHud()->updateResolution(_resolutionWidth, _resolutionHeight);
 	_viewer->updateResolution(_resolutionWidth, _resolutionHeight);
 }
 

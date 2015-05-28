@@ -11,7 +11,7 @@ World::World()
 	_hud = new Hud();
 	_cameraManipulator = new TransformableCameraManipulator();
 
-	_rootNode->addChild(_hud->getProjection());
+	//_rootNode->addChild(_hud->getProjection());
 
 	initializeStateSet();
 }

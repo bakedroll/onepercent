@@ -225,9 +225,10 @@ void GameApplication::setGameSettings(osg::ref_ptr<GameSettings> settings)
 	_gameSettings = settings;
 }
 
-void GameApplication::attachWorld(osg::ref_ptr<World> world)
+void GameApplication::attachWorld(ref_ptr<World> world)
 {
 	_viewer.setSceneData(world->getRootNode());
+	_viewer.setHud(world->getHud());
 	_viewer.setCameraManipulator(world->getCameraManipulator());
 
 	_inputManager->setCurrentWorld(world);

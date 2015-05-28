@@ -20,7 +20,7 @@ Hud::Hud()
 	stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
 	stateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
 	stateSet->setRenderingHint(StateSet::TRANSPARENT_BIN);
-	stateSet->setRenderBinDetails(11, "RenderBin");
+	stateSet->setRenderBinDetails(10, "RenderBin");
 
 
 	_geode = new Geode();
@@ -90,10 +90,10 @@ void Hud::setFpsEnabled(bool enabled)
 
 	if (!_fpsText.valid())
 	{
-		_fpsText = createTextNode("", 25, ResourceManager::getInstance()->loadDefaultFont());
-		_fpsText->setAlignment(osgText::TextBase::LEFT_BOTTOM);
-		_fpsText->setPosition(osg::Vec3(10, 10, -1.5));
-		_fpsText->setDataVariance(osg::Object::DYNAMIC);
+		_fpsText = createTextNode("", 25.0f, ResourceManager::getInstance()->loadDefaultFont());
+		_fpsText->setAlignment(TextBase::LEFT_BOTTOM);
+		_fpsText->setPosition(Vec3f(10.0f, 10.0f, 0.0f));
+		_fpsText->setDataVariance(Object::DYNAMIC);
 		_fpsText->setUpdateCallback(new FpsTextCallback());
 	}
 
