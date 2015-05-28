@@ -11,6 +11,7 @@
 
 #include <osgPPU/Processor.h>
 #include <osgPPU/Unit.h>
+#include <osgPPU/UnitInOut.h>
 
 #include <osgGaming/PostProcessingEffect.h>
 #include <osgGaming/Hud.h>
@@ -32,7 +33,13 @@ namespace osgGaming
 
 		void setHud(osg::ref_ptr<Hud> hud);
 
-		void addPostProcessingEffect(osg::ref_ptr<PostProcessingEffect> ppe);
+		void addPostProcessingEffect(osg::ref_ptr<PostProcessingEffect> ppe, bool enabled = true);
+
+		void setPostProcessingEffectEnabled(osg::ref_ptr<PostProcessingEffect> ppe, bool enabled);
+		void setPostProcessingEffectEnabled(unsigned int index, bool enabled);
+
+		bool getPostProcessingEffectEnabled(osg::ref_ptr<PostProcessingEffect> ppe);
+		bool getPostProcessingEffectEnabled(unsigned int index);
 
 	private:
 		typedef struct _renderTexture
@@ -41,17 +48,28 @@ namespace osgGaming
 			osg::ref_ptr<osgPPU::Unit> bypassUnit;
 		} RenderTexture;
 
+		typedef struct _postProcessingState
+		{
+			osg::ref_ptr<PostProcessingEffect> effect;
+			bool enabled;
+		} PostProcessingState;
+
 		typedef std::map<int, RenderTexture> RenderTextureDictionary;
-		typedef std::vector<osg::ref_ptr<PostProcessingEffect>> PostProcessingEffectList;
+		typedef std::map<void*, PostProcessingState> PostProcessingStateDictionary;
 
 		void initialize();
+
+		void resetPostProcessingEffects();
+		void setupPostProcessingEffects();
 
 		RenderTexture renderTexture(osg::Camera::BufferComponent bufferComponent, bool recreate = false);
 		osg::ref_ptr<osg::Texture2D> createRenderTexture(osg::Camera::BufferComponent bufferComponent);
 		osg::ref_ptr<osgPPU::Unit> bypassUnit(osg::Camera::BufferComponent bufferComponent);
-		osg::ref_ptr<osgPPU::Unit> lastUnit();
+		osg::ref_ptr<osgPPU::Unit> lastUnit(bool reset = false);
 
 		osg::ref_ptr<osgPPU::Unit> unitForType(PostProcessingEffect::UnitType type);
+
+		void* postProcessingEffect(unsigned int index);
 
 		void initializePPU();
 
@@ -69,9 +87,10 @@ namespace osgGaming
 		osg::ref_ptr<osg::ClampColor> _clampColor;
 
 		osg::ref_ptr<osgPPU::Unit> _lastUnit;
+		osg::ref_ptr<osgPPU::UnitInOut> _unitOutput;
 
 		bool _ppuInitialized;
 		RenderTextureDictionary _renderTextures;
-		PostProcessingEffectList _ppeList;
+		PostProcessingStateDictionary _ppeDictionary;
 	};
 }

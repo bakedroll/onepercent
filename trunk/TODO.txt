@@ -1,9 +1,4 @@
-- HDR
 - antialiasing
-- atmospheric scattering
-- clouds
-- background
-
 - WindowSizeHandler to toggle fullscreen
 
 - engine:

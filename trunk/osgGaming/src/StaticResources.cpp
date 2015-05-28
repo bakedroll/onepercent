@@ -79,6 +79,9 @@ const string StaticResources::ShaderDepthOfFieldFp =
 	"	gl_FragColor = mix(result, blurredValue2, factor2);" \
 	"}";
 
+// mix(result, blurredValue2, factor2);
+// texture2D(texDepthMap, inTex);
+
 const string StaticResources::ShaderGaussConvolution1dxFp =
 
 	"uniform sampler2D texUnit0;" \
