@@ -40,7 +40,8 @@ void LoadingGlobeOverviewState::initialize(float resolutionWidth, float resoluti
 
 	getWorld()->getHud()->getRootUIElement()->addChild(_loadingText);
 
-	// getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect());
+	//getViewer()->setClampColorEnabled(true);
+	//getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect());
 }
 
 StateEvent* LoadingGlobeOverviewState::update()
@@ -72,38 +73,6 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	world->getRootNode()->addChild(backgroundModel->getTransform());
 
 	world->getHud()->setFpsEnabled(true);
-
-	/*ref_ptr<CameraAlignedQuad> caq = new CameraAlignedQuad(-1);
-	
-	world->getRootNode()->addChild(caq);
-	world->getCameraManipulator()->addCameraAlignedQuad(caq);
-
-	// shader
-	ref_ptr<StateSet> stateSet = caq->getOrCreateStateSet();
-
-	ref_ptr<Program> pgm = new Program();
-
-	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/stars.vert", Shader::VERTEX);
-	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/stars.frag", Shader::FRAGMENT);
-
-	pgm->addShader(vert_shader);
-	pgm->addShader(frag_shader);
-
-	stateSet->setAttribute(pgm, StateAttribute::ON);
-
-	TextureFactory::make()
-		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/stars/8k/0x0.png"))
-		->texLayer(0)
-		->uniform(stateSet, "colormap_0x0")
-		->assign(stateSet)
-		->build();
-
-	TextureFactory::make()
-		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/stars/8k/1x0.png"))
-		->texLayer(1)
-		->uniform(stateSet, "colormap_1x0")
-		->assign(stateSet)
-		->build();*/
 
 
 

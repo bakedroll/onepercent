@@ -4,6 +4,7 @@
 
 #include <osgViewer/Viewer>
 #include <osg/Texture2D>
+#include <osg/ClampColor>
 
 #include <osgPPU/Processor.h>
 #include <osgPPU/Unit.h>
@@ -20,6 +21,8 @@ namespace osgGaming
 		void updateResolution(float width, float height);
 		virtual void setSceneData(osg::Node* node) override;
 
+		void setClampColorEnabled(bool enabled);
+
 		osg::ref_ptr<osg::Group> getRootGroup();
 
 		void addPostProcessingEffect(osg::ref_ptr<PostProcessingEffect> ppe);
@@ -33,6 +36,8 @@ namespace osgGaming
 
 		typedef std::map<osg::Camera::BufferComponent, RenderTexture> RenderTextureDictionary;
 		typedef std::vector<osg::ref_ptr<PostProcessingEffect>> PostProcessingEffectList;
+
+		void initialize();
 
 		osg::ref_ptr<osgPPU::Unit> bypassUnit(osg::Camera::BufferComponent bufferComponent);
 		osg::ref_ptr<osgPPU::Unit> lastUnit();
@@ -48,6 +53,8 @@ namespace osgGaming
 
 		osg::ref_ptr<osgPPU::Processor> _processor;
 		osg::ref_ptr<osg::Group> _ppGroup;
+		osg::ref_ptr<osg::ClampColor> _clampColor;
+
 		//osg::ref_ptr<osgPPU::Unit> _outputUnit;
 
 		osg::ref_ptr<osgPPU::Unit> _lastUnit;
