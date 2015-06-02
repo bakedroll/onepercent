@@ -132,6 +132,9 @@
     <ClCompile Include="src\DepthOfFieldEffect.cpp">
       <Filter>Source Files\PPU</Filter>
     </ClCompile>
+    <ClCompile Include="src\ShaderFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h">
@@ -247,6 +250,9 @@
     </ClInclude>
     <ClInclude Include="include\osgGaming\DepthOfFieldEffect.h">
       <Filter>Header Files\PPU</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\ShaderFactory.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
