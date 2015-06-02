@@ -8,7 +8,19 @@
 
 namespace osgGaming
 {
-	class HighDynamicRangeEffect : public PostProcessingEffect, public SimulationCallback
+	class HighDynamicRangeEffectCallback : public SimulationCallback
+	{
+	public:
+		HighDynamicRangeEffectCallback(osg::ref_ptr<osgPPU::UnitInOut> unitAdaptedLuminance);
+
+		virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override;
+
+	private:
+		osg::ref_ptr<osgPPU::UnitInOut> _unitAdaptedLuminance;
+
+	};
+
+	class HighDynamicRangeEffect : public PostProcessingEffect
 	{
 	public:
 		static const std::string NAME;
@@ -19,8 +31,6 @@ namespace osgGaming
 		virtual InitialUnitList getInitialUnits() override;
 		virtual osg::ref_ptr<osgPPU::Unit> getResultUnit() override;
 		virtual InputToUniformList getInputToUniform() override;
-
-		virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override;
 
 		void setMidGrey(float midGrey);
 		void setBlurSigma(float blurSigma);
@@ -52,7 +62,6 @@ namespace osgGaming
 
 		osg::ref_ptr<osgPPU::UnitInResampleOut> _unitResample;
 		osg::ref_ptr<osgPPU::UnitInOut> _unitHdr;
-		osg::ref_ptr<osgPPU::UnitInOut> _unitAdaptedLuminance;
 
 		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderBrightpass;
 		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderHdr;

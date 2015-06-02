@@ -13,16 +13,27 @@ using namespace std;
 
 const string HighDynamicRangeEffect::NAME = "hdrEffect";
 
+HighDynamicRangeEffectCallback::HighDynamicRangeEffectCallback(ref_ptr<osgPPU::UnitInOut> unitAdaptedLuminance)
+	: SimulationCallback(),
+	  _unitAdaptedLuminance(unitAdaptedLuminance)
+{
+
+}
+
+void HighDynamicRangeEffectCallback::action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff)
+{
+	_unitAdaptedLuminance->getOrCreateStateSet()->getOrCreateUniform("invFrameTime", osg::Uniform::FLOAT)->set(float(timeDiff));
+}
+
 HighDynamicRangeEffect::HighDynamicRangeEffect()
 	: PostProcessingEffect(),
-	  SimulationCallback(),
 	  _midGrey(5.0f),
 	  _hdrBlurSigma(4.0f),
 	  _hdrBlurRadius(7.0f),
-	  _glareFactor(20.0f),
+	  _glareFactor(14.5f),
 	  _minLuminance(0.2f),
 	  _maxLuminance(5.0f),
-	  _adaptFactor(0.01f)
+	  _adaptFactor(0.03f)
 {
 
 }
@@ -62,11 +73,6 @@ PostProcessingEffect::InputToUniformList HighDynamicRangeEffect::getInputToUnifo
 	list.push_back(ituBypass);
 
 	return list;
-}
-
-void HighDynamicRangeEffect::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
-{
-	_unitAdaptedLuminance->getOrCreateStateSet()->getOrCreateUniform("invFrameTime", osg::Uniform::FLOAT)->set(float(timeDiff));
 }
 
 void HighDynamicRangeEffect::setMidGrey(float midGrey)
@@ -296,7 +302,7 @@ void HighDynamicRangeEffect::initializeUnits()
 		_unitHdr->setInputToUniform(sceneLuminance, "lumInput", true);
 	}
 
-	_unitAdaptedLuminance = new osgPPU::UnitInOut();
+	osgPPU::UnitInOut* adaptedLuminance = new osgPPU::UnitInOut();
 	{
 		_shaderAdapted = new osgPPU::ShaderAttribute();
 		_shaderAdapted->addShader(shaderLuminanceAdaptedFp);
@@ -309,28 +315,28 @@ void HighDynamicRangeEffect::initializeUnits()
 		_shaderAdapted->add("minLuminance", osg::Uniform::FLOAT);
 		_shaderAdapted->add("adaptScaleFactor", osg::Uniform::FLOAT);
 
-		_unitAdaptedLuminance->getOrCreateStateSet()->getOrCreateUniform("invFrameTime", osg::Uniform::FLOAT);
+		adaptedLuminance->getOrCreateStateSet()->getOrCreateUniform("invFrameTime", osg::Uniform::FLOAT);
 
 		_shaderAdapted->set("maxLuminance", _maxLuminance);
 		_shaderAdapted->set("minLuminance", _minLuminance);
 		_shaderAdapted->set("adaptScaleFactor", _adaptFactor);
 
-		_unitAdaptedLuminance->getOrCreateStateSet()->setAttributeAndModes(_shaderAdapted);
-		_unitAdaptedLuminance->setViewport(new osg::Viewport(0, 0, 1, 1));
-		_unitAdaptedLuminance->setInputTextureIndexForViewportReference(-1);
+		adaptedLuminance->getOrCreateStateSet()->setAttributeAndModes(_shaderAdapted);
+		adaptedLuminance->setViewport(new osg::Viewport(0, 0, 1, 1));
+		adaptedLuminance->setInputTextureIndexForViewportReference(-1);
 	}
 
-	sceneLuminance->addChild(_unitAdaptedLuminance);
+	sceneLuminance->addChild(adaptedLuminance);
 
 	osgPPU::UnitInOut* adaptedlumCopy = new osgPPU::UnitInOut();
-	adaptedlumCopy->addChild(_unitAdaptedLuminance);
+	adaptedlumCopy->addChild(adaptedLuminance);
 
-	_unitAdaptedLuminance->addChild(adaptedlumCopy);
-	_unitAdaptedLuminance->addChild(brightpass);
-	brightpass->setInputToUniform(_unitAdaptedLuminance, "texAdaptedLuminance");
+	adaptedLuminance->addChild(adaptedlumCopy);
+	adaptedLuminance->addChild(brightpass);
+	brightpass->setInputToUniform(adaptedLuminance, "texAdaptedLuminance");
 
-	_unitAdaptedLuminance->addChild(_unitHdr);
-	_unitHdr->setInputToUniform(_unitAdaptedLuminance, "texAdaptedLuminance");
+	adaptedLuminance->addChild(_unitHdr);
+	_unitHdr->setInputToUniform(adaptedLuminance, "texAdaptedLuminance");
 
-	_unitAdaptedLuminance->setUpdateCallback(this);
+	adaptedLuminance->setUpdateCallback(new HighDynamicRangeEffectCallback(adaptedLuminance));
 }

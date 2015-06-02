@@ -45,7 +45,7 @@ void LoadingGlobeOverviewState::initialize(float resolutionWidth, float resoluti
 	getWorld()->getHud()->getRootUIElement()->addChild(_loadingText);
 
 	getViewer()->setClampColorEnabled(true);
-	getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect(), false);
+	getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect());
 	getViewer()->addPostProcessingEffect(new DepthOfFieldEffect(projNear, projFar), false);
 }
 
