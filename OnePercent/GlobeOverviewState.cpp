@@ -4,6 +4,8 @@
 #include "BackgroundModel.h"
 
 #include <osgGaming/Helper.h>
+#include <osgGaming/HighDynamicRangeEffect.h>
+#include <osgGaming/DepthOfFieldEffect.h>
 
 using namespace onep;
 using namespace osg;
@@ -85,17 +87,21 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	}
 	else if (key == GUIEventAdapter::KEY_H)
 	{
-		bool enabled = !getViewer()->getPostProcessingEffectEnabled(0);
-		printf("HDR: %s\n", enabled ? "enabled" : "disabled");
+		if (getViewer()->hasPostProcessingEffect(HighDynamicRangeEffect::NAME))
+		{
+			bool enabled = !getViewer()->getPostProcessingEffectEnabled(HighDynamicRangeEffect::NAME);
 
-		getViewer()->setPostProcessingEffectEnabled(0, enabled);
+			getViewer()->setPostProcessingEffectEnabled(HighDynamicRangeEffect::NAME, enabled);
+		}
 	}
 	else if (key == GUIEventAdapter::KEY_D)
 	{
-		bool enabled = !getViewer()->getPostProcessingEffectEnabled(1);
-		printf("DOF: %s\n", enabled ? "enabled" : "disabled");
+		if (getViewer()->hasPostProcessingEffect(DepthOfFieldEffect::NAME))
+		{
+			bool enabled = !getViewer()->getPostProcessingEffectEnabled(DepthOfFieldEffect::NAME);
 
-		getViewer()->setPostProcessingEffectEnabled(1, enabled);
+			getViewer()->setPostProcessingEffectEnabled(DepthOfFieldEffect::NAME, enabled);
+		}
 	}
 	/*else if (key == GUIEventAdapter::KEY_0)
 	{

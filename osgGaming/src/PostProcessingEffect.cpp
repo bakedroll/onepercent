@@ -18,6 +18,11 @@ void PostProcessingEffect::initialize()
 	}
 }
 
+bool PostProcessingEffect::isInitialized()
+{
+	return _initialized;
+}
+
 PostProcessingEffect::InputToUniformList PostProcessingEffect::getInputToUniform()
 {
 	InputToUniformList list;

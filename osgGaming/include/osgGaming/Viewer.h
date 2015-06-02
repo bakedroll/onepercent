@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <string>
 
 #include <osgViewer/Viewer>
 #include <osg/Texture2D>
@@ -33,13 +34,15 @@ namespace osgGaming
 
 		void setHud(osg::ref_ptr<Hud> hud);
 
-		void addPostProcessingEffect(osg::ref_ptr<PostProcessingEffect> ppe, bool enabled = true);
+		void addPostProcessingEffect(osg::ref_ptr<PostProcessingEffect> ppe, bool enabled = true, std::string name = "");
 
-		void setPostProcessingEffectEnabled(osg::ref_ptr<PostProcessingEffect> ppe, bool enabled);
+		void setPostProcessingEffectEnabled(std::string ppeName, bool enabled);
 		void setPostProcessingEffectEnabled(unsigned int index, bool enabled);
 
-		bool getPostProcessingEffectEnabled(osg::ref_ptr<PostProcessingEffect> ppe);
+		bool getPostProcessingEffectEnabled(std::string ppeName);
 		bool getPostProcessingEffectEnabled(unsigned int index);
+
+		bool hasPostProcessingEffect(std::string ppeName);
 
 	private:
 		typedef struct _renderTexture
@@ -55,12 +58,14 @@ namespace osgGaming
 		} PostProcessingState;
 
 		typedef std::map<int, RenderTexture> RenderTextureDictionary;
-		typedef std::map<void*, PostProcessingState> PostProcessingStateDictionary;
+		typedef std::map<std::string, PostProcessingState> PostProcessingStateDictionary;
 
 		void initialize();
 
 		void resetPostProcessingEffects();
 		void setupPostProcessingEffects();
+
+		void updateCameraRenderTextures(bool recreate = false);
 
 		RenderTexture renderTexture(osg::Camera::BufferComponent bufferComponent, bool recreate = false);
 		osg::ref_ptr<osg::Texture2D> createRenderTexture(osg::Camera::BufferComponent bufferComponent);
@@ -69,7 +74,7 @@ namespace osgGaming
 
 		osg::ref_ptr<osgPPU::Unit> unitForType(PostProcessingEffect::UnitType type);
 
-		void* postProcessingEffect(unsigned int index);
+		std::string postProcessingEffectName(unsigned int index);
 
 		void initializePPU();
 

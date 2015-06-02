@@ -33,6 +33,9 @@ LoadingGlobeOverviewState::LoadingGlobeOverviewState(ref_ptr<GameState> nextStat
 
 void LoadingGlobeOverviewState::initialize(float resolutionWidth, float resolutionHeight)
 {
+	float projNear = (float)getWorld()->getCameraManipulator()->getProjectionNear();
+	float projFar = (float)getWorld()->getCameraManipulator()->getProjectionFar();
+
 	_loadingText = new UIText();
 	_loadingText->setText("Loading");
 	_loadingText->setFontSize(25);
@@ -43,10 +46,7 @@ void LoadingGlobeOverviewState::initialize(float resolutionWidth, float resoluti
 
 	getViewer()->setClampColorEnabled(true);
 	getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect(), false);
-
-	getViewer()->addPostProcessingEffect(new DepthOfFieldEffect(
-		(float)getWorld()->getCameraManipulator()->getProjectionNear(),
-		(float)getWorld()->getCameraManipulator()->getProjectionFar()), false);
+	getViewer()->addPostProcessingEffect(new DepthOfFieldEffect(projNear, projFar), false);
 }
 
 StateEvent* LoadingGlobeOverviewState::update()
