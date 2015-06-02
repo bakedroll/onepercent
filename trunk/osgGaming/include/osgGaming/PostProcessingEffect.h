@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include <osg/Referenced>
 #include <osg/Camera>
@@ -38,7 +39,9 @@ namespace osgGaming
 		PostProcessingEffect();
 
 		void initialize();
+		bool isInitialized();
 
+		virtual std::string getName() = 0;
 		virtual InitialUnitList getInitialUnits() = 0;
 		virtual osg::ref_ptr<osgPPU::Unit> getResultUnit() = 0;
 		virtual InputToUniformList getInputToUniform();

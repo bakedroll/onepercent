@@ -10,6 +10,7 @@
 using namespace osgGaming;
 using namespace osgPPU;
 using namespace osg;
+using namespace std;
 
 
 Viewer::Viewer()
@@ -35,21 +36,10 @@ void Viewer::updateResolution(float width, float height)
 		_processor->onViewportChange();
 	}
 
-	for (RenderTextureDictionary::iterator it = _renderTextures.begin(); it != _renderTextures.end(); ++it)
-	{
-		ref_ptr<Texture2D> tex = renderTexture((osg::Camera::BufferComponent)it->first, true).texture;
-		if (it->first == osg::Camera::COLOR_BUFFER && !_processor.valid())
-		{
-			_hudStateSet->setTextureAttributeAndModes(0, tex, StateAttribute::ON);
-		}
-	}
-
 	camera->setViewport(vp);
 	// _hudCamera->setViewport(vp);
 
-	osgViewer::Renderer* renderer = (osgViewer::Renderer*)camera->getRenderer();
-	renderer->getSceneView(0)->getRenderStage()->setCameraRequiresSetUp(true);
-	renderer->getSceneView(0)->getRenderStage()->setFrameBufferObject(NULL);
+	updateCameraRenderTextures(true);
 }
 
 void Viewer::setSceneData(Node* node)
@@ -109,7 +99,7 @@ void Viewer::setHud(ref_ptr<Hud> hud)
 	}
 }
 
-void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe, bool enabled)
+void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe, bool enabled, string name)
 {
 	if (enabled)
 	{
@@ -120,7 +110,12 @@ void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe, bool ena
 	pps.effect = ppe;
 	pps.enabled = enabled;
 
-	_ppeDictionary.insert(PostProcessingStateDictionary::value_type((void*)ppe.get(), pps));
+	if (name.empty())
+	{
+		name = ppe->getName();
+	}
+
+	_ppeDictionary.insert(PostProcessingStateDictionary::value_type(name, pps));
 
 	if (enabled)
 	{
@@ -128,38 +123,44 @@ void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe, bool ena
 	}
 }
 
-void Viewer::setPostProcessingEffectEnabled(ref_ptr<PostProcessingEffect> ppe, bool enabled)
+void Viewer::setPostProcessingEffectEnabled(string ppeName, bool enabled)
 {
-	PostProcessingStateDictionary::iterator it = _ppeDictionary.find((void*)ppe.get());
+	PostProcessingStateDictionary::iterator it = _ppeDictionary.find(ppeName);
 
 	if (it->second.enabled == enabled)
 	{
 		return;
 	}
 
+	printf("Post processing effect '%s': %s\n", ppeName.c_str(), enabled ? "enabled" : "disabled");
+
 	resetPostProcessingEffects();
 
 	it->second.enabled = enabled;
 
 	setupPostProcessingEffects();
-
 }
 
 void Viewer::setPostProcessingEffectEnabled(unsigned int index, bool enabled)
 {
-	setPostProcessingEffectEnabled((PostProcessingEffect*)postProcessingEffect(index), enabled);
+	setPostProcessingEffectEnabled(postProcessingEffectName(index), enabled);
 }
 
-bool Viewer::getPostProcessingEffectEnabled(ref_ptr<PostProcessingEffect> ppe)
+bool Viewer::getPostProcessingEffectEnabled(string ppeName)
 {
-	PostProcessingStateDictionary::iterator it = _ppeDictionary.find((void*)ppe.get());
+	PostProcessingStateDictionary::iterator it = _ppeDictionary.find(ppeName);
 
 	return it->second.enabled;
 }
 
 bool Viewer::getPostProcessingEffectEnabled(unsigned int index)
 {
-	return getPostProcessingEffectEnabled((PostProcessingEffect*)postProcessingEffect(index));
+	return getPostProcessingEffectEnabled(postProcessingEffectName(index));
+}
+
+bool Viewer::hasPostProcessingEffect(string ppeName)
+{
+	return _ppeDictionary.find(ppeName) != _ppeDictionary.end();
 }
 
 void Viewer::initialize()
@@ -169,13 +170,11 @@ void Viewer::initialize()
 	osgViewer::Viewer::setSceneData(_ppGroup);
 
 	ref_ptr<osg::Camera> camera = getCamera();
-	ref_ptr<Texture2D> texture = renderTexture(osg::Camera::COLOR_BUFFER).texture;
-
 	camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::FRAME_BUFFER);
 	camera->setComputeNearFarMode(CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 	camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	camera->setRenderOrder(osg::Camera::PRE_RENDER);
-	camera->attach(osg::Camera::COLOR_BUFFER, texture, 0, 0, false, 8, 8);
+	//camera->attach(osg::Camera::COLOR_BUFFER, texture, 0, 0, false, 8, 8);
 
 	_hudCamera = new osg::Camera();
 	_hudCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER, osg::Camera::FRAME_BUFFER);
@@ -183,6 +182,9 @@ void Viewer::initialize()
 	_hudCamera->setRenderOrder(osg::Camera::POST_RENDER);
 	_hudCamera->setViewMatrix(Matrixd::identity());
 	_hudCamera->setProjectionMatrix(Matrixd::identity());
+
+	// implicitly attaches texture to camera
+	ref_ptr<Texture2D> texture = renderTexture(osg::Camera::COLOR_BUFFER).texture;
 
 	ref_ptr<Geode> geode = new Geode();
 	geode->addDrawable(createTexturedQuadGeometry(Vec3f(-1.0f, -1.0f, 0.0f), Vec3f(2.0f, 0.0f, 0.0f), Vec3f(0.0f, 2.0f, 0.0f)));
@@ -273,7 +275,24 @@ void Viewer::setupPostProcessingEffects()
 
 	_lastUnit->addChild(_unitOutput);
 
+	updateCameraRenderTextures();
 	_processor->dirtyUnitSubgraph();
+}
+
+void Viewer::updateCameraRenderTextures(bool recreate)
+{
+	for (RenderTextureDictionary::iterator it = _renderTextures.begin(); it != _renderTextures.end(); ++it)
+	{
+		ref_ptr<Texture2D> tex = renderTexture((osg::Camera::BufferComponent)it->first, recreate).texture;
+		if (it->first == osg::Camera::COLOR_BUFFER && !_processor.valid())
+		{
+			_hudStateSet->setTextureAttributeAndModes(0, tex, StateAttribute::ON);
+		}
+	}
+
+	osgViewer::Renderer* renderer = (osgViewer::Renderer*)getCamera()->getRenderer();
+	renderer->getSceneView(0)->getRenderStage()->setCameraRequiresSetUp(true);
+	renderer->getSceneView(0)->getRenderStage()->setFrameBufferObject(NULL);
 }
 
 Viewer::RenderTexture Viewer::renderTexture(osg::Camera::BufferComponent bufferComponent, bool recreate)
@@ -404,7 +423,7 @@ ref_ptr<osgPPU::Unit> Viewer::unitForType(PostProcessingEffect::UnitType type)
 	return unit;
 }
 
-void* Viewer::postProcessingEffect(unsigned int index)
+string Viewer::postProcessingEffectName(unsigned int index)
 {
 	unsigned int c = 0;
 
@@ -418,7 +437,7 @@ void* Viewer::postProcessingEffect(unsigned int index)
 		c++;
 	}
 
-	return NULL;
+	return "";
 }
 
 void Viewer::initializePPU()
@@ -440,8 +459,6 @@ void Viewer::initializePPU()
 		osgPPU::Camera::resizeViewport(0, 0, _resolution.x(), _resolution.y(), getCamera());
 		_processor->onViewportChange();
 	}
-
-	// _processor->dirtyUnitSubgraph();
 
 	_ppuInitialized = true;
 }

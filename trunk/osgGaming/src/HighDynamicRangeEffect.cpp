@@ -4,11 +4,13 @@
 #include <osgDB/ReaderWriter>
 #include <osgDB/ReadFile>
 
-#include <osgPPU/ShaderAttribute.h>
 #include <osgPPU/UnitInMipmapOut.h>
 
 using namespace osgGaming;
 using namespace osg;
+using namespace std;
+
+const string HighDynamicRangeEffect::NAME = "hdrEffect";
 
 HighDynamicRangeEffect::HighDynamicRangeEffect()
 	: PostProcessingEffect(),
@@ -22,6 +24,11 @@ HighDynamicRangeEffect::HighDynamicRangeEffect()
 	  _adaptFactor(0.01f)
 {
 
+}
+
+string HighDynamicRangeEffect::getName()
+{
+	return NAME;
 }
 
 PostProcessingEffect::InitialUnitList HighDynamicRangeEffect::getInitialUnits()
@@ -59,6 +66,128 @@ PostProcessingEffect::InputToUniformList HighDynamicRangeEffect::getInputToUnifo
 void HighDynamicRangeEffect::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
 {
 	_unitAdaptedLuminance->getOrCreateStateSet()->getOrCreateUniform("invFrameTime", osg::Uniform::FLOAT)->set(float(timeDiff));
+}
+
+void HighDynamicRangeEffect::setMidGrey(float midGrey)
+{
+	_midGrey = midGrey;
+	
+	if (isInitialized())
+	{
+		_shaderBrightpass->set("g_fMiddleGray", _midGrey);
+		_shaderHdr->set("g_fMiddleGray", _midGrey);
+	}
+
+	printf("Set midGrey to %f\n", _midGrey);
+}
+
+void HighDynamicRangeEffect::setBlurSigma(float blurSigma)
+{
+	_hdrBlurSigma = blurSigma;
+
+	if (isInitialized())
+	{
+		_shaderGaussX->set("sigma", _hdrBlurSigma);
+		_shaderGaussY->set("sigma", _hdrBlurSigma);
+	}
+
+	printf("Set blurSigma to %f\n", _hdrBlurSigma);
+}
+
+void HighDynamicRangeEffect::setBlurRadius(float blurRadius)
+{
+	_hdrBlurRadius = blurRadius;
+
+	if (isInitialized())
+	{
+		_shaderGaussX->set("radius", _hdrBlurRadius);
+		_shaderGaussY->set("radius", _hdrBlurRadius);
+	}
+
+	printf("Set blurRadius to %f\n", _hdrBlurRadius);
+}
+
+void HighDynamicRangeEffect::setGlareFactor(float glareFactor)
+{
+	_glareFactor = glareFactor;
+
+	if (isInitialized())
+	{
+		_shaderHdr->set("fBlurFactor", _glareFactor);
+	}
+
+	printf("Set glateFactor to %f\n", _glareFactor);
+}
+
+void HighDynamicRangeEffect::setAdaptFactor(float adaptFactor)
+{
+	_adaptFactor = adaptFactor;
+
+	if (isInitialized())
+	{
+		_shaderAdapted->set("adaptScaleFactor", _adaptFactor);
+	}
+
+	printf("Set adaptedFactor to %f\n", _adaptFactor);
+}
+
+void HighDynamicRangeEffect::setMinLuminance(float minLuminance)
+{
+	_minLuminance = minLuminance;
+
+	if (isInitialized())
+	{
+		_shaderAdapted->set("minLuminance", _minLuminance);
+	}
+
+	printf("Set minLuminance to %f\n", _minLuminance);
+}
+
+void HighDynamicRangeEffect::setMaxLuminance(float maxLuminance)
+{
+	_maxLuminance = maxLuminance;
+
+	if (isInitialized())
+	{
+		_shaderAdapted->set("maxLuminance", _maxLuminance);
+	}
+
+	printf("Set maxLuminance to %f\n", _maxLuminance);
+}
+
+float HighDynamicRangeEffect::getMidGrey()
+{
+	return _midGrey;
+}
+
+float HighDynamicRangeEffect::getBlurSigma()
+{
+	return _hdrBlurSigma;
+}
+
+float HighDynamicRangeEffect::getBlurRadius()
+{
+	return _hdrBlurRadius;
+}
+
+float HighDynamicRangeEffect::getGlareFactor()
+{
+	return _glareFactor;
+}
+
+float HighDynamicRangeEffect::getAdaptFactor()
+{
+	return _adaptFactor;
+}
+
+float HighDynamicRangeEffect::getMinLuminance()
+{
+	return _minLuminance;
+}
+
+float HighDynamicRangeEffect::getMaxLuminance()
+{
+	return _maxLuminance;
 }
 
 void HighDynamicRangeEffect::initializeUnits()
@@ -116,12 +245,12 @@ void HighDynamicRangeEffect::initializeUnits()
 
 	osgPPU::Unit* brightpass = new osgPPU::UnitInOut();
 	{
-		osgPPU::ShaderAttribute* brightpassSh = new osgPPU::ShaderAttribute();
-		brightpassSh->addShader(shaderBrightpassFp);
+		_shaderBrightpass = new osgPPU::ShaderAttribute();
+		_shaderBrightpass->addShader(shaderBrightpassFp);
 
-		brightpassSh->add("g_fMiddleGray", osg::Uniform::FLOAT);
-		brightpassSh->set("g_fMiddleGray", _midGrey);
-		brightpass->getOrCreateStateSet()->setAttributeAndModes(brightpassSh);
+		_shaderBrightpass->add("g_fMiddleGray", osg::Uniform::FLOAT);
+		_shaderBrightpass->set("g_fMiddleGray", _midGrey);
+		brightpass->getOrCreateStateSet()->setAttributeAndModes(_shaderBrightpass);
 
 		brightpass->setInputToUniform(_unitResample, "hdrInput", true);
 		brightpass->setInputToUniform(sceneLuminance, "lumInput", true);
@@ -130,31 +259,31 @@ void HighDynamicRangeEffect::initializeUnits()
 	osgPPU::UnitInOut* blurx = new osgPPU::UnitInOut();
 	osgPPU::UnitInOut* blury = new osgPPU::UnitInOut();
 	{
-		osgPPU::ShaderAttribute* gaussx = new osgPPU::ShaderAttribute();
-		gaussx->addShader(shaderGaussConvolutionVp);
-		gaussx->addShader(shaderGaussConvolution1dxFp);
-		gaussx->add("sigma", osg::Uniform::FLOAT);
-		gaussx->add("radius", osg::Uniform::FLOAT);
-		gaussx->add("texUnit0", osg::Uniform::SAMPLER_2D);
+		_shaderGaussX = new osgPPU::ShaderAttribute();
+		_shaderGaussX->addShader(shaderGaussConvolutionVp);
+		_shaderGaussX->addShader(shaderGaussConvolution1dxFp);
+		_shaderGaussX->add("sigma", osg::Uniform::FLOAT);
+		_shaderGaussX->add("radius", osg::Uniform::FLOAT);
+		_shaderGaussX->add("texUnit0", osg::Uniform::SAMPLER_2D);
 
-		gaussx->set("sigma", _hdrBlurSigma);
-		gaussx->set("radius", _hdrBlurRadius);
-		gaussx->set("texUnit0", 0);
+		_shaderGaussX->set("sigma", _hdrBlurSigma);
+		_shaderGaussX->set("radius", _hdrBlurRadius);
+		_shaderGaussX->set("texUnit0", 0);
 
-		blurx->getOrCreateStateSet()->setAttributeAndModes(gaussx);
+		blurx->getOrCreateStateSet()->setAttributeAndModes(_shaderGaussX);
 
-		osgPPU::ShaderAttribute* gaussy = new osgPPU::ShaderAttribute();
-		gaussy->addShader(shaderGaussConvolutionVp);
-		gaussy->addShader(shaderGaussConvolution1dyFp);
-		gaussy->add("sigma", osg::Uniform::FLOAT);
-		gaussy->add("radius", osg::Uniform::FLOAT);
-		gaussy->add("texUnit0", osg::Uniform::SAMPLER_2D);
+		_shaderGaussY = new osgPPU::ShaderAttribute();
+		_shaderGaussY->addShader(shaderGaussConvolutionVp);
+		_shaderGaussY->addShader(shaderGaussConvolution1dyFp);
+		_shaderGaussY->add("sigma", osg::Uniform::FLOAT);
+		_shaderGaussY->add("radius", osg::Uniform::FLOAT);
+		_shaderGaussY->add("texUnit0", osg::Uniform::SAMPLER_2D);
 
-		gaussy->set("sigma", _hdrBlurSigma);
-		gaussy->set("radius", _hdrBlurRadius);
-		gaussy->set("texUnit0", 0);
+		_shaderGaussY->set("sigma", _hdrBlurSigma);
+		_shaderGaussY->set("radius", _hdrBlurRadius);
+		_shaderGaussY->set("texUnit0", 0);
 
-		blury->getOrCreateStateSet()->setAttributeAndModes(gaussy);
+		blury->getOrCreateStateSet()->setAttributeAndModes(_shaderGaussY);
 	}
 
 	brightpass->addChild(blurx);
@@ -162,17 +291,17 @@ void HighDynamicRangeEffect::initializeUnits()
 
 	_unitHdr = new osgPPU::UnitInOut();
 	{
-		osgPPU::ShaderAttribute* sh = new osgPPU::ShaderAttribute();
-		sh->addShader(shaderTonemapHdrFp);
+		_shaderHdr = new osgPPU::ShaderAttribute();
+		_shaderHdr->addShader(shaderTonemapHdrFp);
 
-		sh->add("fBlurFactor", osg::Uniform::FLOAT);
-		sh->add("g_fMiddleGray", osg::Uniform::FLOAT);
+		_shaderHdr->add("fBlurFactor", osg::Uniform::FLOAT);
+		_shaderHdr->add("g_fMiddleGray", osg::Uniform::FLOAT);
 
-		sh->set("fBlurFactor", _glareFactor);
-		sh->set("g_fMiddleGray", _midGrey);
+		_shaderHdr->set("fBlurFactor", _glareFactor);
+		_shaderHdr->set("g_fMiddleGray", _midGrey);
 
-		_unitHdr->getOrCreateStateSet()->setAttributeAndModes(sh);
-		_unitHdr->setInputTextureIndexForViewportReference(0);
+		_unitHdr->getOrCreateStateSet()->setAttributeAndModes(_shaderHdr);
+		_unitHdr->setInputTextureIndexForViewportReference(-1);
 
 		_unitHdr->setInputToUniform(blury, "blurInput", true);
 		_unitHdr->setInputToUniform(sceneLuminance, "lumInput", true);
@@ -180,24 +309,24 @@ void HighDynamicRangeEffect::initializeUnits()
 
 	_unitAdaptedLuminance = new osgPPU::UnitInOut();
 	{
-		osgPPU::ShaderAttribute* adaptedShader = new osgPPU::ShaderAttribute();
-		adaptedShader->addShader(shaderLuminanceAdaptedFp);
-		adaptedShader->add("texLuminance", osg::Uniform::SAMPLER_2D);
-		adaptedShader->set("texLuminance", 0);
-		adaptedShader->add("texAdaptedLuminance", osg::Uniform::SAMPLER_2D);
-		adaptedShader->set("texAdaptedLuminance", 1);
+		_shaderAdapted = new osgPPU::ShaderAttribute();
+		_shaderAdapted->addShader(shaderLuminanceAdaptedFp);
+		_shaderAdapted->add("texLuminance", osg::Uniform::SAMPLER_2D);
+		_shaderAdapted->set("texLuminance", 0);
+		_shaderAdapted->add("texAdaptedLuminance", osg::Uniform::SAMPLER_2D);
+		_shaderAdapted->set("texAdaptedLuminance", 1);
 
-		adaptedShader->add("maxLuminance", osg::Uniform::FLOAT);
-		adaptedShader->add("minLuminance", osg::Uniform::FLOAT);
-		adaptedShader->add("adaptScaleFactor", osg::Uniform::FLOAT);
+		_shaderAdapted->add("maxLuminance", osg::Uniform::FLOAT);
+		_shaderAdapted->add("minLuminance", osg::Uniform::FLOAT);
+		_shaderAdapted->add("adaptScaleFactor", osg::Uniform::FLOAT);
 
 		_unitAdaptedLuminance->getOrCreateStateSet()->getOrCreateUniform("invFrameTime", osg::Uniform::FLOAT);
 
-		adaptedShader->set("maxLuminance", _maxLuminance);
-		adaptedShader->set("minLuminance", _minLuminance);
-		adaptedShader->set("adaptScaleFactor", _adaptFactor);
+		_shaderAdapted->set("maxLuminance", _maxLuminance);
+		_shaderAdapted->set("minLuminance", _minLuminance);
+		_shaderAdapted->set("adaptScaleFactor", _adaptFactor);
 
-		_unitAdaptedLuminance->getOrCreateStateSet()->setAttributeAndModes(adaptedShader);
+		_unitAdaptedLuminance->getOrCreateStateSet()->setAttributeAndModes(_shaderAdapted);
 		_unitAdaptedLuminance->setViewport(new osg::Viewport(0, 0, 1, 1));
 		_unitAdaptedLuminance->setInputTextureIndexForViewportReference(-1);
 	}
