@@ -146,6 +146,16 @@ void Viewer::setPostProcessingEffectEnabled(unsigned int index, bool enabled)
 	setPostProcessingEffectEnabled(postProcessingEffectName(index), enabled);
 }
 
+ref_ptr<PostProcessingEffect> Viewer::getPostProcessingEffect(string ppeName)
+{
+	return _ppeDictionary.find(ppeName)->second.effect;
+}
+
+ref_ptr<PostProcessingEffect> Viewer::getPostProcessingEffect(unsigned int index)
+{
+	return getPostProcessingEffect(postProcessingEffectName(index));
+}
+
 bool Viewer::getPostProcessingEffectEnabled(string ppeName)
 {
 	PostProcessingStateDictionary::iterator it = _ppeDictionary.find(ppeName);
@@ -165,6 +175,8 @@ bool Viewer::hasPostProcessingEffect(string ppeName)
 
 void Viewer::initialize()
 {
+	setThreadingModel(ViewerBase::SingleThreaded);
+
 	_ppGroup = new Group();
 
 	osgViewer::Viewer::setSceneData(_ppGroup);

@@ -16,13 +16,14 @@ void main (void)
 { 
 	vec4 finalColor = vec4(0.0, 0.0, 0.0, 1.0);
 
-	vec4 colormap_color = texture2D(colormap, gl_TexCoord[0].st);
 	vec4 specreliefcitiesboundariesmap_color = texture2D(specreliefcitiesboundariesmap, gl_TexCoord[0].st);
-	vec3 normal = 2.0 * texture2D (normalmap, gl_TexCoord[0].st).rgb - 1.0;
-	vec4 nightmap_color = texture2D(nightmap, gl_TexCoord[0].st) + specreliefcitiesboundariesmap_color.b;
-
 	float ocean_depth = clamp(1.0 - specreliefcitiesboundariesmap_color.r + specreliefcitiesboundariesmap_color.g + 0.7, 0.0, 1.0);
 	vec4 boundaries_color = vec4(specreliefcitiesboundariesmap_color.a);
+
+	vec3 normal = 2.0 * texture2D (normalmap, gl_TexCoord[0].st).rgb - 1.0;
+	vec4 colormap_color = clamp(texture2D(colormap, gl_TexCoord[0].st) + boundaries_color, 0.0, 1.0);
+	vec4 nightmap_color = clamp(texture2D(nightmap, gl_TexCoord[0].st) + boundaries_color, 0.0, 1.0) + specreliefcitiesboundariesmap_color.b;
+
 
 	// red overlay for selected country (smoothed)
 	vec4 country_selected_color;
@@ -72,7 +73,7 @@ void main (void)
 		edge = clamp(ndotl * 3.0, -1.0, 1.0) * 0.5 + 0.5;
 
 		// vec4 Idiff = ocean_depth * colormap_color * edge  +  ocean_depth * nightmap_color * (1.0 - edge) + boundaries_color;
-		vec4 Idiff = ocean_depth * country_selected_color * (colormap_color * edge  +  nightmap_color * (1.0 - edge)) + boundaries_color;
+		vec4 Idiff = ocean_depth * country_selected_color * (colormap_color * edge  +  nightmap_color * (1.0 - edge)); //+ boundaries_color;
 
 		// SPECULAR
 		vec4 Ispec = gl_FrontLightProduct[i].specular 

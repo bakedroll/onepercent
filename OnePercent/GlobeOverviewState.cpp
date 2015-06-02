@@ -85,7 +85,7 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	{
 		stateEvent_pop();
 	}
-	else if (key == GUIEventAdapter::KEY_H)
+	else if (key == GUIEventAdapter::KEY_1)
 	{
 		if (getViewer()->hasPostProcessingEffect(HighDynamicRangeEffect::NAME))
 		{
@@ -94,7 +94,7 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 			getViewer()->setPostProcessingEffectEnabled(HighDynamicRangeEffect::NAME, enabled);
 		}
 	}
-	else if (key == GUIEventAdapter::KEY_D)
+	else if (key == GUIEventAdapter::KEY_2)
 	{
 		if (getViewer()->hasPostProcessingEffect(DepthOfFieldEffect::NAME))
 		{
@@ -103,6 +103,80 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 			getViewer()->setPostProcessingEffectEnabled(DepthOfFieldEffect::NAME, enabled);
 		}
 	}
+	else
+	{
+
+		if (getViewer()->hasPostProcessingEffect(HighDynamicRangeEffect::NAME))
+		{
+			ref_ptr<HighDynamicRangeEffect> hdrEffect = dynamic_cast<HighDynamicRangeEffect*>(getViewer()->getPostProcessingEffect(HighDynamicRangeEffect::NAME).get());
+
+			if (key == GUIEventAdapter::KEY_A)
+			{
+				hdrEffect->setMidGrey(hdrEffect->getMidGrey() + 0.5f);
+			}
+			else if (key == GUIEventAdapter::KEY_Y)
+			{
+				hdrEffect->setMidGrey(hdrEffect->getMidGrey() - 0.5f);
+			}
+
+			else if (key == GUIEventAdapter::KEY_S)
+			{
+				hdrEffect->setBlurSigma(hdrEffect->getBlurSigma() + 0.5f);
+			}
+			else if (key == GUIEventAdapter::KEY_X)
+			{
+				hdrEffect->setBlurSigma(hdrEffect->getBlurSigma() - 0.5f);
+			}
+
+			else if (key == GUIEventAdapter::KEY_D)
+			{
+				hdrEffect->setBlurRadius(hdrEffect->getBlurRadius() + 0.5f);
+			}
+			else if (key == GUIEventAdapter::KEY_C)
+			{
+				hdrEffect->setBlurRadius(hdrEffect->getBlurRadius() - 0.5f);
+			}
+
+			else if (key == GUIEventAdapter::KEY_F)
+			{
+				hdrEffect->setGlareFactor(hdrEffect->getGlareFactor() + 1.0f);
+			}
+			else if (key == GUIEventAdapter::KEY_V)
+			{
+				hdrEffect->setGlareFactor(hdrEffect->getGlareFactor() - 1.0f);
+			}
+
+			else if (key == GUIEventAdapter::KEY_F)
+			{
+				hdrEffect->setMinLuminance(hdrEffect->getMinLuminance() + 0.1f);
+			}
+			else if (key == GUIEventAdapter::KEY_V)
+			{
+				hdrEffect->setMinLuminance(hdrEffect->getMinLuminance() - 0.1f);
+			}
+
+			else if (key == GUIEventAdapter::KEY_G)
+			{
+				hdrEffect->setMaxLuminance(hdrEffect->getMaxLuminance() + 0.1f);
+			}
+			else if (key == GUIEventAdapter::KEY_B)
+			{
+				hdrEffect->setMaxLuminance(hdrEffect->getMaxLuminance() - 0.1f);
+			}
+
+			else if (key == GUIEventAdapter::KEY_H)
+			{
+				hdrEffect->setAdaptFactor(hdrEffect->getAdaptFactor() + 0.005f);
+			}
+			else if (key == GUIEventAdapter::KEY_N)
+			{
+				hdrEffect->setAdaptFactor(hdrEffect->getAdaptFactor() - 0.005f);
+			}
+		}
+
+	}
+
+
 	/*else if (key == GUIEventAdapter::KEY_0)
 	{
 		printf("bla\n");

@@ -181,5 +181,5 @@ void main (void)
 	total.a = intensity * 0.7;
 
 	//gl_FragColor = vec4(n1, n1, n1, 1.0);
-	gl_FragColor = total;
+	gl_FragColor = clamp(total, 0.0, 1.0);
 }

@@ -39,6 +39,9 @@ namespace osgGaming
 		void setPostProcessingEffectEnabled(std::string ppeName, bool enabled);
 		void setPostProcessingEffectEnabled(unsigned int index, bool enabled);
 
+		osg::ref_ptr<PostProcessingEffect> getPostProcessingEffect(std::string ppeName);
+		osg::ref_ptr<PostProcessingEffect> getPostProcessingEffect(unsigned int index);
+
 		bool getPostProcessingEffectEnabled(std::string ppeName);
 		bool getPostProcessingEffectEnabled(unsigned int index);
 
