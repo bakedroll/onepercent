@@ -9,8 +9,6 @@ using namespace osg;
 
 InputManager::InputManager()
 	: osgGA::GUIEventHandler(),
-	  _resolutionWidth(0),
-	  _resolutionHeight(0),
 	  _mouseDragging(0)
 {
 	for (int i = 0; i < _NUM_MOUSE_BUTTONS; i++)
@@ -93,9 +91,11 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 
 			float w = ea.getWindowWidth();
 
-			if (newWidth != _resolutionWidth || newHeight != _resolutionHeight)
+			Vec2f resolution = _viewer->getResolution();
+
+			if (newWidth != (int)resolution.x() || newHeight != (int)resolution.y())
 			{
-				updateResolution(newWidth, newHeight);
+				updateResolution(Vec2f((float)newWidth, (float)newHeight));
 				_currentState->onResizeEvent(newWidth, newHeight);
 			}
 		}
@@ -167,27 +167,14 @@ void InputManager::setCurrentWorld(ref_ptr<World> world)
 
 void InputManager::updateResolution()
 {
-	_currentWorld->getCameraManipulator()->updateResolution(_resolutionWidth, _resolutionHeight);
-	_currentWorld->getHud()->updateResolution(_resolutionWidth, _resolutionHeight);
-	_viewer->updateResolution(_resolutionWidth, _resolutionHeight);
+	updateResolution(_viewer->getResolution());
 }
 
-void InputManager::updateResolution(unsigned int width, unsigned int height)
+void InputManager::updateResolution(Vec2f resolution)
 {
-	_resolutionWidth = width;
-	_resolutionHeight = height;
-
-	updateResolution();
-}
-
-float InputManager::getResolutionWidth()
-{
-	return _resolutionWidth;
-}
-
-float InputManager::getResolutionHeight()
-{
-	return _resolutionHeight;
+	_currentWorld->getCameraManipulator()->updateResolution(resolution);
+	_currentWorld->getHud()->updateResolution(resolution);
+	_viewer->updateResolution(resolution);
 }
 
 int InputManager::mousePressed()

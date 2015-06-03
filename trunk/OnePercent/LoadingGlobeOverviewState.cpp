@@ -31,7 +31,7 @@ LoadingGlobeOverviewState::LoadingGlobeOverviewState(ref_ptr<GameState> nextStat
 
 }
 
-void LoadingGlobeOverviewState::initialize(float resolutionWidth, float resolutionHeight)
+void LoadingGlobeOverviewState::initialize()
 {
 	float projNear = (float)getWorld()->getCameraManipulator()->getProjectionNear();
 	float projFar = (float)getWorld()->getCameraManipulator()->getProjectionFar();

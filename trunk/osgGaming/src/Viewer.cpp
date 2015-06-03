@@ -15,24 +15,25 @@ using namespace std;
 
 Viewer::Viewer()
 	: osgViewer::Viewer(),
-	  _resolutionKnown(false),
-	  _ppuInitialized(false)
+	  _ppuInitialized(false),
+	  _lastWindowRectValid(false),
+	  _fullscreenEnabled(true),
+	  _resolutionInitialized(false),
+	  _screenNum(0)
 {
 	initialize();
 }
 
-void Viewer::updateResolution(float width, float height)
+void Viewer::updateResolution(Vec2f resolution)
 {
-	_resolution = Vec2f(width, height);
-
-	_resolutionKnown = true;
+	_resolution = resolution;
 
 	ref_ptr<osg::Camera> camera = getCamera();
-	ref_ptr<Viewport> vp = new Viewport(0, 0, width, height);
+	ref_ptr<Viewport> vp = new Viewport(0, 0, (int)_resolution.x(), (int)_resolution.y());
 
 	if (_processor.valid())
 	{
-		osgPPU::Camera::resizeViewport(0, 0, width, height, camera);
+		osgPPU::Camera::resizeViewport(0, 0, (int)_resolution.x(), (int)_resolution.y(), camera);
 		_processor->onViewportChange();
 	}
 
@@ -146,6 +147,26 @@ void Viewer::setPostProcessingEffectEnabled(unsigned int index, bool enabled)
 	setPostProcessingEffectEnabled(postProcessingEffectName(index), enabled);
 }
 
+void Viewer::setFullscreenEnabled(bool enabled)
+{
+	if (_fullscreenEnabled == enabled)
+	{
+		return;
+	}
+
+	_fullscreenEnabled = enabled;
+}
+
+void Viewer::setWindowedResolution(Vec2f resolution)
+{
+	_windowedResolution = resolution;
+}
+
+void Viewer::setScreenNum(int screenNum)
+{
+	_screenNum = screenNum;
+}
+
 ref_ptr<PostProcessingEffect> Viewer::getPostProcessingEffect(string ppeName)
 {
 	return _ppeDictionary.find(ppeName)->second.effect;
@@ -154,6 +175,26 @@ ref_ptr<PostProcessingEffect> Viewer::getPostProcessingEffect(string ppeName)
 ref_ptr<PostProcessingEffect> Viewer::getPostProcessingEffect(unsigned int index)
 {
 	return getPostProcessingEffect(postProcessingEffectName(index));
+}
+
+bool Viewer::getFullscreenEnabled()
+{
+	return _fullscreenEnabled;
+}
+
+Vec2f Viewer::getWindowedResolution()
+{
+	return _windowedResolution;
+}
+
+Vec2f Viewer::getResolution()
+{
+	return _resolution;
+}
+
+int Viewer::getScreenNum()
+{
+	return _screenNum;
 }
 
 bool Viewer::getPostProcessingEffectEnabled(string ppeName)
@@ -173,6 +214,30 @@ bool Viewer::hasPostProcessingEffect(string ppeName)
 	return _ppeDictionary.find(ppeName) != _ppeDictionary.end();
 }
 
+void Viewer::setupResolution()
+{
+	unsigned int screenWidth, screenHeight;
+	GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(_screenNum), screenWidth, screenHeight);
+
+	if (!_fullscreenEnabled)
+	{
+		setUpViewInWindow(
+			screenWidth / 2 - (int)_windowedResolution.x() / 2,
+			screenHeight / 2 - (int)_windowedResolution.y() / 2,
+			(int)_windowedResolution.x(),
+			(int)_windowedResolution.y(),
+			_screenNum);
+
+		_resolution = _windowedResolution;
+	}
+	else
+	{
+		_resolution = Vec2f((float)screenWidth, (float)screenHeight);
+	}
+
+	_resolutionInitialized = true;
+}
+
 void Viewer::initialize()
 {
 	setThreadingModel(ViewerBase::SingleThreaded);
@@ -186,7 +251,6 @@ void Viewer::initialize()
 	camera->setComputeNearFarMode(CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 	camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	camera->setRenderOrder(osg::Camera::PRE_RENDER);
-	//camera->attach(osg::Camera::COLOR_BUFFER, texture, 0, 0, false, 8, 8);
 
 	_hudCamera = new osg::Camera();
 	_hudCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER, osg::Camera::FRAME_BUFFER);
@@ -340,11 +404,7 @@ ref_ptr<Texture2D> Viewer::createRenderTexture(osg::Camera::BufferComponent buff
 {
 	ref_ptr<Texture2D> texture = new Texture2D();
 
-	if (_resolutionKnown)
-	{
-		texture->setTextureSize((int)_resolution.x(), (int)_resolution.y());
-	}
-
+	texture->setTextureSize((int)_resolution.x(), (int)_resolution.y());
 	texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
 	texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
 	texture->setResizeNonPowerOfTwoHint(false);
@@ -466,11 +526,8 @@ void Viewer::initializePPU()
 
 	_ppGroup->addChild(_processor);
 
-	if (_resolutionKnown)
-	{
-		osgPPU::Camera::resizeViewport(0, 0, _resolution.x(), _resolution.y(), getCamera());
-		_processor->onViewportChange();
-	}
+	osgPPU::Camera::resizeViewport(0, 0, _resolution.x(), _resolution.y(), getCamera());
+	_processor->onViewportChange();
 
 	_ppuInitialized = true;
 }

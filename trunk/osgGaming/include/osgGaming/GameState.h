@@ -34,7 +34,7 @@ namespace osgGaming
 		bool isInitialized();
 		void setInitialized();
 
-		virtual void initialize(float resolutionWidth, float resolutionHeight);
+		virtual void initialize();
 		virtual StateEvent* update();
 
 		virtual bool isLoadingState();

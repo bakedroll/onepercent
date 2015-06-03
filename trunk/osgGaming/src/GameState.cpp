@@ -21,7 +21,7 @@ void GameState::setInitialized()
 	_initialized = true;
 }
 
-void GameState::initialize(float resolutionWidth, float resolutionHeight)
+void GameState::initialize()
 {
 
 }

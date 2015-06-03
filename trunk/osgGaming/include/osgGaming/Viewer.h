@@ -24,7 +24,7 @@ namespace osgGaming
 	public:
 		Viewer();
 
-		void updateResolution(float width, float height);
+		void updateResolution(osg::Vec2f resolution);
 		virtual void setSceneData(osg::Node* node) override;
 
 		void setClampColorEnabled(bool enabled);
@@ -38,14 +38,23 @@ namespace osgGaming
 
 		void setPostProcessingEffectEnabled(std::string ppeName, bool enabled);
 		void setPostProcessingEffectEnabled(unsigned int index, bool enabled);
+		void setFullscreenEnabled(bool enabled);
+		void setWindowedResolution(osg::Vec2f resolution);
+		void setScreenNum(int screenNum);
 
 		osg::ref_ptr<PostProcessingEffect> getPostProcessingEffect(std::string ppeName);
 		osg::ref_ptr<PostProcessingEffect> getPostProcessingEffect(unsigned int index);
+		bool getFullscreenEnabled();
+		osg::Vec2f getWindowedResolution();
+		osg::Vec2f getResolution();
+		int getScreenNum();
 
 		bool getPostProcessingEffectEnabled(std::string ppeName);
 		bool getPostProcessingEffectEnabled(unsigned int index);
 
 		bool hasPostProcessingEffect(std::string ppeName);
+
+		void setupResolution();
 
 	private:
 		typedef struct _renderTexture
@@ -81,8 +90,15 @@ namespace osgGaming
 
 		void initializePPU();
 
-		bool _resolutionKnown;
+		// bool _resolutionKnown;
 		osg::Vec2f _resolution;
+
+		osg::Vec2f _windowedResolution;
+		osg::Vec4f _lastWindowRect;
+		bool _fullscreenEnabled;
+		bool _lastWindowRectValid;
+		bool _resolutionInitialized;
+		int _screenNum;
 
 		osg::ref_ptr<osg::Node> _ppSceneData;
 		osg::ref_ptr<osg::StateSet> _hudStateSet;

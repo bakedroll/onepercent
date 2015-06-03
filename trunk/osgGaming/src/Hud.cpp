@@ -58,11 +58,11 @@ Hud::UIMList Hud::getUserInteractionModels()
 	return _uimList;
 }
 
-void Hud::updateResolution(unsigned int width, unsigned int height)
+void Hud::updateResolution(Vec2f resolution)
 {
-	_projection->setMatrix(Matrix::ortho2D(0.0, (double)width - 1.0, 1.0, (double)height - 1.0));
+	_resolution = resolution;
 
-	_resolution = Vec2f((float)width, (float)height);
+	_projection->setMatrix(Matrix::ortho2D(0.0, (double)_resolution.x() - 1.0, 1.0, (double)_resolution.y() - 1.0));
 
 	updateUIElements();
 }

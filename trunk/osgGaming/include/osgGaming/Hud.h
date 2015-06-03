@@ -26,7 +26,7 @@ namespace osgGaming
 		osg::ref_ptr<UIElement> getRootUIElement();
 		UIMList getUserInteractionModels();
 
-		void updateResolution(unsigned int width, unsigned int height);
+		void updateResolution(osg::Vec2f resolution);
 		void updateUIElements();
 
 		void setFpsEnabled(bool enabled);

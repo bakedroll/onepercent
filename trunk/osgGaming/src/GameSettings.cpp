@@ -6,7 +6,7 @@ using namespace osg;
 GameSettings::GameSettings()
 	: Referenced(),
 	_fullscreenEnabled(false),
-	_windowResolution(Vec2i(1280, 768)),
+	_windowedResolution(Vec2f(1280.0f, 768.0f)),
 	_screenNum(0)
 {
 
@@ -17,9 +17,9 @@ void GameSettings::setFullscreenEnabled(bool enabled)
 	_fullscreenEnabled = enabled;
 }
 
-void GameSettings::setWindowResolution(Vec2i resolution)
+void GameSettings::setWindowResolution(Vec2f resolution)
 {
-	_windowResolution = resolution;
+	_windowedResolution = resolution;
 }
 
 void GameSettings::setScreenNum(unsigned int screenNum)
@@ -32,12 +32,12 @@ bool GameSettings::getFullscreenEnabled()
 	return _fullscreenEnabled;
 }
 
-Vec2i GameSettings::getWindowResolution()
+Vec2f GameSettings::getWindowedResolution()
 {
-	return _windowResolution;
+	return _windowedResolution;
 }
 
-unsigned int GameSettings::getScreenNum()
+int GameSettings::getScreenNum()
 {
 	return _screenNum;
 }
