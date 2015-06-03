@@ -19,12 +19,10 @@ namespace osgGaming
 		void setCurrentWorld(osg::ref_ptr<World> world);
 
 		void updateResolution();
-		void updateResolution(unsigned int width, unsigned int height);
-
-		float getResolutionWidth();
-		float getResolutionHeight();
 
 	private:
+		void updateResolution(osg::Vec2f resolution);
+
 		int mousePressed();
 
 		void handleUserInteractionMove(float x, float y);
@@ -37,9 +35,6 @@ namespace osgGaming
 
 		osg::ref_ptr<osgGaming::Viewer> _viewer;
 		osg::ref_ptr<GameState> _currentState;
-
-		unsigned int _resolutionWidth;
-		unsigned int _resolutionHeight;
 
 		bool _mousePressed[_NUM_MOUSE_BUTTONS];
 		int _mouseDragging;

@@ -38,7 +38,7 @@ void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double
 			state->setViewer(&_viewer);
 			state->setGameSettings(_gameSettings);
 
-			state->initialize(_inputManager->getResolutionWidth(), _inputManager->getResolutionHeight());
+			state->initialize();
 			state->setInitialized();
 
 			if (state->isLoadingState())
@@ -150,37 +150,19 @@ int GameApplication::run(ref_ptr<GameState> initialState)
 
 		_stateStack.push_back(initialState);
 
+
+		_viewer.setFullscreenEnabled(_gameSettings->getFullscreenEnabled());
+		_viewer.setWindowedResolution(_gameSettings->getWindowedResolution());
+		_viewer.setScreenNum(_gameSettings->getScreenNum());
+
+		_viewer.setupResolution();
+
 		_inputManager = new InputManager();
 		_inputManager->setCurrentWorld(_world);
 		_inputManager->setCurrentState(initialState);
+		_inputManager->setViewer(&_viewer);
 
-		unsigned int screenWidth, screenHeight;
-		unsigned int width, height;
-		GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(_gameSettings->getScreenNum()), screenWidth, screenHeight);
-
-		if (!_gameSettings->getFullscreenEnabled())
-		{
-			Vec2i windowResolution = _gameSettings->getWindowResolution();
-
-			_viewer.setUpViewInWindow(
-				screenWidth / 2 - windowResolution.x() / 2,
-				screenHeight / 2 - windowResolution.y() / 2,
-				windowResolution.x(),
-				windowResolution.y(),
-				_gameSettings->getScreenNum());
-
-			width = windowResolution.x();
-			height = windowResolution.y();
-
-			_inputManager->setViewer(&_viewer);
-		}
-		else
-		{
-			width = screenWidth;
-			height = screenHeight;
-		}
-
-		_inputManager->updateResolution(width, height);
+		_inputManager->updateResolution();
 
 		attachWorld(_world);
 

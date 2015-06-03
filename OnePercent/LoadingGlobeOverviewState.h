@@ -12,7 +12,7 @@ namespace onep
 	public:
 		LoadingGlobeOverviewState(osg::ref_ptr<osgGaming::GameState> nextState);
 
-		virtual void initialize(float resolutionWidth, float resolutionHeight) override;
+		virtual void initialize() override;
 		virtual osgGaming::StateEvent* update() override;
 
 		virtual void load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::GameSettings> settings) override;

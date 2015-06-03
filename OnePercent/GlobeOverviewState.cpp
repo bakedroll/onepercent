@@ -34,11 +34,11 @@ GlobeOverviewState::GlobeOverviewState()
 	_cameraViewAngleAnimation = new Animation<Vec2f>(_cameraViewAngle, 0.5, CIRCLE_OUT);
 }
 
-void GlobeOverviewState::initialize(float resolutionWidth, float resolutionHeight)
+void GlobeOverviewState::initialize()
 {
 	_globeWorld = static_cast<GlobeOverviewWorld*>(getWorld().get());
 
-	_globeWorld->getBackgroundModel()->updateResolutionHeight(resolutionHeight);
+	_globeWorld->getBackgroundModel()->updateResolutionHeight(getViewer()->getResolution().y());
 }
 
 StateEvent* GlobeOverviewState::update()
