@@ -135,6 +135,9 @@
     <ClCompile Include="src\ShaderFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\FastApproximateAntiAliasingEffect.cpp">
+      <Filter>Source Files\PPU</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h">
@@ -253,6 +256,9 @@
     </ClInclude>
     <ClInclude Include="include\osgGaming\ShaderFactory.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\FastApproximateAntiAliasingEffect.h">
+      <Filter>Header Files\PPU</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

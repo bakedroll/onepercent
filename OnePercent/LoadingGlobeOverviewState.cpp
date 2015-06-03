@@ -18,6 +18,7 @@
 
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
+#include <osgGaming/FastApproximateAntiAliasingEffect.h>
 
 using namespace onep;
 using namespace osg;
@@ -45,6 +46,8 @@ void LoadingGlobeOverviewState::initialize()
 	getWorld()->getHud()->getRootUIElement()->addChild(_loadingText);
 
 	getViewer()->setClampColorEnabled(true);
+
+	getViewer()->addPostProcessingEffect(new FastApproximateAntiAliasingEffect(getViewer()->getResolution()));
 	getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect());
 	getViewer()->addPostProcessingEffect(new DepthOfFieldEffect(projNear, projFar), false);
 }

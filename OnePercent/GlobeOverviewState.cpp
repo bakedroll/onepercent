@@ -6,6 +6,7 @@
 #include <osgGaming/Helper.h>
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
+#include <osgGaming/FastApproximateAntiAliasingEffect.h>
 
 using namespace onep;
 using namespace osg;
@@ -101,6 +102,20 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 			bool enabled = !getViewer()->getPostProcessingEffectEnabled(DepthOfFieldEffect::NAME);
 
 			getViewer()->setPostProcessingEffectEnabled(DepthOfFieldEffect::NAME, enabled);
+		}
+	}
+	else if (key == GUIEventAdapter::KEY_3)
+	{
+		if (getViewer()->hasPostProcessingEffect(FastApproximateAntiAliasingEffect::NAME))
+		{
+			bool enabled = !getViewer()->getPostProcessingEffectEnabled(FastApproximateAntiAliasingEffect::NAME);
+
+			if (enabled)
+			{
+				static_cast<FastApproximateAntiAliasingEffect*>(getViewer()->getPostProcessingEffect(FastApproximateAntiAliasingEffect::NAME).get())->setResolution(getViewer()->getResolution());
+			}
+
+			getViewer()->setPostProcessingEffectEnabled(FastApproximateAntiAliasingEffect::NAME, enabled);
 		}
 	}
 	else if (key == GUIEventAdapter::KEY_0)
