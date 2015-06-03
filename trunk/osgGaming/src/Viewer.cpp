@@ -415,7 +415,7 @@ void Viewer::updateWindowRect()
 					(int)_windowRect.w());
 			}
 
-			graphicsWindow->grabFocusIfPointerInWindow();
+			// graphicsWindow->grabFocusIfPointerInWindow();
 		}
 	}
 }
