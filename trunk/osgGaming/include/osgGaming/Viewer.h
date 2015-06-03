@@ -25,6 +25,7 @@ namespace osgGaming
 		Viewer();
 
 		void updateResolution(osg::Vec2f resolution);
+		void updateWindowPosition(osg::Vec2f position);
 		virtual void setSceneData(osg::Node* node) override;
 
 		void setClampColorEnabled(bool enabled);
@@ -78,6 +79,7 @@ namespace osgGaming
 		void setupPostProcessingEffects();
 
 		void updateCameraRenderTextures(bool recreate = false);
+		void updateWindowRect();
 
 		RenderTexture renderTexture(osg::Camera::BufferComponent bufferComponent, bool recreate = false);
 		osg::ref_ptr<osg::Texture2D> createRenderTexture(osg::Camera::BufferComponent bufferComponent);
@@ -90,13 +92,9 @@ namespace osgGaming
 
 		void initializePPU();
 
-		// bool _resolutionKnown;
 		osg::Vec2f _resolution;
-
-		osg::Vec2f _windowedResolution;
-		osg::Vec4f _lastWindowRect;
+		osg::Vec4f _windowRect;
 		bool _fullscreenEnabled;
-		bool _lastWindowRectValid;
 		bool _resolutionInitialized;
 		int _screenNum;
 

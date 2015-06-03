@@ -12,11 +12,9 @@ using namespace osgPPU;
 using namespace osg;
 using namespace std;
 
-
 Viewer::Viewer()
 	: osgViewer::Viewer(),
 	  _ppuInitialized(false),
-	  _lastWindowRectValid(false),
 	  _fullscreenEnabled(true),
 	  _resolutionInitialized(false),
 	  _screenNum(0)
@@ -28,6 +26,12 @@ void Viewer::updateResolution(Vec2f resolution)
 {
 	_resolution = resolution;
 
+	if (!_fullscreenEnabled)
+	{
+		_windowRect.z() = _resolution.x();
+		_windowRect.w() = _resolution.y();
+	}
+
 	ref_ptr<osg::Camera> camera = getCamera();
 	ref_ptr<Viewport> vp = new Viewport(0, 0, (int)_resolution.x(), (int)_resolution.y());
 
@@ -38,9 +42,17 @@ void Viewer::updateResolution(Vec2f resolution)
 	}
 
 	camera->setViewport(vp);
-	// _hudCamera->setViewport(vp);
 
 	updateCameraRenderTextures(true);
+}
+
+void Viewer::updateWindowPosition(Vec2f position)
+{
+	if (!_fullscreenEnabled)
+	{
+		_windowRect.x() = position.x();
+		_windowRect.y() = position.y();
+	}
 }
 
 void Viewer::setSceneData(Node* node)
@@ -155,11 +167,16 @@ void Viewer::setFullscreenEnabled(bool enabled)
 	}
 
 	_fullscreenEnabled = enabled;
+
+	updateWindowRect();
 }
 
 void Viewer::setWindowedResolution(Vec2f resolution)
 {
-	_windowedResolution = resolution;
+	_windowRect.z() = resolution.x();
+	_windowRect.w() = resolution.y();
+
+	updateWindowRect();
 }
 
 void Viewer::setScreenNum(int screenNum)
@@ -180,11 +197,6 @@ ref_ptr<PostProcessingEffect> Viewer::getPostProcessingEffect(unsigned int index
 bool Viewer::getFullscreenEnabled()
 {
 	return _fullscreenEnabled;
-}
-
-Vec2f Viewer::getWindowedResolution()
-{
-	return _windowedResolution;
 }
 
 Vec2f Viewer::getResolution()
@@ -219,16 +231,19 @@ void Viewer::setupResolution()
 	unsigned int screenWidth, screenHeight;
 	GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(_screenNum), screenWidth, screenHeight);
 
+	_windowRect.x() = (float)screenWidth / 2.0f - _windowRect.z() / 2.0f;
+	_windowRect.y() = (float)screenHeight / 2.0f - _windowRect.w() / 2.0f;
+
 	if (!_fullscreenEnabled)
 	{
 		setUpViewInWindow(
-			screenWidth / 2 - (int)_windowedResolution.x() / 2,
-			screenHeight / 2 - (int)_windowedResolution.y() / 2,
-			(int)_windowedResolution.x(),
-			(int)_windowedResolution.y(),
+			(int)_windowRect.x(),
+			(int)_windowRect.y(),
+			(int)_windowRect.z(),
+			(int)_windowRect.w(),
 			_screenNum);
 
-		_resolution = _windowedResolution;
+		_resolution = Vec2f(_windowRect.z(), _windowRect.w());
 	}
 	else
 	{
@@ -302,8 +317,6 @@ void Viewer::resetPostProcessingEffects()
 		for (PostProcessingEffect::InputToUniformList::iterator it = inputToUniformList.begin(); it != inputToUniformList.end(); ++it)
 		{
 			unitForType(it->type)->removeChild(it->unit);
-
-			//it->unit->setInputToUniform(unitForType(it->type), it->name, false);
 		}
 
 		_lastUnit = ppe->getResultUnit();
@@ -369,6 +382,40 @@ void Viewer::updateCameraRenderTextures(bool recreate)
 	osgViewer::Renderer* renderer = (osgViewer::Renderer*)getCamera()->getRenderer();
 	renderer->getSceneView(0)->getRenderStage()->setCameraRequiresSetUp(true);
 	renderer->getSceneView(0)->getRenderStage()->setFrameBufferObject(NULL);
+}
+
+void Viewer::updateWindowRect()
+{
+	if (_resolutionInitialized)
+	{
+		ViewerBase::Windows windows;
+		getWindows(windows);
+
+		ref_ptr<osgViewer::GraphicsWindow> graphicsWindow = *windows.begin();
+
+		if (graphicsWindow.valid())
+		{
+			if (_fullscreenEnabled)
+			{
+				unsigned int screenWidth, screenHeight;
+				GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(_screenNum), screenWidth, screenHeight);
+
+				graphicsWindow->setWindowDecoration(false);
+				graphicsWindow->setWindowRectangle(0, 0, screenWidth, screenHeight);
+			}
+			else
+			{
+				graphicsWindow->setWindowDecoration(true);
+				graphicsWindow->setWindowRectangle(
+					(int)_windowRect.x(),
+					(int)_windowRect.y(),
+					(int)_windowRect.z(),
+					(int)_windowRect.w());
+			}
+
+			graphicsWindow->grabFocusIfPointerInWindow();
+		}
+	}
 }
 
 Viewer::RenderTexture Viewer::renderTexture(osg::Camera::BufferComponent bufferComponent, bool recreate)

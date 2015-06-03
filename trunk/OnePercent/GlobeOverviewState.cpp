@@ -103,6 +103,12 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 			getViewer()->setPostProcessingEffectEnabled(DepthOfFieldEffect::NAME, enabled);
 		}
 	}
+	else if (key == GUIEventAdapter::KEY_0)
+	{
+		//getViewer()->setWindowedResolution(Vec2f(800, 600));
+
+		getViewer()->setFullscreenEnabled(!getViewer()->getFullscreenEnabled());
+	}
 	else
 	{
 
