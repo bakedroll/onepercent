@@ -119,6 +119,8 @@ void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe, bool ena
 		resetPostProcessingEffects();
 	}
 
+	// ppe->initialize();
+
 	PostProcessingState pps;
 	pps.effect = ppe;
 	pps.enabled = enabled;

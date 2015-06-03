@@ -15,6 +15,7 @@
     <ClCompile Include="src\ByteStream.cpp" />
     <ClCompile Include="src\CameraAlignedQuad.cpp" />
     <ClCompile Include="src\DepthOfFieldEffect.cpp" />
+    <ClCompile Include="src\FastApproximateAntiAliasingEffect.cpp" />
     <ClCompile Include="src\FileResourceLoader.cpp" />
     <ClCompile Include="src\FpsTextCallback.cpp" />
     <ClCompile Include="src\GameException.cpp" />
@@ -54,6 +55,7 @@
     <ClInclude Include="include\osgGaming\ByteStream.h" />
     <ClInclude Include="include\osgGaming\CameraAlignedQuad.h" />
     <ClInclude Include="include\osgGaming\DepthOfFieldEffect.h" />
+    <ClInclude Include="include\osgGaming\FastApproximateAntiAliasingEffect.h" />
     <ClInclude Include="include\osgGaming\FileResourceLoader.h" />
     <ClInclude Include="include\osgGaming\FpsTextCallback.h" />
     <ClInclude Include="include\osgGaming\GameApplication.h" />
