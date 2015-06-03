@@ -79,26 +79,33 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	}
 	case GUIEventAdapter::RESIZE:
 	{
-		ViewerBase::Windows windows;
-		_viewer->getWindows(windows);
+		//ViewerBase::Windows windows;
+		//_viewer->getWindows(windows);
 
-		ref_ptr<GraphicsWindow> graphicsWindow = *windows.begin();
+		//ref_ptr<GraphicsWindow> graphicsWindow = *windows.begin();
 
-		if (graphicsWindow.valid())
+		//if (graphicsWindow.valid())
+		//{
+		int newWidth = ea.getWindowWidth(); //graphicsWindow->getTraits()->width;
+		int newHeight = ea.getWindowHeight(); //graphicsWindow->getTraits()->height;
+
+		int newX = ea.getWindowX();
+		int newY = ea.getWindowY();
+
+		//float w = ea.getWindowWidth();
+
+		//printf("%d %f\n", newWidth, w);
+
+		Vec2f resolution = _viewer->getResolution();
+
+		_viewer->updateWindowPosition(Vec2f((float)newX, (float)newY));
+
+		if (newWidth != (int)resolution.x() || newHeight != (int)resolution.y())
 		{
-			int newWidth = graphicsWindow->getTraits()->width;
-			int newHeight = graphicsWindow->getTraits()->height;
-
-			float w = ea.getWindowWidth();
-
-			Vec2f resolution = _viewer->getResolution();
-
-			if (newWidth != (int)resolution.x() || newHeight != (int)resolution.y())
-			{
-				updateResolution(Vec2f((float)newWidth, (float)newHeight));
-				_currentState->onResizeEvent(newWidth, newHeight);
-			}
+			updateResolution(Vec2f((float)newWidth, (float)newHeight));
+			_currentState->onResizeEvent(newWidth, newHeight);
 		}
+		//}
 
 		return true;
 	}

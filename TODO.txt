@@ -1,5 +1,4 @@
 - engine:
 	- logging
 	- COMMENTS!!!!
-	- WindowSizeHandler to toggle fullscreen
-	- antialiasing
+	- fxaa antialiasing
