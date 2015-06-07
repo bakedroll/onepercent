@@ -46,7 +46,6 @@ namespace osgGaming
 		osg::ref_ptr<PostProcessingEffect> getPostProcessingEffect(std::string ppeName);
 		osg::ref_ptr<PostProcessingEffect> getPostProcessingEffect(unsigned int index);
 		bool getFullscreenEnabled();
-		osg::Vec2f getWindowedResolution();
 		osg::Vec2f getResolution();
 		int getScreenNum();
 
