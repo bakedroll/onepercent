@@ -11,7 +11,7 @@ using namespace osg;
 UIText::UIText()
 	: UIVisualElement(),
 	  _text(""),
-	  _fontSize(25),
+	  _fontSize(24),
 	  _alignment(TextBase::LEFT_TOP)
 {
 	ref_ptr<Geode> geode = new Geode();

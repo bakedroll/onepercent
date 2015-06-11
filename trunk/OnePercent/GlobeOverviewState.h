@@ -14,6 +14,7 @@ namespace onep
 		GlobeOverviewState();
 
 		virtual void initialize() override;
+
 		virtual osgGaming::StateEvent* update() override;
 
 		virtual void onKeyPressedEvent(int key) override;

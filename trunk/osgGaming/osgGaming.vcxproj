@@ -22,8 +22,9 @@
     <ClCompile Include="src\GameApplication.cpp" />
     <ClCompile Include="src\GameLoadingState.cpp" />
     <ClCompile Include="src\GameSettings.cpp" />
-    <ClCompile Include="src\Helper.cpp" />
     <ClCompile Include="src\GameState.cpp" />
+    <ClCompile Include="src\Helper.cpp" />
+    <ClCompile Include="src\AbstractGameState.cpp" />
     <ClCompile Include="src\HighDynamicRangeEffect.cpp" />
     <ClCompile Include="src\Hud.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
@@ -62,6 +63,7 @@
     <ClInclude Include="include\osgGaming\GameException.h" />
     <ClInclude Include="include\osgGaming\GameLoadingState.h" />
     <ClInclude Include="include\osgGaming\GameSettings.h" />
+    <ClInclude Include="include\osgGaming\AbstractGameState.h" />
     <ClInclude Include="include\osgGaming\GameState.h" />
     <ClInclude Include="include\osgGaming\Helper.h" />
     <ClInclude Include="include\osgGaming\HighDynamicRangeEffect.h" />
