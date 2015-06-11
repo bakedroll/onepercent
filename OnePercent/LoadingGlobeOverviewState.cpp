@@ -43,7 +43,7 @@ void LoadingGlobeOverviewState::initialize()
 	_loadingText->setVerticalAlignment(UIElement::BOTTOM);
 	_loadingText->setMargin(10.0f);
 
-	getWorld()->getHud()->getRootUIElement()->addChild(_loadingText);
+	getHud()->getRootUIElement()->addChild(_loadingText);
 
 	getViewer()->setClampColorEnabled(true);
 
@@ -64,7 +64,7 @@ StateEvent* LoadingGlobeOverviewState::update()
 	return stateEvent_default();
 }
 
-void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings> settings)
+void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud, ref_ptr<GameSettings> settings)
 {
 	ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
@@ -80,12 +80,12 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	globeWorld->setBackgroundModel(backgroundModel);
 	world->getRootNode()->addChild(backgroundModel->getTransform());
 
-	world->getHud()->setFpsEnabled(true);
+	hud->setFpsEnabled(true);
 
 
 
 	// ##################
-	/*ref_ptr<UIElement> root = world->getHud()->getRootUIElement();
+	ref_ptr<UIElement> root = hud->getRootUIElement();
 
 	ref_ptr<UIGrid> grid = new UIGrid();
 	ref_ptr<UIText> first = new UIText();
@@ -134,7 +134,7 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, ref_ptr<GameSettings>
 	second->getVisualGroup();
 	third->getVisualGroup();
 	
-	world->getHud()->registerUserInteractionModel(button1);
-	world->getHud()->registerUserInteractionModel(button2);*/
+	hud->registerUserInteractionModel(button1);
+	hud->registerUserInteractionModel(button2);
 	// #############
 }

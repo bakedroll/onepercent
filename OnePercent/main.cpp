@@ -20,7 +20,8 @@ int main(int argc, char** argv)
 	ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 
 	ref_ptr<GameApplication> app = new GameApplication();
-	app->setWorld<GlobeOverviewWorld>();
+
+	app->setDefaultWorld(new GlobeOverviewWorld());
 
 	//app->getGameSettings()->setScreenNum(1);
 	//app->getGameSettings()->setFullscreenEnabled(true);

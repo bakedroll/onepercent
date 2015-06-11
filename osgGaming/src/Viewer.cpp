@@ -93,23 +93,32 @@ ref_ptr<Hud> Viewer::getHud()
 	return _hud;
 }
 
+// TODO: refactor
 void Viewer::setHud(ref_ptr<Hud> hud)
 {
+	if (_hud == hud)
+	{
+		return;
+	}
+
 	if (_hud.valid())
 	{
-		_hudSwitch->setChildValue(_hud->getProjection(), false);
+		//_hudSwitch->setChildValue(_hud->getProjection(), false);
+		_hudSwitch->removeChild(_hud->getProjection());
 	}
 
 	_hud = hud;
 
-	if (!_hudSwitch->containsNode(_hud->getProjection()))
+	/*if (!_hudSwitch->containsNode(_hud->getProjection()))
 	{
 		_hudSwitch->addChild(_hud->getProjection() , true);
 	}
 	else
 	{
 		_hudSwitch->setChildValue(_hud->getProjection(), true);
-	}
+	}*/
+
+	_hudSwitch->addChild(_hud->getProjection(), true);
 }
 
 void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe, bool enabled, string name)
