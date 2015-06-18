@@ -18,113 +18,126 @@ using namespace std;
 GameApplication::GameApplication()
 	: SimulationCallback(),
 	  _gameEnded(false),
-	  _isLoading(false),
-	  _attachState(true)
+	  _isLoading(false)
 {
 
 }
 
 void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
 {
-	if (!_stateStack.empty())
+	GameStateStack::AbstractGameStateList* runningStates = _gameStateStack.getRunningStates();
+
+	if (!runningStates->empty())
 	{
-		ref_ptr<AbstractGameState> state = *(--_stateStack.end());
+		bool attach = _gameStateStack.attachRequired();
 
-		state->setSimulationTime(simTime);
-		state->setFrameTime(timeDiff);
+		ref_ptr<AbstractGameState> topState = *(--runningStates->end());
 
-		bool initialized = state->isInitialized();
-
-		if (!initialized)
+		for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
 		{
-			initializeState(state);
-			state->setInitialized();
-		}
+			ref_ptr<AbstractGameState> state = *it;
 
-		if (_attachState)
-		{
-			attachState(state);
+			state->setSimulationTime(simTime);
+			state->setFrameTime(timeDiff);
 
-			_attachState = false;
-		}
+			bool initialized = state->isInitialized();
 
-		if (!initialized)
-		{
-			if (state->isLoadingState())
+			if (!initialized)
 			{
-				if (!_isLoading)
-				{
-					_isLoading = true;
-				}
-
-				ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
-
-				ref_ptr<GameState> nextState = loadingState->getNextState();
-				prepareStateWorldAndHud(nextState);
-
-				_loadingThreadFuture = async(launch::async,
-					&GameLoadingState::loading_thread,
-					loadingState,
-					nextState->getWorld(),
-					nextState->getHud(),
-					getDefaultGameSettings());
-
-			}
-			else
-			{
-				if (_isLoading)
-				{
-					_isLoading = false;
-					resetTimeDiff();
-				}
-			}
-		}
-		
-
-		// Update state
-		StateEvent* se = state->update();
-
-		if (_isLoading)
-		{
-			if (_loadingThreadFuture.wait_for(chrono::milliseconds(0)) == future_status::ready)
-			{
-				try
-				{
-					_loadingThreadFuture.get();
-				}
-				catch (GameException& e)
-				{
-					throw e;
-				}
-				catch (std::exception& e)
-				{
-					throw e;
-				}
-
-				ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
-
-				replaceState(loadingState->getNextState());
-			}
-		}
-		else if (se != NULL)
-		{
-			switch (se->type)
-			{
-			case POP:
-				popState();
-				break;
-			case PUSH:
-				pushState(se->referencedState);
-				break;
-			case REPLACE:
-				replaceState(se->referencedState);
-				break;
-			case END_GAME:
-				_gameEnded = true;
-				break;
+				initializeState(state);
+				state->setInitialized();
 			}
 
-			delete se;
+			if (attach && (state == topState))
+			{
+				attachState(state);
+			}
+
+			if (!initialized)
+			{
+				if (state->isLoadingState())
+				{
+					if (!_isLoading)
+					{
+						_isLoading = true;
+					}
+
+					ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
+
+					AbstractGameState::AbstractGameStateList nextStates = loadingState->getNextStates();
+					prepareStateWorldAndHud(nextStates);
+
+					ref_ptr<AbstractGameState> nextState = *nextStates.begin();
+
+					_loadingThreadFuture = async(launch::async,
+						&GameLoadingState::loading_thread,
+						loadingState,
+						nextState->getWorld(),
+						nextState->getHud(),
+						getDefaultGameSettings());
+
+				}
+				else
+				{
+					if (_isLoading)
+					{
+						_isLoading = false;
+						resetTimeDiff();
+					}
+				}
+			}
+
+
+			// Update state
+			GameState::StateEvent* se = state->update();
+
+			if (_isLoading)
+			{
+				if (_loadingThreadFuture.wait_for(chrono::milliseconds(0)) == future_status::ready)
+				{
+					try
+					{
+						_loadingThreadFuture.get();
+					}
+					catch (GameException& e)
+					{
+						throw e;
+					}
+					catch (std::exception& e)
+					{
+						throw e;
+					}
+
+					ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
+
+					_gameStateStack.replaceState(loadingState->getNextStates());
+
+					break;
+				}
+			}
+			else if (se != NULL)
+			{
+				switch (se->type)
+				{
+				case GameState::POP:
+					_gameStateStack.popState();
+					break;
+				case GameState::PUSH:
+					_gameStateStack.pushStates(se->referencedStates);
+					break;
+				case GameState::REPLACE:
+					_gameStateStack.replaceState(se->referencedStates);
+					break;
+				case GameState::END_GAME:
+					_gameEnded = true;
+					break;
+				}
+
+				delete se;
+
+				break;
+			}
+
 		}
 	}
 	else
@@ -184,9 +197,17 @@ void GameApplication::setDefaultGameSettings(ref_ptr<GameSettings> settings)
 
 int GameApplication::run(ref_ptr<AbstractGameState> initialState)
 {
+	GameStateStack::AbstractGameStateList states;
+	states.push_back(initialState);
+
+	return run(states);
+}
+
+int GameApplication::run(GameStateStack::AbstractGameStateList initialStates)
+{
 	try
 	{
-		_stateStack.push_back(initialState);
+		_gameStateStack.pushStates(initialStates);
 
 		ref_ptr<GameSettings> settings = getDefaultGameSettings();
 
@@ -247,6 +268,14 @@ void GameApplication::prepareStateWorldAndHud(ref_ptr<AbstractGameState> state)
 	}
 }
 
+void GameApplication::prepareStateWorldAndHud(AbstractGameState::AbstractGameStateList states)
+{
+	for (AbstractGameState::AbstractGameStateList::iterator it = states.begin(); it != states.end(); ++it)
+	{
+		prepareStateWorldAndHud(*it);
+	}
+}
+
 void GameApplication::attachState(ref_ptr<AbstractGameState> state)
 {
 	if (!state->isLoadingState())
@@ -258,6 +287,7 @@ void GameApplication::attachState(ref_ptr<AbstractGameState> state)
 	if (!_inputManager.valid())
 	{
 		_inputManager = new InputManager();
+		_inputManager->setGameStateStack(&_gameStateStack);
 		_inputManager->setViewer(&_viewer);
 
 		_viewer.addEventHandler(_inputManager);
@@ -267,30 +297,6 @@ void GameApplication::attachState(ref_ptr<AbstractGameState> state)
 	_viewer.setHud(state->getHud());
 	_viewer.setCameraManipulator(state->getWorld()->getCameraManipulator());
 
-	_inputManager->setCurrentState(state);
-}
-
-void GameApplication::popState()
-{
-	_stateStack.pop_back();
-
-	if (_stateStack.size() == 0)
-	{
-		return;
-	}
-	
-	_attachState = true;
-}
-
-void GameApplication::pushState(ref_ptr<AbstractGameState> state)
-{
-	_stateStack.push_back(state);
-
-	_attachState = true;
-}
-
-void GameApplication::replaceState(ref_ptr<AbstractGameState> state)
-{
-	_stateStack.pop_back();
-	pushState(state);
+	_inputManager->updateNewRunningStates();
+	//_inputManager->setCurrentState(state);
 }

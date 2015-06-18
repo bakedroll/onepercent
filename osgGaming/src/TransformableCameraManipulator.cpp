@@ -25,12 +25,7 @@ TransformableCameraManipulator::TransformableCameraManipulator()
 
 void TransformableCameraManipulator::updateCamera(osg::Camera &camera)
 {
-	if (_updateViewMatrix)
-	{
-		updateViewMatrix();
-	}
-
-	camera.setViewMatrix(_viewMatrix);
+	camera.setViewMatrix(getViewMatrix());
 	camera.setProjectionMatrix(_projectionMatrix);
 
 	if (_updateClearColor)
@@ -107,7 +102,7 @@ void TransformableCameraManipulator::getPickRay(float x, float y, osg::Vec3f& po
 	Vec3f near(mappedX, mappedY, -1.0f);
 	Vec3f far(mappedX, mappedY, 1.0f);
 
-	Matrixd mat = Matrix::inverse(_viewMatrix * _projectionMatrix);
+	Matrixd mat = Matrix::inverse(getViewMatrix() * _projectionMatrix);
 
 	point = near * mat;
 	direction = (far * mat) - point;
@@ -144,7 +139,7 @@ void TransformableCameraManipulator::updateCameraAlignedQuads()
 		return;
 	}
 
-	Matrixd mat = Matrix::inverse(_viewMatrix * _projectionMatrix);
+	Matrixd mat = Matrix::inverse(getViewMatrix() * _projectionMatrix);
 
 	for (int i = 0; i < 4; i++)
 	{

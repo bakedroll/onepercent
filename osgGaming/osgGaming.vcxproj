@@ -33,6 +33,7 @@
     <ClCompile Include="src\ResourceManager.cpp" />
     <ClCompile Include="src\ShaderFactory.cpp" />
     <ClCompile Include="src\SimulationCallback.cpp" />
+    <ClCompile Include="src\GameStateStack.cpp" />
     <ClCompile Include="src\StaticResources.cpp" />
     <ClCompile Include="src\TextResource.cpp" />
     <ClCompile Include="src\TextureFactory.cpp" />
@@ -75,6 +76,7 @@
     <ClInclude Include="include\osgGaming\ResourceManager.h" />
     <ClInclude Include="include\osgGaming\ShaderFactory.h" />
     <ClInclude Include="include\osgGaming\SimulationCallback.h" />
+    <ClInclude Include="include\osgGaming\GameStateStack.h" />
     <ClInclude Include="include\osgGaming\StaticResources.h" />
     <ClInclude Include="include\osgGaming\TextResource.h" />
     <ClInclude Include="include\osgGaming\TextureFactory.h" />

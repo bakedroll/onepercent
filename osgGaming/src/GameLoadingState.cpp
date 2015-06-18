@@ -4,8 +4,14 @@ using namespace osg;
 using namespace osgGaming;
 
 GameLoadingState::GameLoadingState(ref_ptr<GameState> nextState)
+	: AbstractGameState()
+{
+	_nextStates.push_back(nextState);
+}
+
+GameLoadingState::GameLoadingState(AbstractGameState::AbstractGameStateList nextStates)
 	: AbstractGameState(),
-	  _nextState(nextState)
+	  _nextStates(nextStates)
 {
 
 }
@@ -30,7 +36,7 @@ ref_ptr<Hud> GameLoadingState::newHud()
 	return new Hud();
 }
 
-osg::ref_ptr<GameState> GameLoadingState::getNextState()
+AbstractGameState::AbstractGameStateList GameLoadingState::getNextStates()
 {
-	return _nextState;
+	return _nextStates;
 }

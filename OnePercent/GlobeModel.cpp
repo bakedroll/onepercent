@@ -33,6 +33,9 @@ const int GlobeModel::SPHERE_SLICES = 192;
 const double GlobeModel::SUN_DISTANCE = 149600.0;
 const double GlobeModel::SUN_RADIUS_PM2 = pow(695.8f, -2.0f);
 
+const float GlobeModel::_CLOUD_SPEED = 0.3f;
+const float GlobeModel::_CLOUD_MORPH_SPEED = 20.0f;
+
 GlobeModel::GlobeModel(osg::ref_ptr<TransformableCameraManipulator> tcm)
 {
 	makeEarthModel();
@@ -48,12 +51,12 @@ void GlobeModel::updateLightDirection(osg::Vec3f direction)
 	_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), SUN_RADIUS_PM2));
 }
 
-void GlobeModel::updateClouds(double simTime)
+void GlobeModel::updateClouds(float day)
 {
-	Quat quat = getQuatFromEuler(0.0, 0.0, fmodf(simTime * 0.003f, 2.0f * C_PI));
+	Quat quat = getQuatFromEuler(0.0, 0.0, fmodf(day * _CLOUD_SPEED, C_2PI));
 	_cloudsTransform->setAttitude(quat);
 
-	_uniformTime->set((float)simTime * 0.2f);
+	_uniformTime->set(day * _CLOUD_MORPH_SPEED);
 }
 
 void GlobeModel::setSelectedCountry(int countryId)

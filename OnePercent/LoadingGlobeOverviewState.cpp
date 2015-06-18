@@ -32,6 +32,12 @@ LoadingGlobeOverviewState::LoadingGlobeOverviewState(ref_ptr<GameState> nextStat
 
 }
 
+LoadingGlobeOverviewState::LoadingGlobeOverviewState(AbstractGameState::AbstractGameStateList nextStates)
+	: GameLoadingState(nextStates)
+{
+
+}
+
 void LoadingGlobeOverviewState::initialize()
 {
 	float projNear = (float)getWorld()->getCameraManipulator()->getProjectionNear();
@@ -52,7 +58,7 @@ void LoadingGlobeOverviewState::initialize()
 	getViewer()->addPostProcessingEffect(new DepthOfFieldEffect(projNear, projFar), false);
 }
 
-StateEvent* LoadingGlobeOverviewState::update()
+GameState::StateEvent* LoadingGlobeOverviewState::update()
 {
 	int dotCount = (int)(getSimulationTime() * 10.0) % 4;
 	string loadingTextString = "Loading";
@@ -68,24 +74,18 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud
 {
 	ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
-
 	globeWorld->getSimulation()->loadCountries();
 
-
 	ref_ptr<GlobeModel> globe = new GlobeModel(world->getCameraManipulator());
-	globeWorld->setGlobeModel(globe);
-	world->getRootNode()->addChild(globe);
-
 	ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel();
+
+	globeWorld->setGlobeModel(globe);
 	globeWorld->setBackgroundModel(backgroundModel);
-	world->getRootNode()->addChild(backgroundModel->getTransform());
 
 	hud->setFpsEnabled(true);
 
-
-
 	// ##################
-	ref_ptr<UIElement> root = hud->getRootUIElement();
+	/*ref_ptr<UIElement> root = hud->getRootUIElement();
 
 	ref_ptr<UIGrid> grid = new UIGrid();
 	ref_ptr<UIText> first = new UIText();
@@ -135,6 +135,6 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud
 	third->getVisualGroup();
 	
 	hud->registerUserInteractionModel(button1);
-	hud->registerUserInteractionModel(button2);
+	hud->registerUserInteractionModel(button2);*/
 	// #############
 }

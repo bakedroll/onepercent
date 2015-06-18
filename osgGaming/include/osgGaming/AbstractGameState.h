@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <osgGaming/World.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/GameSettings.h>
@@ -11,25 +13,31 @@
 
 namespace osgGaming
 {
-	class AbstractGameState;
-
-	typedef enum _stateEventType
-	{
-		PUSH,
-		POP,
-		REPLACE,
-		END_GAME
-	} StateEventType;
-
-	typedef struct _stateEvent
-	{
-		StateEventType type;
-		osg::ref_ptr<AbstractGameState> referencedState;
-	} StateEvent;
-
 	class AbstractGameState : public osg::Referenced
 	{
 	public:
+		typedef enum _stateEventType
+		{
+			PUSH,
+			POP,
+			REPLACE,
+			END_GAME
+		} StateEventType;
+
+		typedef enum _stateProperties
+		{
+			PROP_ENABLED = 0x01,
+			PROP_RUN_ALWAYS = 0x02
+		} StateProperties;
+
+		typedef std::vector<osg::ref_ptr<AbstractGameState>> AbstractGameStateList;
+
+		typedef struct _stateEvent
+		{
+			StateEventType type;
+			AbstractGameStateList referencedStates;
+		} StateEvent;
+
 		AbstractGameState();
 
 		bool isInitialized();
@@ -40,6 +48,7 @@ namespace osgGaming
 		virtual StateEvent* update();
 
 		virtual bool isLoadingState() = 0;
+		virtual unsigned char getProperties();
 
 		virtual void onKeyPressedEvent(int key);
 		virtual void onKeyReleasedEvent(int key);
@@ -80,8 +89,10 @@ namespace osgGaming
 		virtual osg::ref_ptr<Hud> newHud();
 
 		StateEvent* stateEvent_push(osg::ref_ptr<AbstractGameState> state);
+		StateEvent* stateEvent_push(AbstractGameStateList states);
 		StateEvent* stateEvent_pop();
 		StateEvent* stateEvent_replace(osg::ref_ptr<AbstractGameState> state);
+		StateEvent* stateEvent_replace(AbstractGameStateList states);
 		StateEvent* stateEvent_endGame();
 
 		StateEvent* stateEvent_default();

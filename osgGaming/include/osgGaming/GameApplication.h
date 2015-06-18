@@ -7,14 +7,13 @@
 #include <osgGaming/InputManager.h>
 #include <osgGaming/Viewer.h>
 #include <osgGaming/SimulationCallback.h>
+#include <osgGaming/GameStateStack.h>
 
 #include <vector>
 #include <future>
 
 namespace osgGaming
 {
-	typedef std::vector<osg::ref_ptr<AbstractGameState>> GameStateList;
-
 	class GameApplication : public SimulationCallback
 	{
 	public:
@@ -31,17 +30,15 @@ namespace osgGaming
 		void setDefaultGameSettings(osg::ref_ptr<GameSettings> settings);
 
 		int run(osg::ref_ptr<AbstractGameState> initialState);
+		int run(GameStateStack::AbstractGameStateList initialStates);
 
 	private:
 		void initializeState(osg::ref_ptr<AbstractGameState> state);
 		void prepareStateWorldAndHud(osg::ref_ptr<AbstractGameState> state);
+		void prepareStateWorldAndHud(AbstractGameState::AbstractGameStateList states);
 		void attachState(osg::ref_ptr<AbstractGameState> state);
 
-		void popState();
-		void pushState(osg::ref_ptr<AbstractGameState> state);
-		void replaceState(osg::ref_ptr<AbstractGameState> state);
-
-		GameStateList _stateStack;
+		GameStateStack _gameStateStack;
 
 		Viewer _viewer;
 
@@ -53,7 +50,6 @@ namespace osgGaming
 
 		bool _gameEnded;
 		bool _isLoading;
-		bool _attachState;
 
 		std::future<void> _loadingThreadFuture;
 	};

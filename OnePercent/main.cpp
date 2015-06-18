@@ -4,6 +4,7 @@
 
 #include "LoadingGlobeOverviewState.h"
 #include "GlobeOverviewState.h"
+#include "GlobeInteractionState.h"
 #include "GlobeOverviewWorld.h"
 
 using namespace osgGaming;
@@ -23,8 +24,12 @@ int main(int argc, char** argv)
 
 	app->setDefaultWorld(new GlobeOverviewWorld());
 
-	//app->getGameSettings()->setScreenNum(1);
-	//app->getGameSettings()->setFullscreenEnabled(true);
+	app->getDefaultGameSettings()->setScreenNum(1);
+	//app->getDefaultGameSettings()->setFullscreenEnabled(true);
 
-	return app->run(new LoadingGlobeOverviewState(new GlobeOverviewState()));
+	GameState::AbstractGameStateList states;
+	states.push_back(new GlobeOverviewState());
+	states.push_back(new GlobeInteractionState());
+
+	return app->run(new LoadingGlobeOverviewState(states));
 }

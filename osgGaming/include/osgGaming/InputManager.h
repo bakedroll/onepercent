@@ -5,6 +5,7 @@
 #include <osgGaming/Hud.h>
 #include <osgGA/GUIEventHandler>
 #include <osgGaming/Viewer.h>
+#include <osgGaming/GameStateStack.h>
 
 namespace osgGaming
 {
@@ -16,7 +17,10 @@ namespace osgGaming
 		virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
 
 		void setViewer(osg::ref_ptr<osgGaming::Viewer> viewer);
-		void setCurrentState(osg::ref_ptr<AbstractGameState> state);
+		void setGameStateStack(GameStateStack* stack);
+
+		void updateNewRunningStates();
+		//void setCurrentState(osg::ref_ptr<AbstractGameState> state);
 
 	private:
 		void updateResolution(osg::Vec2f resolution);
@@ -30,7 +34,6 @@ namespace osgGaming
 		static const unsigned int _NUM_MOUSE_BUTTONS = 3;
 
 		osg::ref_ptr<osgGaming::Viewer> _viewer;
-		osg::ref_ptr<AbstractGameState> _currentState;
 
 		bool _mousePressed[_NUM_MOUSE_BUTTONS];
 		int _mouseDragging;
@@ -38,5 +41,7 @@ namespace osgGaming
 		osg::Vec2f _lastDragPosition;
 
 		osg::Vec2f _mousePosition;
+
+		GameStateStack* _gameStateStack;
 	};
 }

@@ -32,9 +32,14 @@ void AbstractGameState::initialize()
 
 }
 
-StateEvent* AbstractGameState::update()
+AbstractGameState::StateEvent* AbstractGameState::update()
 {
 	return stateEvent_default();
+}
+
+unsigned char AbstractGameState::getProperties()
+{
+	return AbstractGameState::PROP_ENABLED;
 }
 
 void AbstractGameState::onKeyPressedEvent(int key)
@@ -170,7 +175,7 @@ ref_ptr<Hud> AbstractGameState::newHud()
 	return NULL;
 }
 
-StateEvent* AbstractGameState::stateEvent_push(ref_ptr<AbstractGameState> state)
+AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(ref_ptr<AbstractGameState> state)
 {
 	if (_stateEvent != NULL)
 	{
@@ -179,12 +184,26 @@ StateEvent* AbstractGameState::stateEvent_push(ref_ptr<AbstractGameState> state)
 
 	_stateEvent = new StateEvent();
 	_stateEvent->type = PUSH;
-	_stateEvent->referencedState = state;
+	_stateEvent->referencedStates.push_back(state);
 
 	return _stateEvent;
 }
 
-StateEvent* AbstractGameState::stateEvent_pop()
+AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(AbstractGameStateList states)
+{
+	if (_stateEvent != NULL)
+	{
+		return _stateEvent;
+	}
+
+	_stateEvent = new StateEvent();
+	_stateEvent->type = PUSH;
+	_stateEvent->referencedStates = states;
+
+	return _stateEvent;
+}
+
+AbstractGameState::StateEvent* AbstractGameState::stateEvent_pop()
 {
 	if (_stateEvent != NULL)
 	{
@@ -197,7 +216,7 @@ StateEvent* AbstractGameState::stateEvent_pop()
 	return _stateEvent;
 }
 
-StateEvent* AbstractGameState::stateEvent_replace(ref_ptr<AbstractGameState> state)
+AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(ref_ptr<AbstractGameState> state)
 {
 	if (_stateEvent != NULL)
 	{
@@ -206,12 +225,26 @@ StateEvent* AbstractGameState::stateEvent_replace(ref_ptr<AbstractGameState> sta
 
 	_stateEvent = new StateEvent();
 	_stateEvent->type = REPLACE;
-	_stateEvent->referencedState = state;
+	_stateEvent->referencedStates.push_back(state);
 
 	return _stateEvent;
 }
 
-StateEvent* AbstractGameState::stateEvent_endGame()
+AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(AbstractGameStateList states)
+{
+	if (_stateEvent != NULL)
+	{
+		return _stateEvent;
+	}
+
+	_stateEvent = new StateEvent();
+	_stateEvent->type = REPLACE;
+	_stateEvent->referencedStates = states;
+
+	return _stateEvent;
+}
+
+AbstractGameState::StateEvent* AbstractGameState::stateEvent_endGame()
 {
 	if (_stateEvent != NULL)
 	{
@@ -224,7 +257,7 @@ StateEvent* AbstractGameState::stateEvent_endGame()
 	return _stateEvent;
 }
 
-StateEvent* AbstractGameState::stateEvent_default()
+AbstractGameState::StateEvent* AbstractGameState::stateEvent_default()
 {
 	return _stateEvent;
 }
