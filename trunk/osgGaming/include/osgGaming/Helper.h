@@ -8,6 +8,7 @@
 #include <osgText/Text>
 
 #define C_PI 3.14159265359f
+#define C_2PI 6.28318530718f
 
 namespace osgGaming
 {

@@ -8,9 +8,10 @@ using namespace onep;
 using namespace osg;
 using namespace osgGaming;
 
+const float GlobeOverviewWorld::_DAYS_IN_YEAR = 356.0f;
+
 GlobeOverviewWorld::GlobeOverviewWorld()
-	: World(),
-	 _timeOfYearAndDay(0.0f, 0.0f)
+	: World()
 {
 	_simulation = new Simulation();
 
@@ -40,28 +41,35 @@ ref_ptr<Simulation> GlobeOverviewWorld::getSimulation()
 	return _simulation;
 }
 
-Vec2f GlobeOverviewWorld::getTimeOfYearAndDay()
+void GlobeOverviewWorld::setGlobeModel(ref_ptr<GlobeModel> globeModel)
 {
-	return _timeOfYearAndDay;
-}
+	if (_globeModel.valid())
+	{
+		getRootNode()->removeChild(_globeModel);
+	}
 
-void GlobeOverviewWorld::setGlobeModel(osg::ref_ptr<GlobeModel> globeModel)
-{
+	getRootNode()->addChild(globeModel);
 	_globeModel = globeModel;
 }
 
 void GlobeOverviewWorld::setBackgroundModel(ref_ptr<BackgroundModel> backgroundModel)
 {
+	if (_backgroundModel.valid())
+	{
+		getRootNode()->removeChild(_backgroundModel->getTransform());
+	}
+
+	getRootNode()->addChild(backgroundModel->getTransform());
 	_backgroundModel = backgroundModel;
 }
 
-Vec3f GlobeOverviewWorld::setTimeOfYearAndDay(Vec2f timeOfYearAndDay)
+void GlobeOverviewWorld::setDay(float day)
 {
-	_timeOfYearAndDay = timeOfYearAndDay;
+	float year = day / _DAYS_IN_YEAR;
 
-	Matrix yearMat = getMatrixFromEuler(0.0f, 0.0f, -_timeOfYearAndDay.x() * 2.0f * C_PI) *
-		getMatrixFromEuler(-sin(_timeOfYearAndDay.x() * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);
-	Matrix dayMat = getMatrixFromEuler(0.0f, 0.0f, _timeOfYearAndDay.y() * 2.0f * C_PI);
+	Matrix yearMat = getMatrixFromEuler(0.0f, 0.0f, - year * 2.0f * C_PI) *
+		getMatrixFromEuler(-sin(year * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);
+	Matrix dayMat = getMatrixFromEuler(0.0f, 0.0f, day * 2.0f * C_PI);
 
 	Matrix yearDayMat = dayMat * yearMat;
 
@@ -73,7 +81,8 @@ Vec3f GlobeOverviewWorld::setTimeOfYearAndDay(Vec2f timeOfYearAndDay)
 	_backgroundModel->getTransform()->setAttitude(Matrix::inverse(dayMat).getRotate());
 	_backgroundModel->getSunTransform()->setAttitude(Matrix::inverse(yearMat).getRotate());
 
-	return direction;
+	_globeModel->updateClouds(day);
+	updateSun(direction);
 }
 
 void GlobeOverviewWorld::updateSun(Vec3f sunDirection)

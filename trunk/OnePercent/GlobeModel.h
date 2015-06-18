@@ -27,11 +27,14 @@ namespace onep
 		GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);
 
 		void updateLightDirection(osg::Vec3f direction);
-		void updateClouds(double simTime);
+		void updateClouds(float day);
 
 		void setSelectedCountry(int countryId);
 
 	private:
+		static const float _CLOUD_SPEED;
+		static const float _CLOUD_MORPH_SPEED;
+
 		void makeEarthModel();
 		void makeCloudsModel();
 		void makeAtmosphericScattering(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);

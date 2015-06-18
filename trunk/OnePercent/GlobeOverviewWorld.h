@@ -16,17 +16,16 @@ namespace onep
 		osg::ref_ptr<GlobeModel> getGlobeModel();
 		osg::ref_ptr<BackgroundModel> getBackgroundModel();
 		osg::ref_ptr<Simulation> getSimulation();
-
-		osg::Vec2f getTimeOfYearAndDay();
 		
 		void setGlobeModel(osg::ref_ptr<GlobeModel> globeModel);
 		void setBackgroundModel(osg::ref_ptr<BackgroundModel> backgroundModel);
-		osg::Vec3f setTimeOfYearAndDay(osg::Vec2f timeOfYearAndDay);
 
-		void updateSun(osg::Vec3f sunDirection);
+		void setDay(float day);
 
 	private:
-		osg::Vec2f _timeOfYearAndDay;
+		static const float _DAYS_IN_YEAR;
+
+		void updateSun(osg::Vec3f sunDirection);
 
 		osg::ref_ptr<GlobeModel> _globeModel;
 		osg::ref_ptr<BackgroundModel> _backgroundModel;

@@ -23,37 +23,60 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	{
 	case GUIEventAdapter::KEYDOWN:
 	{
-		_currentState->onKeyPressedEvent(ea.getKey());
+		GameStateStack::AbstractGameStateList* runningStates = _gameStateStack->getRunningStates();
+
+		for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
+		{
+			(*it)->onKeyPressedEvent(ea.getKey());
+		}
 
 		return true;
 	}
 	case GUIEventAdapter::KEYUP:
 	{
-		_currentState->onKeyReleasedEvent(ea.getKey());
+		GameStateStack::AbstractGameStateList* runningStates = _gameStateStack->getRunningStates();
+
+		for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
+		{
+			(*it)->onKeyReleasedEvent(ea.getKey());
+		}
 
 		return true;
 	}
 	case GUIEventAdapter::PUSH:
 	case GUIEventAdapter::DOUBLECLICK:
 	{
-		if (_currentState->getHud()->anyUserInteractionModelHovered())
+		bool anyUIMHovered = false;
+
+		GameStateStack::AbstractGameStateList* runningStates = _gameStateStack->getRunningStates();
+
+		for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
 		{
-			if (ea.getButton() == GUIEventAdapter::LEFT_MOUSE_BUTTON)
+			if ((*it)->getHud()->anyUserInteractionModelHovered())
 			{
-				Hud::UIMList uimList = _currentState->getHud()->getUserInteractionModels();
-				for (Hud::UIMList::iterator it = uimList.begin(); it != uimList.end(); ++it)
+				anyUIMHovered = true;
+
+				if (ea.getButton() == GUIEventAdapter::LEFT_MOUSE_BUTTON)
 				{
-					if ((*it)->getHovered())
+					Hud::UIMList uimList = (*it)->getHud()->getUserInteractionModels();
+					for (Hud::UIMList::iterator uit = uimList.begin(); uit != uimList.end(); ++uit)
 					{
-						_currentState->onUIMClickedEvent(*it);
+						if ((*uit)->getHovered())
+						{
+							(*it)->onUIMClickedEvent(*uit);
+						}
 					}
 				}
 			}
+			else
+			{
+				(*it)->onMousePressedEvent(ea.getButton(), ea.getX(), ea.getY());
+			}
 		}
-		else
+
+		if (!anyUIMHovered)
 		{
 			_mousePressed[log_x_2(ea.getButton())] = true;
-			_currentState->onMousePressedEvent(ea.getButton(), ea.getX(), ea.getY());
 		}
 
 		return true;
@@ -62,39 +85,36 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	{
 		_mousePressed[log_x_2(ea.getButton())] = false;
 
+		GameStateStack::AbstractGameStateList* runningStates = _gameStateStack->getRunningStates();
+
 		if (_mouseDragging == ea.getButton())
 		{
-			_currentState->onDragEndEvent(_mouseDragging, _dragOrigin, Vec2f(ea.getX(), ea.getY()));
-			handleUserInteractionMove(_currentState, ea.getX(), ea.getY());
+			for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
+			{
+				(*it)->onDragEndEvent(_mouseDragging, _dragOrigin, Vec2f(ea.getX(), ea.getY()));
+				handleUserInteractionMove(*it, ea.getX(), ea.getY());
+			}
 
 			_mouseDragging = 0;
 		}
 
-		if (!_currentState->getHud()->anyUserInteractionModelHovered())
+		for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
 		{
-			_currentState->onMouseReleasedEvent(ea.getButton(), ea.getX(), ea.getY());
+			if (!(*it)->getHud()->anyUserInteractionModelHovered())
+			{
+				(*it)->onMouseReleasedEvent(ea.getButton(), ea.getX(), ea.getY());
+			}
 		}
 
 		return true;
 	}
 	case GUIEventAdapter::RESIZE:
 	{
-		//ViewerBase::Windows windows;
-		//_viewer->getWindows(windows);
-
-		//ref_ptr<GraphicsWindow> graphicsWindow = *windows.begin();
-
-		//if (graphicsWindow.valid())
-		//{
-		int newWidth = ea.getWindowWidth(); //graphicsWindow->getTraits()->width;
-		int newHeight = ea.getWindowHeight(); //graphicsWindow->getTraits()->height;
+		int newWidth = ea.getWindowWidth();
+		int newHeight = ea.getWindowHeight();
 
 		int newX = ea.getWindowX();
 		int newY = ea.getWindowY();
-
-		//float w = ea.getWindowWidth();
-
-		//printf("%d %f\n", newWidth, w);
 
 		Vec2f resolution = _viewer->getResolution();
 
@@ -103,25 +123,43 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 		if (newWidth != (int)resolution.x() || newHeight != (int)resolution.y())
 		{
 			updateResolution(Vec2f((float)newWidth, (float)newHeight));
-			_currentState->onResizeEvent(newWidth, newHeight);
+
+			GameStateStack::AbstractGameStateList* runningStates = _gameStateStack->getRunningStates();
+
+			for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
+			{
+				(*it)->onResizeEvent(newWidth, newHeight);
+			}
 		}
-		//}
 
 		return true;
 	}
 	case GUIEventAdapter::DRAG:
 	case GUIEventAdapter::MOVE:
 	{
+		bool anyUIMHovered = false;
+
 		_mousePosition = Vec2f(ea.getX(), ea.getY());
 
-		_currentState->onMouseMoveEvent(_mousePosition.x(), _mousePosition.y());
+		GameStateStack::AbstractGameStateList* runningStates = _gameStateStack->getRunningStates();
 
-		if (_mouseDragging == 0)
+		for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
 		{
-			handleUserInteractionMove(_currentState, _mousePosition.x(), _mousePosition.y());
+			(*it)->onMouseMoveEvent(_mousePosition.x(), _mousePosition.y());
+
+			if (_mouseDragging == 0)
+			{
+				handleUserInteractionMove(*it, _mousePosition.x(), _mousePosition.y());
+			}
+
+			if ((*it)->getHud()->anyUserInteractionModelHovered())
+			{
+				anyUIMHovered = true;
+			}
 		}
 
-		if (_mouseDragging == 0 && !_currentState->getHud()->anyUserInteractionModelHovered())
+
+		if (_mouseDragging == 0 && !anyUIMHovered)
 		{
 			int pressed = mousePressed();
 
@@ -131,13 +169,19 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 				_dragOrigin = _mousePosition;
 				_lastDragPosition = _dragOrigin;
 
-				_currentState->onDragBeginEvent(_mouseDragging, _dragOrigin);
+				for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
+				{
+					(*it)->onDragBeginEvent(_mouseDragging, _dragOrigin);
+				}
 			}
 		}
 
 		if (_mouseDragging != 0)
 		{
-			_currentState->onDragEvent(_mouseDragging, _dragOrigin, _mousePosition, _mousePosition - _lastDragPosition);
+			for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
+			{
+				(*it)->onDragEvent(_mouseDragging, _dragOrigin, _mousePosition, _mousePosition - _lastDragPosition);
+			}
 
 			_lastDragPosition = _mousePosition;
 		}
@@ -146,7 +190,13 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	}
 	case GUIEventAdapter::SCROLL:
 	{
-		_currentState->onScrollEvent(ea.getScrollingMotion());
+		GameStateStack::AbstractGameStateList* runningStates = _gameStateStack->getRunningStates();
+
+		for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
+		{
+			(*it)->onScrollEvent(ea.getScrollingMotion());
+		}
+
 		return true;
 	}
 	}
@@ -159,31 +209,76 @@ void InputManager::setViewer(ref_ptr<osgGaming::Viewer> viewer)
 	_viewer = viewer;
 }
 
-void InputManager::setCurrentState(osg::ref_ptr<AbstractGameState> state)
+void InputManager::setGameStateStack(GameStateStack* stack)
 {
+	_gameStateStack = stack;
+}
+
+void InputManager::updateNewRunningStates()
+{
+	GameStateStack::AbstractGameStateList* newRunningStates = _gameStateStack->getNewRunningStates();
+
+	if (newRunningStates->empty())
+	{
+		return;
+	}
+
 	Vec2f resolution = _viewer->getResolution();
 
-	if (!_currentState.valid() || _currentState->getHud() != state->getHud())
+	ref_ptr<Hud> currentHud;
+	ref_ptr<World> currentWorld;
+
+	for (GameStateStack::AbstractGameStateList::iterator it = newRunningStates->begin(); it != newRunningStates->end(); ++it)
 	{
-		state->getHud()->updateResolution(resolution);
+		if (currentHud != it->get()->getHud())
+		{
+			currentHud = it->get()->getHud();
 
-		state->getHud()->resetUserInteractionModel();
-		handleUserInteractionMove(state, _mousePosition.x(), _mousePosition.y());
+			currentHud->updateResolution(resolution);
+			currentHud->resetUserInteractionModel();
+
+			handleUserInteractionMove((*it), _mousePosition.x(), _mousePosition.y());
+		}
+
+		if (currentWorld != it->get()->getWorld())
+		{
+			currentWorld = it->get()->getWorld();
+
+			currentWorld->getCameraManipulator()->updateResolution(resolution);
+		}
 	}
-
-	if (!_currentState.valid() || _currentState->getWorld() != state->getWorld())
-	{
-		state->getWorld()->getCameraManipulator()->updateResolution(resolution);
-	}
-
-	_currentState = state;
 }
 
 void InputManager::updateResolution(Vec2f resolution)
 {
 	_viewer->updateResolution(resolution);
-	_currentState->getWorld()->getCameraManipulator()->updateResolution(resolution);
-	_currentState->getHud()->updateResolution(resolution);
+
+	GameStateStack::AbstractGameStateList* runningStates = _gameStateStack->getRunningStates();
+
+	if (runningStates->empty())
+	{
+		return;
+	}
+
+	ref_ptr<Hud> currentHud;
+	ref_ptr<World> currentWorld;
+
+	for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
+	{
+		if (currentHud != it->get()->getHud())
+		{
+			currentHud = it->get()->getHud();
+
+			currentHud->updateResolution(resolution);
+		}
+
+		if (currentWorld != it->get()->getWorld())
+		{
+			currentWorld = it->get()->getWorld();
+
+			currentWorld->getCameraManipulator()->updateResolution(resolution);
+		}
+	}
 }
 
 int InputManager::mousePressed()
