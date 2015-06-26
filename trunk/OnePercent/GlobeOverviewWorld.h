@@ -22,6 +22,12 @@ namespace onep
 
 		void setDay(float day);
 
+		osg::Vec2f getCameraLatLong();
+		osg::Vec2f getCameraViewAngle();
+		float getCameraDistance();
+
+		void updateCameraPosition(osg::Vec2f latLong, osg::Vec2f viewAngle, float distance);
+
 	private:
 		static const float _DAYS_IN_YEAR;
 
@@ -31,5 +37,9 @@ namespace onep
 		osg::ref_ptr<BackgroundModel> _backgroundModel;
 
 		osg::ref_ptr<Simulation> _simulation;
+
+		osg::Vec2f _cameraLatLong;
+		osg::Vec2f _cameraViewAngle;
+		float _cameraDistance;
 	};
 }

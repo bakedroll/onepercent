@@ -25,13 +25,11 @@ GlobeOverviewState::GlobeOverviewState()
 void GlobeOverviewState::initialize()
 {
 	_globeWorld = static_cast<GlobeOverviewWorld*>(getWorld().get());
-
-	_globeWorld->getBackgroundModel()->updateResolutionHeight(getViewer()->getResolution().y());
 }
 
 unsigned char GlobeOverviewState::getProperties()
 {
-	return GameState::PROP_ENABLED | GameState::PROP_RUN_ALWAYS;
+	return GameState::PROP_UPDATE_ALWAYS | PROP_UIMEVENTS_ALWAYS | PROP_GUIEVENTS_ALWAYS;
 }
 
 GameState::StateEvent* GlobeOverviewState::update()

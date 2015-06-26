@@ -4,8 +4,9 @@
 
 #include "LoadingGlobeOverviewState.h"
 #include "GlobeOverviewState.h"
-#include "GlobeInteractionState.h"
+#include "MainMenuState.h"
 #include "GlobeOverviewWorld.h"
+#include "GlobeInteractionState.h"
 
 using namespace osgGaming;
 using namespace onep;
@@ -29,7 +30,7 @@ int main(int argc, char** argv)
 
 	GameState::AbstractGameStateList states;
 	states.push_back(new GlobeOverviewState());
-	states.push_back(new GlobeInteractionState());
+	states.push_back(new MainMenuState());
 
 	return app->run(new LoadingGlobeOverviewState(states));
 }

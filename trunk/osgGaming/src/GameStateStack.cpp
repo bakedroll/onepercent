@@ -21,72 +21,87 @@ bool GameStateStack::attachRequired()
 	return res;
 }
 
-GameStateStack::AbstractGameStateList* GameStateStack::getRunningStates()
+bool GameStateStack::isEmpty()
 {
-	return &_runningStateStack;
+	return _stateStack.empty();
 }
 
-GameStateStack::AbstractGameStateList* GameStateStack::getNewRunningStates()
+void GameStateStack::begin(AbstractGameState::StateBehavior behavior)
 {
-	return &_newRunningStateStack;
+	_itBehavior = behavior;
+	_itNext = _stateStack.begin();
+	_itTop = *(--_stateStack.end());
+}
+
+bool GameStateStack::next()
+{
+	while (_itNext != _stateStack.end())
+	{
+		char props = _itNext->get()->getProperties();
+
+		if (_itBehavior == AbstractGameState::UPDATE)
+		{
+			if ((props & AbstractGameState::PROP_UPDATE_ALWAYS) || ((_itNext->get() == _itTop.get()) && (props & AbstractGameState::PROP_UPDATE_TOP)))
+			{
+				break;
+			}
+		}
+		else if (_itBehavior == AbstractGameState::GUIEVENT)
+		{
+			if ((props & AbstractGameState::PROP_GUIEVENTS_ALWAYS) || ((_itNext->get() == _itTop.get()) && (props & AbstractGameState::PROP_GUIEVENTS_TOP)))
+			{
+				break;
+			}
+		}
+		else if (_itBehavior == AbstractGameState::UIMEVENT)
+		{
+			if ((props & AbstractGameState::PROP_UIMEVENTS_ALWAYS) || ((_itNext->get() == _itTop.get()) && (props & AbstractGameState::PROP_UIMEVENTS_TOP)))
+			{
+				break;
+			}
+		}
+
+		_itNext->get()->dirty(_itBehavior);
+		++_itNext;
+	}
+
+	if (_itNext != _stateStack.end())
+	{
+		_itCurrent = _itNext;
+		_itNext = _itCurrent + 1;
+		return true;
+	}
+
+	return false;
+}
+
+bool GameStateStack::isTop()
+{
+	return _itCurrent->get() == _itTop.get();
+}
+
+ref_ptr<AbstractGameState> GameStateStack::get()
+{
+	return *_itCurrent;
+}
+
+ref_ptr<AbstractGameState> GameStateStack::top()
+{
+	return *(--_stateStack.end());
 }
 
 void GameStateStack::popState()
 {
 	_attachRequired = true;
-
-	_newRunningStateStack.clear();
-
 	_stateStack.pop_back();
-	_runningStateStack.pop_back();
-
-	if (_stateStack.empty())
-	{
-		return;
-	}
-
-	ref_ptr<AbstractGameState> topState = *(--_stateStack.end());
-
-	if (!(topState->getProperties() & AbstractGameState::PROP_RUN_ALWAYS))
-	{
-		_runningStateStack.push_back(topState);
-		_newRunningStateStack.push_back(topState);
-	}
 }
 
 void GameStateStack::pushStates(AbstractGameStateList states)
 {
 	_attachRequired = true;
 
-	_newRunningStateStack.clear();
-
-	ref_ptr<AbstractGameState> topPushedState = *(--states.end());
-
-	if (!_stateStack.empty())
-	{
-		ref_ptr<AbstractGameState> topState = *(--_stateStack.end());
-
-		if (!(topState->getProperties() & AbstractGameState::PROP_RUN_ALWAYS))
-		{
-			_runningStateStack.pop_back();
-		}
-	}
-
 	for (AbstractGameStateList::iterator it = states.begin(); it != states.end(); ++it)
 	{
-		unsigned char props = (*it)->getProperties();
-
-		if (!(props & AbstractGameState::PROP_ENABLED))
-		{
-			continue;
-		}
-
-		if ((props & AbstractGameState::PROP_RUN_ALWAYS) || (topPushedState == (*it)))
-		{
-			_runningStateStack.push_back(*it);
-			_newRunningStateStack.push_back(*it);
-		}
-
 		_stateStack.push_back(*it);
 	}
 }

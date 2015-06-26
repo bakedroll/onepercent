@@ -14,9 +14,14 @@ namespace osgGaming
 		GameStateStack();
 
 		bool attachRequired();
+		bool isEmpty();
 
-		AbstractGameStateList* getRunningStates();
-		AbstractGameStateList* getNewRunningStates();
+		void begin(AbstractGameState::StateBehavior behavior);
+		bool next();
+		bool isTop();
+		osg::ref_ptr<AbstractGameState> get();
+
+		osg::ref_ptr<AbstractGameState> top();
 
 		void popState();
 		void pushStates(AbstractGameStateList states);
@@ -24,9 +29,13 @@ namespace osgGaming
 
 	private:
 		AbstractGameStateList _stateStack;
-		AbstractGameStateList _runningStateStack;
-		AbstractGameStateList _newRunningStateStack;
 
 		bool _attachRequired;
+
+		AbstractGameState::StateBehavior _itBehavior;
+		AbstractGameStateList::iterator _itCurrent;
+		AbstractGameStateList::iterator _itNext;
+		osg::ref_ptr<AbstractGameState> _itTop;
+
 	};
 }

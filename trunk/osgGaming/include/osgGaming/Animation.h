@@ -46,6 +46,12 @@ namespace osgGaming
 			_animationStarted = true;
 		}
 
+		void setValue(T value)
+		{
+			_value = value;
+			_animationStarted = false;
+		}
+
 		void beginAnimation(T toValue, double timeBegin)
 		{
 			beginAnimation(_value, toValue, timeBegin);

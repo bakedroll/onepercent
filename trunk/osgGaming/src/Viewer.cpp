@@ -57,6 +57,11 @@ void Viewer::updateWindowPosition(Vec2f position)
 
 void Viewer::setSceneData(Node* node)
 {
+	if (node == _ppSceneData.get())
+	{
+		return;
+	}
+
 	if (_ppSceneData.valid())
 	{
 		_ppGroup->removeChild(_ppSceneData);

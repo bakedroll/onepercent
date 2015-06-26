@@ -27,6 +27,20 @@ void AbstractGameState::setInitialized()
 	_initialized = true;
 }
 
+void AbstractGameState::dirty(StateBehavior behavior)
+{
+	_dirty[(int)behavior] = true;
+}
+
+bool AbstractGameState::isDirty(StateBehavior behavior)
+{
+	bool dirty = _dirty[(int)behavior];
+
+	_dirty[(int)behavior] = false;
+
+	return dirty;
+}
+
 void AbstractGameState::initialize()
 {
 
@@ -39,7 +53,7 @@ AbstractGameState::StateEvent* AbstractGameState::update()
 
 unsigned char AbstractGameState::getProperties()
 {
-	return AbstractGameState::PROP_ENABLED;
+	return AbstractGameState::PROP_GUIEVENTS_TOP | AbstractGameState::PROP_UIMEVENTS_TOP | AbstractGameState::PROP_UPDATE_TOP;
 }
 
 void AbstractGameState::onKeyPressedEvent(int key)
