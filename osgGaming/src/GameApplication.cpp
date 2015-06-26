@@ -25,17 +25,20 @@ GameApplication::GameApplication()
 
 void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
 {
-	GameStateStack::AbstractGameStateList* runningStates = _gameStateStack.getRunningStates();
+	//GameStateStack::AbstractGameStateList* runningStates = _gameStateStack.getRunningStates();
 
-	if (!runningStates->empty())
+	if (!_gameStateStack.isEmpty())
 	{
 		bool attach = _gameStateStack.attachRequired();
 
-		ref_ptr<AbstractGameState> topState = *(--runningStates->end());
+		// ref_ptr<AbstractGameState> topState = *(--runningStates->end());
 
-		for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
+
+		_gameStateStack.begin(AbstractGameState::UPDATE);
+		while (_gameStateStack.next())
+		//for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
 		{
-			ref_ptr<AbstractGameState> state = *it;
+			ref_ptr<AbstractGameState> state = _gameStateStack.get();
 
 			state->setSimulationTime(simTime);
 			state->setFrameTime(timeDiff);
@@ -48,7 +51,7 @@ void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double
 				state->setInitialized();
 			}
 
-			if (attach && (state == topState))
+			if (attach && _gameStateStack.isTop())
 			{
 				attachState(state);
 			}

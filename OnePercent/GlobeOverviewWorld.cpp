@@ -11,7 +11,10 @@ using namespace osgGaming;
 const float GlobeOverviewWorld::_DAYS_IN_YEAR = 356.0f;
 
 GlobeOverviewWorld::GlobeOverviewWorld()
-	: World()
+	: World(),
+	  _cameraLatLong(Vec2f(0.0f, 0.0f)),
+	  _cameraDistance(28.0f),
+	  _cameraViewAngle(Vec2f(0.0f, 0.0f))
 {
 	_simulation = new Simulation();
 
@@ -83,6 +86,43 @@ void GlobeOverviewWorld::setDay(float day)
 
 	_globeModel->updateClouds(day);
 	updateSun(direction);
+}
+
+Vec2f GlobeOverviewWorld::getCameraLatLong()
+{
+	return _cameraLatLong;
+}
+
+Vec2f GlobeOverviewWorld::getCameraViewAngle()
+{
+	return _cameraViewAngle;
+}
+
+float GlobeOverviewWorld::getCameraDistance()
+{
+	return _cameraDistance;
+}
+
+void GlobeOverviewWorld::updateCameraPosition(Vec2f latLong, Vec2f viewAngle, float distance)
+{
+	_cameraLatLong = latLong;
+	_cameraViewAngle = viewAngle;
+	_cameraDistance = distance;
+
+	// update camera position
+	Vec3f position = getVec3FromEuler(latLong.x(), 0.0, latLong.y()) * _cameraDistance;
+
+	getCameraManipulator()->setPosition(position);
+
+	_backgroundModel->getTransform()->setPosition(position);
+
+	// update camera attitude
+	Matrix latLongMat = Matrix::rotate(getQuatFromEuler(-latLong.x(), 0.0f, fmodf(latLong.y() + C_PI, C_PI * 2.0f)));
+	Matrix viewAngleMat = Matrix::rotate(getQuatFromEuler(viewAngle.y(), viewAngle.x(), 0.0f));
+
+	Matrix mat = viewAngleMat * latLongMat;
+
+	getCameraManipulator()->setAttitude(mat.getRotate());
 }
 
 void GlobeOverviewWorld::updateSun(Vec3f sunDirection)

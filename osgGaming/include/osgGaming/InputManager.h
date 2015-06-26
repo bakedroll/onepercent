@@ -20,10 +20,10 @@ namespace osgGaming
 		void setGameStateStack(GameStateStack* stack);
 
 		void updateNewRunningStates();
-		//void setCurrentState(osg::ref_ptr<AbstractGameState> state);
 
 	private:
 		void updateResolution(osg::Vec2f resolution);
+		void updateStates(bool onlyDirty, bool onlyResolution);
 
 		int mousePressed();
 

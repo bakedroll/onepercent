@@ -26,9 +26,20 @@ namespace osgGaming
 
 		typedef enum _stateProperties
 		{
-			PROP_ENABLED = 0x01,
-			PROP_RUN_ALWAYS = 0x02
+			PROP_UPDATE_TOP = 0x01,
+			PROP_UPDATE_ALWAYS = 0x02,
+			PROP_GUIEVENTS_TOP = 0x04,
+			PROP_GUIEVENTS_ALWAYS = 0x08,
+			PROP_UIMEVENTS_TOP = 0x16,
+			PROP_UIMEVENTS_ALWAYS = 0x32
 		} StateProperties;
+
+		typedef enum _stateBahavior
+		{
+			UPDATE,
+			GUIEVENT,
+			UIMEVENT
+		} StateBehavior;
 
 		typedef std::vector<osg::ref_ptr<AbstractGameState>> AbstractGameStateList;
 
@@ -43,6 +54,9 @@ namespace osgGaming
 		bool isInitialized();
 		bool isWorldAndHudPrepared();
 		void setInitialized();
+
+		void dirty(StateBehavior behavior);
+		bool isDirty(StateBehavior behavior);
 
 		virtual void initialize();
 		virtual StateEvent* update();
@@ -98,8 +112,11 @@ namespace osgGaming
 		StateEvent* stateEvent_default();
 
 	private:
+		static const int _stateBehaviorCount = 3;
+
 		bool _initialized;
 		bool _worldHudPrepared;
+		bool _dirty[_stateBehaviorCount];
 
 		StateEvent* _stateEvent;
 
@@ -109,5 +126,6 @@ namespace osgGaming
 		osg::ref_ptr<Hud> _hud;
 		osg::ref_ptr<Viewer> _viewer;
 		osg::ref_ptr<GameSettings> _gameSettings;
+
 	};
 }
