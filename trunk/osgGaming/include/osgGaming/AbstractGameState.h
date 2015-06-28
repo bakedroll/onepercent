@@ -38,7 +38,8 @@ namespace osgGaming
 		{
 			UPDATE,
 			GUIEVENT,
-			UIMEVENT
+			UIMEVENT,
+			ALL
 		} StateBehavior;
 
 		typedef std::vector<osg::ref_ptr<AbstractGameState>> AbstractGameStateList;
@@ -53,6 +54,7 @@ namespace osgGaming
 
 		bool isInitialized();
 		bool isWorldAndHudPrepared();
+		bool isFirstUpdate();
 		void setInitialized();
 
 		void dirty(StateBehavior behavior);
@@ -98,6 +100,8 @@ namespace osgGaming
 		void setViewer(osg::ref_ptr<Viewer> viewer);
 		void setGameSettings(osg::ref_ptr<GameSettings> settings);
 
+		StateEvent* stateEvent_default();
+
 	protected:
 		virtual osg::ref_ptr<World> newWorld();
 		virtual osg::ref_ptr<Hud> newHud();
@@ -109,12 +113,11 @@ namespace osgGaming
 		StateEvent* stateEvent_replace(AbstractGameStateList states);
 		StateEvent* stateEvent_endGame();
 
-		StateEvent* stateEvent_default();
-
 	private:
 		static const int _stateBehaviorCount = 3;
 
 		bool _initialized;
+		bool _firstUpdate;
 		bool _worldHudPrepared;
 		bool _dirty[_stateBehaviorCount];
 

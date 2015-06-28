@@ -58,6 +58,8 @@ void MainMenuState::initialize()
 
 	getHud()->registerUserInteractionModel(button1);
 	getHud()->registerUserInteractionModel(button2);
+
+	getHud()->setFpsEnabled(true);
 }
 
 GameState::StateEvent* MainMenuState::update()

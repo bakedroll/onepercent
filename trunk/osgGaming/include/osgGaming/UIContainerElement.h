@@ -15,12 +15,12 @@ namespace osgGaming
 	public:
 		typedef std::map<osg::ref_ptr<UIElement>, UILocationType> ChildLocationMap;
 
-		virtual bool addChild(osg::Node* node) override
+		virtual bool addChild(osg::Node* node) override final
 		{
 			return addChild(node, UILocationType());
 		}
 
-		virtual bool addChild(osg::Node* node, UILocationType location)
+		virtual bool addChild(osg::Node* node, UILocationType location) final
 		{
 			osg::ref_ptr<UIElement> uiElement = dynamic_cast<UIElement*>(node);
 			if (uiElement.valid())
@@ -35,7 +35,7 @@ namespace osgGaming
 				_childLocationMap.insert(ChildLocationMap::value_type(uiElement, location));
 			}
 
-			return osg::MatrixTransform::addChild(node);
+			return getChildGroup()->addChild(node);
 		}
 
 		virtual void getOriginSizeForChildInArea(osg::ref_ptr<UIElement> child, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override final

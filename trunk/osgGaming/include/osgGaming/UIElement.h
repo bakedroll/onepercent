@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <osg/MatrixTransform>
+#include <osg/Switch>
 
 namespace osgGaming
 {
@@ -49,6 +50,8 @@ namespace osgGaming
 		osg::Vec2f getMinContentSize();
 		osg::Vec2f getMinSize();
 
+		bool getVisible();
+
 		void setOrigin(osg::Vec2f origin);
 		void setAbsoluteOrigin(osg::Vec2f origin);
 		void setSize(osg::Vec2f size);
@@ -65,6 +68,8 @@ namespace osgGaming
 		void setHorizontalAlignment(HorizontalAlignment alignment);
 		void setVerticalAlignment(VerticalAlignment alignment);
 
+		void setVisible(bool visible);
+
 		void resetMinContentSize();
 
 	//protected:
@@ -73,6 +78,8 @@ namespace osgGaming
 		virtual osg::Vec2f calculateMinContentSize();
 
 		virtual void onResetMinContentSize();
+
+		osg::ref_ptr<osg::Group> getChildGroup();
 
 	private:
 		void updateVisualGroup();
@@ -87,12 +94,15 @@ namespace osgGaming
 		float _width;
 		float _height;
 
+		bool _visible;
+
 		osg::Vec4f _padding;
 		osg::Vec4f _margin;
 
 		HorizontalAlignment _horizontalAlignment;
 		VerticalAlignment _verticalAlignment;
 
+		osg::ref_ptr<osg::Switch> _visualSwitch;
 		osg::ref_ptr<osg::MatrixTransform> _visualGroup;
 	};
 }

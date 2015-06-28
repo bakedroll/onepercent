@@ -14,12 +14,13 @@ namespace onep
 
 		std::string getCountryName();
 		unsigned char getId();
+		int getBip();
 
 	private:
 		std::string _name;
 
 		float _populationInMio;
-		int _bipInMio;
+		int _bip;
 		unsigned char _id;
 	};
 }

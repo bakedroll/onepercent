@@ -37,6 +37,8 @@
     <ClCompile Include="src\StaticResources.cpp" />
     <ClCompile Include="src\TextResource.cpp" />
     <ClCompile Include="src\TextureFactory.cpp" />
+    <ClCompile Include="src\Timer.cpp" />
+    <ClCompile Include="src\TimerFactory.cpp" />
     <ClCompile Include="src\TransformableCameraManipulator.cpp" />
     <ClCompile Include="src\UIButton.cpp" />
     <ClCompile Include="src\UICells.cpp" />
@@ -80,6 +82,8 @@
     <ClInclude Include="include\osgGaming\StaticResources.h" />
     <ClInclude Include="include\osgGaming\TextResource.h" />
     <ClInclude Include="include\osgGaming\TextureFactory.h" />
+    <ClInclude Include="include\osgGaming\Timer.h" />
+    <ClInclude Include="include\osgGaming\TimerFactory.h" />
     <ClInclude Include="include\osgGaming\TransformableCameraManipulator.h" />
     <ClInclude Include="include\osgGaming\UIButton.h" />
     <ClInclude Include="include\osgGaming\UICells.h" />

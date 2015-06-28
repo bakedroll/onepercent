@@ -2,6 +2,8 @@
 #include "GlobeModel.h"
 
 #include <osgGaming/Helper.h>
+#include <osgGaming/UIStackPanel.h>
+#include <osgGaming/TimerFactory.h>
 
 using namespace onep;
 using namespace osg;
@@ -18,7 +20,10 @@ const float GlobeInteractionState::_CAMERA_SCROLL_SPEED = 0.003f;
 const float GlobeInteractionState::_CAMERA_ROTATION_SPEED = 0.003;
 
 GlobeInteractionState::GlobeInteractionState()
-	: GlobeCameraState()
+	: GlobeCameraState(),
+	  _ready(false),
+	  _started(false),
+	  _selectedCountry(255)
 {
 }
 
@@ -26,12 +31,52 @@ void GlobeInteractionState::initialize()
 {
 	GlobeCameraState::initialize();
 
+	ref_ptr<UIStackPanel> stackPanel = new UIStackPanel();
+	stackPanel->setOrientation(UIStackPanel::VERTICAL);
+	stackPanel->getCells()->setNumCells(4);
+	stackPanel->getCells()->setSizePolicy(0, UICells::CONTENT);
+	stackPanel->getCells()->setSizePolicy(2, UICells::CONTENT);
+	stackPanel->getCells()->setSizePolicy(3, UICells::CONTENT);
+	stackPanel->setMargin(10.0f);
+
+	_textPleaseSelect = new UIText();
+	_textPleaseSelect->setText("Please select a country.");
+
+	_textConfirm = new UIText();
+	_textConfirm->setText("Click again to confirm your selection.");
+	_textConfirm->setFontSize(14);
+	_textConfirm->setVisible(false);
+
+	_textProgress = new UIText();
+	_textProgress->setText("Day 0");
+	_textProgress->setFontSize(14);
+	_textProgress->setMargin(Vec4f(0.0f, 0.0f, 0.0f, 30.0f));
+	_textProgress->setVisible(false);
+
+	//text->setMargin(20.0f);
+
+	getHud()->getRootUIElement()->addChild(stackPanel);
+	stackPanel->addChild(_textPleaseSelect, 3);
+	stackPanel->addChild(_textConfirm, 2);
+	stackPanel->addChild(_textProgress, 0);
+
+	getHud()->setFpsEnabled(true);
+
+
+	setCameraMotionDuration(2.0);
+	setCameraMotionEase(AnimationEase::SMOOTHER);
+
 	setCameraDistance(28.0f, getSimulationTime());
 	setCameraViewAngle(Vec2f(0.0f, 0.0f), getSimulationTime());
 }
 
 void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 {
+	if (!ready())
+	{
+		return;
+	}
+
 	if (button == GUIEventAdapter::LEFT_MOUSE_BUTTON)
 	{
 		Vec3f point, direction;
@@ -41,18 +86,75 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), GlobeModel::EARTH_RADIUS, point, direction, pickResult))
 		{
 			Vec2f polar = getPolarFromCartesian(pickResult);
-			unsigned char id = getGlobeOverviewWorld()->getSimulation()->getCountryId(polar);
-			string country_name = getGlobeOverviewWorld()->getSimulation()->getCountryName(polar);
+			int selected = (int)getGlobeOverviewWorld()->getSimulation()->getCountryId(polar);
+			//string country_name = getGlobeOverviewWorld()->getSimulation()->getCountryName(polar);
 
-			getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry((int)id);
+			getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
 
-			printf("INTERSECTION at %f, %f, %f Polar: %f, %f Id: %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), (int)id, country_name.data());
+			if (!_started)
+			{
+				if (selected == 255)
+				{
+					_textConfirm->setVisible(false);
+				}
+				else
+				{
+					if (_selectedCountry == selected)
+					{
+						startSimulation();
+					}
+					else
+					{
+						_textConfirm->setVisible(true);
+					}
+				}
+			}
+
+			_selectedCountry = selected;
+			
+			//printf("INTERSECTION at %f, %f, %f Polar: %f, %f Id: %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), _selectedCountry, country_name.data());
+		}
+	}
+}
+
+void GlobeInteractionState::onKeyPressedEvent(int key)
+{
+	/*if (!ready())
+	{
+		return;
+	}*/
+
+	if (_started)
+	{
+		if (key == GUIEventAdapter::KEY_Space)
+		{
+			if (_simulationTimer->running())
+			{
+				_simulationTimer->stop();
+
+				printf("Simulation stopped\n");
+			}
+			else
+			{
+				_simulationTimer->start();
+
+				printf("Simulation started\n");
+			}
+		}
+		else if (key == GUIEventAdapter::KEY_P)
+		{
+			getGlobeOverviewWorld()->getSimulation()->printStats();
 		}
 	}
 }
 
 void GlobeInteractionState::onScrollEvent(GUIEventAdapter::ScrollingMotion motion)
 {
+	if (!ready())
+	{
+		return;
+	}
+
 	float distance = getCameraDistance();
 
 	if (motion == GUIEventAdapter::SCROLL_UP)
@@ -75,6 +177,11 @@ void GlobeInteractionState::onScrollEvent(GUIEventAdapter::ScrollingMotion motio
 
 void GlobeInteractionState::onDragEvent(int button, Vec2f origin, Vec2f position, osg::Vec2f change)
 {
+	if (!ready())
+	{
+		return;
+	}
+
 	Vec2f latLong = getCameraLatLong();
 	float distance = getCameraDistance();
 	Vec2f viewAngle = getCameraViewAngle();
@@ -109,6 +216,28 @@ void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::V
 	}
 }
 
+void GlobeInteractionState::dayTimerElapsed()
+{
+	char textProgressBuffer[16];
+
+	getGlobeOverviewWorld()->getSimulation()->step();
+
+	sprintf(&textProgressBuffer[0], "Day %d\n", getGlobeOverviewWorld()->getSimulation()->getDay());
+	_textProgress->setText(textProgressBuffer);
+}
+
+void GlobeInteractionState::startSimulation()
+{
+	_textPleaseSelect->setVisible(false);
+	_textConfirm->setVisible(false);
+	_textProgress->setVisible(true);
+
+	_simulationTimer = TimerFactory::get()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
+	_simulationTimer->start();
+
+	_started = true;
+}
+
 /*void GlobeInteractionState::onUIMClickedEvent(UserInteractionModel* model)
 {
 	printf("Clicked UIM: %s\n", model->getUIMName().data());
@@ -117,4 +246,16 @@ void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::V
 ref_ptr<Hud> GlobeInteractionState::newHud()
 {
 	return new Hud();
+}
+
+bool GlobeInteractionState::ready()
+{
+	if (!_ready && !isCameraInMotion())
+	{
+		setCameraMotionDuration(0.5);
+		setCameraMotionEase(AnimationEase::CIRCLE_OUT);
+		_ready = true;
+	}
+
+	return _ready;
 }

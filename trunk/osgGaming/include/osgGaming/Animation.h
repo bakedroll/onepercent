@@ -11,7 +11,9 @@ namespace osgGaming
 		CIRCLE_IN,
 		CIRCLE_OUT,
 		CIRCLE_IN_OUT,
-		LINEAR
+		LINEAR,
+		SMOOTH,
+		SMOOTHER
 	} AnimationEase;
 
 	template <class T>
@@ -72,12 +74,17 @@ namespace osgGaming
 					switch (_ease)
 					{
 					case CIRCLE_OUT:
+
 						elapsed = sqrt(1.0 - (elapsed * elapsed - 2 * elapsed + 1));
 						break;
+
 					case CIRCLE_IN:
+
 						elapsed = 1.0 - sqrt(1.0 - elapsed * elapsed);
 						break;
+
 					case CIRCLE_IN_OUT:
+
 						if (elapsed < 0.5)
 						{
 							elapsed = (1.0 - sqrt(1.0 - (4.0 * elapsed * elapsed))) * 0.5;
@@ -87,6 +94,17 @@ namespace osgGaming
 							elapsed = sqrt(8.0 * elapsed - 4 * elapsed * elapsed - 3.0) * 0.5 + 0.5;
 						}
 						break;
+
+					case SMOOTH:
+
+						elapsed = elapsed * elapsed * (3.0 - 2.0 * elapsed);
+						break;
+
+					case SMOOTHER:
+
+						elapsed = elapsed * elapsed * elapsed * (elapsed * (elapsed * 6.0 - 15.0) + 10.0);
+						break;
+
 					}
 
 					_value = _fromValue + (_toValue - _fromValue) * elapsed;

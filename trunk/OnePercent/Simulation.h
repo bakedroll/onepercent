@@ -21,10 +21,18 @@ namespace onep
 		unsigned char getCountryId(osg::Vec2f coord);
 		std::string getCountryName(osg::Vec2f coord);
 
+		int getDay();
+
+		void step();
+
+		void printStats();
+
 	private:
 		typedef std::vector<osg::ref_ptr<Country>> CountryList;
 
 		CountryList _countries;
 		osg::ref_ptr<CountriesMap> _countriesMap;
+
+		int _day;
 	};
 }

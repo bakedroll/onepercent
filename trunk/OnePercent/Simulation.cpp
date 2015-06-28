@@ -10,7 +10,8 @@ using namespace osg;
 using namespace std;
 
 Simulation::Simulation()
-	: Referenced()
+	: Referenced(),
+	  _day(0)
 {
 }
 
@@ -71,4 +72,34 @@ string Simulation::getCountryName(Vec2f coord)
 	}
 
 	return "No country selected";
+}
+
+int Simulation::getDay()
+{
+	return _day;
+}
+
+void Simulation::step()
+{
+	_day++;
+}
+
+void Simulation::printStats()
+{
+	printf("\n=========================================\n\n");
+
+	for (CountryList::iterator it = _countries.begin(); it != _countries.end(); ++it)
+	{
+		string name = it->get()->getCountryName();
+		int s = 22 - (int)name.size();
+
+		for (int i = 0; i < s; i++)
+		{
+			name += " ";
+		}
+
+		printf("%sBip: %d Mio\n", name.data(), it->get()->getBip());
+	}
+
+	printf("\n=========================================\n");
 }

@@ -26,9 +26,10 @@ bool GameStateStack::isEmpty()
 	return _stateStack.empty();
 }
 
-void GameStateStack::begin(AbstractGameState::StateBehavior behavior)
+void GameStateStack::begin(AbstractGameState::StateBehavior behavior, bool onlyInitialized)
 {
 	_itBehavior = behavior;
+	_itOnlyInitialized = onlyInitialized;
 	_itNext = _stateStack.begin();
 	_itTop = *(--_stateStack.end());
 }
@@ -37,28 +38,9 @@ bool GameStateStack::next()
 {
 	while (_itNext != _stateStack.end())
 	{
-		char props = _itNext->get()->getProperties();
-
-		if (_itBehavior == AbstractGameState::UPDATE)
+		if (hasBehavior(*_itNext, _itBehavior) && (!_itOnlyInitialized || _itNext->get()->isInitialized()))
 		{
-			if ((props & AbstractGameState::PROP_UPDATE_ALWAYS) || ((_itNext->get() == _itTop.get()) && (props & AbstractGameState::PROP_UPDATE_TOP)))
-			{
-				break;
-			}
-		}
-		else if (_itBehavior == AbstractGameState::GUIEVENT)
-		{
-			if ((props & AbstractGameState::PROP_GUIEVENTS_ALWAYS) || ((_itNext->get() == _itTop.get()) && (props & AbstractGameState::PROP_GUIEVENTS_TOP)))
-			{
-				break;
-			}
-		}
-		else if (_itBehavior == AbstractGameState::UIMEVENT)
-		{
-			if ((props & AbstractGameState::PROP_UIMEVENTS_ALWAYS) || ((_itNext->get() == _itTop.get()) && (props & AbstractGameState::PROP_UIMEVENTS_TOP)))
-			{
-				break;
-			}
+			break;
 		}
 
 		_itNext->get()->dirty(_itBehavior);
@@ -80,14 +62,50 @@ bool GameStateStack::isTop()
 	return _itCurrent->get() == _itTop.get();
 }
 
+bool GameStateStack::hasBehavior(osg::ref_ptr<AbstractGameState> state, AbstractGameState::StateBehavior behavior)
+{
+	char props = state->getProperties();
+
+	bool isTop = state == _itTop.get();
+
+	if (behavior == AbstractGameState::UPDATE)
+	{
+		if ((props & AbstractGameState::PROP_UPDATE_ALWAYS) || (isTop && (props & AbstractGameState::PROP_UPDATE_TOP)))
+		{
+			return true;
+		}
+	}
+	else if (behavior == AbstractGameState::GUIEVENT)
+	{
+		if ((props & AbstractGameState::PROP_GUIEVENTS_ALWAYS) || (isTop && (props & AbstractGameState::PROP_GUIEVENTS_TOP)))
+		{
+			return true;
+		}
+	}
+	else if (behavior == AbstractGameState::UIMEVENT)
+	{
+		if ((props & AbstractGameState::PROP_UIMEVENTS_ALWAYS) || (isTop && (props & AbstractGameState::PROP_UIMEVENTS_TOP)))
+		{
+			return true;
+		}
+	}
+	else if (behavior == AbstractGameState::ALL)
+	{
+		if (((props & AbstractGameState::PROP_UPDATE_ALWAYS) || (isTop && (props & AbstractGameState::PROP_UPDATE_TOP))) ||
+			((props & AbstractGameState::PROP_GUIEVENTS_ALWAYS) || (isTop && (props & AbstractGameState::PROP_GUIEVENTS_TOP))) ||
+			((props & AbstractGameState::PROP_UIMEVENTS_ALWAYS) || (isTop && (props & AbstractGameState::PROP_UIMEVENTS_TOP))))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
 ref_ptr<AbstractGameState> GameStateStack::get()
 {
 	return *_itCurrent;
-}
-
-ref_ptr<AbstractGameState> GameStateStack::top()
-{
-	return *(--_stateStack.end());
 }
 
 void GameStateStack::popState()

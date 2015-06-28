@@ -15,10 +15,12 @@ UIElement::UIElement()
 	  _margin(0.0f, 0.0f, 0.0f, 0.0f),
 	  _horizontalAlignment(H_STRETCH),
 	  _verticalAlignment(V_STRETCH),
-	  _calculatedMinContentSize(false)
+	  _calculatedMinContentSize(false),
+	  _visible(true)
 	
 {
-
+	_visualSwitch = new Switch();
+	MatrixTransform::addChild(_visualSwitch);
 }
 
 bool UIElement::addChild(Node* child)
@@ -117,6 +119,11 @@ Vec2f UIElement::getMinSize()
 		_margin.y() + _margin.w() + _padding.y() + _padding.w());
 }
 
+bool UIElement::getVisible()
+{
+	return _visible;
+}
+
 void UIElement::setOrigin(Vec2f origin)
 {
 	_origin = origin;
@@ -178,6 +185,20 @@ void UIElement::setVerticalAlignment(UIElement::VerticalAlignment alignment)
 	_verticalAlignment = alignment;
 }
 
+void UIElement::setVisible(bool visible)
+{
+	if (visible)
+	{
+		_visualSwitch->setAllChildrenOn();
+	}
+	else
+	{
+		_visualSwitch->setAllChildrenOff();
+	}
+
+	_visible = visible;
+}
+
 void UIElement::resetMinContentSize()
 {
 	_calculatedMinContentSize = false;
@@ -224,7 +245,7 @@ ref_ptr<Group> UIElement::getVisualGroup()
 		_visualGroup->addChild(geode);
 		geode->addDrawable(geo);
 
-		MatrixTransform::addChild(_visualGroup);
+		_visualSwitch->addChild(_visualGroup);
 
 		updateVisualGroup();
 	}
@@ -240,6 +261,11 @@ Vec2f UIElement::calculateMinContentSize()
 void UIElement::onResetMinContentSize()
 {
 
+}
+
+ref_ptr<Group> UIElement::getChildGroup()
+{
+	return _visualSwitch;
 }
 
 void UIElement::updateVisualGroup()

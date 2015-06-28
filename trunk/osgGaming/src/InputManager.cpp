@@ -250,24 +250,31 @@ void InputManager::updateStates(bool onlyDirty, bool onlyResolution)
 	while (_gameStateStack->next())
 	{
 		ref_ptr<AbstractGameState> state = _gameStateStack->get();
-		ref_ptr<Hud> hud = state->getHud();
 
-		HudSet::iterator it = hudSet.find(hud.get());
-		if (it == hudSet.end())
+		if (!onlyDirty || state->isDirty(AbstractGameState::UIMEVENT))
 		{
-			hudSet.insert(hud.get());
+			ref_ptr<Hud> hud = state->getHud();
 
-			hud->updateResolution(resolution);
-
-			if (!onlyResolution || state->isDirty(AbstractGameState::UIMEVENT))
+			HudSet::iterator it = hudSet.find(hud.get());
+			if (it == hudSet.end())
 			{
-				hud->resetUserInteractionModel();
-				handleUserInteractionMove(state, _mousePosition.x(), _mousePosition.y());
+				hudSet.insert(hud.get());
+
+				hud->updateResolution(resolution);
+
+				if (!onlyResolution)
+				{
+					hud->resetUserInteractionModel();
+					handleUserInteractionMove(state, _mousePosition.x(), _mousePosition.y());
+				}
+			}
+
+			if (_gameStateStack->isTop())
+			{
+				state->getWorld()->getCameraManipulator()->updateResolution(resolution);
 			}
 		}
 	}
-
-	_gameStateStack->top()->getWorld()->getCameraManipulator()->updateResolution(resolution);
 }
 
 int InputManager::mousePressed()
