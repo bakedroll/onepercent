@@ -87,6 +87,20 @@ void GlobeCameraState::setCameraDistance(float distance, double time)
 	}
 }
 
+void GlobeCameraState::setCameraMotionDuration(double time)
+{
+	_cameraDistanceAnimation->setDuration(time);
+	_cameraLatLongAnimation->setDuration(time);
+	_cameraViewAngleAnimation->setDuration(time);
+}
+
+void GlobeCameraState::setCameraMotionEase(AnimationEase ease)
+{
+	_cameraDistanceAnimation->setEase(ease);
+	_cameraLatLongAnimation->setEase(ease);
+	_cameraViewAngleAnimation->setEase(ease);
+}
+
 void GlobeCameraState::setCameraViewAngle(osg::Vec2f viewAngle, double time)
 {
 	_cameraViewAngle = viewAngle;
@@ -99,4 +113,9 @@ void GlobeCameraState::setCameraViewAngle(osg::Vec2f viewAngle, double time)
 	{
 		_cameraViewAngleAnimation->beginAnimation(_cameraViewAngle, time);
 	}
+}
+
+bool GlobeCameraState::isCameraInMotion()
+{
+	return _cameraDistanceAnimation->running();
 }

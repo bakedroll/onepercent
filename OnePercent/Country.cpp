@@ -9,7 +9,7 @@ Country::Country(string name, unsigned char id, float population, int bip)
 	  _name(name),
 	  _id(id),
 	  _populationInMio(population),
-	  _bipInMio(bip)
+	  _bip(bip)
 {
 	
 }
@@ -22,4 +22,9 @@ string Country::getCountryName()
 unsigned char Country::getId()
 {
 	return _id;
+}
+
+int Country::getBip()
+{
+	return _bip;
 }

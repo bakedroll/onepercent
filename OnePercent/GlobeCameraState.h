@@ -27,6 +27,11 @@ namespace onep
 		void setCameraDistance(float distance, double time = -1.0);
 		void setCameraViewAngle(osg::Vec2f viewAngle, double time = -1.0);
 
+		void setCameraMotionDuration(double time);
+		void setCameraMotionEase(osgGaming::AnimationEase ease);
+
+		bool isCameraInMotion();
+
 	private:
 		osg::ref_ptr<GlobeOverviewWorld> _globeWorld;
 

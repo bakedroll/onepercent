@@ -18,7 +18,8 @@ UIText::UIText()
 
 	_textNode = createTextNode(_text, _fontSize, ResourceManager::getInstance()->loadDefaultFont());
 
-	MatrixTransform::addChild(geode);
+	getChildGroup()->addChild(geode);
+	// MatrixTransform::addChild(geode);
 	geode->addDrawable(_textNode);
 }
 

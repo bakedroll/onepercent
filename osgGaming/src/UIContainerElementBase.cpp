@@ -13,10 +13,10 @@ UIContainerElementBase::UIElementList UIContainerElementBase::getUIChildren()
 {
 	UIElementList elements;
 
-	unsigned int num = getNumChildren();
+	unsigned int num = getChildGroup()->getNumChildren();
 	for (unsigned int i = 0; i < num; i++)
 	{
-		ref_ptr<UIElement> element = dynamic_cast<UIElement*>(getChild(i));
+		ref_ptr<UIElement> element = dynamic_cast<UIElement*>(getChildGroup()->getChild(i));
 		if (element.valid())
 		{
 			elements.push_back(element);
@@ -30,10 +30,10 @@ unsigned int UIContainerElementBase::getNumUIChildren()
 {
 	unsigned int result = 0;
 
-	unsigned int num = getNumChildren();
+	unsigned int num = getChildGroup()->getNumChildren();
 	for (unsigned int i = 0; i < num; i++)
 	{
-		ref_ptr<UIElement> element = dynamic_cast<UIElement*>(getChild(i));
+		ref_ptr<UIElement> element = dynamic_cast<UIElement*>(getChildGroup()->getChild(i));
 		if (element.valid())
 		{
 			result++;

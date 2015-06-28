@@ -29,8 +29,8 @@ HighDynamicRangeEffect::HighDynamicRangeEffect()
 	: PostProcessingEffect(),
 	  _midGrey(5.0f),
 	  _hdrBlurSigma(4.0f),
-	  _hdrBlurRadius(7.0f),
-	  _glareFactor(14.5f),
+	  _hdrBlurRadius(5.0f),
+	  _glareFactor(7.5f),
 	  _minLuminance(0.2f),
 	  _maxLuminance(5.0f),
 	  _adaptFactor(0.03f)

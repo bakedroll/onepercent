@@ -7,9 +7,13 @@ AbstractGameState::AbstractGameState()
 	: Referenced(),
 	  _initialized(false),
 	  _worldHudPrepared(false),
-	  _stateEvent(NULL)
+	  _stateEvent(NULL),
+	  _firstUpdate(true)
 {
-
+	for (int i = 0; i < _stateBehaviorCount; i++)
+	{
+		_dirty[i] = true;
+	}
 }
 
 bool AbstractGameState::isInitialized()
@@ -20,6 +24,18 @@ bool AbstractGameState::isInitialized()
 bool AbstractGameState::isWorldAndHudPrepared()
 {
 	return _worldHudPrepared;
+}
+
+bool AbstractGameState::isFirstUpdate()
+{
+	bool first = _firstUpdate;
+
+	if (first)
+	{
+		_firstUpdate = false;
+	}
+
+	return first;
 }
 
 void AbstractGameState::setInitialized()
@@ -179,6 +195,11 @@ void AbstractGameState::setGameSettings(ref_ptr<GameSettings> settings)
 	_gameSettings = settings;
 }
 
+AbstractGameState::StateEvent* AbstractGameState::stateEvent_default()
+{
+	return _stateEvent;
+}
+
 ref_ptr<World> AbstractGameState::newWorld()
 {
 	return NULL;
@@ -268,10 +289,5 @@ AbstractGameState::StateEvent* AbstractGameState::stateEvent_endGame()
 	_stateEvent = new StateEvent();
 	_stateEvent->type = END_GAME;
 
-	return _stateEvent;
-}
-
-AbstractGameState::StateEvent* AbstractGameState::stateEvent_default()
-{
 	return _stateEvent;
 }

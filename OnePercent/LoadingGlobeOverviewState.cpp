@@ -82,8 +82,6 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud
 	globeWorld->setGlobeModel(globe);
 	globeWorld->setBackgroundModel(backgroundModel);
 
-	hud->setFpsEnabled(true);
-
 	// ##################
 	/*ref_ptr<UIElement> root = hud->getRootUIElement();
 

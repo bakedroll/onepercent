@@ -3,6 +3,7 @@
 #include <osgGaming/GameException.h>
 #include <osgGaming/GameLoadingState.h>
 #include <osgGaming/TransformableCameraManipulator.h>
+#include <osgGaming/TimerFactory.h>
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/LightModel>
@@ -25,18 +26,14 @@ GameApplication::GameApplication()
 
 void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
 {
-	//GameStateStack::AbstractGameStateList* runningStates = _gameStateStack.getRunningStates();
+	TimerFactory::get()->updateRegisteredTimers(simTime);
 
 	if (!_gameStateStack.isEmpty())
 	{
 		bool attach = _gameStateStack.attachRequired();
 
-		// ref_ptr<AbstractGameState> topState = *(--runningStates->end());
-
-
-		_gameStateStack.begin(AbstractGameState::UPDATE);
+		_gameStateStack.begin(AbstractGameState::ALL, false);
 		while (_gameStateStack.next())
-		//for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
 		{
 			ref_ptr<AbstractGameState> state = _gameStateStack.get();
 
@@ -90,9 +87,17 @@ void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double
 				}
 			}
 
-
-			// Update state
-			GameState::StateEvent* se = state->update();
+			// update state
+			GameState::StateEvent* se;
+			
+			if (_gameStateStack.hasBehavior(state, AbstractGameState::UPDATE))
+			{
+				se = state->update();
+			}
+			else
+			{
+				se = state->stateEvent_default();
+			}
 
 			if (_isLoading)
 			{
