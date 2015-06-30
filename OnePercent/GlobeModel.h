@@ -29,6 +29,8 @@ namespace onep
 		void updateLightDirection(osg::Vec3f direction);
 		void updateClouds(float day);
 
+		int getSelectedCountry();
+
 		void setSelectedCountry(int countryId);
 
 	private:

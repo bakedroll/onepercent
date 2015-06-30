@@ -59,6 +59,15 @@ void GlobeModel::updateClouds(float day)
 	_uniformTime->set(day * _CLOUD_MORPH_SPEED);
 }
 
+int GlobeModel::getSelectedCountry()
+{
+	int res;
+
+	_uniformSelectedCountry->get(res);
+
+	return res;
+}
+
 void GlobeModel::setSelectedCountry(int countryId)
 {
 	_uniformSelectedCountry->set(countryId);

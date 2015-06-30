@@ -36,7 +36,7 @@ void Simulation::loadCountries()
 		unsigned char id = stream.read<unsigned char>();
 
 		ref_ptr<Country> country = new Country(name, id, population, bip);
-		_countries.push_back(country);
+		_countries.insert(CountryMap::value_type(id, country));
 
 		delete[] name_p;
 	}
@@ -47,6 +47,11 @@ void Simulation::loadCountries()
 	_countriesMap = new CountriesMap(mapWidth, mapHeight, (unsigned char*)&bytes[stream.getPos()]);
 
 	ResourceManager::getInstance()->clearCacheResource(countriesBinFilename);
+}
+
+ref_ptr<Country> Simulation::getCountry(unsigned char id)
+{
+	return _countries.find(id)->second;
 }
 
 unsigned char Simulation::getCountryId(Vec2f coord)
@@ -61,17 +66,13 @@ unsigned char Simulation::getCountryId(Vec2f coord)
 
 string Simulation::getCountryName(Vec2f coord)
 {
-	unsigned char id = getCountryId(coord);
-
-	for (CountryList::iterator it = _countries.begin(); it != _countries.end(); ++it)
+	CountryMap::iterator it = _countries.find(getCountryId(coord));
+	if (it == _countries.end())
 	{
-		if (id == it->get()->getId())
-		{
-			return it->get()->getCountryName();
-		}
+		return "No country selected";
 	}
 
-	return "No country selected";
+	return it->second->getCountryName();
 }
 
 int Simulation::getDay()
@@ -88,9 +89,9 @@ void Simulation::printStats()
 {
 	printf("\n=========================================\n\n");
 
-	for (CountryList::iterator it = _countries.begin(); it != _countries.end(); ++it)
+	for (CountryMap::iterator it = _countries.begin(); it != _countries.end(); ++it)
 	{
-		string name = it->get()->getCountryName();
+		string name = it->second->getCountryName();
 		int s = 22 - (int)name.size();
 
 		for (int i = 0; i < s; i++)
@@ -98,7 +99,7 @@ void Simulation::printStats()
 			name += " ";
 		}
 
-		printf("%sBip: %d Mio\n", name.data(), it->get()->getBip());
+		printf("%sBip: %d Mio\n", name.data(), it->second->getBip());
 	}
 
 	printf("\n=========================================\n");
