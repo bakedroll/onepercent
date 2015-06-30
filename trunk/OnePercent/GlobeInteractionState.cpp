@@ -232,6 +232,10 @@ void GlobeInteractionState::startSimulation()
 	_textConfirm->setVisible(false);
 	_textProgress->setVisible(true);
 
+	getGlobeOverviewWorld()->getSimulation()->getCountry(
+		(unsigned char)getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountry())
+		->setSkillBranchActivated(Country::BRANCH_BANKS, true);
+
 	_simulationTimer = TimerFactory::get()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
 	_simulationTimer->start();
 

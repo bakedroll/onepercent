@@ -3,7 +3,7 @@
 #include "Country.h"
 #include "CountriesMap.h"
 
-#include <vector>
+#include <map>
 
 #include <osg/Object>
 #include <osg/Referenced>
@@ -18,6 +18,7 @@ namespace onep
 
 		void loadCountries();
 
+		osg::ref_ptr<Country> getCountry(unsigned char id);
 		unsigned char getCountryId(osg::Vec2f coord);
 		std::string getCountryName(osg::Vec2f coord);
 
@@ -28,9 +29,9 @@ namespace onep
 		void printStats();
 
 	private:
-		typedef std::vector<osg::ref_ptr<Country>> CountryList;
+		typedef std::map<unsigned char, osg::ref_ptr<Country>> CountryMap;
 
-		CountryList _countries;
+		CountryMap _countries;
 		osg::ref_ptr<CountriesMap> _countriesMap;
 
 		int _day;

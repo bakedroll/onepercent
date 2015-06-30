@@ -9,9 +9,20 @@ Country::Country(string name, unsigned char id, float population, int bip)
 	  _name(name),
 	  _id(id),
 	  _populationInMio(population),
-	  _bip(bip)
+	  _bip(bip),
+	  _anger(0.0f),
+	  _buyingPower(0.0f),
+	  _dept(0)
 {
-	
+	for (int i = 0; i < SkillBranchCount; i++)
+	{
+		_skillBranchActivated[i] = false;
+	}
+}
+
+void Country::setSkillBranchActivated(SkillBranchType type, bool activated)
+{
+	_skillBranchActivated[type] = activated;
 }
 
 string Country::getCountryName()
@@ -27,4 +38,9 @@ unsigned char Country::getId()
 int Country::getBip()
 {
 	return _bip;
+}
+
+bool Country::getSKillBranchActivated(SkillBranchType type)
+{
+	return _skillBranchActivated[type];
 }
