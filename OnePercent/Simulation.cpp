@@ -85,21 +85,39 @@ void Simulation::step()
 	_day++;
 }
 
+string fillString(string s, int l)
+{
+	int fs = l - s.size();
+
+	for (int i = 0; i < fs; i++)
+	{
+		s += " ";
+	}
+
+	return s;
+}
+
 void Simulation::printStats()
 {
 	printf("\n=========================================\n\n");
 
+	char buffer[255];
+
 	for (CountryMap::iterator it = _countries.begin(); it != _countries.end(); ++it)
 	{
-		string name = it->second->getCountryName();
-		int s = 22 - (int)name.size();
+		string name = fillString(it->second->getCountryName(), 22);
 
-		for (int i = 0; i < s; i++)
+		sprintf(&buffer[0], "%d Mio", it->second->getBip());
+		string bip = fillString(buffer, 12);
+
+		string skills = "";
+
+		for (int i = 0; i < Country::SkillBranchCount; i++)
 		{
-			name += " ";
+			skills += string("[") + string(it->second->getSKillBranchActivated((Country::SkillBranchType)i) ? "x" : " ") + string("] ");
 		}
 
-		printf("%sBip: %d Mio\n", name.data(), it->second->getBip());
+		printf("%sBip: %s Skills: %s\n", name.data(), bip.data(), skills.data());
 	}
 
 	printf("\n=========================================\n");
