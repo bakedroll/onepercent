@@ -17,7 +17,7 @@ namespace onep
 			BRANCH_BANKS = 0,
 			BRANCH_CONTROL = 1,
 			BRANCH_MEDIA = 2,
-			BRANCH_LOBBY = 3,
+			BRANCH_CORPORATIONS = 3,
 			BRANCH_POLITICS = 4,
 
 		} SkillBranchType;
