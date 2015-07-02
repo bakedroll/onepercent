@@ -4,13 +4,16 @@ using namespace onep;
 using namespace osg;
 using namespace std;
 
-Country::Country(string name, unsigned char id, float population, int bip)
+Country::Country(string name, unsigned char id, float population, int bip, Vec2f centerLatLong, Vec2f size)
 	: Referenced(),
 	  _name(name),
 	  _id(id),
+	  _centerLatLong(centerLatLong),
+	  _size(size),
 	  _populationInMio(population),
 	  _bip(bip),
 	  _anger(0.0f),
+	  _angerBalance(0.0f),
 	  _buyingPower(0.0f),
 	  _dept(0)
 {
@@ -33,6 +36,16 @@ string Country::getCountryName()
 unsigned char Country::getId()
 {
 	return _id;
+}
+
+Vec2f Country::getCenterLatLong()
+{
+	return _centerLatLong;
+}
+
+Vec2f Country::getSize()
+{
+	return _size;
 }
 
 int Country::getBip()

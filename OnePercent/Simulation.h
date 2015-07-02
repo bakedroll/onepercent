@@ -19,6 +19,7 @@ namespace onep
 		void loadCountries();
 
 		osg::ref_ptr<Country> getCountry(unsigned char id);
+		osg::ref_ptr<Country> getCountry(osg::Vec2f coord);
 		unsigned char getCountryId(osg::Vec2f coord);
 		std::string getCountryName(osg::Vec2f coord);
 
