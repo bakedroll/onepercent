@@ -2,6 +2,7 @@
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/ByteStream.h>
+#include <osgGaming/Helper.h>
 #include <osg/Image>
 
 using namespace osgGaming;
@@ -34,8 +35,19 @@ void Simulation::loadCountries()
 		float population = stream.read<float>();
 		int bip = stream.read<int>();
 		unsigned char id = stream.read<unsigned char>();
+		float centerX = stream.read<float>();
+		float centerY = stream.read<float>();
+		float width = stream.read<float>();
+		float height = stream.read<float>();
 
-		ref_ptr<Country> country = new Country(name, id, population, bip);
+		ref_ptr<Country> country = new Country(
+			name,
+			id,
+			population,
+			bip,
+			Vec2f((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI),
+			Vec2f(width, height));
+
 		_countries.insert(CountryMap::value_type(id, country));
 
 		delete[] name_p;
@@ -51,6 +63,18 @@ void Simulation::loadCountries()
 
 ref_ptr<Country> Simulation::getCountry(unsigned char id)
 {
+	return _countries.find(id)->second;
+}
+
+ref_ptr<Country> Simulation::getCountry(Vec2f coord)
+{
+	unsigned char id = getCountryId(coord);
+
+	if (id == 255)
+	{
+		return NULL;
+	}
+
 	return _countries.find(id)->second;
 }
 

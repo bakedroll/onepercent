@@ -86,8 +86,10 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), GlobeModel::EARTH_RADIUS, point, direction, pickResult))
 		{
 			Vec2f polar = getPolarFromCartesian(pickResult);
-			int selected = (int)getGlobeOverviewWorld()->getSimulation()->getCountryId(polar);
+			ref_ptr<Country> country = getGlobeOverviewWorld()->getSimulation()->getCountry(polar);
 			//string country_name = getGlobeOverviewWorld()->getSimulation()->getCountryName(polar);
+
+			int selected = country == NULL ? 255 : (int)country->getId();
 
 			getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
 
@@ -111,6 +113,11 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 			}
 
 			_selectedCountry = selected;
+
+			if (country != NULL)
+			{
+				setCameraLatLong(country->getCenterLatLong(), getSimulationTime());
+			}
 			
 			//printf("INTERSECTION at %f, %f, %f Polar: %f, %f Id: %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), _selectedCountry, country_name.data());
 		}

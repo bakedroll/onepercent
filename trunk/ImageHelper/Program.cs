@@ -9,6 +9,59 @@ using System.Text;
 
 namespace ImageHelper
 {
+    class Bounds
+    {
+        private float _minX;
+        private float _minY;
+        private float _maxX;
+        private float _maxY;
+
+        public Bounds()
+        {
+            _minX = Single.MaxValue;
+            _minY = Single.MaxValue;
+            _maxX = Single.MinValue;
+            _maxY = Single.MinValue;
+        }
+
+        public float CenterX
+        {
+            get { return _minX + Width / 2.0f; }
+        }
+
+        public float CenterY
+        {
+            get { return _minY + Height / 2.0f; }
+        }
+
+        public float Width
+        {
+            get { return _maxX - _minX; }
+        }
+
+        public float Height
+        {
+            get { return _maxY - _minY; }
+        }
+
+        public void Expand(float x, float y)
+        {
+            _minX = Math.Min(_minX, x);
+            _minY = Math.Min(_minY, y);
+            _maxX = Math.Max(_maxX, x);
+            _maxY = Math.Max(_maxY, y);
+        }
+    }
+
+    internal struct CountryInfo
+    {
+        public byte Id { get; set; }
+        public byte[] Name { get; set; }
+        public float Population { get; set; }
+        public int Bip { get; set; }
+        public Bounds Bounds { get; set; }
+    }
+
     class Program
     {
         private static int _pressKeyOnExit = 1;
@@ -157,76 +210,96 @@ namespace ImageHelper
 
             var asen = new UTF8Encoding();
 
-            var countries = new Dictionary<Color, byte>();
-            int percentCounter;
+            var countries = new Dictionary<Color, CountryInfo>();
 
             int oldWidth = countriesBitmap.Width;
             int oldHeight = countriesBitmap.Height;
 
-            using (var writer = new BinaryWriter(binFile))
+            byte counter = 0;
+            foreach (var tLine in tableLines)
             {
-                writer.Write(tableLines.Length);
+                var values = tLine.Split('\t').Where(x => !x.Equals(string.Empty)).ToArray();
 
-                byte counter = 0;
-                foreach (var tLine in tableLines)
+                var color = ColorTranslator.FromHtml("#" + values[2]);
+
+                if (countries.ContainsKey(color))
                 {
-                    var values = tLine.Split('\t').Where(x => !x.Equals(string.Empty)).ToArray();
+                    Console.WriteLine("Warning: Color #{0} already exists ({1})", values[2], values[1]);
+                }
+                else
+                {
+                    countries.Add(color, new CountryInfo
+                    {
+                        Id = counter,
+                        Name = asen.GetBytes(values[1]),
+                        Population = float.Parse(values[3]),
+                        Bip = int.Parse(values[4]),
+                        Bounds = new Bounds()
+                    });
 
-                    var color = ColorTranslator.FromHtml("#" + values[2]);
+                    counter++;
+                }
+            }
+
+            int percentCounter = 0;
+            Console.WriteLine("0%");
+
+            var mapData = new byte[newWidth * newHeight];
+
+            for (int y = 0; y < newHeight; y++)
+            {
+                for (int x = 0; x < newWidth; x++)
+                {
+                    var color = countriesBitmap.GetPixel((oldWidth * x) / newWidth, (oldHeight * y) / newHeight);
+
+                    byte id;
 
                     if (countries.ContainsKey(color))
                     {
-                        Console.WriteLine("Warning: Color #{0} already exists ({1})", values[2], values[1]);
+                        CountryInfo info;
+                        countries.TryGetValue(color, out info);
+
+                        info.Bounds.Expand((float)x / (newWidth - 1), (float)y / (newHeight - 1));
+
+                        id = info.Id;
                     }
                     else
                     {
-                        countries.Add(color, counter);
+                        id = 255;
                     }
 
-                    var encoded = asen.GetBytes(values[1]);
+                    mapData[y * newWidth + x] = id;
+                }
 
-                    writer.Write(encoded.Length);
-                    writer.Write(encoded);
-                    writer.Write(float.Parse(values[3]));
-                    writer.Write(int.Parse(values[4]));
-                    writer.Write(counter);
+                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                ClearCurrentConsoleLine();
 
-                    counter++;
+                percentCounter++;
+                Console.WriteLine("{0}%", percentCounter * 100 / newHeight);
+            }
+
+            using (var writer = new BinaryWriter(binFile))
+            {
+                writer.Write(countries.Count);
+
+                foreach (var country in countries)
+                {
+                    writer.Write(country.Value.Name.Length);
+                    writer.Write(country.Value.Name);
+                    writer.Write(country.Value.Population);
+                    writer.Write(country.Value.Bip);
+                    writer.Write(country.Value.Id);
+                    writer.Write(country.Value.Bounds.CenterX);
+                    writer.Write(country.Value.Bounds.CenterY);
+                    writer.Write(country.Value.Bounds.Width);
+                    writer.Write(country.Value.Bounds.Height);
                 }
 
                 writer.Write(newWidth);
                 writer.Write(newHeight);
-
-                percentCounter = 0;
-                Console.WriteLine("0%");
-
-                for (int y = 0; y < newHeight; y++)
-                {
-                    for (int x = 0; x < newWidth; x++)
-                    {
-                        var color = countriesBitmap.GetPixel((oldWidth * x) / newWidth, (oldHeight * y) / newHeight);
-
-                        byte id;
-
-                        if (countries.ContainsKey(color))
-                        {
-                            countries.TryGetValue(color, out id);
-                        }
-                        else
-                        {
-                            id = 255;
-                        }
-
-                        writer.Write(id);
-                    }
-
-                    Console.SetCursorPosition(0, Console.CursorTop - 1);
-                    ClearCurrentConsoleLine();
-
-                    percentCounter++;
-                    Console.WriteLine("{0}%", percentCounter * 100 / newHeight);
-                }
+                writer.Write(mapData);
             }
+
 
             var resultBitmap = new Bitmap(newWidthMap, newHeightMap, PixelFormat.Format32bppArgb);
 
@@ -245,9 +318,9 @@ namespace ImageHelper
 
                     if (countries.ContainsKey(color))
                     {
-                        byte id;
-                        countries.TryGetValue(color, out id);
-                        col = Color.FromArgb(id, id, id);
+                        CountryInfo info;
+                        countries.TryGetValue(color, out info);
+                        col = Color.FromArgb(info.Id, info.Id, info.Id);
                     }
                     else
                     {
