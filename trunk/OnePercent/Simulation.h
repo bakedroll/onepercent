@@ -27,7 +27,7 @@ namespace onep
 
 		void step();
 
-		void printStats();
+		void printStats(bool onlyActivated = false);
 
 	private:
 		typedef std::map<unsigned char, osg::ref_ptr<Country>> CountryMap;

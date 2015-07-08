@@ -33,7 +33,7 @@ void Simulation::loadCountries()
 		string name = string(name_p);
 		
 		float population = stream.read<float>();
-		int bip = stream.read<int>();
+		float wealth = (float)stream.read<int>();
 		unsigned char id = stream.read<unsigned char>();
 		float centerX = stream.read<float>();
 		float centerY = stream.read<float>();
@@ -44,7 +44,7 @@ void Simulation::loadCountries()
 			name,
 			id,
 			population,
-			bip,
+			wealth,
 			Vec2f((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI),
 			Vec2f(width, height));
 
@@ -106,42 +106,89 @@ int Simulation::getDay()
 
 void Simulation::step()
 {
+	for (CountryMap::iterator it = _countries.begin(); it != _countries.end(); ++it)
+	{
+		it->second->step();
+	}
+
 	_day++;
 }
 
-string fillString(string s, int l)
+string fillString(string s, int l, bool rightAligned = false)
 {
 	int fs = l - s.size();
 
 	for (int i = 0; i < fs; i++)
 	{
-		s += " ";
+		if (rightAligned)
+		{
+			s = " " + s;
+		}
+		else
+		{
+			s += " ";
+		}
 	}
 
 	return s;
 }
 
-void Simulation::printStats()
+string str(float value, int round = 2)
+{
+	char roundBuffer[4];
+	sprintf(&roundBuffer[0], "%d", round);
+
+	string format = "%." + string(roundBuffer) + "f";
+
+	char buffer[16];
+
+	sprintf(&buffer[0], format.data(), value);
+
+	return buffer;
+}
+
+string progBar(float value, int length = 12)
+{
+	string result = "[";
+
+	int l = length - 2;
+	int p = l * value;
+
+	for (int i = 0; i < l; i++)
+	{
+		result += ((i + 1) <= p) ? "|" : " ";
+	}
+
+	result += "]";
+
+	return result;
+}
+
+void Simulation::printStats(bool onlyActivated)
 {
 	printf("\n=========================================\n\n");
 
-	char buffer[255];
+	printf("%s | %s | %s | %s | %s\n", fillString("Country", 22).data(), fillString("Wealth", 8).data(), fillString("Anger/Balance", 25).data(), fillString("Dept/Relative/Balance", 37).data(), fillString("Skills", 19).data());
+	printf("------------------------------------------------------------------------------------------------------------\n\n");
 
 	for (CountryMap::iterator it = _countries.begin(); it != _countries.end(); ++it)
 	{
-		string name = fillString(it->second->getCountryName(), 22);
-
-		sprintf(&buffer[0], "%d Mio", it->second->getBip());
-		string bip = fillString(buffer, 12);
-
-		string skills = "";
-
-		for (int i = 0; i < Country::SkillBranchCount; i++)
+		if (!onlyActivated || it->second->anySkillBranchActivated())
 		{
-			skills += string("[") + string(it->second->getSKillBranchActivated((Country::SkillBranchType)i) ? "x" : " ") + string("] ");
-		}
+			string skills = "";
 
-		printf("%sBip: %s Skills: %s\n", name.data(), bip.data(), skills.data());
+			for (int i = 0; i < Country::SkillBranchCount; i++)
+			{
+				skills += string("[") + string(it->second->getSKillBranchActivated((Country::SkillBranchType)i) ? "x" : " ") + string("] ");
+			}
+
+			printf("%s | %s | %s | %s | %s\n",
+				fillString(it->second->getCountryName(), 22).data(),
+				fillString(str(it->second->getWealth(), 0), 8, true).data(),
+				(fillString(str(it->second->getAnger()), 6, true) + " " + progBar(it->second->getAnger()) + fillString(str(it->second->getAngerBalance()), 6, true)).data(),
+				(fillString(str(it->second->getDept(), 0), 8, true) + fillString(str(it->second->getRelativeDept()), 6, true) + " " + progBar(it->second->getRelativeDept()) + fillString(str(it->second->getDeptBalance(), 1), 10, true)).data(),
+				skills.data());
+		}
 	}
 
 	printf("\n=========================================\n");

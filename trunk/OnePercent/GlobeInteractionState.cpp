@@ -228,6 +228,7 @@ void GlobeInteractionState::dayTimerElapsed()
 	char textProgressBuffer[16];
 
 	getGlobeOverviewWorld()->getSimulation()->step();
+	getGlobeOverviewWorld()->getSimulation()->printStats(true);
 
 	sprintf(&textProgressBuffer[0], "Day %d\n", getGlobeOverviewWorld()->getSimulation()->getDay());
 	_textProgress->setText(textProgressBuffer);

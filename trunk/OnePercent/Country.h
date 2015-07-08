@@ -22,7 +22,7 @@ namespace onep
 			BRANCH_POLITICS = 4
 		} SkillBranchType;
 
-		Country(std::string name, unsigned char id, float population, int bip, osg::Vec2f center, osg::Vec2f size);
+		Country(std::string name, unsigned char id, float population, float wealth, osg::Vec2f center, osg::Vec2f size);
 
 		void setSkillBranchActivated(SkillBranchType type, bool activated);
 
@@ -30,18 +30,33 @@ namespace onep
 		unsigned char getId();
 		osg::Vec2f getCenterLatLong();
 		osg::Vec2f getSize();
-		int getBip();
+
+		float getWealth();
+		float getDept();
+		float getDeptBalance();
+		float getRelativeDept();
+		float getAnger();
+		float getAngerBalance();
+
 		bool getSKillBranchActivated(SkillBranchType type);
 
+		bool anySkillBranchActivated();
+
+		void step();
+
 	private:
+		static const float _startBuyingPower;
+
 		std::string _name;
 
 		float _populationInMio;
-		int _bip;
+		float _wealth;
 		float _anger;
 		float _angerBalance;
 		float _buyingPower;
-		int _dept;
+		float _dept;
+		float _deptBalance;
+		float _interest;
 
 		bool _skillBranchActivated[SkillBranchCount];
 
