@@ -4,18 +4,20 @@ using namespace onep;
 using namespace osg;
 using namespace std;
 
-Country::Country(string name, unsigned char id, float population, int bip, Vec2f centerLatLong, Vec2f size)
+Country::Country(string name, unsigned char id, float population, float wealth, Vec2f centerLatLong, Vec2f size)
 	: Referenced(),
 	  _name(name),
 	  _id(id),
 	  _centerLatLong(centerLatLong),
 	  _size(size),
 	  _populationInMio(population),
-	  _bip(bip),
+	  _wealth(wealth),
 	  _anger(0.0f),
 	  _angerBalance(0.0f),
 	  _buyingPower(0.0f),
-	  _dept(0)
+	  _dept(0.0f),
+	  _deptBalance(0.0f),
+	  _interest(0.0f)
 {
 	for (int i = 0; i < SkillBranchCount; i++)
 	{
@@ -48,12 +50,71 @@ Vec2f Country::getSize()
 	return _size;
 }
 
-int Country::getBip()
+float Country::getWealth()
 {
-	return _bip;
+	return _wealth;
+}
+
+float Country::getDept()
+{
+	return _dept;
+}
+
+float Country::getDeptBalance()
+{
+	return _deptBalance;
+}
+
+float Country::getRelativeDept()
+{
+	return _dept / _wealth;
+}
+
+float Country::getAnger()
+{
+	return _anger;
+}
+
+float Country::getAngerBalance()
+{
+	return _angerBalance;
 }
 
 bool Country::getSKillBranchActivated(SkillBranchType type)
 {
 	return _skillBranchActivated[type];
 }
+
+bool Country::anySkillBranchActivated()
+{
+	for (int i = 0; i < SkillBranchCount; i++)
+	{
+		if (_skillBranchActivated[i])
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void Country::step()
+{
+	if (_skillBranchActivated[BRANCH_BANKS])
+	{
+		_buyingPower = _startBuyingPower;
+		_interest = 0.05f;
+
+		_deptBalance = _dept * _interest + _buyingPower;
+		_dept += _deptBalance;
+
+		_dept = clampBetween<float>(_dept, 0.0f, _wealth);
+	}
+
+	_angerBalance = getRelativeDept() * 0.1f;
+	_anger += _angerBalance;
+
+	_anger = clampBetween<float>(_anger, 0.0f, 1.0f);
+}
+
+const float Country::_startBuyingPower = 1.0f;
