@@ -13,14 +13,13 @@ using namespace std;
 using namespace osgGaming;
 using namespace osgText;
 
-ref_ptr<ResourceManager> ResourceManager::getInstance()
-{
-	if (!_instance.valid())
-	{
-		_instance = new ResourceManager();
-	}
+ref_ptr<ResourceManager> Singleton<ResourceManager>::_instance;
 
-	return _instance;
+ResourceManager::ResourceManager()
+	: Singleton<ResourceManager>(),
+	  _defaultFontResourceKey("")
+{
+
 }
 
 string ResourceManager::loadText(string resourceKey)
@@ -83,15 +82,6 @@ void ResourceManager::clearCache()
 {
 	_cache.clear();
 }
-
-ResourceManager::ResourceManager()
-	: Referenced(),
-	  _defaultFontResourceKey("")
-{
-
-}
-
-ref_ptr<ResourceManager> ResourceManager::_instance = NULL;
 
 ref_ptr<ResourceLoader> ResourceManager::resourceLoader()
 {

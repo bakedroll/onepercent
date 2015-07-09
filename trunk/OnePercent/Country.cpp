@@ -1,6 +1,10 @@
 #include "Country.h"
+#include "Globals.h"
+
+#include <osgGaming/Parameter.h>
 
 using namespace onep;
+using namespace osgGaming;
 using namespace osg;
 using namespace std;
 
@@ -102,19 +106,17 @@ void Country::step()
 {
 	if (_skillBranchActivated[BRANCH_BANKS])
 	{
-		_buyingPower = _startBuyingPower;
+		_buyingPower = ~Parameter<float, ParamSimulationStartBuyingPowerName>();
 		_interest = 0.05f;
 
 		_deptBalance = _dept * _interest + _buyingPower;
 		_dept += _deptBalance;
 
-		_dept = clampBetween<float>(_dept, 0.0f, _wealth);
+		_dept = clampBetween(_dept, 0.0f, _wealth);
 	}
 
 	_angerBalance = getRelativeDept() * 0.1f;
 	_anger += _angerBalance;
 
-	_anger = clampBetween<float>(_anger, 0.0f, 1.0f);
+	_anger = clampBetween(_anger, 0.0f, 1.0f);
 }
-
-const float Country::_startBuyingPower = 1.0f;

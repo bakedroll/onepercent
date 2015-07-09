@@ -177,7 +177,7 @@ void GlobeInteractionState::onScrollEvent(GUIEventAdapter::ScrollingMotion motio
 		return;
 	}
 
-	distance = clamp(distance, _MIN_CAMERA_DISTANCE, _MAX_CAMERA_DISTANCE);
+	distance = clampBetween(distance, _MIN_CAMERA_DISTANCE, _MAX_CAMERA_DISTANCE);
 
 	setCameraDistance(distance, getSimulationTime());
 }
@@ -198,7 +198,7 @@ void GlobeInteractionState::onDragEvent(int button, Vec2f origin, Vec2f position
 		change *= ((distance - GlobeModel::EARTH_RADIUS) / (_MAX_CAMERA_DISTANCE - GlobeModel::EARTH_RADIUS)) * _CAMERA_ZOOM_SPEED_FACTOR;
 
 		latLong.set(
-			clamp(latLong.x() - change.y() * _CAMERA_SCROLL_SPEED, -_MAX_CAMERA_LONGITUDE, _MAX_CAMERA_LONGITUDE),
+			clampBetween(latLong.x() - change.y() * _CAMERA_SCROLL_SPEED, -_MAX_CAMERA_LONGITUDE, _MAX_CAMERA_LONGITUDE),
 			latLong.y() - change.x() * _CAMERA_SCROLL_SPEED);
 
 		setCameraLatLong(latLong, getSimulationTime());
@@ -209,7 +209,7 @@ void GlobeInteractionState::onDragEvent(int button, Vec2f origin, Vec2f position
 
 		viewAngle.set(
 			viewAngle.x() + change.x() * _CAMERA_ROTATION_SPEED,
-			clamp(viewAngle.y() + change.y() * _CAMERA_ROTATION_SPEED, 0.0f, clamp_to));
+			clampBetween(viewAngle.y() + change.y() * _CAMERA_ROTATION_SPEED, 0.0f, clamp_to));
 
 		setCameraViewAngle(viewAngle, getSimulationTime());
 	}
@@ -244,7 +244,7 @@ void GlobeInteractionState::startSimulation()
 		(unsigned char)getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountry())
 		->setSkillBranchActivated(Country::BRANCH_BANKS, true);
 
-	_simulationTimer = TimerFactory::get()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
+	_simulationTimer = TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
 	_simulationTimer->start();
 
 	_started = true;

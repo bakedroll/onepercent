@@ -275,35 +275,35 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 			sprintf(normalmap_file, "./GameData/textures/earth/normal/%s/%dx%d.png", resolutionLevel1, x, y);
 			sprintf(countriesmap_file, "./GameData/textures/earth/countries/%s/%dx%d.png", resolutionLevel0, x, y);
 
-			TextureFactory::make()
+			TextureFactory::getInstance()->make()
 				->image(ResourceManager::getInstance()->loadImage(colormap_file))
 				->texLayer(0)
 				->uniform(stateSet, "colormap")
 				->assign(stateSet)
 				->build();
 
-			TextureFactory::make()
+			TextureFactory::getInstance()->make()
 				->image(ResourceManager::getInstance()->loadImage(nightmap_file))
 				->texLayer(1)
 				->uniform(stateSet, "nightmap")
 				->assign(stateSet)
 				->build();
 
-			TextureFactory::make()
+			TextureFactory::getInstance()->make()
 				->image(ResourceManager::getInstance()->loadImage(specreliefcitiesboundariesmap_file))
 				->texLayer(2)
 				->uniform(stateSet, "specreliefcitiesboundariesmap")
 				->assign(stateSet)
 				->build();
 
-			TextureFactory::make()
+			TextureFactory::getInstance()->make()
 				->image(ResourceManager::getInstance()->loadImage(normalmap_file))
 				->texLayer(3)
 				->uniform(stateSet, "normalmap")
 				->assign(stateSet)
 				->build();
 
-			TextureFactory::make()
+			TextureFactory::getInstance()->make()
 				->image(ResourceManager::getInstance()->loadImage(countriesmap_file))
 				->texLayer(4)
 				->uniform(stateSet, "countriesmap")
@@ -343,7 +343,7 @@ ref_ptr<Geode> GlobeModel::createCloudsGeode()
 			char colormap_file[128];
 			sprintf(colormap_file, "./GameData/textures/earth/clouds/8k/%dx%d.png", x, y);
 
-			TextureFactory::make()
+			TextureFactory::getInstance()->make()
 				->image(ResourceManager::getInstance()->loadImage(colormap_file))
 				->texLayer(0)
 				->uniform(stateSet, "colormap")

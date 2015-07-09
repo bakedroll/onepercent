@@ -2,8 +2,11 @@
 
 #include "Country.h"
 #include "CountriesMap.h"
+#include "Globals.h"
 
 #include <map>
+
+#include <osgGaming/Parameter.h>
 
 #include <osg/Object>
 #include <osg/Referenced>
@@ -31,6 +34,8 @@ namespace onep
 
 	private:
 		typedef std::map<unsigned char, osg::ref_ptr<Country>> CountryMap;
+
+		osgGaming::Parameter<float, ParamSimulationStartBuyingPowerName> _paramStartBuyingPower;
 
 		CountryMap _countries;
 		osg::ref_ptr<CountriesMap> _countriesMap;

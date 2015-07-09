@@ -2,16 +2,15 @@
 
 #include <vector>
 
-#include <osg/Object>
-
 #include <osgGaming/Timer.h>
+#include <osgGaming/Singleton.h>
 
 namespace osgGaming
 {
-	class TimerFactory
+	class TimerFactory : public Singleton<TimerFactory>
 	{
 	public:
-		static TimerFactory* get();
+		TimerFactory();
 
 		osg::ref_ptr<Timer> create(void(*callback)(), double duration = 1.0, bool singleShot = true);
 
@@ -30,10 +29,6 @@ namespace osgGaming
 	private:
 		typedef std::vector<osg::ref_ptr<Timer>> TimerList;
 
-		TimerFactory();
-
 		TimerList _timers;
-
-		static TimerFactory* _instance;
 	};
 }

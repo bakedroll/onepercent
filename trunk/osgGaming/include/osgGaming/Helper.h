@@ -19,12 +19,6 @@ namespace osgGaming
 		YZ
 	} QuadOrientation;
 
-	template <typename T>
-	T clamp(const T& n, const T& lower, const T& upper)
-	{
-		return std::max(lower, std::min(n, upper));
-	}
-
 	void rotateVector(osg::Vec3* vec, osg::Quat quat);
 	void transformVector(osg::Vec3* vec, osg::Matrixd* mat);
 

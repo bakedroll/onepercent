@@ -162,10 +162,10 @@ float DepthOfFieldEffect::getZFar()
 
 void DepthOfFieldEffect::initializeUnits()
 {
-	ref_ptr<Shader> shaderDepthOfFieldFp		= ShaderFactory::fromSourceText("ShaderDepthOfFieldFp", StaticResources::ShaderDepthOfFieldFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderGaussConvolution1dxFp = ShaderFactory::fromSourceText("ShaderGaussConvolution1dxFp", StaticResources::ShaderGaussConvolution1dxFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderGaussConvolution1dyFp = ShaderFactory::fromSourceText("ShaderGaussConvolution1dyFp", StaticResources::ShaderGaussConvolution1dyFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderGaussConvolutionVp	= ShaderFactory::fromSourceText("ShaderGaussConvolutionVp", StaticResources::ShaderGaussConvolutionVp, Shader::VERTEX);
+	ref_ptr<Shader> shaderDepthOfFieldFp		= ShaderFactory::getInstance()->fromSourceText("ShaderDepthOfFieldFp", StaticResources::ShaderDepthOfFieldFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderGaussConvolution1dxFp = ShaderFactory::getInstance()->fromSourceText("ShaderGaussConvolution1dxFp", StaticResources::ShaderGaussConvolution1dxFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderGaussConvolution1dyFp = ShaderFactory::getInstance()->fromSourceText("ShaderGaussConvolution1dyFp", StaticResources::ShaderGaussConvolution1dyFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderGaussConvolutionVp	= ShaderFactory::getInstance()->fromSourceText("ShaderGaussConvolutionVp", StaticResources::ShaderGaussConvolutionVp, Shader::VERTEX);
 
 	_unitResampleLight = new osgPPU::UnitInResampleOut();
 	{

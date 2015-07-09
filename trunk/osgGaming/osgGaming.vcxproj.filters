@@ -25,6 +25,12 @@
     <Filter Include="Header Files\PPU">
       <UniqueIdentifier>{da6da027-d54f-4943-9de7-8915855db0c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Parameters">
+      <UniqueIdentifier>{31c8cfb1-48f1-413f-806c-0e7f5e4b19e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Parameters">
+      <UniqueIdentifier>{e047c339-d3c7-415f-9ac3-d73d3e62e5ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameApplication.cpp">
@@ -150,6 +156,9 @@
     <ClCompile Include="src\TimerFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ParameterManager.cpp">
+      <Filter>Source Files\Parameters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h">
@@ -159,9 +168,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\osgGaming\GameSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\osgGaming\Helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\osgGaming\World.h">
@@ -283,6 +289,21 @@
     </ClInclude>
     <ClInclude Include="include\osgGaming\TimerFactory.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\Singleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\Helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\Parameter.h">
+      <Filter>Header Files\Parameters</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\ParameterManager.h">
+      <Filter>Header Files\Parameters</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\ParameterValue.h">
+      <Filter>Header Files\Parameters</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

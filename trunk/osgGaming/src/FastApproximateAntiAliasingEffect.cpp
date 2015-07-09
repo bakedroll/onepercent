@@ -87,8 +87,8 @@ void FastApproximateAntiAliasingEffect::setResolution(Vec2f resolution)
 
 void FastApproximateAntiAliasingEffect::initializeUnits()
 {
-	ref_ptr<Shader> shaderFxaaFp = ShaderFactory::fromSourceText("ShaderFxaaFp", StaticResources::ShaderFxaaFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderFxaaVp = ShaderFactory::fromSourceText("ShaderFxaaVp", StaticResources::ShaderFxaaVp, Shader::VERTEX);
+	ref_ptr<Shader> shaderFxaaFp = ShaderFactory::getInstance()->fromSourceText("ShaderFxaaFp", StaticResources::ShaderFxaaFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderFxaaVp = ShaderFactory::getInstance()->fromSourceText("ShaderFxaaVp", StaticResources::ShaderFxaaVp, Shader::VERTEX);
 
 	_unitFxaa = new osgPPU::UnitInOut();
 	{

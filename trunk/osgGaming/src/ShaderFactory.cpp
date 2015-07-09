@@ -4,6 +4,8 @@ using namespace std;
 using namespace osg;
 using namespace osgGaming;
 
+ref_ptr<ShaderFactory> Singleton<ShaderFactory>::_instance;
+
 ref_ptr<Shader> ShaderFactory::fromSourceText(string key, string source, Shader::Type type)
 {
 	ShaderDictionary::iterator it = _shaderCache.find(key);
@@ -20,5 +22,3 @@ ref_ptr<Shader> ShaderFactory::fromSourceText(string key, string source, Shader:
 
 	return shader;
 }
-
-ShaderFactory::ShaderDictionary ShaderFactory::_shaderCache;

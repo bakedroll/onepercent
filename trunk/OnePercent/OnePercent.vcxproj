@@ -74,6 +74,7 @@
     <ClCompile Include="BackgroundModel.cpp" />
     <ClCompile Include="CountriesMap.cpp" />
     <ClCompile Include="Country.cpp" />
+    <ClCompile Include="Globals.cpp" />
     <ClCompile Include="GlobeCameraState.cpp" />
     <ClCompile Include="GlobeInteractionState.cpp" />
     <ClCompile Include="GlobeModel.cpp" />
@@ -88,6 +89,7 @@
     <ClInclude Include="BackgroundModel.h" />
     <ClInclude Include="CountriesMap.h" />
     <ClInclude Include="Country.h" />
+    <ClInclude Include="Globals.h" />
     <ClInclude Include="GlobeCameraState.h" />
     <ClInclude Include="GlobeInteractionState.h" />
     <ClInclude Include="GlobeModel.h" />

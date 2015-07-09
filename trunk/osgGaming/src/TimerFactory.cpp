@@ -3,14 +3,11 @@
 using namespace osgGaming;
 using namespace osg;
 
-TimerFactory* TimerFactory::get()
-{
-	if (_instance == NULL)
-	{
-		_instance = new TimerFactory();
-	}
+ref_ptr<TimerFactory> Singleton<TimerFactory>::_instance;
 
-	return _instance;
+TimerFactory::TimerFactory()
+{
+
 }
 
 ref_ptr<Timer> TimerFactory::create(void(*callback)(), double duration, bool singleShot)
@@ -38,10 +35,3 @@ void TimerFactory::updateRegisteredTimers(double time)
 		++it;
 	}
 }
-
-TimerFactory::TimerFactory()
-{
-
-}
-
-TimerFactory* TimerFactory::_instance = NULL;

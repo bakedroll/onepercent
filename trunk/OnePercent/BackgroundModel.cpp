@@ -156,12 +156,12 @@ void BackgroundModel::makeSun()
 	sunPosTransform->setPosition(Vec3f(0.0f, 9.0f, 0.0f));
 	sunPosTransform->setScale(Vec3f(0.3f, 0.3f, 0.3f));
 
-	TextureFactory::make()
+	TextureFactory::getInstance()->make()
 		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/sun/sprite.png"))
 		->assign(stateSet)
 		->build();
 
-	TextureFactory::make()
+	TextureFactory::getInstance()->make()
 		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/sun/blend.png"))
 		->assign(_sunGlowTransform->getOrCreateStateSet())
 		->build();

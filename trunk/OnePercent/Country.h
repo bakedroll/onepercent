@@ -45,8 +45,6 @@ namespace onep
 		void step();
 
 	private:
-		static const float _startBuyingPower;
-
 		std::string _name;
 
 		float _populationInMio;

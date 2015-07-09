@@ -4,8 +4,8 @@
 #include <fstream>
 
 #include <osgGaming/FileResourceLoader.h>
+#include <osgGaming/Singleton.h>
 
-#include <osg/Referenced>
 #include <osg/Image>
 #include <osgText/Font>
 #include <osgDB/ReadFile>
@@ -13,7 +13,7 @@
 
 namespace osgGaming
 {
-	class ResourceManager : public osg::Referenced
+	class ResourceManager : public Singleton<ResourceManager>
 	{
 	public:
 		typedef enum _resourceType
@@ -24,7 +24,7 @@ namespace osgGaming
 			SHADER
 		} ResourceType;
 
-		static osg::ref_ptr<ResourceManager> getInstance();
+		ResourceManager();
 
 		std::string loadText(std::string resourceKey);
 		char* loadBinary(std::string resourceKey);
@@ -40,13 +40,8 @@ namespace osgGaming
 		void clearCacheResource(std::string resourceKey);
 		void clearCache();
 
-	protected:
-		ResourceManager();
-
 	private:
 		typedef std::map<std::string, osg::ref_ptr<osg::Object>> ResourceDictionary;
-
-		static osg::ref_ptr<ResourceManager> _instance;
 
 		osg::ref_ptr<ResourceLoader> resourceLoader();
 

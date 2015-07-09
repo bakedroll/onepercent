@@ -48,9 +48,6 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	{
 		bool anyUIMHovered = false;
 
-		//GameStateStack::AbstractGameStateList* runningStates = _gameStateStack->getRunningStates();
-
-		//for (GameStateStack::AbstractGameStateList::iterator it = runningStates->begin(); it != runningStates->end(); ++it)
 		_gameStateStack->begin(AbstractGameState::UIMEVENT);
 		while (_gameStateStack->next())
 		{
