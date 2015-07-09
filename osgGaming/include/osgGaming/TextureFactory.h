@@ -7,6 +7,8 @@
 #include <osg/Texture2D>
 #include <osg/Image>
 
+#include <osgGaming/Singleton.h>
+
 namespace osgGaming
 {
 	class TextureBlueprint : public osg::Referenced
@@ -47,9 +49,9 @@ namespace osgGaming
 		StateSetList _assignToStateSets;
 	};
 
-	class TextureFactory
+	class TextureFactory : public Singleton<TextureFactory>
 	{
 	public:
-		static osg::ref_ptr<TextureBlueprint> make();
+		osg::ref_ptr<TextureBlueprint> make();
 	};
 }

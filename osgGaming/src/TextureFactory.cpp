@@ -79,6 +79,8 @@ ref_ptr<Texture2D> TextureBlueprint::build()
 	return texture;
 }
 
+ref_ptr<TextureFactory> Singleton<TextureFactory>::_instance;
+
 ref_ptr<TextureBlueprint> TextureFactory::make()
 {
 	return new TextureBlueprint();

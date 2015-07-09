@@ -29,6 +29,7 @@
     <ClCompile Include="src\Hud.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\PackageResourceLoader.cpp" />
+    <ClCompile Include="src\ParameterManager.cpp" />
     <ClCompile Include="src\PostProcessingEffect.cpp" />
     <ClCompile Include="src\ResourceManager.cpp" />
     <ClCompile Include="src\ShaderFactory.cpp" />
@@ -73,12 +74,16 @@
     <ClInclude Include="include\osgGaming\Hud.h" />
     <ClInclude Include="include\osgGaming\InputManager.h" />
     <ClInclude Include="include\osgGaming\PackageResourceLoader.h" />
+    <ClInclude Include="include\osgGaming\Parameter.h" />
+    <ClInclude Include="include\osgGaming\ParameterManager.h" />
+    <ClInclude Include="include\osgGaming\ParameterValue.h" />
     <ClInclude Include="include\osgGaming\PostProcessingEffect.h" />
     <ClInclude Include="include\osgGaming\ResourceLoader.h" />
     <ClInclude Include="include\osgGaming\ResourceManager.h" />
     <ClInclude Include="include\osgGaming\ShaderFactory.h" />
     <ClInclude Include="include\osgGaming\SimulationCallback.h" />
     <ClInclude Include="include\osgGaming\GameStateStack.h" />
+    <ClInclude Include="include\osgGaming\Singleton.h" />
     <ClInclude Include="include\osgGaming\StaticResources.h" />
     <ClInclude Include="include\osgGaming\TextResource.h" />
     <ClInclude Include="include\osgGaming\TextureFactory.h" />

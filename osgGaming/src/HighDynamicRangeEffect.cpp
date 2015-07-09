@@ -199,14 +199,14 @@ float HighDynamicRangeEffect::getMaxLuminance()
 
 void HighDynamicRangeEffect::initializeUnits()
 {
-	ref_ptr<Shader> shaderBrightpassFp			= ShaderFactory::fromSourceText("ShaderBrightpassFp", StaticResources::ShaderBrightpassFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderGaussConvolution1dxFp = ShaderFactory::fromSourceText("ShaderGaussConvolution1dxFp", StaticResources::ShaderGaussConvolution1dxFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderGaussConvolution1dyFp = ShaderFactory::fromSourceText("ShaderGaussConvolution1dyFp", StaticResources::ShaderGaussConvolution1dyFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderGaussConvolutionVp	= ShaderFactory::fromSourceText("ShaderGaussConvolutionVp", StaticResources::ShaderGaussConvolutionVp, Shader::VERTEX);
-	ref_ptr<Shader> shaderLuminanceAdaptedFp	= ShaderFactory::fromSourceText("ShaderLuminanceAdaptedFp", StaticResources::ShaderLuminanceAdaptedFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderLuminanceFp			= ShaderFactory::fromSourceText("ShaderLuminanceFp", StaticResources::ShaderLuminanceFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderLuminanceMipmapFp		= ShaderFactory::fromSourceText("ShaderLuminanceMipmapFp", StaticResources::ShaderLuminanceMipmapFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderTonemapHdrFp			= ShaderFactory::fromSourceText("ShaderTonemapHdrFp", StaticResources::ShaderTonemapHdrFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderBrightpassFp			= ShaderFactory::getInstance()->fromSourceText("ShaderBrightpassFp", StaticResources::ShaderBrightpassFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderGaussConvolution1dxFp = ShaderFactory::getInstance()->fromSourceText("ShaderGaussConvolution1dxFp", StaticResources::ShaderGaussConvolution1dxFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderGaussConvolution1dyFp = ShaderFactory::getInstance()->fromSourceText("ShaderGaussConvolution1dyFp", StaticResources::ShaderGaussConvolution1dyFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderGaussConvolutionVp	= ShaderFactory::getInstance()->fromSourceText("ShaderGaussConvolutionVp", StaticResources::ShaderGaussConvolutionVp, Shader::VERTEX);
+	ref_ptr<Shader> shaderLuminanceAdaptedFp	= ShaderFactory::getInstance()->fromSourceText("ShaderLuminanceAdaptedFp", StaticResources::ShaderLuminanceAdaptedFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderLuminanceFp			= ShaderFactory::getInstance()->fromSourceText("ShaderLuminanceFp", StaticResources::ShaderLuminanceFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderLuminanceMipmapFp		= ShaderFactory::getInstance()->fromSourceText("ShaderLuminanceMipmapFp", StaticResources::ShaderLuminanceMipmapFp, Shader::FRAGMENT);
+	ref_ptr<Shader> shaderTonemapHdrFp			= ShaderFactory::getInstance()->fromSourceText("ShaderTonemapHdrFp", StaticResources::ShaderTonemapHdrFp, Shader::FRAGMENT);
 
 	_unitResample = new osgPPU::UnitInResampleOut();
 	{

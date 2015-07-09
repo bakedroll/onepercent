@@ -14,6 +14,7 @@ Simulation::Simulation()
 	: Referenced(),
 	  _day(0)
 {
+	_paramStartBuyingPower = 1.0f;
 }
 
 void Simulation::loadCountries()

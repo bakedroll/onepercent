@@ -26,7 +26,7 @@ GameApplication::GameApplication()
 
 void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
 {
-	TimerFactory::get()->updateRegisteredTimers(simTime);
+	TimerFactory::getInstance()->updateRegisteredTimers(simTime);
 
 	if (!_gameStateStack.isEmpty())
 	{
