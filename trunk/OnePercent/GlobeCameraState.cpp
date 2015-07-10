@@ -22,7 +22,7 @@ void GlobeCameraState::initialize()
 	_cameraDistance = _globeWorld->getCameraDistance();
 	_cameraViewAngle = _globeWorld->getCameraViewAngle();
 
-	_cameraLatLongAnimation = new Animation<Vec2f>(_cameraLatLong, 0.5, CIRCLE_OUT);
+	_cameraLatLongAnimation = new RepeatedSpaceAnimation<Vec2f>(Vec2f(-C_PI / 2.0f, 0.0f), Vec2f(C_PI / 2.0f, 2.0f * C_PI), _cameraLatLong, 0.5, CIRCLE_OUT);
 	_cameraDistanceAnimation = new Animation<float>(_cameraDistance, 0.5, CIRCLE_OUT);
 	_cameraViewAngleAnimation = new Animation<Vec2f>(_cameraViewAngle, 0.5, CIRCLE_OUT);
 

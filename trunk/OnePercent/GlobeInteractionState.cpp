@@ -49,7 +49,7 @@ void GlobeInteractionState::initialize()
 
 	_textProgress = new UIText();
 	_textProgress->setText("Day 0");
-	_textProgress->setFontSize(14);
+	_textProgress->setFontSize(32); //(14);
 	_textProgress->setMargin(Vec4f(0.0f, 0.0f, 0.0f, 30.0f));
 	_textProgress->setVisible(false);
 
