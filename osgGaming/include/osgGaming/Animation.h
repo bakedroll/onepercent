@@ -16,7 +16,7 @@ namespace osgGaming
 		SMOOTHER
 	} AnimationEase;
 
-	template <class T>
+	template <typename T>
 	class Animation : public osg::Referenced
 	{
 	public:
@@ -107,7 +107,7 @@ namespace osgGaming
 
 					}
 
-					_value = _fromValue + (_toValue - _fromValue) * elapsed;
+					_value = relocate(_fromValue, _toValue, elapsed);
 				}
 				else
 				{
@@ -135,6 +135,12 @@ namespace osgGaming
 			_ease = ease;
 		}
 
+	protected:
+		virtual T relocate(const T& from, const T& to, float elapsed)
+		{
+			return from + (to - from) * elapsed;
+		}
+
 	private:
 		T _value;
 		T _fromValue;
@@ -146,6 +152,76 @@ namespace osgGaming
 		bool _animationStarted;
 
 		AnimationEase _ease;
+	};
+
+	template <typename T>
+	class RepeatedSpaceAnimation : public Animation <T>
+	{
+	public:
+		RepeatedSpaceAnimation(const T min, const T max)
+			: Animation<T>(),
+			  _min(min),
+			  _max(max)
+		{
+
+		}
+
+		RepeatedSpaceAnimation(const T min, const T max, T value, double duration, AnimationEase ease)
+			: Animation<T>(value, duration, ease),
+			  _min(min),
+			  _max(max)
+		{
+
+		}
+
+	protected:
+		virtual T relocate(const T& from, const T& to, float elapsed)
+		{
+			T result;
+
+			for (int i = 0; i < T::num_components; i++)
+			{
+				float l = _max._v[i] - _min._v[i];
+
+				float fromv = from._v[i];
+				float tov = to._v[i];
+				while (fromv < _min._v[i])
+					fromv += l;
+				while (tov < _min._v[i])
+					tov += l;
+				while (fromv > _max._v[i])
+					fromv -= l;
+				while (tov > _max._v[i])
+					tov -= l;
+
+				float ab = tov - fromv;
+				float ababs = std::abs(ab);
+
+				if (ababs <= l / 2.0f)
+				{
+					result._v[i] = fromv + ab * elapsed;
+				}
+				else
+				{
+					result._v[i] = fromv - ab * elapsed * ((l - ababs) / ababs);
+
+					if (result._v[i] < _min._v[i])
+					{
+						result._v[i] += l;
+					}
+					else if (result._v[i] > _max._v[i])
+					{
+						result._v[i] -= l;
+					}
+				}
+			}
+
+			return result;
+		}
+
+	private:
+		T _min;
+		T _max;
 	};
 
 }

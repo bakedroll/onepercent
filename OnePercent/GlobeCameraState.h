@@ -39,7 +39,8 @@ namespace onep
 		float _cameraDistance;
 		osg::Vec2f _cameraViewAngle;
 
-		osg::ref_ptr<osgGaming::Animation<osg::Vec2f>> _cameraLatLongAnimation;
+		osg::ref_ptr<osgGaming::RepeatedSpaceAnimation<osg::Vec2f>> _cameraLatLongAnimation;
+		//osg::ref_ptr<osgGaming::Animation<osg::Vec2f>> _cameraLatLongAnimation;
 		osg::ref_ptr<osgGaming::Animation<float>> _cameraDistanceAnimation;
 		osg::ref_ptr<osgGaming::Animation<osg::Vec2f>> _cameraViewAngleAnimation;
 
