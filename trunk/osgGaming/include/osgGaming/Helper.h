@@ -27,6 +27,7 @@ namespace osgGaming
 	osg::Vec3f getVec3FromEuler(double pitch, double roll, double yaw, osg::Vec3 origin = osg::Vec3(0.0, 1.0, 0.0));
 
 	osg::Vec2f getPolarFromCartesian(osg::Vec3f cartesian);
+	osg::Vec3f getCartesianFromPolar(osg::Vec2f polar);
 
 	osg::Vec2f getTextSize(osg::ref_ptr<osgText::Text> text);
 

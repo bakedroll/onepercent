@@ -34,6 +34,7 @@ namespace osgGaming
 		// TODO: deprecated - move near far to viewer
 		double getProjectionNear();
 		double getProjectionFar();
+		double getProjectionAngle();
 
 		osg::Vec3f getLookDirection();
 

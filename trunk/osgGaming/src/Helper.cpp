@@ -82,6 +82,13 @@ Vec2f osgGaming::getPolarFromCartesian(Vec3f cartesian)
 	return result;
 }
 
+Vec3f osgGaming::getCartesianFromPolar(Vec2f polar)
+{
+	Matrix mat = Matrix::rotate(getQuatFromEuler(polar.x(), 0.0f, polar.y()));
+
+	return Vec3f(0.0f, 1.0f, 0.0f) * mat;
+}
+
 Vec2f osgGaming::getTextSize(ref_ptr<Text> text)
 {
 	BoundingBox bb;

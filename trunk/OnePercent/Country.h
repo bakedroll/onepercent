@@ -30,6 +30,8 @@ namespace onep
 		unsigned char getId();
 		osg::Vec2f getCenterLatLong();
 		osg::Vec2f getSize();
+		osg::Vec2f getSurfaceSize();
+		float getOptimalCameraDistance(float angle, float ratio);
 
 		float getWealth();
 		float getDept();
