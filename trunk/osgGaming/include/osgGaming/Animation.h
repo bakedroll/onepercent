@@ -3,6 +3,9 @@
 #include <math.h>
 
 #include <osg/Referenced>
+#include <osg/Vec2f>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
 
 namespace osgGaming
 {
@@ -175,53 +178,101 @@ namespace osgGaming
 		}
 
 	protected:
-		virtual T relocate(const T& from, const T& to, float elapsed)
+		float relocateValue(float from, float to, const float min, const float max, const float elapsed)
 		{
-			T result;
+			float result;
+			float l = max - min;
 
-			for (int i = 0; i < T::num_components; i++)
+			while (from < min)
+				from += l;
+			while (to < min)
+				to += l;
+			while (from > max)
+				from -= l;
+			while (to > max)
+				to -= l;
+
+			float ab = to - from;
+			float ababs = std::abs(ab);
+
+			if (ababs <= l / 2.0f)
 			{
-				float l = _max._v[i] - _min._v[i];
+				result = from + ab * elapsed;
+			}
+			else
+			{
+				result = from - ab * elapsed * ((l - ababs) / ababs);
 
-				float fromv = from._v[i];
-				float tov = to._v[i];
-				while (fromv < _min._v[i])
-					fromv += l;
-				while (tov < _min._v[i])
-					tov += l;
-				while (fromv > _max._v[i])
-					fromv -= l;
-				while (tov > _max._v[i])
-					tov -= l;
-
-				float ab = tov - fromv;
-				float ababs = std::abs(ab);
-
-				if (ababs <= l / 2.0f)
+				if (result < max)
 				{
-					result._v[i] = fromv + ab * elapsed;
+					result += l;
 				}
-				else
+				else if (result > max)
 				{
-					result._v[i] = fromv - ab * elapsed * ((l - ababs) / ababs);
-
-					if (result._v[i] < _min._v[i])
-					{
-						result._v[i] += l;
-					}
-					else if (result._v[i] > _max._v[i])
-					{
-						result._v[i] -= l;
-					}
+					result -= l;
 				}
 			}
 
 			return result;
 		}
 
-	private:
 		T _min;
 		T _max;
 	};
 
+	class RepeatedScalarfAnimation : public RepeatedSpaceAnimation <float>
+	{
+	public:
+		RepeatedScalarfAnimation(const float min, const float max)
+			: RepeatedSpaceAnimation <float>(min, max)
+		{
+
+		}
+
+		RepeatedScalarfAnimation(const float min, const float max, float value, double duration, AnimationEase ease)
+			: RepeatedSpaceAnimation <float>(min, max, value, duration, ease)
+		{
+
+		}
+
+	protected:
+		virtual float relocate(const float& from, const float& to, float elapsed) override
+		{
+			return relocateValue(from, to, _min, _max, elapsed);
+		}
+	};
+
+	template <typename T>
+	class RepeatedVectorfAnimation : public RepeatedSpaceAnimation <T>
+	{
+	public:
+		RepeatedVectorfAnimation(const T min, const T max)
+			: RepeatedSpaceAnimation <T>(min, max)
+		{
+
+		}
+
+		RepeatedVectorfAnimation(const T min, const T max, T value, double duration, AnimationEase ease)
+			: RepeatedSpaceAnimation <T>(min, max, value, duration, ease)
+		{
+
+		}
+
+	protected:
+		virtual T relocate(const T& from, const T& to, float elapsed) override
+		{
+			T result;
+
+			for (int i = 0; i < T::num_components; i++)
+			{
+				result._v[i] = relocateValue(from._v[i], to._v[i], _min._v[i], _max._v[i], elapsed);
+			}
+
+			return result;
+		}
+	};
+
+	typedef RepeatedVectorfAnimation<osg::Vec2f> RepeatedVec2fAnimation;
+	typedef RepeatedVectorfAnimation<osg::Vec3f> RepeatedVec3fAnimation;
+	typedef RepeatedVectorfAnimation<osg::Vec4f> RepeatedVec4fAnimation;
 }
