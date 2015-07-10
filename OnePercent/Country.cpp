@@ -1,7 +1,9 @@
 #include "Country.h"
 #include "Globals.h"
+#include "GlobeModel.h"
 
 #include <osgGaming/Parameter.h>
+#include <osgGaming/Helper.h>
 
 using namespace onep;
 using namespace osgGaming;
@@ -52,6 +54,23 @@ Vec2f Country::getCenterLatLong()
 Vec2f Country::getSize()
 {
 	return _size;
+}
+
+Vec2f Country::getSurfaceSize()
+{
+	return Vec2f(
+		2.0f * C_PI * sin(C_PI / 2.0f - abs(_centerLatLong.x())) * GlobeModel::EARTH_RADIUS * _size.x(),
+		C_PI * GlobeModel::EARTH_RADIUS * _size.y());
+}
+
+float Country::getOptimalCameraDistance(float angle, float ratio)
+{
+	Vec2f surfaceSize = getSurfaceSize();
+
+	float hdistance = surfaceSize.x() * 1.5f / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + GlobeModel::EARTH_RADIUS;
+	float vdistance = surfaceSize.y() * 1.5f / (2.0f * tan(angle * C_PI / 360.0f)) + GlobeModel::EARTH_RADIUS;
+
+	return max(hdistance, vdistance);
 }
 
 float Country::getWealth()

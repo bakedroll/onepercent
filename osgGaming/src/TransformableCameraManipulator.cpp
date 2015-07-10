@@ -205,6 +205,11 @@ double TransformableCameraManipulator::getProjectionFar()
 	return _projectionFar;
 }
 
+double TransformableCameraManipulator::getProjectionAngle()
+{
+	return _projectionAngle;
+}
+
 Vec3f TransformableCameraManipulator::getLookDirection()
 {
 	return _look;

@@ -87,7 +87,6 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 		{
 			Vec2f polar = getPolarFromCartesian(pickResult);
 			ref_ptr<Country> country = getGlobeOverviewWorld()->getSimulation()->getCountry(polar);
-			//string country_name = getGlobeOverviewWorld()->getSimulation()->getCountryName(polar);
 
 			int selected = country == NULL ? 255 : (int)country->getId();
 
@@ -116,10 +115,43 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 
 			if (country != NULL)
 			{
-				Vec2f countrySize = country->getSize();
+				//Vec2f countrySize = country->getSize();
+				//Vec2f surfaceSize = country->getSurfaceSize();
+				//Vec2f latLong = country->getCenterLatLong();
+
+
+
+				/*ref_ptr<PositionAttitudeTransform> rotation = new PositionAttitudeTransform();
+				rotation->setAttitude(getQuatFromEuler(latLong.x(), 0.0f, latLong.y()));
+
+				ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
+				transform->setPosition(Vec3f(0.0f, GlobeModel::EARTH_RADIUS , 0.0f));
+				transform->setScale(Vec3f(surfaceSize.x(), 1.0f, surfaceSize.y()));
+
+				ref_ptr<Geode> geode = new Geode();
+				geode->addDrawable(createQuadGeometry(-0.5f, 0.5f, -0.5f, 0.5f, 0.0f, XZ, true));
+
+				rotation->addChild(transform);
+				transform->addChild(geode);
+				getWorld()->getRootNode()->addChild(rotation);*/
+
+
+
+
+
+
+				/*float angle = (float)getWorld()->getCameraManipulator()->getProjectionAngle();
+				float ratio = (float)getWorld()->getCameraManipulator()->getProjectionRatio();
+
+				float hdistance = surfaceSize.x() * 1.5f / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + GlobeModel::EARTH_RADIUS;
+				float vdistance = surfaceSize.y() * 1.5f / (2.0f * tan(angle * C_PI / 360.0f)) + GlobeModel::EARTH_RADIUS;
+
+				float distance = max(_MIN_CAMERA_DISTANCE, max(hdistance, vdistance));*/
 
 				setCameraLatLong(country->getCenterLatLong(), getSimulationTime());
-				setCameraDistance(_MIN_CAMERA_DISTANCE + std::max(countrySize.x(), countrySize.y()) * 50.0f, getSimulationTime());
+				setCameraDistance(max(country->getOptimalCameraDistance(
+					(float)getWorld()->getCameraManipulator()->getProjectionAngle(),
+					(float)getWorld()->getCameraManipulator()->getProjectionRatio()), _MIN_CAMERA_DISTANCE), getSimulationTime());
 			}
 			
 			//printf("INTERSECTION at %f, %f, %f Polar: %f, %f Id: %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), _selectedCountry, country_name.data());
