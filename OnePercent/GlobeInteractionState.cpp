@@ -116,7 +116,10 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 
 			if (country != NULL)
 			{
+				Vec2f countrySize = country->getSize();
+
 				setCameraLatLong(country->getCenterLatLong(), getSimulationTime());
+				setCameraDistance(_MIN_CAMERA_DISTANCE + std::max(countrySize.x(), countrySize.y()) * 50.0f, getSimulationTime());
 			}
 			
 			//printf("INTERSECTION at %f, %f, %f Polar: %f, %f Id: %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), _selectedCountry, country_name.data());

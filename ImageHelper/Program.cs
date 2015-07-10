@@ -259,7 +259,16 @@ namespace ImageHelper
                         CountryInfo info;
                         countries.TryGetValue(color, out info);
 
-                        info.Bounds.Expand((float)x / (newWidth - 1), (float)y / (newHeight - 1));
+                        float relX = (float)x / newWidth;
+                        if (info.Id == 80 && relX < 0.2) // Russia
+                        {
+                            info.Bounds.Expand((float)x / (newWidth - 1) + 1.0f, (float)y / (newHeight - 1));
+                        }
+                        else
+                        {
+                            info.Bounds.Expand((float)x / (newWidth - 1), (float)y / (newHeight - 1));
+                        }
+                        
 
                         id = info.Id;
                     }
