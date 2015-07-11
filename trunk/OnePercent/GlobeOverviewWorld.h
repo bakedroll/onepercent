@@ -3,8 +3,10 @@
 #include "GlobeModel.h"
 #include "BackgroundModel.h"
 #include "Simulation.h"
+#include "Globals.h"
 
 #include <osgGaming/World.h>
+#include <osgGaming/Parameter.h>
 
 namespace onep
 {
@@ -29,7 +31,7 @@ namespace onep
 		void updateCameraPosition(osg::Vec2f latLong, osg::Vec2f viewAngle, float distance);
 
 	private:
-		static const float _DAYS_IN_YEAR;
+		osgGaming::Parameter<float, Param_EarthRadiusName> _paramEarthRadius;
 
 		void updateSun(osg::Vec3f sunDirection);
 

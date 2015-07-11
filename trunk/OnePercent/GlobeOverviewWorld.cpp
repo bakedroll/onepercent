@@ -8,8 +8,6 @@ using namespace onep;
 using namespace osg;
 using namespace osgGaming;
 
-const float GlobeOverviewWorld::_DAYS_IN_YEAR = 356.0f;
-
 GlobeOverviewWorld::GlobeOverviewWorld()
 	: World(),
 	  _cameraLatLong(Vec2f(0.0f, 0.0f)),
@@ -68,7 +66,7 @@ void GlobeOverviewWorld::setBackgroundModel(ref_ptr<BackgroundModel> backgroundM
 
 void GlobeOverviewWorld::setDay(float day)
 {
-	float year = day / _DAYS_IN_YEAR;
+	float year = day / ~Parameter<float, Param_MechanicsDaysInYearName>();
 
 	Matrix yearMat = getMatrixFromEuler(0.0f, 0.0f, - year * 2.0f * C_PI) *
 		getMatrixFromEuler(-sin(year * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);
@@ -134,7 +132,7 @@ void GlobeOverviewWorld::updateSun(Vec3f sunDirection)
 		float range = 0.3f;
 
 		float dist = pointLineDistance(getCameraManipulator()->getPosition(), sunDirection, Vec3f(0.0f, 0.0f, 0.0f));
-		float scale = clampBetween(dist - (float)GlobeModel::EARTH_RADIUS, 0.0f, range);
+		float scale = clampBetween(dist - ~_paramEarthRadius, 0.0f, range);
 		scale /= range;
 		scale *= 2.5f;
 

@@ -11,14 +11,6 @@ using namespace std;
 using namespace osgGA;
 using namespace osgGaming;
 
-const float GlobeInteractionState::_MIN_CAMERA_DISTANCE = 9.0f;
-const float GlobeInteractionState::_MAX_CAMERA_DISTANCE = 100.0f;
-const float GlobeInteractionState::_MAX_CAMERA_LONGITUDE = C_PI / 2.0f * 0.9f;
-const float GlobeInteractionState::_CAMERA_ZOOM_SPEED = 0.85f;
-const float GlobeInteractionState::_CAMERA_ZOOM_SPEED_FACTOR = 3.0f;
-const float GlobeInteractionState::_CAMERA_SCROLL_SPEED = 0.003f;
-const float GlobeInteractionState::_CAMERA_ROTATION_SPEED = 0.003;
-
 GlobeInteractionState::GlobeInteractionState()
 	: GlobeCameraState(),
 	  _ready(false),
@@ -83,7 +75,7 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 		getWorld()->getCameraManipulator()->getPickRay(x, y, point, direction);
 
 		Vec3f pickResult;
-		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), GlobeModel::EARTH_RADIUS, point, direction, pickResult))
+		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), ~_paramEarthRadius, point, direction, pickResult))
 		{
 			Vec2f polar = getPolarFromCartesian(pickResult);
 			ref_ptr<Country> country = getGlobeOverviewWorld()->getSimulation()->getCountry(polar);
@@ -151,7 +143,7 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 				setCameraLatLong(country->getCenterLatLong(), getSimulationTime());
 				setCameraDistance(max(country->getOptimalCameraDistance(
 					(float)getWorld()->getCameraManipulator()->getProjectionAngle(),
-					(float)getWorld()->getCameraManipulator()->getProjectionRatio()), _MIN_CAMERA_DISTANCE), getSimulationTime());
+					(float)getWorld()->getCameraManipulator()->getProjectionRatio()), ~_paramCameraMinDistance), getSimulationTime());
 			}
 			
 			//printf("INTERSECTION at %f, %f, %f Polar: %f, %f Id: %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), _selectedCountry, country_name.data());
@@ -201,18 +193,18 @@ void GlobeInteractionState::onScrollEvent(GUIEventAdapter::ScrollingMotion motio
 
 	if (motion == GUIEventAdapter::SCROLL_UP)
 	{
-		distance = distance * _CAMERA_ZOOM_SPEED;
+		distance = distance * ~_paramCameraZoomSpeed;
 	}
 	else if (motion == GUIEventAdapter::SCROLL_DOWN)
 	{
-		distance = distance * (1.0f / _CAMERA_ZOOM_SPEED);
+		distance = distance * (1.0f / ~_paramCameraZoomSpeed);
 	}
 	else
 	{
 		return;
 	}
 
-	distance = clampBetween(distance, _MIN_CAMERA_DISTANCE, _MAX_CAMERA_DISTANCE);
+	distance = clampBetween(distance, ~_paramCameraMinDistance, ~_paramCameraMaxDistance);
 
 	setCameraDistance(distance, getSimulationTime());
 }
@@ -230,21 +222,21 @@ void GlobeInteractionState::onDragEvent(int button, Vec2f origin, Vec2f position
 
 	if (button == GUIEventAdapter::RIGHT_MOUSE_BUTTON)
 	{
-		change *= ((distance - GlobeModel::EARTH_RADIUS) / (_MAX_CAMERA_DISTANCE - GlobeModel::EARTH_RADIUS)) * _CAMERA_ZOOM_SPEED_FACTOR;
+		change *= ((distance - ~_paramEarthRadius) / (~_paramCameraMaxDistance - ~_paramEarthRadius)) * ~_paramCameraZoomSpeedFactor;
 
 		latLong.set(
-			clampBetween(latLong.x() - change.y() * _CAMERA_SCROLL_SPEED, -_MAX_CAMERA_LONGITUDE, _MAX_CAMERA_LONGITUDE),
-			latLong.y() - change.x() * _CAMERA_SCROLL_SPEED);
+			clampBetween(latLong.x() - change.y() * ~_paramCameraScrollSpeed, -~_paramCameraMaxLatitude, ~_paramCameraMaxLatitude),
+			latLong.y() - change.x() * ~_paramCameraScrollSpeed);
 
 		setCameraLatLong(latLong, getSimulationTime());
 	}
 	else if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
 	{
-		float clamp_to = atan(GlobeModel::EARTH_RADIUS * 1.3 / distance);
+		float clamp_to = atan(~_paramEarthRadius * 1.3 / distance);
 
 		viewAngle.set(
-			viewAngle.x() + change.x() * _CAMERA_ROTATION_SPEED,
-			clampBetween(viewAngle.y() + change.y() * _CAMERA_ROTATION_SPEED, 0.0f, clamp_to));
+			viewAngle.x() + change.x() * ~_paramCameraRotationSpeed,
+			clampBetween(viewAngle.y() + change.y() * ~_paramCameraRotationSpeed, 0.0f, clamp_to));
 
 		setCameraViewAngle(viewAngle, getSimulationTime());
 	}

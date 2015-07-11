@@ -40,7 +40,6 @@ namespace onep
 		osg::Vec2f _cameraViewAngle;
 
 		osg::ref_ptr<osgGaming::RepeatedVec2fAnimation> _cameraLatLongAnimation;
-		//osg::ref_ptr<osgGaming::Animation<osg::Vec2f>> _cameraLatLongAnimation;
 		osg::ref_ptr<osgGaming::Animation<float>> _cameraDistanceAnimation;
 		osg::ref_ptr<osgGaming::Animation<osg::Vec2f>> _cameraViewAngleAnimation;
 
