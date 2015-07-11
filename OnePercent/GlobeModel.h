@@ -1,10 +1,13 @@
 #pragma once
 
+#include "Globals.h"
+
 #include <osg/Geometry>
 #include <osg/Program>
 #include <osg/Uniform>
 
 #include <osgGaming/TransformableCameraManipulator.h>
+#include <osgGaming/Parameter.h>
 
 #include <string>
 
@@ -13,17 +16,6 @@ namespace onep
 	class GlobeModel : public osg::Group
 	{
 	public:
-		static const double EARTH_RADIUS;
-		static const double CLOUDS_HEIGHT;
-		static const double ATMOSPHERE_HEIGHT;
-		static const double SCATTERING_DEPTH;
-		static const double SCATTERING_INTENSITY;
-		static const osg::Vec4f ATMOSPHERE_COLOR;
-		static const int SPHERE_STACKS;
-		static const int SPHERE_SLICES;
-		static const double SUN_DISTANCE;
-		static const double SUN_RADIUS_PM2;
-
 		GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);
 
 		void updateLightDirection(osg::Vec3f direction);
@@ -34,8 +26,11 @@ namespace onep
 		void setSelectedCountry(int countryId);
 
 	private:
-		static const float _CLOUD_SPEED;
-		static const float _CLOUD_MORPH_SPEED;
+		osgGaming::Parameter<float, Param_SunDistanceName> _paramSunDistance;
+		osgGaming::Parameter<float, Param_SunRadiusPm2Name> _paramSunRadiusMp2;
+
+		osgGaming::Parameter<float, Param_EarthCloudsSpeedName> _paramEarthCloudsSpeed;
+		osgGaming::Parameter<float, Param_EarthCloudsMorphSpeedName> _paramEarthCloudsMorphSpeed;
 
 		void makeEarthModel();
 		void makeCloudsModel();

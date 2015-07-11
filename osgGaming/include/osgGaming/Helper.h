@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include <string>
+
 #include <osg/Vec3>
 #include <osg/Matrix>
 #include <osg/Geometry>
@@ -12,6 +15,8 @@
 
 namespace osgGaming
 {
+	typedef std::vector<std::string> StringList;
+
 	typedef enum _quadOrientation
 	{
 		XY,
@@ -43,4 +48,7 @@ namespace osgGaming
 
 	osg::ref_ptr<osgText::Text> createTextNode(std::string text, float characterSize, osg::ref_ptr<osgText::Font> font = NULL);
 	osg::ref_ptr<osg::Geometry> createQuadGeometry(float left, float right, float bottom, float top, float z = 0.0f, QuadOrientation orientation = XZ, bool flipped = false);
+
+	StringList &splitString(const std::string &s, char delim, StringList &elems);
+	StringList splitString(const std::string &s, char delim);
 }

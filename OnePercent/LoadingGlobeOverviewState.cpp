@@ -15,6 +15,7 @@
 #include <osgGaming/PackageResourceLoader.h>
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/TextureFactory.h>
+#include <osgGaming/ParameterManager.h>
 
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
@@ -72,6 +73,8 @@ GameState::StateEvent* LoadingGlobeOverviewState::update()
 
 void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud, ref_ptr<GameSettings> settings)
 {
+	ParameterManager::getInstance()->loadParametersFromXmlResource("./GameData/data/game_parameters.xml");
+
 	ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
 	globeWorld->getSimulation()->loadCountries();

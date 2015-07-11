@@ -58,17 +58,21 @@ Vec2f Country::getSize()
 
 Vec2f Country::getSurfaceSize()
 {
+	float earthRadius = ~Parameter<float, Param_EarthRadiusName>();
+
 	return Vec2f(
-		2.0f * C_PI * sin(C_PI / 2.0f - abs(_centerLatLong.x())) * GlobeModel::EARTH_RADIUS * _size.x(),
-		C_PI * GlobeModel::EARTH_RADIUS * _size.y());
+		2.0f * C_PI * sin(C_PI / 2.0f - abs(_centerLatLong.x())) * earthRadius * _size.x(),
+		C_PI * earthRadius * _size.y());
 }
 
 float Country::getOptimalCameraDistance(float angle, float ratio)
 {
+	float earthRadius = ~Parameter<float, Param_EarthRadiusName>();
+
 	Vec2f surfaceSize = getSurfaceSize();
 
-	float hdistance = surfaceSize.x() * 1.5f / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + GlobeModel::EARTH_RADIUS;
-	float vdistance = surfaceSize.y() * 1.5f / (2.0f * tan(angle * C_PI / 360.0f)) + GlobeModel::EARTH_RADIUS;
+	float hdistance = surfaceSize.x() * 1.5f / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + earthRadius;
+	float vdistance = surfaceSize.y() * 1.5f / (2.0f * tan(angle * C_PI / 360.0f)) + earthRadius;
 
 	return max(hdistance, vdistance);
 }
@@ -125,7 +129,7 @@ void Country::step()
 {
 	if (_skillBranchActivated[BRANCH_BANKS])
 	{
-		_buyingPower = ~Parameter<float, ParamSimulationStartBuyingPowerName>();
+		_buyingPower = ~Parameter<float, Param_MechanicsStartBuyingPowerName>();
 		_interest = 0.05f;
 
 		_deptBalance = _dept * _interest + _buyingPower;

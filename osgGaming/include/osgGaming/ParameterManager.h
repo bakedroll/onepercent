@@ -3,6 +3,8 @@
 #include <string>
 #include <map>
 
+#include <rapidxml.hpp>
+
 #include <osgGaming/Singleton.h>
 #include <osgGaming/ParameterValue.h>
 
@@ -26,8 +28,12 @@ namespace osgGaming
 			return static_cast<ParameterValue<T>*>(it->second.get())->getPtr();
 		}
 
+		void loadParametersFromXmlResource(std::string resourceKey);
+
 	private:
 		typedef std::map<std::string, osg::ref_ptr<AbstractParameterValue>> ValueMap;
+
+		void parseXmlGroup(rapidxml::xml_node<>* node, std::string path);
 
 		ValueMap _values;
 	};

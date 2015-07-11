@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <math.h>
+#include <sstream>
 
 #include <osg/Geode>
 #include <osgUtil/TangentSpaceGenerator>
@@ -287,4 +288,23 @@ ref_ptr<Geometry> osgGaming::createQuadGeometry(float left, float right, float b
 	//geo->setColorBinding(osg::Geometry::BIND_OVERALL);
 
 	return geo;
+}
+
+osgGaming::StringList& osgGaming::splitString(const string &s, char delim, StringList &elems)
+{
+	stringstream ss(s);
+	string item;
+	while (getline(ss, item, delim))
+	{
+		elems.push_back(item);
+	}
+
+	return elems;
+}
+
+osgGaming::StringList osgGaming::splitString(const string &s, char delim)
+{
+	StringList elems;
+	splitString(s, delim, elems);
+	return elems;
 }

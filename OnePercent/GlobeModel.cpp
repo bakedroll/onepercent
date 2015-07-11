@@ -22,20 +22,6 @@ using namespace osg;
 using namespace osgGaming;
 using namespace std;
 
-const double GlobeModel::EARTH_RADIUS = 6.371;
-const double GlobeModel::CLOUDS_HEIGHT = 0.004;
-const double GlobeModel::ATMOSPHERE_HEIGHT = 0.06;
-const double GlobeModel::SCATTERING_DEPTH = 0.25;
-const double GlobeModel::SCATTERING_INTENSITY = 0.8;
-const Vec4f GlobeModel::ATMOSPHERE_COLOR = Vec4f(0.1981f, 0.4656f, 0.8625f, 0.75f);
-const int GlobeModel::SPHERE_STACKS = 96;
-const int GlobeModel::SPHERE_SLICES = 192;
-const double GlobeModel::SUN_DISTANCE = 149600.0;
-const double GlobeModel::SUN_RADIUS_PM2 = pow(695.8f, -2.0f);
-
-const float GlobeModel::_CLOUD_SPEED = 0.3f;
-const float GlobeModel::_CLOUD_MORPH_SPEED = 20.0f;
-
 GlobeModel::GlobeModel(osg::ref_ptr<TransformableCameraManipulator> tcm)
 {
 	makeEarthModel();
@@ -46,17 +32,17 @@ GlobeModel::GlobeModel(osg::ref_ptr<TransformableCameraManipulator> tcm)
 void GlobeModel::updateLightDirection(osg::Vec3f direction)
 {
 	_scatteringLightDirUniform->setElement(0, direction);
-	Vec3f position = -direction * SUN_DISTANCE;
+	Vec3f position = -direction * ~_paramSunDistance;
 
-	_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), SUN_RADIUS_PM2));
+	_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), ~_paramSunRadiusMp2));
 }
 
 void GlobeModel::updateClouds(float day)
 {
-	Quat quat = getQuatFromEuler(0.0, 0.0, fmodf(day * _CLOUD_SPEED, C_2PI));
+	Quat quat = getQuatFromEuler(0.0, 0.0, fmodf(day * ~_paramEarthCloudsSpeed, C_2PI));
 	_cloudsTransform->setAttitude(quat);
 
-	_uniformTime->set(day * _CLOUD_MORPH_SPEED);
+	_uniformTime->set(day * ~_paramEarthCloudsMorphSpeed);
 }
 
 int GlobeModel::getSelectedCountry()
@@ -179,6 +165,12 @@ void GlobeModel::makeCloudsModel()
 
 void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<TransformableCameraManipulator> tcm)
 {
+	float earthRadius = ~Parameter<float, Param_EarthRadiusName>();
+	float atmosphereHeight = ~Parameter<float, Param_EarthAtmosphereHeightName>();
+	float scatteringDepth = ~Parameter<float, Param_EarthScatteringDepthName>();
+	float scatteringIntensity = ~Parameter<float, Param_EarthScatteringIntensityName>();
+	Vec4f atmosphereColor = ~Parameter<Vec4f, Param_EarthAtmosphereColorName>();
+
 	// atmospheric scattering geometry
 	ref_ptr<CameraAlignedQuad> caq = new CameraAlignedQuad();
 
@@ -194,13 +186,13 @@ void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<TransformableCameraManip
 	pgm->addShader(vert_shader);
 	pgm->addShader(frag_shader);
 
-	double earth_rad = pow(EARTH_RADIUS * 0.9999, -2.0f);
-	double atmos_rad = pow(EARTH_RADIUS + ATMOSPHERE_HEIGHT, -2.0f);
+	double earth_rad = pow(earthRadius * 0.9999, -2.0f);
+	double atmos_rad = pow(earthRadius + atmosphereHeight, -2.0f);
 
 	stateSet->addUniform(new Uniform("planet_r", Vec3f(earth_rad, earth_rad, earth_rad)));
 	stateSet->addUniform(new Uniform("planet_R", Vec3f(atmos_rad, atmos_rad, atmos_rad)));
-	stateSet->addUniform(new Uniform("planet_h", (float)ATMOSPHERE_HEIGHT));
-	stateSet->addUniform(new Uniform("view_depth", (float)SCATTERING_DEPTH));
+	stateSet->addUniform(new Uniform("planet_h", atmosphereHeight));
+	stateSet->addUniform(new Uniform("view_depth", scatteringDepth));
 
 	_scatteringLightDirUniform = new Uniform(Uniform::FLOAT_VEC3, "light_dir", 1);
 	ref_ptr<Uniform> light_col_uniform = new Uniform(Uniform::FLOAT_VEC3, "light_col", 1);
@@ -214,7 +206,7 @@ void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<TransformableCameraManip
 	stateSet->addUniform(light_col_uniform);
 	stateSet->addUniform(_scatteringLightPosrUniform);
 
-	stateSet->addUniform(new Uniform("B0", ATMOSPHERE_COLOR * SCATTERING_INTENSITY));
+	stateSet->addUniform(new Uniform("B0", atmosphereColor * scatteringIntensity));
 
 	stateSet->setAttribute(pgm, StateAttribute::ON);
 
@@ -247,15 +239,19 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 		break;
 	};
 
-	int stacksPerSegment = SPHERE_STACKS / m;
-	int slicesPerSegment = SPHERE_SLICES / n;
+	int stacks = ~Parameter<int, Param_EarthSphereStacksName>();
+	int slices = ~Parameter<int, Param_EarthSphereSlicesName>();
+	float radius = ~Parameter<float, Param_EarthRadiusName>();
+
+	int stacksPerSegment = stacks / m;
+	int slicesPerSegment = slices / n;
 
 	for (int y = 0; y < m; y++)
 	{
 		for (int x = 0; x < n; x++)
 		{
 			ref_ptr<Geometry> geo = createSphereSegmentMesh(
-				SPHERE_STACKS, SPHERE_SLICES, EARTH_RADIUS,
+				stacks, slices, radius,
 				y * stacksPerSegment,
 				(y + 1) * stacksPerSegment - 1,
 				x * slicesPerSegment,
@@ -324,15 +320,20 @@ ref_ptr<Geode> GlobeModel::createCloudsGeode()
 	int n = 2;
 	int m = 1;
 
-	int stacksPerSegment = SPHERE_STACKS / m;
-	int slicesPerSegment = SPHERE_SLICES / n;
+	int stacks = ~Parameter<int, Param_EarthSphereStacksName>();
+	int slices = ~Parameter<int, Param_EarthSphereSlicesName>();
+	float radius = ~Parameter<float, Param_EarthRadiusName>();
+	float cloudsHeight = ~Parameter<float, Param_EarthCloudsHeightName>();
+
+	int stacksPerSegment = stacks / m;
+	int slicesPerSegment = slices / n;
 
 	for (int y = 0; y < m; y++)
 	{
 		for (int x = 0; x < n; x++)
 		{
 			ref_ptr<Geometry> geo = createSphereSegmentMesh(
-				SPHERE_STACKS, SPHERE_SLICES, EARTH_RADIUS + CLOUDS_HEIGHT,
+				stacks, slices, radius + cloudsHeight,
 				y * stacksPerSegment,
 				(y + 1) * stacksPerSegment - 1,
 				x * slicesPerSegment,

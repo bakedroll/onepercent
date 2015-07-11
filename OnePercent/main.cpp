@@ -21,6 +21,7 @@ int main(int argc, char** argv)
 	ResourceManager::getInstance()->setResourceLoader(resourceLoader);*/
 	ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 
+
 	ref_ptr<GameApplication> app = new GameApplication();
 
 	app->setDefaultWorld(new GlobeOverviewWorld());
