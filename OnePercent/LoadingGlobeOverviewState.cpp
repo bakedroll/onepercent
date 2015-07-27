@@ -3,18 +3,9 @@
 #include "GlobeOverviewWorld.h"
 #include "BackgroundModel.h"
 
-#include <osg/PositionAttitudeTransform>
-#include <osg/StateSet>
-#include <osg/Program>
-#include <osgGaming/Helper.h>
-#include <osgGaming/UIStackPanel.h>
-#include <osgGaming/UIGrid.h>
 #include <osgGaming/UIText.h>
-#include <osgGaming/UIButton.h>
 
-#include <osgGaming/PackageResourceLoader.h>
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/TextureFactory.h>
 #include <osgGaming/ParameterManager.h>
 
 #include <osgGaming/HighDynamicRangeEffect.h>
@@ -41,11 +32,13 @@ LoadingGlobeOverviewState::LoadingGlobeOverviewState(AbstractGameState::Abstract
 
 void LoadingGlobeOverviewState::initialize()
 {
-	float projNear = (float)getWorld()->getCameraManipulator()->getProjectionNear();
-	float projFar = (float)getWorld()->getCameraManipulator()->getProjectionFar();
+	ParameterManager::getInstance()->loadParametersFromXmlResource("./GameData/data/localization/en.xml");
+
+	float projNear = float(getWorld()->getCameraManipulator()->getProjectionNear());
+	float projFar = float(getWorld()->getCameraManipulator()->getProjectionFar());
 
 	_loadingText = new UIText();
-	_loadingText->setText("Loading");
+	_loadingText->setText(~Parameter<string, Param_LocalizationInfoTextLoading>());
 	_loadingText->setFontSize(25);
 	_loadingText->setVerticalAlignment(UIElement::BOTTOM);
 	_loadingText->setMargin(10.0f);
@@ -61,8 +54,8 @@ void LoadingGlobeOverviewState::initialize()
 
 GameState::StateEvent* LoadingGlobeOverviewState::update()
 {
-	int dotCount = (int)(getSimulationTime() * 10.0) % 4;
-	string loadingTextString = "Loading";
+	int dotCount = int(getSimulationTime() * 10.0) % 4;
+	string loadingTextString = ~Parameter<string, Param_LocalizationInfoTextLoading>();
 	for (int i = 0; i < dotCount; i++)
 		loadingTextString += ".";
 		
@@ -84,58 +77,4 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud
 
 	globeWorld->setGlobeModel(globe);
 	globeWorld->setBackgroundModel(backgroundModel);
-
-	// ##################
-	/*ref_ptr<UIElement> root = hud->getRootUIElement();
-
-	ref_ptr<UIGrid> grid = new UIGrid();
-	ref_ptr<UIText> first = new UIText();
-	ref_ptr<UIText> second = new UIText();
-	ref_ptr<UIText> third = new UIText();
-	ref_ptr<UIStackPanel> stackPanel = new UIStackPanel();
-	ref_ptr<UIButton> button1 = new UIButton();
-	ref_ptr<UIButton> button2 = new UIButton();
-
-	button1->setUIMName("button1");
-	button2->setUIMName("button2");
-	button1->setText("button 1");
-	button2->setText("button 2");
-
-	first->setText("Text1");
-	second->setText("Text2");
-	third->setText("Text3");
-
-	first->setPadding(20.0f);
-	first->setTextAlignment(osgText::TextBase::RIGHT_TOP);
-
-	stackPanel->getCells()->setNumCells(2);
-	stackPanel->setVerticalAlignment(UIElement::BOTTOM);
-	
-	stackPanel->addChild(button1, 0);
-	stackPanel->addChild(button2, 1);
-
-	grid->setMargin(10.0f);
-	grid->setPadding(10.0f);
-
-	grid->getColumns()->setNumCells(3);
-	grid->getRows()->setNumCells(2);
-
-	grid->getColumns()->setSizePolicy(1, UICells::CONTENT);
-
-	root->addChild(grid);
-	grid->addChild(first, ColRow(0, 0));
-	grid->addChild(second, ColRow(1, 0));
-	grid->addChild(third, ColRow(0, 1));
-	grid->addChild(stackPanel, ColRow(2, 0));
-
-
-	root->getVisualGroup();
-	grid->getVisualGroup();
-	first->getVisualGroup();
-	second->getVisualGroup();
-	third->getVisualGroup();
-	
-	hud->registerUserInteractionModel(button1);
-	hud->registerUserInteractionModel(button2);*/
-	// #############
 }

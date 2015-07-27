@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include <osg/MatrixTransform>
 #include <osg/Switch>
@@ -50,6 +51,8 @@ namespace osgGaming
 		osg::Vec2f getMinContentSize();
 		osg::Vec2f getMinSize();
 
+		std::string getUIName();
+
 		bool getVisible();
 
 		void setOrigin(osg::Vec2f origin);
@@ -68,6 +71,8 @@ namespace osgGaming
 		void setHorizontalAlignment(HorizontalAlignment alignment);
 		void setVerticalAlignment(VerticalAlignment alignment);
 
+		void setUIName(std::string name);
+
 		void setVisible(bool visible);
 
 		void resetMinContentSize();
@@ -83,6 +88,8 @@ namespace osgGaming
 
 	private:
 		void updateVisualGroup();
+
+		std::string _uiName;
 
 		osg::Vec2f _absoluteOrigin;
 		osg::Vec2f _origin;

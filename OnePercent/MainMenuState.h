@@ -2,6 +2,8 @@
 
 #include "GlobeCameraState.h"
 
+#include <osgGaming/UIElement.h>
+
 namespace onep
 {
 	class MainMenuState : public GlobeCameraState
@@ -13,7 +15,7 @@ namespace onep
 
 		virtual osgGaming::GameState::StateEvent* update() override;
 
-		virtual void onUIMClickedEvent(osgGaming::UserInteractionModel* model) override;
+		virtual void onUIClickedEvent(osg::ref_ptr<osgGaming::UIElement> uiElement) override;
 
 	protected:
 		virtual osg::ref_ptr<osgGaming::Hud> newHud() override;

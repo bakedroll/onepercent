@@ -22,7 +22,7 @@ goto ERROR
 
 :BUILD
 ECHO Build solution...
-start /b /w "" "%appdir%\devenv.exe" /build Release OnePercent.sln
+start /b /w "" "%appdir%\devenv.exe" /build Debug OnePercent.sln
 
 goto END
 

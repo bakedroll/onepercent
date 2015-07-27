@@ -6,7 +6,7 @@ using namespace std;
 
 void FileResourceLoader::getResourceStream(string resourceKey, ifstream& stream, long long& length)
 {
-	stream.open(resourceKey.data(), ios::binary);
+	stream.open(resourceKey.c_str(), ios::binary);
 
 	if (!stream.is_open())
 	{

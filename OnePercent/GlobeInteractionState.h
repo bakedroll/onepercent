@@ -27,6 +27,8 @@ namespace onep
 		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change) override;
 		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position) override;
 
+		virtual void onUIClickedEvent(osg::ref_ptr<osgGaming::UIElement> uiElement) override;
+
 		void dayTimerElapsed();
 
 		void startSimulation();

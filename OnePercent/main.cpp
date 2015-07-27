@@ -1,12 +1,10 @@
 #include <osgGaming/GameApplication.h>
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/PackageResourceLoader.h>
 
 #include "LoadingGlobeOverviewState.h"
 #include "GlobeOverviewState.h"
 #include "MainMenuState.h"
 #include "GlobeOverviewWorld.h"
-#include "GlobeInteractionState.h"
 
 using namespace osgGaming;
 using namespace onep;

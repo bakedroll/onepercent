@@ -3,13 +3,10 @@
 #include "Globals.h"
 
 #include <osg/Geometry>
-#include <osg/Program>
 #include <osg/Uniform>
 
 #include <osgGaming/TransformableCameraManipulator.h>
 #include <osgGaming/Parameter.h>
-
-#include <string>
 
 namespace onep
 {
@@ -20,8 +17,6 @@ namespace onep
 
 		void updateLightDirection(osg::Vec3f direction);
 		void updateClouds(float day);
-
-		int getSelectedCountry();
 
 		void setSelectedCountry(int countryId);
 

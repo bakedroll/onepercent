@@ -2,15 +2,34 @@
 
 #include <osg/Referenced>
 #include <osg/Vec2f>
-#include <osg/Vec3i>
+#include <osg/ref_ptr>
 
 #include <string>
+#include <vector>
 
 namespace onep
 {
+	class NeighborCountryInfo : public osg::Referenced
+	{
+	public:
+		float getRelation();
+		void setRelation(float relation);
+
+	private:
+		float _relation;
+	};
+
 	class Country : public osg::Referenced
 	{
 	public:
+		typedef struct _neighborCountry
+		{
+			osg::ref_ptr<Country> country;
+			osg::ref_ptr<NeighborCountryInfo> info;
+		} NeighborCountry;
+
+		typedef std::vector<NeighborCountry> NeighborCountryList;
+
 		static const int SkillBranchCount = 5;
 
 		typedef enum _skillBranchType
@@ -18,11 +37,13 @@ namespace onep
 			BRANCH_BANKS = 0,
 			BRANCH_CONTROL = 1,
 			BRANCH_MEDIA = 2,
-			BRANCH_CORPORATIONS = 3,
+			BRANCH_CONCERNS = 3,
 			BRANCH_POLITICS = 4
 		} SkillBranchType;
 
 		Country(std::string name, unsigned char id, float population, float wealth, osg::Vec2f center, osg::Vec2f size);
+
+		void addNeighborCountry(osg::ref_ptr<Country> country, osg::ref_ptr<NeighborCountryInfo> info);
 
 		void setSkillBranchActivated(SkillBranchType type, bool activated);
 
@@ -39,6 +60,7 @@ namespace onep
 		float getRelativeDept();
 		float getAnger();
 		float getAngerBalance();
+		NeighborCountryList& getNeighborCountries();
 
 		bool getSKillBranchActivated(SkillBranchType type);
 
@@ -63,5 +85,7 @@ namespace onep
 		unsigned char _id;
 		osg::Vec2f _centerLatLong;
 		osg::Vec2f _size;
+
+		NeighborCountryList _neighborCountries;
 	};
 }

@@ -6,6 +6,7 @@
 
 using namespace osg;
 using namespace osgGaming;
+using namespace std;
 
 UIElement::UIElement()
 	: MatrixTransform(),
@@ -119,6 +120,11 @@ Vec2f UIElement::getMinSize()
 		_margin.y() + _margin.w() + _padding.y() + _padding.w());
 }
 
+string UIElement::getUIName()
+{
+	return _uiName;
+}
+
 bool UIElement::getVisible()
 {
 	return _visible;
@@ -155,12 +161,12 @@ void UIElement::setHeight(float height)
 }
 
 
-void UIElement::setPadding(osg::Vec4f padding)
+void UIElement::setPadding(Vec4f padding)
 {
 	_padding = padding;
 }
 
-void UIElement::setMargin(osg::Vec4f margin)
+void UIElement::setMargin(Vec4f margin)
 {
 	_margin = margin;
 }
@@ -183,6 +189,11 @@ void UIElement::setHorizontalAlignment(UIElement::HorizontalAlignment alignment)
 void UIElement::setVerticalAlignment(UIElement::VerticalAlignment alignment)
 {
 	_verticalAlignment = alignment;
+}
+
+void UIElement::setUIName(string name)
+{
+	_uiName = name;
 }
 
 void UIElement::setVisible(bool visible)

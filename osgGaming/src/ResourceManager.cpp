@@ -19,7 +19,7 @@ ResourceManager::ResourceManager()
 	: Singleton<ResourceManager>(),
 	  _defaultFontResourceKey("")
 {
-
+	// _utf8Locale = locale(locale(), new codecvt_utf8<char>);
 }
 
 string ResourceManager::loadText(string resourceKey)
@@ -123,6 +123,7 @@ ref_ptr<Object> ResourceManager::loadObject(string resourceKey, ResourceType typ
 	}
 
 	std::ifstream stream;
+
 	long long length;
 	resourceLoader()->getResourceStream(resourceKey, stream, length);
 
@@ -135,6 +136,8 @@ ref_ptr<Object> ResourceManager::loadObject(string resourceKey, ResourceType typ
 	}
 	else if (type == TEXT)
 	{
+		// stream.imbue(_utf8Locale);
+
 		ref_ptr<TextResource> textRes = new TextResource();
 		textRes->text = loadTextFromStream(stream, length);
 

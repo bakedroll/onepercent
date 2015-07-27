@@ -117,7 +117,7 @@ void AbstractGameState::onDragEndEvent(int button, Vec2f origin, Vec2f position)
 
 }
 
-void AbstractGameState::onUIMClickedEvent(UserInteractionModel* model)
+void AbstractGameState::onUIClickedEvent(osg::ref_ptr<UIElement> uiElement)
 {
 
 }

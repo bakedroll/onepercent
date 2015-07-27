@@ -3,16 +3,28 @@
 #include <string>
 
 #include <osgGaming/ParameterManager.h>
+#include <osgGaming/GameException.h>
 
 namespace osgGaming
 {
-	template <typename T, char const* N>
+	template <typename T, char const* N = NULL>
 	class Parameter
 	{
 	public:
 		Parameter()
 		{
+			if (N == NULL)
+			{
+				throw GameException("Invalid parameter key");
+			}
+
 			_name = N;
+			_value = ParameterManager::getInstance()->getValuePtr<T>(_name);
+		}
+
+		Parameter(const char* key)
+		{
+			_name = key;
 			_value = ParameterManager::getInstance()->getValuePtr<T>(_name);
 		}
 

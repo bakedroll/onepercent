@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+
+	<stackpanel margin="10" orientation="horizontal" cells="2">
+		<celldefinitions>
+			<cell index="0" sizepolicy="content" />
+		</celldefinitions>
+	
+		<stackpanel cell="0" orientation="vertical" cells="3">
+			<celldefinitions>
+				<cell index="0" sizepolicy="content" />
+				<cell index="2" sizepolicy="content" />
+			</celldefinitions>
+			
+			<stackpanel margin="10" cell="2" cells="7" orientation="vertical">
+			
+				<text name="text_selectCountry" content="{localization/infoText_selectCountry}" cell="6" />
+				<text name="text_selectCountryAgain" content="{localization/infoText_selectCountryAgain}" cell="5" fontsize="14" visible="false" />
+
+				<button name="button_makeBanks" cell="4" text="Banks" />
+				<button name="button_makePolitics" cell="3" text="Politics" />
+				<button name="button_makeConcerns" cell="2" text="Concerns" />
+				<button name="button_makeMedia" cell="1" text="Media" />
+				<button name="button_makeControl" cell="0" text="Control" />
+				
+			</stackpanel>
+			
+			<text name="text_dayProgress" content="{localization/infoText_day}" cell="0" fontsize="32" visible="false" margin="0,0,0,30" />
+			
+		</stackpanel>
+	
+	</stackpanel>
+
+</root>

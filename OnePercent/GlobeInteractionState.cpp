@@ -2,7 +2,6 @@
 #include "GlobeModel.h"
 
 #include <osgGaming/Helper.h>
-#include <osgGaming/UIStackPanel.h>
 #include <osgGaming/TimerFactory.h>
 
 using namespace onep;
@@ -23,34 +22,11 @@ void GlobeInteractionState::initialize()
 {
 	GlobeCameraState::initialize();
 
-	ref_ptr<UIStackPanel> stackPanel = new UIStackPanel();
-	stackPanel->setOrientation(UIStackPanel::VERTICAL);
-	stackPanel->getCells()->setNumCells(4);
-	stackPanel->getCells()->setSizePolicy(0, UICells::CONTENT);
-	stackPanel->getCells()->setSizePolicy(2, UICells::CONTENT);
-	stackPanel->getCells()->setSizePolicy(3, UICells::CONTENT);
-	stackPanel->setMargin(10.0f);
+	getHud()->loadMarkupFromXmlResource("./GameData/data/ui/ingamehud.xml");
 
-	_textPleaseSelect = new UIText();
-	_textPleaseSelect->setText("Please select a country.");
-
-	_textConfirm = new UIText();
-	_textConfirm->setText("Click again to confirm your selection.");
-	_textConfirm->setFontSize(14);
-	_textConfirm->setVisible(false);
-
-	_textProgress = new UIText();
-	_textProgress->setText("Day 0");
-	_textProgress->setFontSize(32); //(14);
-	_textProgress->setMargin(Vec4f(0.0f, 0.0f, 0.0f, 30.0f));
-	_textProgress->setVisible(false);
-
-	//text->setMargin(20.0f);
-
-	getHud()->getRootUIElement()->addChild(stackPanel);
-	stackPanel->addChild(_textPleaseSelect, 3);
-	stackPanel->addChild(_textConfirm, 2);
-	stackPanel->addChild(_textProgress, 0);
+	_textPleaseSelect = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountry").get());
+	_textConfirm = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountryAgain").get());
+	_textProgress = static_cast<UIText*>(getHud()->getUIElementByName("text_dayProgress").get());
 
 	getHud()->setFpsEnabled(true);
 
@@ -80,7 +56,7 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 			Vec2f polar = getPolarFromCartesian(pickResult);
 			ref_ptr<Country> country = getGlobeOverviewWorld()->getSimulation()->getCountry(polar);
 
-			int selected = country == NULL ? 255 : (int)country->getId();
+			int selected = country == nullptr ? 255 : int(country->getId());
 
 			getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
 
@@ -105,7 +81,7 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 
 			_selectedCountry = selected;
 
-			if (country != NULL)
+			if (country != nullptr)
 			{
 				//Vec2f countrySize = country->getSize();
 				//Vec2f surfaceSize = country->getSurfaceSize();
@@ -129,24 +105,15 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 
 
 
-
-
-
-				/*float angle = (float)getWorld()->getCameraManipulator()->getProjectionAngle();
-				float ratio = (float)getWorld()->getCameraManipulator()->getProjectionRatio();
-
-				float hdistance = surfaceSize.x() * 1.5f / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + GlobeModel::EARTH_RADIUS;
-				float vdistance = surfaceSize.y() * 1.5f / (2.0f * tan(angle * C_PI / 360.0f)) + GlobeModel::EARTH_RADIUS;
-
-				float distance = max(_MIN_CAMERA_DISTANCE, max(hdistance, vdistance));*/
+				printf("Selected country (%d): %s\n", _selectedCountry, country->getCountryName().c_str());
 
 				setCameraLatLong(country->getCenterLatLong(), getSimulationTime());
 				setCameraDistance(max(country->getOptimalCameraDistance(
-					(float)getWorld()->getCameraManipulator()->getProjectionAngle(),
-					(float)getWorld()->getCameraManipulator()->getProjectionRatio()), ~_paramCameraMinDistance), getSimulationTime());
+					float(getWorld()->getCameraManipulator()->getProjectionAngle()),
+					float(getWorld()->getCameraManipulator()->getProjectionRatio())), ~_paramCameraMinDistance), getSimulationTime());
 			}
 			
-			//printf("INTERSECTION at %f, %f, %f Polar: %f, %f Id: %d Country: %s\n", pickResult.x(), pickResult.y(), pickResult.z(), polar.x(), polar.y(), _selectedCountry, country_name.data());
+			
 		}
 	}
 }
@@ -250,15 +217,51 @@ void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::V
 	}
 }
 
+void GlobeInteractionState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
+{
+	if (uiElement->getUIName() == "button_makeBanks")
+	{
+		if (_selectedCountry != 255)
+		{
+			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_BANKS, true);
+		}
+	}
+	else if (uiElement->getUIName() == "button_makePolitics")
+	{
+		if (_selectedCountry != 255)
+		{
+			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_POLITICS, true);
+		}
+	}
+	else if (uiElement->getUIName() == "button_makeConcerns")
+	{
+		if (_selectedCountry != 255)
+		{
+			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_CONCERNS, true);
+		}
+	}
+	else if (uiElement->getUIName() == "button_makeMedia")
+	{
+		if (_selectedCountry != 255)
+		{
+			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_MEDIA, true);
+		}
+	}
+	else if (uiElement->getUIName() == "button_makeControl")
+	{
+		if (_selectedCountry != 255)
+		{
+			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_CONTROL, true);
+		}
+	}
+}
+
 void GlobeInteractionState::dayTimerElapsed()
 {
-	char textProgressBuffer[16];
-
 	getGlobeOverviewWorld()->getSimulation()->step();
 	getGlobeOverviewWorld()->getSimulation()->printStats(true);
 
-	sprintf(&textProgressBuffer[0], "Day %d\n", getGlobeOverviewWorld()->getSimulation()->getDay());
-	_textProgress->setText(textProgressBuffer);
+	_textProgress->setText(~Parameter<string, Param_LocalizationInfoTextDay>() + " " + to_string(getGlobeOverviewWorld()->getSimulation()->getDay()));
 }
 
 void GlobeInteractionState::startSimulation()
@@ -267,9 +270,7 @@ void GlobeInteractionState::startSimulation()
 	_textConfirm->setVisible(false);
 	_textProgress->setVisible(true);
 
-	getGlobeOverviewWorld()->getSimulation()->getCountry(
-		(unsigned char)getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountry())
-		->setSkillBranchActivated(Country::BRANCH_BANKS, true);
+	getGlobeOverviewWorld()->getSimulation()->getCountry(unsigned char(_selectedCountry))->setSkillBranchActivated(Country::BRANCH_BANKS, true);
 
 	_simulationTimer = TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
 	_simulationTimer->start();

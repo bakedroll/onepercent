@@ -9,6 +9,7 @@ namespace onep
 	char Param_CameraZoomSpeedFactorName[];
 	char Param_CameraScrollSpeedName[];
 	char Param_CameraRotationSpeedName[];
+	char Param_CameraCountryZoomName[];
 
 	char Param_EarthRadiusName[];
 	char Param_EarthSphereStacksName[];
@@ -29,4 +30,7 @@ namespace onep
 
 	char Param_MechanicsDaysInYearName[];
 	char Param_MechanicsStartBuyingPowerName[];
+
+	char Param_LocalizationInfoTextDay[];
+	char Param_LocalizationInfoTextLoading[];
 }

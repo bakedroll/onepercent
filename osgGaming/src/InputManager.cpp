@@ -59,12 +59,12 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 
 				if (ea.getButton() == GUIEventAdapter::LEFT_MOUSE_BUTTON)
 				{
-					Hud::UIMList uimList = state->getHud()->getUserInteractionModels();
-					for (Hud::UIMList::iterator uit = uimList.begin(); uit != uimList.end(); ++uit)
+					UserInteractionModelList uimList = state->getHud()->getUserInteractionModels();
+					for (UserInteractionModelList::iterator uit = uimList.begin(); uit != uimList.end(); ++uit)
 					{
 						if ((*uit)->getHovered())
 						{
-							state->onUIMClickedEvent(*uit);
+							state->onUIClickedEvent(dynamic_cast<UIElement*>(*uit));
 						}
 					}
 				}
@@ -287,9 +287,9 @@ int InputManager::mousePressed()
 
 void InputManager::handleUserInteractionMove(osg::ref_ptr<AbstractGameState> state, float x, float y)
 {
-	Hud::UIMList uimList = state->getHud()->getUserInteractionModels();
+	UserInteractionModelList uimList = state->getHud()->getUserInteractionModels();
 
-	for (Hud::UIMList::iterator it = uimList.begin(); it != uimList.end(); ++it)
+	for (UserInteractionModelList::iterator it = uimList.begin(); it != uimList.end(); ++it)
 	{
 		UserInteractionModel* model = *it;
 

@@ -13,8 +13,6 @@
 #include <osgGaming/Helper.h>
 #include <osgGaming/ByteStream.h>
 
-#include <fstream>
-
 using namespace onep;
 using namespace osgGaming;
 using namespace osg;
@@ -59,6 +57,10 @@ bool BackgroundModel::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 		updateResolutionHeight(ea.getWindowHeight());
 
 		return true;
+
+	default:
+		break;
+
 	}
 
 	return false;
@@ -97,7 +99,7 @@ void BackgroundModel::makeStars()
 
 	_point = new Point();
 	ref_ptr<PointSprite> pointSprite = new PointSprite();
-	ref_ptr<BlendEquation> blendEquation = new BlendEquation(osg::BlendEquation::FUNC_ADD);
+	ref_ptr<BlendEquation> blendEquation = new BlendEquation(BlendEquation::FUNC_ADD);
 
 	stateSet->setAttribute(_point);
 	stateSet->setTextureAttributeAndModes(0, pointSprite, StateAttribute::ON);
