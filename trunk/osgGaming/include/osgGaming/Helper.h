@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include <osg/Vec3>
 #include <osg/Matrix>
@@ -51,4 +52,31 @@ namespace osgGaming
 
 	StringList &splitString(const std::string &s, char delim, StringList &elems);
 	StringList splitString(const std::string &s, char delim);
+
+	std::string utf8ToLatin1(const char* in);
+
+	template <typename T>
+	T parseVector(std::string& s)
+	{
+		StringList values = splitString(s, ',');
+		T result;
+
+		if (values.size() == 1)
+		{
+			for (int i = 0; i < T::num_components; i++)
+			{
+				result._v[i] = stof(values[0]);
+			}
+		}
+		else
+		{
+			int n = std::min<int>(T::num_components, values.size());
+			for (int i = 0; i < n; i++)
+			{
+				result._v[i] = stof(values[i]);
+			}
+		}
+
+		return result;
+	}
 }

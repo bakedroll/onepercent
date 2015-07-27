@@ -10,12 +10,14 @@ using namespace osgGaming;
 using namespace osg;
 using namespace std;
 
+float NeighborCountryInfo::getRelation()
+{
+	return _relation;
+}
+
 Country::Country(string name, unsigned char id, float population, float wealth, Vec2f centerLatLong, Vec2f size)
 	: Referenced(),
 	  _name(name),
-	  _id(id),
-	  _centerLatLong(centerLatLong),
-	  _size(size),
 	  _populationInMio(population),
 	  _wealth(wealth),
 	  _anger(0.0f),
@@ -23,12 +25,24 @@ Country::Country(string name, unsigned char id, float population, float wealth, 
 	  _buyingPower(0.0f),
 	  _dept(0.0f),
 	  _deptBalance(0.0f),
-	  _interest(0.0f)
+	  _interest(0.0f),
+	  _id(id),
+	  _centerLatLong(centerLatLong),
+	  _size(size)
 {
 	for (int i = 0; i < SkillBranchCount; i++)
 	{
 		_skillBranchActivated[i] = false;
 	}
+}
+
+void Country::addNeighborCountry(osg::ref_ptr<Country> country, osg::ref_ptr<NeighborCountryInfo> info)
+{
+	NeighborCountry nc;
+	nc.country = country;
+	nc.info = info;
+
+	_neighborCountries.push_back(nc);
 }
 
 void Country::setSkillBranchActivated(SkillBranchType type, bool activated)
@@ -67,12 +81,13 @@ Vec2f Country::getSurfaceSize()
 
 float Country::getOptimalCameraDistance(float angle, float ratio)
 {
+	float cameraZoom = ~Parameter<float, Param_CameraCountryZoomName>();
 	float earthRadius = ~Parameter<float, Param_EarthRadiusName>();
 
 	Vec2f surfaceSize = getSurfaceSize();
 
-	float hdistance = surfaceSize.x() * 1.5f / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + earthRadius;
-	float vdistance = surfaceSize.y() * 1.5f / (2.0f * tan(angle * C_PI / 360.0f)) + earthRadius;
+	float hdistance = surfaceSize.x() * cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + earthRadius;
+	float vdistance = surfaceSize.y() * cameraZoom / (2.0f * tan(angle * C_PI / 360.0f)) + earthRadius;
 
 	return max(hdistance, vdistance);
 }
@@ -105,6 +120,11 @@ float Country::getAnger()
 float Country::getAngerBalance()
 {
 	return _angerBalance;
+}
+
+Country::NeighborCountryList& Country::getNeighborCountries()
+{
+	return _neighborCountries;
 }
 
 bool Country::getSKillBranchActivated(SkillBranchType type)

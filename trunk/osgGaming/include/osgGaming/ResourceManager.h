@@ -2,6 +2,8 @@
 
 #include <map>
 #include <fstream>
+//#include <locale>
+//#include <codecvt>
 
 #include <osgGaming/FileResourceLoader.h>
 #include <osgGaming/Singleton.h>
@@ -56,5 +58,7 @@ namespace osgGaming
 		std::string _defaultFontResourceKey;
 
 		osg::ref_ptr<ResourceLoader> _resourceLoader;
+
+		// std::locale _utf8Locale;
 	};
 }

@@ -13,8 +13,13 @@ ref_ptr<ParameterManager> Singleton<ParameterManager>::_instance;
 void ParameterManager::loadParametersFromXmlResource(string resourceKey)
 {
 	string xmlText = ResourceManager::getInstance()->loadText(resourceKey);
+
+	//locale loc = locale::global(locale(locale("de"), new codecvt_utf8<char>));
+
 	char* xmlCstr = new char[xmlText.size() + 1];
 	strcpy(xmlCstr, xmlText.c_str());
+
+	//locale loc = locale::global(locale(locale(), new codecvt_utf8<char>));
 
 	xml_document<> doc;
 	doc.parse<0>(xmlCstr);
@@ -27,6 +32,8 @@ void ParameterManager::loadParametersFromXmlResource(string resourceKey)
 	}
 
 	parseXmlGroup(rootNode, "");
+
+	//locale::global(loc);
 
 	delete[] xmlCstr;
 	ResourceManager::getInstance()->clearCacheResource(resourceKey);
@@ -41,7 +48,7 @@ void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path)
 
 		parseXmlGroup(groupChild, path + attr_name->value() + "/");
 
-		groupChild = groupChild->next_sibling();
+		groupChild = groupChild->next_sibling("group");
 	}
 
 	xml_node<>* parameterChild = node->first_node("parameter");
@@ -58,7 +65,7 @@ void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path)
 
 		if (strcmp(attr_type->value(), "string") == 0)
 		{
-			*getValuePtr<string>(path + attr_name->value()) = attr_value->value();
+			*getValuePtr<string>(path + attr_name->value()) = utf8ToLatin1(attr_value->value());
 		}
 		else if (strcmp(attr_type->value(), "int") == 0)
 		{
@@ -74,47 +81,17 @@ void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path)
 		}
 		else if (strcmp(attr_type->value(), "vec2") == 0)
 		{
-			StringList values = splitString(string(attr_value->value()), ',');
-
-			if (values.size() < 2)
-			{
-				throw GameException("Not enough values in 'value' attribute");
-			}
-
-			*getValuePtr<Vec2f>(path + attr_name->value()) = Vec2f(
-				stof(values[0]),
-				stof(values[1]));
+			*getValuePtr<Vec2f>(path + attr_name->value()) = parseVector<Vec2f>(string(attr_value->value()));
 		}
 		else if (strcmp(attr_type->value(), "vec3") == 0)
 		{
-			StringList values = splitString(string(attr_value->value()), ',');
-
-			if (values.size() < 3)
-			{
-				throw GameException("Not enough values in 'value' attribute");
-			}
-
-			*getValuePtr<Vec3f>(path + attr_name->value()) = Vec3f(
-				stof(values[0]),
-				stof(values[1]),
-				stof(values[2]));
+			*getValuePtr<Vec3f>(path + attr_name->value()) = parseVector<Vec3f>(string(attr_value->value()));
 		}
 		else if (strcmp(attr_type->value(), "vec4") == 0)
 		{
-			StringList values = splitString(string(attr_value->value()), ',');
-
-			if (values.size() < 4)
-			{
-				throw GameException("Not enough values in 'value' attribute");
-			}
-
-			*getValuePtr<Vec4f>(path + attr_name->value()) = Vec4f(
-				stof(values[0]),
-				stof(values[1]),
-				stof(values[2]),
-				stof(values[3]));
+			*getValuePtr<Vec4f>(path + attr_name->value()) = parseVector<Vec4f>(string(attr_value->value()));
 		}
 
-		parameterChild = parameterChild->next_sibling();
+		parameterChild = parameterChild->next_sibling("parameter");
 	}
 }

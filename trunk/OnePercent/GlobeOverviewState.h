@@ -21,7 +21,7 @@ namespace onep
 
 		virtual void onKeyPressedEvent(int key) override;
 
-		virtual void onUIMClickedEvent(osgGaming::UserInteractionModel* model) override;
+		//virtual void onUIClickedEvent(osg::ref_ptr<UIElement> uiElement) override;
 
 	private:
 		static const float _NORMAL_TIME;

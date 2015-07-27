@@ -1,7 +1,9 @@
 #include <osgGaming/Hud.h>
 #include <osgGaming/FpsTextCallback.h>
-#include <osgGaming/UIGrid.h>
 #include <osgGaming/UIUpdateVisitor.h>
+#include <osgGaming/UIMCollectorVisitor.h>
+#include <osgGaming/UIFindElementVisitor.h>
+#include <osgGaming/UIMarkupLoader.h>
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/Helper.h>
 
@@ -10,6 +12,7 @@
 using namespace osgGaming;
 using namespace osgText;
 using namespace osg;
+using namespace std;
 
 Hud::Hud()
 	: Referenced(),
@@ -43,6 +46,13 @@ ref_ptr<Projection> Hud::getProjection()
 	return _projection;
 }
 
+void Hud::loadMarkupFromXmlResource(string resourceKey)
+{
+	ref_ptr<UIElement> element = UIMarkupLoader::getInstance()->loadMarkupFromXmlResource(resourceKey);
+
+	setRootUIElement(element);
+}
+
 ref_ptr<Geode> Hud::getGeode()
 {
 	return _geode;
@@ -53,9 +63,18 @@ ref_ptr<UIElement> Hud::getRootUIElement()
 	return _rootUIElement;
 }
 
-Hud::UIMList Hud::getUserInteractionModels()
+UserInteractionModelList Hud::getUserInteractionModels()
 {
 	return _uimList;
+}
+
+ref_ptr<UIElement> Hud::getUIElementByName(string name)
+{
+	UIFindElementVisitor visitor(name);
+
+	_rootUIElement->accept(visitor);
+
+	return visitor.getResult();
 }
 
 void Hud::updateResolution(Vec2f resolution)
@@ -109,7 +128,26 @@ void Hud::setFpsEnabled(bool enabled)
 
 void Hud::setRootUIElement(osg::ref_ptr<UIElement> element)
 {
+	if (_rootUIElement == element)
+	{
+		return;
+	}
+
+	ref_ptr<Group> parent = _rootUIElement->getParent(0);
+	parent->removeChild(_rootUIElement);
+
 	_rootUIElement = element;
+
+	parent->addChild(_rootUIElement);
+
+	resetUserInteractionModel();
+	_uimList.clear();
+
+	UIMCollectorVisitor visitor;
+	_rootUIElement->accept(visitor);
+
+	_uimList = visitor.getUserInteractionModels();
+
 	updateUIElements();
 }
 
@@ -120,7 +158,7 @@ void Hud::registerUserInteractionModel(UserInteractionModel* model)
 
 bool Hud::anyUserInteractionModelHovered()
 {
-	for (UIMList::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
+	for (UserInteractionModelList::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
 	{
 		if ((*it)->getHovered())
 		{
@@ -133,7 +171,7 @@ bool Hud::anyUserInteractionModelHovered()
 
 void Hud::resetUserInteractionModel()
 {
-	for (UIMList::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
+	for (UserInteractionModelList::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
 	{
 		(*it)->setHovered(false);
 	}

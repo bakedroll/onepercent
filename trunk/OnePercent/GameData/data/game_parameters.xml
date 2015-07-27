@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <root>
 
 	<group name="camera">
@@ -8,6 +9,8 @@
 		<parameter name="zoom_speed_factor" type="float" value="3.0" />
 		<parameter name="scroll_speed" type="float" value="0.003" />
 		<parameter name="rotation_speed" type="float" value="0.003" />
+		
+		<parameter name="country_zoom" type="float" value="1.5" />
 	</group>
 	
 	<group name="earth">	

@@ -10,6 +10,7 @@
 
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 using namespace osgGaming;
 using namespace osgViewer;
@@ -21,7 +22,6 @@ GameApplication::GameApplication()
 	  _gameEnded(false),
 	  _isLoading(false)
 {
-
 }
 
 void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
@@ -238,11 +238,15 @@ int GameApplication::run(GameStateStack::AbstractGameStateList initialStates)
 	}
 	catch (GameException& e)
 	{
-		printf("Exception: %s\n", e.getMessage().data());
+		printf("Exception: %s\n", e.getMessage().c_str());
+
+		std::cin.ignore();
 	}
 	catch (exception& e)
 	{
 		printf("Exception: %s\n", e.what());
+
+		std::cin.ignore();
 	}
 
 	return -1;

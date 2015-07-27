@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include <osg/PositionAttitudeTransform>
 #include <osg/Point>
 #include <osgGA/GUIEventHandler>

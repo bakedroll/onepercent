@@ -197,6 +197,13 @@ void Viewer::setWindowedResolution(Vec2f resolution)
 
 void Viewer::setScreenNum(int screenNum)
 {
+	int numScreens = (int)GraphicsContext::getWindowingSystemInterface()->getNumScreens();
+
+	if (screenNum >= numScreens)
+	{
+		screenNum = numScreens - 1;
+	}
+
 	_screenNum = screenNum;
 }
 

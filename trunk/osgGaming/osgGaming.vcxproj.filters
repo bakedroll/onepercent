@@ -159,6 +159,15 @@
     <ClCompile Include="src\ParameterManager.cpp">
       <Filter>Source Files\Parameters</Filter>
     </ClCompile>
+    <ClCompile Include="src\UIMarkupLoader.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIMCollectorVisitor.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIFindElementVisitor.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h">
@@ -304,6 +313,15 @@
     </ClInclude>
     <ClInclude Include="include\osgGaming\ParameterValue.h">
       <Filter>Header Files\Parameters</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\UIMarkupLoader.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\UIMCollectorVisitor.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\UIFindElementVisitor.h">
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

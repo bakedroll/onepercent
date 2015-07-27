@@ -1,12 +1,8 @@
 #include "GlobeModel.h"
 
-#include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include <osg/Material>
-#include <osg/Point>
 #include <osg/Texture2D>
-#include <osg/MatrixTransform>
-#include <osg/Projection>
 #include <osg/BlendFunc>
 
 #include <osgDB/ReadFile>
@@ -43,15 +39,6 @@ void GlobeModel::updateClouds(float day)
 	_cloudsTransform->setAttitude(quat);
 
 	_uniformTime->set(day * ~_paramEarthCloudsMorphSpeed);
-}
-
-int GlobeModel::getSelectedCountry()
-{
-	int res;
-
-	_uniformSelectedCountry->get(res);
-
-	return res;
 }
 
 void GlobeModel::setSelectedCountry(int countryId)
@@ -371,13 +358,13 @@ ref_ptr<Geometry> GlobeModel::createSphereSegmentMesh(int stacks, int slices, do
 	{
 		for (int stack = firstStack; stack <= lastStack + 1; stack++)
 		{
-			Vec3 point = getVec3FromEuler((double)stack * (C_PI / (double)stacks), 0.0, (double)slice * (2.0 * C_PI / (double)slices), Vec3(0.0, 0.0, 1.0));
+			Vec3 point = getVec3FromEuler(double(stack) * (C_PI / double(stacks)), 0.0, double(slice) * (2.0 * C_PI / double(slices)), Vec3(0.0, 0.0, 1.0));
 
 			vertices->push_back(point * radius);
 			normals->push_back(point);
 
-			double u = (double)(slice - firstSlice) / (double)(lastSlice - firstSlice + 1);
-			double v = (double)(stack - firstStack) / (double)(lastStack - firstStack + 1);
+			double u = double(slice - firstSlice) / double(lastSlice - firstSlice + 1);
+			double v = double(stack - firstStack) / double(lastStack - firstStack + 1);
 
 			texcoords->push_back(Vec2(u, 1.0 - v));
 		}

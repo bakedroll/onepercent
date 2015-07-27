@@ -7,6 +7,7 @@ char onep::Param_CameraZoomSpeedName[] = "camera/zoom_speed";
 char onep::Param_CameraZoomSpeedFactorName[] = "camera/zoom_speed_factor";
 char onep::Param_CameraScrollSpeedName[] = "camera/scroll_speed";
 char onep::Param_CameraRotationSpeedName[] = "camera/rotation_speed";
+char onep::Param_CameraCountryZoomName[] = "camera/country_zoom";
 
 char onep::Param_EarthRadiusName[] = "earth/radius";
 char onep::Param_EarthSphereStacksName[] = "earth/sphere_stacks";
@@ -27,3 +28,6 @@ char onep::Param_SunRadiusPm2Name[] = "sun/radius_pm2";
 
 char onep::Param_MechanicsDaysInYearName[] = "mechanics/days_in_year";
 char onep::Param_MechanicsStartBuyingPowerName[] = "mechanics/start_buying_power";
+
+char onep::Param_LocalizationInfoTextDay[] = "localization/infoText_day";
+char onep::Param_LocalizationInfoTextLoading[] = "localization/infoText_loading";

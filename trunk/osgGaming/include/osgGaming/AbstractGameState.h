@@ -5,8 +5,8 @@
 #include <osgGaming/World.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/GameSettings.h>
-#include <osgGaming/UserInteractionModel.h>
 #include <osgGaming/Viewer.h>
+#include <osgGaming/UIElement.h>
 
 #include <osg/Referenced>
 #include <osg/ref_ptr>
@@ -80,7 +80,7 @@ namespace osgGaming
 		virtual void onDragBeginEvent(int button, osg::Vec2f origin);
 		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position);
 
-		virtual void onUIMClickedEvent(UserInteractionModel* model);
+		virtual void onUIClickedEvent(osg::ref_ptr<UIElement> uiElement);
 
 		virtual void onResizeEvent(float width, float height);
 

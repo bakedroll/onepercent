@@ -45,7 +45,10 @@
     <ClCompile Include="src\UICells.cpp" />
     <ClCompile Include="src\UIContainerElementBase.cpp" />
     <ClCompile Include="src\UIElement.cpp" />
+    <ClCompile Include="src\UIFindElementVisitor.cpp" />
     <ClCompile Include="src\UIGrid.cpp" />
+    <ClCompile Include="src\UIMarkupLoader.cpp" />
+    <ClCompile Include="src\UIMCollectorVisitor.cpp" />
     <ClCompile Include="src\UIStackPanel.cpp" />
     <ClCompile Include="src\UIText.cpp" />
     <ClCompile Include="src\UIUpdateVisitor.cpp" />
@@ -95,7 +98,10 @@
     <ClInclude Include="include\osgGaming\UIContainerElement.h" />
     <ClInclude Include="include\osgGaming\UIContainerElementBase.h" />
     <ClInclude Include="include\osgGaming\UIElement.h" />
+    <ClInclude Include="include\osgGaming\UIFindElementVisitor.h" />
     <ClInclude Include="include\osgGaming\UIGrid.h" />
+    <ClInclude Include="include\osgGaming\UIMarkupLoader.h" />
+    <ClInclude Include="include\osgGaming\UIMCollectorVisitor.h" />
     <ClInclude Include="include\osgGaming\UIStackPanel.h" />
     <ClInclude Include="include\osgGaming\UIText.h" />
     <ClInclude Include="include\osgGaming\UIUpdateVisitor.h" />
@@ -116,7 +122,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -137,6 +143,11 @@
     <LibraryPath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)lib\</OutDir>
     <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>E:\SDK\rapidxml-1.13;E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(ProjectDir)include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>E:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <OutDir>$(ProjectDir)lib\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -159,6 +170,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

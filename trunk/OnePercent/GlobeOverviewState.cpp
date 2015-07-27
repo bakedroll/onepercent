@@ -171,7 +171,7 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	*/
 }
 
-void GlobeOverviewState::onUIMClickedEvent(UserInteractionModel* model)
+/*void GlobeOverviewState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
 {
-	printf("Clicked UIM: %s\n", model->getUIMName().data());
-}
+	printf("Clicked UIM: %s\n", uiElement->getUIName().c_str());
+}*/
