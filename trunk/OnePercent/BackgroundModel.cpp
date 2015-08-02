@@ -20,7 +20,7 @@ using namespace std;
 using namespace osgGA;
 
 BackgroundModel::BackgroundModel()
-	: osgGA::GUIEventHandler()
+	: GUIEventHandler()
 {
 	makeStars();
 	makeSun();
