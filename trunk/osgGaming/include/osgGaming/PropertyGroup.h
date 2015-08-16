@@ -27,6 +27,10 @@ namespace osgGaming
 		void addArray(std::string name, osg::ref_ptr<PropertyArray> a);
 		void addProperty(std::string name, osg::ref_ptr<AbstractPropertyValue> value);
 
+		bool hasGroup(std::string name);
+		bool hasArray(std::string name);
+		bool hasProperty(std::string name);
+
 	private:
 		typedef std::map<std::string, osg::ref_ptr<PropertyGroup>> GroupMap;
 		typedef std::map<std::string, osg::ref_ptr<PropertyArray>> ArrayMap;

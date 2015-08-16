@@ -1,5 +1,7 @@
 #include <osgGaming/PropertyArray.h>
 
+using namespace std;
+using namespace osg;
 using namespace osgGaming;
 
 int PropertyArray::size()
@@ -7,7 +9,7 @@ int PropertyArray::size()
 	return _array.size();
 }
 
-void PropertyArray::addProperty(int index, std::string name, osg::ref_ptr<AbstractPropertyValue> value)
+void PropertyArray::addProperty(int index, string name, ref_ptr<AbstractPropertyValue> value)
 {
 	PropertyArrayMap::iterator itarr = _array.find(index);
 
@@ -25,4 +27,21 @@ void PropertyArray::addProperty(int index, std::string name, osg::ref_ptr<Abstra
 	{
 		itarr->second.insert(PropertyNameValueMap::value_type(name, value));
 	}
+}
+
+bool PropertyArray::hasProperty(int index, string name)
+{
+	PropertyArrayMap::iterator itarr = _array.find(index);
+
+	if (itarr == _array.end())
+	{
+		return false;
+	}
+
+	if (itarr->second.find(name) == itarr->second.end())
+	{
+		return false;
+	}
+
+	return true;
 }

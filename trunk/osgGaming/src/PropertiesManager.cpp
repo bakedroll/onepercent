@@ -25,12 +25,8 @@ void PropertiesManager::loadPropertiesFromXmlResource(string resourceKey)
 {
 	string xmlText = ResourceManager::getInstance()->loadText(resourceKey);
 
-	//locale loc = locale::global(locale(locale("de"), new codecvt_utf8<char>));
-
 	char* xmlCstr = new char[xmlText.size() + 1];
 	strcpy(xmlCstr, xmlText.c_str());
-
-	//locale loc = locale::global(locale(locale(), new codecvt_utf8<char>));
 
 	xml_document<> doc;
 	doc.parse<0>(xmlCstr);
@@ -42,60 +38,104 @@ void PropertiesManager::loadPropertiesFromXmlResource(string resourceKey)
 		throw GameException("Invalid resource format: " + resourceKey);
 	}
 
-	parseXmlGroup(rootNode, _root, "");
-
-	//locale::global(loc);
+	parseXmlNode(rootNode, _root, "");
 
 	delete[] xmlCstr;
 	ResourceManager::getInstance()->clearCacheResource(resourceKey);
 }
 
-void PropertiesManager::parseXmlGroup(xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path, ArrayContext* arrayContext)
+void PropertiesManager::initializeProperty(string path, string type, string value)
+{
+	if (type == "string")
+	{
+		*getValuePtr<string>(path) = utf8ToLatin1(value.c_str());
+	}
+	else if (type == "int")
+	{
+		*getValuePtr<int>(path) = atoi(value.c_str());
+	}
+	else if (type == "float")
+	{
+		*getValuePtr<float>(path) = float(atof(value.c_str()));
+	}
+	else if (type == "double")
+	{
+		*getValuePtr<double>(path) = atof(value.c_str());
+	}
+	else if (type == "vec2")
+	{
+		*getValuePtr<Vec2f>(path) = parseVector<Vec2f>(value);
+	}
+	else if (type == "vec3")
+	{
+		*getValuePtr<Vec3f>(path) = parseVector<Vec3f>(value);
+	}
+	else if (type == "vec4")
+	{
+		*getValuePtr<Vec4f>(path) = parseVector<Vec4f>(value);
+	}
+}
+
+void PropertiesManager::parseXmlNode(xml_node<>* node, ref_ptr<PropertyGroup> group, string path, ArrayContext* arrayContext)
 {
 	if (arrayContext == nullptr)
 	{
-		xml_node<>* groupChild = node->first_node("group");
-		while (groupChild != nullptr)
-		{
-			xml_attribute<>* attr_name = groupChild->first_attribute("name");
-
-			if (attr_name == nullptr)
-			{
-				throwMissingAttribute(path, "group", "name");
-			}
-
-			string name = string(attr_name->value());
-
-			group->addGroup(name, new PropertyGroup());
-			parseXmlGroup(groupChild, group->group(name), path + name + "/");
-
-			groupChild = groupChild->next_sibling("group");
-		}
-
-		xml_node<>* arrayChild = node->first_node("array");
-		while (arrayChild != nullptr)
-		{
-			xml_attribute<>* attr_name = arrayChild->first_attribute("name");
-
-			if (attr_name == nullptr)
-			{
-				throwMissingAttribute(path, "array", "name");
-			}
-
-			std::string name = attr_name->value();
-			ArrayContext context;
-			std::string p = path + name;
-
-			group->addArray(name, new PropertyArray());
-			context.propertyArray = group->array(name);
-
-			parseXmlArrayFields(arrayChild, p, &context);
-			parseXmlArrayElements(arrayChild, p, &context);
-
-			arrayChild = arrayChild->next_sibling("array");
-		}
+		parseXmlGroup(node, group, path);
+		parseXmlArray(node, group, path);
 	}
 
+	parseXmlProperty(node, group, path, arrayContext);
+}
+
+void PropertiesManager::parseXmlGroup(xml_node<>* node, ref_ptr<PropertyGroup> group, string path)
+{
+	xml_node<>* groupChild = node->first_node("group");
+	while (groupChild != nullptr)
+	{
+		xml_attribute<>* attr_name = groupChild->first_attribute("name");
+
+		if (attr_name == nullptr)
+		{
+			throwMissingAttribute(path, "group", "name");
+		}
+
+		string name = string(attr_name->value());
+
+		group->addGroup(name, new PropertyGroup());
+		parseXmlNode(groupChild, group->group(name), path + name + "/");
+
+		groupChild = groupChild->next_sibling("group");
+	}
+}
+
+void PropertiesManager::parseXmlArray(xml_node<>* node, ref_ptr<PropertyGroup> group, string path)
+{
+	xml_node<>* arrayChild = node->first_node("array");
+	while (arrayChild != nullptr)
+	{
+		xml_attribute<>* attr_name = arrayChild->first_attribute("name");
+
+		if (attr_name == nullptr)
+		{
+			throwMissingAttribute(path, "array", "name");
+		}
+
+		std::string name = attr_name->value();
+		ArrayContext context;
+		std::string p = path + name;
+
+		group->addArray(name, new PropertyArray());
+		context.propertyArray = group->array(name);
+
+		parseXmlArrayFields(arrayChild, p, &context);
+		parseXmlArrayElements(arrayChild, p, &context);
+
+		arrayChild = arrayChild->next_sibling("array");
+	}
+}
+
+void PropertiesManager::parseXmlProperty(xml_node<>* node, ref_ptr<PropertyGroup> group, string path, ArrayContext* arrayContext)
+{
 	xml_node<>* propertyChild = node->first_node("property");
 	while (propertyChild != nullptr)
 	{
@@ -107,19 +147,19 @@ void PropertiesManager::parseXmlGroup(xml_node<>* node, osg::ref_ptr<PropertyGro
 			throwMissingAttribute(path, "property");
 		}
 
-		std::string name = attr_name->value();
-		std::string type;
+		string name = attr_name->value();
+		string type;
 
 		if (arrayContext != nullptr)
 		{
-			FieldMap::iterator it = arrayContext->fields.find(name);
+			ArrayFieldMap::iterator it = arrayContext->fields.find(name);
 			if (it == arrayContext->fields.end())
 			{
 				propertyChild = propertyChild->next_sibling("property");
 				continue;
 			}
 
-			type = it->second;
+			type = it->second.type;
 		}
 		else
 		{
@@ -133,40 +173,7 @@ void PropertiesManager::parseXmlGroup(xml_node<>* node, osg::ref_ptr<PropertyGro
 			type = string(attr_type->value());
 		}
 
-		if (strcmp(type.c_str(), "string") == 0)
-		{
-			*getValuePtr<string>(path + name) = utf8ToLatin1(attr_value->value());
-		}
-		else if (strcmp(type.c_str(), "int") == 0)
-		{
-			*getValuePtr<int>(path + name) = atoi(attr_value->value());
-		}
-		else if (strcmp(type.c_str(), "float") == 0)
-		{
-			*getValuePtr<float>(path + name) = float(atof(attr_value->value()));
-		}
-		else if (strcmp(type.c_str(), "double") == 0)
-		{
-			*getValuePtr<double>(path + name) = atof(attr_value->value());
-		}
-		else if (strcmp(type.c_str(), "vec2") == 0)
-		{
-			string val = string(attr_value->value());
-
-			*getValuePtr<Vec2f>(path + name) = parseVector<Vec2f>(val);
-		}
-		else if (strcmp(type.c_str(), "vec3") == 0)
-		{
-			string val = string(attr_value->value());
-
-			*getValuePtr<Vec3f>(path + name) = parseVector<Vec3f>(val);
-		}
-		else if (strcmp(type.c_str(), "vec4") == 0)
-		{
-			string val = string(attr_value->value());
-
-			*getValuePtr<Vec4f>(path + name) = parseVector<Vec4f>(val);
-		}
+		initializeProperty(path + name, type, string(attr_value->value()));
 
 		AbstractPropertyValue::ValueMap::iterator it = _values.find(path + name);
 		if (arrayContext == nullptr)
@@ -189,7 +196,8 @@ void PropertiesManager::parseXmlArrayFields(xml_node<>* node, const std::string&
 	{
 		xml_attribute<>* attr_name = fieldChild->first_attribute("name");
 		xml_attribute<>* attr_type = fieldChild->first_attribute("type");
-		
+		xml_attribute<>* attr_default = fieldChild->first_attribute("default");
+
 		if (attr_name == nullptr || attr_type == nullptr)
 		{
 			throwMissingAttribute(path, "field");
@@ -203,7 +211,15 @@ void PropertiesManager::parseXmlArrayFields(xml_node<>* node, const std::string&
 			throw GameException("Field " + name + " already exists at " + path);
 		}
 
-		arrayContext->fields.insert(FieldMap::value_type(name, type));
+		ArrayField field;
+		field.type = type;
+
+		if (attr_default != nullptr)
+		{
+			field.defaultValue = string(attr_default->value());
+		}
+
+		arrayContext->fields.insert(ArrayFieldMap::value_type(name, field));
 
 		fieldChild = fieldChild->next_sibling("field");
 	}
@@ -221,7 +237,20 @@ void PropertiesManager::parseXmlArrayElements(rapidxml::xml_node<>* node, std::s
 
 		context->index = counter;
 
-		parseXmlGroup(elementChild, nullptr, path + string(ac) + ".", context);
+		string p = path + string(ac) + ".";
+
+		parseXmlNode(elementChild, nullptr, p, context);
+
+		for (ArrayFieldMap::iterator itfield = context->fields.begin(); itfield != context->fields.end(); ++itfield)
+		{
+			if (itfield->second.defaultValue != "" && !context->propertyArray->hasProperty(context->index, itfield->first))
+			{
+				initializeProperty(p + itfield->first, itfield->second.type, itfield->second.defaultValue);
+				AbstractPropertyValue::ValueMap::iterator itprop = _values.find(p + itfield->first);
+
+				context->propertyArray->addProperty(context->index, itfield->first, itprop->second);
+			}
+		}
 
 		counter++;
 		elementChild = elementChild->next_sibling("element");

@@ -15,6 +15,8 @@ namespace osgGaming
 		int size();
 		void addProperty(int index, std::string name, osg::ref_ptr<AbstractPropertyValue> value);
 
+		bool hasProperty(int index, std::string name);
+
 		template <typename T>
 		osg::ref_ptr<PropertyValue<T>> property(int index, std::string name)
 		{
