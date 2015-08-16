@@ -29,7 +29,7 @@
     <ClCompile Include="src\Hud.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\PackageResourceLoader.cpp" />
-    <ClCompile Include="src\ParameterManager.cpp" />
+    <ClCompile Include="src\PropertiesManager.cpp" />
     <ClCompile Include="src\PostProcessingEffect.cpp" />
     <ClCompile Include="src\ResourceManager.cpp" />
     <ClCompile Include="src\ShaderFactory.cpp" />
@@ -77,9 +77,9 @@
     <ClInclude Include="include\osgGaming\Hud.h" />
     <ClInclude Include="include\osgGaming\InputManager.h" />
     <ClInclude Include="include\osgGaming\PackageResourceLoader.h" />
-    <ClInclude Include="include\osgGaming\Parameter.h" />
-    <ClInclude Include="include\osgGaming\ParameterManager.h" />
-    <ClInclude Include="include\osgGaming\ParameterValue.h" />
+    <ClInclude Include="include\osgGaming\Property.h" />
+    <ClInclude Include="include\osgGaming\PropertiesManager.h" />
+    <ClInclude Include="include\osgGaming\PropertyValue.h" />
     <ClInclude Include="include\osgGaming\PostProcessingEffect.h" />
     <ClInclude Include="include\osgGaming\ResourceLoader.h" />
     <ClInclude Include="include\osgGaming\ResourceManager.h" />

@@ -152,11 +152,11 @@ void GlobeModel::makeCloudsModel()
 
 void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<TransformableCameraManipulator> tcm)
 {
-	float earthRadius = ~Parameter<float, Param_EarthRadiusName>();
-	float atmosphereHeight = ~Parameter<float, Param_EarthAtmosphereHeightName>();
-	float scatteringDepth = ~Parameter<float, Param_EarthScatteringDepthName>();
-	float scatteringIntensity = ~Parameter<float, Param_EarthScatteringIntensityName>();
-	Vec4f atmosphereColor = ~Parameter<Vec4f, Param_EarthAtmosphereColorName>();
+	float earthRadius = ~Property<float, Param_EarthRadiusName>();
+	float atmosphereHeight = ~Property<float, Param_EarthAtmosphereHeightName>();
+	float scatteringDepth = ~Property<float, Param_EarthScatteringDepthName>();
+	float scatteringIntensity = ~Property<float, Param_EarthScatteringIntensityName>();
+	Vec4f atmosphereColor = ~Property<Vec4f, Param_EarthAtmosphereColorName>();
 
 	// atmospheric scattering geometry
 	ref_ptr<CameraAlignedQuad> caq = new CameraAlignedQuad();
@@ -226,9 +226,9 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 		break;
 	};
 
-	int stacks = ~Parameter<int, Param_EarthSphereStacksName>();
-	int slices = ~Parameter<int, Param_EarthSphereSlicesName>();
-	float radius = ~Parameter<float, Param_EarthRadiusName>();
+	int stacks = ~Property<int, Param_EarthSphereStacksName>();
+	int slices = ~Property<int, Param_EarthSphereSlicesName>();
+	float radius = ~Property<float, Param_EarthRadiusName>();
 
 	int stacksPerSegment = stacks / m;
 	int slicesPerSegment = slices / n;
@@ -307,10 +307,10 @@ ref_ptr<Geode> GlobeModel::createCloudsGeode()
 	int n = 2;
 	int m = 1;
 
-	int stacks = ~Parameter<int, Param_EarthSphereStacksName>();
-	int slices = ~Parameter<int, Param_EarthSphereSlicesName>();
-	float radius = ~Parameter<float, Param_EarthRadiusName>();
-	float cloudsHeight = ~Parameter<float, Param_EarthCloudsHeightName>();
+	int stacks = ~Property<int, Param_EarthSphereStacksName>();
+	int slices = ~Property<int, Param_EarthSphereSlicesName>();
+	float radius = ~Property<float, Param_EarthRadiusName>();
+	float cloudsHeight = ~Property<float, Param_EarthCloudsHeightName>();
 
 	int stacksPerSegment = stacks / m;
 	int slicesPerSegment = slices / n;

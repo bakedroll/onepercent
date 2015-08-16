@@ -2,7 +2,7 @@
 #include "Globals.h"
 #include "GlobeModel.h"
 
-#include <osgGaming/Parameter.h>
+#include <osgGaming/Property.h>
 #include <osgGaming/Helper.h>
 
 using namespace onep;
@@ -77,7 +77,7 @@ Vec2f Country::getSize()
 
 Vec2f Country::getSurfaceSize()
 {
-	float earthRadius = ~Parameter<float, Param_EarthRadiusName>();
+	float earthRadius = ~Property<float, Param_EarthRadiusName>();
 
 	return Vec2f(
 		2.0f * C_PI * sin(C_PI / 2.0f - abs(_centerLatLong.x())) * earthRadius * _size.x(),
@@ -86,8 +86,8 @@ Vec2f Country::getSurfaceSize()
 
 float Country::getOptimalCameraDistance(float angle, float ratio)
 {
-	float cameraZoom = ~Parameter<float, Param_CameraCountryZoomName>();
-	float earthRadius = ~Parameter<float, Param_EarthRadiusName>();
+	float cameraZoom = ~Property<float, Param_CameraCountryZoomName>();
+	float earthRadius = ~Property<float, Param_EarthRadiusName>();
 
 	Vec2f surfaceSize = getSurfaceSize();
 
@@ -154,7 +154,7 @@ void Country::step()
 {
 	if (_skillBranchActivated[BRANCH_BANKS])
 	{
-		_buyingPower = ~Parameter<float, Param_MechanicsStartBuyingPowerName>();
+		_buyingPower = ~Property<float, Param_MechanicsStartBuyingPowerName>();
 		_interest = 0.05f;
 
 		_deptBalance = _dept * _interest + _buyingPower;

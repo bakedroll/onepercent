@@ -66,7 +66,7 @@ void GlobeOverviewWorld::setBackgroundModel(ref_ptr<BackgroundModel> backgroundM
 
 void GlobeOverviewWorld::setDay(float day)
 {
-	float year = day / ~Parameter<float, Param_MechanicsDaysInYearName>();
+	float year = day / ~Property<float, Param_MechanicsDaysInYearName>();
 
 	Matrix yearMat = getMatrixFromEuler(0.0f, 0.0f, - year * 2.0f * C_PI) *
 		getMatrixFromEuler(-sin(year * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);

@@ -6,7 +6,7 @@
 
 #include <osgGaming/Animation.h>
 #include <osgGaming/UIText.h>
-#include <osgGaming/Parameter.h>
+#include <osgGaming/Property.h>
 
 #include <osgGaming/Timer.h>
 
@@ -37,15 +37,15 @@ namespace onep
 		virtual osg::ref_ptr<osgGaming::Hud> newHud() override;
 
 	private:
-		osgGaming::Parameter<float, Param_EarthRadiusName> _paramEarthRadius;
+		osgGaming::Property<float, Param_EarthRadiusName> _paramEarthRadius;
 
-		osgGaming::Parameter<float, Param_CameraMinDistanceName> _paramCameraMinDistance;
-		osgGaming::Parameter<float, Param_CameraMaxDistanceName> _paramCameraMaxDistance;
-		osgGaming::Parameter<float, Param_CameraMaxLatitudeName> _paramCameraMaxLatitude;
-		osgGaming::Parameter<float, Param_CameraZoomSpeedName> _paramCameraZoomSpeed;
-		osgGaming::Parameter<float, Param_CameraZoomSpeedFactorName> _paramCameraZoomSpeedFactor;
-		osgGaming::Parameter<float, Param_CameraScrollSpeedName> _paramCameraScrollSpeed;
-		osgGaming::Parameter<float, Param_CameraRotationSpeedName> _paramCameraRotationSpeed;
+		osgGaming::Property<float, Param_CameraMinDistanceName> _paramCameraMinDistance;
+		osgGaming::Property<float, Param_CameraMaxDistanceName> _paramCameraMaxDistance;
+		osgGaming::Property<float, Param_CameraMaxLatitudeName> _paramCameraMaxLatitude;
+		osgGaming::Property<float, Param_CameraZoomSpeedName> _paramCameraZoomSpeed;
+		osgGaming::Property<float, Param_CameraZoomSpeedFactorName> _paramCameraZoomSpeedFactor;
+		osgGaming::Property<float, Param_CameraScrollSpeedName> _paramCameraScrollSpeed;
+		osgGaming::Property<float, Param_CameraRotationSpeedName> _paramCameraRotationSpeed;
 
 		bool ready();
 

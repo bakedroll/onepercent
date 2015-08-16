@@ -2,13 +2,9 @@
 
 #include "Country.h"
 #include "CountriesMap.h"
-#include "Globals.h"
 
 #include <map>
 
-#include <osgGaming/Parameter.h>
-
-#include <osg/Object>
 #include <osg/Referenced>
 #include <osg/Vec2f>
 

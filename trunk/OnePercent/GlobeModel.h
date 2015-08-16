@@ -6,7 +6,7 @@
 #include <osg/Uniform>
 
 #include <osgGaming/TransformableCameraManipulator.h>
-#include <osgGaming/Parameter.h>
+#include <osgGaming/Property.h>
 
 namespace onep
 {
@@ -21,11 +21,11 @@ namespace onep
 		void setSelectedCountry(int countryId);
 
 	private:
-		osgGaming::Parameter<float, Param_SunDistanceName> _paramSunDistance;
-		osgGaming::Parameter<float, Param_SunRadiusPm2Name> _paramSunRadiusMp2;
+		osgGaming::Property<float, Param_SunDistanceName> _paramSunDistance;
+		osgGaming::Property<float, Param_SunRadiusPm2Name> _paramSunRadiusMp2;
 
-		osgGaming::Parameter<float, Param_EarthCloudsSpeedName> _paramEarthCloudsSpeed;
-		osgGaming::Parameter<float, Param_EarthCloudsMorphSpeedName> _paramEarthCloudsMorphSpeed;
+		osgGaming::Property<float, Param_EarthCloudsSpeedName> _paramEarthCloudsSpeed;
+		osgGaming::Property<float, Param_EarthCloudsMorphSpeedName> _paramEarthCloudsMorphSpeed;
 
 		void makeEarthModel();
 		void makeCloudsModel();

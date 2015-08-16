@@ -156,9 +156,6 @@
     <ClCompile Include="src\TimerFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ParameterManager.cpp">
-      <Filter>Source Files\Parameters</Filter>
-    </ClCompile>
     <ClCompile Include="src\UIMarkupLoader.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
@@ -167,6 +164,9 @@
     </ClCompile>
     <ClCompile Include="src\UIFindElementVisitor.cpp">
       <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PropertiesManager.cpp">
+      <Filter>Source Files\Parameters</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -305,15 +305,6 @@
     <ClInclude Include="include\osgGaming\Helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\osgGaming\Parameter.h">
-      <Filter>Header Files\Parameters</Filter>
-    </ClInclude>
-    <ClInclude Include="include\osgGaming\ParameterManager.h">
-      <Filter>Header Files\Parameters</Filter>
-    </ClInclude>
-    <ClInclude Include="include\osgGaming\ParameterValue.h">
-      <Filter>Header Files\Parameters</Filter>
-    </ClInclude>
     <ClInclude Include="include\osgGaming\UIMarkupLoader.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
@@ -322,6 +313,15 @@
     </ClInclude>
     <ClInclude Include="include\osgGaming\UIFindElementVisitor.h">
       <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\Property.h">
+      <Filter>Header Files\Parameters</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\PropertiesManager.h">
+      <Filter>Header Files\Parameters</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\PropertyValue.h">
+      <Filter>Header Files\Parameters</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
