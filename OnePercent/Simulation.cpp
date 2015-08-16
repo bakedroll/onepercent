@@ -82,6 +82,11 @@ void Simulation::loadCountries()
 	ResourceManager::getInstance()->clearCacheResource(countriesBinFilename);
 }
 
+void Simulation::loadSkillsXml(std::string filename)
+{
+	ParameterManager::getInstance()->loadParametersFromXmlResource(filename);
+}
+
 ref_ptr<Country> Simulation::getCountry(unsigned char id)
 {
 	return _countries.find(id)->second;

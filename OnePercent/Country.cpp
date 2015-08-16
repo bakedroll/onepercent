@@ -15,6 +15,11 @@ float NeighborCountryInfo::getRelation()
 	return _relation;
 }
 
+void NeighborCountryInfo::setRelation(float relation)
+{
+	_relation = relation;
+}
+
 Country::Country(string name, unsigned char id, float population, float wealth, Vec2f centerLatLong, Vec2f size)
 	: Referenced(),
 	  _name(name),
