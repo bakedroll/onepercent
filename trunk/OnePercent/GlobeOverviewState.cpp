@@ -1,8 +1,6 @@
 #include "GlobeOverviewState.h"
 #include "GlobeModel.h"
-#include "BackgroundModel.h"
 
-#include <osgGaming/Helper.h>
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>

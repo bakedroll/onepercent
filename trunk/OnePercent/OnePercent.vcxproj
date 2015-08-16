@@ -91,6 +91,7 @@
     <ClCompile Include="Simulation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AbstractSkill.h" />
     <ClInclude Include="BackgroundModel.h" />
     <ClInclude Include="CountriesMap.h" />
     <ClInclude Include="Country.h" />

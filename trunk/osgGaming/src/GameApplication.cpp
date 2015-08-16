@@ -1,14 +1,9 @@
 #include <osgGaming/GameApplication.h>
-#include <osgGaming/Helper.h>
 #include <osgGaming/GameException.h>
 #include <osgGaming/GameLoadingState.h>
 #include <osgGaming/TransformableCameraManipulator.h>
 #include <osgGaming/TimerFactory.h>
 
-#include <osg/PositionAttitudeTransform>
-#include <osg/LightModel>
-
-#include <thread>
 #include <chrono>
 #include <iostream>
 
@@ -123,7 +118,7 @@ void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double
 					break;
 				}
 			}
-			else if (se != NULL)
+			else if (se != nullptr)
 			{
 				switch (se->type)
 				{

@@ -20,6 +20,7 @@ namespace onep
 		Simulation();
 
 		void loadCountries();
+		void loadSkillsXml(std::string filename);
 
 		osg::ref_ptr<Country> getCountry(unsigned char id);
 		osg::ref_ptr<Country> getCountry(osg::Vec2f coord);

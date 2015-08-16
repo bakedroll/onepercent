@@ -7,13 +7,13 @@
 
 namespace osgGaming
 {
-	template <typename T, char const* N = NULL>
+	template <typename T, char const* N = nullptr>
 	class Parameter
 	{
 	public:
 		Parameter()
 		{
-			if (N == NULL)
+			if (N == nullptr)
 			{
 				throw GameException("Invalid parameter key");
 			}

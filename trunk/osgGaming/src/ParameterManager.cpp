@@ -26,7 +26,7 @@ void ParameterManager::loadParametersFromXmlResource(string resourceKey)
 
 	xml_node<>* rootNode = doc.first_node("root");
 
-	if (rootNode == NULL)
+	if (rootNode == nullptr)
 	{
 		throw GameException("Invalid resource format: " + resourceKey);
 	}
@@ -39,59 +39,171 @@ void ParameterManager::loadParametersFromXmlResource(string resourceKey)
 	ResourceManager::getInstance()->clearCacheResource(resourceKey);
 }
 
-void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path)
+void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayContext* arrayContext)
 {
-	xml_node<>* groupChild = node->first_node("group");
-	while (groupChild != NULL)
+	if (arrayContext == nullptr)
 	{
-		xml_attribute<>* attr_name = groupChild->first_attribute("name");
+		xml_node<>* groupChild = node->first_node("group");
+		while (groupChild != nullptr)
+		{
+			xml_attribute<>* attr_name = groupChild->first_attribute("name");
 
-		parseXmlGroup(groupChild, path + attr_name->value() + "/");
+			if (attr_name == nullptr)
+			{
+				throwMissingAttribute(path, "group", "name");
+			}
 
-		groupChild = groupChild->next_sibling("group");
+			parseXmlGroup(groupChild, path + attr_name->value() + "/");
+
+			groupChild = groupChild->next_sibling("group");
+		}
+
+		xml_node<>* arrayChild = node->first_node("array");
+		while (arrayChild != nullptr)
+		{
+			xml_attribute<>* attr_name = arrayChild->first_attribute("name");
+
+			if (attr_name == nullptr)
+			{
+				throwMissingAttribute(path, "array", "name");
+			}
+
+			ArrayContext context;
+			std::string p = path + attr_name->value();
+			parseXmlArrayFields(arrayChild, p, &context);
+			parseXmlArrayElements(arrayChild, p, &context);
+
+			arrayChild = arrayChild->next_sibling("array");
+		}
 	}
 
 	xml_node<>* parameterChild = node->first_node("parameter");
-	while (parameterChild != NULL)
+	while (parameterChild != nullptr)
 	{
 		xml_attribute<>* attr_name = parameterChild->first_attribute("name");
-		xml_attribute<>* attr_type = parameterChild->first_attribute("type");
+		//xml_attribute<>* attr_type = parameterChild->first_attribute("type");
 		xml_attribute<>* attr_value = parameterChild->first_attribute("value");
 
-		if (attr_name == NULL || attr_type == NULL || attr_value == NULL)
+		if (attr_name == nullptr || attr_value == nullptr)
 		{
-			throw GameException("Missing attribute(s) in parameter tag");
+			throwMissingAttribute(path, "parameter");
 		}
 
-		if (strcmp(attr_type->value(), "string") == 0)
+		std::string name = attr_name->value();
+		std::string type;
+
+		if (arrayContext != nullptr)
 		{
-			*getValuePtr<string>(path + attr_name->value()) = utf8ToLatin1(attr_value->value());
+			ArrayContext::iterator it = arrayContext->find(name);
+			if (it == arrayContext->end())
+			{
+				parameterChild = parameterChild->next_sibling("parameter");
+				continue;
+			}
+
+			type = it->second;
 		}
-		else if (strcmp(attr_type->value(), "int") == 0)
+		else
 		{
-			*getValuePtr<int>(path + attr_name->value()) = atoi(attr_value->value());
+			xml_attribute<>* attr_type = parameterChild->first_attribute("type");
+
+			if (attr_type == nullptr)
+			{
+				throwMissingAttribute(path, "parameter", "type");
+			}
+
+			type = string(attr_type->value());
 		}
-		else if (strcmp(attr_type->value(), "float") == 0)
+
+		if (strcmp(type.c_str(), "string") == 0)
 		{
-			*getValuePtr<float>(path + attr_name->value()) = (float)atof(attr_value->value());
+			*getValuePtr<string>(path + name) = utf8ToLatin1(attr_value->value());
 		}
-		else if (strcmp(attr_type->value(), "double") == 0)
+		else if (strcmp(type.c_str(), "int") == 0)
 		{
-			*getValuePtr<double>(path + attr_name->value()) = atof(attr_value->value());
+			*getValuePtr<int>(path + name) = atoi(attr_value->value());
 		}
-		else if (strcmp(attr_type->value(), "vec2") == 0)
+		else if (strcmp(type.c_str(), "float") == 0)
 		{
-			*getValuePtr<Vec2f>(path + attr_name->value()) = parseVector<Vec2f>(string(attr_value->value()));
+			*getValuePtr<float>(path + name) = float(atof(attr_value->value()));
 		}
-		else if (strcmp(attr_type->value(), "vec3") == 0)
+		else if (strcmp(type.c_str(), "double") == 0)
 		{
-			*getValuePtr<Vec3f>(path + attr_name->value()) = parseVector<Vec3f>(string(attr_value->value()));
+			*getValuePtr<double>(path + name) = atof(attr_value->value());
 		}
-		else if (strcmp(attr_type->value(), "vec4") == 0)
+		else if (strcmp(type.c_str(), "vec2") == 0)
 		{
-			*getValuePtr<Vec4f>(path + attr_name->value()) = parseVector<Vec4f>(string(attr_value->value()));
+			string val = string(attr_value->value());
+
+			*getValuePtr<Vec2f>(path + name) = parseVector<Vec2f>(val);
+		}
+		else if (strcmp(type.c_str(), "vec3") == 0)
+		{
+			string val = string(attr_value->value());
+
+			*getValuePtr<Vec3f>(path + name) = parseVector<Vec3f>(val);
+		}
+		else if (strcmp(type.c_str(), "vec4") == 0)
+		{
+			string val = string(attr_value->value());
+
+			*getValuePtr<Vec4f>(path + name) = parseVector<Vec4f>(val);
 		}
 
 		parameterChild = parameterChild->next_sibling("parameter");
 	}
+}
+
+void ParameterManager::parseXmlArrayFields(xml_node<>* node, const std::string& path, ArrayContext* arrayContext)
+{
+	xml_node<>* fieldChild = node->first_node("field");
+	while (fieldChild != nullptr)
+	{
+		xml_attribute<>* attr_name = fieldChild->first_attribute("name");
+		xml_attribute<>* attr_type = fieldChild->first_attribute("type");
+		
+		if (attr_name == nullptr || attr_type == nullptr)
+		{
+			throwMissingAttribute(path, "field");
+		}
+
+		string name = string(attr_name->value());
+		string type = string(attr_type->value());
+
+		if (arrayContext->find(name) != arrayContext->end())
+		{
+			throw GameException("Field " + name + " already exists at " + path);
+		}
+
+		arrayContext->insert(ArrayContext::value_type(name, type));
+
+		fieldChild = fieldChild->next_sibling("field");
+	}
+}
+
+void ParameterManager::parseXmlArrayElements(rapidxml::xml_node<>* node, std::string path, ArrayContext* context)
+{
+	int counter = 0;
+
+	xml_node<>* elementChild = node->first_node("element");
+	while (elementChild != nullptr)
+	{
+		char ac[16];
+		sprintf(ac, "[%d]", counter);
+
+		parseXmlGroup(elementChild, path + string(ac) + "/", context);
+
+		counter++;
+		elementChild = elementChild->next_sibling("element");
+	}
+}
+
+void ParameterManager::throwMissingAttribute(const std::string& path, const std::string& tag)
+{
+	throw GameException("Missing attribute(s) in " + tag + " tag at " + path);
+}
+
+void ParameterManager::throwMissingAttribute(const std::string& path, const std::string& tag, const std::string& attribute)
+{
+	throw GameException("Missing attribute " + attribute + " in " + tag + " tag at " + path);
 }
