@@ -1,4 +1,4 @@
-#include <osgGaming/ParameterManager.h>
+#include <osgGaming/PropertiesManager.h>
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/GameException.h>
 #include <osgGaming/Helper.h>
@@ -8,9 +8,9 @@ using namespace osg;
 using namespace std;
 using namespace rapidxml;
 
-ref_ptr<ParameterManager> Singleton<ParameterManager>::_instance;
+ref_ptr<PropertiesManager> Singleton<PropertiesManager>::_instance;
 
-void ParameterManager::loadParametersFromXmlResource(string resourceKey)
+void PropertiesManager::loadPropertiesFromXmlResource(string resourceKey)
 {
 	string xmlText = ResourceManager::getInstance()->loadText(resourceKey);
 
@@ -39,7 +39,7 @@ void ParameterManager::loadParametersFromXmlResource(string resourceKey)
 	ResourceManager::getInstance()->clearCacheResource(resourceKey);
 }
 
-void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayContext* arrayContext)
+void PropertiesManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayContext* arrayContext)
 {
 	if (arrayContext == nullptr)
 	{
@@ -77,16 +77,16 @@ void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayCo
 		}
 	}
 
-	xml_node<>* parameterChild = node->first_node("parameter");
-	while (parameterChild != nullptr)
+	xml_node<>* propertyChild = node->first_node("property");
+	while (propertyChild != nullptr)
 	{
-		xml_attribute<>* attr_name = parameterChild->first_attribute("name");
-		//xml_attribute<>* attr_type = parameterChild->first_attribute("type");
-		xml_attribute<>* attr_value = parameterChild->first_attribute("value");
+		xml_attribute<>* attr_name = propertyChild->first_attribute("name");
+		//xml_attribute<>* attr_type = propertyChild->first_attribute("type");
+		xml_attribute<>* attr_value = propertyChild->first_attribute("value");
 
 		if (attr_name == nullptr || attr_value == nullptr)
 		{
-			throwMissingAttribute(path, "parameter");
+			throwMissingAttribute(path, "property");
 		}
 
 		std::string name = attr_name->value();
@@ -97,7 +97,7 @@ void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayCo
 			ArrayContext::iterator it = arrayContext->find(name);
 			if (it == arrayContext->end())
 			{
-				parameterChild = parameterChild->next_sibling("parameter");
+				propertyChild = propertyChild->next_sibling("property");
 				continue;
 			}
 
@@ -105,11 +105,11 @@ void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayCo
 		}
 		else
 		{
-			xml_attribute<>* attr_type = parameterChild->first_attribute("type");
+			xml_attribute<>* attr_type = propertyChild->first_attribute("type");
 
 			if (attr_type == nullptr)
 			{
-				throwMissingAttribute(path, "parameter", "type");
+				throwMissingAttribute(path, "property", "type");
 			}
 
 			type = string(attr_type->value());
@@ -150,11 +150,11 @@ void ParameterManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayCo
 			*getValuePtr<Vec4f>(path + name) = parseVector<Vec4f>(val);
 		}
 
-		parameterChild = parameterChild->next_sibling("parameter");
+		propertyChild = propertyChild->next_sibling("property");
 	}
 }
 
-void ParameterManager::parseXmlArrayFields(xml_node<>* node, const std::string& path, ArrayContext* arrayContext)
+void PropertiesManager::parseXmlArrayFields(xml_node<>* node, const std::string& path, ArrayContext* arrayContext)
 {
 	xml_node<>* fieldChild = node->first_node("field");
 	while (fieldChild != nullptr)
@@ -181,7 +181,7 @@ void ParameterManager::parseXmlArrayFields(xml_node<>* node, const std::string& 
 	}
 }
 
-void ParameterManager::parseXmlArrayElements(rapidxml::xml_node<>* node, std::string path, ArrayContext* context)
+void PropertiesManager::parseXmlArrayElements(rapidxml::xml_node<>* node, std::string path, ArrayContext* context)
 {
 	int counter = 0;
 
@@ -198,12 +198,12 @@ void ParameterManager::parseXmlArrayElements(rapidxml::xml_node<>* node, std::st
 	}
 }
 
-void ParameterManager::throwMissingAttribute(const std::string& path, const std::string& tag)
+void PropertiesManager::throwMissingAttribute(const std::string& path, const std::string& tag)
 {
 	throw GameException("Missing attribute(s) in " + tag + " tag at " + path);
 }
 
-void ParameterManager::throwMissingAttribute(const std::string& path, const std::string& tag, const std::string& attribute)
+void PropertiesManager::throwMissingAttribute(const std::string& path, const std::string& tag, const std::string& attribute)
 {
 	throw GameException("Missing attribute " + attribute + " in " + tag + " tag at " + path);
 }

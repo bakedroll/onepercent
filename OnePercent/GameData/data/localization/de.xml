@@ -2,15 +2,15 @@
 <root>
 
 	<group name="localization">
-		<parameter name="buttonText_startGame" type="string" value="Spiel starten" />
-		<parameter name="buttonText_endGame" type="string" value="Spiel beenden" />
+		<property name="buttonText_startGame" type="string" value="Spiel starten" />
+		<property name="buttonText_endGame" type="string" value="Spiel beenden" />
 		
-		<parameter name="infoText_selectCountry" type="string" value="Bitte wähle ein Land aus." />
-		<parameter name="infoText_selectCountryAgain" type="string" value="Klicke noch einmal, um die Auswahl zu bestätigen." />
+		<property name="infoText_selectCountry" type="string" value="Bitte wähle ein Land aus." />
+		<property name="infoText_selectCountryAgain" type="string" value="Klicke noch einmal, um die Auswahl zu bestätigen." />
 		
-		<parameter name="infoText_day" type="string" value="Tag" />
+		<property name="infoText_day" type="string" value="Tag" />
 		
-		<parameter name="infoText_loading" type="string" value="Laden" />
+		<property name="infoText_loading" type="string" value="Laden" />
 	</group>
 	
 </root>

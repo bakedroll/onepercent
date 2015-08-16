@@ -6,7 +6,7 @@
 #include <osgGaming/UIText.h>
 
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/ParameterManager.h>
+#include <osgGaming/PropertiesManager.h>
 
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
@@ -32,13 +32,13 @@ LoadingGlobeOverviewState::LoadingGlobeOverviewState(AbstractGameState::Abstract
 
 void LoadingGlobeOverviewState::initialize()
 {
-	ParameterManager::getInstance()->loadParametersFromXmlResource("./GameData/data/localization/en.xml");
+	PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/localization/en.xml");
 
 	float projNear = float(getWorld()->getCameraManipulator()->getProjectionNear());
 	float projFar = float(getWorld()->getCameraManipulator()->getProjectionFar());
 
 	_loadingText = new UIText();
-	_loadingText->setText(~Parameter<string, Param_LocalizationInfoTextLoading>());
+	_loadingText->setText(~Property<string, Param_LocalizationInfoTextLoading>());
 	_loadingText->setFontSize(25);
 	_loadingText->setVerticalAlignment(UIElement::BOTTOM);
 	_loadingText->setMargin(10.0f);
@@ -55,7 +55,7 @@ void LoadingGlobeOverviewState::initialize()
 GameState::StateEvent* LoadingGlobeOverviewState::update()
 {
 	int dotCount = int(getSimulationTime() * 10.0) % 4;
-	string loadingTextString = ~Parameter<string, Param_LocalizationInfoTextLoading>();
+	string loadingTextString = ~Property<string, Param_LocalizationInfoTextLoading>();
 	for (int i = 0; i < dotCount; i++)
 		loadingTextString += ".";
 		
@@ -66,7 +66,7 @@ GameState::StateEvent* LoadingGlobeOverviewState::update()
 
 void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud, ref_ptr<GameSettings> settings)
 {
-	ParameterManager::getInstance()->loadParametersFromXmlResource("./GameData/data/game_parameters.xml");
+	PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/game_parameters.xml");
 
 	ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 

@@ -9,15 +9,15 @@
 			<field name="interest" type="float" />
 			
 			<element>
-				<parameter name="branch" value="banks" />
-				<parameter name="anger" value="0.1" />
-				<parameter name="interest" value="0.1" />
+				<property name="branch" value="banks" />
+				<property name="anger" value="0.1" />
+				<property name="interest" value="0.1" />
 			</element>
 			
 			<element>
-				<parameter name="branch" value="banks" />
-				<parameter name="anger" value="0.3" />
-				<parameter name="interest" value="0.2" />
+				<property name="branch" value="banks" />
+				<property name="anger" value="0.3" />
+				<property name="interest" value="0.2" />
 			</element>
 		
 		</array>

@@ -6,7 +6,7 @@
 #include "Globals.h"
 
 #include <osgGaming/World.h>
-#include <osgGaming/Parameter.h>
+#include <osgGaming/Property.h>
 
 namespace onep
 {
@@ -31,7 +31,7 @@ namespace onep
 		void updateCameraPosition(osg::Vec2f latLong, osg::Vec2f viewAngle, float distance);
 
 	private:
-		osgGaming::Parameter<float, Param_EarthRadiusName> _paramEarthRadius;
+		osgGaming::Property<float, Param_EarthRadiusName> _paramEarthRadius;
 
 		void updateSun(osg::Vec3f sunDirection);
 

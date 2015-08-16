@@ -4,6 +4,7 @@
 #include <osgGaming/ByteStream.h>
 #include <osgGaming/Helper.h>
 #include <osg/Image>
+#include <osgGaming/PropertiesManager.h>
 
 using namespace osgGaming;
 using namespace onep;
@@ -84,7 +85,7 @@ void Simulation::loadCountries()
 
 void Simulation::loadSkillsXml(std::string filename)
 {
-	ParameterManager::getInstance()->loadParametersFromXmlResource(filename);
+	PropertiesManager::getInstance()->loadPropertiesFromXmlResource(filename);
 }
 
 ref_ptr<Country> Simulation::getCountry(unsigned char id)

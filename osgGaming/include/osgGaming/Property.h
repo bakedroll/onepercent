@@ -2,16 +2,16 @@
 
 #include <string>
 
-#include <osgGaming/ParameterManager.h>
+#include <osgGaming/PropertiesManager.h>
 #include <osgGaming/GameException.h>
 
 namespace osgGaming
 {
 	template <typename T, char const* N = nullptr>
-	class Parameter
+	class Property
 	{
 	public:
-		Parameter()
+		Property()
 		{
 			if (N == nullptr)
 			{
@@ -19,13 +19,13 @@ namespace osgGaming
 			}
 
 			_name = N;
-			_value = ParameterManager::getInstance()->getValuePtr<T>(_name);
+			_value = PropertiesManager::getInstance()->getValuePtr<T>(_name);
 		}
 
-		Parameter(const char* key)
+		Property(const char* key)
 		{
 			_name = key;
-			_value = ParameterManager::getInstance()->getValuePtr<T>(_name);
+			_value = PropertiesManager::getInstance()->getValuePtr<T>(_name);
 		}
 
 		void operator =(T value)

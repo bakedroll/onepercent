@@ -4,13 +4,13 @@
 
 namespace osgGaming
 {
-	class AbstractParameterValue : public osg::Referenced
+	class AbstractPropertyValue : public osg::Referenced
 	{
 	
 	};
 
 	template <typename T>
-	class ParameterValue : public AbstractParameterValue
+	class PropertyValue : public AbstractPropertyValue
 	{
 	public:
 		T* getPtr()

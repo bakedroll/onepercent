@@ -1,6 +1,6 @@
 #include <osgGaming/UIMarkupLoader.h>
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/Parameter.h>
+#include <osgGaming/Property.h>
 #include <osgGaming/Helper.h>
 #include <osgGaming/GameException.h>
 
@@ -255,27 +255,27 @@ bool UIMarkupLoader::parseXmlAttribute(string& value)
 
 string UIMarkupLoader::parseXmlAttributeString(string value)
 {
-	return parseXmlAttribute(value) ? ~Parameter<string>(value.c_str()) : utf8ToLatin1(value.c_str());
+	return parseXmlAttribute(value) ? ~Property<string>(value.c_str()) : utf8ToLatin1(value.c_str());
 }
 
 int UIMarkupLoader::parseXmlAttributeInt(string value)
 {
-	return parseXmlAttribute(value) ? ~Parameter<int>(value.c_str()) : stoi(value);
+	return parseXmlAttribute(value) ? ~Property<int>(value.c_str()) : stoi(value);
 }
 
 float UIMarkupLoader::parseXmlAttributeFloat(string value)
 {
-	return parseXmlAttribute(value) ? ~Parameter<float>(value.c_str()) : stof(value);
+	return parseXmlAttribute(value) ? ~Property<float>(value.c_str()) : stof(value);
 }
 
 bool UIMarkupLoader::parseXmlAttributeBool(string value)
 {
-	return parseXmlAttribute(value) ? ~Parameter<bool>(value.c_str()) : (value == "true" ? true : false);
+	return parseXmlAttribute(value) ? ~Property<bool>(value.c_str()) : (value == "true" ? true : false);
 }
 
 Vec4f UIMarkupLoader::parseXmlAttributeVec4(string value)
 {
-	return parseXmlAttribute(value) ? ~Parameter<Vec4f>(value.c_str()) : parseVector<Vec4f>(value);
+	return parseXmlAttribute(value) ? ~Property<Vec4f>(value.c_str()) : parseVector<Vec4f>(value);
 }
 
 void UIMarkupLoader::parseXmlCellDefinitions(rapidxml::xml_node<>* node, const char* attrname, const char* defname, const char* tagname, ref_ptr<UICells> cells)

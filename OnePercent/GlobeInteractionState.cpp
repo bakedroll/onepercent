@@ -261,7 +261,7 @@ void GlobeInteractionState::dayTimerElapsed()
 	getGlobeOverviewWorld()->getSimulation()->step();
 	getGlobeOverviewWorld()->getSimulation()->printStats(true);
 
-	_textProgress->setText(~Parameter<string, Param_LocalizationInfoTextDay>() + " " + to_string(getGlobeOverviewWorld()->getSimulation()->getDay()));
+	_textProgress->setText(~Property<string, Param_LocalizationInfoTextDay>() + " " + to_string(getGlobeOverviewWorld()->getSimulation()->getDay()));
 }
 
 void GlobeInteractionState::startSimulation()

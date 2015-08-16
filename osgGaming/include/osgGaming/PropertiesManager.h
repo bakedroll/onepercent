@@ -7,11 +7,11 @@
 #include <rapidxml.hpp>
 
 #include <osgGaming/Singleton.h>
-#include <osgGaming/ParameterValue.h>
+#include <osgGaming/PropertyValue.h>
 
 namespace osgGaming
 {
-	class ParameterManager : public Singleton<ParameterManager>
+	class PropertiesManager : public Singleton<PropertiesManager>
 	{
 	public:
 		template <typename T>
@@ -20,20 +20,20 @@ namespace osgGaming
 			ValueMap::iterator it = _values.find(name);
 			if (it == _values.end())
 			{
-				ParameterValue<T>* value = new ParameterValue<T>();
+				PropertyValue<T>* value = new PropertyValue<T>();
 				_values.insert(ValueMap::value_type(name, value));
 
 				return value->getPtr();
 			}
 
-			return static_cast<ParameterValue<T>*>(it->second.get())->getPtr();
+			return static_cast<PropertyValue<T>*>(it->second.get())->getPtr();
 		}
 
-		void loadParametersFromXmlResource(std::string resourceKey);
+		void loadPropertiesFromXmlResource(std::string resourceKey);
 
 	private:
 		typedef std::map<std::string, std::string> ArrayContext;
-		typedef std::map<std::string, osg::ref_ptr<AbstractParameterValue>> ValueMap;
+		typedef std::map<std::string, osg::ref_ptr<AbstractPropertyValue>> ValueMap;
 
 		void parseXmlGroup(rapidxml::xml_node<>* node, std::string path, ArrayContext* arrayContext = nullptr);
 		void parseXmlArrayFields(rapidxml::xml_node<>* node, const std::string& path, ArrayContext* arrayContext);
