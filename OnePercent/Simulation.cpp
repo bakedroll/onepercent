@@ -87,10 +87,43 @@ void Simulation::loadSkillsXml(string filename)
 {
 	PropertiesManager::getInstance()->loadPropertiesFromXmlResource(filename);
 
+	int id = _skills.size();
 	int elements = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->size();
 	for (int i = 0; i < elements; i++)
 	{
 		string name = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "name")->get();
+		string type = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "branch")->get();
+		float anger = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<float>(i, "anger")->get();
+		float interest = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<float>(i, "interest")->get();
+
+		Country::SkillBranchType branch = {};
+		if (type == "banks")
+		{
+			branch = Country::SkillBranchType::BRANCH_BANKS;
+		}
+		else if (type == "control")
+		{
+			branch = Country::SkillBranchType::BRANCH_CONTROL;
+		}
+		else if (type == "concerns")
+		{
+			branch = Country::SkillBranchType::BRANCH_CONCERNS;
+		}
+		else if (type == "media")
+		{
+			branch = Country::SkillBranchType::BRANCH_MEDIA;
+		}
+		else if (type == "politics")
+		{
+			branch = Country::SkillBranchType::BRANCH_POLITICS;
+		}
+
+		ref_ptr<AbstractSkill> skill = new AbstractSkill(name, branch);
+		skill->setAnger(anger);
+		skill->setInterest(interest);
+
+		_skills.insert(SkillMap::value_type(id, skill));
+		id++;
 
 		printf("SKILL LOADED: %s\n", name.c_str());
 	}
@@ -134,6 +167,16 @@ string Simulation::getCountryName(Vec2f coord)
 	return it->second->getCountryName();
 }
 
+ref_ptr<AbstractSkill> Simulation::getSkill(int id)
+{
+	return _skills.find(id)->second;
+}
+
+int Simulation::getNumSkills()
+{
+	return _skills.size();
+}
+
 int Simulation::getDay()
 {
 	return _day;
@@ -141,9 +184,19 @@ int Simulation::getDay()
 
 void Simulation::step()
 {
-	for (CountryMap::iterator it = _countries.begin(); it != _countries.end(); ++it)
+	for (CountryMap::iterator itcountry = _countries.begin(); itcountry != _countries.end(); ++itcountry)
 	{
-		it->second->step();
+		itcountry->second->clearEffects();
+
+		for (SkillMap::iterator itskill = _skills.begin(); itskill != _skills.end(); ++itskill)
+		{
+			if (itskill->second->getActivated() && itcountry->second->getSKillBranchActivated(itskill->second->getBranch()))
+			{
+				itskill->second->takeEffect(itcountry->second);
+			}
+		}
+
+		itcountry->second->step();
 	}
 
 	_day++;
