@@ -83,9 +83,17 @@ void Simulation::loadCountries()
 	ResourceManager::getInstance()->clearCacheResource(countriesBinFilename);
 }
 
-void Simulation::loadSkillsXml(std::string filename)
+void Simulation::loadSkillsXml(string filename)
 {
 	PropertiesManager::getInstance()->loadPropertiesFromXmlResource(filename);
+
+	int elements = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->size();
+	for (int i = 0; i < elements; i++)
+	{
+		string name = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "name")->get();
+
+		printf("SKILL LOADED: %s\n", name.c_str());
+	}
 }
 
 ref_ptr<Country> Simulation::getCountry(unsigned char id)

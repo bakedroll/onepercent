@@ -10,6 +10,17 @@ using namespace rapidxml;
 
 ref_ptr<PropertiesManager> Singleton<PropertiesManager>::_instance;
 
+PropertiesManager::PropertiesManager()
+	: Singleton<PropertiesManager>()
+{
+	_root = new PropertyGroup();
+}
+
+ref_ptr<PropertyGroup> PropertiesManager::root()
+{
+	return _root;
+}
+
 void PropertiesManager::loadPropertiesFromXmlResource(string resourceKey)
 {
 	string xmlText = ResourceManager::getInstance()->loadText(resourceKey);
@@ -31,7 +42,7 @@ void PropertiesManager::loadPropertiesFromXmlResource(string resourceKey)
 		throw GameException("Invalid resource format: " + resourceKey);
 	}
 
-	parseXmlGroup(rootNode, "");
+	parseXmlGroup(rootNode, _root, "");
 
 	//locale::global(loc);
 
@@ -39,7 +50,7 @@ void PropertiesManager::loadPropertiesFromXmlResource(string resourceKey)
 	ResourceManager::getInstance()->clearCacheResource(resourceKey);
 }
 
-void PropertiesManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayContext* arrayContext)
+void PropertiesManager::parseXmlGroup(xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path, ArrayContext* arrayContext)
 {
 	if (arrayContext == nullptr)
 	{
@@ -53,7 +64,10 @@ void PropertiesManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayC
 				throwMissingAttribute(path, "group", "name");
 			}
 
-			parseXmlGroup(groupChild, path + attr_name->value() + "/");
+			string name = string(attr_name->value());
+
+			group->addGroup(name, new PropertyGroup());
+			parseXmlGroup(groupChild, group->group(name), path + name + "/");
 
 			groupChild = groupChild->next_sibling("group");
 		}
@@ -68,8 +82,13 @@ void PropertiesManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayC
 				throwMissingAttribute(path, "array", "name");
 			}
 
+			std::string name = attr_name->value();
 			ArrayContext context;
-			std::string p = path + attr_name->value();
+			std::string p = path + name;
+
+			group->addArray(name, new PropertyArray());
+			context.propertyArray = group->array(name);
+
 			parseXmlArrayFields(arrayChild, p, &context);
 			parseXmlArrayElements(arrayChild, p, &context);
 
@@ -81,7 +100,6 @@ void PropertiesManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayC
 	while (propertyChild != nullptr)
 	{
 		xml_attribute<>* attr_name = propertyChild->first_attribute("name");
-		//xml_attribute<>* attr_type = propertyChild->first_attribute("type");
 		xml_attribute<>* attr_value = propertyChild->first_attribute("value");
 
 		if (attr_name == nullptr || attr_value == nullptr)
@@ -94,8 +112,8 @@ void PropertiesManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayC
 
 		if (arrayContext != nullptr)
 		{
-			ArrayContext::iterator it = arrayContext->find(name);
-			if (it == arrayContext->end())
+			FieldMap::iterator it = arrayContext->fields.find(name);
+			if (it == arrayContext->fields.end())
 			{
 				propertyChild = propertyChild->next_sibling("property");
 				continue;
@@ -150,6 +168,16 @@ void PropertiesManager::parseXmlGroup(xml_node<>* node, std::string path, ArrayC
 			*getValuePtr<Vec4f>(path + name) = parseVector<Vec4f>(val);
 		}
 
+		AbstractPropertyValue::ValueMap::iterator it = _values.find(path + name);
+		if (arrayContext == nullptr)
+		{
+			group->addProperty(name, it->second);
+		}
+		else
+		{
+			arrayContext->propertyArray->addProperty(arrayContext->index, name, it->second);
+		}
+
 		propertyChild = propertyChild->next_sibling("property");
 	}
 }
@@ -170,12 +198,12 @@ void PropertiesManager::parseXmlArrayFields(xml_node<>* node, const std::string&
 		string name = string(attr_name->value());
 		string type = string(attr_type->value());
 
-		if (arrayContext->find(name) != arrayContext->end())
+		if (arrayContext->fields.find(name) != arrayContext->fields.end())
 		{
 			throw GameException("Field " + name + " already exists at " + path);
 		}
 
-		arrayContext->insert(ArrayContext::value_type(name, type));
+		arrayContext->fields.insert(FieldMap::value_type(name, type));
 
 		fieldChild = fieldChild->next_sibling("field");
 	}
@@ -191,7 +219,9 @@ void PropertiesManager::parseXmlArrayElements(rapidxml::xml_node<>* node, std::s
 		char ac[16];
 		sprintf(ac, "[%d]", counter);
 
-		parseXmlGroup(elementChild, path + string(ac) + "/", context);
+		context->index = counter;
+
+		parseXmlGroup(elementChild, nullptr, path + string(ac) + ".", context);
 
 		counter++;
 		elementChild = elementChild->next_sibling("element");
