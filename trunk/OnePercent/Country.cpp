@@ -31,6 +31,8 @@ Country::Country(string name, unsigned char id, float population, float wealth, 
 	  _dept(0.0f),
 	  _deptBalance(0.0f),
 	  _interest(0.0f),
+	  _angerInfluence(0.0f),
+	  _interestInfluence(0.0f),
 	  _id(id),
 	  _centerLatLong(centerLatLong),
 	  _size(size)
@@ -48,6 +50,16 @@ void Country::addNeighborCountry(osg::ref_ptr<Country> country, osg::ref_ptr<Nei
 	nc.info = info;
 
 	_neighborCountries.push_back(nc);
+}
+
+void Country::addAngerInfluence(float influence)
+{
+	_angerInfluence += influence;
+}
+
+void Country::addInterestInfluence(float influence)
+{
+	_interestInfluence += influence;
 }
 
 void Country::setSkillBranchActivated(SkillBranchType type, bool activated)
@@ -150,12 +162,18 @@ bool Country::anySkillBranchActivated()
 	return false;
 }
 
+void Country::clearEffects()
+{
+	_angerInfluence = 0.0f;
+	_interestInfluence = 0.0f;
+}
+
 void Country::step()
 {
 	if (_skillBranchActivated[BRANCH_BANKS])
 	{
 		_buyingPower = ~Property<float, Param_MechanicsStartBuyingPowerName>();
-		_interest = 0.05f;
+		_interest = 0.05f + _interestInfluence;
 
 		_deptBalance = _dept * _interest + _buyingPower;
 		_dept += _deptBalance;
@@ -163,7 +181,7 @@ void Country::step()
 		_dept = clampBetween(_dept, 0.0f, _wealth);
 	}
 
-	_angerBalance = getRelativeDept() * 0.1f;
+	_angerBalance = getRelativeDept() * 0.1f + _angerInfluence;
 	_anger += _angerBalance;
 
 	_anger = clampBetween(_anger, 0.0f, 1.0f);

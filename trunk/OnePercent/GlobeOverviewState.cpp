@@ -46,7 +46,7 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	{
 		stateEvent_endGame();
 	}
-	else if (key == GUIEventAdapter::KEY_1)
+	else if (key == GUIEventAdapter::KEY_Q)
 	{
 		if (getViewer()->hasPostProcessingEffect(HighDynamicRangeEffect::NAME))
 		{
@@ -55,7 +55,7 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 			getViewer()->setPostProcessingEffectEnabled(HighDynamicRangeEffect::NAME, enabled);
 		}
 	}
-	else if (key == GUIEventAdapter::KEY_2)
+	else if (key == GUIEventAdapter::KEY_W)
 	{
 		if (getViewer()->hasPostProcessingEffect(DepthOfFieldEffect::NAME))
 		{
@@ -64,7 +64,7 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 			getViewer()->setPostProcessingEffectEnabled(DepthOfFieldEffect::NAME, enabled);
 		}
 	}
-	else if (key == GUIEventAdapter::KEY_3)
+	else if (key == GUIEventAdapter::KEY_E)
 	{
 		if (getViewer()->hasPostProcessingEffect(FastApproximateAntiAliasingEffect::NAME))
 		{
@@ -78,21 +78,36 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 			getViewer()->setPostProcessingEffectEnabled(FastApproximateAntiAliasingEffect::NAME, enabled);
 		}
 	}
-	else if (key == GUIEventAdapter::KEY_0)
+	else if (key == GUIEventAdapter::KEY_F)
 	{
 		//getViewer()->setWindowedResolution(Vec2f(800, 600));
 
 		getViewer()->setFullscreenEnabled(!getViewer()->getFullscreenEnabled());
 	}
-	else if (key == GUIEventAdapter::KEY_Q)
+	else if (key == GUIEventAdapter::KEY_Minus)
 	{
 		_timeSpeed *= 0.75f;
 		printf("Speed: x%f\n", _timeSpeed);
 	}
-	else if (key == GUIEventAdapter::KEY_W)
+	else if (key == GUIEventAdapter::KEY_Plus)
 	{
 		_timeSpeed *= 1.25f;
 		printf("Speed: x%f\n", _timeSpeed);
+	}
+	else
+	{
+		int numSkills = _globeWorld->getSimulation()->getNumSkills();
+		for (int i = 0; i < numSkills; i++)
+		{
+			if (key == GUIEventAdapter::KEY_1 + i)
+			{
+				ref_ptr<AbstractSkill> skill = _globeWorld->getSimulation()->getSkill(i);
+				skill->setActivated(!skill->getActivated());
+
+				printf("Skill %s activated: %d\n", skill->getName().c_str(), int(skill->getActivated()));
+				break;
+			}
+		}
 	}
 	/*else
 	{

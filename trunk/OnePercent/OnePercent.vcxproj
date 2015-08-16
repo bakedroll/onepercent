@@ -76,6 +76,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AbstractSkill.cpp" />
     <ClCompile Include="BackgroundModel.cpp" />
     <ClCompile Include="CountriesMap.cpp" />
     <ClCompile Include="Country.cpp" />

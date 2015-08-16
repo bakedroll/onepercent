@@ -45,6 +45,9 @@ namespace onep
 
 		void addNeighborCountry(osg::ref_ptr<Country> country, osg::ref_ptr<NeighborCountryInfo> info);
 
+		void addAngerInfluence(float influence);
+		void addInterestInfluence(float influence);
+
 		void setSkillBranchActivated(SkillBranchType type, bool activated);
 
 		std::string getCountryName();
@@ -66,8 +69,9 @@ namespace onep
 
 		bool anySkillBranchActivated();
 
-		void step();
+		void clearEffects();
 
+		void step();
 	private:
 		std::string _name;
 
@@ -79,6 +83,9 @@ namespace onep
 		float _dept;
 		float _deptBalance;
 		float _interest;
+
+		float _angerInfluence;
+		float _interestInfluence;
 
 		bool _skillBranchActivated[SkillBranchCount];
 
