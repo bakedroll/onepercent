@@ -168,6 +168,12 @@
     <ClCompile Include="src\PropertiesManager.cpp">
       <Filter>Source Files\Parameters</Filter>
     </ClCompile>
+    <ClCompile Include="src\PropertyGroup.cpp">
+      <Filter>Source Files\Parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PropertyArray.cpp">
+      <Filter>Source Files\Parameters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\osgGaming\GameApplication.h">
@@ -321,6 +327,15 @@
       <Filter>Header Files\Parameters</Filter>
     </ClInclude>
     <ClInclude Include="include\osgGaming\PropertyValue.h">
+      <Filter>Header Files\Parameters</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\PropertyNode.h">
+      <Filter>Header Files\Parameters</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\PropertyGroup.h">
+      <Filter>Header Files\Parameters</Filter>
+    </ClInclude>
+    <ClInclude Include="include\osgGaming\PropertyArray.h">
       <Filter>Header Files\Parameters</Filter>
     </ClInclude>
   </ItemGroup>
