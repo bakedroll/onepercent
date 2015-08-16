@@ -37,3 +37,18 @@ void PropertyGroup::addProperty(std::string name, osg::ref_ptr<AbstractPropertyV
 		_properties.insert(PropertyMap::value_type(name, value));
 	}
 }
+
+bool PropertyGroup::hasGroup(std::string name)
+{
+	return _groups.find(name) != _groups.end();
+}
+
+bool PropertyGroup::hasArray(std::string name)
+{
+	return _arrays.find(name) != _arrays.end();
+}
+
+bool PropertyGroup::hasProperty(std::string name)
+{
+	return _properties.find(name) != _properties.end();
+}

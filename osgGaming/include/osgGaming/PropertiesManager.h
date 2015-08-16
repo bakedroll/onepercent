@@ -37,16 +37,26 @@ namespace osgGaming
 		void loadPropertiesFromXmlResource(std::string resourceKey);
 
 	private:
-		typedef std::map<std::string, std::string> FieldMap;
+		typedef struct _arrayField
+		{
+			std::string type;
+			std::string defaultValue;
+		} ArrayField;
+
+		typedef std::map<std::string, ArrayField> ArrayFieldMap;
 
 		typedef struct _arrayContext
 		{
 			int index;
 			osg::ref_ptr<PropertyArray> propertyArray;
-			FieldMap fields;
+			ArrayFieldMap fields;
 		} ArrayContext;
 
-		void parseXmlGroup(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path, ArrayContext* arrayContext = nullptr);
+		void initializeProperty(std::string path, std::string type, std::string value);;
+		void parseXmlNode(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path, ArrayContext* arrayContext = nullptr);
+		void parseXmlGroup(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path);
+		void parseXmlArray(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path);
+		void parseXmlProperty(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path, ArrayContext* arrayContext = nullptr);
 		void parseXmlArrayFields(rapidxml::xml_node<>* node, const std::string& path, ArrayContext* arrayContext);
 		void parseXmlArrayElements(rapidxml::xml_node<>* node, std::string path, ArrayContext* context);
 

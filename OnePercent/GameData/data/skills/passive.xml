@@ -6,8 +6,8 @@
 			
 			<field name="name" type="string" />
 			<field name="branch" type="string" />
-			<field name="anger" type="float" />
-			<field name="interest" type="float" />
+			<field name="anger" type="float" default="5.0" />
+			<field name="interest" type="float" default="0.0" />
 			
 			<element>
 				<property name="name" value="INTEREST I" />
@@ -21,6 +21,11 @@
 				<property name="branch" value="banks" />
 				<property name="anger" value="0.3" />
 				<property name="interest" value="0.2" />
+			</element>
+			
+			<element>
+				<property name="name" value="MEDIA I" />
+				<property name="branch" value="media" />
 			</element>
 		
 		</array>
