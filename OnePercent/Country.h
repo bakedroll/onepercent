@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace onep
 {
@@ -29,6 +30,7 @@ namespace onep
 		} NeighborCountry;
 
 		typedef std::vector<NeighborCountry> NeighborCountryList;
+		typedef std::map<unsigned char, osg::ref_ptr<Country>> Map;
 
 		static const int SkillBranchCount = 5;
 

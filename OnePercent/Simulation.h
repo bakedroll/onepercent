@@ -18,6 +18,7 @@ namespace onep
 
 		void loadCountries();
 		void loadSkillsXml(std::string filename);
+		const Country::Map& getCountryMap();
 
 		osg::ref_ptr<Country> getCountry(unsigned char id);
 		osg::ref_ptr<Country> getCountry(osg::Vec2f coord);
@@ -33,11 +34,8 @@ namespace onep
 
 		void printStats(bool onlyActivated = false);
 	private:
-		typedef std::map<unsigned char, osg::ref_ptr<Country>> CountryMap;
-		typedef std::map<int, osg::ref_ptr<AbstractSkill>> SkillMap;
-
-		CountryMap _countries;
-		SkillMap _skills;
+		Country::Map _countries;
+		AbstractSkill::Map _skills;
 
 		osg::ref_ptr<CountriesMap> _countriesMap;
 
