@@ -4,6 +4,7 @@
 #include "BackgroundModel.h"
 #include "Simulation.h"
 #include "Globals.h"
+#include "CountryOverlay.h"
 
 #include <osgGaming/World.h>
 #include <osgGaming/Property.h>
@@ -20,6 +21,7 @@ namespace onep
 		osg::ref_ptr<Simulation> getSimulation();
 		
 		void setGlobeModel(osg::ref_ptr<GlobeModel> globeModel);
+		void setCountryOverlay(osg::ref_ptr<CountryOverlay> countryOverlay);
 		void setBackgroundModel(osg::ref_ptr<BackgroundModel> backgroundModel);
 
 		void setDay(float day);
@@ -29,13 +31,13 @@ namespace onep
 		float getCameraDistance();
 
 		void updateCameraPosition(osg::Vec2f latLong, osg::Vec2f viewAngle, float distance);
-
 	private:
 		osgGaming::Property<float, Param_EarthRadiusName> _paramEarthRadius;
 
 		void updateSun(osg::Vec3f sunDirection);
 
 		osg::ref_ptr<GlobeModel> _globeModel;
+		osg::ref_ptr<CountryOverlay> _countryOverlay;
 		osg::ref_ptr<BackgroundModel> _backgroundModel;
 
 		osg::ref_ptr<Simulation> _simulation;

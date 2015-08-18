@@ -53,6 +53,17 @@ void GlobeOverviewWorld::setGlobeModel(ref_ptr<GlobeModel> globeModel)
 	_globeModel = globeModel;
 }
 
+void GlobeOverviewWorld::setCountryOverlay(osg::ref_ptr<CountryOverlay> countryOverlay)
+{
+	if (_countryOverlay.valid())
+	{
+		getRootNode()->removeChild(_countryOverlay);
+	}
+
+	getRootNode()->addChild(countryOverlay);
+	_countryOverlay = countryOverlay;
+}
+
 void GlobeOverviewWorld::setBackgroundModel(ref_ptr<BackgroundModel> backgroundModel)
 {
 	if (_backgroundModel.valid())

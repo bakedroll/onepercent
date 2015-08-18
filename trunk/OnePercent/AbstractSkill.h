@@ -9,6 +9,8 @@ namespace onep
 	class AbstractSkill : public osg::Referenced
 	{
 	public:
+		typedef std::map<int, osg::ref_ptr<AbstractSkill>> Map;
+
 		AbstractSkill(std::string name, Country::SkillBranchType branch);
 
 		void setAnger(float anger);

@@ -49,7 +49,7 @@ void Simulation::loadCountries()
 			Vec2f((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI),
 			Vec2f(width, height));
 
-		_countries.insert(CountryMap::value_type(id, country));
+		_countries.insert(Country::Map::value_type(id, country));
 
 		delete[] name_p;
 	}
@@ -122,11 +122,16 @@ void Simulation::loadSkillsXml(string filename)
 		skill->setAnger(anger);
 		skill->setInterest(interest);
 
-		_skills.insert(SkillMap::value_type(id, skill));
+		_skills.insert(AbstractSkill::Map::value_type(id, skill));
 		id++;
 
 		printf("SKILL LOADED: %s\n", name.c_str());
 	}
+}
+
+const Country::Map& Simulation::getCountryMap()
+{
+	return _countries;
 }
 
 ref_ptr<Country> Simulation::getCountry(unsigned char id)
@@ -158,7 +163,7 @@ unsigned char Simulation::getCountryId(Vec2f coord)
 
 string Simulation::getCountryName(Vec2f coord)
 {
-	CountryMap::iterator it = _countries.find(getCountryId(coord));
+	Country::Map::iterator it = _countries.find(getCountryId(coord));
 	if (it == _countries.end())
 	{
 		return "No country selected";
@@ -184,11 +189,11 @@ int Simulation::getDay()
 
 void Simulation::step()
 {
-	for (CountryMap::iterator itcountry = _countries.begin(); itcountry != _countries.end(); ++itcountry)
+	for (Country::Map::iterator itcountry = _countries.begin(); itcountry != _countries.end(); ++itcountry)
 	{
 		itcountry->second->clearEffects();
 
-		for (SkillMap::iterator itskill = _skills.begin(); itskill != _skills.end(); ++itskill)
+		for (AbstractSkill::Map::iterator itskill = _skills.begin(); itskill != _skills.end(); ++itskill)
 		{
 			if (itskill->second->getActivated() && itcountry->second->getSKillBranchActivated(itskill->second->getBranch()))
 			{
@@ -259,7 +264,7 @@ void Simulation::printStats(bool onlyActivated)
 	printf("%s | %s | %s | %s | %s\n", fillString("Country", 22).c_str(), fillString("Wealth", 8).c_str(), fillString("Anger/Balance", 25).c_str(), fillString("Dept/Relative/Balance", 37).c_str(), fillString("Skills", 19).c_str());
 	printf("------------------------------------------------------------------------------------------------------------\n\n");
 
-	for (CountryMap::iterator it = _countries.begin(); it != _countries.end(); ++it)
+	for (Country::Map::iterator it = _countries.begin(); it != _countries.end(); ++it)
 	{
 		if (!onlyActivated || it->second->anySkillBranchActivated())
 		{
