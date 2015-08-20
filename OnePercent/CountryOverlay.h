@@ -12,8 +12,9 @@ namespace onep
 	public:
 		CountryOverlay();
 
-		void setCountryMap(const Country::Map& countryMap);
+		bool getEnabled();
 
+		void setCountryMap(const Country::Map& countryMap);
 		void setEnabled(bool enabled);
 
 	private:

@@ -17,6 +17,7 @@ namespace onep
 		GlobeOverviewWorld();
 
 		osg::ref_ptr<GlobeModel> getGlobeModel();
+		osg::ref_ptr<CountryOverlay> getCountryOverlay();
 		osg::ref_ptr<BackgroundModel> getBackgroundModel();
 		osg::ref_ptr<Simulation> getSimulation();
 		
