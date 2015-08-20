@@ -25,6 +25,11 @@ CountryOverlay::CountryOverlay()
 	setScale(Vec3f(0.01, 0.01, 0.01));
 }
 
+bool CountryOverlay::getEnabled()
+{
+	return _enabled;
+}
+
 void CountryOverlay::setCountryMap(const Country::Map& countryMap)
 {
 	ref_ptr<osgText::Font> font = osgGaming::ResourceManager::getInstance()->loadFont("./GameData/fonts/coolvetica rg.ttf");

@@ -32,6 +32,11 @@ ref_ptr<GlobeModel> GlobeOverviewWorld::getGlobeModel()
 	return _globeModel;
 }
 
+ref_ptr<CountryOverlay> GlobeOverviewWorld::getCountryOverlay()
+{
+	return _countryOverlay;
+}
+
 ref_ptr<BackgroundModel> GlobeOverviewWorld::getBackgroundModel()
 {
 	return _backgroundModel;

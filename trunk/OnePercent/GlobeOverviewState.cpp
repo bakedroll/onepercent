@@ -94,6 +94,12 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 		_timeSpeed *= 1.25f;
 		printf("Speed: x%f\n", _timeSpeed);
 	}
+	else if (key == GUIEventAdapter::KEY_O)
+	{
+		ref_ptr<CountryOverlay> overlay = _globeWorld->getCountryOverlay();
+
+		overlay->setEnabled(!overlay->getEnabled());
+	}
 	else
 	{
 		int numSkills = _globeWorld->getSimulation()->getNumSkills();
