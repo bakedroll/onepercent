@@ -218,7 +218,7 @@ namespace ImageHelper
             byte counter = 0;
             foreach (var tLine in tableLines)
             {
-                var values = tLine.Split('\t').Where(x => !x.Equals(string.Empty)).ToArray();
+                var values = tLine.Split(';').Where(x => !x.Equals(string.Empty)).Select(x => x.Trim()).ToArray();
 
                 var color = ColorTranslator.FromHtml("#" + values[2]);
 
