@@ -19,11 +19,16 @@ Simulation::Simulation()
 
 void Simulation::loadCountries()
 {
+	typedef vector<unsigned char> NeighborList;
+	typedef map<unsigned char, NeighborList> NeighborMap;
+
 	string countriesBinFilename = "./GameData/data/countries.dat";
 
 	char* bytes = ResourceManager::getInstance()->loadBinary(countriesBinFilename);
 
 	ByteStream stream(bytes);
+
+	NeighborMap neighborMap;
 
 	int ncountries = stream.read<int>();
 
@@ -49,34 +54,33 @@ void Simulation::loadCountries()
 			Vec2f((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI),
 			Vec2f(width, height));
 
+		NeighborList neighborList;
+
+		int neighbors_count = stream.read<int>();
+		for (int j = 0; j < neighbors_count; j++)
+		{
+			neighborList.push_back(stream.read<unsigned char>());
+		}
+
+		neighborMap.insert(NeighborMap::value_type(id, neighborList));
+
 		_countries.insert(Country::Map::value_type(id, country));
 
 		delete[] name_p;
 	}
 
+	for (Country::Map::iterator it = _countries.begin(); it != _countries.end(); ++it)
+	{
+		NeighborList neighborList = neighborMap.find(it->second->getId())->second;
+
+		for (NeighborList::iterator nit = neighborList.begin(); nit != neighborList.end(); ++nit)
+		{
+			it->second->addNeighborCountry(getCountry(*nit), new NeighborCountryInfo());
+		}
+	}
+
 	int mapWidth = stream.read<int>();
 	int mapHeight = stream.read<int>();
-
-
-	// dummy neighbors
-	ref_ptr<Country> germany = getCountry(20);
-
-	ref_ptr<Country> benelux = getCountry(10);
-	ref_ptr<Country> france = getCountry(25);
-	ref_ptr<Country> switzerland = getCountry(83);
-	ref_ptr<Country> austria = getCountry(70);
-	ref_ptr<Country> czech = getCountry(99);
-	ref_ptr<Country> poland = getCountry(77);
-	ref_ptr<Country> denmark = getCountry(19);
-
-	germany->addNeighborCountry(benelux, new NeighborCountryInfo());
-	germany->addNeighborCountry(france, new NeighborCountryInfo());
-	germany->addNeighborCountry(switzerland, new NeighborCountryInfo());
-	germany->addNeighborCountry(austria, new NeighborCountryInfo());
-	germany->addNeighborCountry(czech, new NeighborCountryInfo());
-	germany->addNeighborCountry(poland, new NeighborCountryInfo());
-	germany->addNeighborCountry(denmark, new NeighborCountryInfo());
-	// ###
 
 	_countriesMap = new CountriesMap(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
 

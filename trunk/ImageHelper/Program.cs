@@ -56,10 +56,14 @@ namespace ImageHelper
     internal struct CountryInfo
     {
         public byte Id { get; set; }
+        public string NameStr { get; set; }
         public byte[] Name { get; set; }
         public float Population { get; set; }
         public int Bip { get; set; }
         public Bounds Bounds { get; set; }
+
+        public List<string> Neighbors { get; set; }
+        public List<byte> NeighborsId { get; set; } 
     }
 
     class Program
@@ -218,7 +222,7 @@ namespace ImageHelper
             byte counter = 0;
             foreach (var tLine in tableLines)
             {
-                var values = tLine.Split(';').Where(x => !x.Equals(string.Empty)).Select(x => x.Trim()).ToArray();
+                var values = tLine.Split(';').Select(x => x.Trim()).Where(x => !x.Equals(string.Empty)).ToArray();
 
                 var color = ColorTranslator.FromHtml("#" + values[2]);
 
@@ -231,13 +235,32 @@ namespace ImageHelper
                     countries.Add(color, new CountryInfo
                     {
                         Id = counter,
+                        NameStr = values[1],
                         Name = asen.GetBytes(values[1]),
                         Population = float.Parse(values[3]),
                         Bip = int.Parse(values[4]),
-                        Bounds = new Bounds()
+                        Bounds = new Bounds(),
+                        Neighbors = values.Reverse().Take(values.Length - 5).Reverse().ToList(),
+                        NeighborsId = new List<byte>()
                     });
 
                     counter++;
+                }
+            }
+
+            foreach (var country in countries)
+            {
+                foreach (var neighbor in country.Value.Neighbors)
+                {
+                    if (countries.Any(x => x.Value.NameStr.Equals(neighbor)))
+                    {
+                        var neighborCountry = countries.Single(x => x.Value.NameStr.Equals(neighbor));
+                        country.Value.NeighborsId.Add(neighborCountry.Value.Id);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Neighbor not found: {0} at: {1}", neighbor, country.Value.NameStr);
+                    }
                 }
             }
 
@@ -302,6 +325,8 @@ namespace ImageHelper
                     writer.Write(country.Value.Bounds.CenterY);
                     writer.Write(country.Value.Bounds.Width);
                     writer.Write(country.Value.Bounds.Height);
+                    writer.Write(country.Value.NeighborsId.Count);
+                    country.Value.NeighborsId.ForEach(x => writer.Write(x));
                 }
 
                 writer.Write(newWidth);
