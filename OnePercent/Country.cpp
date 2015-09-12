@@ -139,7 +139,7 @@ float Country::getAngerBalance()
 	return _angerBalance;
 }
 
-Country::NeighborCountryList& Country::getNeighborCountries()
+Country::Neighbors& Country::getNeighborCountries()
 {
 	return _neighborCountries;
 }

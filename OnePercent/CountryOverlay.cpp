@@ -50,11 +50,19 @@ void CountryOverlay::setCountryMap(const Country::Map& countryMap)
 			continue;
 		}
 
-		std::string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str());
+		std::string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str()) + "\n";
+		Country::Neighbors neighbors = it->second->getNeighborCountries();
+
+		bool first = true;
+		for (Country::Neighbors::iterator nit = neighbors.begin(); nit != neighbors.end(); ++nit)
+		{
+			name += (first ? "" : "; ") + osgGaming::utf8ToLatin1(nit->country->getCountryName().c_str());
+			first = false;
+		}
 
 		ref_ptr<osgText::Text> text = new osgText::Text();
 
-		text->setCharacterSize(14);
+		text->setCharacterSize(10);
 		text->setFont(font);
 		text->setText(name);
 		text->setAlignment(osgText::Text::AlignmentType::CENTER_CENTER);

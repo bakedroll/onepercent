@@ -283,7 +283,7 @@ namespace ImageHelper
                         countries.TryGetValue(color, out info);
 
                         float relX = (float)x / newWidth;
-                        if (info.Id == 80 && relX < 0.2) // Russia
+                        if (info.NameStr == "Russland" && relX < 0.2) // Russia
                         {
                             info.Bounds.Expand((float)x / (newWidth - 1) + 1.0f, (float)y / (newHeight - 1));
                         }

@@ -29,7 +29,7 @@ namespace onep
 			osg::ref_ptr<NeighborCountryInfo> info;
 		} NeighborCountry;
 
-		typedef std::vector<NeighborCountry> NeighborCountryList;
+		typedef std::vector<NeighborCountry> Neighbors;
 		typedef std::map<unsigned char, osg::ref_ptr<Country>> Map;
 
 		static const int SkillBranchCount = 5;
@@ -65,7 +65,7 @@ namespace onep
 		float getRelativeDept();
 		float getAnger();
 		float getAngerBalance();
-		NeighborCountryList& getNeighborCountries();
+		Neighbors& getNeighborCountries();
 
 		bool getSKillBranchActivated(SkillBranchType type);
 
@@ -95,6 +95,6 @@ namespace onep
 		osg::Vec2f _centerLatLong;
 		osg::Vec2f _size;
 
-		NeighborCountryList _neighborCountries;
+		Neighbors _neighborCountries;
 	};
 }
