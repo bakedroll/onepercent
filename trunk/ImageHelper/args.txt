@@ -1,13 +1,11 @@
 ﻿Merge:
 
-0 ../../../../OnePercent/data/earth/clouds/fair_clouds_8k.png ../../../../OnePercent/data/earth/clouds/n_amer_clouds_8k.png ../../../../OnePercent/data/earth/clouds/se_asia_clouds_8k.png ../../../../OnePercent/data/earth/clouds/storm_clouds_8k.png ../../../../OnePercent/data/earth/clouds/clouds.png
+0 0 ../../../../Resources/earth_textures/water_8k.png ../../../../Resources/earth_textures/relief_8k.png ../../../../Resources/earth_textures/cities_8k.png ../../../../Resources/earth_textures/boundaries_8k.png ../../../../Resources/TEMP/specreliefcitiesbounds.png
 
 Subdivide:
 
-1 ../../../../OnePercent/data/earth/boundaries/countries_polar_greyscale_map_8192x4096.png 2 1 ../../../../OnePercent/data/earth/countries/8k/
+1 0 ../../../../Resources/TEMP/specreliefcitiesbounds.png 2 1 ../../../../OnePercent/GameData/textures/earth/specreliefcitiesbounds/8k
 
 convert countries map:
-
-3 ../../../../OnePercent/data/earth/boundaries/Laender.txt ../../../../OnePercent/data/earth/boundaries/boundries_8k.png ../../../../OnePercent/data/earth/boundaries/countries_polar_greyscale_map_2048x1024.png 2048 1024 ../../../../OnePercent/GameData/data/countries.dat
 
 3 0 ../../../../Resources/boundaries/Laender.txt ../../../../Resources/boundaries/boundries_8k.png ../../../../Resources/TEMP/countries_map.png 2048 1024 8192 4096 ../../../../OnePercent/GameData/data/countries.dat
