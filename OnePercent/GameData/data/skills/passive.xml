@@ -12,20 +12,21 @@
 			<element>
 				<property name="name" value="INTEREST I" />
 				<property name="branch" value="banks" />
-				<property name="anger" value="0.1" />
+				<property name="anger" value="0.001" />
 				<property name="interest" value="0.1" />
 			</element>
 			
 			<element>
 				<property name="name" value="INTEREST II" />
 				<property name="branch" value="banks" />
-				<property name="anger" value="0.3" />
+				<property name="anger" value="0.003" />
 				<property name="interest" value="0.2" />
 			</element>
 			
 			<element>
-				<property name="name" value="MEDIA I" />
-				<property name="branch" value="media" />
+				<property name="name" value="ANGER TEST" />
+				<property name="branch" value="banks" />
+				<property name="anger" value="-1.0" />
 			</element>
 		
 		</array>
