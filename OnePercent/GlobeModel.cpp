@@ -254,7 +254,7 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 
 			sprintf(colormap_file, "./GameData/textures/earth/color/%s/%dx%d.png", resolutionLevel0, x, y);
 			sprintf(nightmap_file, "./GameData/textures/earth/night/%s/%dx%d.png", resolutionLevel0, x, y);
-			sprintf(specreliefcitiesboundariesmap_file, "./GameData/textures/earth/specular_relief_cities/%s/%dx%d.png", resolutionLevel1, x, y);
+			sprintf(specreliefcitiesboundariesmap_file, "./GameData/textures/earth/specreliefcitiesbounds/%s/%dx%d.png", resolutionLevel1, x, y);
 			sprintf(normalmap_file, "./GameData/textures/earth/normal/%s/%dx%d.png", resolutionLevel1, x, y);
 			sprintf(countriesmap_file, "./GameData/textures/earth/countries/%s/%dx%d.png", resolutionLevel0, x, y);
 
