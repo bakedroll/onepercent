@@ -8,7 +8,7 @@
 #include <osgGaming/ResourceManager.h>
 
 using namespace onep;
-
+using namespace std;
 using namespace osg;
 
 CountryOverlay::CountryOverlay()
@@ -50,7 +50,8 @@ void CountryOverlay::setCountryMap(const Country::Map& countryMap)
 			continue;
 		}
 
-		std::string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str()) + "\n";
+		string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str());
+		/*std::string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str()) + "\n";
 		Country::Neighbors neighbors = it->second->getNeighborCountries();
 
 		bool first = true;
@@ -58,7 +59,7 @@ void CountryOverlay::setCountryMap(const Country::Map& countryMap)
 		{
 			name += (first ? "" : "; ") + osgGaming::utf8ToLatin1(nit->country->getCountryName().c_str());
 			first = false;
-		}
+		}*/
 
 		ref_ptr<osgText::Text> text = new osgText::Text();
 

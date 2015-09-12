@@ -49,9 +49,12 @@ namespace onep
 
 		bool ready();
 
+		void updateCountryInfoText();
+
 		osg::ref_ptr<osgGaming::UIText> _textPleaseSelect;
 		osg::ref_ptr<osgGaming::UIText> _textConfirm;
 		osg::ref_ptr<osgGaming::UIText> _textProgress;
+		osg::ref_ptr<osgGaming::UIText> _textCountryInfo;
 
 		bool _ready;
 		bool _started;

@@ -77,6 +77,8 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud
 	ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel();
 
 	ref_ptr<CountryOverlay> countryOverlay = new CountryOverlay();
+	countryOverlay->setEnabled(false);
+
 	countryOverlay->setCountryMap(globeWorld->getSimulation()->getCountryMap());
 
 	globeWorld->setGlobeModel(globe);

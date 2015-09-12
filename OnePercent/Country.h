@@ -29,6 +29,7 @@ namespace onep
 			osg::ref_ptr<NeighborCountryInfo> info;
 		} NeighborCountry;
 
+		typedef osg::ref_ptr<Country> Ptr;
 		typedef std::vector<NeighborCountry> Neighbors;
 		typedef std::map<unsigned char, osg::ref_ptr<Country>> Map;
 
