@@ -27,6 +27,7 @@ void GlobeInteractionState::initialize()
 	_textPleaseSelect = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountry").get());
 	_textConfirm = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountryAgain").get());
 	_textProgress = static_cast<UIText*>(getHud()->getUIElementByName("text_dayProgress").get());
+	_textCountryInfo = static_cast<UIText*>(getHud()->getUIElementByName("text_countryInfo").get());
 
 	getHud()->setFpsEnabled(true);
 
@@ -80,6 +81,8 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 			}
 
 			_selectedCountry = selected;
+
+			updateCountryInfoText();
 
 			if (country != nullptr)
 			{
@@ -259,9 +262,11 @@ void GlobeInteractionState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
 void GlobeInteractionState::dayTimerElapsed()
 {
 	getGlobeOverviewWorld()->getSimulation()->step();
-	getGlobeOverviewWorld()->getSimulation()->printStats(true);
+	// getGlobeOverviewWorld()->getSimulation()->printStats(true);
 
 	_textProgress->setText(~Property<string, Param_LocalizationInfoTextDay>() + " " + to_string(getGlobeOverviewWorld()->getSimulation()->getDay()));
+
+	updateCountryInfoText();
 }
 
 void GlobeInteractionState::startSimulation()
@@ -298,4 +303,39 @@ bool GlobeInteractionState::ready()
 	}
 
 	return _ready;
+}
+
+void GlobeInteractionState::updateCountryInfoText()
+{
+	if (_selectedCountry == 255)
+	{
+		_textCountryInfo->setText("");
+
+		return;
+	}
+
+	string infoText = "";
+	Country::Ptr country = getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry);
+
+	char buffer[16];
+
+	infoText += country->getCountryName() + "\n";
+	infoText += "Wealth: " + to_string(country->getWealth()) + "\n";
+
+	sprintf(buffer, "%.2f", country->getDept());
+	infoText += "Dept: " + string(buffer) + "\n";
+
+	sprintf(buffer, "%.2f", country->getRelativeDept() * 100.0f);
+	infoText += "Rel. Dept: " + string(buffer) + "%\n";
+
+	sprintf(buffer, "%.2f", country->getDeptBalance());
+	infoText += "Dept balance: " + string(buffer) + "\n";
+
+	sprintf(buffer, "%.2f", country->getAnger() * 100.0f);
+	infoText += "Anger: " + string(buffer) + "%\n";
+
+	sprintf(buffer, "%.2f", country->getAngerBalance());
+	infoText += "Anger balance: " + string(buffer) + "\n";
+
+	_textCountryInfo->setText(infoText);
 }

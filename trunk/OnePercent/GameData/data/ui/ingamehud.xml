@@ -12,16 +12,18 @@
 				<cell index="2" sizepolicy="content" />
 			</celldefinitions>
 			
-			<stackpanel margin="10" cell="2" cells="7" orientation="vertical">
+			<stackpanel margin="10" cell="2" cells="8" orientation="vertical">
 			
-				<text name="text_selectCountry" content="{localization/infoText_selectCountry}" cell="6" />
-				<text name="text_selectCountryAgain" content="{localization/infoText_selectCountryAgain}" cell="5" fontsize="14" visible="false" />
-
-				<button name="button_makeBanks" cell="4" text="Banks" />
-				<button name="button_makePolitics" cell="3" text="Politics" />
-				<button name="button_makeConcerns" cell="2" text="Concerns" />
-				<button name="button_makeMedia" cell="1" text="Media" />
-				<button name="button_makeControl" cell="0" text="Control" />
+				<text name="text_selectCountry" content="{localization/infoText_selectCountry}" cell="7" />
+				<text name="text_selectCountryAgain" content="{localization/infoText_selectCountryAgain}" cell="6" fontsize="14" visible="false" />
+				
+				<button name="button_makeBanks" cell="5" text="Banks" />
+				<button name="button_makePolitics" cell="4" text="Politics" />
+				<button name="button_makeConcerns" cell="3" text="Concerns" />
+				<button name="button_makeMedia" cell="2" text="Media" />
+				<button name="button_makeControl" cell="1" text="Control" />
+				
+				<text name="text_countryInfo" content="" cell="0" fontsize="14" />
 				
 			</stackpanel>
 			
