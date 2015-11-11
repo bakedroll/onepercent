@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OnePercent", "OnePercent\OnePercent.vcxproj", "{76B146B7-D5C8-407B-B695-506B840511AF}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -13,6 +13,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "osgGaming", "osgGaming\osgGaming.vcxproj", "{A73F05F2-DB1B-4366-A6E7-E063F2A12925}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageBuilder", "PackageBuilder\PackageBuilder.csproj", "{8B4D17B9-1629-4697-B60C-EB0DDC774970}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImageHelperCpp", "ImageHelperCpp\ImageHelperCpp.vcxproj", "{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +99,22 @@ Global
 		{8B4D17B9-1629-4697-B60C-EB0DDC774970}.Release|x64.ActiveCfg = Release|Any CPU
 		{8B4D17B9-1629-4697-B60C-EB0DDC774970}.Release|x86.ActiveCfg = Release|x86
 		{8B4D17B9-1629-4697-B60C-EB0DDC774970}.Release|x86.Build.0 = Release|x86
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Debug|Win32.Build.0 = Debug|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Debug|x64.ActiveCfg = Debug|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Debug|x86.ActiveCfg = Debug|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Debug|x86.Build.0 = Debug|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Release|Any CPU.ActiveCfg = Release|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Release|Win32.ActiveCfg = Release|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Release|Win32.Build.0 = Release|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Release|x64.ActiveCfg = Release|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Release|x86.ActiveCfg = Release|Win32
+		{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
