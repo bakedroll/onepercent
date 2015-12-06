@@ -1,3 +1,7 @@
+TESSELLATION:
+
+http://www.cs.cmu.edu/~quake/triangle.html
+
 Textures:
 
 http://www.shadedrelief.com/natural3/index.html
