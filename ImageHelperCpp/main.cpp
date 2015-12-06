@@ -62,77 +62,157 @@ private:
 typedef Array<bool> BoolArray;
 
 typedef std::vector<Point> PointList;
+typedef std::vector<PointList> PointListGroup;
+
+class Aabb
+{
+public:
+  Aabb(PointList& points)
+  {
+    m_min = Point(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
+    m_max = Point(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
+
+    for (PointList::iterator it = points.begin(); it != points.end(); ++it)
+    {
+      m_min.x = std::min(m_min.x, it->x);
+      m_min.y = std::min(m_min.y, it->y);
+      m_max.x = std::max(m_max.x, it->x);
+      m_max.y = std::max(m_max.y, it->y);
+    }
+  }
+
+  Point min()
+  {
+    return m_min;
+  }
+
+  Point max()
+  {
+    return m_max;
+  }
+
+  int width()
+  {
+    return m_max.x - m_min.x + 1;
+  }
+
+  int height()
+  {
+    return m_max.y - m_min.y + 1;
+  }
+
+private:
+  Point m_min;
+  Point m_max;
+};
 
 Vec3f randomColor()
 {
   return Vec3b(rand() % 155 + 100, rand() % 155 + 100, rand() % 155 + 100);
 }
 
-void checkPixel(Mat& image, BoolArray& aVisited, PointList& points, int x, int y)
+void checkPixel(Mat& image, BoolArray& aVisited, PointList& points, int x, int y, bool repeat)
 {
-  if (x >= 0 && y >= 0 && x < image.cols && y < image.rows)
-    if (image.at<uchar>(Point(x, y)) == 255)
-      if (!aVisited.get(x, y))
-        points.push_back(Point(x, y));
-}
+  if (x < 0) if (repeat) x += image.cols; else return;
+  if (y < 0) if (repeat) y += image.rows; else return;
+  if (x >= image.cols) if (repeat) x -= image.cols; else return;
+  if (y >= image.rows) if (repeat) y -= image.rows; else return;
 
-void checkPixelsAround(Mat& image, BoolArray& aVisited, PointList& points, int x, int y)
-{
-  checkPixel(image, aVisited, points, x - 1, y - 1);
-  checkPixel(image, aVisited, points, x    , y - 1);
-  checkPixel(image, aVisited, points, x + 1, y - 1);
-  checkPixel(image, aVisited, points, x - 1, y    );
-  checkPixel(image, aVisited, points, x + 1, y    );
-  checkPixel(image, aVisited, points, x - 1, y + 1);
-  checkPixel(image, aVisited, points, x    , y + 1);
-  checkPixel(image, aVisited, points, x + 1, y + 1);
-}
-
-void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointList& lNeighbours, PointList& lResult, int x, int y, int depth, const Vec3b& displayColor)
-{
-  if (depth == 0)
-    return;
-
-  checkPixelsAround(image, aVisited, lNeighbours, x, y);
-
-  // reached end
-  if (lNeighbours.size() == 0)
-    return;
-
-  for (PointList::iterator it = lNeighbours.begin(); it != lNeighbours.end(); ++it)
+  if (image.at<uchar>(Point(x, y)) == 255 && !aVisited.get(x, y))
   {
+    points.push_back(Point(x, y));
+    aVisited.set(x, y, true);
+  }
+}
+
+void checkPixelsAround(Mat& image, BoolArray& aVisited, PointList& points, int x, int y, bool repeat = true)
+{
+  checkPixel(image, aVisited, points, x - 1, y - 1, repeat);
+  checkPixel(image, aVisited, points, x    , y - 1, repeat);
+  checkPixel(image, aVisited, points, x + 1, y - 1, repeat);
+  checkPixel(image, aVisited, points, x - 1, y    , repeat);
+  checkPixel(image, aVisited, points, x + 1, y    , repeat);
+  checkPixel(image, aVisited, points, x - 1, y + 1, repeat);
+  checkPixel(image, aVisited, points, x    , y + 1, repeat);
+  checkPixel(image, aVisited, points, x + 1, y + 1, repeat);
+}
+
+void groupPoints(PointList& points, PointListGroup& groups)
+{
+  Aabb fieldAabb(points);
+  Mat field(fieldAabb.height(), fieldAabb.width(), CV_8UC1);
+  BoolArray visited(fieldAabb.width(), fieldAabb.height(), false);
+
+  field.setTo(0);
+
+  for (PointList::iterator it = points.begin(); it != points.end(); ++it)
+    field.at<uchar>(*it - fieldAabb.min()) = 255;
+
+  for (int y = 0; y < fieldAabb.height(); y++)
+  {
+    for (int x = 0; x < fieldAabb.width(); x++)
+    {
+      if (field.at<uchar>(Point(x, y)) == 255 && !visited.get(x, y))
+      {
+        PointList group;
+
+        PointList check;
+        check.push_back(Point(x, y));
+        group.push_back(Point(x, y) + fieldAabb.min());
+
+        do
+        {
+          PointList result;
+          for (PointList::iterator it = check.begin(); it != check.end(); ++it)
+            checkPixelsAround(field, visited, result, x, y, false);
+
+          for (PointList::iterator it = result.begin(); it != result.end(); ++it)
+            group.push_back(*it + fieldAabb.min());
+
+          check = result;
+        } while (check.size() > 0);
+
+        groups.push_back(group);
+      }
+    }
+  }
+}
+
+void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointList& lResult, int x, int y, int depth)
+{
+  PointList lCurrentStage;
+  lCurrentStage.push_back(Point(x, y));
+  aVisited.set(x, y, true);
+
+  for (int i = 0; i < depth; i++)
+  {
+    PointList neighbours;
+    Vec3b color = randomColor();
+
+    for (PointList::iterator it = lCurrentStage.begin(); it != lCurrentStage.end(); ++it)
+      checkPixelsAround(image, aVisited, neighbours, it->x, it->y);
+
+    PointListGroup lGroups;
+    groupPoints(neighbours, lGroups);
+
     // color
-    if (depth > 1)
-      display.at<Vec3b>(Point(it->x, it->y)) = displayColor;
+    if (i < depth - 1)
+    {
+      for (PointList::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
+        display.at<Vec3b>(Point(it->x, it->y)) = color;
+    }
 
-    aVisited.set(it->x, it->y, true);
+    lCurrentStage = neighbours;
   }
 
-  PointList neighbours;
-  Vec3f color = randomColor();
-  for (PointList::iterator it = lNeighbours.begin(); it != lNeighbours.end(); ++it)
-    findNeighbours(image, display, aVisited, neighbours, lResult, it->x, it->y, depth - 1, color);
-
-  if (neighbours.size() == 0)
-  {
-    for (PointList::iterator it = lNeighbours.begin(); it != lNeighbours.end(); ++it)
-    lResult.push_back(*it);
-  }
-
-  if (depth == 1)
-  {
-    for (PointList::iterator it = lNeighbours.begin(); it != lNeighbours.end(); ++it)
-      lResult.push_back(*it);
-  }  
+  lResult = lCurrentStage;
 }
 
 void searchPath(Mat& image, Mat& display, BoolArray& aVisited, int x, int y)
 {
   PointList lResult;
-  PointList lNeighbours;
 
-  aVisited.set(x, y, true);
-  findNeighbours(image, display, aVisited, lNeighbours, lResult, x, y, 10, randomColor());
+  findNeighbours(image, display, aVisited, lResult, x, y, 10);
 
   printf("bla\n");
 }
