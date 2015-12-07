@@ -178,39 +178,63 @@ void groupPoints(PointList& points, PointListGroup& groups)
   }
 }
 
-void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointList& lResult, int x, int y, int depth)
+void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGroup& lResult, int x, int y, int depth)
 {
-  PointList lCurrentStage;
-  lCurrentStage.push_back(Point(x, y));
+  PointListGroup lCurrentStage;
+
+  PointList points;
+  points.push_back(Point(x, y));
+
+  lCurrentStage.push_back(points);
   aVisited.set(x, y, true);
 
   for (int i = 0; i < depth; i++)
   {
-    PointList neighbours;
-    Vec3b color = randomColor();
+    PointListGroup lNextStage;
 
-    for (PointList::iterator it = lCurrentStage.begin(); it != lCurrentStage.end(); ++it)
-      checkPixelsAround(image, aVisited, neighbours, it->x, it->y);
+    for (PointListGroup::iterator csIt = lCurrentStage.begin(); csIt != lCurrentStage.end(); ++csIt)
+    {
+      PointList neighbours;
 
-    PointListGroup lGroups;
-    groupPoints(neighbours, lGroups);
+      for (PointList::iterator pIt = csIt->begin(); pIt != csIt->end(); ++pIt)
+        checkPixelsAround(image, aVisited, neighbours, pIt->x, pIt->y);
+
+      // end of line
+      if (neighbours.empty())
+      {
+        lResult.push_back(*csIt);
+        continue;
+      }
+
+      PointListGroup lGroups;
+      groupPoints(neighbours, lGroups);
+
+      for (PointListGroup::iterator gIt = lGroups.begin(); gIt != lGroups.end(); ++gIt)
+        lNextStage.push_back(*gIt);
+    }
 
     // color
     if (i < depth - 1)
     {
-      for (PointList::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
-        display.at<Vec3b>(Point(it->x, it->y)) = color;
+      for (PointListGroup::iterator nsIt = lNextStage.begin(); nsIt != lNextStage.end(); ++nsIt)
+      {
+        Vec3b color = randomColor();
+
+        for (PointList::iterator pIt = nsIt->begin(); pIt != nsIt->end(); ++pIt)
+          display.at<Vec3b>(Point(pIt->x, pIt->y)) = color;
+      }
     }
 
-    lCurrentStage = neighbours;
+    lCurrentStage = lNextStage;
   }
 
-  lResult = lCurrentStage;
+  for (PointListGroup::iterator csIt = lCurrentStage.begin(); csIt != lCurrentStage.end(); ++csIt)
+    lResult.push_back(*csIt);
 }
 
 void searchPath(Mat& image, Mat& display, BoolArray& aVisited, int x, int y)
 {
-  PointList lResult;
+  PointListGroup lResult;
 
   findNeighbours(image, display, aVisited, lResult, x, y, 10);
 
