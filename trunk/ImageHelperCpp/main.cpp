@@ -108,7 +108,7 @@ private:
 
 Vec3f randomColor()
 {
-  return Vec3b(rand() % 155 + 100, rand() % 155 + 100, rand() % 155 + 100);
+  return Vec3b(rand() % 100 + 155, rand() % 100 + 155, rand() % 100 + 155);
 }
 
 void checkPixel(Mat& image, BoolArray& aVisited, PointList& points, int x, int y, bool repeat)
@@ -160,11 +160,13 @@ void groupPoints(PointList& points, PointListGroup& groups)
         check.push_back(Point(x, y));
         group.push_back(Point(x, y) + fieldAabb.min());
 
+        visited.set(x, y, true);
+
         do
         {
           PointList result;
           for (PointList::iterator it = check.begin(); it != check.end(); ++it)
-            checkPixelsAround(field, visited, result, x, y, false);
+            checkPixelsAround(field, visited, result, it->x, it->y, false);
 
           for (PointList::iterator it = result.begin(); it != result.end(); ++it)
             group.push_back(*it + fieldAabb.min());
@@ -188,7 +190,8 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
   lCurrentStage.push_back(points);
   aVisited.set(x, y, true);
 
-  for (int i = 0; i < depth; i++)
+  int i = 0;
+  do
   {
     PointListGroup lNextStage;
 
@@ -203,6 +206,12 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
       if (neighbours.empty())
       {
         lResult.push_back(*csIt);
+
+        // color
+        for (PointList::iterator pIt = csIt->begin(); pIt != csIt->end(); ++pIt)
+          display.at<Vec3b>(Point(pIt->x, pIt->y)) = Vec3b(0, 0, 100);
+
+        //imshow("Lines", display);
         continue;
       }
 
@@ -226,10 +235,25 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
     }
 
     lCurrentStage = lNextStage;
-  }
+    i++;
 
-  for (PointListGroup::iterator csIt = lCurrentStage.begin(); csIt != lCurrentStage.end(); ++csIt)
-    lResult.push_back(*csIt);
+    if (i == depth)
+    {
+      for (PointListGroup::iterator csIt = lCurrentStage.begin(); csIt != lCurrentStage.end(); ++csIt)
+      {
+        lResult.push_back(*csIt);
+
+        // color
+        for (PointList::iterator pIt = csIt->begin(); pIt != csIt->end(); ++pIt)
+          display.at<Vec3b>(Point(pIt->x, pIt->y)) = Vec3b(0, 0, 100);
+
+        //imshow("Lines", display);
+      }
+
+      i = 0;
+    }
+
+  } while (!lCurrentStage.empty());
 }
 
 void searchPath(Mat& image, Mat& display, BoolArray& aVisited, int x, int y)
@@ -245,7 +269,7 @@ void findEntries(Mat& image, Mat& display)
 {
   BoolArray aVisited(image.cols, image.rows, false);
 
-	for (int y = 5; y < image.rows; y++)
+	for (int y = 0; y < image.rows; y++)
 		for (int x = 0; x < image.cols; x++)
       if (image.at<uchar>(Point(x, y)) == 255
         && !aVisited.get(x, y))
