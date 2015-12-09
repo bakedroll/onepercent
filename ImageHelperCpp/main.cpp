@@ -210,7 +210,7 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
   lCurrentStage.push_back(firstStage);
   aVisited.set(x, y, true);
 
-  bool justSplit = false;
+  //bool justSplit = false;
   do
   {
     StageList lNextStage;
@@ -225,8 +225,8 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
       // end of line
       if (neighbours.empty())
       {
-        if (!justSplit)
-          lResult.push_back(csIt->points);
+        //if (!justSplit)
+        lResult.push_back(csIt->points);
 
         continue;
       }
@@ -235,9 +235,19 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
       groupPoints(neighbours, lGroups);
 
       if (lGroups.size() > 1)
-        justSplit = true;
-      else
-        justSplit = false;
+      {
+        if (csIt->iteration > 0)
+        {
+          lResult.push_back(csIt->points);
+          csIt->iteration = 0;
+        }
+
+        //justSplit = true;
+      }
+      //else
+      //{
+      //  justSplit = false;
+      //}
 
       for (PointListGroup::iterator gIt = lGroups.begin(); gIt != lGroups.end(); ++gIt)
       {
@@ -268,29 +278,45 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
   } while (!lCurrentStage.empty());
 }
 
-void searchPath(Mat& image, Mat& display, BoolArray& aVisited, int x, int y)
+void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, int x, int y)
 {
   PointListGroup lResult;
 
   findNeighbours(image, display, aVisited, lResult, x, y, 10);
 
   for (PointListGroup::iterator rIt = lResult.begin(); rIt != lResult.end(); ++rIt)
+  {
+    Point p(0, 0);
+
     for (PointList::iterator pIt = rIt->begin(); pIt != rIt->end(); ++pIt)
+    {
       display.at<Vec3b>(Point(pIt->x, pIt->y)) = Vec3b(0, 0, 100);
+      p += *pIt;
+    }
+
+    p.x /= rIt->size();
+    p.y /= rIt->size();
+
+    result.at<Vec3b>(p) = Vec3b(255, 0, 0);
+  }
+
+
 
   printf("bla\n");
 }
 
-void findEntries(Mat& image, Mat& display)
+void findEntries(Mat& image, Mat& display, Mat& result)
 {
   BoolArray aVisited(image.cols, image.rows, false);
+
+  result.setTo(cv::Scalar(0, 0, 0));
 
 	for (int y = 0; y < image.rows; y++)
 		for (int x = 0; x < image.cols; x++)
       if (image.at<uchar>(Point(x, y)) == 255
         && !aVisited.get(x, y))
       {
-        searchPath(image, display, aVisited, x, y);
+        searchPath(image, display, result, aVisited, x, y);
         return;
       }
 }
@@ -309,15 +335,17 @@ int detectLines(const char* in, float display, int thres)
 	}
 
 	Mat displayImage(int(image.rows * display), int(image.cols * display), CV_8UC3);
+  Mat resultImage(int(image.rows * display), int(image.cols * display), CV_8UC3);
 
 	threshold(image, image, thres, 255, THRESH_BINARY);
   cvtColor(image, displayImage, CV_GRAY2RGB);
 
-	findEntries(image, displayImage);
+	findEntries(image, displayImage, resultImage);
 
 	namedWindow("Lines", WINDOW_AUTOSIZE);
   imshow("Lines", displayImage);
   imwrite("img.png", displayImage);
+  imwrite("result.png", resultImage);
 
 	return 0;
 }
