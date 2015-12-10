@@ -2,6 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
+#include <map>
 
 using namespace cv;
 using namespace std;
@@ -61,13 +62,17 @@ private:
 
 typedef Array<bool> BoolArray;
 
-typedef std::vector<Point> PointList;
-typedef std::vector<PointList> PointListGroup;
+typedef vector<Point> PointList;
+typedef vector<PointList> PointListGroup;
+typedef pair<int, int> ResultEdge;
+typedef map<int, Point2f> ResultPointMap;
+typedef vector<ResultEdge> ResultEdgeMap;
 
 typedef struct _stage
 {
   PointList points;
   int iteration;
+  int currentId;
 } Stage;
 
 typedef std::vector<Stage> StageList;
@@ -194,8 +199,28 @@ void groupPoints(PointList& points, PointListGroup& groups)
   }
 }
 
-void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGroup& lResult, int x, int y, int depth)
+void addToResults(int& idCounter, int connectTo, ResultPointMap& mResultPoints, ResultEdgeMap& mResultEdges, const PointList& points)
 {
+  Point2f p(0, 0);
+
+  for (PointList::const_iterator pIt = points.cbegin(); pIt != points.cend(); ++pIt)
+    p += Point2f(float(pIt->x), float(pIt->y));
+
+  p.x /= float(points.size());
+  p.y /= float(points.size());
+
+  mResultPoints.insert(ResultPointMap::value_type(idCounter, p));
+
+  if (connectTo > -1)
+    mResultEdges.push_back(ResultEdge(connectTo, idCounter));
+
+  idCounter++;
+}
+
+void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, ResultPointMap& mResults, ResultEdgeMap& mEdges, int x, int y, int depth)
+{
+  int idCounter = 0;
+
   StageList lCurrentStage;
 
   PointList points;
@@ -204,13 +229,13 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
   Stage firstStage;
   firstStage.points = points;
   firstStage.iteration = 0;
+  firstStage.currentId = idCounter;
 
-  lResult.push_back(points);
+  addToResults(idCounter, -1, mResults, mEdges, points);
 
   lCurrentStage.push_back(firstStage);
   aVisited.set(x, y, true);
 
-  //bool justSplit = false;
   do
   {
     StageList lNextStage;
@@ -225,9 +250,7 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
       // end of line
       if (neighbours.empty())
       {
-        //if (!justSplit)
-        lResult.push_back(csIt->points);
-
+        addToResults(idCounter, csIt->currentId, mResults, mEdges, csIt->points);
         continue;
       }
 
@@ -238,17 +261,16 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
       {
         if (csIt->iteration > 0)
         {
-          lResult.push_back(csIt->points);
+          int currentId = idCounter;
+
+          addToResults(idCounter, csIt->currentId, mResults, mEdges, csIt->points);
+
           csIt->iteration = 0;
+          csIt->currentId = currentId;
         }
-
-        //justSplit = true;
       }
-      //else
-      //{
-      //  justSplit = false;
-      //}
 
+      int currentId = idCounter;
       for (PointListGroup::iterator gIt = lGroups.begin(); gIt != lGroups.end(); ++gIt)
       {
         Stage stage;
@@ -256,8 +278,10 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
 
         if (csIt->iteration == depth-1)
         {
-          lResult.push_back(*gIt);
           stage.iteration = 0;
+          stage.currentId = currentId;
+
+          addToResults(idCounter, csIt->currentId, mResults, mEdges, *gIt);
         }
         else
         {
@@ -267,6 +291,7 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
             display.at<Vec3b>(Point(pIt->x, pIt->y)) = color;
 
           stage.iteration = csIt->iteration + 1;
+          stage.currentId = csIt->currentId;
         }
 
         lNextStage.push_back(stage);
@@ -278,34 +303,23 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, PointListGrou
   } while (!lCurrentStage.empty());
 }
 
-void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, int x, int y)
+void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, int x, int y, int displaySize)
 {
-  PointListGroup lResult;
+  ResultPointMap mResults;
+  ResultEdgeMap mEdges;
 
-  findNeighbours(image, display, aVisited, lResult, x, y, 10);
+  findNeighbours(image, display, aVisited, mResults, mEdges, x, y, 10);
 
-  for (PointListGroup::iterator rIt = lResult.begin(); rIt != lResult.end(); ++rIt)
-  {
-    Point p(0, 0);
+  for (ResultEdgeMap::iterator eIt = mEdges.begin(); eIt != mEdges.end(); ++eIt)
+    line(result, mResults.find(eIt->first)->second * displaySize, mResults.find(eIt->second)->second * displaySize, Scalar(0, 0, 255));
 
-    for (PointList::iterator pIt = rIt->begin(); pIt != rIt->end(); ++pIt)
-    {
-      display.at<Vec3b>(Point(pIt->x, pIt->y)) = Vec3b(0, 0, 100);
-      p += *pIt;
-    }
-
-    p.x /= rIt->size();
-    p.y /= rIt->size();
-
-    result.at<Vec3b>(p) = Vec3b(255, 0, 0);
-  }
-
-
+  for (ResultPointMap::iterator rIt = mResults.begin(); rIt != mResults.end(); ++rIt)
+    result.at<Vec3b>(rIt->second * displaySize) = Vec3b(255, 0, 0);
 
   printf("bla\n");
 }
 
-void findEntries(Mat& image, Mat& display, Mat& result)
+void findEntries(Mat& image, Mat& display, Mat& result, int displaySize)
 {
   BoolArray aVisited(image.cols, image.rows, false);
 
@@ -316,7 +330,7 @@ void findEntries(Mat& image, Mat& display, Mat& result)
       if (image.at<uchar>(Point(x, y)) == 255
         && !aVisited.get(x, y))
       {
-        searchPath(image, display, result, aVisited, x, y);
+        searchPath(image, display, result, aVisited, x, y, displaySize);
         return;
       }
 }
@@ -340,7 +354,7 @@ int detectLines(const char* in, float display, int thres)
 	threshold(image, image, thres, 255, THRESH_BINARY);
   cvtColor(image, displayImage, CV_GRAY2RGB);
 
-	findEntries(image, displayImage, resultImage);
+	findEntries(image, displayImage, resultImage, int(display));
 
 	namedWindow("Lines", WINDOW_AUTOSIZE);
   imshow("Lines", displayImage);
@@ -362,7 +376,7 @@ int main(int argc, char** argv)
 	switch (atoi(argv[1]))
 	{
 	case 0:
-		result = detectLines(argv[2], 1.0, atoi(argv[3]));//0.125f);
+		result = detectLines(argv[2], 3.0, atoi(argv[3]));//0.125f);
 		break;
 
 	default:
