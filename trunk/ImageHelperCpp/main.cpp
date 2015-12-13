@@ -61,26 +61,29 @@ private:
 };
 
 typedef Array<bool> BoolArray;
+typedef Array<int> IntArray;
 
 typedef vector<Point> PointList;
 typedef vector<PointList> PointListGroup;
 typedef pair<int, int> ResultEdge;
 typedef map<int, Point2f> ResultPointMap;
 typedef vector<ResultEdge> ResultEdgeMap;
+typedef std::map<int, int> PointEdgesCountMap;
 
 typedef struct _stage
 {
   PointList points;
   int iteration;
   int currentId;
+  //bool justSplit;
 } Stage;
 
 typedef std::vector<Stage> StageList;
 
-class Aabb
+class BoundingBox
 {
 public:
-  Aabb(PointList& points)
+  BoundingBox(PointList& points)
   {
     m_min = Point(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
     m_max = Point(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
@@ -124,30 +127,40 @@ Vec3f randomColor()
   return Vec3b(rand() % 100 + 155, rand() % 100 + 155, rand() % 100 + 155);
 }
 
-void checkPixel(Mat& image, BoolArray& aVisited, PointList& points, int x, int y, bool repeat)
+void checkPixel(Mat& image, BoolArray& aVisited, IntArray* aPointIds, PointList& points, int* neighbourId, int x, int y, bool repeat)
 {
   if (x < 0) if (repeat) x += image.cols; else return;
   if (y < 0) if (repeat) y += image.rows; else return;
   if (x >= image.cols) if (repeat) x -= image.cols; else return;
   if (y >= image.rows) if (repeat) y -= image.rows; else return;
 
-  if (image.at<uchar>(Point(x, y)) == 255 && !aVisited.get(x, y))
+  if (image.at<uchar>(Point(x, y)) == 255)
   {
-    points.push_back(Point(x, y));
-    aVisited.set(x, y, true);
+    if (!aVisited.get(x, y))
+    {
+      points.push_back(Point(x, y));
+      aVisited.set(x, y, true);
+    }
+    else if (aPointIds != nullptr && aPointIds->get(x, y) > -1)
+    {
+      *neighbourId = aPointIds->get(x, y);
+    }
   }
 }
 
-void checkPixelsAround(Mat& image, BoolArray& aVisited, PointList& points, int x, int y, bool repeat = true)
+void checkPixelsAround(Mat& image, BoolArray& aVisited, IntArray* aPointIds, PointList& points, int* neighbourId, int x, int y, bool repeat = true)
 {
-  checkPixel(image, aVisited, points, x - 1, y - 1, repeat);
-  checkPixel(image, aVisited, points, x    , y - 1, repeat);
-  checkPixel(image, aVisited, points, x + 1, y - 1, repeat);
-  checkPixel(image, aVisited, points, x - 1, y    , repeat);
-  checkPixel(image, aVisited, points, x + 1, y    , repeat);
-  checkPixel(image, aVisited, points, x - 1, y + 1, repeat);
-  checkPixel(image, aVisited, points, x    , y + 1, repeat);
-  checkPixel(image, aVisited, points, x + 1, y + 1, repeat);
+  if (neighbourId != nullptr)
+    *neighbourId = -1;
+
+  checkPixel(image, aVisited, aPointIds, points, neighbourId, x - 1, y - 1, repeat);
+  checkPixel(image, aVisited, aPointIds, points, neighbourId, x, y - 1, repeat);
+  checkPixel(image, aVisited, aPointIds, points, neighbourId, x + 1, y - 1, repeat);
+  checkPixel(image, aVisited, aPointIds, points, neighbourId, x - 1, y, repeat);
+  checkPixel(image, aVisited, aPointIds, points, neighbourId, x + 1, y, repeat);
+  checkPixel(image, aVisited, aPointIds, points, neighbourId, x - 1, y + 1, repeat);
+  checkPixel(image, aVisited, aPointIds, points, neighbourId, x, y + 1, repeat);
+  checkPixel(image, aVisited, aPointIds, points, neighbourId, x + 1, y + 1, repeat);
 
   /*if (points.size() == 1)
   {
@@ -158,7 +171,7 @@ void checkPixelsAround(Mat& image, BoolArray& aVisited, PointList& points, int x
 
 void groupPoints(PointList& points, PointListGroup& groups)
 {
-  Aabb fieldAabb(points);
+  BoundingBox fieldAabb(points);
   Mat field(fieldAabb.height(), fieldAabb.width(), CV_8UC1);
   BoolArray visited(fieldAabb.width(), fieldAabb.height(), false);
 
@@ -185,7 +198,7 @@ void groupPoints(PointList& points, PointListGroup& groups)
         {
           PointList result;
           for (PointList::iterator it = check.begin(); it != check.end(); ++it)
-            checkPixelsAround(field, visited, result, it->x, it->y, false);
+            checkPixelsAround(field, visited, nullptr, result, nullptr, it->x, it->y, false);
 
           for (PointList::iterator it = result.begin(); it != result.end(); ++it)
             group.push_back(*it + fieldAabb.min());
@@ -199,12 +212,15 @@ void groupPoints(PointList& points, PointListGroup& groups)
   }
 }
 
-void addToResults(int& idCounter, int connectTo, ResultPointMap& mResultPoints, ResultEdgeMap& mResultEdges, const PointList& points)
+void addToResults(int& idCounter, int connectTo, IntArray& aPointIds, ResultPointMap& mResultPoints, ResultEdgeMap& mResultEdges, const PointList& points)
 {
   Point2f p(0, 0);
 
   for (PointList::const_iterator pIt = points.cbegin(); pIt != points.cend(); ++pIt)
+  {
+    aPointIds.set(pIt->x, pIt->y, idCounter);
     p += Point2f(float(pIt->x), float(pIt->y));
+  }
 
   p.x /= float(points.size());
   p.y /= float(points.size());
@@ -217,7 +233,7 @@ void addToResults(int& idCounter, int connectTo, ResultPointMap& mResultPoints, 
   idCounter++;
 }
 
-void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, ResultPointMap& mResults, ResultEdgeMap& mEdges, int x, int y, int depth)
+void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, IntArray& aPointIds, ResultPointMap& mResults, ResultEdgeMap& mEdges, int x, int y, int depth)
 {
   int idCounter = 0;
 
@@ -230,8 +246,9 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, ResultPointMa
   firstStage.points = points;
   firstStage.iteration = 0;
   firstStage.currentId = idCounter;
+  //firstStage.justSplit = false;
 
-  addToResults(idCounter, -1, mResults, mEdges, points);
+  addToResults(idCounter, -1, aPointIds, mResults, mEdges, points);
 
   lCurrentStage.push_back(firstStage);
   aVisited.set(x, y, true);
@@ -243,31 +260,43 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, ResultPointMa
     for (StageList::iterator csIt = lCurrentStage.begin(); csIt != lCurrentStage.end(); ++csIt)
     {
       PointList neighbours;
+      int neighbourId;
 
       for (PointList::iterator pIt = csIt->points.begin(); pIt != csIt->points.end(); ++pIt)
-        checkPixelsAround(image, aVisited, neighbours, pIt->x, pIt->y);
+        checkPixelsAround(image, aVisited, &aPointIds, neighbours, &neighbourId, pIt->x, pIt->y);
 
-      // end of line
-      if (neighbours.empty())
+      if (neighbourId == csIt->currentId)
+        neighbourId = -1;
+
+      if (neighbourId > -1)
       {
-        addToResults(idCounter, csIt->currentId, mResults, mEdges, csIt->points);
+        mEdges.push_back(ResultEdge(csIt->currentId, neighbourId));
+      }
+      // end of line
+      else if (neighbours.empty())
+      {
+        //if (!csIt->justSplit)
+          addToResults(idCounter, csIt->currentId, aPointIds, mResults, mEdges, csIt->points);
+
         continue;
       }
 
       PointListGroup lGroups;
       groupPoints(neighbours, lGroups);
 
-      if (lGroups.size() > 1)
+      if (lGroups.size() > 1 && csIt->iteration > 0)
       {
-        if (csIt->iteration > 0)
-        {
-          int currentId = idCounter;
+        int currentId = idCounter;
 
-          addToResults(idCounter, csIt->currentId, mResults, mEdges, csIt->points);
+        addToResults(idCounter, csIt->currentId, aPointIds, mResults, mEdges, csIt->points);
 
-          csIt->iteration = 0;
-          csIt->currentId = currentId;
-        }
+        csIt->iteration = 0;
+        csIt->currentId = neighbourId > -1 ? neighbourId : currentId;
+        //csIt->justSplit = true;
+      }
+      else
+      {
+        //csIt->justSplit = false;
       }
 
       int currentId = idCounter;
@@ -275,13 +304,14 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, ResultPointMa
       {
         Stage stage;
         stage.points = *gIt;
+        //stage.justSplit = csIt->justSplit;
 
         if (csIt->iteration == depth-1)
         {
           stage.iteration = 0;
-          stage.currentId = currentId;
+          stage.currentId = neighbourId > -1 ? neighbourId : currentId;
 
-          addToResults(idCounter, csIt->currentId, mResults, mEdges, *gIt);
+          addToResults(idCounter, csIt->currentId, aPointIds, mResults, mEdges, *gIt);
         }
         else
         {
@@ -291,7 +321,7 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, ResultPointMa
             display.at<Vec3b>(Point(pIt->x, pIt->y)) = color;
 
           stage.iteration = csIt->iteration + 1;
-          stage.currentId = csIt->currentId;
+          stage.currentId = neighbourId > -1 ? neighbourId : csIt->currentId;
         }
 
         lNextStage.push_back(stage);
@@ -303,12 +333,81 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, ResultPointMa
   } while (!lCurrentStage.empty());
 }
 
-void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, int x, int y, int displaySize)
+void incrementEdgeCount(PointEdgesCountMap& peCountMap, int pointId)
+{
+  PointEdgesCountMap::iterator it = peCountMap.find(pointId);
+
+  if (it != peCountMap.end())
+  {
+    it->second++;
+    return;
+  }
+
+  peCountMap.insert(PointEdgesCountMap::value_type(pointId, 1));
+}
+
+void cleanUpDeadEnds(ResultPointMap& mResults, ResultEdgeMap& mEdges)
+{
+  typedef vector<ResultPointMap::iterator> RPMIteratorList;
+
+  PointEdgesCountMap peCountMap;
+
+  for (ResultEdgeMap::iterator eIt = mEdges.begin(); eIt != mEdges.end(); ++eIt)
+  {
+    incrementEdgeCount(peCountMap, eIt->first);
+    incrementEdgeCount(peCountMap, eIt->second);
+  }
+
+  RPMIteratorList pointsToRemove;
+  for (ResultPointMap::iterator pIt = mResults.begin(); pIt != mResults.end(); ++pIt)
+  {
+    PointEdgesCountMap::iterator peIt = peCountMap.find(pIt->first);
+    assert(peIt != peCountMap.end());
+
+    if (peIt->second == 1)
+    {
+      ResultEdgeMap::iterator edgeToRemoveIt;
+
+      int neighbourId = -1;
+      for (ResultEdgeMap::iterator eIt = mEdges.begin(); eIt != mEdges.end(); ++eIt)
+      {
+        if (eIt->first == pIt->first)
+        {
+          neighbourId = eIt->second;
+          edgeToRemoveIt = eIt;
+          break;
+        }
+        if (eIt->second == pIt->first)
+        {
+          neighbourId = eIt->first;
+          edgeToRemoveIt = eIt;
+          break;
+        }
+      }
+
+      assert(neighbourId > -1);
+      PointEdgesCountMap::iterator peIt2 = peCountMap.find(neighbourId);
+      assert(peIt2 != peCountMap.end());
+
+      if (peIt2->second > 2)
+      {
+        pointsToRemove.push_back(pIt);
+        mEdges.erase(edgeToRemoveIt);
+      }
+    }
+  }
+
+  for (RPMIteratorList::iterator it = pointsToRemove.begin(); it != pointsToRemove.end(); ++it)
+    mResults.erase(*it);
+}
+
+void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, IntArray& aPointIds, int x, int y, int displaySize)
 {
   ResultPointMap mResults;
   ResultEdgeMap mEdges;
 
-  findNeighbours(image, display, aVisited, mResults, mEdges, x, y, 10);
+  findNeighbours(image, display, aVisited, aPointIds, mResults, mEdges, x, y, 10);
+  cleanUpDeadEnds(mResults, mEdges);
 
   for (ResultEdgeMap::iterator eIt = mEdges.begin(); eIt != mEdges.end(); ++eIt)
     line(result, mResults.find(eIt->first)->second * displaySize, mResults.find(eIt->second)->second * displaySize, Scalar(0, 0, 255));
@@ -322,6 +421,7 @@ void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, int 
 void findEntries(Mat& image, Mat& display, Mat& result, int displaySize)
 {
   BoolArray aVisited(image.cols, image.rows, false);
+  IntArray aPointIds(image.cols, image.rows, -1);
 
   result.setTo(cv::Scalar(0, 0, 0));
 
@@ -330,7 +430,7 @@ void findEntries(Mat& image, Mat& display, Mat& result, int displaySize)
       if (image.at<uchar>(Point(x, y)) == 255
         && !aVisited.get(x, y))
       {
-        searchPath(image, display, result, aVisited, x, y, displaySize);
+        searchPath(image, display, result, aVisited, aPointIds, x, y, displaySize);
         return;
       }
 }
@@ -358,6 +458,7 @@ int detectLines(const char* in, float display, int thres)
 
 	namedWindow("Lines", WINDOW_AUTOSIZE);
   imshow("Lines", displayImage);
+  imshow("Result", resultImage);
   imwrite("img.png", displayImage);
   imwrite("result.png", resultImage);
 
@@ -376,7 +477,7 @@ int main(int argc, char** argv)
 	switch (atoi(argv[1]))
 	{
 	case 0:
-		result = detectLines(argv[2], 3.0, atoi(argv[3]));//0.125f);
+		result = detectLines(argv[2], 2.0, atoi(argv[3]));//0.125f);
 		break;
 
 	default:
