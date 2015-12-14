@@ -75,7 +75,6 @@ typedef struct _stage
   PointList points;
   int iteration;
   int currentId;
-  //bool justSplit;
 } Stage;
 
 typedef std::vector<Stage> StageList;
@@ -246,7 +245,6 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, IntArray& aPo
   firstStage.points = points;
   firstStage.iteration = 0;
   firstStage.currentId = idCounter;
-  //firstStage.justSplit = false;
 
   addToResults(idCounter, -1, aPointIds, mResults, mEdges, points);
 
@@ -275,9 +273,7 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, IntArray& aPo
       // end of line
       else if (neighbours.empty())
       {
-        //if (!csIt->justSplit)
-          addToResults(idCounter, csIt->currentId, aPointIds, mResults, mEdges, csIt->points);
-
+        addToResults(idCounter, csIt->currentId, aPointIds, mResults, mEdges, csIt->points);
         continue;
       }
 
@@ -292,11 +288,6 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, IntArray& aPo
 
         csIt->iteration = 0;
         csIt->currentId = neighbourId > -1 ? neighbourId : currentId;
-        //csIt->justSplit = true;
-      }
-      else
-      {
-        //csIt->justSplit = false;
       }
 
       int currentId = idCounter;
@@ -304,7 +295,6 @@ void findNeighbours(Mat& image, Mat& display, BoolArray& aVisited, IntArray& aPo
       {
         Stage stage;
         stage.points = *gIt;
-        //stage.justSplit = csIt->justSplit;
 
         if (csIt->iteration == depth-1)
         {
@@ -401,12 +391,12 @@ void cleanUpDeadEnds(ResultPointMap& mResults, ResultEdgeMap& mEdges)
     mResults.erase(*it);
 }
 
-void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, IntArray& aPointIds, int x, int y, int displaySize)
+void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, IntArray& aPointIds, int x, int y, int displaySize, int depth)
 {
   ResultPointMap mResults;
   ResultEdgeMap mEdges;
 
-  findNeighbours(image, display, aVisited, aPointIds, mResults, mEdges, x, y, 10);
+  findNeighbours(image, display, aVisited, aPointIds, mResults, mEdges, x, y, depth);
   cleanUpDeadEnds(mResults, mEdges);
 
   for (ResultEdgeMap::iterator eIt = mEdges.begin(); eIt != mEdges.end(); ++eIt)
@@ -414,11 +404,9 @@ void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, IntA
 
   for (ResultPointMap::iterator rIt = mResults.begin(); rIt != mResults.end(); ++rIt)
     result.at<Vec3b>(rIt->second * displaySize) = Vec3b(255, 0, 0);
-
-  printf("bla\n");
 }
 
-void findEntries(Mat& image, Mat& display, Mat& result, int displaySize)
+void findEntries(Mat& image, Mat& display, Mat& result, int displaySize, int depth)
 {
   BoolArray aVisited(image.cols, image.rows, false);
   IntArray aPointIds(image.cols, image.rows, -1);
@@ -430,17 +418,19 @@ void findEntries(Mat& image, Mat& display, Mat& result, int displaySize)
       if (image.at<uchar>(Point(x, y)) == 255
         && !aVisited.get(x, y))
       {
-        searchPath(image, display, result, aVisited, aPointIds, x, y, displaySize);
-        return;
+        searchPath(image, display, result, aVisited, aPointIds, x, y, displaySize, depth);
       }
 }
 
-int detectLines(const char* in, float display, int thres)
+int detectLines(const char* in, const char* boundariesIn, float display, int thres, int depth)
 {
 	typedef vector<Vec4f> LinesList;
 
 	Mat image;
+  Mat boundaries;
+
 	image = imread(in, IMREAD_GRAYSCALE);
+  boundaries = imread(boundariesIn, IMREAD_GRAYSCALE);
 
 	if (!image.data)
 	{
@@ -454,13 +444,28 @@ int detectLines(const char* in, float display, int thres)
 	threshold(image, image, thres, 255, THRESH_BINARY);
   cvtColor(image, displayImage, CV_GRAY2RGB);
 
-	findEntries(image, displayImage, resultImage, int(display));
+  //resize(boundaries, boundaries, Size(4096, 2048), 0, 0, INTER_NEAREST);
+  //Canny(boundaries, boundaries, 127.0, 255.0, 5);
+  //resize(boundaries, boundaries, Size(image.cols, image.rows), 0, 0, INTER_NEAREST);
+
+  /*for (int y = 0; y < image.rows; y++)
+  {
+    for (int x = 0; x < image.cols; x++)
+    {
+      if (image.at<uchar>(Point(x, y)) == 255)
+        boundaries.at<uchar>(Point(x, y)) = 255;
+    }
+  }*/
+
+	findEntries(image, displayImage, resultImage, int(display), depth);
 
 	namedWindow("Lines", WINDOW_AUTOSIZE);
   imshow("Lines", displayImage);
   imshow("Result", resultImage);
+  imshow("Boundaries", boundaries);
   imwrite("img.png", displayImage);
   imwrite("result.png", resultImage);
+  imwrite("boundaries.png", boundaries);
 
 	return 0;
 }
@@ -477,7 +482,7 @@ int main(int argc, char** argv)
 	switch (atoi(argv[1]))
 	{
 	case 0:
-		result = detectLines(argv[2], 2.0, atoi(argv[3]));//0.125f);
+    result = detectLines(argv[2], argv[3], float(atof(argv[6])), atoi(argv[4]), atoi(argv[5]));
 		break;
 
 	default:
