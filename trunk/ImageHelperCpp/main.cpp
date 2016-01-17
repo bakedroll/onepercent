@@ -2,6 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
+#include <fstream>
 #include <map>
 
 using namespace cv;
@@ -131,6 +132,29 @@ private:
 Vec3f randomColor()
 {
   return Vec3b(rand() % 100 + 155, rand() % 100 + 155, rand() % 100 + 155);
+}
+
+void writePolyFile(ResultPointMap& points, ResultEdgeValueList& edges, char* filename)
+{
+  ofstream fs(filename);
+  if (!fs.is_open())
+    return;
+
+  fs << int(points.size()) << " 2 0 0" << endl;
+
+  for (ResultPointMap::iterator it = points.begin(); it != points.end(); ++it)
+    fs << it->first << " " << it->second.x << " " << it->second.y << endl;
+
+  fs << int(edges.size()) << " 1" << endl;
+
+  int i = 0;
+  for (ResultEdgeValueList::iterator it = edges.begin(); it != edges.end(); ++it)
+  {
+    fs << i << " " << it->first.first << " " << it->first.second << " 1" << endl;
+    i++;
+  }
+
+  fs.close();
 }
 
 void checkPixel(Mat& image, BoolArray& aVisited, IntArray* aPointIds, PointValueList& points, int* neighbourId, int x, int y, bool repeat)
@@ -454,23 +478,17 @@ void cleanUpDeadEnds(ResultPointMap& mResults, ResultEdgeValueList& mEdges)
     mResults.erase(*it);
 }
 
-void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, IntArray& aPointIds, int x, int y, uchar edgeVal, int displaySize, int depth)
+void searchPath(Mat& image, Mat& display, Mat& result, BoolArray& aVisited, IntArray& aPointIds, int x, int y, uchar edgeVal, int displaySize, int depth, ResultPointMap& mResultPoints, ResultEdgeValueList& mResultEdges)
 {
-  ResultPointMap mResults;
-  ResultEdgeValueList mEdges;
-
-  findNeighbours(image, display, aVisited, aPointIds, mResults, mEdges, x, y, edgeVal, depth);
-  cleanUpDeadEnds(mResults, mEdges);
-
-  for (ResultEdgeValueList::iterator eIt = mEdges.begin(); eIt != mEdges.end(); ++eIt)
-    line(result, mResults.find(eIt->first.first)->second * displaySize, mResults.find(eIt->first.second)->second * displaySize, Scalar(0, 0, eIt->second));
-
-  for (ResultPointMap::iterator rIt = mResults.begin(); rIt != mResults.end(); ++rIt)
-    result.at<Vec3b>(rIt->second * displaySize) = Vec3b(255, 0, 0);
+  findNeighbours(image, display, aVisited, aPointIds, mResultPoints, mResultEdges, x, y, edgeVal, depth);
+  cleanUpDeadEnds(mResultPoints, mResultEdges);
 }
 
-void findEntries(Mat& image, Mat& display, Mat& result, int displaySize, int depth)
+void findEntries(Mat& image, Mat& display, Mat& result, int displaySize, int depth, char* outPoly)
 {
+  ResultPointMap mResultPoints;
+  ResultEdgeValueList mResultEdges;
+
   BoolArray aVisited(image.cols, image.rows, false);
   IntArray aPointIds(image.cols, image.rows, -1);
 
@@ -484,13 +502,21 @@ void findEntries(Mat& image, Mat& display, Mat& result, int displaySize, int dep
 
       if (edgeVal > 0 && !aVisited.get(x, y))
       {
-        searchPath(image, display, result, aVisited, aPointIds, x, y, edgeVal, displaySize, depth);
+        searchPath(image, display, result, aVisited, aPointIds, x, y, edgeVal, displaySize, depth, mResultPoints, mResultEdges);
       }
     }
   }
+
+  for (ResultEdgeValueList::iterator eIt = mResultEdges.begin(); eIt != mResultEdges.end(); ++eIt)
+    line(result, mResultPoints.find(eIt->first.first)->second * displaySize, mResultPoints.find(eIt->first.second)->second * displaySize, Scalar(0, 0, eIt->second));
+
+  for (ResultPointMap::iterator rIt = mResultPoints.begin(); rIt != mResultPoints.end(); ++rIt)
+    result.at<Vec3b>(rIt->second * displaySize) = Vec3b(255, 0, 0);
+
+  writePolyFile(mResultPoints, mResultEdges, outPoly);
 }
 
-int detectLines(const char* in, float display, int depth)
+int detectLines(const char* in, float display, int depth, char* outPoly)
 {
 	typedef vector<Vec4f> LinesList;
 
@@ -509,7 +535,7 @@ int detectLines(const char* in, float display, int depth)
 
   cvtColor(image, displayImage, CV_GRAY2RGB);
 
-	findEntries(image, displayImage, resultImage, int(display), depth);
+	findEntries(image, displayImage, resultImage, int(display), depth, outPoly);
 
 	namedWindow("Lines", WINDOW_AUTOSIZE);
   imshow("Lines", displayImage);
@@ -532,7 +558,7 @@ int main(int argc, char** argv)
 	switch (atoi(argv[1]))
 	{
 	case 0:
-    result = detectLines(argv[2], float(atof(argv[4])), atoi(argv[3]));
+    result = detectLines(argv[2], float(atof(argv[4])), atoi(argv[3]), argv[5]);
 		break;
 
 	default:
