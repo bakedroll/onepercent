@@ -96,6 +96,7 @@ RM = /bin/rm
 
 all: $(BIN)triangle $(BIN)showme
 
+triangle: $(BIN)triangle
 trilibrary: $(BIN)triangle.o $(BIN)tricall
 
 $(BIN)triangle: $(SRC)triangle.c
