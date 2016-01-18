@@ -4,5 +4,5 @@
 
 namespace helper
 {
-  void detectLines(const char* in, float display, int depth, Graph& outGraph);
+  void detectLines(cv::Mat& inputImage, cv::Mat& displayImage, int depth, Graph& outGraph);
 }

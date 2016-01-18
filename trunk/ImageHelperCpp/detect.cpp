@@ -1,8 +1,4 @@
 #include "detect.h"
-#include "draw.h"
-
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 
 namespace helper
 {
@@ -420,33 +416,9 @@ namespace helper
     }
   }
 
-  void detectLines(const char* in, float display, int depth, Graph& outGraph)
+  void detectLines(cv::Mat& inputImage, cv::Mat& displayImage, int depth, Graph& outGraph)
   {
-    typedef std::vector<cv::Vec4f> LinesList;
-
-    cv::Mat image;
-
-    image = cv::imread(in, cv::IMREAD_GRAYSCALE);
-
-    if (!image.data)
-    {
-      printf("Error: Image could not be loaded: %s\n", in);
-      return;
-    }
-
-    cv::Mat displayImage(image.rows, image.cols, CV_8UC3);
-    cv::Mat resultImage(int(image.rows * display), int(image.cols * display), CV_8UC3);
-
-    cvtColor(image, displayImage, CV_GRAY2RGB);
-
-    findEntries(image, displayImage, depth, outGraph);
+    findEntries(inputImage, displayImage, depth, outGraph);
     cleanUpDeadEnds(outGraph);
-
-    drawGraph(resultImage, outGraph, display);
-
-    imshow("Lines", displayImage);
-    imshow("Result", resultImage);
-    imwrite("img.png", displayImage);
-    imwrite("result.png", resultImage);
   }
 }

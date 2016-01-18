@@ -2,7 +2,6 @@
 
 namespace helper
 {
-
   typedef std::pair<int, uchar> NeighbourValue;
   typedef std::vector<NeighbourValue> NeighbourValueList;
   typedef std::map<int, NeighbourValueList> NeighbourMap;
