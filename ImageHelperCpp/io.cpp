@@ -4,7 +4,7 @@
 
 namespace helper
 {
-  void writePolyFile(ResultPointMap& points, ResultEdgeValueList& edges, char* filename)
+  void writePolyFile(Graph& graph, const char* filename)
   {
     typedef std::map<int, int> IdMap;
 
@@ -14,10 +14,10 @@ namespace helper
     if (!fs.is_open())
       return;
 
-    fs << int(points.size()) << " 2 0 0" << std::endl;
+    fs << int(graph.points.size()) << " 2 0 0" << std::endl;
 
     int i = 1;
-    for (ResultPointMap::iterator it = points.begin(); it != points.end(); ++it)
+    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
     {
       ids.insert(IdMap::value_type(it->first, i));
 
@@ -25,10 +25,10 @@ namespace helper
       i++;
     }
 
-    fs << int(edges.size()) << " 1" << std::endl;
+    fs << int(graph.edges.size()) << " 1" << std::endl;
 
     i = 1;
-    for (ResultEdgeValueList::iterator it = edges.begin(); it != edges.end(); ++it)
+    for (EdgeValueList::iterator it = graph.edges.begin(); it != graph.edges.end(); ++it)
     {
       fs << i << " " << ids[it->first.first] << " " << ids[it->first.second] << " 1" << std::endl;
       i++;

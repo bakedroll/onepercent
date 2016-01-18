@@ -3,6 +3,9 @@
 #include <iostream>
 
 #include "detect.h"
+#include "draw.h"
+#include "reduce.h"
+#include "io.h"
 
 using namespace cv;
 using namespace std;
@@ -15,18 +18,26 @@ int main(int argc, char** argv)
     return -1;
   }
 
-  int result;
-  switch (atoi(argv[1]))
+  int result = 0;
+  int mode = atoi(argv[1]);
+  
+  if (mode == 0)
   {
-  case 0:
-    result = helper::detectLines(argv[2], float(atof(argv[4])), atoi(argv[3]), argv[5]);
-    break;
+    const char* inputImage = argv[2];
+    float displayScale = float(atof(argv[4]));
+    int depth = atoi(argv[3]);
+    const char* outputPoly = argv[5];
 
-  default:
+    helper::Graph graph;
+    helper::detectLines(inputImage, displayScale, depth, graph);
+    helper::reducePoints(graph);
+    helper::writePolyFile(graph, outputPoly);
+
+  }
+  else
+  {
     cout << "Error: Wrong mode." << endl;
     result = -1;
-    break;
-
   }
 
   waitKey(0);

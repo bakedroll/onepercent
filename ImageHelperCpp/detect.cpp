@@ -1,8 +1,5 @@
 #include "detect.h"
-
-#include "types.h"
-#include "reduce.h"
-#include "io.h"
+#include "draw.h"
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -165,7 +162,7 @@ namespace helper
     }
   }
 
-  void addToResults(int& idCounter, int connectTo, IntArray& aPointIds, ResultPointMap& mResultPoints, ResultEdgeValueList& mResultEdges, const PointList& points, uchar edgeVal = 255)
+  void addToResults(int& idCounter, int connectTo, IntArray& aPointIds, Graph& outGraph, const PointList& points, uchar edgeVal = 255)
   {
     cv::Point2f p(0, 0);
 
@@ -178,10 +175,10 @@ namespace helper
     p.x /= float(points.size());
     p.y /= float(points.size());
 
-    mResultPoints.insert(ResultPointMap::value_type(idCounter, p));
+    outGraph.points.insert(IdPointMap::value_type(idCounter, p));
 
     if (connectTo > -1)
-      mResultEdges.push_back(ResultEdgeValue(ResultEdge(connectTo, idCounter), edgeVal));
+      outGraph.edges.push_back(EdgeValue(Edge(connectTo, idCounter), edgeVal));
 
     idCounter++;
   }
@@ -196,14 +193,14 @@ namespace helper
     return false;
   }
 
-  bool checkStagesCollide(Stage& stage, StageList& nextStage, int& idCounter, IntArray& aPointIds, ResultPointMap& mResults, ResultEdgeValueList& mEdges)
+  bool checkStagesCollide(Stage& stage, StageList& nextStage, int& idCounter, IntArray& aPointIds, Graph& outGraph)
   {
     for (StageList::iterator it = nextStage.begin(); it != nextStage.end(); ++it)
     {
       if ((&*it != &stage) /*&& (idCounter-1 != it->currentId)*/ && stagesCollide(stage, *it))
       {
-        addToResults(idCounter, stage.currentId, aPointIds, mResults, mEdges, stage.points, stage.edgeValue);
-        mEdges.push_back(ResultEdgeValue(ResultEdge(idCounter - 1, it->currentId), it->edgeValue));
+        addToResults(idCounter, stage.currentId, aPointIds, outGraph, stage.points, stage.edgeValue);
+        outGraph.edges.push_back(EdgeValue(Edge(idCounter - 1, it->currentId), it->edgeValue));
 
         it->obsolete = true;
         stage.iteration = 0;
@@ -216,13 +213,13 @@ namespace helper
     return false;
   }
 
-  void checkEndOfLine(Stage& stage, StageList& nextStage, int& idCounter, IntArray& aPointIds, ResultPointMap& mResults, ResultEdgeValueList& mEdges)
+  void checkEndOfLine(Stage& stage, StageList& nextStage, int& idCounter, IntArray& aPointIds, Graph& outGraph)
   {
-    if (!checkStagesCollide(stage, nextStage, idCounter, aPointIds, mResults, mEdges))
-      addToResults(idCounter, stage.currentId, aPointIds, mResults, mEdges, stage.points, stage.edgeValue);
+    if (!checkStagesCollide(stage, nextStage, idCounter, aPointIds, outGraph))
+      addToResults(idCounter, stage.currentId, aPointIds, outGraph, stage.points, stage.edgeValue);
   }
 
-  void findNeighbours(cv::Mat& image, cv::Mat& display, BoolArray& aVisited, IntArray& aPointIds, ResultPointMap& mResults, ResultEdgeValueList& mEdges, int x, int y, uchar edgeVal, int depth)
+  void findNeighbours(cv::Mat& image, cv::Mat& display, BoolArray& aVisited, IntArray& aPointIds, Graph& outGraph, int x, int y, uchar edgeVal, int depth)
   {
     int idCounter = 0;
 
@@ -238,7 +235,7 @@ namespace helper
     firstStage.edgeValue = edgeVal;
     firstStage.obsolete = false;
 
-    addToResults(idCounter, -1, aPointIds, mResults, mEdges, points);
+    addToResults(idCounter, -1, aPointIds, outGraph, points);
 
     lCurrentStage.push_back(firstStage);
     aVisited.set(x, y, true);
@@ -263,19 +260,19 @@ namespace helper
 
         if (neighbourId > -1)
         {
-          mEdges.push_back(ResultEdgeValue(ResultEdge(csIt->currentId, neighbourId), csIt->edgeValue));
+          outGraph.edges.push_back(EdgeValue(Edge(csIt->currentId, neighbourId), csIt->edgeValue));
         }
         // end of line
         else if (neighbours.empty())
         {
           if (!csIt->obsolete)
-            checkEndOfLine(*csIt, lCurrentStage, idCounter, aPointIds, mResults, mEdges);
+            checkEndOfLine(*csIt, lCurrentStage, idCounter, aPointIds, outGraph);
 
           continue;
         }
 
         if (!csIt->obsolete)
-          checkStagesCollide(*csIt, lCurrentStage, idCounter, aPointIds, mResults, mEdges);
+          checkStagesCollide(*csIt, lCurrentStage, idCounter, aPointIds, outGraph);
 
         PointValueListGroup lGroups;
         groupPoints(neighbours, lGroups);
@@ -284,7 +281,7 @@ namespace helper
         {
           int currentId = idCounter;
 
-          addToResults(idCounter, csIt->currentId, aPointIds, mResults, mEdges, csIt->points, csIt->edgeValue);
+          addToResults(idCounter, csIt->currentId, aPointIds, outGraph, csIt->points, csIt->edgeValue);
 
           csIt->iteration = 0;
           csIt->currentId = neighbourId > -1 ? neighbourId : currentId;
@@ -305,7 +302,7 @@ namespace helper
             stage.iteration = 0;
             stage.currentId = neighbourId > -1 ? neighbourId : currentId;
 
-            addToResults(idCounter, csIt->currentId, aPointIds, mResults, mEdges, resultPoints, csIt->edgeValue);
+            addToResults(idCounter, csIt->currentId, aPointIds, outGraph, resultPoints, csIt->edgeValue);
           }
           else
           {
@@ -349,30 +346,30 @@ namespace helper
     peCountMap.insert(PointEdgesCountMap::value_type(pointId, 1));
   }
 
-  void cleanUpDeadEnds(ResultPointMap& mResults, ResultEdgeValueList& mEdges)
+  void cleanUpDeadEnds(Graph& outGraph)
   {
-    typedef std::vector<ResultPointMap::iterator> RPMIteratorList;
+    typedef std::vector<IdPointMap::iterator> RPMIteratorList;
 
     PointEdgesCountMap peCountMap;
 
-    for (ResultEdgeValueList::iterator eIt = mEdges.begin(); eIt != mEdges.end(); ++eIt)
+    for (EdgeValueList::iterator eIt = outGraph.edges.begin(); eIt != outGraph.edges.end(); ++eIt)
     {
       incrementEdgeCount(peCountMap, eIt->first.first);
       incrementEdgeCount(peCountMap, eIt->first.second);
     }
 
     RPMIteratorList pointsToRemove;
-    for (ResultPointMap::iterator pIt = mResults.begin(); pIt != mResults.end(); ++pIt)
+    for (IdPointMap::iterator pIt = outGraph.points.begin(); pIt != outGraph.points.end(); ++pIt)
     {
       PointEdgesCountMap::iterator peIt = peCountMap.find(pIt->first);
       assert(peIt != peCountMap.end());
 
       if (peIt->second == 1)
       {
-        ResultEdgeValueList::iterator edgeToRemoveIt;
+        EdgeValueList::iterator edgeToRemoveIt;
 
         int neighbourId = -1;
-        for (ResultEdgeValueList::iterator eIt = mEdges.begin(); eIt != mEdges.end(); ++eIt)
+        for (EdgeValueList::iterator eIt = outGraph.edges.begin(); eIt != outGraph.edges.end(); ++eIt)
         {
           if (eIt->first.first == pIt->first)
           {
@@ -395,30 +392,19 @@ namespace helper
         if (peIt2->second > 2)
         {
           pointsToRemove.push_back(pIt);
-          mEdges.erase(edgeToRemoveIt);
+          outGraph.edges.erase(edgeToRemoveIt);
         }
       }
     }
 
     for (RPMIteratorList::iterator it = pointsToRemove.begin(); it != pointsToRemove.end(); ++it)
-      mResults.erase(*it);
+      outGraph.points.erase(*it);
   }
 
-  void searchPath(cv::Mat& image, cv::Mat& display, cv::Mat& result, BoolArray& aVisited, IntArray& aPointIds, int x, int y, uchar edgeVal, int depth, ResultPointMap& mResultPoints, ResultEdgeValueList& mResultEdges)
+  void findEntries(cv::Mat& image, cv::Mat& result, int depth, Graph& outGraph)
   {
-    findNeighbours(image, display, aVisited, aPointIds, mResultPoints, mResultEdges, x, y, edgeVal, depth);
-    cleanUpDeadEnds(mResultPoints, mResultEdges);
-  }
-
-  void findEntries(cv::Mat& image, cv::Mat& display, cv::Mat& result, int displaySize, int depth, char* outPoly)
-  {
-    ResultPointMap mResultPoints;
-    ResultEdgeValueList mResultEdges;
-
     BoolArray aVisited(image.cols, image.rows, false);
     IntArray aPointIds(image.cols, image.rows, -1);
-
-    result.setTo(cv::Scalar(0, 0, 0));
 
     for (int y = 0; y < image.rows; y++)
     {
@@ -428,23 +414,13 @@ namespace helper
 
         if (edgeVal > 0 && !aVisited.get(x, y))
         {
-          searchPath(image, display, result, aVisited, aPointIds, x, y, edgeVal, depth, mResultPoints, mResultEdges);
+          findNeighbours(image, result, aVisited, aPointIds, outGraph, x, y, edgeVal, depth);
         }
       }
     }
-
-    for (ResultEdgeValueList::iterator eIt = mResultEdges.begin(); eIt != mResultEdges.end(); ++eIt)
-      line(result, mResultPoints.find(eIt->first.first)->second * displaySize, mResultPoints.find(eIt->first.second)->second * displaySize, cv::Scalar(0, 0, eIt->second));
-
-    for (ResultPointMap::iterator rIt = mResultPoints.begin(); rIt != mResultPoints.end(); ++rIt)
-      result.at<cv::Vec3b>(rIt->second * displaySize) = cv::Vec3b(255, 0, 0);
-
-    reducePoints(mResultPoints, mResultEdges);
-
-    writePolyFile(mResultPoints, mResultEdges, outPoly);
   }
 
-  int detectLines(const char* in, float display, int depth, char* outPoly)
+  void detectLines(const char* in, float display, int depth, Graph& outGraph)
   {
     typedef std::vector<cv::Vec4f> LinesList;
 
@@ -455,22 +431,22 @@ namespace helper
     if (!image.data)
     {
       printf("Error: Image could not be loaded: %s\n", in);
-      return -1;
+      return;
     }
 
-    cv::Mat displayImage(int(image.rows * display), int(image.cols * display), CV_8UC3);
+    cv::Mat displayImage(image.rows, image.cols, CV_8UC3);
     cv::Mat resultImage(int(image.rows * display), int(image.cols * display), CV_8UC3);
 
     cvtColor(image, displayImage, CV_GRAY2RGB);
 
-    findEntries(image, displayImage, resultImage, int(display), depth, outPoly);
+    findEntries(image, displayImage, depth, outGraph);
+    cleanUpDeadEnds(outGraph);
 
-    cv::namedWindow("Lines", cv::WINDOW_AUTOSIZE);
+    drawGraph(resultImage, outGraph, display);
+
     imshow("Lines", displayImage);
     imshow("Result", resultImage);
     imwrite("img.png", displayImage);
     imwrite("result.png", resultImage);
-
-    return 0;
   }
 }
