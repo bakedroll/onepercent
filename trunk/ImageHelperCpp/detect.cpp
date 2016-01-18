@@ -242,16 +242,13 @@ namespace helper
 
       for (StageList::iterator csIt = lCurrentStage.begin(); csIt != lCurrentStage.end(); ++csIt)
       {
-        //if (csIt->obsolete)
-        //  continue;
-
         PointValueList neighbours;
         int neighbourId;
 
         for (PointList::iterator pIt = csIt->points.begin(); pIt != csIt->points.end(); ++pIt)
           checkPixelsAround(image, aVisited, &aPointIds, neighbours, &neighbourId, pIt->x, pIt->y);
 
-        if (neighbourId == csIt->currentId)
+        if (neighbourId == csIt->currentId || csIt->obsolete)
           neighbourId = -1;
 
         if (neighbourId > -1)
