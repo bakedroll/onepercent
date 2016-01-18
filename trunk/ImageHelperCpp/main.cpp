@@ -7,6 +7,7 @@
 #include "reduce.h"
 #include "io.h"
 #include "draw.h"
+#include "check.h"
 
 int detectLines(int argc, char** argv)
 {
@@ -19,7 +20,8 @@ int detectLines(int argc, char** argv)
   const char* inputImage = argv[2];
   float displayScale = float(atof(argv[4]));
   int depth = atoi(argv[3]);
-  const char* outputPoly = argv[5];
+  float reduce = float(atof(argv[5]));
+  const char* outputPoly = argv[6];
 
   cv::Mat image;
 
@@ -38,7 +40,13 @@ int detectLines(int argc, char** argv)
 
   helper::Graph graph;
   helper::detectLines(image, displayImage, depth, graph);
-  helper::reducePoints(graph);
+
+  helper::checkDuplicates(graph);
+
+  helper::reducePoints(graph, reduce);
+
+  helper::checkDuplicates(graph);
+
   helper::writePolyFile(graph, outputPoly);
   helper::drawGraph(resultImage, graph, displayScale);
 

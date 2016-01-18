@@ -4,5 +4,5 @@
 
 namespace helper
 {
-  void reducePoints(Graph& graph, float percentPoints);
+  void checkDuplicates(Graph& graph);
 }
