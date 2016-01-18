@@ -68,10 +68,16 @@ namespace helper
   typedef std::vector<cv::Point> PointList;
   typedef std::vector<PointValue> PointValueList;
   typedef std::vector<PointValueList> PointValueListGroup;
-  typedef std::pair<int, int> ResultEdge;
-  typedef std::pair<ResultEdge, uchar> ResultEdgeValue;
-  typedef std::map<int, cv::Point2f> ResultPointMap;
-  typedef std::vector<ResultEdgeValue> ResultEdgeValueList;
+  typedef std::pair<int, int> Edge;
+  typedef std::pair<Edge, uchar> EdgeValue;
+  typedef std::map<int, cv::Point2f> IdPointMap;
+  typedef std::vector<EdgeValue> EdgeValueList;
   typedef std::map<int, int> PointEdgesCountMap;
+
+  typedef struct _graph
+  {
+    IdPointMap points;
+    EdgeValueList edges;
+  } Graph;
 
 }

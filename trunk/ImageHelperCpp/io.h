@@ -4,5 +4,5 @@
 
 namespace helper
 {
-  void writePolyFile(ResultPointMap& points, ResultEdgeValueList& edges, char* filename);
+  void writePolyFile(Graph& graph, const char* filename);
 }

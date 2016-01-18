@@ -4,5 +4,5 @@
 
 namespace helper
 {
-  void reducePoints(ResultPointMap& points, ResultEdgeValueList& edges);
+  void reducePoints(Graph& graph);
 }

@@ -27,11 +27,11 @@ namespace helper
     }
   }
 
-  void reducePoints(ResultPointMap& points, ResultEdgeValueList& edges)
+  void reducePoints(Graph& graph)
   {
     NeighbourMap neighbourMap;
 
-    for (ResultEdgeValueList::iterator eit = edges.begin(); eit != edges.end(); ++eit)
+    for (EdgeValueList::iterator eit = graph.edges.begin(); eit != graph.edges.end(); ++eit)
     {
       insertNeighbour(neighbourMap, eit->first.first, eit->first.second, eit->second);
       insertNeighbour(neighbourMap, eit->first.second, eit->first.first, eit->second);
