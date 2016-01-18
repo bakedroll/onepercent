@@ -196,19 +196,30 @@ namespace helper
     return false;
   }
 
-  void checkEndOfLine(Stage& stage, StageList& nextStage, int& idCounter, IntArray& aPointIds, ResultPointMap& mResults, ResultEdgeValueList& mEdges)
+  bool checkStagesCollide(Stage& stage, StageList& nextStage, int& idCounter, IntArray& aPointIds, ResultPointMap& mResults, ResultEdgeValueList& mEdges)
   {
-    addToResults(idCounter, stage.currentId, aPointIds, mResults, mEdges, stage.points, stage.edgeValue);
-
     for (StageList::iterator it = nextStage.begin(); it != nextStage.end(); ++it)
     {
-      if (&*it != &stage && stagesCollide(stage, *it))
+      if ((&*it != &stage) /*&& (idCounter-1 != it->currentId)*/ && stagesCollide(stage, *it))
       {
+        addToResults(idCounter, stage.currentId, aPointIds, mResults, mEdges, stage.points, stage.edgeValue);
         mEdges.push_back(ResultEdgeValue(ResultEdge(idCounter - 1, it->currentId), it->edgeValue));
+
         it->obsolete = true;
-        return;
+        stage.iteration = 0;
+        stage.currentId = idCounter - 1;
+
+        return true;
       }
     }
+
+    return false;
+  }
+
+  void checkEndOfLine(Stage& stage, StageList& nextStage, int& idCounter, IntArray& aPointIds, ResultPointMap& mResults, ResultEdgeValueList& mEdges)
+  {
+    if (!checkStagesCollide(stage, nextStage, idCounter, aPointIds, mResults, mEdges))
+      addToResults(idCounter, stage.currentId, aPointIds, mResults, mEdges, stage.points, stage.edgeValue);
   }
 
   void findNeighbours(cv::Mat& image, cv::Mat& display, BoolArray& aVisited, IntArray& aPointIds, ResultPointMap& mResults, ResultEdgeValueList& mEdges, int x, int y, uchar edgeVal, int depth)
@@ -238,8 +249,8 @@ namespace helper
 
       for (StageList::iterator csIt = lCurrentStage.begin(); csIt != lCurrentStage.end(); ++csIt)
       {
-        if (csIt->obsolete)
-          continue;
+        //if (csIt->obsolete)
+        //  continue;
 
         PointValueList neighbours;
         int neighbourId;
@@ -257,9 +268,14 @@ namespace helper
         // end of line
         else if (neighbours.empty())
         {
-          checkEndOfLine(*csIt, lCurrentStage, idCounter, aPointIds, mResults, mEdges);
+          if (!csIt->obsolete)
+            checkEndOfLine(*csIt, lCurrentStage, idCounter, aPointIds, mResults, mEdges);
+
           continue;
         }
+
+        if (!csIt->obsolete)
+          checkStagesCollide(*csIt, lCurrentStage, idCounter, aPointIds, mResults, mEdges);
 
         PointValueListGroup lGroups;
         groupPoints(neighbours, lGroups);
@@ -388,7 +404,7 @@ namespace helper
       mResults.erase(*it);
   }
 
-  void searchPath(cv::Mat& image, cv::Mat& display, cv::Mat& result, BoolArray& aVisited, IntArray& aPointIds, int x, int y, uchar edgeVal, int displaySize, int depth, ResultPointMap& mResultPoints, ResultEdgeValueList& mResultEdges)
+  void searchPath(cv::Mat& image, cv::Mat& display, cv::Mat& result, BoolArray& aVisited, IntArray& aPointIds, int x, int y, uchar edgeVal, int depth, ResultPointMap& mResultPoints, ResultEdgeValueList& mResultEdges)
   {
     findNeighbours(image, display, aVisited, aPointIds, mResultPoints, mResultEdges, x, y, edgeVal, depth);
     cleanUpDeadEnds(mResultPoints, mResultEdges);
@@ -412,7 +428,7 @@ namespace helper
 
         if (edgeVal > 0 && !aVisited.get(x, y))
         {
-          searchPath(image, display, result, aVisited, aPointIds, x, y, edgeVal, displaySize, depth, mResultPoints, mResultEdges);
+          searchPath(image, display, result, aVisited, aPointIds, x, y, edgeVal, depth, mResultPoints, mResultEdges);
         }
       }
     }
