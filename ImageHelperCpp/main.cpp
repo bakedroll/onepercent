@@ -9,9 +9,20 @@
 #include "draw.h"
 #include "check.h"
 
+void triangulate(const char* triangleCommand, const char* polyFilename)
+{
+  std::string fn(polyFilename);
+  fn += ".0.poly";
+
+  std::string command(triangleCommand);
+  command += " -pq " + fn;
+
+  std::system(command.c_str());
+}
+
 int detectLines(int argc, char** argv)
 {
-  if (argc < 4)
+  if (argc < 8)
   {
     std::cout << "Error: Not enough parameters." << std::endl;
     return -1;
@@ -21,7 +32,8 @@ int detectLines(int argc, char** argv)
   float displayScale = float(atof(argv[4]));
   int depth = atoi(argv[3]);
   float reduce = float(atof(argv[5]));
-  const char* outputPoly = argv[6];
+  const char* polyfile = argv[6];
+  const char* triangleCommand = argv[7];
 
   cv::Mat image;
 
@@ -35,6 +47,7 @@ int detectLines(int argc, char** argv)
 
   cv::Mat displayImage(image.rows, image.cols, CV_8UC3);
   cv::Mat resultImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
+  cv::Mat finalImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
 
   cvtColor(image, displayImage, CV_GRAY2RGB);
 
@@ -47,13 +60,22 @@ int detectLines(int argc, char** argv)
 
   helper::checkDuplicates(graph);
 
-  helper::writePolyFile(graph, outputPoly);
+  helper::writePolyFile(graph, polyfile);
   helper::drawGraph(resultImage, graph, displayScale);
+
+  triangulate(triangleCommand, polyfile);
+
+  helper::Graph triGraph;
+  helper::readGraphFiles(triGraph, polyfile, 1);
+
+  helper::drawGraph(finalImage, triGraph, displayScale);
 
   imshow("Lines", displayImage);
   imshow("Result", resultImage);
+  imshow("Final", finalImage);
   imwrite("img.png", displayImage);
   imwrite("result.png", resultImage);
+  imwrite("final.png", finalImage);
 
   return 0;
 }

@@ -61,6 +61,11 @@ namespace helper
     int m_rows;
   };
 
+  typedef struct _triangle
+  {
+    int idx[3];
+  } Triangle;
+
   typedef Array<bool> BoolArray;
   typedef Array<int> IntArray;
   typedef std::pair<cv::Point, uchar> PointValue;
@@ -73,11 +78,13 @@ namespace helper
   typedef std::map<int, cv::Point2f> IdPointMap;
   typedef std::vector<EdgeValue> EdgeValueList;
   typedef std::map<int, int> PointEdgesCountMap;
+  typedef std::vector<Triangle> TriangleList;
 
   typedef struct _graph
   {
     IdPointMap points;
     EdgeValueList edges;
+    TriangleList triangles;
   } Graph;
 
 }
