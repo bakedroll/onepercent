@@ -2,40 +2,73 @@
 
 namespace helper
 {
-  void checkPoint(Graph& graph, IdPointMap::iterator& pointIt)
+  void checkPointAndRemove(Graph& graph, IdPointMap::iterator& pointIt)
   {
     int count = 0;
 
-    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+    IdPointMap::iterator it = pointIt;
+    ++it;
+    while (it != graph.points.end())
+    {
       if (it->second == pointIt->second)
+      {
         count++;
 
-    if (count != 1)
+        for (EdgeValueList::iterator eit = graph.edges.begin(); eit != graph.edges.end(); ++eit)
+        {
+          if (eit->first.first == it->first)
+            eit->first.first = pointIt->first;
+
+          if (eit->first.second == it->first)
+            eit->first.second = pointIt->first;
+        }
+
+        it = graph.points.erase(it);
+      }
+      else
+      {
+        ++it;
+      }
+    }
+
+    if (count > 0)
       printf("Duplicate point: %d\n", pointIt->first);
   }
 
-  void checkEdge(Graph& graph, EdgeValueList::iterator& edgeIt)
+  void checkEdgeAndRemove(Graph& graph, EdgeValueList::iterator& edgeIt)
   {
     int count = 0;
 
-    for (EdgeValueList::iterator it = graph.edges.begin(); it != graph.edges.end(); ++it)
+    EdgeValueList::iterator it = edgeIt;
+    ++it;
+    while (it != graph.edges.end())
+    {
       if ((it->first.first == edgeIt->first.first && it->first.second == edgeIt->first.second) ||
         (it->first.first == edgeIt->first.second && it->first.second == edgeIt->first.first))
+      {
         count++;
 
-    if (count != 1)
+        it = graph.edges.erase(it);
+      }
+      else
+      {
+        ++it;
+      }
+    }
+
+    if (count > 0)
       printf("Duplicate edge: (%d, %d)\n", edgeIt->first.first, edgeIt->first.second);
   }
 
-  void checkDuplicates(Graph& graph)
+  void checkDuplicatesAndRemove(Graph& graph)
   {
     printf("checking for duplicates...\n");
 
     for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
-      checkPoint(graph, it);
+      checkPointAndRemove(graph, it);
 
     for (EdgeValueList::iterator it = graph.edges.begin(); it != graph.edges.end(); ++it)
-      checkEdge(graph, it);
+      checkEdgeAndRemove(graph, it);
 
     printf("\n");
   }
