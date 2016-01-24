@@ -2,31 +2,6 @@
 
 namespace helper
 {
-  typedef std::pair<int, uchar> NeighbourValue;
-  typedef std::vector<NeighbourValue> NeighbourValueList;
-  typedef std::map<int, NeighbourValueList> NeighbourMap;
-  typedef std::multimap<double, int> AnglePointMap;
-
-  void insertNeighbour(NeighbourMap& map, int p1, int p2, uchar attr)
-  {
-    NeighbourMap::iterator it = map.find(p1);
-
-    NeighbourValue value;
-    value.first = p2;
-    value.second = attr;
-
-    if (it == map.end())
-    {
-      NeighbourValueList list;
-      list.push_back(value);
-      map.insert(NeighbourMap::value_type(p1, list));
-    }
-    else
-    {
-      it->second.push_back(value);
-    }
-  }
-
   double angleBetween(cv::Vec2f pend1, cv::Vec2f pcenter, cv::Vec2f pend2)
   {
     cv::Vec2d v1(pend1 - pcenter);
@@ -42,35 +17,6 @@ namespace helper
     v2.val[1] /= l2;
 
     return acos(v1.ddot(v2));
-  }
-
-  void removeNeighbourFromList(NeighbourValueList& list, int id)
-  {
-    for (NeighbourValueList::iterator it = list.begin(); it != list.end(); ++it)
-    {
-      if (it->first == id)
-      {
-        list.erase(it);
-        return;
-      }
-    }
-  }
-
-  void removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value)
-  {
-    NeighbourMap::iterator it = neighbourMap.find(pointId);
-
-    assert(it->second.size() == 2);
-    assert(it->second[0].second == it->second[1].second);
-
-    value = it->second[0].second;
-    endpoint1 = it->second[0].first;
-    endpoint2 = it->second[1].first;
-
-    neighbourMap.erase(it);
-
-    removeNeighbourFromList(neighbourMap.find(endpoint1)->second, pointId);
-    removeNeighbourFromList(neighbourMap.find(endpoint2)->second, pointId);
   }
 
   void removeFromGraph(Graph& graph, int pointId)
@@ -114,11 +60,7 @@ namespace helper
     NeighbourMap neighbourMap;
     AnglePointMap angles;
 
-    for (EdgeValueList::iterator eit = graph.edges.begin(); eit != graph.edges.end(); ++eit)
-    {
-      insertNeighbour(neighbourMap, eit->first.first, eit->first.second, eit->second);
-      insertNeighbour(neighbourMap, eit->first.second, eit->first.first, eit->second);
-    }
+    neighbourMapFromGraph(graph, neighbourMap);
 
     for (NeighbourMap::iterator it = neighbourMap.begin(); it != neighbourMap.end(); ++it)
       calculateAngle(it, angles, graph);

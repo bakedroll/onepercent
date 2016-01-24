@@ -1,0 +1,3 @@
+0 ../Resources/earth_textures/img3.png 10 3.0 0.7 ../Resources/TEMP/countries ..\Resources\triangle\bin\triangle.exe 15 ../Resources/TEMP/dbg 0
+
+0 ../Resources/earth_textures/boundaries_8k.png 10 1.0 0.7 ../Resources/TEMP/countries ..\Resources\triangle\bin\triangle.exe 15 ../Resources/TEMP/dbg 1

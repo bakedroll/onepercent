@@ -71,17 +71,23 @@
     <ClCompile Include="check.cpp" />
     <ClCompile Include="detect.cpp" />
     <ClCompile Include="draw.cpp" />
+    <ClCompile Include="findcycles.cpp" />
     <ClCompile Include="io.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="reduce.cpp" />
+    <ClCompile Include="types.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="check.h" />
     <ClInclude Include="detect.h" />
     <ClInclude Include="draw.h" />
+    <ClInclude Include="findcycles.h" />
     <ClInclude Include="io.h" />
     <ClInclude Include="reduce.h" />
     <ClInclude Include="types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="args.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

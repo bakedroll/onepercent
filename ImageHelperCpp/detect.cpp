@@ -95,12 +95,6 @@ namespace helper
     checkPixel(image, aVisited, aPointIds, points, neighbourId, x - 1, y + 1, repeat);
     checkPixel(image, aVisited, aPointIds, points, neighbourId, x, y + 1, repeat);
     checkPixel(image, aVisited, aPointIds, points, neighbourId, x + 1, y + 1, repeat);
-
-    /*if (points.size() == 1)
-    {
-    if (points[0].x != x && points[0].y != y)
-    aVisited.set(points[0].x, points[0].y, false);
-    }*/
   }
 
   PointList fromPointValueList(PointValueList& list)
@@ -193,7 +187,7 @@ namespace helper
   {
     for (StageList::iterator it = nextStage.begin(); it != nextStage.end(); ++it)
     {
-      if ((&*it != &stage) /*&& (idCounter-1 != it->currentId)*/ && stagesCollide(stage, *it))
+      if ((&*it != &stage) && stagesCollide(stage, *it))
       {
         addToResults(idCounter, stage.currentId, aPointIds, outGraph, stage.points, stage.edgeValue);
         outGraph.edges.push_back(EdgeValue(Edge(idCounter - 1, it->currentId), it->edgeValue));
@@ -215,10 +209,8 @@ namespace helper
       addToResults(idCounter, stage.currentId, aPointIds, outGraph, stage.points, stage.edgeValue);
   }
 
-  void findNeighbours(cv::Mat& image, cv::Mat& display, BoolArray& aVisited, IntArray& aPointIds, Graph& outGraph, int x, int y, uchar edgeVal, int depth)
+  void findNeighbours(cv::Mat& image, cv::Mat& display, BoolArray& aVisited, IntArray& aPointIds, Graph& outGraph, int x, int y, uchar edgeVal, int depth, int& idCounter)
   {
-    int idCounter = 0;
-
     StageList lCurrentStage;
 
     PointList points;
@@ -398,6 +390,7 @@ namespace helper
   {
     BoolArray aVisited(image.cols, image.rows, false);
     IntArray aPointIds(image.cols, image.rows, -1);
+    int idCounter = 0;
 
     for (int y = 0; y < image.rows; y++)
     {
@@ -407,7 +400,7 @@ namespace helper
 
         if (edgeVal > 0 && !aVisited.get(x, y))
         {
-          findNeighbours(image, result, aVisited, aPointIds, outGraph, x, y, edgeVal, depth);
+          findNeighbours(image, result, aVisited, aPointIds, outGraph, x, y, edgeVal, depth, idCounter);
         }
       }
     }

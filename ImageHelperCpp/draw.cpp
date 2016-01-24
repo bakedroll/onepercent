@@ -15,9 +15,9 @@ namespace helper
 
     for (TriangleList::iterator tIt = graph.triangles.begin(); tIt != graph.triangles.end(); ++tIt)
     {
-      drawLine(mat, graph, tIt->idx[0], tIt->idx[1], scale, cv::Scalar(0, 255, 0));
-      drawLine(mat, graph, tIt->idx[1], tIt->idx[2], scale, cv::Scalar(0, 255, 0));
-      drawLine(mat, graph, tIt->idx[2], tIt->idx[0], scale, cv::Scalar(0, 255, 0));
+      drawLine(mat, graph, tIt->idx[0], tIt->idx[1], scale, cv::Scalar(0, 172, 0));
+      drawLine(mat, graph, tIt->idx[1], tIt->idx[2], scale, cv::Scalar(0, 172, 0));
+      drawLine(mat, graph, tIt->idx[2], tIt->idx[0], scale, cv::Scalar(0, 172, 0));
     }
 
     for (EdgeValueList::iterator eIt = graph.edges.begin(); eIt != graph.edges.end(); ++eIt)

@@ -79,6 +79,10 @@ namespace helper
   typedef std::vector<EdgeValue> EdgeValueList;
   typedef std::map<int, int> PointEdgesCountMap;
   typedef std::vector<Triangle> TriangleList;
+  typedef std::pair<int, uchar> NeighbourValue;
+  typedef std::vector<NeighbourValue> NeighbourValueList;
+  typedef std::map<int, NeighbourValueList> NeighbourMap;
+  typedef std::multimap<double, int> AnglePointMap;
 
   typedef struct _graph
   {
@@ -87,4 +91,8 @@ namespace helper
     TriangleList triangles;
   } Graph;
 
+  void neighbourMapFromGraph(Graph& graph, NeighbourMap& neighbourMap);
+
+  void removeNeighbourFromList(NeighbourValueList& list, int id);
+  void removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value);
 }

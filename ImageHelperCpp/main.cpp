@@ -8,21 +8,22 @@
 #include "io.h"
 #include "draw.h"
 #include "check.h"
+#include "findcycles.h"
 
-void triangulate(const char* triangleCommand, const char* polyFilename)
+void triangulate(const char* triangleCommand, const char* polyFilename, int minAngle = 20)
 {
   std::string fn(polyFilename);
   fn += ".0.poly";
 
   std::string command(triangleCommand);
-  command += " -pq " + fn;
+  command += " -pq" + std::to_string(minAngle) + " " + fn;
 
   std::system(command.c_str());
 }
 
 int detectLines(int argc, char** argv)
 {
-  if (argc < 8)
+  if (argc < 11)
   {
     std::cout << "Error: Not enough parameters." << std::endl;
     return -1;
@@ -34,6 +35,14 @@ int detectLines(int argc, char** argv)
   float reduce = float(atof(argv[5]));
   const char* polyfile = argv[6];
   const char* triangleCommand = argv[7];
+  int minAngle = atoi(argv[8]);
+  const char* dbgImage = argv[9];
+  int useThres = atoi(argv[10]);
+
+  printf("Triangulating...\n");
+  printf("Depth (edge length): %d\n", depth);
+  printf("Reduce: %f percent\n", reduce * 100.0f);
+  printf("Min angle: %d\n\n", minAngle);
 
   cv::Mat image;
 
@@ -51,31 +60,40 @@ int detectLines(int argc, char** argv)
 
   cvtColor(image, displayImage, CV_GRAY2RGB);
 
+  if (useThres)
+    cv::threshold(image, image, 30, 255, CV_THRESH_BINARY);
+
+  // detecting lines
   helper::Graph graph;
   helper::detectLines(image, displayImage, depth, graph);
 
-  helper::checkDuplicates(graph);
-
+  // reducing points and double checking for duplicates
+  helper::checkDuplicatesAndRemove(graph);
   helper::reducePoints(graph, reduce);
+  helper::checkDuplicatesAndRemove(graph);
 
-  helper::checkDuplicates(graph);
-
+  // write to poly file and draw debug image
   helper::writePolyFile(graph, polyfile);
   helper::drawGraph(resultImage, graph, displayScale);
 
-  triangulate(triangleCommand, polyfile);
+  // triangulate
+  triangulate(triangleCommand, polyfile, minAngle);
 
+  // read result and draw debug image
   helper::Graph triGraph;
   helper::readGraphFiles(triGraph, polyfile, 1);
-
   helper::drawGraph(finalImage, triGraph, displayScale);
 
+  // find cycles
+  helper::Cycles cycles;
+  helper::findCycles(triGraph, cycles);
+  
   imshow("Lines", displayImage);
   imshow("Result", resultImage);
   imshow("Final", finalImage);
-  imwrite("img.png", displayImage);
-  imwrite("result.png", resultImage);
-  imwrite("final.png", finalImage);
+  imwrite(std::string(dbgImage) + ".steps.png", displayImage);
+  imwrite(std::string(dbgImage) + ".edges.png", resultImage);
+  imwrite(std::string(dbgImage) + ".triangles.png", finalImage);
 
   return 0;
 }
