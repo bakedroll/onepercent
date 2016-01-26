@@ -7,10 +7,17 @@ namespace helper
   typedef std::multimap<double, PointIdValue> AnglePointIdValueMap;
   typedef std::set<int> PointsVisited;
 
+  typedef enum
+  {
+    LEFT = 0,
+    RIGHT = 1
+  } Side;
+
   typedef struct _cycleStage
   {
     int adjacentCycleIds[2];
     Edge directedEdge;
+    bool isBoundary;
   } CycleStage;
 
   typedef std::vector<CycleStage> CycleStageList;
@@ -36,25 +43,122 @@ namespace helper
       p1 = graph.points[p1Id] - graph.points[originId];
 
     for (NeighbourValueList::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
-    {
-      //if (visited.find(it->first) != visited.end())
-      //  continue;
-
       if (it->first != p1Id)
         angles.insert(AnglePointIdValueMap::value_type(angleBetween(p1, graph.points[it->first] - graph.points[originId]), PointIdValue(it->first, it->second)));
-    }
   }
 
-  void makeNextStages(AnglePointIdValueMap& angles, NeighbourValueList& neighbours, CycleStageList& nextStage, CycleStageList& results, int& cycleId, PointsVisited& visited, int originId, PointsVisited& processed)
+  void getLeftRightCycleId(CycleStageList& results, int p1, int p2, int& leftId, int& rightId)
   {
-    for (AnglePointIdValueMap::iterator it = angles.begin(); it != angles.end(); ++it)
+    
+  }
+
+  template<typename Container>
+  typename Container::iterator nextContainerElement(typename Container::iterator& it)
+  {
+    typename Container::iterator next = it;
+    ++next;
+
+    return next;
+  }
+
+  template<typename Container>
+  bool isLastContainerElement(Container& container, typename Container::iterator& it)
+  {
+    typename Container::iterator next = it;
+    ++next;
+
+    return next == container.end();
+  }
+
+  void setAdjacentCycle(CycleStage& stage, Side side, int cycleId)
+  {
+    if (stage.isBoundary && side == RIGHT)
+      side = LEFT;
+
+    stage.adjacentCycleIds[side] = cycleId;
+  }
+
+  int getAdjacentCycle(CycleStage& stage, Side side)
+  {
+    if (stage.isBoundary && side == RIGHT)
+      side = LEFT;
+
+    return stage.adjacentCycleIds[side];
+  }
+
+  void makeStage(
+    PointIdValue& pvalue,
+    PointsVisited& visited,
+    int origin,
+    int left,
+    int right,
+    CycleStageList& nextStage,
+    CycleStageList& results)
+  {
+    CycleStage stage;
+
+    stage.adjacentCycleIds[0] = left;
+    stage.adjacentCycleIds[1] = right;
+
+    stage.directedEdge = Edge(origin, pvalue.first);
+    stage.isBoundary = pvalue.second < 255;
+
+    if (visited.find(pvalue.first) == visited.end())
     {
-      if (processed.find(it->second.first) != processed.end())
+      nextStage.push_back(stage);
+      visited.insert(pvalue.first);
+    }
+
+    results.push_back(stage);
+  }
+
+  void makeNextStages(
+    AnglePointIdValueMap& angles,
+    NeighbourValueList& neighbours,
+    CycleStageList& nextStage,
+    CycleStageList& results,
+    int& cycleId,
+    PointsVisited& visited,
+    int originId,
+    PointsVisited& processed,
+    int leftCycleId = -1,
+    int rightCycleId = -1,
+    bool isFirst = false)
+  {
+    if (angles.size() == 0)
+      return;
+
+    AnglePointIdValueMap::iterator ait = angles.begin();
+    if (isFirst)
+    {
+      leftCycleId = cycleId++;
+
+      if (ait->second.second == 255)
+        rightCycleId = cycleId++;
+
+      makeStage(ait->second, visited, originId, leftCycleId, rightCycleId, results, nextStage);
+      ++ait;
+    }
+
+    int currentCycleId = leftCycleId;
+    if (rightCycleId == -1)
+      rightCycleId = leftCycleId;
+
+    for (ait; ait != angles.end(); ++ait)
+    {
+      AnglePointIdValueMap::iterator nextit = nextContainerElement<AnglePointIdValueMap>(ait);
+      bool isLast = isLastContainerElement(angles, ait);
+
+      if (processed.find(ait->second.first) != processed.end())
+      {
         continue;
+      }
 
-      CycleStage stage;
+      makeStage(ait->second, visited, originId, leftCycleId, rightCycleId, nextStage, results);
 
-      stage.adjacentCycleIds[0] = cycleId;
+      //CycleStage stage;
+
+      /*stage.adjacentCycleIds[0] = cycleId;
       if (it->second.second == 255)
       {
         stage.adjacentCycleIds[1] = cycleId++;
@@ -65,17 +169,46 @@ namespace helper
 
         if (neighbours.size() > 2)
           cycleId++;
+      }*/
+
+      /*stage.adjacentCycleIds[0] = currentCycleId;
+
+      if (ait->second.second == 255)
+      {
+        // last element
+        //if (it->second.first == angles.rbegin()->second.first)
+        if (isLast)
+        {
+          //if (rightCycleId == -1)
+          //  stage.adjacentCycleIds[1] = 
+          //stage.adjacentCycleIds[1] = rightCycleId == -1 ? ;
+        }
+        else
+        {
+          stage.adjacentCycleIds[1] = cycleId++;
+          currentCycleId = stage.adjacentCycleIds[1];
+        }
+      }
+      else
+      {
+        stage.adjacentCycleIds[1] = -1;
+
+        //if (neighbours.size() > 2)
+        //  cycleId++;
       }
 
-      stage.directedEdge = Edge(originId, it->second.first);
+      stage.directedEdge = Edge(originId, ait->second.first);
+      stage.isBoundary = ait->second.second < 255;
 
-      if (visited.find(it->second.first) == visited.end())
+      if (visited.find(ait->second.first) == visited.end())
       {
         nextStage.push_back(stage);
-        visited.insert(it->second.first);
+        visited.insert(ait->second.first);
       }
 
-      results.push_back(stage);
+      results.push_back(stage);*/
+
+
     }
 
     processed.insert(originId);
@@ -92,14 +225,10 @@ namespace helper
     {
       // determine first stage
       NeighbourMap::iterator nit = neighbourMap.begin();
-      //while ((nit != neighbourMap.end()) && (nit->second.size() < 1) && (visited.find(nit->first) != visited.end()))
       while ((nit->second.size() < 2) || (visited.find(nit->first) != visited.end()))
       {
         ++nit;
       }
-
-      //if (nit == neighbourMap.end())
-      //  break;
 
       int cycleId = 0;
 
@@ -110,7 +239,7 @@ namespace helper
 
       CycleStageList currentStage;
       PointsVisited processed;
-      makeNextStages(angles, nit->second, currentStage, results, cycleId, visited, nit->first, processed);
+      makeNextStages(angles, nit->second, currentStage, results, cycleId, visited, nit->first, processed, -1, -1, true);
 
       while (currentStage.size() > 0)
       {
@@ -122,7 +251,17 @@ namespace helper
 
           AnglePointIdValueMap nextAngles;
           makeAnglePointMap(graph, nextNeighbours, sit->directedEdge.second, sit->directedEdge.first, nextAngles, visited);
-          makeNextStages(nextAngles, nextNeighbours, nextStage, results, cycleId, visited, sit->directedEdge.second, processed);
+          makeNextStages(
+            nextAngles,
+            nextNeighbours,
+            nextStage,
+            results,
+            cycleId,
+            visited,
+            sit->directedEdge.second,
+            processed,
+            sit->adjacentCycleIds[0],
+            sit->adjacentCycleIds[1]);
         }
 
         currentStage = nextStage;
