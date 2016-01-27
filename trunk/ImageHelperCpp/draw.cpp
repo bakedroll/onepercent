@@ -26,4 +26,19 @@ namespace helper
     for (IdPointMap::iterator rIt = graph.points.begin(); rIt != graph.points.end(); ++rIt)
       mat.at<cv::Vec3b>(rIt->second * scale) = cv::Vec3b(255, 0, 0);
   }
+
+  void drawCycles(cv::Mat& mat, Graph& graph, Cycles& cycles, float scale)
+  {
+    mat.setTo(cv::Scalar(0, 0, 0));
+
+    for (Cycles::iterator it = cycles.begin(); it != cycles.end(); ++it)
+    {
+      cv::Scalar color(rand() & 155 + 100, rand() & 155 + 100, rand() & 155 + 100);
+
+      for (EdgeValueList::iterator eit = it->begin(); eit != it->end(); ++eit)
+      {
+        drawLine(mat, graph, eit->first.first, eit->first.second, scale, color);
+      }
+    }
+  }
 }

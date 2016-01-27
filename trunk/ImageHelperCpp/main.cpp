@@ -57,6 +57,7 @@ int detectLines(int argc, char** argv)
   cv::Mat displayImage(image.rows, image.cols, CV_8UC3);
   cv::Mat resultImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
   cv::Mat finalImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
+  cv::Mat cycleImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
 
   cvtColor(image, displayImage, CV_GRAY2RGB);
 
@@ -87,13 +88,17 @@ int detectLines(int argc, char** argv)
   // find cycles
   helper::Cycles cycles;
   helper::findCycles(triGraph, cycles);
+
+  helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
   
   imshow("Lines", displayImage);
   imshow("Result", resultImage);
   imshow("Final", finalImage);
+  imshow("Cycles", cycleImage);
   imwrite(std::string(dbgImage) + ".steps.png", displayImage);
   imwrite(std::string(dbgImage) + ".edges.png", resultImage);
   imwrite(std::string(dbgImage) + ".triangles.png", finalImage);
+  imwrite(std::string(dbgImage) + ".cycles.png", cycleImage);
 
   return 0;
 }
