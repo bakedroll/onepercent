@@ -49,16 +49,17 @@ namespace helper
 
   void getLeftRightCycleId(CycleStageList& results, int p1, int p2, int& leftId, int& rightId)
   {
-    
-  }
+    for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
+    {
+      if (it->directedEdge.first == p2 && it->directedEdge.second == p1)
+      {
+        leftId = it->adjacentCycleIds[1];
+        rightId = it->adjacentCycleIds[0];
+        return;
+      }
+    }
 
-  template<typename Container>
-  typename Container::iterator nextContainerElement(typename Container::iterator& it)
-  {
-    typename Container::iterator next = it;
-    ++next;
-
-    return next;
+    assert(false);
   }
 
   template<typename Container>
@@ -68,22 +69,6 @@ namespace helper
     ++next;
 
     return next == container.end();
-  }
-
-  void setAdjacentCycle(CycleStage& stage, Side side, int cycleId)
-  {
-    if (stage.isBoundary && side == RIGHT)
-      side = LEFT;
-
-    stage.adjacentCycleIds[side] = cycleId;
-  }
-
-  int getAdjacentCycle(CycleStage& stage, Side side)
-  {
-    if (stage.isBoundary && side == RIGHT)
-      side = LEFT;
-
-    return stage.adjacentCycleIds[side];
   }
 
   void makeStage(
@@ -112,6 +97,11 @@ namespace helper
     results.push_back(stage);
   }
 
+  void getLeftRight(CycleStageList& results, int originId, int targetId, int& left, int& right)
+  {
+    
+  }
+
   void makeNextStages(
     AnglePointIdValueMap& angles,
     NeighbourValueList& neighbours,
@@ -128,16 +118,23 @@ namespace helper
     if (angles.size() == 0)
       return;
 
+    bool prevBoundary;
+
     AnglePointIdValueMap::iterator ait = angles.begin();
     if (isFirst)
     {
       leftCycleId = cycleId++;
 
+      prevBoundary = ait->second.second < 255;
       if (ait->second.second == 255)
         rightCycleId = cycleId++;
 
       makeStage(ait->second, visited, originId, leftCycleId, rightCycleId, results, nextStage);
       ++ait;
+    }
+    else
+    {
+      prevBoundary = rightCycleId == -1;
     }
 
     int currentCycleId = leftCycleId;
@@ -146,69 +143,61 @@ namespace helper
 
     for (ait; ait != angles.end(); ++ait)
     {
-      AnglePointIdValueMap::iterator nextit = nextContainerElement<AnglePointIdValueMap>(ait);
-      bool isLast = isLastContainerElement(angles, ait);
-
+      // edge already processed
       if (processed.find(ait->second.first) != processed.end())
       {
+        int l, r;
+        getLeftRight(results, originId, ait->second.first, l, r);
+
+        prevBoundary = ait->second.second < 255;
+        if (prevBoundary)
+          currentCycleId = l;
+        else
+          currentCycleId = r;
+
         continue;
       }
 
-      makeStage(ait->second, visited, originId, leftCycleId, rightCycleId, nextStage, results);
+      bool isLast = isLastContainerElement(angles, ait);
+      int left, right;
 
-      //CycleStage stage;
-
-      /*stage.adjacentCycleIds[0] = cycleId;
-      if (it->second.second == 255)
+      left = currentCycleId;
+      if (ait->second.second < 255)
       {
-        stage.adjacentCycleIds[1] = cycleId++;
-      }
-      else
-      {
-        stage.adjacentCycleIds[1] = -1;
-
-        if (neighbours.size() > 2)
-          cycleId++;
-      }*/
-
-      /*stage.adjacentCycleIds[0] = currentCycleId;
-
-      if (ait->second.second == 255)
-      {
-        // last element
-        //if (it->second.first == angles.rbegin()->second.first)
         if (isLast)
         {
-          //if (rightCycleId == -1)
-          //  stage.adjacentCycleIds[1] = 
-          //stage.adjacentCycleIds[1] = rightCycleId == -1 ? ;
+          if (prevBoundary)
+            left = rightCycleId;
         }
         else
         {
-          stage.adjacentCycleIds[1] = cycleId++;
-          currentCycleId = stage.adjacentCycleIds[1];
+          if (prevBoundary)
+          {
+            left = cycleId++;
+            currentCycleId = left;
+          }
         }
+
+        right = -1;
+
+        prevBoundary = true;
       }
       else
       {
-        stage.adjacentCycleIds[1] = -1;
+        if (isLast)
+        {
+          right = rightCycleId;
+        }
+        else
+        {
+          right = cycleId++;
+          currentCycleId = right;
+        }
 
-        //if (neighbours.size() > 2)
-        //  cycleId++;
+        prevBoundary = false;
       }
 
-      stage.directedEdge = Edge(originId, ait->second.first);
-      stage.isBoundary = ait->second.second < 255;
-
-      if (visited.find(ait->second.first) == visited.end())
-      {
-        nextStage.push_back(stage);
-        visited.insert(ait->second.first);
-      }
-
-      results.push_back(stage);*/
-
-
+      makeStage(ait->second, visited, originId, left, right, nextStage, results);
     }
 
     processed.insert(originId);
@@ -221,6 +210,8 @@ namespace helper
     NeighbourMap neighbourMap;
     neighbourMapFromGraph(graph, neighbourMap);
 
+    int cycleId = 0;
+
     while (results.size() < graph.edges.size())
     {
       // determine first stage
@@ -229,8 +220,6 @@ namespace helper
       {
         ++nit;
       }
-
-      int cycleId = 0;
 
       visited.insert(nit->first);
 
@@ -269,6 +258,20 @@ namespace helper
 
     }
 
-    return;
+    for (int cId = 0; cId < cycleId; cId++)
+    {
+      if (cId != 3)
+        continue;
+
+      EdgeValueList cycle;
+      for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
+      {
+        if (it->adjacentCycleIds[0] == cId || it->adjacentCycleIds[2] == cId)
+          cycle.push_back(EdgeValue(Edge(it->directedEdge.first, it->directedEdge.second), it->isBoundary ? 128 : 255));
+      }
+
+      if (cycle.size() > 0)
+        cycles.push_back(cycle);
+    }
   }
 }
