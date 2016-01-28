@@ -1,5 +1,10 @@
 #include "findcycles.h"
+
+#include "draw.h"
+
 #include <set>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace helper
 {
@@ -55,6 +60,10 @@ namespace helper
       {
         leftId = it->adjacentCycleIds[1];
         rightId = it->adjacentCycleIds[0];
+
+        if (leftId == -1)
+          std::swap(leftId, rightId);
+
         return;
       }
     }
@@ -71,7 +80,7 @@ namespace helper
     return next == container.end();
   }
 
-  void makeStage(
+  bool makeStage(
     PointIdValue& pvalue,
     PointsVisited& visited,
     int origin,
@@ -88,24 +97,38 @@ namespace helper
     stage.directedEdge = Edge(origin, pvalue.first);
     stage.isBoundary = pvalue.second < 255;
 
+    results.push_back(stage);
+
     if (visited.find(pvalue.first) == visited.end())
     {
       nextStage.push_back(stage);
       visited.insert(pvalue.first);
+
+      return false;
     }
 
-    results.push_back(stage);
+    return true;
   }
 
-  void getLeftRight(CycleStageList& results, int originId, int targetId, int& left, int& right)
+  void mergeCycleIds(CycleStageList& stage, int cycleId, int replaceById)
   {
-    
+    if (cycleId == replaceById)
+      return;
+
+    for (CycleStageList::iterator it = stage.begin(); it != stage.end(); ++it)
+    {
+      for (int i = 0; i < 2; i++)
+        if (it->adjacentCycleIds[i] == cycleId)
+          it->adjacentCycleIds[i] = replaceById;
+    }
   }
 
   void makeNextStages(
+    Graph& graph,
     AnglePointIdValueMap& angles,
-    NeighbourValueList& neighbours,
+    NeighbourMap& neighbours,
     CycleStageList& nextStage,
+    CycleStageList& currentStage,
     CycleStageList& results,
     int& cycleId,
     PointsVisited& visited,
@@ -147,7 +170,7 @@ namespace helper
       if (processed.find(ait->second.first) != processed.end())
       {
         int l, r;
-        getLeftRight(results, originId, ait->second.first, l, r);
+        getLeftRightCycleId(results, originId, ait->second.first, l, r);
 
         prevBoundary = ait->second.second < 255;
         if (prevBoundary)
@@ -197,14 +220,93 @@ namespace helper
         prevBoundary = false;
       }
 
-      makeStage(ait->second, visited, originId, left, right, nextStage, results);
+      if (makeStage(ait->second, visited, originId, left, right, nextStage, results))
+      {
+        NeighbourMap::iterator nit = neighbours.find(ait->second.first);
+
+        // merge
+        AnglePointIdValueMap pangles;
+        makeAnglePointMap(graph, nit->second, ait->second.first, originId, pangles, visited);
+
+        assert(pangles.size() > 0);
+
+        AnglePointIdValueMap::iterator lit = pangles.begin();
+        AnglePointIdValueMap::reverse_iterator rit = pangles.rbegin();
+
+        int l, r;
+        getLeftRightCycleId(results, ait->second.first, lit->second.first, l, r);
+        mergeCycleIds(results, left, l);
+        mergeCycleIds(currentStage, left, l);
+        mergeCycleIds(nextStage, left, l);
+
+        if (ait->second.second == 255)
+        {
+          getLeftRightCycleId(results, ait->second.first, rit->second.first, l, r);
+          mergeCycleIds(results, right, r);
+          mergeCycleIds(currentStage, right, r);
+          mergeCycleIds(nextStage, right, r);
+        }
+
+      }
     }
 
     processed.insert(originId);
   }
 
-  void findCycles(Graph& graph, Cycles& cycles)
+  void normalize(cv::Vec2f& p)
   {
+    float l = sqrt(p.val[0] * p.val[0] + p.val[1] * p.val[1]);
+    p.val[0] /= l;
+    p.val[1] /= l;
+  }
+
+  void drawAdjacentCycleNumbers(cv::Mat& image, cv::Point2f& p1, cv::Point2f& p2, int left, int right, float scale)
+  {
+    cv::Vec2f mid((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
+
+    cv::Vec2f p1vec = cv::Vec2f(p1) - mid;
+    cv::Vec2f p2vec = cv::Vec2f(p2) - mid;
+
+    normalize(p1vec);
+    normalize(p2vec);
+
+    cv::Vec2f r = cv::Vec2f(p1vec.val[1], -p1vec.val[0]) * 10.0f + mid;
+    cv::Vec2f l = cv::Vec2f(p2vec.val[1], -p2vec.val[0]) * 10.0f + mid;
+
+    cv::putText(image, std::to_string(left), cv::Point(int(l[0]), int(l[1])) * scale, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255));
+    cv::putText(image, std::to_string(right), cv::Point(int(r[0]), int(r[1])) * scale, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255));
+  }
+
+  void debugStage(cv::Mat& image, Graph& graph, CycleStageList& results, CycleStageList& stage, float scale)
+  {
+    drawGraph(image, graph, scale, false);
+
+    for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
+    {
+      drawEdge(image, graph, it->directedEdge.first, it->directedEdge.second, scale, cv::Scalar(0, 150, 0));
+    }
+
+    for (CycleStageList::iterator it = stage.begin(); it != stage.end(); ++it)
+    {
+      IdPointMap::iterator itp1 = graph.points.find(it->directedEdge.first);
+      IdPointMap::iterator itp2 = graph.points.find(it->directedEdge.second);
+
+      cv::circle(image, itp1->second * scale, 5, cvScalar(0, 50, 255), -1);
+      cv::circle(image, itp2->second * scale, 3, cvScalar(0, 255, 255), -1);
+
+      drawAdjacentCycleNumbers(image, itp1->second, itp2->second, it->adjacentCycleIds[0], it->adjacentCycleIds[1], scale);
+    }
+
+    cv::imshow("Debug Cycles", image);
+    cv::waitKey(600000);
+  }
+
+  void findCycles(Graph& graph, Cycles& cycles, bool debug, int rows, int cols, float scale)
+  {
+    cv::Mat debugImage;
+    if (debug)
+      debugImage = cv::Mat(int(rows * scale), int(cols * scale), CV_8UC3);
+
     CycleStageList results;
     PointsVisited visited;
     NeighbourMap neighbourMap;
@@ -228,10 +330,13 @@ namespace helper
 
       CycleStageList currentStage;
       PointsVisited processed;
-      makeNextStages(angles, nit->second, currentStage, results, cycleId, visited, nit->first, processed, -1, -1, true);
+      makeNextStages(graph, angles, neighbourMap, currentStage, currentStage, results, cycleId, visited, nit->first, processed, -1, -1, true);
 
       while (currentStage.size() > 0)
       {
+        if (debug)
+          debugStage(debugImage, graph, results, currentStage, scale);
+
         CycleStageList nextStage;
 
         for (CycleStageList::iterator sit = currentStage.begin(); sit != currentStage.end(); ++sit)
@@ -241,9 +346,11 @@ namespace helper
           AnglePointIdValueMap nextAngles;
           makeAnglePointMap(graph, nextNeighbours, sit->directedEdge.second, sit->directedEdge.first, nextAngles, visited);
           makeNextStages(
+            graph,
             nextAngles,
-            nextNeighbours,
+            neighbourMap,
             nextStage,
+            currentStage,
             results,
             cycleId,
             visited,
@@ -260,13 +367,10 @@ namespace helper
 
     for (int cId = 0; cId < cycleId; cId++)
     {
-      if (cId != 3)
-        continue;
-
       EdgeValueList cycle;
       for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
       {
-        if (it->adjacentCycleIds[0] == cId || it->adjacentCycleIds[2] == cId)
+        if (it->adjacentCycleIds[0] == cId || it->adjacentCycleIds[1] == cId)
           cycle.push_back(EdgeValue(Edge(it->directedEdge.first, it->directedEdge.second), it->isBoundary ? 128 : 255));
       }
 
