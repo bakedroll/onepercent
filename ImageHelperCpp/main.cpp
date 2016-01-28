@@ -87,7 +87,7 @@ int detectLines(int argc, char** argv)
 
   // find cycles
   helper::Cycles cycles;
-  helper::findCycles(triGraph, cycles);
+  helper::findCycles(triGraph, cycles, false, image.rows, image.cols, displayScale);
 
   helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
   
