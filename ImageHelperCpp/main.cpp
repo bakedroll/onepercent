@@ -64,6 +64,8 @@ int detectLines(int argc, char** argv)
   if (useThres)
     cv::threshold(image, image, 30, 255, CV_THRESH_BINARY);
 
+  printf("Detecting lines\n");
+
   // detecting lines
   helper::Graph graph;
   helper::detectLines(image, displayImage, depth, graph);
@@ -73,6 +75,8 @@ int detectLines(int argc, char** argv)
   helper::reducePoints(graph, reduce);
   helper::checkDuplicatesAndRemove(graph);
 
+  printf("Write to poly file\n");
+
   // write to poly file and draw debug image
   helper::writePolyFile(graph, polyfile);
   helper::drawGraph(resultImage, graph, displayScale);
@@ -80,15 +84,18 @@ int detectLines(int argc, char** argv)
   // triangulate
   triangulate(triangleCommand, polyfile, minAngle);
 
+  printf("Read from poly file\n");
+
   // read result and draw debug image
   helper::Graph triGraph;
   helper::readGraphFiles(triGraph, polyfile, 1);
   helper::drawGraph(finalImage, triGraph, displayScale);
 
+  printf("Detecting cycles\n");
+
   // find cycles
   helper::Cycles cycles;
-  helper::findCycles(triGraph, cycles, false, image.rows, image.cols, displayScale);
-
+  helper::findCycles(triGraph, cycles); //, false, image.rows, image.cols, displayScale);
   helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
   
   imshow("Lines", displayImage);

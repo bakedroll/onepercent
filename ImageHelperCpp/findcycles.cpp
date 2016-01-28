@@ -10,13 +10,7 @@ namespace helper
 {
   typedef std::pair<int, uchar> PointIdValue;
   typedef std::multimap<double, PointIdValue> AnglePointIdValueMap;
-  typedef std::set<int> PointsVisited;
-
-  typedef enum
-  {
-    LEFT = 0,
-    RIGHT = 1
-  } Side;
+  typedef std::set<int> PointSet;
 
   typedef struct _cycleStage
   {
@@ -26,6 +20,63 @@ namespace helper
   } CycleStage;
 
   typedef std::vector<CycleStage> CycleStageList;
+
+  int addContourPointId(Graph& graph, PointSet& boundingPoints, PointList& contour, int pointId)
+  {
+    contour.push_back(graph.points.find(pointId)->second);
+    boundingPoints.insert(pointId);
+    return pointId;
+  }
+
+  bool pointInCycle(Graph& graph, PointSet& bounds, PointList& contour, int pointId)
+  {
+    if (bounds.find(pointId) != bounds.end() ||
+      cv::pointPolygonTest(contour, graph.points.find(pointId)->second, false) >= 0)
+      return true;
+
+    return false;
+  }
+
+  void addCycleTriangles(Graph& graph, Cycle& cycle)
+  {
+    if (cycle.edges.size() < 1)
+      return;
+
+    PointSet boundingPoints;
+    PointList contour;
+
+    EdgeValueList::iterator eit = cycle.edges.begin();
+
+    int currentPt = addContourPointId(graph, boundingPoints, contour, eit->first.first);
+
+    for (int i = 0; i < int(cycle.edges.size()); i++)
+    //while (contour.size() < cycle.edges.size())
+    {
+      for (EdgeValueList::iterator it = cycle.edges.begin(); it != cycle.edges.end(); ++it)
+      {
+        if (it->first.first == currentPt && boundingPoints.find(it->first.second) == boundingPoints.end())
+        {
+          currentPt = addContourPointId(graph, boundingPoints, contour, it->first.second);
+          break;
+        }
+        if (it->first.second == currentPt && boundingPoints.find(it->first.first) == boundingPoints.end())
+        {
+          currentPt = addContourPointId(graph, boundingPoints, contour, it->first.first);
+          break;
+        }
+      }
+    }
+
+    for (TriangleList::iterator it = graph.triangles.begin(); it != graph.triangles.end(); ++it)
+    {
+      if (pointInCycle(graph, boundingPoints, contour, it->idx[0]) &&
+        pointInCycle(graph, boundingPoints, contour, it->idx[1]) &&
+        pointInCycle(graph, boundingPoints, contour, it->idx[2]))
+      {
+        cycle.trianlges.push_back(*it);
+      }
+    }
+  }
 
   double angleBetween(cv::Vec2f v1, cv::Vec2f v2)
   {
@@ -39,7 +90,7 @@ namespace helper
     return angle;
   }
 
-  void makeAnglePointMap(Graph& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles, PointsVisited& visited)
+  void makeAnglePointMap(Graph& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles, PointSet& visited)
   {
     cv::Vec2f p1;
     if (p1Id < 0)
@@ -66,9 +117,20 @@ namespace helper
 
         return;
       }
+      /*if (it->directedEdge.first == p1 && it->directedEdge.second == p2)
+      {
+        leftId = it->adjacentCycleIds[0];
+        rightId = it->adjacentCycleIds[1];
+
+        if (leftId == -1)
+          std::swap(leftId, rightId);
+
+        return;
+      } */     
     }
 
-    assert(false);
+    leftId = -1;
+    rightId = -1;
   }
 
   template<typename Container>
@@ -82,7 +144,7 @@ namespace helper
 
   bool makeStage(
     PointIdValue& pvalue,
-    PointsVisited& visited,
+    PointSet& visited,
     int origin,
     int left,
     int right,
@@ -131,9 +193,9 @@ namespace helper
     CycleStageList& currentStage,
     CycleStageList& results,
     int& cycleId,
-    PointsVisited& visited,
+    PointSet& visited,
     int originId,
-    PointsVisited& processed,
+    PointSet& processed,
     int leftCycleId = -1,
     int rightCycleId = -1,
     bool isFirst = false)
@@ -176,7 +238,7 @@ namespace helper
         if (prevBoundary)
           currentCycleId = l;
         else
-          currentCycleId = r;
+          currentCycleId = r > -1 ? r : l;
 
         continue;
       }
@@ -235,16 +297,23 @@ namespace helper
 
         int l, r;
         getLeftRightCycleId(results, ait->second.first, lit->second.first, l, r);
-        mergeCycleIds(results, left, l);
-        mergeCycleIds(currentStage, left, l);
-        mergeCycleIds(nextStage, left, l);
+        if (l > -1)
+        {
+          mergeCycleIds(results, left, l);
+          mergeCycleIds(currentStage, left, l);
+          mergeCycleIds(nextStage, left, l);
+        }
 
         if (ait->second.second == 255)
         {
           getLeftRightCycleId(results, ait->second.first, rit->second.first, l, r);
-          mergeCycleIds(results, right, r);
-          mergeCycleIds(currentStage, right, r);
-          mergeCycleIds(nextStage, right, r);
+
+          if (r > -1)
+          {
+            mergeCycleIds(results, right, r);
+            mergeCycleIds(currentStage, right, r);
+            mergeCycleIds(nextStage, right, r);
+          }
         }
 
       }
@@ -308,7 +377,7 @@ namespace helper
       debugImage = cv::Mat(int(rows * scale), int(cols * scale), CV_8UC3);
 
     CycleStageList results;
-    PointsVisited visited;
+    PointSet visited;
     NeighbourMap neighbourMap;
     neighbourMapFromGraph(graph, neighbourMap);
 
@@ -329,7 +398,7 @@ namespace helper
       makeAnglePointMap(graph, nit->second, nit->first, -1, angles, visited);
 
       CycleStageList currentStage;
-      PointsVisited processed;
+      PointSet processed;
       makeNextStages(graph, angles, neighbourMap, currentStage, currentStage, results, cycleId, visited, nit->first, processed, -1, -1, true);
 
       while (currentStage.size() > 0)
@@ -367,15 +436,19 @@ namespace helper
 
     for (int cId = 0; cId < cycleId; cId++)
     {
-      EdgeValueList cycle;
+      Cycle cycle;
       for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
       {
         if (it->adjacentCycleIds[0] == cId || it->adjacentCycleIds[1] == cId)
-          cycle.push_back(EdgeValue(Edge(it->directedEdge.first, it->directedEdge.second), it->isBoundary ? 128 : 255));
+          cycle.edges.push_back(EdgeValue(Edge(it->directedEdge.first, it->directedEdge.second), it->isBoundary ? 128 : 255));
       }
 
-      if (cycle.size() > 0)
+      if (cycle.edges.size() > 0)
+      {
+        addCycleTriangles(graph, cycle);
+
         cycles.push_back(cycle);
+      }
     }
   }
 }
