@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 
 namespace helper
 {
@@ -84,6 +85,12 @@ namespace helper
   typedef std::map<int, NeighbourValueList> NeighbourMap;
   typedef std::multimap<double, int> AnglePointMap;
 
+  typedef std::map<float, int> FloatIdMap;
+  typedef std::map<float, FloatIdMap> FloatFloatIdMap;
+
+  typedef std::set<int> IdSet;
+  typedef std::map<int, IdSet> IdIdMap;
+
   typedef struct _graph
   {
     IdPointMap points;
@@ -91,8 +98,10 @@ namespace helper
     TriangleList triangles;
   } Graph;
 
-  void neighbourMapFromGraph(Graph& graph, NeighbourMap& neighbourMap);
+  void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);
 
   void removeNeighbourFromList(NeighbourValueList& list, int id);
   void removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value);
+
+  void makeFloatFloatIdMap(Graph& graph, FloatFloatIdMap& map);
 }

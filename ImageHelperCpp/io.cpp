@@ -44,7 +44,7 @@ namespace helper
     fs.close();
   }
 
-  std::string readLine(std::ifstream& stream)
+  std::string readLine(std::stringstream& stream)
   {
     char buffer[128];
     stream.getline(buffer, 255);
@@ -63,7 +63,7 @@ namespace helper
     }
   }
 
-  void readPointElements(Graph& graph, std::ifstream& fs)
+  void readPointElements(Graph& graph, std::stringstream& fs)
   {
     std::string headLine = readLine(fs);
 
@@ -88,7 +88,7 @@ namespace helper
     }
   }
 
-  void readSegmentElements(Graph& graph, std::ifstream& fs)
+  void readSegmentElements(Graph& graph, std::stringstream& fs)
   {
     std::string headLine = readLine(fs);
 
@@ -118,7 +118,7 @@ namespace helper
     }
   }
 
-  void readTriangleElements(Graph& graph, std::ifstream& fs)
+  void readTriangleElements(Graph& graph, std::stringstream& fs)
   {
     std::string headLine = readLine(fs);
 
@@ -145,39 +145,54 @@ namespace helper
 
   void readNodeFile(Graph& graph, const char* filename)
   {
-    std::ifstream fs(filename);
-
-    if (!fs.is_open())
+    std::ifstream t(filename);
+    if (!t.is_open())
       return;
+
+    std::stringstream fs;
+    fs << t.rdbuf();
+    fs.seekg(0, std::ios::beg);
 
     readPointElements(graph, fs);
 
-    fs.close();
+    t.close();
   }
 
   void readPolyFile(Graph& graph, const char* filename)
   {
-    std::ifstream fs(filename);
+    std::ifstream t(filename);
+    if (!t.is_open())
+      return;
 
-    if (!fs.is_open())
+    std::stringstream fs;
+    fs << t.rdbuf();
+    fs.seekg(0, std::ios::beg);
+
+    if (!t.is_open())
       return;
 
     readPointElements(graph, fs);
     readSegmentElements(graph, fs);
 
-    fs.close();
+    t.close();
   }
 
   void readEleFile(Graph& graph, const char* filename)
   {
-    std::ifstream fs(filename);
+    std::ifstream t(filename);
+    if (!t.is_open())
+      return;
 
-    if (!fs.is_open())
+    std::stringstream fs;
+    fs << t.rdbuf();
+    fs.seekg(0, std::ios::beg);
+
+    if (!t.is_open())
       return;
 
     readTriangleElements(graph, fs);
 
-    fs.close();
+    t.close();
   }
 
   void readGraphFiles(Graph& graph, const char* filename, int iteration)

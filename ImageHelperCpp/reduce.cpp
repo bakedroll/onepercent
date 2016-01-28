@@ -60,7 +60,7 @@ namespace helper
     NeighbourMap neighbourMap;
     AnglePointMap angles;
 
-    neighbourMapFromGraph(graph, neighbourMap);
+    neighbourMapFromEdges(graph.edges, neighbourMap);
 
     for (NeighbourMap::iterator it = neighbourMap.begin(); it != neighbourMap.end(); ++it)
       calculateAngle(it, angles, graph);
