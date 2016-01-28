@@ -1,6 +1,7 @@
 #include "findcycles.h"
 
 #include "draw.h"
+#include "quadtree.h"
 
 #include <set>
 #include <opencv2/highgui/highgui.hpp>
@@ -21,11 +22,10 @@ namespace helper
 
   typedef std::vector<CycleStage> CycleStageList;
 
-  int addContourPointId(Graph& graph, PointSet& boundingPoints, PointList& contour, int pointId)
+  void addContourPointId(Graph& graph, PointSet& boundingPoints, PointList& contour, int pointId)
   {
     contour.push_back(graph.points.find(pointId)->second);
     boundingPoints.insert(pointId);
-    return pointId;
   }
 
   bool pointInCycle(Graph& graph, PointSet& bounds, PointList& contour, int pointId)
@@ -44,24 +44,22 @@ namespace helper
 
     PointSet boundingPoints;
     PointList contour;
+    NeighbourMap neighbourMap;
 
-    EdgeValueList::iterator eit = cycle.edges.begin();
+    neighbourMapFromEdges(cycle.edges, neighbourMap);
 
-    int currentPt = addContourPointId(graph, boundingPoints, contour, eit->first.first);
+    NeighbourMap::iterator eit = neighbourMap.begin();
+    addContourPointId(graph, boundingPoints, contour, eit->first);
 
     for (int i = 0; i < int(cycle.edges.size()); i++)
     //while (contour.size() < cycle.edges.size())
     {
-      for (EdgeValueList::iterator it = cycle.edges.begin(); it != cycle.edges.end(); ++it)
+      for (NeighbourValueList::iterator it = eit->second.begin(); it != eit->second.end(); ++it)
       {
-        if (it->first.first == currentPt && boundingPoints.find(it->first.second) == boundingPoints.end())
+        if (boundingPoints.find(it->first) == boundingPoints.end())
         {
-          currentPt = addContourPointId(graph, boundingPoints, contour, it->first.second);
-          break;
-        }
-        if (it->first.second == currentPt && boundingPoints.find(it->first.first) == boundingPoints.end())
-        {
-          currentPt = addContourPointId(graph, boundingPoints, contour, it->first.first);
+          addContourPointId(graph, boundingPoints, contour, it->first);
+          eit = neighbourMap.find(it->first);
           break;
         }
       }
@@ -379,7 +377,7 @@ namespace helper
     CycleStageList results;
     PointSet visited;
     NeighbourMap neighbourMap;
-    neighbourMapFromGraph(graph, neighbourMap);
+    neighbourMapFromEdges(graph.edges, neighbourMap);
 
     int cycleId = 0;
 
@@ -387,10 +385,14 @@ namespace helper
     {
       // determine first stage
       NeighbourMap::iterator nit = neighbourMap.begin();
-      while ((nit->second.size() < 2) || (visited.find(nit->first) != visited.end()))
+      while (nit != neighbourMap.end() && ((nit->second.size() < 2) || (visited.find(nit->first) != visited.end())))
       {
         ++nit;
       }
+
+      // safe
+      if (nit == neighbourMap.end())
+        break;
 
       visited.insert(nit->first);
 

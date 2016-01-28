@@ -72,6 +72,8 @@ int detectLines(int argc, char** argv)
 
   // reducing points and double checking for duplicates
   helper::checkDuplicatesAndRemove(graph);
+
+  printf("Reduce\n");
   helper::reducePoints(graph, reduce);
   helper::checkDuplicatesAndRemove(graph);
 

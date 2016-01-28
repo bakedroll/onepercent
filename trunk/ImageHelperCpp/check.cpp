@@ -1,74 +1,97 @@
 #include "check.h"
+#include <set>
 
 namespace helper
 {
-  void checkPointAndRemove(Graph& graph, IdPointMap::iterator& pointIt)
+  void checkDuplicatePoints(Graph& graph)
   {
-    int count = 0;
+    FloatFloatIdMap map;
 
-    IdPointMap::iterator it = pointIt;
-    ++it;
+    IdPointMap::iterator it = graph.points.begin();
     while (it != graph.points.end())
     {
-      if (it->second == pointIt->second)
+      FloatFloatIdMap::iterator itx = map.find(it->second.x);
+      if (itx != map.end())
       {
-        count++;
-
-        for (EdgeValueList::iterator eit = graph.edges.begin(); eit != graph.edges.end(); ++eit)
+        FloatIdMap::iterator ity = itx->second.find(it->second.y);
+        if (ity != itx->second.end())
         {
-          if (eit->first.first == it->first)
-            eit->first.first = pointIt->first;
+          // duplicate
+          printf("Duplicate point found %d: (%f, %f)\n", it->first, it->second.x, it->second.y);
 
-          if (eit->first.second == it->first)
-            eit->first.second = pointIt->first;
+          for (EdgeValueList::iterator eit = graph.edges.begin(); eit != graph.edges.end(); ++eit)
+          {
+            if (eit->first.first == it->first)
+              eit->first.first = ity->second;
+
+            if (eit->first.second == it->first)
+              eit->first.second = ity->second;
+          }
+
+          it = graph.points.erase(it);
+          continue;
         }
 
-        it = graph.points.erase(it);
+        itx->second.insert(FloatIdMap::value_type(it->second.y, it->first));
       }
       else
       {
-        ++it;
+        FloatIdMap fmap;
+        fmap.insert(FloatIdMap::value_type(it->second.y, it->first));
+        map.insert(FloatFloatIdMap::value_type(it->second.x, fmap));
       }
-    }
 
-    if (count > 0)
-      printf("Duplicate point: %d\n", pointIt->first);
+      ++it;
+    }
   }
 
-  void checkEdgeAndRemove(Graph& graph, EdgeValueList::iterator& edgeIt)
+  bool checkEdgeSet(IdIdMap& map, int p1, int p2)
   {
-    int count = 0;
-
-    EdgeValueList::iterator it = edgeIt;
-    ++it;
-    while (it != graph.edges.end())
+    IdIdMap::iterator itp1 = map.find(p1);
+    if (itp1 != map.end())
     {
-      if ((it->first.first == edgeIt->first.first && it->first.second == edgeIt->first.second) ||
-        (it->first.first == edgeIt->first.second && it->first.second == edgeIt->first.first))
-      {
-        count++;
+      if (itp1->second.find(p2) != itp1->second.end())
+        return true;
 
-        it = graph.edges.erase(it);
-      }
-      else
-      {
-        ++it;
-      }
+      itp1->second.insert(p2);
+    }
+    else
+    {
+      IdSet set;
+      set.insert(p2);
+      map.insert(IdIdMap::value_type(p1, set));
     }
 
-    if (count > 0)
-      printf("Duplicate edge: (%d, %d)\n", edgeIt->first.first, edgeIt->first.second);
+    return false;
+  }
+
+  void checkDuplicateEdges(Graph& graph)
+  {
+    IdIdMap map;
+
+    EdgeValueList::iterator it = graph.edges.begin();
+    while (it != graph.edges.end())
+    {
+      if (checkEdgeSet(map, it->first.first, it->first.second) ||
+        checkEdgeSet(map, it->first.second, it->first.first))
+      {
+        // duplicate
+        printf("Duplicate edge found (%d, %d)\n", it->first.first, it->first.second);
+
+        it = graph.edges.erase(it);
+        continue;
+      }
+        
+      ++it;
+    }
   }
 
   void checkDuplicatesAndRemove(Graph& graph)
   {
     printf("checking for duplicates...\n");
 
-    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
-      checkPointAndRemove(graph, it);
-
-    for (EdgeValueList::iterator it = graph.edges.begin(); it != graph.edges.end(); ++it)
-      checkEdgeAndRemove(graph, it);
+    checkDuplicatePoints(graph);
+    checkDuplicateEdges(graph);
 
     printf("\n");
   }

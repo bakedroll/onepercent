@@ -22,9 +22,9 @@ namespace helper
     }
   }
 
-  void neighbourMapFromGraph(Graph& graph, NeighbourMap& neighbourMap)
+  void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap)
   {
-    for (EdgeValueList::iterator eit = graph.edges.begin(); eit != graph.edges.end(); ++eit)
+    for (EdgeValueList::iterator eit = edges.begin(); eit != edges.end(); ++eit)
     {
       insertNeighbour(neighbourMap, eit->first.first, eit->first.second, eit->second);
       insertNeighbour(neighbourMap, eit->first.second, eit->first.first, eit->second);
@@ -58,5 +58,27 @@ namespace helper
 
     removeNeighbourFromList(neighbourMap.find(endpoint1)->second, pointId);
     removeNeighbourFromList(neighbourMap.find(endpoint2)->second, pointId);
+  }
+
+  void makeFloatFloatIdMap(Graph& graph, FloatFloatIdMap& map)
+  {
+    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+    {
+      FloatFloatIdMap::iterator itx = map.find(it->second.x);
+      if (itx != map.end())
+      {
+        FloatIdMap::iterator ity = itx->second.find(it->second.y);
+        if (ity != itx->second.end())
+          continue;
+
+        itx->second.insert(FloatIdMap::value_type(it->second.y, it->first));
+      }
+      else
+      {
+        FloatIdMap fmap;
+        fmap.insert(FloatIdMap::value_type(it->second.y, it->first));
+        map.insert(FloatFloatIdMap::value_type(it->second.x, fmap));
+      }
+    }
   }
 }
