@@ -8,7 +8,6 @@
 
 namespace helper
 {
-
   template<typename T>
   class Array
   {
@@ -79,7 +78,7 @@ namespace helper
   typedef std::map<int, cv::Point2f> IdPointMap;
   typedef std::vector<EdgeValue> EdgeValueList;
   typedef std::map<int, int> PointEdgesCountMap;
-  typedef std::vector<Triangle> TriangleList;
+  typedef std::map<int, Triangle> TriangleMap;
   typedef std::pair<int, uchar> NeighbourValue;
   typedef std::vector<NeighbourValue> NeighbourValueList;
   typedef std::map<int, NeighbourValueList> NeighbourMap;
@@ -91,12 +90,82 @@ namespace helper
   typedef std::set<int> IdSet;
   typedef std::map<int, IdSet> IdIdMap;
 
+  typedef std::pair<int, uchar> PointIdValue;
+  typedef std::multimap<double, PointIdValue> AnglePointIdValueMap;
+  typedef std::set<int> PointSet;
+
+  typedef std::map<int, IdSet> PointTriangleMap;
+
+
   typedef struct _graph
   {
     IdPointMap points;
     EdgeValueList edges;
-    TriangleList triangles;
+    TriangleMap triangles;
   } Graph;
+
+  class BoundingBox
+  {
+  public:
+    BoundingBox(PointList& points)
+    {
+      m_min = cv::Point(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
+      m_max = cv::Point(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
+
+      for (PointList::iterator it = points.begin(); it != points.end(); ++it)
+      {
+        m_min.x = std::min(m_min.x, it->x);
+        m_min.y = std::min(m_min.y, it->y);
+        m_max.x = std::max(m_max.x, it->x);
+        m_max.y = std::max(m_max.y, it->y);
+      }
+    }
+
+    BoundingBox(Graph& graph, PointSet& points)
+    {
+      m_min = cv::Point(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
+      m_max = cv::Point(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
+
+      for (PointSet::iterator it = points.begin(); it != points.end(); ++it)
+      {
+        IdPointMap::iterator pit = graph.points.find(*it);
+
+        m_min.x = std::min(m_min.x, int(pit->second.x));
+        m_min.y = std::min(m_min.y, int(pit->second.y));
+        m_max.x = std::max(m_max.x, int(pit->second.x));
+        m_max.y = std::max(m_max.y, int(pit->second.y));
+      }
+    }
+
+    cv::Point min()
+    {
+      return m_min;
+    }
+
+    cv::Point max()
+    {
+      return m_max;
+    }
+
+    int width()
+    {
+      return m_max.x - m_min.x + 1;
+    }
+
+    int height()
+    {
+      return m_max.y - m_min.y + 1;
+    }
+
+    cv::Point center()
+    {
+      return m_min + m_max / 2.0f;
+    }
+
+  private:
+    cv::Point m_min;
+    cv::Point m_max;
+  };
 
   void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);
 
@@ -104,4 +173,5 @@ namespace helper
   void removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value);
 
   void makeFloatFloatIdMap(Graph& graph, FloatFloatIdMap& map);
+  void makePointTriangleMap(Graph& graph, PointTriangleMap& map);
 }

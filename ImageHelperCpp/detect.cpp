@@ -13,48 +13,6 @@ namespace helper
 
   typedef std::vector<Stage> StageList;
 
-  class BoundingBox
-  {
-  public:
-    BoundingBox(PointList& points)
-    {
-      m_min = cv::Point(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-      m_max = cv::Point(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
-
-      for (PointList::iterator it = points.begin(); it != points.end(); ++it)
-      {
-        m_min.x = std::min(m_min.x, it->x);
-        m_min.y = std::min(m_min.y, it->y);
-        m_max.x = std::max(m_max.x, it->x);
-        m_max.y = std::max(m_max.y, it->y);
-      }
-    }
-
-    cv::Point min()
-    {
-      return m_min;
-    }
-
-    cv::Point max()
-    {
-      return m_max;
-    }
-
-    int width()
-    {
-      return m_max.x - m_min.x + 1;
-    }
-
-    int height()
-    {
-      return m_max.y - m_min.y + 1;
-    }
-
-  private:
-    cv::Point m_min;
-    cv::Point m_max;
-  };
-
   cv::Vec3f randomColor()
   {
     return cv::Vec3b(rand() % 100 + 155, rand() % 100 + 155, rand() % 100 + 155);

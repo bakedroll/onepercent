@@ -83,6 +83,7 @@
     <ClInclude Include="draw.h" />
     <ClInclude Include="findcycles.h" />
     <ClInclude Include="io.h" />
+    <ClInclude Include="quadtree.h" />
     <ClInclude Include="reduce.h" />
     <ClInclude Include="types.h" />
   </ItemGroup>

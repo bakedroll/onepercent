@@ -139,7 +139,7 @@ namespace helper
       tri.idx[1] = atoi(pelems[2].c_str());
       tri.idx[2] = atoi(pelems[3].c_str());
 
-      graph.triangles.push_back(tri);
+      graph.triangles.insert(TriangleMap::value_type(atoi(pelems[0].c_str()), tri));
     }
   }
 

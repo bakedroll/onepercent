@@ -137,7 +137,7 @@ bool Quadtree<T>::insert(const Data<T>& d)
     return false;
   }
 
-  if (objects.size() < CAPACITY)
+  if (int(objects.size()) < CAPACITY)
   {
     objects.push_back(d);
     return true;
@@ -178,7 +178,7 @@ std::vector< Data<T> > Quadtree<T>::queryRange(const AABB& range)
     return pInRange;
   }
 
-  for (int i = 0; i < objects.size(); i++)
+  for (int i = 0; i < int(objects.size()); i++)
   {
     if (range.contains(objects.at(i).pos))
     {
