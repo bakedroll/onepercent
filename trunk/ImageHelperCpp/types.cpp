@@ -81,4 +81,25 @@ namespace helper
       }
     }
   }
+
+  void makePointTriangleMap(Graph& graph, PointTriangleMap& map)
+  {
+    for (TriangleMap::iterator it = graph.triangles.begin(); it != graph.triangles.end(); ++it)
+    {
+      for (int i = 0; i < 3; i++)
+      {
+        PointTriangleMap::iterator pit = map.find(it->second.idx[i]);
+        if (pit == map.end())
+        {
+          IdSet set;
+          set.insert(it->first);
+          map.insert(PointTriangleMap::value_type(it->second.idx[i], set));
+
+          continue;
+        }
+
+        pit->second.insert(it->first);
+      }
+    }
+  }
 }

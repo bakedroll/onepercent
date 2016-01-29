@@ -21,8 +21,8 @@ namespace helper
     mat.setTo(cv::Scalar(0, 0, 0));
 
     if (drawTriangles)
-      for (TriangleList::iterator tIt = graph.triangles.begin(); tIt != graph.triangles.end(); ++tIt)
-        drawTriangle(mat, graph, tIt->idx, scale, cv::Scalar(0, 172, 0));
+      for (TriangleMap::iterator tIt = graph.triangles.begin(); tIt != graph.triangles.end(); ++tIt)
+        drawTriangle(mat, graph, tIt->second.idx, scale, cv::Scalar(0, 172, 0));
 
     for (EdgeValueList::iterator eIt = graph.edges.begin(); eIt != graph.edges.end(); ++eIt)
       drawEdge(mat, graph, eIt->first.first, eIt->first.second, scale, cv::Scalar(0, 0, eIt->second));
@@ -39,8 +39,8 @@ namespace helper
     {
       cv::Scalar color(rand() & 155 + 100, rand() & 155 + 100, rand() & 155 + 100);
 
-      for (TriangleList::iterator tit = it->trianlges.begin(); tit != it->trianlges.end(); ++tit)
-        drawTriangle(mat, graph, tit->idx, scale, color);
+      for (TriangleMap::iterator tit = it->trianlges.begin(); tit != it->trianlges.end(); ++tit)
+        drawTriangle(mat, graph, tit->second.idx, scale, color);
     }
   }
 }

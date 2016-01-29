@@ -7,7 +7,7 @@ namespace helper
   typedef struct _cycle
   {
     EdgeValueList edges;
-    TriangleList trianlges;
+    TriangleMap trianlges;
   } Cycle;
 
   typedef std::vector<Cycle> Cycles;

@@ -9,10 +9,6 @@
 
 namespace helper
 {
-  typedef std::pair<int, uchar> PointIdValue;
-  typedef std::multimap<double, PointIdValue> AnglePointIdValueMap;
-  typedef std::set<int> PointSet;
-
   typedef struct _cycleStage
   {
     int adjacentCycleIds[2];
@@ -37,7 +33,7 @@ namespace helper
     return false;
   }
 
-  void addCycleTriangles(Graph& graph, Cycle& cycle)
+  void addCycleTriangles(Graph& graph, Quadtree<int>& quadtree, PointTriangleMap& triangles, Cycle& cycle)
   {
     if (cycle.edges.size() < 1)
       return;
@@ -65,13 +61,41 @@ namespace helper
       }
     }
 
-    for (TriangleList::iterator it = graph.triangles.begin(); it != graph.triangles.end(); ++it)
+    BoundingBox bb(graph, boundingPoints);
+    cv::Point center = bb.center();
+    AABB aabb(Point(float(center.x), float(center.y)), Point(float(bb.width() / 2 + 5), float(bb.height() / 2 + 5)));
+
+    std::vector<Data<int>> points = quadtree.queryRange(aabb);
+
+    IdSet trianglesVisited;
+
+    /*for (std::vector<Data<int>>::iterator it = points.begin(); it != points.end(); ++it)
     {
-      if (pointInCycle(graph, boundingPoints, contour, it->idx[0]) &&
-        pointInCycle(graph, boundingPoints, contour, it->idx[1]) &&
-        pointInCycle(graph, boundingPoints, contour, it->idx[2]))
+      PointTriangleMap::iterator tit = triangles.find(*it->load);
+      for (IdSet::iterator iit = tit->second.begin(); iit != tit->second.end(); ++iit)
       {
-        cycle.trianlges.push_back(*it);
+        if (trianglesVisited.find(*iit) != trianglesVisited.end())
+          continue;
+
+        TriangleMap::iterator tmit = graph.triangles.find(*iit);
+        if (pointInCycle(graph, boundingPoints, contour, tmit->second.idx[0]) &&
+          pointInCycle(graph, boundingPoints, contour, tmit->second.idx[1]) &&
+          pointInCycle(graph, boundingPoints, contour, tmit->second.idx[2]))
+        {
+          cycle.trianlges.insert(TriangleMap::value_type(tmit->first, tmit->second));
+        }
+
+        trianglesVisited.insert(*iit);
+      }
+    }*/
+
+    for (TriangleMap::iterator it = graph.triangles.begin(); it != graph.triangles.end(); ++it)
+    {
+      if (pointInCycle(graph, boundingPoints, contour, it->second.idx[0]) &&
+        pointInCycle(graph, boundingPoints, contour, it->second.idx[1]) &&
+        pointInCycle(graph, boundingPoints, contour, it->second.idx[2]))
+      {
+        cycle.trianlges.insert(*it);
       }
     }
   }
@@ -436,6 +460,13 @@ namespace helper
 
     }
 
+    Quadtree<int> quadtree;
+    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+      quadtree.insert(Data<int>(Point(it->second.x, it->second.y), const_cast<int*>(&it->first)));
+
+    PointTriangleMap triangleMap;
+    makePointTriangleMap(graph, triangleMap);
+
     for (int cId = 0; cId < cycleId; cId++)
     {
       Cycle cycle;
@@ -447,7 +478,7 @@ namespace helper
 
       if (cycle.edges.size() > 0)
       {
-        addCycleTriangles(graph, cycle);
+        addCycleTriangles(graph, quadtree, triangleMap, cycle);
 
         cycles.push_back(cycle);
       }
