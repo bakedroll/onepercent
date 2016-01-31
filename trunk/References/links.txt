@@ -42,3 +42,6 @@ http://stackoverflow.com/questions/10213361/how-can-i-render-an-atmosphere-over-
 
 FXAA shader code:
 http://www.geeks3d.com/20110405/fxaa-fast-approximate-anti-aliasing-demo-glsl-opengl-test-radeon-geforce/2/
+
+Quadtree:
+https://gist.github.com/tomasbasham/10545966
