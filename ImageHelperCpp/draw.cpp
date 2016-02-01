@@ -4,6 +4,12 @@
 
 namespace helper
 {
+  void drawPoints(cv::Mat& mat, PointList points, float scale, cv::Vec3b color)
+  {
+    for (PointList::iterator it = points.begin(); it != points.end(); ++it)
+      mat.at<cv::Vec3b>(*it * scale) = color;
+  }
+
   void drawEdge(cv::Mat& mat, Graph& graph, int p1, int p2, float scale, cv::Scalar scalar)
   {
     line(mat, graph.points.find(p1)->second * scale, graph.points.find(p2)->second * scale, scalar);

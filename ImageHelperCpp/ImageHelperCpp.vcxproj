@@ -74,6 +74,7 @@
     <ClCompile Include="findcycles.cpp" />
     <ClCompile Include="io.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="quadtree.cpp" />
     <ClCompile Include="reduce.cpp" />
     <ClCompile Include="types.cpp" />
   </ItemGroup>

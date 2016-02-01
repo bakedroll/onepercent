@@ -33,7 +33,7 @@ namespace helper
     return false;
   }
 
-  void addCycleTriangles(Graph& graph, Quadtree<int>& quadtree, PointTriangleMap& triangles, Cycle& cycle)
+  void addCycleTriangles(Graph& graph, QuadTreeNode& quadtree, PointTriangleMap& triangles, Cycle& cycle)
   {
     if (cycle.edges.size() < 1)
       return;
@@ -63,9 +63,9 @@ namespace helper
 
     BoundingBox bb(graph, boundingPoints);
     cv::Point center = bb.center();
-    AABB aabb(Point(float(center.x), float(center.y)), Point(float(bb.width() / 2 + 5), float(bb.height() / 2 + 5)));
+    //AABB aabb(Point(float(center.x), float(center.y)), Point(float(bb.width() / 2 + 5), float(bb.height() / 2 + 5)));
 
-    std::vector<Data<int>> points = quadtree.queryRange(aabb);
+    //std::vector<Data<int>> points = quadtree.queryRange(aabb);
 
     IdSet trianglesVisited;
 
@@ -460,9 +460,10 @@ namespace helper
 
     }
 
-    Quadtree<int> quadtree;
-    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
-      quadtree.insert(Data<int>(Point(it->second.x, it->second.y), const_cast<int*>(&it->first)));
+    BoundingBox bb;
+    QuadTreeNode quadtree(bb, 1);
+    //for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+    //  quadtree.insert(Data<int>(Point(it->second.x, it->second.y), const_cast<int*>(&it->first)));
 
     PointTriangleMap triangleMap;
     makePointTriangleMap(graph, triangleMap);
