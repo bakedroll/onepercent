@@ -18,8 +18,11 @@ namespace helper
     return cv::Vec3b(rand() % 100 + 155, rand() % 100 + 155, rand() % 100 + 155);
   }
 
-  void checkPixel(cv::Mat& image, BoolArray& aVisited, IntArray* aPointIds, PointValueList& points, int* neighbourId, int x, int y, bool repeat)
+  void checkPixel(cv::Mat& image, BoolArray& aVisited, IntArray* aPointIds, PointValueList& points, int* neighbourId, float xf, float yf, bool repeat)
   {
+    int x = int(xf);
+    int y = int(yf);
+
     if (x < 0) if (repeat) x += image.cols; else return;
     if (y < 0) if (repeat) y += image.rows; else return;
     if (x >= image.cols) if (repeat) x -= image.cols; else return;
@@ -30,7 +33,7 @@ namespace helper
     {
       if (!aVisited.get(x, y))
       {
-        points.push_back(PointValue(cv::Point(x, y), pval));
+        points.push_back(PointValue(cv::Point2f(xf, yf), pval));
         aVisited.set(x, y, true);
       }
       else if (aPointIds != nullptr && aPointIds->get(x, y) > -1)
@@ -40,7 +43,7 @@ namespace helper
     }
   }
 
-  void checkPixelsAround(cv::Mat& image, BoolArray& aVisited, IntArray* aPointIds, PointValueList& points, int* neighbourId, int x, int y, bool repeat = true)
+  void checkPixelsAround(cv::Mat& image, BoolArray& aVisited, IntArray* aPointIds, PointValueList& points, int* neighbourId, float x, float y, bool repeat = true)
   {
     if (neighbourId != nullptr)
       *neighbourId = -1;
@@ -69,8 +72,8 @@ namespace helper
     PointList pointList = fromPointValueList(points);
 
     BoundingBox fieldAabb(pointList);
-    cv::Mat field(fieldAabb.height(), fieldAabb.width(), CV_8UC1);
-    BoolArray visited(fieldAabb.width(), fieldAabb.height(), false);
+    cv::Mat field(int(fieldAabb.height()), int(fieldAabb.width()), CV_8UC1);
+    BoolArray visited(int(fieldAabb.width()), int(fieldAabb.height()), false);
 
     field.setTo(0);
 
@@ -87,8 +90,8 @@ namespace helper
           PointValueList group;
 
           PointValueList check;
-          check.push_back(PointValue(cv::Point(x, y), pval));
-          group.push_back(PointValue(cv::Point(x, y) + fieldAabb.min(), pval));
+          check.push_back(PointValue(cv::Point2f(float(x), float(y)), pval));
+          group.push_back(PointValue(cv::Point2f(float(x), float(y)) + fieldAabb.min(), pval));
 
           visited.set(x, y, true);
 
@@ -112,11 +115,11 @@ namespace helper
 
   void addToResults(int& idCounter, int connectTo, IntArray& aPointIds, Graph& outGraph, const PointList& points, uchar edgeVal = 255)
   {
-    cv::Point2f p(0, 0);
+    cv::Point2f p(0.0f, 0.0f);
 
     for (PointList::const_iterator pIt = points.cbegin(); pIt != points.cend(); ++pIt)
     {
-      aPointIds.set(pIt->x, pIt->y, idCounter);
+      aPointIds.set(int(pIt->x), int(pIt->y), idCounter);
       p += cv::Point2f(float(pIt->x), float(pIt->y));
     }
 
@@ -167,12 +170,12 @@ namespace helper
       addToResults(idCounter, stage.currentId, aPointIds, outGraph, stage.points, stage.edgeValue);
   }
 
-  void findNeighbours(cv::Mat& image, cv::Mat& display, BoolArray& aVisited, IntArray& aPointIds, Graph& outGraph, int x, int y, uchar edgeVal, int depth, int& idCounter)
+  void findNeighbours(cv::Mat& image, cv::Mat& display, BoolArray& aVisited, IntArray& aPointIds, Graph& outGraph, float x, float y, uchar edgeVal, int depth, int& idCounter)
   {
     StageList lCurrentStage;
 
     PointList points;
-    points.push_back(cv::Point(x, y));
+    points.push_back(cv::Point2f(x, y));
 
     Stage firstStage;
     firstStage.points = points;
@@ -184,7 +187,7 @@ namespace helper
     addToResults(idCounter, -1, aPointIds, outGraph, points);
 
     lCurrentStage.push_back(firstStage);
-    aVisited.set(x, y, true);
+    aVisited.set(int(x), int(y), true);
 
     do
     {
@@ -252,7 +255,7 @@ namespace helper
             cv::Vec3b color = randomColor();
 
             for (PointValueList::iterator pIt = gIt->begin(); pIt != gIt->end(); ++pIt)
-              display.at<cv::Vec3b>(cv::Point(pIt->first.x, pIt->first.y)) = color;
+              display.at<cv::Vec3b>(cv::Point2f(pIt->first.x, pIt->first.y)) = color;
 
             stage.iteration = csIt->iteration + 1;
             stage.currentId = neighbourId > -1 ? neighbourId : csIt->currentId;
@@ -358,7 +361,7 @@ namespace helper
 
         if (edgeVal > 0 && !aVisited.get(x, y))
         {
-          findNeighbours(image, result, aVisited, aPointIds, outGraph, x, y, edgeVal, depth, idCounter);
+          findNeighbours(image, result, aVisited, aPointIds, outGraph, float(x), float(y), edgeVal, depth, idCounter);
         }
       }
     }

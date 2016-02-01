@@ -68,9 +68,9 @@ namespace helper
 
   typedef Array<bool> BoolArray;
   typedef Array<int> IntArray;
-  typedef std::pair<cv::Point, uchar> PointValue;
+  typedef std::pair<cv::Point2f, uchar> PointValue;
 
-  typedef std::vector<cv::Point> PointList;
+  typedef std::vector<cv::Point2f> PointList;
   typedef std::vector<PointValue> PointValueList;
   typedef std::vector<PointValueList> PointValueListGroup;
   typedef std::pair<int, int> Edge;
@@ -107,64 +107,22 @@ namespace helper
   class BoundingBox
   {
   public:
-    BoundingBox(PointList& points)
-    {
-      m_min = cv::Point(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-      m_max = cv::Point(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
+    BoundingBox();
+    BoundingBox(PointList& points);
+    BoundingBox(Graph& graph, PointSet& points);
+    BoundingBox(cv::Point2f min, cv::Point2f max);
 
-      for (PointList::iterator it = points.begin(); it != points.end(); ++it)
-      {
-        m_min.x = std::min(m_min.x, it->x);
-        m_min.y = std::min(m_min.y, it->y);
-        m_max.x = std::max(m_max.x, it->x);
-        m_max.y = std::max(m_max.y, it->y);
-      }
-    }
+    cv::Point2f min() const;
+    cv::Point2f max() const;
 
-    BoundingBox(Graph& graph, PointSet& points)
-    {
-      m_min = cv::Point(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-      m_max = cv::Point(std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
+    float width() const;
+    float height() const;
 
-      for (PointSet::iterator it = points.begin(); it != points.end(); ++it)
-      {
-        IdPointMap::iterator pit = graph.points.find(*it);
-
-        m_min.x = std::min(m_min.x, int(pit->second.x));
-        m_min.y = std::min(m_min.y, int(pit->second.y));
-        m_max.x = std::max(m_max.x, int(pit->second.x));
-        m_max.y = std::max(m_max.y, int(pit->second.y));
-      }
-    }
-
-    cv::Point min()
-    {
-      return m_min;
-    }
-
-    cv::Point max()
-    {
-      return m_max;
-    }
-
-    int width()
-    {
-      return m_max.x - m_min.x + 1;
-    }
-
-    int height()
-    {
-      return m_max.y - m_min.y + 1;
-    }
-
-    cv::Point center()
-    {
-      return m_min + m_max / 2.0f;
-    }
+    cv::Point2f center() const;
 
   private:
-    cv::Point m_min;
-    cv::Point m_max;
+    cv::Point2f m_min;
+    cv::Point2f m_max;
   };
 
   void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);
