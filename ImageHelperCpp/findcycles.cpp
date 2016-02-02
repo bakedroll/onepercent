@@ -18,27 +18,18 @@ namespace helper
 
   typedef std::vector<CycleStage> CycleStageList;
 
-  void addContourPointId(Graph& graph, PointSet& boundingPoints, PointList& contour, int pointId)
+  void addContourPointId(Graph& graph, IdSet& boundingPoints, PointList& contour, int pointId)
   {
     contour.push_back(graph.points.find(pointId)->second);
     boundingPoints.insert(pointId);
   }
 
-  bool pointInCycle(Graph& graph, PointSet& bounds, PointList& contour, int pointId)
-  {
-    if (bounds.find(pointId) != bounds.end() ||
-      cv::pointPolygonTest(contour, graph.points.find(pointId)->second, false) >= 0)
-      return true;
-
-    return false;
-  }
-
-  void addCycleTriangles(Graph& graph, QuadTreeNode& quadtree, PointTriangleMap& triangles, Cycle& cycle)
+  void addCycleTriangles(Graph& graph, QuadTreeNode<int>& quadtree, IdSet& trianglesVisited, Cycle& cycle)
   {
     if (cycle.edges.size() < 1)
       return;
 
-    PointSet boundingPoints;
+    IdSet boundingPoints;
     PointList contour;
     NeighbourMap neighbourMap;
 
@@ -61,41 +52,18 @@ namespace helper
       }
     }
 
-    BoundingBox bb(graph, boundingPoints);
-    cv::Point center = bb.center();
-    //AABB aabb(Point(float(center.x), float(center.y)), Point(float(bb.width() / 2 + 5), float(bb.height() / 2 + 5)));
+    BoundingBox bb(graph.points, boundingPoints);
 
-    //std::vector<Data<int>> points = quadtree.queryRange(aabb);
+    QuadTreeNode<int>::Data trianglesCheck;
+    quadtree.gatherDataWithinBoundary(bb, trianglesCheck);
 
-    IdSet trianglesVisited;
-
-    /*for (std::vector<Data<int>>::iterator it = points.begin(); it != points.end(); ++it)
+    for (QuadTreeNode<int>::Data::iterator it = trianglesCheck.begin(); it != trianglesCheck.end(); ++it)
     {
-      PointTriangleMap::iterator tit = triangles.find(*it->load);
-      for (IdSet::iterator iit = tit->second.begin(); iit != tit->second.end(); ++iit)
+      if (trianglesVisited.find(it->data()) == trianglesVisited.end() &&
+        cv::pointPolygonTest(contour, it->point(), false) >= 0)
       {
-        if (trianglesVisited.find(*iit) != trianglesVisited.end())
-          continue;
-
-        TriangleMap::iterator tmit = graph.triangles.find(*iit);
-        if (pointInCycle(graph, boundingPoints, contour, tmit->second.idx[0]) &&
-          pointInCycle(graph, boundingPoints, contour, tmit->second.idx[1]) &&
-          pointInCycle(graph, boundingPoints, contour, tmit->second.idx[2]))
-        {
-          cycle.trianlges.insert(TriangleMap::value_type(tmit->first, tmit->second));
-        }
-
-        trianglesVisited.insert(*iit);
-      }
-    }*/
-
-    for (TriangleMap::iterator it = graph.triangles.begin(); it != graph.triangles.end(); ++it)
-    {
-      if (pointInCycle(graph, boundingPoints, contour, it->second.idx[0]) &&
-        pointInCycle(graph, boundingPoints, contour, it->second.idx[1]) &&
-        pointInCycle(graph, boundingPoints, contour, it->second.idx[2]))
-      {
-        cycle.trianlges.insert(*it);
+        cycle.trianlges.insert(*graph.triangles.find(it->data()));
+        trianglesVisited.insert(it->data());
       }
     }
   }
@@ -112,7 +80,7 @@ namespace helper
     return angle;
   }
 
-  void makeAnglePointMap(Graph& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles, PointSet& visited)
+  void makeAnglePointMap(Graph& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles, IdSet& visited)
   {
     cv::Vec2f p1;
     if (p1Id < 0)
@@ -166,7 +134,7 @@ namespace helper
 
   bool makeStage(
     PointIdValue& pvalue,
-    PointSet& visited,
+    IdSet& visited,
     int origin,
     int left,
     int right,
@@ -215,9 +183,9 @@ namespace helper
     CycleStageList& currentStage,
     CycleStageList& results,
     int& cycleId,
-    PointSet& visited,
+    IdSet& visited,
     int originId,
-    PointSet& processed,
+    IdSet& processed,
     int leftCycleId = -1,
     int rightCycleId = -1,
     bool isFirst = false)
@@ -392,14 +360,47 @@ namespace helper
     cv::waitKey(600000);
   }
 
-  void findCycles(Graph& graph, Cycles& cycles, bool debug, int rows, int cols, float scale)
+  void assignTriangles(Graph& graph, Cycles& cycles, int cycleId, CycleStageList& results)
+  {
+    QuadTreeNode<int> quadtree(graph.boundary, 10);
+
+    for (TriangleMap::iterator it = graph.triangles.begin(); it != graph.triangles.end(); ++it)
+    {
+      cv::Point2f p1 = graph.points.find(it->second.idx[0])->second;
+      cv::Point2f p2 = graph.points.find(it->second.idx[1])->second;
+      cv::Point2f p3 = graph.points.find(it->second.idx[2])->second;
+
+      quadtree.insert(QuadTreeNodeData<int>(cv::Point2f((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f), it->first));
+    }
+
+    IdSet trianglesVisited;
+
+    for (int cId = 0; cId < cycleId; cId++)
+    {
+      Cycle cycle;
+      for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
+      {
+        if (it->adjacentCycleIds[0] == cId || it->adjacentCycleIds[1] == cId)
+          cycle.edges.push_back(EdgeValue(Edge(it->directedEdge.first, it->directedEdge.second), it->isBoundary ? 128 : 255));
+      }
+
+      if (cycle.edges.size() > 0)
+      {
+        addCycleTriangles(graph, quadtree, trianglesVisited, cycle);
+
+        cycles.push_back(cycle);
+      }
+    }
+  }
+
+  void findCycles(Graph& graph, Cycles& cycles, bool debug, float scale)
   {
     cv::Mat debugImage;
     if (debug)
-      debugImage = cv::Mat(int(rows * scale), int(cols * scale), CV_8UC3);
+      debugImage = cv::Mat(int(graph.boundary.height() * scale), int(graph.boundary.width() * scale), CV_8UC3);
 
     CycleStageList results;
-    PointSet visited;
+    IdSet visited;
     NeighbourMap neighbourMap;
     neighbourMapFromEdges(graph.edges, neighbourMap);
 
@@ -424,7 +425,7 @@ namespace helper
       makeAnglePointMap(graph, nit->second, nit->first, -1, angles, visited);
 
       CycleStageList currentStage;
-      PointSet processed;
+      IdSet processed;
       makeNextStages(graph, angles, neighbourMap, currentStage, currentStage, results, cycleId, visited, nit->first, processed, -1, -1, true);
 
       while (currentStage.size() > 0)
@@ -460,29 +461,6 @@ namespace helper
 
     }
 
-    BoundingBox bb;
-    QuadTreeNode quadtree(bb, 1);
-    //for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
-    //  quadtree.insert(Data<int>(Point(it->second.x, it->second.y), const_cast<int*>(&it->first)));
-
-    PointTriangleMap triangleMap;
-    makePointTriangleMap(graph, triangleMap);
-
-    for (int cId = 0; cId < cycleId; cId++)
-    {
-      Cycle cycle;
-      for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
-      {
-        if (it->adjacentCycleIds[0] == cId || it->adjacentCycleIds[1] == cId)
-          cycle.edges.push_back(EdgeValue(Edge(it->directedEdge.first, it->directedEdge.second), it->isBoundary ? 128 : 255));
-      }
-
-      if (cycle.edges.size() > 0)
-      {
-        addCycleTriangles(graph, quadtree, triangleMap, cycle);
-
-        cycles.push_back(cycle);
-      }
-    }
+    assignTriangles(graph, cycles, cycleId, results);
   }
 }

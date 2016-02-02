@@ -9,32 +9,16 @@ namespace helper
 
   BoundingBox::BoundingBox(PointList& points)
   {
-    m_min = cv::Point2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-    m_max = cv::Point2f(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-
+    reset();
     for (PointList::iterator it = points.begin(); it != points.end(); ++it)
-    {
-      m_min.x = std::min(m_min.x, it->x);
-      m_min.y = std::min(m_min.y, it->y);
-      m_max.x = std::max(m_max.x, it->x);
-      m_max.y = std::max(m_max.y, it->y);
-    }
+      expand(*it);
   }
 
-  BoundingBox::BoundingBox(Graph& graph, PointSet& points)
+  BoundingBox::BoundingBox(IdPointMap& points, IdSet ids)
   {
-    m_min = cv::Point2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-    m_max = cv::Point2f(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-
-    for (PointSet::iterator it = points.begin(); it != points.end(); ++it)
-    {
-      IdPointMap::iterator pit = graph.points.find(*it);
-
-      m_min.x = std::min(m_min.x, pit->second.x);
-      m_min.y = std::min(m_min.y, pit->second.y);
-      m_max.x = std::max(m_max.x, pit->second.x);
-      m_max.y = std::max(m_max.y, pit->second.y);
-    }
+    reset();
+    for (IdSet::iterator it = ids.begin(); it != ids.end(); ++it)
+      expand(points.find(*it)->second);
   }
 
   BoundingBox::BoundingBox(cv::Point2f min, cv::Point2f max)
@@ -67,6 +51,20 @@ namespace helper
   cv::Point2f BoundingBox::center() const
   {
     return m_min + m_max / 2.0f;
+  }
+
+  void BoundingBox::reset()
+  {
+    m_min = cv::Point2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    m_max = cv::Point2f(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+  }
+
+  void BoundingBox::expand(const cv::Point2f point)
+  {
+    m_min.x = std::min(m_min.x, point.x);
+    m_min.y = std::min(m_min.y, point.y);
+    m_max.x = std::max(m_max.x, point.x);
+    m_max.y = std::max(m_max.y, point.y);
   }
 
   void insertNeighbour(NeighbourMap& map, int p1, int p2, uchar attr)

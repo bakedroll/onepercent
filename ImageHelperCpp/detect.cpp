@@ -353,6 +353,8 @@ namespace helper
     IntArray aPointIds(image.cols, image.rows, -1);
     int idCounter = 0;
 
+    outGraph.boundary = BoundingBox(cv::Point2f(0.0f, 0.0f), cv::Point2f(float(image.cols - 1), float(image.rows - 1)));
+
     for (int y = 0; y < image.rows; y++)
     {
       for (int x = 0; x < image.cols; x++)

@@ -94,6 +94,8 @@ int detectLines(int argc, char** argv)
   helper::readGraphFiles(triGraph, polyfile, 1);
   helper::drawGraph(finalImage, triGraph, displayScale);
 
+  triGraph.boundary = graph.boundary;
+
   printf("Detecting cycles\n");
 
   // find cycles
@@ -126,23 +128,23 @@ int main(int argc, char** argv)
   
   if (mode == 0)
   {
-    //result = detectLines(argc, argv);
+    result = detectLines(argc, argv);
 
-    helper::QuadTreeNode tree(helper::BoundingBox(cv::Point2f(0.0f, 0.0f), cv::Point2f(float(width), float(height))), 100);
+    helper::QuadTreeNode<int> tree(helper::BoundingBox(cv::Point2f(0.0f, 0.0f), cv::Point2f(float(width), float(height))), 10);
 
     helper::PointList points;
     for (int i = 0; i < 1000; i++)
     {
-      helper::QuadTreeNodeData data(cv::Point2f(float(rand() % width), float(rand() % height)), 0);
+      helper::QuadTreeNodeData<int> data(cv::Point2f(float(rand() % width), float(rand() % height)), 0);
       tree.insert(data);
       points.push_back(data.point());
     }
 
-    helper::QuadTreeNode::QuadTreeNodeDataList resultData;
+    helper::QuadTreeNode<int>::Data resultData;
     tree.gatherDataWithinBoundary(helper::BoundingBox(cv::Point2f(100.0f, 56.0f), cv::Point2f(290.0f, 250.0f)), resultData);
 
     helper::PointList results;
-    for (helper::QuadTreeNode::QuadTreeNodeDataList::iterator it = resultData.begin(); it != resultData.end(); ++it)
+    for (helper::QuadTreeNode<int>::Data::iterator it = resultData.begin(); it != resultData.end(); ++it)
       results.push_back(it->point());
 
     helper::drawPoints(display, points, 1.0f, cv::Vec3b(0, 100, 0));
