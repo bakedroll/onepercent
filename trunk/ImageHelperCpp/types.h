@@ -87,29 +87,20 @@ namespace helper
   typedef std::map<float, int> FloatIdMap;
   typedef std::map<float, FloatIdMap> FloatFloatIdMap;
 
-  typedef std::set<int> IdSet;
-  typedef std::map<int, IdSet> IdIdMap;
 
   typedef std::pair<int, uchar> PointIdValue;
   typedef std::multimap<double, PointIdValue> AnglePointIdValueMap;
-  typedef std::set<int> PointSet;
+  typedef std::set<int> IdSet;
+  typedef std::map<int, IdSet> IdIdMap;
 
   typedef std::map<int, IdSet> PointTriangleMap;
-
-
-  typedef struct _graph
-  {
-    IdPointMap points;
-    EdgeValueList edges;
-    TriangleMap triangles;
-  } Graph;
 
   class BoundingBox
   {
   public:
     BoundingBox();
     BoundingBox(PointList& points);
-    BoundingBox(Graph& graph, PointSet& points);
+    BoundingBox(IdPointMap& points, IdSet ids);
     BoundingBox(cv::Point2f min, cv::Point2f max);
 
     cv::Point2f min() const;
@@ -121,9 +112,20 @@ namespace helper
     cv::Point2f center() const;
 
   private:
+    void reset();
+    void expand(const cv::Point2f point);
+
     cv::Point2f m_min;
     cv::Point2f m_max;
   };
+
+  typedef struct _graph
+  {
+    IdPointMap points;
+    EdgeValueList edges;
+    TriangleMap triangles;
+    BoundingBox boundary;
+  } Graph;
 
   void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);
 

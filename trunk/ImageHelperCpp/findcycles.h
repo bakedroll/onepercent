@@ -12,5 +12,5 @@ namespace helper
 
   typedef std::vector<Cycle> Cycles;
 
-  void findCycles(Graph& graph, Cycles& cycles, bool debug = false, int rows = 0, int cols = 0, float scale = 1.0);
+  void findCycles(Graph& graph, Cycles& cycles, bool debug = false, float scale = 1.0);
 }
