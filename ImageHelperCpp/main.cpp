@@ -117,7 +117,7 @@ int detectLines(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-  int result = 0;
+  int result;
   int mode = atoi(argv[1]);
 
   int width = 300;
@@ -129,27 +129,6 @@ int main(int argc, char** argv)
   if (mode == 0)
   {
     result = detectLines(argc, argv);
-
-    helper::QuadTreeNode<int> tree(helper::BoundingBox<float>(cv::Point2f(0.0f, 0.0f), cv::Point2f(float(width), float(height))), 10);
-
-    helper::PointListi points;
-    for (int i = 0; i < 1000; i++)
-    {
-      helper::QuadTreeNodeData<int> data(cv::Point2f(float(rand() % width), float(rand() % height)), 0);
-      tree.insert(data);
-      points.push_back(data.point());
-    }
-
-    helper::QuadTreeNode<int>::Data resultData;
-    tree.gatherDataWithinBoundary(helper::BoundingBox<float>(cv::Point2f(100.0f, 56.0f), cv::Point2f(290.0f, 250.0f)), resultData);
-
-    helper::PointListi results;
-    for (helper::QuadTreeNode<int>::Data::iterator it = resultData.begin(); it != resultData.end(); ++it)
-      results.push_back(it->point());
-
-    helper::drawPoints(display, points, 1.0f, cv::Vec3b(0, 100, 0));
-    helper::drawPoints(display, results, 1.0f, cv::Vec3b(200, 0, 0));
-    imshow("QuadTree", display);
   }
   else
   {

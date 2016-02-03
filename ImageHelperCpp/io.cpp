@@ -6,6 +6,22 @@ namespace helper
 {
   typedef std::vector<std::string> StringList;
 
+  bool readFileIntoString(const char* filename, std::string& buffer)
+  {
+    std::ifstream fs(filename);
+    if (!fs.is_open())
+      return false;
+
+    fs.seekg(0, std::ios::end);
+    buffer.reserve(size_t(fs.tellg()));
+    fs.seekg(0, std::ios::beg);
+
+    buffer.assign((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
+
+    fs.close();
+    return true;
+  }
+
   void writePolyFile(Graph& graph, const char* filename)
   {
     std::string fn(filename);
@@ -145,54 +161,35 @@ namespace helper
 
   void readNodeFile(Graph& graph, const char* filename)
   {
-    std::ifstream t(filename);
-    if (!t.is_open())
+    std::string buffer;
+    if (!readFileIntoString(filename, buffer))
       return;
 
-    std::stringstream fs;
-    fs << t.rdbuf();
-    fs.seekg(0, std::ios::beg);
-
+    std::stringstream fs(buffer);
     readPointElements(graph, fs);
-
-    t.close();
   }
 
   void readPolyFile(Graph& graph, const char* filename)
   {
-    std::ifstream t(filename);
-    if (!t.is_open())
+    std::string buffer;
+    if (!readFileIntoString(filename, buffer))
       return;
 
-    std::stringstream fs;
-    fs << t.rdbuf();
-    fs.seekg(0, std::ios::beg);
-
-    if (!t.is_open())
-      return;
+    std::stringstream fs(buffer);
 
     readPointElements(graph, fs);
     readSegmentElements(graph, fs);
-
-    t.close();
   }
 
   void readEleFile(Graph& graph, const char* filename)
   {
-    std::ifstream t(filename);
-    if (!t.is_open())
+    std::string buffer;
+    if (!readFileIntoString(filename, buffer))
       return;
 
-    std::stringstream fs;
-    fs << t.rdbuf();
-    fs.seekg(0, std::ios::beg);
-
-    if (!t.is_open())
-      return;
+    std::stringstream fs(buffer);
 
     readTriangleElements(graph, fs);
-
-    t.close();
   }
 
   void readGraphFiles(Graph& graph, const char* filename, int iteration)
@@ -206,10 +203,14 @@ namespace helper
     std::string elefn(filename);
     elefn += "." + std::to_string(iteration) + ".ele";
 
+    printf("Read node file: %s\n", nodefn.c_str());
     readNodeFile(graph, nodefn.c_str());
+
+    printf("Read poly file: %s\n", polyfn.c_str());
     readPolyFile(graph, polyfn.c_str());
+
+    printf("Read ele file: %s\n", elefn.c_str());
     readEleFile(graph, elefn.c_str());
   }
-
 
 }
