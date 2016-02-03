@@ -68,9 +68,10 @@ namespace helper
 
   typedef Array<bool> BoolArray;
   typedef Array<int> IntArray;
-  typedef std::pair<cv::Point2f, uchar> PointValue;
+  typedef std::pair<cv::Point2i, uchar> PointValue;
 
-  typedef std::vector<cv::Point2f> PointList;
+  typedef std::vector<cv::Point2i> PointListi;
+  typedef std::vector<cv::Point2f> PointListf;
   typedef std::vector<PointValue> PointValueList;
   typedef std::vector<PointValueList> PointValueListGroup;
   typedef std::pair<int, int> Edge;
@@ -95,28 +96,78 @@ namespace helper
 
   typedef std::map<int, IdSet> PointTriangleMap;
 
+  template<typename T>
   class BoundingBox
   {
   public:
-    BoundingBox();
-    BoundingBox(PointList& points);
-    BoundingBox(IdPointMap& points, IdSet ids);
-    BoundingBox(cv::Point2f min, cv::Point2f max);
+    BoundingBox()
+    {
+      
+    }
 
-    cv::Point2f min() const;
-    cv::Point2f max() const;
+    BoundingBox(std::vector<cv::Point_<T>>& points)
+    {
+      reset();
+      for (typename std::vector<cv::Point_<T>>::iterator it = points.begin(); it != points.end(); ++it)
+        expand(*it);
+    }
+    /*
+    BoundingBox(std::map<int, cv::Point_<T> >& points, IdSet ids)
+    {
+      reset();
+      for (typename std::map<int, cv::Point_<T>>::iterator it = ids.begin(); it != ids.end(); ++it)
+        expand(points.find(*it)->second);
+    }
+    */
+    BoundingBox(cv::Point_<T> min, cv::Point_<T> max)
+      : m_min(min)
+      , m_max(max)
+    {
 
-    float width() const;
-    float height() const;
+    }
 
-    cv::Point2f center() const;
+    cv::Point_<T> min() const
+    {
+      return m_min;
+    }
+
+    cv::Point_<T> max() const
+    {
+      return m_max;
+    }
+
+    T width() const
+    {
+      return m_max.x - m_min.x + static_cast<T>(1);
+    }
+
+    T height() const
+    {
+      return m_max.y - m_min.y + static_cast<T>(1);
+    }
+
+    cv::Point_<T> center() const
+    {
+      return m_min + m_max / static_cast<T>(2);
+    }
 
   private:
-    void reset();
-    void expand(const cv::Point2f point);
+    void reset()
+    {
+      m_min = cv::Point_<T>(std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
+      m_max = cv::Point_<T>(std::numeric_limits<T>::min(), std::numeric_limits<T>::min());
+    }
 
-    cv::Point2f m_min;
-    cv::Point2f m_max;
+    void expand(const cv::Point_<T>& point)
+    {
+      m_min.x = std::min<T>(m_min.x, point.x);
+      m_min.y = std::min<T>(m_min.y, point.y);
+      m_max.x = std::max<T>(m_max.x, point.x);
+      m_max.y = std::max<T>(m_max.y, point.y);
+    }
+
+    cv::Point_<T> m_min;
+    cv::Point_<T> m_max;
   };
 
   typedef struct _graph
@@ -124,7 +175,7 @@ namespace helper
     IdPointMap points;
     EdgeValueList edges;
     TriangleMap triangles;
-    BoundingBox boundary;
+    BoundingBox<float> boundary;
   } Graph;
 
   void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);
@@ -134,4 +185,6 @@ namespace helper
 
   void makeFloatFloatIdMap(Graph& graph, FloatFloatIdMap& map);
   void makePointTriangleMap(Graph& graph, PointTriangleMap& map);
+
+  void makePointList(IdPointMap& points, IdSet& ids, PointListf& result);
 }
