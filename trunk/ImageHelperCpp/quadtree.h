@@ -39,7 +39,7 @@ namespace helper
     typedef std::vector<QuadTreeNodeData<T>> Data;
     typedef void(QuadTreeNodeTraverseBlock)(QuadTreeNode *node);
 
-    QuadTreeNode(BoundingBox boundary, int capacity)
+    QuadTreeNode(BoundingBox<float> boundary, int capacity)
       : m_northWest(nullptr)
       , m_northEast(nullptr)
       , m_southWest(nullptr)
@@ -57,7 +57,7 @@ namespace helper
       if (m_southEast != nullptr) delete m_southEast;
     }
 
-    void gatherDataWithinBoundary(const BoundingBox& boundary, Data& results)
+    void gatherDataWithinBoundary(const BoundingBox<float>& boundary, Data& results)
     {
       // If range is not contained in the node's boundingBox then bail
       if (!boundingBoxIntersectsBoundingBox(m_boundary, boundary)) {
@@ -124,31 +124,31 @@ namespace helper
 
     void subdivide()
     {
-      BoundingBox box = m_boundary;
+      BoundingBox<float> box = m_boundary;
 
       // Spit the quadrant into four equal parts.
       float xMid = (box.max().x + box.min().x) / 2.0f;
       float yMid = (box.max().y + box.min().y) / 2.0f;
 
       // Create the north west bounding box.
-      BoundingBox northWestbb(cv::Point2f(box.min().x, box.min().y), cv::Point2f(xMid, yMid));
+      BoundingBox<float> northWestbb(cv::Point2f(box.min().x, box.min().y), cv::Point2f(xMid, yMid));
       m_northWest = new QuadTreeNode(northWestbb, m_capacity);
 
       // Create the north east bounding box.
-      BoundingBox northEastbb(cv::Point2f(xMid, box.min().y), cv::Point2f(box.max().x, yMid));
+      BoundingBox<float> northEastbb(cv::Point2f(xMid, box.min().y), cv::Point2f(box.max().x, yMid));
       m_northEast = new QuadTreeNode(northEastbb, m_capacity);
 
       // Create the south west bounding box.
-      BoundingBox southWestbb(cv::Point2f(box.min().x, yMid), cv::Point2f(xMid, box.max().y));
+      BoundingBox<float> southWestbb(cv::Point2f(box.min().x, yMid), cv::Point2f(xMid, box.max().y));
       m_southWest = new QuadTreeNode(southWestbb, m_capacity);
 
       // Create the south east bounding box.
-      BoundingBox southEastbb(cv::Point2f(xMid, yMid), cv::Point2f(box.max().x, box.max().y));
+      BoundingBox<float> southEastbb(cv::Point2f(xMid, yMid), cv::Point2f(box.max().x, box.max().y));
       m_southEast = new QuadTreeNode(southEastbb, m_capacity);
     }
 
   protected:
-    bool boundingBoxContainsData(const BoundingBox& boundary, const QuadTreeNodeData<T>& data)
+    bool boundingBoxContainsData(const BoundingBox<float>& boundary, const QuadTreeNodeData<T>& data)
     {
       bool containsX = boundary.min().x <= data.point().x && data.point().x <= boundary.max().x;
       bool containsY = boundary.min().y <= data.point().y && data.point().y <= boundary.max().y;
@@ -156,7 +156,7 @@ namespace helper
       return containsX && containsY;
     }
 
-    bool boundingBoxIntersectsBoundingBox(const BoundingBox& boundary, const BoundingBox& test)
+    bool boundingBoxIntersectsBoundingBox(const BoundingBox<float>& boundary, const BoundingBox<float>& test)
     {
       return (boundary.min().x <= test.max().x && boundary.max().x >= test.min().x && boundary.min().y <= test.max().y && boundary.max().y >= test.min().y);
     }
@@ -167,7 +167,7 @@ namespace helper
     QuadTreeNode* m_southEast;
 
     Data m_data;
-    BoundingBox m_boundary;
+    BoundingBox<float> m_boundary;
 
     int m_capacity;
   };

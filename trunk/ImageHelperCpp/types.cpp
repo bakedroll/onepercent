@@ -2,71 +2,6 @@
 
 namespace helper
 {
-  BoundingBox::BoundingBox()
-  {
-
-  }
-
-  BoundingBox::BoundingBox(PointList& points)
-  {
-    reset();
-    for (PointList::iterator it = points.begin(); it != points.end(); ++it)
-      expand(*it);
-  }
-
-  BoundingBox::BoundingBox(IdPointMap& points, IdSet ids)
-  {
-    reset();
-    for (IdSet::iterator it = ids.begin(); it != ids.end(); ++it)
-      expand(points.find(*it)->second);
-  }
-
-  BoundingBox::BoundingBox(cv::Point2f min, cv::Point2f max)
-    : m_min(min)
-    , m_max(max)
-  {
-
-  }
-
-  cv::Point2f BoundingBox::min() const
-  {
-    return m_min;
-  }
-
-  cv::Point2f BoundingBox::max() const
-  {
-    return m_max;
-  }
-
-  float BoundingBox::width() const
-  {
-    return m_max.x - m_min.x + 1.0f;
-  }
-
-  float BoundingBox::height() const
-  {
-    return m_max.y - m_min.y + 1.0f;
-  }
-
-  cv::Point2f BoundingBox::center() const
-  {
-    return m_min + m_max / 2.0f;
-  }
-
-  void BoundingBox::reset()
-  {
-    m_min = cv::Point2f(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-    m_max = cv::Point2f(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-  }
-
-  void BoundingBox::expand(const cv::Point2f point)
-  {
-    m_min.x = std::min(m_min.x, point.x);
-    m_min.y = std::min(m_min.y, point.y);
-    m_max.x = std::max(m_max.x, point.x);
-    m_max.y = std::max(m_max.y, point.y);
-  }
-
   void insertNeighbour(NeighbourMap& map, int p1, int p2, uchar attr)
   {
     NeighbourMap::iterator it = map.find(p1);
@@ -166,5 +101,11 @@ namespace helper
         pit->second.insert(it->first);
       }
     }
+  }
+
+  void makePointList(IdPointMap& points, IdSet& ids, PointListf& result)
+  {
+    for (IdSet::iterator it = ids.begin(); it != ids.end(); ++it)
+      result.push_back(points.find(*it)->second);
   }
 }

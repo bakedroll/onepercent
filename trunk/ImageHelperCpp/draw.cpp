@@ -4,9 +4,9 @@
 
 namespace helper
 {
-  void drawPoints(cv::Mat& mat, PointList points, float scale, cv::Vec3b color)
+  void drawPoints(cv::Mat& mat, PointListi points, float scale, cv::Vec3b color)
   {
-    for (PointList::iterator it = points.begin(); it != points.end(); ++it)
+    for (PointListi::iterator it = points.begin(); it != points.end(); ++it)
       mat.at<cv::Vec3b>(*it * scale) = color;
   }
 

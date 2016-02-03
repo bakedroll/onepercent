@@ -18,7 +18,7 @@ namespace helper
 
   typedef std::vector<CycleStage> CycleStageList;
 
-  void addContourPointId(Graph& graph, IdSet& boundingPoints, PointList& contour, int pointId)
+  void addContourPointId(Graph& graph, IdSet& boundingPoints, PointListi& contour, int pointId)
   {
     contour.push_back(graph.points.find(pointId)->second);
     boundingPoints.insert(pointId);
@@ -30,7 +30,7 @@ namespace helper
       return;
 
     IdSet boundingPoints;
-    PointList contour;
+    PointListi contour;
     NeighbourMap neighbourMap;
 
     neighbourMapFromEdges(cycle.edges, neighbourMap);
@@ -52,7 +52,9 @@ namespace helper
       }
     }
 
-    BoundingBox bb(graph.points, boundingPoints);
+    PointListf points;
+    makePointList(graph.points, boundingPoints, points);
+    BoundingBox<float> bb(points);
 
     QuadTreeNode<int>::Data trianglesCheck;
     quadtree.gatherDataWithinBoundary(bb, trianglesCheck);
@@ -362,6 +364,8 @@ namespace helper
 
   void assignTriangles(Graph& graph, Cycles& cycles, int cycleId, CycleStageList& results)
   {
+    printf("Building quadtree\n");
+
     QuadTreeNode<int> quadtree(graph.boundary, 10);
 
     for (TriangleMap::iterator it = graph.triangles.begin(); it != graph.triangles.end(); ++it)
@@ -373,6 +377,7 @@ namespace helper
       quadtree.insert(QuadTreeNodeData<int>(cv::Point2f((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f), it->first));
     }
 
+    printf("Assign triangles to cycles");
     IdSet trianglesVisited;
 
     for (int cId = 0; cId < cycleId; cId++)
