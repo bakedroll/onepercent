@@ -17,7 +17,7 @@ namespace helper
         if (ity != itx->second.end())
         {
           // duplicate
-          printf("Duplicate point found %d: (%f, %f)\n", it->first, it->second.x, it->second.y);
+          printf("Warning: Duplicate point found %d: (%f, %f)\n", it->first, it->second.x, it->second.y);
 
           for (EdgeValueList::iterator eit = graph.edges.begin(); eit != graph.edges.end(); ++eit)
           {
@@ -76,7 +76,7 @@ namespace helper
         checkEdgeSet(map, it->first.second, it->first.first))
       {
         // duplicate
-        printf("Duplicate edge found (%d, %d)\n", it->first.first, it->first.second);
+        printf("Warning: Duplicate edge found (%d, %d)\n", it->first.first, it->first.second);
 
         it = graph.edges.erase(it);
         continue;
@@ -88,11 +88,9 @@ namespace helper
 
   void checkDuplicatesAndRemove(Graph& graph)
   {
-    printf("checking for duplicates...\n");
+    printf("checking for duplicates\n");
 
     checkDuplicatePoints(graph);
     checkDuplicateEdges(graph);
-
-    printf("\n");
   }
 }

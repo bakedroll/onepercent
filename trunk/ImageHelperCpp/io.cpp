@@ -6,6 +6,38 @@ namespace helper
 {
   typedef std::vector<std::string> StringList;
 
+  ProgressPrinter::ProgressPrinter(std::string name)
+    : m_name(name)
+    , m_percent(0)
+    , m_lastUpdate(clock())
+  {
+    printf("%s 0%%", m_name.c_str());
+  }
+
+  void ProgressPrinter::update(long long p, long long max)
+  {
+    m_percent = p * 100 / max;
+
+    if (m_percent < 0)
+      printf("bla\n");
+
+    if (clock() - m_lastUpdate >= 500 || m_percent >= 100)
+    {
+      printCurrent();
+      m_lastUpdate = clock();
+    }
+  }
+
+  void ProgressPrinter::printCurrent()
+  {
+    std::string p = std::to_string(m_percent) + "%";
+
+    printf("\r%s %s", m_name.c_str(), p.c_str());
+
+    if (m_percent >= 100)
+      printf("\n");
+  }
+
   bool readFileIntoString(const char* filename, std::string& buffer)
   {
     std::ifstream fs(filename);
@@ -212,5 +244,4 @@ namespace helper
     printf("Read ele file: %s\n", elefn.c_str());
     readEleFile(graph, elefn.c_str());
   }
-
 }

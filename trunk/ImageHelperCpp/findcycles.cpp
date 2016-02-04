@@ -6,6 +6,7 @@
 #include <set>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "io.h"
 
 namespace helper
 {
@@ -364,10 +365,12 @@ namespace helper
 
   void assignTriangles(Graph& graph, Cycles& cycles, int cycleId, CycleStageList& results)
   {
-    printf("Building quadtree\n");
+    ProgressPrinter qprogress("Build quadtree");
 
     QuadTreeNode<int> quadtree(graph.boundary, 10);
 
+    int i = 0;
+    int max = graph.triangles.size() - 1;
     for (TriangleMap::iterator it = graph.triangles.begin(); it != graph.triangles.end(); ++it)
     {
       cv::Point2f p1 = graph.points.find(it->second.idx[0])->second;
@@ -375,9 +378,12 @@ namespace helper
       cv::Point2f p3 = graph.points.find(it->second.idx[2])->second;
 
       quadtree.insert(QuadTreeNodeData<int>(cv::Point2f((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f), it->first));
+      qprogress.update(i, max);
+
+      i++;
     }
 
-    printf("Assign triangles to cycles");
+    ProgressPrinter aprogress("Assign triangles to cycles");
     IdSet trianglesVisited;
 
     for (int cId = 0; cId < cycleId; cId++)
@@ -395,11 +401,15 @@ namespace helper
 
         cycles.push_back(cycle);
       }
+
+      aprogress.update(cId, cycleId - 1);
     }
   }
 
   void findCycles(Graph& graph, Cycles& cycles, bool debug, float scale)
   {
+    ProgressPrinter progress("Detect cylces");
+
     cv::Mat debugImage;
     if (debug)
       debugImage = cv::Mat(int(graph.boundary.height() * scale), int(graph.boundary.width() * scale), CV_8UC3);
@@ -464,7 +474,9 @@ namespace helper
         currentStage = nextStage;
       }
 
+      progress.update(results.size(), graph.edges.size());
     }
+    progress.update(1, 1);
 
     assignTriangles(graph, cycles, cycleId, results);
   }
