@@ -9,7 +9,99 @@
 #include "draw.h"
 #include "check.h"
 #include "findcycles.h"
-#include "quadtree.h"
+
+typedef std::vector<std::string> StringList;
+typedef std::map<std::string, StringList> ArgumentMap;
+
+void parseParameters(int argc, char** argv, ArgumentMap& arguments)
+{
+  std::string lastArg = "";
+  StringList lastParams;
+
+  bool justAdded = false;
+  for (int i = 1; i < argc; i++)
+  {
+    std::string arg(argv[i]);
+    if (*arg.begin() == '-')
+    {
+      arg.erase(arg.begin());
+
+      if (!lastArg.empty())
+      {
+        if (arguments.find(arg) != arguments.end())
+        {
+          printf("Warning: Duplicate argument: %s\n", argv[i]);
+        }
+        else
+        {
+          arguments.insert(ArgumentMap::value_type(lastArg, lastParams));
+          justAdded = true;
+        }
+
+        lastParams.clear();
+      }
+
+      lastArg = arg;
+    }
+    else
+    {
+      justAdded = false;
+      if (lastArg.empty())
+      {
+        printf("Warning: Unexpected argument: %s\n", argv[i]);
+        continue;
+      }
+
+      lastParams.push_back(arg);
+    }
+  }
+
+  if (!justAdded)
+    arguments.insert(ArgumentMap::value_type(lastArg, lastParams));
+}
+
+std::string getStringArgument(ArgumentMap& arguments, std::string key, bool required = false)
+{
+  ArgumentMap::iterator it = arguments.find(key);
+  if (it == arguments.end() || it->second.size() < 1)
+  {
+    if (required)
+      throw std::exception(key.c_str());
+
+    return std::string();
+  }
+
+  return it->second[0];
+}
+
+bool getBoolArgument(ArgumentMap& arguments, std::string key)
+{
+  ArgumentMap::iterator it = arguments.find(key);
+  if (it == arguments.end())
+    return false;
+
+  return true;
+}
+
+int getIntArgument(ArgumentMap& arguments, std::string key, int defaultVal, bool required = false)
+{
+  std::string result = getStringArgument(arguments, key, required);
+
+  if (result.empty())
+    return defaultVal;
+
+  return atoi(result.c_str());
+}
+
+float getFloatArgument(ArgumentMap& arguments, std::string key, float defaultVal, bool required = false)
+{
+  std::string result = getStringArgument(arguments, key, required);
+
+  if (result.empty())
+    return defaultVal;
+
+  return float(atof(result.c_str()));
+}
 
 void triangulate(const char* triangleCommand, const char* polyFilename, int minAngle = 20)
 {
@@ -24,34 +116,49 @@ void triangulate(const char* triangleCommand, const char* polyFilename, int minA
 
 int detectLines(int argc, char** argv)
 {
-  if (argc < 11)
+  ArgumentMap arguments;
+  parseParameters(argc, argv, arguments);
+
+  std::string inputimage;
+  std::string dbgimage;
+  std::string polyfile;
+  std::string trianglecommand;
+  float displayScale, reduce;
+  int depth, minAngle;
+  bool useThres, dbgCycles;
+
+  try
   {
-    std::cout << "Error: Not enough parameters." << std::endl;
+    inputimage = getStringArgument(arguments, "i", true);
+    dbgimage = getStringArgument(arguments, "D", false);
+    polyfile = getStringArgument(arguments, "p", true);
+    trianglecommand = getStringArgument(arguments, "t", true);
+    displayScale = getFloatArgument(arguments, "s", 1.0f);
+    reduce = getFloatArgument(arguments, "r", 0.7f);
+    depth = getIntArgument(arguments, "d", 10);
+    minAngle = getIntArgument(arguments, "a", 15);
+    useThres = getBoolArgument(arguments, "T");
+    dbgCycles = getBoolArgument(arguments, "C");
+  }
+  catch (std::exception& e)
+  {
+    printf("Error: Missing argument: %s\n", e.what());
     return -1;
   }
 
-  const char* inputImage = argv[2];
-  float displayScale = float(atof(argv[4]));
-  int depth = atoi(argv[3]);
-  float reduce = float(atof(argv[5]));
-  const char* polyfile = argv[6];
-  const char* triangleCommand = argv[7];
-  int minAngle = atoi(argv[8]);
-  const char* dbgImage = argv[9];
-  int useThres = atoi(argv[10]);
+  printf("Detecting countries\n");
 
-  printf("Triangulating...\n");
   printf("Depth (edge length): %d\n", depth);
   printf("Reduce: %f percent\n", reduce * 100.0f);
   printf("Min angle: %d\n\n", minAngle);
 
   cv::Mat image;
 
-  image = cv::imread(inputImage, cv::IMREAD_GRAYSCALE);
+  image = cv::imread(inputimage, cv::IMREAD_GRAYSCALE);
 
   if (!image.data)
   {
-    printf("Error: Image could not be loaded: %s\n", inputImage);
+    printf("Error: Image could not be loaded: %s\n", inputimage.c_str());
     return -1;
   }
 
@@ -81,17 +188,17 @@ int detectLines(int argc, char** argv)
   printf("Write to poly file\n");
 
   // write to poly file and draw debug image
-  helper::writePolyFile(graph, polyfile);
+  helper::writePolyFile(graph, polyfile.c_str());
   helper::drawGraph(resultImage, graph, displayScale);
 
   // triangulate
-  triangulate(triangleCommand, polyfile, minAngle);
+  triangulate(trianglecommand.c_str(), polyfile.c_str(), minAngle);
 
   printf("Read from poly file\n");
 
   // read result and draw debug image
   helper::Graph triGraph;
-  helper::readGraphFiles(triGraph, polyfile, 1);
+  helper::readGraphFiles(triGraph, polyfile.c_str(), 1);
   helper::drawGraph(finalImage, triGraph, displayScale);
 
   triGraph.boundary = graph.boundary;
@@ -100,17 +207,20 @@ int detectLines(int argc, char** argv)
 
   // find cycles
   helper::Cycles cycles;
-  helper::findCycles(triGraph, cycles); //, false, image.rows, image.cols, displayScale);
+  helper::findCycles(triGraph, cycles, dbgCycles, displayScale);
   helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
   
-  imshow("Lines", displayImage);
-  imshow("Result", resultImage);
-  imshow("Final", finalImage);
-  imshow("Cycles", cycleImage);
-  imwrite(std::string(dbgImage) + ".steps.png", displayImage);
-  imwrite(std::string(dbgImage) + ".edges.png", resultImage);
-  imwrite(std::string(dbgImage) + ".triangles.png", finalImage);
-  imwrite(std::string(dbgImage) + ".cycles.png", cycleImage);
+  if (!dbgimage.empty())
+  {
+    imshow("Lines", displayImage);
+    imshow("Result", resultImage);
+    imshow("Final", finalImage);
+    imshow("Cycles", cycleImage);
+    imwrite(std::string(dbgimage) + ".steps.png", displayImage);
+    imwrite(std::string(dbgimage) + ".edges.png", resultImage);
+    imwrite(std::string(dbgimage) + ".triangles.png", finalImage);
+    imwrite(std::string(dbgimage) + ".cycles.png", cycleImage);
+  }
 
   return 0;
 }
