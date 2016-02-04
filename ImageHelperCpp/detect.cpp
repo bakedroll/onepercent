@@ -1,4 +1,5 @@
 #include "detect.h"
+#include "io.h"
 
 namespace helper
 {
@@ -77,9 +78,11 @@ namespace helper
     for (PointValueList::iterator it = points.begin(); it != points.end(); ++it)
       field.at<uchar>(it->first - fieldAabb.min()) = it->second;
 
-    for (int y = 0; y < fieldAabb.height(); y++)
+    int xmax = fieldAabb.width();
+    int ymax = fieldAabb.height();
+    for (int y = 0; y < ymax; y++)
     {
-      for (int x = 0; x < fieldAabb.width(); x++)
+      for (int x = 0; x < xmax; x++)
       {
         uchar pval = field.at<uchar>(cv::Point(x, y));
         if (pval > 0 && !visited.get(x, y))
@@ -346,6 +349,8 @@ namespace helper
 
   void findEntries(cv::Mat& image, cv::Mat& result, int depth, Graph& outGraph)
   {
+    ProgressPrinter progress("Detect lines");
+
     BoolArray aVisited(image.cols, image.rows, false);
     IntArray aPointIds(image.cols, image.rows, -1);
     int idCounter = 0;
@@ -362,6 +367,8 @@ namespace helper
         {
           findNeighbours(image, result, aVisited, aPointIds, outGraph, x, y, edgeVal, depth, idCounter);
         }
+
+        progress.update(long(y) * image.cols + x, long(image.rows) * image.cols - 1);
       }
     }
   }

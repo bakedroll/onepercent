@@ -1,4 +1,5 @@
 #include "reduce.h"
+#include "io.h"
 
 namespace helper
 {
@@ -57,6 +58,8 @@ namespace helper
 
   void reducePoints(Graph& graph, float percentPoints)
   {
+    ProgressPrinter progress("Reduce");
+
     NeighbourMap neighbourMap;
     AnglePointMap angles;
 
@@ -98,6 +101,8 @@ namespace helper
 
       calculateAngle(e1it, angles, graph);
       calculateAngle(e2it, angles, graph);
+
+      progress.update(i, nPoints - 1);
     }
   }
 }
