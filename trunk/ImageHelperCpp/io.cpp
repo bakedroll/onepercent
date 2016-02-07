@@ -18,9 +18,6 @@ namespace helper
   {
     m_percent = p * 100 / max;
 
-    if (m_percent < 0)
-      printf("bla\n");
-
     if (clock() - m_lastUpdate >= 500 || m_percent >= 100)
     {
       printCurrent();

@@ -279,103 +279,96 @@ namespace helper
     } while (!lCurrentStage.empty());
   }
 
-  void incrementEdgeCount(PointEdgesCountMap& peCountMap, int pointId)
+  void removeEdge(Graph& graph, int p1, int p2)
   {
-    PointEdgesCountMap::iterator it = peCountMap.find(pointId);
-
-    if (it != peCountMap.end())
+    EdgeValueList::iterator it = graph.edges.begin();
+    while (it != graph.edges.end())
     {
-      it->second++;
-      return;
-    }
-
-    peCountMap.insert(PointEdgesCountMap::value_type(pointId, 1));
-  }
-
-  void cleanUpDeadEnds(Graph& outGraph)
-  {
-    typedef std::vector<IdPointMap::iterator> RPMIteratorList;
-
-    PointEdgesCountMap peCountMap;
-
-    for (EdgeValueList::iterator eIt = outGraph.edges.begin(); eIt != outGraph.edges.end(); ++eIt)
-    {
-      incrementEdgeCount(peCountMap, eIt->first.first);
-      incrementEdgeCount(peCountMap, eIt->first.second);
-    }
-
-    RPMIteratorList pointsToRemove;
-    for (IdPointMap::iterator pIt = outGraph.points.begin(); pIt != outGraph.points.end(); ++pIt)
-    {
-      PointEdgesCountMap::iterator peIt = peCountMap.find(pIt->first);
-      assert(peIt != peCountMap.end());
-
-      if (peIt->second == 1)
+      if ((p1 == it->first.first && p2 == it->first.second) ||
+        (p2 == it->first.first && p1 == it->first.second))
       {
-        EdgeValueList::iterator edgeToRemoveIt;
-
-        int neighbourId = -1;
-        for (EdgeValueList::iterator eIt = outGraph.edges.begin(); eIt != outGraph.edges.end(); ++eIt)
-        {
-          if (eIt->first.first == pIt->first)
-          {
-            neighbourId = eIt->first.second;
-            edgeToRemoveIt = eIt;
-            break;
-          }
-          if (eIt->first.second == pIt->first)
-          {
-            neighbourId = eIt->first.first;
-            edgeToRemoveIt = eIt;
-            break;
-          }
-        }
-
-        assert(neighbourId > -1);
-        PointEdgesCountMap::iterator peIt2 = peCountMap.find(neighbourId);
-        assert(peIt2 != peCountMap.end());
-
-        if (peIt2->second > 2)
-        {
-          pointsToRemove.push_back(pIt);
-          outGraph.edges.erase(edgeToRemoveIt);
-        }
+        it = graph.edges.erase(it);
+      }
+      else
+      {
+        ++it;
       }
     }
-
-    for (RPMIteratorList::iterator it = pointsToRemove.begin(); it != pointsToRemove.end(); ++it)
-      outGraph.points.erase(*it);
   }
 
-  void findEntries(cv::Mat& image, cv::Mat& result, int depth, Graph& outGraph)
+  void removeDeadEndEdges(Graph& graph, NeighbourMap& neighbours, IdSet& ignore, int pointId, NeighbourValueList nlist)
   {
-    ProgressPrinter progress("Detect lines");
+    int currentPoint = pointId;
+    int prevPoint = -1;
 
-    BoolArray aVisited(image.cols, image.rows, false);
-    IntArray aPointIds(image.cols, image.rows, -1);
-    int idCounter = 0;
-
-    outGraph.boundary = BoundingBox<float>(cv::Point2f(0.0f, 0.0f), cv::Point2f(float(image.cols - 1), float(image.rows - 1)));
-
-    for (int y = 0; y < image.rows; y++)
+    while (nlist.size() <= 2)
     {
-      for (int x = 0; x < image.cols; x++)
+      for (NeighbourValueList::iterator it = nlist.begin(); it != nlist.end(); ++it)
       {
-        uchar edgeVal = image.at<uchar>(cv::Point(x, y));
-
-        if (edgeVal > 0 && !aVisited.get(x, y))
+        if (it->first != prevPoint)
         {
-          findNeighbours(image, result, aVisited, aPointIds, outGraph, x, y, edgeVal, depth, idCounter);
-        }
+          removeEdge(graph, currentPoint, it->first);
+          graph.points.erase(graph.points.find(currentPoint));
 
-        progress.update(long(y) * image.cols + x, long(image.rows) * image.cols - 1);
+          prevPoint = currentPoint;
+          currentPoint = it->first;
+          nlist = neighbours.find(it->first)->second;
+          break;
+        }
       }
+
+      if (nlist.size() == 1)
+      {
+        graph.points.erase(graph.points.find(currentPoint));
+        ignore.insert(currentPoint);
+        break;
+      }
+    }
+  }
+
+  void removeDeadEnds(Graph& graph)
+  {
+    ProgressPrinter progress("Remove dead ends");
+
+    NeighbourMap neighbours;
+    neighbourMapFromEdges(graph.edges, neighbours);
+
+    IdSet ignorePoints;
+
+    int i = 0;
+    for (NeighbourMap::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
+    {
+      if (it->second.size() == 1 && ignorePoints.find(it->first) == ignorePoints.end())
+        removeDeadEndEdges(graph, neighbours, ignorePoints, it->first, it->second);
+
+      progress.update(i, neighbours.size() - 1);
+      i++;
     }
   }
 
   void detectLines(cv::Mat& inputImage, cv::Mat& displayImage, int depth, Graph& outGraph)
   {
-    findEntries(inputImage, displayImage, depth, outGraph);
-    cleanUpDeadEnds(outGraph);
+    ProgressPrinter progress("Detect lines");
+
+    BoolArray aVisited(inputImage.cols, inputImage.rows, false);
+    IntArray aPointIds(inputImage.cols, inputImage.rows, -1);
+    int idCounter = 0;
+
+    outGraph.boundary = BoundingBox<float>(cv::Point2f(0.0f, 0.0f), cv::Point2f(float(inputImage.cols - 1), float(inputImage.rows - 1)));
+
+    for (int y = 0; y < inputImage.rows; y++)
+    {
+      for (int x = 0; x < inputImage.cols; x++)
+      {
+        uchar edgeVal = inputImage.at<uchar>(cv::Point(x, y));
+
+        if (edgeVal > 0 && !aVisited.get(x, y))
+        {
+          findNeighbours(inputImage, displayImage, aVisited, aPointIds, outGraph, x, y, edgeVal, depth, idCounter);
+        }
+
+        progress.update(long(y) * inputImage.cols + x, long(inputImage.rows) * inputImage.cols - 1);
+      }
+    }
   }
 }
