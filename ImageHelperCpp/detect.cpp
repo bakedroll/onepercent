@@ -324,6 +324,16 @@ namespace helper
         break;
       }
     }
+
+    for (NeighbourValueList::iterator it = nlist.begin(); it != nlist.end(); ++it)
+    {
+      if (it->first == prevPoint)
+      {
+        nlist.erase(it);
+        neighbours.find(currentPoint)->second = nlist;
+        break;
+      }
+    }
   }
 
   void removeDeadEnds(Graph& graph)

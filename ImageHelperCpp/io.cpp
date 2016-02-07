@@ -56,6 +56,8 @@ namespace helper
     std::string fn(filename);
     fn += ".0.poly";
 
+    printf("Write to poly file: %s\n", fn.c_str());
+
     typedef std::map<int, int> IdMap;
 
     IdMap ids;

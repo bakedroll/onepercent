@@ -1,5 +1,6 @@
 #include "check.h"
 #include <set>
+#include "io.h"
 
 namespace helper
 {
@@ -86,11 +87,33 @@ namespace helper
     }
   }
 
-  void checkDuplicatesAndRemove(Graph& graph)
+  void removeDuplicates(Graph& graph)
   {
-    printf("checking for duplicates\n");
+    printf("check for duplicates\n");
 
     checkDuplicatePoints(graph);
     checkDuplicateEdges(graph);
+  }
+
+  void removeSinglePoints(Graph& graph)
+  {
+    printf("Check for single points\n");
+
+    NeighbourMap neighbours;
+    neighbourMapFromEdges(graph.edges, neighbours);
+
+    IdPointMap::iterator nit = graph.points.begin();
+    while (nit != graph.points.end())
+    {
+      if (neighbours.find(nit->first) == neighbours.end())
+      {
+        printf("Single point found: %d\n", nit->first);
+        nit = graph.points.erase(nit);
+      }
+      else
+      {
+        ++nit;
+      }
+    }
   }
 }
