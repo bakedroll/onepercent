@@ -43,21 +43,30 @@ namespace helper
     }
   }
 
-  void removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value)
+  bool removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value)
   {
     NeighbourMap::iterator it = neighbourMap.find(pointId);
 
     assert(it->second.size() == 2);
     assert(it->second[0].second == it->second[1].second);
-
+    
     value = it->second[0].second;
     endpoint1 = it->second[0].first;
     endpoint2 = it->second[1].first;
 
+    NeighbourMap::iterator e1it = neighbourMap.find(endpoint1);
+    NeighbourMap::iterator e2it = neighbourMap.find(endpoint2);
+
+    for (NeighbourValueList::iterator nit = e1it->second.begin(); nit != e1it->second.end(); ++nit)
+      if (nit->first == endpoint2)
+        return false;
+
     neighbourMap.erase(it);
 
-    removeNeighbourFromList(neighbourMap.find(endpoint1)->second, pointId);
-    removeNeighbourFromList(neighbourMap.find(endpoint2)->second, pointId);
+    removeNeighbourFromList(e1it->second, pointId);
+    removeNeighbourFromList(e2it->second, pointId);
+
+    return true;
   }
 
   void makeFloatFloatIdMap(Graph& graph, FloatFloatIdMap& map)

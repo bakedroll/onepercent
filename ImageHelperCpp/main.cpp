@@ -186,7 +186,7 @@ int detectLines(int argc, char** argv)
   helper::reducePoints(graph, reduce);
 
   // check for duplicates
-  helper::checkDuplicatesAndRemove(graph);
+  //helper::checkDuplicatesAndRemove(graph);
 
   printf("Write to poly file\n");
 

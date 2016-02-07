@@ -62,6 +62,7 @@ namespace helper
 
     NeighbourMap neighbourMap;
     AnglePointMap angles;
+    IdSet ignore;
 
     neighbourMapFromEdges(graph.edges, neighbourMap);
 
@@ -73,13 +74,26 @@ namespace helper
     for (int i = 0; i < nPoints; i++)
     {
       AnglePointMap::iterator firstIt = angles.begin();
+      while (firstIt != angles.end() && ignore.find(firstIt->second) != ignore.end())
+      {
+        ++firstIt;
+      }
+
+      if (firstIt == angles.end())
+        break;
 
       int pointId = firstIt->second;
 
       // remove from helper structured
       int e1, e2;
       uchar value;
-      removeNeighbourMapPoint(neighbourMap, pointId, e1, e2, value);
+      if (!removeNeighbourMapPoint(neighbourMap, pointId, e1, e2, value))
+      {
+        ignore.insert(pointId);
+        i--;
+        continue;
+      }
+
       angles.erase(firstIt);
 
       // remove from graph

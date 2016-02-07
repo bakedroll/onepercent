@@ -181,7 +181,7 @@ namespace helper
   void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);
 
   void removeNeighbourFromList(NeighbourValueList& list, int id);
-  void removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value);
+  bool removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value);
 
   void makeFloatFloatIdMap(Graph& graph, FloatFloatIdMap& map);
   void makePointTriangleMap(Graph& graph, PointTriangleMap& map);
