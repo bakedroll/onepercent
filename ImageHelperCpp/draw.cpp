@@ -49,4 +49,24 @@ namespace helper
         drawTriangle(mat, graph, tit->second.idx, scale, color);
     }
   }
+
+  void drawFilledCycles(cv::Mat& mat, Graph& graph, Cycles& cycles, float scale)
+  {
+    mat.setTo(cv::Scalar(0, 0, 0));
+
+    for (Cycles::iterator it = cycles.begin(); it != cycles.end(); ++it)
+    {
+      cv::Scalar color(rand() & 155 + 100, rand() & 155 + 100, rand() & 155 + 100);
+
+      for (TriangleMap::iterator tit = it->trianlges.begin(); tit != it->trianlges.end(); ++tit)
+      {
+        cv::Point2i points[3];
+        points[0] = graph.points.find(tit->second.idx[0])->second * scale;
+        points[1] = graph.points.find(tit->second.idx[1])->second * scale;
+        points[2] = graph.points.find(tit->second.idx[2])->second * scale;
+
+        fillConvexPoly(mat, points, 3, color);
+      }
+    }
+  }
 }
