@@ -177,18 +177,13 @@ int detectLines(int argc, char** argv)
   helper::detectLines(image, displayImage, depth, graph);
 
   // check for duplicates
-  helper::checkDuplicatesAndRemove(graph);
+  helper::removeDuplicates(graph);
 
   // remove dead ends
   helper::removeDeadEnds(graph);
 
   // reduce
   helper::reducePoints(graph, reduce);
-
-  // check for duplicates
-  //helper::checkDuplicatesAndRemove(graph);
-
-  printf("Write to poly file\n");
 
   // write to poly file and draw debug image
   helper::writePolyFile(graph, polyfile.c_str());
@@ -200,6 +195,10 @@ int detectLines(int argc, char** argv)
   // read result and draw debug image
   helper::Graph triGraph;
   helper::readGraphFiles(triGraph, polyfile.c_str(), 1);
+
+  // remove single points
+  //helper::removeSinglePoints(graph);
+
   helper::drawGraph(finalImage, triGraph, displayScale);
 
   triGraph.boundary = graph.boundary;

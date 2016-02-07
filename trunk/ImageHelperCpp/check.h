@@ -4,5 +4,6 @@
 
 namespace helper
 {
-  void checkDuplicatesAndRemove(Graph& graph);
+  void removeDuplicates(Graph& graph);
+  void removeSinglePoints(Graph& graph);
 }
