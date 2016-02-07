@@ -14,7 +14,7 @@ namespace helper
 
   private:
     std::string m_name;
-    long m_percent;
+    long long m_percent;
     clock_t m_lastUpdate;
 
     void printCurrent();

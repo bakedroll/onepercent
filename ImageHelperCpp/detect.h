@@ -5,4 +5,5 @@
 namespace helper
 {
   void detectLines(cv::Mat& inputImage, cv::Mat& displayImage, int depth, Graph& outGraph);
+  void removeDeadEnds(Graph& graph);
 }

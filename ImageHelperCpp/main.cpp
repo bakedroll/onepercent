@@ -176,10 +176,16 @@ int detectLines(int argc, char** argv)
   helper::Graph graph;
   helper::detectLines(image, displayImage, depth, graph);
 
-  // reducing points and double checking for duplicates
+  // check for duplicates
   helper::checkDuplicatesAndRemove(graph);
 
+  // remove dead ends
+  helper::removeDeadEnds(graph);
+
+  // reduce
   helper::reducePoints(graph, reduce);
+
+  // check for duplicates
   helper::checkDuplicatesAndRemove(graph);
 
   printf("Write to poly file\n");
