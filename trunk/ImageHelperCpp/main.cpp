@@ -166,6 +166,7 @@ int detectLines(int argc, char** argv)
   cv::Mat resultImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
   cv::Mat finalImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
   cv::Mat cycleImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
+  cv::Mat filledCycleImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
 
   cvtColor(image, displayImage, CV_GRAY2RGB);
 
@@ -207,6 +208,7 @@ int detectLines(int argc, char** argv)
   helper::Cycles cycles;
   helper::findCycles(triGraph, cycles, dbgCycles, displayScale);
   helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
+  helper::drawFilledCycles(filledCycleImage, triGraph, cycles, displayScale);
   
   if (!dbgimage.empty())
   {
@@ -214,10 +216,12 @@ int detectLines(int argc, char** argv)
     imshow("Result", resultImage);
     imshow("Final", finalImage);
     imshow("Cycles", cycleImage);
+    imshow("Filled cycles", filledCycleImage);
     imwrite(std::string(dbgimage) + ".steps.png", displayImage);
     imwrite(std::string(dbgimage) + ".edges.png", resultImage);
     imwrite(std::string(dbgimage) + ".triangles.png", finalImage);
     imwrite(std::string(dbgimage) + ".cycles.png", cycleImage);
+    imwrite(std::string(dbgimage) + ".filled.png", filledCycleImage);
   }
 
   return 0;
