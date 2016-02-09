@@ -5,14 +5,14 @@ using namespace osg;
 
 BinaryResource::BinaryResource()
 	: Object(),
-	  _bytes(NULL)
+	  _bytes(nullptr)
 {
 
 }
 
 BinaryResource::~BinaryResource()
 {
-	if (_bytes != NULL)
+	if (_bytes != nullptr)
 	{
 		delete[] _bytes;
 	}
@@ -47,7 +47,7 @@ char* BinaryResource::getBytes()
 
 void BinaryResource::setBytes(char* bytes)
 {
-	if (_bytes != NULL)
+	if (_bytes != nullptr)
 	{
 		delete[] _bytes;
 	}

@@ -311,12 +311,12 @@ osgGaming::StringList osgGaming::splitString(const string &s, char delim)
 string osgGaming::utf8ToLatin1(const char* in)
 {
 	string out;
-	if (in == NULL)
+	if (in == nullptr)
 	{
 		return out;
 	}
 
-	unsigned int codepoint;
+	unsigned int codepoint = 0;
 	while (*in != 0)
 	{
 		unsigned char ch = static_cast<unsigned char>(*in);

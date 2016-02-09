@@ -29,6 +29,7 @@ namespace onep
 
 		void makeEarthModel();
 		void makeCloudsModel();
+    void makeBoundariesModel();
 		void makeAtmosphericScattering(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);
 
 		osg::ref_ptr<osg::Geode> createPlanetGeode(int textureResolution);

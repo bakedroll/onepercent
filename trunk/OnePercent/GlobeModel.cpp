@@ -12,6 +12,7 @@
 #include <osgGaming/Helper.h>
 #include <osgGaming/CameraAlignedQuad.h>
 #include <osgGaming/TextureFactory.h>
+#include <osgGaming/ByteStream.h>
 
 using namespace onep;
 using namespace osg;
@@ -22,6 +23,7 @@ GlobeModel::GlobeModel(osg::ref_ptr<TransformableCameraManipulator> tcm)
 {
 	makeEarthModel();
 	makeCloudsModel();
+  makeBoundariesModel();
 	makeAtmosphericScattering(tcm);
 }
 
@@ -80,6 +82,7 @@ void GlobeModel::makeEarthModel()
 
 	_uniformSelectedCountry = new Uniform("selected_country_id", 255);
 	stateSet->addUniform(_uniformSelectedCountry);
+  //stateSet->setRenderBinDetails(0, "RenderBin");
 
 	earth->setStateSet(stateSet);
 
@@ -148,6 +151,54 @@ void GlobeModel::makeCloudsModel()
 
 	_cloudsTransform->addChild(atmosphere_geode);
 	addChild(_cloudsTransform);
+}
+
+void GlobeModel::makeBoundariesModel()
+{
+  float earthRadius = ~Property<float, Param_EarthRadiusName>();
+
+  char* bytes = ResourceManager::getInstance()->loadBinary("./GameData/data/boundaries.dat");
+  ByteStream stream(bytes);
+
+  ref_ptr<Geode> geode = new Geode();
+
+  ref_ptr<Vec3Array> vertices = new Vec3Array();
+
+  int nverts = stream.read<int>();
+  float pi2 = 2.0f * C_PI;
+  for (int i = 0; i < nverts; i++)
+  {
+    float x = stream.read<float>();
+    float y = stream.read<float>();
+    float z = stream.read<float>();
+
+    vertices->push_back(Vec3f(x, y, z));
+  }
+
+  ref_ptr<DrawElementsUInt> elements = new DrawElementsUInt(GL_LINES, 0);
+
+  int nedges = stream.read<int>();
+  for (int i = 0; i < nedges; i++)
+  {
+    elements->push_back(stream.read<int>());
+    elements->push_back(stream.read<int>());
+  }
+
+  ref_ptr<Vec4Array> colors = new Vec4Array();
+  colors->push_back(Vec4f(0.7f, 0.7f, 0.7f, 1.0f));
+
+  ref_ptr<Geometry> geo = new Geometry();
+  geo->setVertexArray(vertices);
+  geo->setColorArray(colors, Array::BIND_OVERALL);
+  geo->addPrimitiveSet(elements);
+
+  geode->addDrawable(geo);
+  addChild(geode);
+
+  //geode->getOrCreateStateSet()->setRenderBinDetails(-1, "RenderBin");
+  geode->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
+
+  ResourceManager::getInstance()->clearCacheResource("./GameData/data/boundaries.dat");
 }
 
 void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<TransformableCameraManipulator> tcm)

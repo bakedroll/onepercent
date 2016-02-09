@@ -476,7 +476,6 @@ namespace helper
 
       progress.update(results.size(), graph.edges.size());
     }
-    progress.update(1, 1);
 
     assignTriangles(graph, cycles, cycleId, results);
   }

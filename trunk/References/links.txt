@@ -1,3 +1,7 @@
+Line rendering:
+
+http://mattdesl.svbtle.com/drawing-lines-is-hard
+
 TESSELLATION:
 
 http://www.cs.cmu.edu/~quake/triangle.html

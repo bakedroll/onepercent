@@ -78,7 +78,7 @@ namespace helper
   typedef std::pair<Edge, uchar> EdgeValue;
   typedef std::map<int, cv::Point2f> IdPointMap;
   typedef std::vector<EdgeValue> EdgeValueList;
-  typedef std::map<int, int> PointEdgesCountMap;
+  typedef std::map<int, int> IdMap;
   typedef std::map<int, Triangle> TriangleMap;
   typedef std::pair<int, uchar> NeighbourValue;
   typedef std::vector<NeighbourValue> NeighbourValueList;
