@@ -1,7 +1,6 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <iostream>
 
 #include "detect.h"
 #include "reduce.h"
@@ -209,6 +208,8 @@ int detectLines(int argc, char** argv)
   helper::findCycles(triGraph, cycles, dbgCycles, displayScale);
   helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
   helper::drawFilledCycles(filledCycleImage, triGraph, cycles, displayScale);
+
+  helper::writeBoundariesFile(triGraph, "../OnePercent/GameData/data/boundaries.dat");
   
   if (!dbgimage.empty())
   {
@@ -230,23 +231,7 @@ int detectLines(int argc, char** argv)
 int main(int argc, char** argv)
 {
   int result;
-  int mode = atoi(argv[1]);
-
-  int width = 300;
-  int height = 300;
-
-  cv::Mat display(width, height, CV_8UC3);
-  display.setTo(cv::Vec3b(0, 0, 0));
-  
-  if (mode == 0)
-  {
-    result = detectLines(argc, argv);
-  }
-  else
-  {
-    std::cout << "Error: Wrong mode." << std::endl;
-    result = -1;
-  }
+  result = detectLines(argc, argv);
 
   cv::waitKey(0);
   return result;

@@ -39,18 +39,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\SDK\opencv-3.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\SDK\opencv-3.0.0\lib\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)osgGaming\include;E:\SDK\opencv-3.0.0\include;E:\SDK\OpenSceneGraph-3.2.1\build\x86\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\osgGaming\lib;E:\SDK\OpenSceneGraph-3.2.1\build\x86\lib;E:\SDK\opencv-3.0.0\lib\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opencv_core300d.lib;opencv_highgui300d.lib;opencv_imgcodecs300d.lib;opencv_imgproc300d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_core300d.lib;opencv_highgui300d.lib;opencv_imgcodecs300d.lib;opencv_imgproc300d.lib;osgd.lib;osgViewerd.lib;osgUtild.lib;osgGAd.lib;osgDBd.lib;osgTextd.lib;osgPPUd.lib;osgGamingd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
