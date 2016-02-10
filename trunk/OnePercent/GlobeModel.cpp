@@ -13,6 +13,7 @@
 #include <osgGaming/CameraAlignedQuad.h>
 #include <osgGaming/TextureFactory.h>
 #include <osgGaming/ByteStream.h>
+#include <osg/Point>
 
 using namespace onep;
 using namespace osg;
@@ -155,8 +156,6 @@ void GlobeModel::makeCloudsModel()
 
 void GlobeModel::makeBoundariesModel()
 {
-  float earthRadius = ~Property<float, Param_EarthRadiusName>();
-
   char* bytes = ResourceManager::getInstance()->loadBinary("./GameData/data/boundaries.dat");
   ByteStream stream(bytes);
 
@@ -165,7 +164,6 @@ void GlobeModel::makeBoundariesModel()
   ref_ptr<Vec3Array> vertices = new Vec3Array();
 
   int nverts = stream.read<int>();
-  float pi2 = 2.0f * C_PI;
   for (int i = 0; i < nverts; i++)
   {
     float x = stream.read<float>();
@@ -184,15 +182,26 @@ void GlobeModel::makeBoundariesModel()
     elements->push_back(stream.read<int>());
   }
 
-  ref_ptr<Vec4Array> colors = new Vec4Array();
-  colors->push_back(Vec4f(0.7f, 0.7f, 0.7f, 1.0f));
+  ref_ptr<Vec4Array> white = new Vec4Array();
+  white->push_back(Vec4f(0.7f, 0.7f, 0.7f, 1.0f));
 
-  ref_ptr<Geometry> geo = new Geometry();
-  geo->setVertexArray(vertices);
-  geo->setColorArray(colors, Array::BIND_OVERALL);
-  geo->addPrimitiveSet(elements);
+  ref_ptr<Vec4Array> red = new Vec4Array();
+  red->push_back(Vec4f(1.0f, 0.0f, 0.0f, 1.0f));
 
-  geode->addDrawable(geo);
+  ref_ptr<Geometry> geo_lines = new Geometry();
+  geo_lines->setVertexArray(vertices);
+  geo_lines->setColorArray(white, Array::BIND_OVERALL);
+  geo_lines->addPrimitiveSet(elements);
+
+  ref_ptr<Geometry> geo_points = new Geometry();
+  geo_points->setVertexArray(vertices);
+  geo_points->setColorArray(red, Array::BIND_OVERALL);
+  geo_points->addPrimitiveSet(new DrawArrays(GL_POINTS, 0, vertices->size()));
+
+  geo_points->getOrCreateStateSet()->setAttribute(new Point(5.0f), StateAttribute::ON);
+
+  geode->addDrawable(geo_lines);
+  geode->addDrawable(geo_points);
   addChild(geode);
 
   //geode->getOrCreateStateSet()->setRenderBinDetails(-1, "RenderBin");

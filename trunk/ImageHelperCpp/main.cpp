@@ -8,6 +8,7 @@
 #include "draw.h"
 #include "check.h"
 #include "findcycles.h"
+#include "mesh.h"
 
 typedef std::vector<std::string> StringList;
 typedef std::map<std::string, StringList> ArgumentMap;
@@ -122,9 +123,11 @@ int detectLines(int argc, char** argv)
   std::string dbgimage;
   std::string polyfile;
   std::string trianglecommand;
+  std::string outputFilename;
   float displayScale, reduce;
   int depth, minAngle;
   bool useThres, dbgCycles;
+  float thickness;
 
   try
   {
@@ -132,12 +135,14 @@ int detectLines(int argc, char** argv)
     dbgimage = getStringArgument(arguments, "D", false);
     polyfile = getStringArgument(arguments, "p", true);
     trianglecommand = getStringArgument(arguments, "t", true);
+    outputFilename = getStringArgument(arguments, "o", true);
     displayScale = getFloatArgument(arguments, "s", 1.0f);
     reduce = getFloatArgument(arguments, "r", 0.7f);
     depth = getIntArgument(arguments, "d", 10);
     minAngle = getIntArgument(arguments, "a", 15);
     useThres = getBoolArgument(arguments, "T");
     dbgCycles = getBoolArgument(arguments, "C");
+    thickness = getFloatArgument(arguments, "l", 0.2f);
   }
   catch (std::exception& e)
   {
@@ -209,7 +214,10 @@ int detectLines(int argc, char** argv)
   helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
   helper::drawFilledCycles(filledCycleImage, triGraph, cycles, displayScale);
 
-  helper::writeBoundariesFile(triGraph, "../OnePercent/GameData/data/boundaries.dat");
+  // make mesh
+  helper::SphericalMesh mesh;
+  helper::makeSphericalMesh(triGraph, mesh, thickness);
+  helper::writeBoundariesFile(mesh, outputFilename.c_str());
   
   if (!dbgimage.empty())
   {

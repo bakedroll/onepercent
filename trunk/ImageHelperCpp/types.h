@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <osg/Vec3f>
 
 namespace helper
 {
@@ -77,6 +78,7 @@ namespace helper
   typedef std::pair<int, int> Edge;
   typedef std::pair<Edge, uchar> EdgeValue;
   typedef std::map<int, cv::Point2f> IdPointMap;
+  typedef std::map<int, osg::Vec3f> IdPoint3DMap;
   typedef std::vector<EdgeValue> EdgeValueList;
   typedef std::map<int, int> IdMap;
   typedef std::map<int, Triangle> TriangleMap;
@@ -177,6 +179,12 @@ namespace helper
     TriangleMap triangles;
     BoundingBox<float> boundary;
   } Graph;
+
+  typedef struct _sphericalMesh
+  {
+    IdPoint3DMap points;
+    EdgeValueList edges;
+  } SphericalMesh;
 
   void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);
 
