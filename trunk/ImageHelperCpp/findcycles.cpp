@@ -71,31 +71,6 @@ namespace helper
     }
   }
 
-  double angleBetween(cv::Vec2f v1, cv::Vec2f v2)
-  {
-    double dot = v1.val[0] * v2.val[0] + v1.val[1] * v2.val[1];
-    double det = v1.val[0] * v2.val[1] - v1.val[1] * v2.val[0];
-
-    double angle = atan2(det, dot);
-    if (angle < 0)
-      angle += 2 * CV_PI;
-
-    return angle;
-  }
-
-  void makeAnglePointMap(Graph& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles, IdSet& visited)
-  {
-    cv::Vec2f p1;
-    if (p1Id < 0)
-      p1 = cv::Vec2f(-1.0f, 0.0f);
-    else
-      p1 = graph.points[p1Id] - graph.points[originId];
-
-    for (NeighbourValueList::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
-      if (it->first != p1Id)
-        angles.insert(AnglePointIdValueMap::value_type(angleBetween(p1, graph.points[it->first] - graph.points[originId]), PointIdValue(it->first, it->second)));
-  }
-
   void getLeftRightCycleId(CycleStageList& results, int p1, int p2, int& leftId, int& rightId)
   {
     for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
@@ -281,7 +256,7 @@ namespace helper
 
         // merge
         AnglePointIdValueMap pangles;
-        makeAnglePointMap(graph, nit->second, ait->second.first, originId, pangles, visited);
+        makeAnglePointMap(graph, nit->second, ait->second.first, originId, pangles);
 
         assert(pangles.size() > 0);
 
@@ -370,7 +345,7 @@ namespace helper
     QuadTreeNode<int> quadtree(graph.boundary, 10);
 
     int i = 0;
-    int max = graph.triangles.size() - 1;
+    int max = graph.triangles.size();
     for (TriangleMap::iterator it = graph.triangles.begin(); it != graph.triangles.end(); ++it)
     {
       cv::Point2f p1 = graph.points.find(it->second.idx[0])->second;
@@ -378,9 +353,9 @@ namespace helper
       cv::Point2f p3 = graph.points.find(it->second.idx[2])->second;
 
       quadtree.insert(QuadTreeNodeData<int>(cv::Point2f((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f), it->first));
-      qprogress.update(i, max);
 
       i++;
+      qprogress.update(i, max);
     }
 
     ProgressPrinter aprogress("Assign triangles to cycles");
@@ -437,7 +412,7 @@ namespace helper
       visited.insert(nit->first);
 
       AnglePointIdValueMap angles;
-      makeAnglePointMap(graph, nit->second, nit->first, -1, angles, visited);
+      makeAnglePointMap(graph, nit->second, nit->first, -1, angles);
 
       CycleStageList currentStage;
       IdSet processed;
@@ -455,7 +430,7 @@ namespace helper
           NeighbourValueList nextNeighbours = neighbourMap.find(sit->directedEdge.second)->second;
 
           AnglePointIdValueMap nextAngles;
-          makeAnglePointMap(graph, nextNeighbours, sit->directedEdge.second, sit->directedEdge.first, nextAngles, visited);
+          makeAnglePointMap(graph, nextNeighbours, sit->directedEdge.second, sit->directedEdge.first, nextAngles);
           makeNextStages(
             graph,
             nextAngles,

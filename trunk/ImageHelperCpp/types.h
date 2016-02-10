@@ -191,8 +191,10 @@ namespace helper
   void removeNeighbourFromList(NeighbourValueList& list, int id);
   bool removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value);
 
-  void makeFloatFloatIdMap(Graph& graph, FloatFloatIdMap& map);
+  void makeAnglePointMap(Graph& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles);
   void makePointTriangleMap(Graph& graph, PointTriangleMap& map);
 
   void makePointList(IdPointMap& points, IdSet& ids, PointListf& result);
+
+  void removeUnusedPoints(IdPoint3DMap& points, EdgeValueList& edges, IdPoint3DMap& results);
 }

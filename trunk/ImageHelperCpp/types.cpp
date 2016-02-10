@@ -69,26 +69,29 @@ namespace helper
     return true;
   }
 
-  void makeFloatFloatIdMap(Graph& graph, FloatFloatIdMap& map)
+  double angleBetween(cv::Vec2f v1, cv::Vec2f v2)
   {
-    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
-    {
-      FloatFloatIdMap::iterator itx = map.find(it->second.x);
-      if (itx != map.end())
-      {
-        FloatIdMap::iterator ity = itx->second.find(it->second.y);
-        if (ity != itx->second.end())
-          continue;
+    double dot = v1.val[0] * v2.val[0] + v1.val[1] * v2.val[1];
+    double det = v1.val[0] * v2.val[1] - v1.val[1] * v2.val[0];
 
-        itx->second.insert(FloatIdMap::value_type(it->second.y, it->first));
-      }
-      else
-      {
-        FloatIdMap fmap;
-        fmap.insert(FloatIdMap::value_type(it->second.y, it->first));
-        map.insert(FloatFloatIdMap::value_type(it->second.x, fmap));
-      }
-    }
+    double angle = atan2(det, dot);
+    if (angle < 0)
+      angle += 2 * CV_PI;
+
+    return angle;
+  }
+
+  void makeAnglePointMap(Graph& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles)
+  {
+    cv::Vec2f p1;
+    if (p1Id < 0)
+      p1 = cv::Vec2f(-1.0f, 0.0f);
+    else
+      p1 = graph.points[p1Id] - graph.points[originId];
+
+    for (NeighbourValueList::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
+      if (it->first != p1Id)
+        angles.insert(AnglePointIdValueMap::value_type(angleBetween(p1, graph.points[it->first] - graph.points[originId]), PointIdValue(it->first, it->second)));
   }
 
   void makePointTriangleMap(Graph& graph, PointTriangleMap& map)
@@ -116,5 +119,21 @@ namespace helper
   {
     for (IdSet::iterator it = ids.begin(); it != ids.end(); ++it)
       result.push_back(points.find(*it)->second);
+  }
+
+  void removeUnusedPoints(IdPoint3DMap& points, EdgeValueList& edges, IdPoint3DMap& results)
+  {
+    IdSet ids;
+    for (EdgeValueList::iterator it = edges.begin(); it != edges.end(); ++it)
+    {
+      if (ids.find(it->first.first) == ids.end())
+        ids.insert(it->first.first);
+
+      if (ids.find(it->first.second) == ids.end())
+        ids.insert(it->first.second);
+    }
+
+    for (IdSet::iterator it = ids.begin(); it != ids.end(); ++it)
+      results.insert(IdPoint3DMap::value_type(*it, points.find(*it)->second));
   }
 }

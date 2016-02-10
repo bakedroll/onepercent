@@ -351,8 +351,8 @@ namespace helper
       if (it->second.size() == 1 && ignorePoints.find(it->first) == ignorePoints.end())
         removeDeadEndEdges(graph, neighbours, ignorePoints, it->first, it->second);
 
-      progress.update(i, neighbours.size() - 1);
       i++;
+      progress.update(i, neighbours.size());
     }
   }
 

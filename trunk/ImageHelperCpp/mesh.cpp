@@ -1,8 +1,39 @@
 #include "mesh.h"
 #include <osgGaming/Helper.h>
+#include "io.h"
 
 namespace helper
 {
+  typedef struct _direction
+  {
+    _direction(int p1, int mid, int p2)
+      : m_p1(p1)
+      , m_mid(mid)
+      , m_p2(p2)
+    {
+      
+    }
+
+    int m_p1;
+    int m_mid;
+    int m_p2;
+
+    bool operator<(const _direction& other) const
+    {
+      if (m_p1 == other.m_p1)
+      {
+        if (m_mid == other.m_mid)
+          return m_p2 < other.m_p2;
+
+        return m_mid < other.m_mid;
+      }
+
+      return m_p1 < other.m_p1;
+    }
+  } Direction;
+
+  typedef std::map<Direction, int> DirectionPointMap;
+
   void makeCartesianPoints(Graph& graph, IdPoint3DMap& points, float radius)
   {
     float width = graph.boundary.width();
@@ -19,8 +50,15 @@ namespace helper
     }
   }
 
-  int getPoint(IdPoint3DMap& points, int p1id, int midid, int p2id, int& id, float thickness)
+  int getPoint(IdPoint3DMap& points, DirectionPointMap& directions, int p1id, int midid, int p2id, int& id, float thickness)
   {
+    DirectionPointMap::iterator it = directions.find(Direction(p1id, midid, p2id));
+    if (it != directions.end())
+    {
+      //assert(p1id == it->first.m_p1 && p2id == it->first.m_p2 && midid == it->first.m_mid);
+      return it->second;
+    }
+
     osg::Vec3f p1 = points.find(p1id)->second;
     osg::Vec3f mid = points.find(midid)->second;
     osg::Vec3f p2 = points.find(p2id)->second;
@@ -44,18 +82,59 @@ namespace helper
     l.normalize();
     l = l * (thickness / sin(a));
 
-    points.insert(IdPoint3DMap::value_type(++id, mid + l));
-    points.insert(IdPoint3DMap::value_type(++id, mid - l));
+    //points.insert(IdPoint3DMap::value_type(++id, mid + l));
+    //directions.insert(DirectionPointMap::value_type(Direction(p2id, midid, p1id), id));
 
-    return -1;
+    points.insert(IdPoint3DMap::value_type(++id, mid - l));
+    directions.insert(DirectionPointMap::value_type(Direction(p1id, midid, p2id), id));
+
+    return id;
+  }
+
+  void getPointIds(NeighbourMap& neighbours, DirectionPointMap& directions, SphericalMesh& mesh, Graph& graph, int p1id, int midid, int& l, int & r, int& id, float thickness)
+  {
+    NeighbourMap::iterator it = neighbours.find(midid);
+    assert(it->second.size() > 1);
+
+    int p2lid = -1;
+    int p2rid = -1;
+    if (it->second.size() == 2)
+    {
+      for (NeighbourValueList::iterator nit = it->second.begin(); nit != it->second.end(); ++nit)
+      {
+        if (nit->first != p1id)
+        {
+          p2lid = nit->first;
+          p2rid = nit->first;
+          break;
+        }
+      }
+    }
+    else
+    {
+      AnglePointIdValueMap angles;
+      makeAnglePointMap(graph, it->second, midid, p1id, angles);
+
+      p2lid = angles.begin()->second.first;
+      p2rid = angles.rbegin()->second.first;
+    }
+
+    l = getPoint(mesh.points, directions, p1id, midid, p2lid, id, thickness);
+    r = getPoint(mesh.points, directions, p2rid, midid, p1id, id, thickness);
   }
 
   void makeSphericalMesh(Graph& graph, SphericalMesh& mesh, float thickness)
   {
-    printf("Make spherical mesh");
+    ProgressPrinter progress("Make spherical mesh");
+
+    DirectionPointMap directions;
 
     makeCartesianPoints(graph, mesh.points, 6.371f * 1.1f); // 1.001f
     mesh.edges = graph.edges;
+
+    IdPoint3DMap removedPoints;
+    removeUnusedPoints(mesh.points, mesh.edges, removedPoints);
+    mesh.points = removedPoints;
 
     // get current id
     int id = -1;
@@ -64,13 +143,17 @@ namespace helper
 
     NeighbourMap neighbours;
     neighbourMapFromEdges(mesh.edges, neighbours);
-
-    for (NeighbourMap::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
+    
+    int i = 0;
+    int max = mesh.edges.size();
+    for (EdgeValueList::iterator it = mesh.edges.begin(); it != mesh.edges.end(); ++it)
     {
-      if (it->second.size() == 2)
-      {
-        getPoint(mesh.points, it->second[0].first, it->first, it->second[1].first, id, thickness);
-      }
+      int p1, p2, p3, p4;
+      getPointIds(neighbours, directions, mesh, graph, it->first.second, it->first.first, p1, p2, id, thickness);
+      getPointIds(neighbours, directions, mesh, graph, it->first.first, it->first.second, p3, p4, id, thickness);
+
+      i++;
+      progress.update(i, max);
     }
   }
 }
