@@ -142,7 +142,7 @@ int detectLines(int argc, char** argv)
     minAngle = getIntArgument(arguments, "a", 15);
     useThres = getBoolArgument(arguments, "T");
     dbgCycles = getBoolArgument(arguments, "C");
-    thickness = getFloatArgument(arguments, "l", 0.2f);
+    thickness = getFloatArgument(arguments, "l", 0.1f);
   }
   catch (std::exception& e)
   {
