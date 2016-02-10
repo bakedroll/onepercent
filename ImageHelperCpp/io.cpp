@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <stdio.h>
-#include <osgGaming/Helper.h>
 
 namespace helper
 {
@@ -105,41 +104,32 @@ namespace helper
     fs.close();
   }
 
-  void writeBoundariesFile(Graph& graph, const char* filename)
+  void writeBoundariesFile(SphericalMesh& mesh, const char* filename)
   {
+    printf("Write to boundary file: %s\n", filename);
+
     FILE * file;
     file = fopen(filename, "w+b");
     if (!file)
       return;
 
-    float width = graph.boundary.width();
-    float height = graph.boundary.height();
-
-    int psize = int(graph.points.size());
-    writeFile<int>(file, psize);
-
     IdMap ids;
     int i = 0;
-    float pi2 = 2.0f * C_PI;
-    float earthRadius = 6.371f;
-    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+    int psize = int(mesh.points.size());
+    writeFile<int>(file, psize);
+    for (IdPoint3DMap::iterator it = mesh.points.begin(); it != mesh.points.end(); ++it)
     {
-      float x = it->second.x / width;
-      float y = it->second.y / height;
-
-      osg::Vec3f vec = osgGaming::getCartesianFromPolar(osg::Vec2f(-y * C_PI + 0.5f * C_PI, x * pi2 - C_PI)) * earthRadius * 1.001f;
-
-      writeFile<float>(file, vec.x());
-      writeFile<float>(file, vec.y());
-      writeFile<float>(file, vec.z());
+      writeFile<float>(file, it->second.x());
+      writeFile<float>(file, it->second.y());
+      writeFile<float>(file, it->second.z());
 
       ids.insert(IdMap::value_type(it->first, i));
       i++;
     }
 
-    int esize = int(graph.edges.size());
+    int esize = int(mesh.edges.size());
     writeFile<int>(file, esize);
-    for (EdgeValueList::iterator it = graph.edges.begin(); it != graph.edges.end(); ++it)
+    for (EdgeValueList::iterator it = mesh.edges.begin(); it != mesh.edges.end(); ++it)
     {
       writeFile<int>(file, ids.find(it->first.first)->second);
       writeFile<int>(file, ids.find(it->first.second)->second);

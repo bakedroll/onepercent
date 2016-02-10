@@ -1,2 +1,2 @@
--i ../Resources/earth_textures/img3.png -d 10 -s 3.0 -r 0.7 -p ../Resources/TEMP/countries -t ..\Resources\triangle\bin\triangle.exe -a 15 -D ../Resources/TEMP/dbg
--i ../Resources/earth_textures/boundaries.png -d 10 -s 1.0 -r 0.7 -p ../Resources/TEMP/countries -t ..\Resources\triangle\bin\triangle.exe -a 15 -D ../Resources/TEMP/dbg
+-i ../Resources/earth_textures/img3.png -d 10 -s 3.0 -r 0.7 -p ../Resources/TEMP/countries -t ..\Resources\triangle\bin\triangle.exe -a 15 -D ../Resources/TEMP/dbg -o ../OnePercent/GameData/data/boundaries.dat
+-i ../Resources/earth_textures/boundaries.png -d 10 -s 1.0 -r 0.7 -p ../Resources/TEMP/countries -t ..\Resources\triangle\bin\triangle.exe -a 15 -D ../Resources/TEMP/dbg -o ../OnePercent/GameData/data/boundaries.dat
