@@ -67,6 +67,19 @@ namespace helper
     int idx[3];
   } Triangle;
 
+  typedef struct _quad
+  {
+    _quad(int p1, int p2, int p3, int p4)
+    {
+      idx[0] = p1;
+      idx[1] = p2;
+      idx[2] = p3;
+      idx[3] = p4;
+    }
+
+    int idx[4];
+  } Quad;
+
   typedef Array<bool> BoolArray;
   typedef Array<int> IntArray;
   typedef std::pair<cv::Point2i, uchar> PointValue;
@@ -82,6 +95,7 @@ namespace helper
   typedef std::vector<EdgeValue> EdgeValueList;
   typedef std::map<int, int> IdMap;
   typedef std::map<int, Triangle> TriangleMap;
+  typedef std::vector<Quad> QuadList;
   typedef std::pair<int, uchar> NeighbourValue;
   typedef std::vector<NeighbourValue> NeighbourValueList;
   typedef std::map<int, NeighbourValueList> NeighbourMap;
@@ -184,6 +198,8 @@ namespace helper
   {
     IdPoint3DMap points;
     EdgeValueList edges;
+    QuadList quads;
+    int nInnerPoints;
   } SphericalMesh;
 
   void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);

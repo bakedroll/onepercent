@@ -173,17 +173,34 @@ void GlobeModel::makeBoundariesModel()
     vertices->push_back(Vec3f(x, y, z));
   }
 
-  ref_ptr<DrawElementsUInt> elements = new DrawElementsUInt(GL_LINES, 0);
+  int nInnerPoints = stream.read<int>();
+  ref_ptr<Vec2Array> texcoords = new Vec2Array();
+  for (int i = 0; i < nInnerPoints; i++)
+    texcoords->push_back(Vec2f(1.0f, 0.0f));
+
+  for (int i = 0; i < (nverts - nInnerPoints); i++)
+    texcoords->push_back(Vec2f(0.0f, 0.0f));
+
+  ref_ptr<DrawElementsUInt> lines = new DrawElementsUInt(GL_LINES, 0);
 
   int nedges = stream.read<int>();
   for (int i = 0; i < nedges; i++)
   {
-    elements->push_back(stream.read<int>());
-    elements->push_back(stream.read<int>());
+    lines->push_back(stream.read<int>());
+    lines->push_back(stream.read<int>());
+  }
+
+  ref_ptr<DrawElementsUInt> quads = new DrawElementsUInt(GL_QUADS, 0);
+
+  int nquads = stream.read<int>();
+  for (int i = 0; i < nquads; i++)
+  {
+    for (int j = 0; j < 4; j++)
+      quads->push_back(stream.read<int>());
   }
 
   ref_ptr<Vec4Array> white = new Vec4Array();
-  white->push_back(Vec4f(0.7f, 0.7f, 0.7f, 1.0f));
+  white->push_back(Vec4f(1.0f, 1.0f, 1.0f, 1.0f));
 
   ref_ptr<Vec4Array> red = new Vec4Array();
   red->push_back(Vec4f(1.0f, 0.0f, 0.0f, 1.0f));
@@ -191,21 +208,41 @@ void GlobeModel::makeBoundariesModel()
   ref_ptr<Geometry> geo_lines = new Geometry();
   geo_lines->setVertexArray(vertices);
   geo_lines->setColorArray(white, Array::BIND_OVERALL);
-  geo_lines->addPrimitiveSet(elements);
+  geo_lines->addPrimitiveSet(lines);
 
   ref_ptr<Geometry> geo_points = new Geometry();
   geo_points->setVertexArray(vertices);
-  geo_points->setColorArray(red, Array::BIND_OVERALL);
+  //geo_points->setColorArray(red, Array::BIND_OVERALL);
   geo_points->addPrimitiveSet(new DrawArrays(GL_POINTS, 0, vertices->size()));
+
+  ref_ptr<Geometry> geo_quads = new Geometry();
+  geo_quads->setVertexArray(vertices);
+  geo_quads->setTexCoordArray(0, texcoords, Array::BIND_PER_VERTEX);
+  //geo_quads->setColorArray(white, Array::BIND_OVERALL);
+  geo_quads->addPrimitiveSet(quads);
 
   geo_points->getOrCreateStateSet()->setAttribute(new Point(5.0f), StateAttribute::ON);
 
-  geode->addDrawable(geo_lines);
-  geode->addDrawable(geo_points);
+  //geode->addDrawable(geo_lines);
+  //geode->addDrawable(geo_points);
+  geode->addDrawable(geo_quads);
   addChild(geode);
+
+  ref_ptr<Program> program = new Program();
+  //ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/boundaries.vert", Shader::VERTEX);
+  ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/boundaries.frag", Shader::FRAGMENT);
+
+  //program->addShader(vert_shader);
+  program->addShader(frag_shader);
 
   //geode->getOrCreateStateSet()->setRenderBinDetails(-1, "RenderBin");
   geode->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
+  geode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
+  geode->getOrCreateStateSet()->setAttribute(program, StateAttribute::ON);
+  geode->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
+  geode->getOrCreateStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
+  geode->getOrCreateStateSet()->setRenderBinDetails(1, "RenderBin");
+
 
   ResourceManager::getInstance()->clearCacheResource("./GameData/data/boundaries.dat");
 }

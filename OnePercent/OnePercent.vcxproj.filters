@@ -129,5 +129,8 @@
     <None Include="GameData\shaders\star.vert">
       <Filter>shader</Filter>
     </None>
+    <None Include="GameData\shaders\boundaries.frag">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
