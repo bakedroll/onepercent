@@ -127,12 +127,22 @@ namespace helper
       i++;
     }
 
+    writeFile<int>(file, mesh.nInnerPoints);
+
     int esize = int(mesh.edges.size());
     writeFile<int>(file, esize);
     for (EdgeValueList::iterator it = mesh.edges.begin(); it != mesh.edges.end(); ++it)
     {
       writeFile<int>(file, ids.find(it->first.first)->second);
       writeFile<int>(file, ids.find(it->first.second)->second);
+    }
+
+    int qsize = int(mesh.quads.size());
+    writeFile<int>(file, qsize);
+    for (QuadList::iterator it = mesh.quads.begin(); it != mesh.quads.end(); ++it)
+    {
+      for (int i = 0; i < 4; i++)
+        writeFile<int>(file, ids.find(it->idx[i])->second);
     }
 
     fclose(file);

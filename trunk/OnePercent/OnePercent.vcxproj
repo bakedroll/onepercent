@@ -111,6 +111,7 @@
   <ItemGroup>
     <None Include="GameData\shaders\atmosphere.frag" />
     <None Include="GameData\shaders\atmosphere.vert" />
+    <None Include="GameData\shaders\boundaries.frag" />
     <None Include="GameData\shaders\clouds.frag" />
     <None Include="GameData\shaders\clouds.vert" />
     <None Include="GameData\shaders\globe.frag" />
