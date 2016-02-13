@@ -164,7 +164,7 @@ namespace helper
 
     cv::Point_<T> center() const
     {
-      return m_min + m_max / static_cast<T>(2);
+      return m_min + ((m_max - m_min) / static_cast<T>(2));
     }
 
   private:

@@ -374,7 +374,8 @@ namespace helper
       {
         addCycleTriangles(graph, quadtree, trianglesVisited, cycle);
 
-        cycles.push_back(cycle);
+        if (cycle.trianlges.size() > 0)
+          cycles.push_back(cycle);
       }
 
       aprogress.update(cId, cycleId - 1);

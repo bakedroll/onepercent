@@ -69,4 +69,34 @@ namespace helper
       }
     }
   }
+
+  void insertPoint(PointListf& points, IdSet& ids, Graph& graph, int id)
+  {
+    if (ids.find(id) == ids.end())
+    {
+      ids.insert(id);
+      points.push_back(graph.points.find(id)->second);
+    }
+  }
+
+  void drawCycleNumbers(cv::Mat& mat, Graph& graph, Cycles& cycles, float scale)
+  {
+    cv::Scalar color(0, 0, 255);
+
+    int i = 0;
+    for (Cycles::iterator it = cycles.begin(); it != cycles.end(); ++it)
+    {
+      PointListf points;
+      IdSet ids;
+      for (EdgeValueList::iterator eit = it->edges.begin(); eit != it->edges.end(); ++eit)
+      {
+        insertPoint(points, ids, graph, eit->first.first);
+        insertPoint(points, ids, graph, eit->first.second);
+      }
+
+      BoundingBox<float> bb(points);      
+      cv::putText(mat, std::to_string(i), bb.center() * scale, cv::FONT_HERSHEY_DUPLEX, 0.5, color);
+      i++;
+    }
+  }
 }
