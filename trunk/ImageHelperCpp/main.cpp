@@ -213,6 +213,7 @@ int detectLines(int argc, char** argv)
   helper::findCycles(triGraph, cycles, dbgCycles, displayScale);
   helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
   helper::drawFilledCycles(filledCycleImage, triGraph, cycles, displayScale);
+  helper::drawCycleNumbers(filledCycleImage, triGraph, cycles, displayScale);
 
   // make mesh
   helper::SphericalMesh mesh;
