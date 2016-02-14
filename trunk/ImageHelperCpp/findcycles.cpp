@@ -57,6 +57,8 @@ namespace helper
     makePointList(graph.points, boundingPoints, points);
     BoundingBox<float> bb(points);
 
+    cycle.boundingbox = bb;
+
     QuadTreeNode<int>::Data trianglesCheck;
     quadtree.gatherDataWithinBoundary(bb, trianglesCheck);
 

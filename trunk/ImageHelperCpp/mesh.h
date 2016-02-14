@@ -3,5 +3,5 @@
 
 namespace helper
 {
-  void makeSphericalMesh(Graph& graph, SphericalMesh& mesh, float thickness);
+  void makeSphericalMesh(Graph& graph, SphericalMesh& mesh, float thickness, float shift);
 }

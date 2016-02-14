@@ -34,7 +34,7 @@ namespace helper
 
   typedef std::map<Direction, int> DirectionPointMap;
 
-  void makeCartesianPoints(Graph& graph, IdPoint3DMap& points, float radius)
+  void makeCartesianPoints(Graph& graph, IdPoint3DMap& points, float radius, float shift)
   {
     float width = graph.boundary.width();
     float height = graph.boundary.height();
@@ -42,7 +42,7 @@ namespace helper
     float pi2 = 2.0f * C_PI;
     for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
     {
-      float x = it->second.x / width;
+      float x = (it->second.x + shift) / width;
       float y = it->second.y / height;
 
       osg::Vec3f vec = osgGaming::getCartesianFromPolar(osg::Vec2f(-y * C_PI + 0.5f * C_PI, x * pi2 - C_PI)) * radius;
@@ -123,13 +123,13 @@ namespace helper
     return false;
   }
 
-  void makeSphericalMesh(Graph& graph, SphericalMesh& mesh, float thickness)
+  void makeSphericalMesh(Graph& graph, SphericalMesh& mesh, float thickness, float shift)
   {
     ProgressPrinter progress("Make spherical mesh");
 
     DirectionPointMap directions;
 
-    makeCartesianPoints(graph, mesh.points, 6.371f); // 1.001f
+    makeCartesianPoints(graph, mesh.points, 6.371f, shift); // 1.001f
     mesh.edges = graph.edges;
 
     IdPoint3DMap removedPoints;

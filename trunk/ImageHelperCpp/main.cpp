@@ -128,6 +128,7 @@ int detectLines(int argc, char** argv)
   int depth, minAngle;
   bool useThres, dbgCycles;
   float thickness;
+  float shift;
 
   try
   {
@@ -143,6 +144,7 @@ int detectLines(int argc, char** argv)
     useThres = getBoolArgument(arguments, "T");
     dbgCycles = getBoolArgument(arguments, "C");
     thickness = getFloatArgument(arguments, "l", 0.005f);
+    shift = getFloatArgument(arguments, "S", 255.0f);
   }
   catch (std::exception& e)
   {
@@ -217,7 +219,7 @@ int detectLines(int argc, char** argv)
 
   // make mesh
   helper::SphericalMesh mesh;
-  helper::makeSphericalMesh(triGraph, mesh, thickness);
+  helper::makeSphericalMesh(triGraph, mesh, thickness, shift);
   helper::writeBoundariesFile(mesh, outputFilename.c_str());
   
   if (!dbgimage.empty())
