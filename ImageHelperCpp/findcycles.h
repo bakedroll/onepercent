@@ -8,6 +8,7 @@ namespace helper
   {
     EdgeValueList edges;
     TriangleMap trianlges;
+    BoundingBox<float> boundingbox;
   } Cycle;
 
   typedef std::vector<Cycle> Cycles;
