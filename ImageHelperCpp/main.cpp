@@ -9,6 +9,7 @@
 #include "check.h"
 #include "findcycles.h"
 #include "mesh.h"
+#include "countries.h"
 
 typedef std::vector<std::string> StringList;
 typedef std::map<std::string, StringList> ArgumentMap;
@@ -124,11 +125,14 @@ int detectLines(int argc, char** argv)
   std::string polyfile;
   std::string trianglecommand;
   std::string outputFilename;
+  std::string countriesTableFilename;
+  std::string countriesFilename;
   float displayScale, reduce;
   int depth, minAngle;
   bool useThres, dbgCycles;
   float thickness;
   float shift;
+  float countriesMapScale;
 
   try
   {
@@ -137,6 +141,8 @@ int detectLines(int argc, char** argv)
     polyfile = getStringArgument(arguments, "p", true);
     trianglecommand = getStringArgument(arguments, "t", true);
     outputFilename = getStringArgument(arguments, "o", true);
+    countriesTableFilename = getStringArgument(arguments, "c", false);
+    countriesFilename = getStringArgument(arguments, "co", false);
     displayScale = getFloatArgument(arguments, "s", 1.0f);
     reduce = getFloatArgument(arguments, "r", 0.7f);
     depth = getIntArgument(arguments, "d", 10);
@@ -145,6 +151,7 @@ int detectLines(int argc, char** argv)
     dbgCycles = getBoolArgument(arguments, "C");
     thickness = getFloatArgument(arguments, "l", 0.005f);
     shift = getFloatArgument(arguments, "S", 255.0f);
+    countriesMapScale = getFloatArgument(arguments, "ms", 0.25f);
   }
   catch (std::exception& e)
   {
@@ -211,7 +218,7 @@ int detectLines(int argc, char** argv)
   triGraph.boundary = graph.boundary;
 
   // find cycles
-  helper::Cycles cycles;
+  helper::CyclesMap cycles;
   helper::findCycles(triGraph, cycles, dbgCycles, displayScale);
   helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
   helper::drawFilledCycles(filledCycleImage, triGraph, cycles, displayScale);
@@ -221,6 +228,18 @@ int detectLines(int argc, char** argv)
   helper::SphericalMesh mesh;
   helper::makeSphericalMesh(triGraph, mesh, thickness, shift);
   helper::writeBoundariesFile(mesh, outputFilename.c_str());
+
+  if (!countriesTableFilename.empty() && !countriesFilename.empty())
+  {
+    // make countries
+    helper::CountriesTable table;
+    helper::readCountriesTable(countriesTableFilename.c_str(), table);
+
+    helper::CountriesMap countries;
+    cv::Mat countriesMap;
+    helper::makeCountries(triGraph, cycles, table, countriesMapScale, countries, countriesMap);
+    helper::writeCountriesFile(countriesFilename.c_str(), triGraph, countries, countriesMap, triGraph.boundary, shift);
+  }
   
   if (!dbgimage.empty())
   {

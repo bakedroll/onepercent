@@ -17,7 +17,7 @@ Simulation::Simulation()
 {
 }
 
-void Simulation::loadCountries()
+void Simulation::loadCountries(ref_ptr<GlobeModel> globeModel)
 {
 	typedef vector<unsigned char> NeighborList;
 	typedef map<unsigned char, NeighborList> NeighborMap;
@@ -62,8 +62,22 @@ void Simulation::loadCountries()
 			neighborList.push_back(stream.read<unsigned char>());
 		}
 
-		neighborMap.insert(NeighborMap::value_type(id, neighborList));
+    ref_ptr<DrawElementsUInt> triangles = new DrawElementsUInt(GL_TRIANGLES, 0);
+    int triangles_count = stream.read<int>();
+    for (int j = 0; j < triangles_count; j++)
+    {
+      int v0 = stream.read<int>();
+      int v1 = stream.read<int>();
+      int v2 = stream.read<int>();
 
+      triangles->push_back(v0);
+      triangles->push_back(v2);
+      triangles->push_back(v1);
+    }
+
+    globeModel->addCountryTriangles(int(id), triangles);
+
+		neighborMap.insert(NeighborMap::value_type(id, neighborList));
 		_countries.insert(Country::Map::value_type(id, country));
 
 		delete[] name_p;
@@ -147,10 +161,8 @@ ref_ptr<Country> Simulation::getCountry(Vec2f coord)
 {
 	unsigned char id = getCountryId(coord);
 
-	if (id == 255)
-	{
+	if (id == 0)
 		return nullptr;
-	}
 
 	return _countries.find(id)->second;
 }

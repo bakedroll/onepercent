@@ -70,15 +70,14 @@ void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud
 
 	ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
-	globeWorld->getSimulation()->loadCountries();
-	globeWorld->getSimulation()->loadSkillsXml("./GameData/data/skills/passive.xml");
-
 	ref_ptr<GlobeModel> globe = new GlobeModel(world->getCameraManipulator());
 	ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel();
 
+  globeWorld->getSimulation()->loadCountries(globe);
+  globeWorld->getSimulation()->loadSkillsXml("./GameData/data/skills/passive.xml");
+
 	ref_ptr<CountryOverlay> countryOverlay = new CountryOverlay();
 	countryOverlay->setEnabled(false);
-
 	countryOverlay->setCountryMap(globeWorld->getSimulation()->getCountryMap());
 
 	globeWorld->setGlobeModel(globe);

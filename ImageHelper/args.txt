@@ -9,3 +9,5 @@ Subdivide:
 convert countries map:
 
 3 0 ../../../../Resources/boundaries/Laender.txt ../../../../Resources/boundaries/boundries_8k.png ../../../../Resources/TEMP/countries_map.png 2048 1024 8192 4096 ../../../../OnePercent/GameData/data/countries.dat
+
+4 0 ../../../../Resources/earth_textures/4_no_ice_clouds_mts_8k.jpg ../../../../Resources/earth_textures/water_8k.png ../../../../Resources/earth_textures/relief_8k.png ../../../../Resources/TEMP/colormap.png

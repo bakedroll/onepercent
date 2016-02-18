@@ -134,14 +134,11 @@ void main (void)
 
 	float n1 = cloud_noise(0.0);
 	float n2 = cloud_noise(32.5);
-	float n3 = cloud_noise(75.1);
-	float n4 = cloud_noise(54.7);
 
-	float i1 = colormap_color.r * n1 + colormap_color.g * n2;
-	float i2 = colormap_color.b * n3 + colormap_color.a * n4;
+	float intensity = colormap_color.b * n1 + colormap_color.a * n2;
 
 	//float intensity = (i1 + i2) / 2.0;
-	float intensity = min(i1, i2);
+	//float intensity = min(i1, i2);
 
 	vec4 finalColor = vec4(0.0, 0.0, 0.0, 1.0);
 

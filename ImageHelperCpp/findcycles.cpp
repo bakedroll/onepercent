@@ -39,7 +39,11 @@ namespace helper
     NeighbourMap::iterator eit = neighbourMap.begin();
     addContourPointId(graph, boundingPoints, contour, eit->first);
 
-    for (int i = 0; i < int(cycle.edges.size()); i++)
+    int nEdges = 0;
+    for (NeighbourEdgesMap::iterator it = cycle.edges.begin(); it != cycle.edges.end(); ++it)
+      nEdges += int(it->second.size());
+
+    for (int i = 0; i < nEdges; i++)
     //while (contour.size() < cycle.edges.size())
     {
       for (NeighbourValueList::iterator it = eit->second.begin(); it != eit->second.end(); ++it)
@@ -340,7 +344,7 @@ namespace helper
     cv::waitKey(600000);
   }
 
-  void assignTriangles(Graph& graph, Cycles& cycles, int cycleId, CycleStageList& results)
+  void assignTriangles(Graph& graph, CyclesMap& cycles, int cycleId, CycleStageList& results)
   {
     ProgressPrinter qprogress("Build quadtree");
 
@@ -368,8 +372,25 @@ namespace helper
       Cycle cycle;
       for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
       {
-        if (it->adjacentCycleIds[0] == cId || it->adjacentCycleIds[1] == cId)
-          cycle.edges.push_back(EdgeValue(Edge(it->directedEdge.first, it->directedEdge.second), it->isBoundary ? 128 : 255));
+        for (int j = 0; j < 2; j++)
+        {
+          if (it->adjacentCycleIds[j] == cId)
+          {
+            NeighbourEdgesMap::iterator nit = cycle.edges.find(it->adjacentCycleIds[1 - j]);
+            if (nit == cycle.edges.end())
+            {
+              EdgeList edges;
+              edges.push_back(Edge(it->directedEdge.first, it->directedEdge.second));
+              cycle.edges.insert(NeighbourEdgesMap::value_type(it->adjacentCycleIds[1 - j], edges));
+            }
+            else
+            {
+              nit->second.push_back(Edge(it->directedEdge.first, it->directedEdge.second));
+            }
+
+            break;
+          }
+        }
       }
 
       if (cycle.edges.size() > 0)
@@ -377,14 +398,14 @@ namespace helper
         addCycleTriangles(graph, quadtree, trianglesVisited, cycle);
 
         if (cycle.trianlges.size() > 0)
-          cycles.push_back(cycle);
+          cycles.insert(CyclesMap::value_type(cId, cycle));
       }
 
       aprogress.update(cId, cycleId - 1);
     }
   }
 
-  void findCycles(Graph& graph, Cycles& cycles, bool debug, float scale)
+  void findCycles(Graph& graph, CyclesMap& cycles, bool debug, float scale)
   {
     ProgressPrinter progress("Detect cylces");
 

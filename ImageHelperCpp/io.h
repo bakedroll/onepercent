@@ -24,4 +24,7 @@ namespace helper
   void writeBoundariesFile(SphericalMesh& mesh, const char* filename);
 
   void readGraphFiles(Graph& graph, const char* filename, int iteration);
+
+  void readCountriesTable(const char* filename, CountriesTable& countries);
+  void writeCountriesFile(const char* filename, Graph& graph, CountriesMap& countries, cv::Mat& countriesMap, BoundingBox<float> graphBb, float shift);
 }

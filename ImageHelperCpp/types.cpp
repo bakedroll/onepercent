@@ -31,6 +31,18 @@ namespace helper
     }
   }
 
+  void neighbourMapFromEdges(NeighbourEdgesMap& edges, NeighbourMap& neighbourMap)
+  {
+    for (NeighbourEdgesMap::iterator it = edges.begin(); it != edges.end(); ++it)
+    {
+      for (EdgeList::iterator eit = it->second.begin(); eit != it->second.end(); ++eit)
+      {
+        insertNeighbour(neighbourMap, eit->first, eit->second, it->first > -1 ? 255 : 128);
+        insertNeighbour(neighbourMap, eit->second, eit->first, eit->second);
+      }
+    }
+  }
+
   void removeNeighbourFromList(NeighbourValueList& list, int id)
   {
     for (NeighbourValueList::iterator it = list.begin(); it != list.end(); ++it)

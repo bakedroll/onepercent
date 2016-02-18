@@ -57,13 +57,13 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 			Vec2f polar = getPolarFromCartesian(pickResult);
 			ref_ptr<Country> country = getGlobeOverviewWorld()->getSimulation()->getCountry(polar);
 
-			int selected = country == nullptr ? 255 : int(country->getId());
+			int selected = country == nullptr ? 0 : int(country->getId());
 
 			getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
 
 			if (!_started)
 			{
-				if (selected == 255)
+				if (selected == 0)
 				{
 					_textConfirm->setVisible(false);
 				}
@@ -307,7 +307,7 @@ bool GlobeInteractionState::ready()
 
 void GlobeInteractionState::updateCountryInfoText()
 {
-	if (_selectedCountry == 255)
+	if (_selectedCountry == 0)
 	{
 		_textCountryInfo->setText("");
 
