@@ -33,4 +33,4 @@ ECHO Visual Studio 12.0 installation not found
 
 :END
 
-echo Builded successfully
+echo Built successfully

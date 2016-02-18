@@ -89,10 +89,12 @@ namespace helper
   typedef std::vector<PointValue> PointValueList;
   typedef std::vector<PointValueList> PointValueListGroup;
   typedef std::pair<int, int> Edge;
+  typedef std::vector<Edge> EdgeList;
   typedef std::pair<Edge, uchar> EdgeValue;
   typedef std::map<int, cv::Point2f> IdPointMap;
   typedef std::map<int, osg::Vec3f> IdPoint3DMap;
   typedef std::vector<EdgeValue> EdgeValueList;
+  typedef std::map<int, EdgeList> NeighbourEdgesMap;
   typedef std::map<int, int> IdMap;
   typedef std::map<int, Triangle> TriangleMap;
   typedef std::vector<Quad> QuadList;
@@ -118,7 +120,7 @@ namespace helper
   public:
     BoundingBox()
     {
-      
+      reset();
     }
 
     BoundingBox(std::vector<cv::Point_<T>>& points)
@@ -127,14 +129,7 @@ namespace helper
       for (typename std::vector<cv::Point_<T>>::iterator it = points.begin(); it != points.end(); ++it)
         expand(*it);
     }
-    /*
-    BoundingBox(std::map<int, cv::Point_<T> >& points, IdSet ids)
-    {
-      reset();
-      for (typename std::map<int, cv::Point_<T>>::iterator it = ids.begin(); it != ids.end(); ++it)
-        expand(points.find(*it)->second);
-    }
-    */
+
     BoundingBox(cv::Point_<T> min, cv::Point_<T> max)
       : m_min(min)
       , m_max(max)
@@ -152,26 +147,27 @@ namespace helper
       return m_max;
     }
 
-    T width() const
+    T width(bool addone = true) const
     {
-      return m_max.x - m_min.x + static_cast<T>(1);
+      T w = m_max.x - m_min.x;
+      if (addone)
+        w += static_cast<T>(1);
+
+      return w;
     }
 
-    T height() const
+    T height(bool addone = true) const
     {
-      return m_max.y - m_min.y + static_cast<T>(1);
+      T h = m_max.y - m_min.y;
+      if (addone)
+        h += static_cast<T>(1);
+
+      return h;
     }
 
     cv::Point_<T> center() const
     {
       return m_min + ((m_max - m_min) / static_cast<T>(2));
-    }
-
-  private:
-    void reset()
-    {
-      m_min = cv::Point_<T>(std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
-      m_max = cv::Point_<T>(std::numeric_limits<T>::min(), std::numeric_limits<T>::min());
     }
 
     void expand(const cv::Point_<T>& point)
@@ -180,6 +176,35 @@ namespace helper
       m_min.y = std::min<T>(m_min.y, point.y);
       m_max.x = std::max<T>(m_max.x, point.x);
       m_max.y = std::max<T>(m_max.y, point.y);
+    }
+
+    void expand(const BoundingBox<T> bb)
+    {
+      m_min.x = std::min<T>(m_min.x, bb.m_min.x);
+      m_min.y = std::min<T>(m_min.y, bb.m_min.y);
+      m_max.x = std::max<T>(m_max.x, bb.m_max.x);
+      m_max.y = std::max<T>(m_max.y, bb.m_max.y);
+    }
+
+    void scale(float x, float y)
+    {
+      m_min.x *= x;
+      m_max.x *= x;
+      m_min.y *= y;
+      m_max.y *= y;
+    }
+
+    void shift(T x, T y)
+    {
+      m_min += cv::Point_<T>(x, y);
+      m_max += cv::Point_<T>(x, y);
+    }
+
+  private:
+    void reset()
+    {
+      m_min = cv::Point_<T>(std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
+      m_max = cv::Point_<T>(std::numeric_limits<T>::min(), std::numeric_limits<T>::min());
     }
 
     cv::Point_<T> m_min;
@@ -194,6 +219,15 @@ namespace helper
     BoundingBox<float> boundary;
   } Graph;
 
+  typedef struct _cycle
+  {
+    NeighbourEdgesMap edges;
+    TriangleMap trianlges;
+    BoundingBox<float> boundingbox;
+  } Cycle;
+
+  typedef std::map<int, Cycle> CyclesMap;
+
   typedef struct _sphericalMesh
   {
     IdPoint3DMap points;
@@ -202,7 +236,35 @@ namespace helper
     int nInnerPoints;
   } SphericalMesh;
 
+  typedef struct _countryData
+  {
+    int id;
+    std::string name;
+    float population;
+    float gdp;
+  } CountryData;
+
+  typedef struct _countryRow
+  {
+    CountryData data;
+    IdSet cycleIds;
+    IdSet additionalNeighbourIds;
+  } CountryRow;
+
+  typedef std::vector<CountryRow> CountriesTable;
+
+  typedef struct _country
+  {
+    CountryData data;
+    BoundingBox<float> boundingbox;
+    TriangleMap triangles;
+    IdSet neighbours;
+  } Country;
+
+  typedef std::map<int, Country> CountriesMap;
+
   void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);
+  void neighbourMapFromEdges(NeighbourEdgesMap& edges, NeighbourMap& neighbourMap);
 
   void removeNeighbourFromList(NeighbourValueList& list, int id);
   bool removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value);

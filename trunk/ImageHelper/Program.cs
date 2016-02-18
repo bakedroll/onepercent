@@ -376,6 +376,36 @@ namespace ImageHelper
             binFile.Close();
         }
 
+        private static int Clamp(int value, int min, int max)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
+        }
+
+        private static void MakeColorMap(string colormapFilename, string specularmapFilename, string reliefmapFilename, string outputFilename)
+        {
+            var colormapBitmap = new Bitmap(colormapFilename);
+            var specularmapBitmap = new Bitmap(specularmapFilename);
+            var reliefmapBitmap = new Bitmap(reliefmapFilename);
+
+            var width = Math.Min(Math.Min(colormapBitmap.Width, specularmapBitmap.Width), reliefmapBitmap.Width);
+            var height = Math.Min(Math.Min(colormapBitmap.Height, specularmapBitmap.Height), reliefmapBitmap.Height);
+
+            var outputBitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float depth = Clamp(255 - specularmapBitmap.GetPixel(x, y).R + reliefmapBitmap.GetPixel(x, y).R + 178, 0, 255) / 255.0f;
+
+                    var color = colormapBitmap.GetPixel(x, y);
+                    outputBitmap.SetPixel(x, y, Color.FromArgb(255, (int)(color.R * depth), (int)(color.G * depth), (int)(color.B * depth)));
+                }
+            }
+
+            outputBitmap.Save(outputFilename, ImageFormat.Png);
+        }
+
         static void Main(string[] args)
         {
             if (args.Length < 1)
@@ -401,6 +431,9 @@ namespace ImageHelper
                         break;
                     case 3:
                         ConvertCountriesMap(args[2], args[3], args[4], Int32.Parse(args[5]), Int32.Parse(args[6]), Int32.Parse(args[7]), Int32.Parse(args[8]), args[9]);
+                        break;
+                    case 4:
+                        MakeColorMap(args[2], args[3], args[4], args[5]);
                         break;
                 }
             }

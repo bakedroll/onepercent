@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <stdio.h>
+#include <functional>
 
 namespace helper
 {
@@ -48,6 +49,12 @@ namespace helper
     fwrite(reinterpret_cast<void*>(&value), 1, sizeof(T), file);
   }
 
+  void writeFileString(FILE* file, std::string& str)
+  {
+    writeFile<int>(file, int(str.size()));
+    fwrite(str.c_str(), str.size(), 1, file);
+  }
+
   bool readFileIntoString(const char* filename, std::string& buffer)
   {
     std::ifstream fs(filename);
@@ -62,6 +69,26 @@ namespace helper
 
     fs.close();
     return true;
+  }
+
+  // trim from start
+  static inline std::string &ltrim(std::string &s)
+  {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+    return s;
+  }
+
+  // trim from end
+  static inline std::string &rtrim(std::string &s)
+  {
+    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    return s;
+  }
+
+  // trim from both ends
+  static inline std::string &trim(std::string &s)
+  {
+    return ltrim(rtrim(s));
   }
 
   void writePolyFile(Graph& graph, const char* filename)
@@ -141,8 +168,8 @@ namespace helper
     writeFile<int>(file, qsize);
     for (QuadList::iterator it = mesh.quads.begin(); it != mesh.quads.end(); ++it)
     {
-      for (int i = 0; i < 4; i++)
-        writeFile<int>(file, ids.find(it->idx[i])->second);
+      for (int j = 0; j < 4; j++)
+        writeFile<int>(file, ids.find(it->idx[j])->second);
     }
 
     fclose(file);
@@ -156,14 +183,19 @@ namespace helper
     return std::string(buffer);
   }
 
-  void split(const std::string& s, char delim, StringList& elems)
+  void split(const std::string& s, char delim, StringList& elems, bool trimElems = false, bool ignoreEmpty = true)
   {
     std::stringstream ss(s);
     std::string item;
     while (std::getline(ss, item, delim))
     {
-      if (!item.empty())
+      if (!ignoreEmpty || !item.empty())
+      {
+        //if (trimElems)
+        //  item = trim(item);
+
         elems.push_back(item);
+      }
     }
   }
 
@@ -299,5 +331,127 @@ namespace helper
 
     printf("Read ele file: %s\n", elefn.c_str());
     readEleFile(graph, elefn.c_str());
+  }
+
+  void readCountriesTable(const char* filename, CountriesTable& countries)
+  {
+    std::string buffer;
+    if (!readFileIntoString(filename, buffer))
+      return;
+
+    // buffer = osgGaming::utf8ToLatin1(buffer.c_str());
+
+    std::stringstream fs(buffer);
+
+    std::string line;
+
+    // eat first line
+    std::getline(fs, line);
+
+    while (std::getline(fs, line))
+    {
+      StringList elems;
+      split(line, '\t', elems, true, false);
+      
+      if (elems.size() < 4)
+        continue;
+
+      CountryRow row;
+      row.data.id = atoi(elems[0].c_str());
+      row.data.name = elems[1];
+      row.data.population = atof(elems[2].c_str());
+      row.data.gdp = atof(elems[3].c_str());
+
+      if (elems.size() >= 5)
+      {
+        if (elems[4][0] == '\"')
+          elems[4] = std::string(elems[4].begin() + 1, elems[4].end() - 1);
+
+        StringList cycleIds;
+        split(elems[4], ';', cycleIds, true);
+        for (StringList::iterator it = cycleIds.begin(); it != cycleIds.end(); ++it)
+          row.cycleIds.insert(atoi(it->c_str()));
+      }
+
+      if (elems.size() >= 6)
+      {
+        if (elems[5][0] == '\"')
+          elems[5] = std::string(elems[5].begin() + 1, elems[5].end() - 2);
+
+        StringList anIds;
+        split(elems[5], ';', anIds, true);
+        for (StringList::iterator it = anIds.begin(); it != anIds.end(); ++it)
+          row.additionalNeighbourIds.insert(atoi(it->c_str()));
+      }
+
+      countries.push_back(row);
+    }
+  }
+
+  void writeCountriesFile(const char* filename, Graph& graph, CountriesMap& countries, cv::Mat& countriesMap, BoundingBox<float> graphBb, float shift)
+  {
+    printf("Write to countries file: %s\n", filename);
+
+    FILE * file;
+    file = fopen(filename, "w+b");
+    if (!file)
+      return;
+
+    IdMap ids;
+    int i = 0;
+    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+    {
+      ids.insert(IdMap::value_type(it->first, i));
+      i++;
+    }
+
+    float sx = shift / graphBb.width();
+
+    writeFile<int>(file, int(countries.size()));
+    for (CountriesMap::iterator it = countries.begin(); it != countries.end(); ++it)
+    {
+      BoundingBox<float> bb = it->second.boundingbox;
+      bb.shift(sx, 0.0f);
+
+      writeFileString(file, it->second.data.name);
+      writeFile<float>(file, it->second.data.population);
+      writeFile<int>(file, int(it->second.data.gdp));
+      writeFile<uchar>(file, uchar(it->second.data.id));
+      writeFile<float>(file, bb.center().x);
+      writeFile<float>(file, bb.center().y);
+      writeFile<float>(file, bb.width(false));
+      writeFile<float>(file, bb.height(false));
+
+      writeFile<int>(file, int(it->second.neighbours.size()));
+      for (IdSet::iterator iit = it->second.neighbours.begin(); iit != it->second.neighbours.end(); ++iit)
+        writeFile<uchar>(file, uchar(*iit));
+
+      writeFile<int>(file, int(it->second.triangles.size()));
+      for (TriangleMap::iterator tit = it->second.triangles.begin(); tit != it->second.triangles.end(); ++tit)
+      {
+        writeFile<int>(file, ids.find(tit->second.idx[0])->second);
+        writeFile<int>(file, ids.find(tit->second.idx[1])->second);
+        writeFile<int>(file, ids.find(tit->second.idx[2])->second);
+      }
+    }
+
+    writeFile<int>(file, countriesMap.cols);
+    writeFile<int>(file, countriesMap.rows);
+
+    int xms = int(float(countriesMap.cols) * shift / graphBb.width());
+
+    for (int y = 0; y < countriesMap.rows; y++)
+    {
+      for (int x = 0; x < countriesMap.cols; x++)
+      {
+        int px = x - xms;
+        while (px < 0)
+          px += countriesMap.cols;
+
+        writeFile<uchar>(file, countriesMap.at<uchar>(cv::Point(px % countriesMap.cols, y)));
+      }
+    }
+
+    fclose(file);
   }
 }

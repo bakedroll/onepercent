@@ -20,7 +20,16 @@ namespace onep
 
 		void setSelectedCountry(int countryId);
 
+    void addCountryTriangles(int id, osg::ref_ptr<osg::DrawElementsUInt> triangles);
+
 	private:
+    typedef struct _countrySurface
+    {
+      osg::ref_ptr<osg::Switch> switchNode;
+    } CountrySurface;
+
+    typedef std::map<int, CountrySurface> CountrySurfaceMap;
+
 		osgGaming::Property<float, Param_SunDistanceName> _paramSunDistance;
 		osgGaming::Property<float, Param_SunRadiusPm2Name> _paramSunRadiusMp2;
 
@@ -44,5 +53,11 @@ namespace onep
 
 		osg::ref_ptr<osg::PositionAttitudeTransform> _cloudsTransform;
 		osg::ref_ptr<osg::Uniform> _uniformTime;
+
+    osg::ref_ptr<osg::Vec3Array> _countriesVertices;
+    osg::ref_ptr<Group> _countrySurfacesGroup;
+    CountrySurfaceMap _countrySurfaces;
+
+    int _enabledSurface;
 	};
 }

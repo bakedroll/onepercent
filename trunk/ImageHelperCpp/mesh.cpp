@@ -132,9 +132,9 @@ namespace helper
     makeCartesianPoints(graph, mesh.points, 6.371f, shift); // 1.001f
     mesh.edges = graph.edges;
 
-    IdPoint3DMap removedPoints;
-    removeUnusedPoints(mesh.points, mesh.edges, removedPoints);
-    mesh.points = removedPoints;
+    //IdPoint3DMap removedPoints;
+    //removeUnusedPoints(mesh.points, mesh.edges, removedPoints);
+    //mesh.points = removedPoints;
 
     mesh.nInnerPoints = int(mesh.points.size());
 

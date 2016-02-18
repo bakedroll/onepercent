@@ -1,6 +1,8 @@
 #include "GlobeOverviewState.h"
 #include "GlobeModel.h"
 
+#include <osgViewer/ViewerEventHandlers>
+
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>
@@ -100,6 +102,20 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 
 		overlay->setEnabled(!overlay->getEnabled());
 	}
+  else if (key == GUIEventAdapter::KEY_F4)
+  {
+    printf("Capturing screenshot\n");
+
+    osg::ref_ptr<osg::Image> capturedImage;
+    osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler = new osgViewer::ScreenCaptureHandler();
+   
+    screenCaptureHandler->setCaptureOperation(new osgViewer::ScreenCaptureHandler::WriteToFile(
+      "./screenshots/capture",
+      "png",
+      osgViewer::ScreenCaptureHandler::WriteToFile::SEQUENTIAL_NUMBER));
+
+    screenCaptureHandler->captureNextFrame(*getViewer());
+  }
 	else
 	{
 		int numSkills = _globeWorld->getSimulation()->getNumSkills();

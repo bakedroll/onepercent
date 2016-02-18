@@ -8,6 +8,7 @@
 
 #include <osg/Referenced>
 #include <osg/Vec2f>
+#include "GlobeModel.h"
 
 namespace onep
 {
@@ -16,7 +17,7 @@ namespace onep
 	public:
 		Simulation();
 
-		void loadCountries();
+    void loadCountries(osg::ref_ptr<GlobeModel> globeModel);
 		void loadSkillsXml(std::string filename);
 		const Country::Map& getCountryMap();
 
