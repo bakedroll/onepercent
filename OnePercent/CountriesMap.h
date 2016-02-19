@@ -1,7 +1,7 @@
 #pragma once
 
+#include <osg/ref_ptr>
 #include <osg/Referenced>
-#include <osg/Vec3i>
 #include <osg/Vec2i>
 
 namespace onep
@@ -9,6 +9,8 @@ namespace onep
 	class CountriesMap : public osg::Referenced
 	{
 	public:
+    typedef osg::ref_ptr<CountriesMap> Ptr;
+
 		CountriesMap(int width, int height, unsigned char* data);
 		~CountriesMap();
 

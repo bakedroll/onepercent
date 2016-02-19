@@ -4,6 +4,7 @@
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/Switch>
+#include "CountryMesh.h"
 
 namespace onep
 {
@@ -14,12 +15,12 @@ namespace onep
 
 		bool getEnabled();
 
-		void setCountryMap(const Country::Map& countryMap);
+    void setCountryMap(const CountryMesh::Map& countryMap);
 		void setEnabled(bool enabled);
 
 	private:
 		osg::ref_ptr<osg::Switch> _switch;
-		const Country::Map* _countryMap;
+    const CountryMesh::Map* _countryMap;
 
 		bool _enabled;
 	};

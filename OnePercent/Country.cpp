@@ -43,15 +43,6 @@ Country::Country(string name, unsigned char id, float population, float wealth, 
 	}
 }
 
-void Country::addNeighborCountry(osg::ref_ptr<Country> country, osg::ref_ptr<NeighborCountryInfo> info)
-{
-	NeighborCountry nc;
-	nc.country = country;
-	nc.info = info;
-
-	_neighborCountries.push_back(nc);
-}
-
 void Country::addAngerInfluence(float influence)
 {
 	_angerInfluence += influence;
@@ -137,11 +128,6 @@ float Country::getAnger()
 float Country::getAngerBalance()
 {
 	return _angerBalance;
-}
-
-Country::Neighbors& Country::getNeighborCountries()
-{
-	return _neighborCountries;
 }
 
 bool Country::getSKillBranchActivated(SkillBranchType type)

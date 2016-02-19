@@ -62,11 +62,18 @@ namespace helper
 
       for (IdSet::iterator iit = it->additionalNeighbourIds.begin(); iit != it->additionalNeighbourIds.end(); ++iit)
       {
+        CountriesMap::iterator nit = countries.find(*iit);
+
         if (cit->second.neighbours.find(*iit) != cit->second.neighbours.end() ||
-          countries.find(*iit) == countries.end())
+          nit == countries.end())
           continue;
 
         cit->second.neighbours.insert(*iit);
+
+        if (nit->second.neighbours.find(*iit) != nit->second.neighbours.end())
+          continue;
+
+        nit->second.neighbours.insert(cit->first);
       }
     }
 

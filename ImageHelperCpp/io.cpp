@@ -156,13 +156,13 @@ namespace helper
 
     writeFile<int>(file, mesh.nInnerPoints);
 
-    int esize = int(mesh.edges.size());
+    /*int esize = int(mesh.edges.size());
     writeFile<int>(file, esize);
     for (EdgeValueList::iterator it = mesh.edges.begin(); it != mesh.edges.end(); ++it)
     {
       writeFile<int>(file, ids.find(it->first.first)->second);
       writeFile<int>(file, ids.find(it->first.second)->second);
-    }
+    }*/
 
     int qsize = int(mesh.quads.size());
     writeFile<int>(file, qsize);
@@ -376,7 +376,7 @@ namespace helper
       if (elems.size() >= 6)
       {
         if (elems[5][0] == '\"')
-          elems[5] = std::string(elems[5].begin() + 1, elems[5].end() - 2);
+          elems[5] = std::string(elems[5].begin() + 1, elems[5].end() - 1);
 
         StringList anIds;
         split(elems[5], ';', anIds, true);

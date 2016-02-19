@@ -17,29 +17,26 @@ namespace onep
 	public:
 		Simulation();
 
-    void loadCountries(osg::ref_ptr<GlobeModel> globeModel);
+    void loadCountries(std::string filename);
 		void loadSkillsXml(std::string filename);
-		const Country::Map& getCountryMap();
-
-		osg::ref_ptr<Country> getCountry(unsigned char id);
-		osg::ref_ptr<Country> getCountry(osg::Vec2f coord);
-		unsigned char getCountryId(osg::Vec2f coord);
-		std::string getCountryName(osg::Vec2f coord);
 
 		osg::ref_ptr<AbstractSkill> getSkill(int id);
 		int getNumSkills();
 
 		int getDay();
 
+    void setGlobeModel(GlobeModel::Ptr model);
+
 		void step();
 
 		void printStats(bool onlyActivated = false);
 	private:
-		Country::Map _countries;
-		AbstractSkill::Map _skills;
+		//Country::Map _countries;
+		AbstractSkill::Map m_skills;
+    GlobeModel::Ptr m_globeModel;
 
-		osg::ref_ptr<CountriesMap> _countriesMap;
+		//osg::ref_ptr<CountriesMap> _countriesMap;
 
-		int _day;
+		int m_day;
 	};
 }

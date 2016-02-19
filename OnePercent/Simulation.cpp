@@ -13,18 +13,16 @@ using namespace std;
 
 Simulation::Simulation()
 	: Referenced(),
-	  _day(0)
+	  m_day(0)
 {
 }
 
-void Simulation::loadCountries(ref_ptr<GlobeModel> globeModel)
+void Simulation::loadCountries(std::string filename)
 {
 	typedef vector<unsigned char> NeighborList;
 	typedef map<unsigned char, NeighborList> NeighborMap;
 
-	string countriesBinFilename = "./GameData/data/countries.dat";
-
-	char* bytes = ResourceManager::getInstance()->loadBinary(countriesBinFilename);
+  char* bytes = ResourceManager::getInstance()->loadBinary(filename);
 
 	ByteStream stream(bytes);
 
@@ -62,6 +60,8 @@ void Simulation::loadCountries(ref_ptr<GlobeModel> globeModel)
 			neighborList.push_back(stream.read<unsigned char>());
 		}
 
+    neighborMap.insert(NeighborMap::value_type(id, neighborList));
+
     ref_ptr<DrawElementsUInt> triangles = new DrawElementsUInt(GL_TRIANGLES, 0);
     int triangles_count = stream.read<int>();
     for (int j = 0; j < triangles_count; j++)
@@ -75,37 +75,35 @@ void Simulation::loadCountries(ref_ptr<GlobeModel> globeModel)
       triangles->push_back(v1);
     }
 
-    globeModel->addCountryTriangles(int(id), triangles);
-
-		neighborMap.insert(NeighborMap::value_type(id, neighborList));
-		_countries.insert(Country::Map::value_type(id, country));
+    m_globeModel->addCountry(int(id), country, triangles);
 
 		delete[] name_p;
 	}
 
-	for (Country::Map::iterator it = _countries.begin(); it != _countries.end(); ++it)
+  CountryMesh::Map& countries = m_globeModel->getCountryMeshs();
+  for (CountryMesh::Map::iterator it = countries.begin(); it != countries.end(); ++it)
 	{
-		NeighborList neighborList = neighborMap.find(it->second->getId())->second;
+		NeighborList neighborList = neighborMap.find(it->second->getCountryData()->getId())->second;
 
 		for (NeighborList::iterator nit = neighborList.begin(); nit != neighborList.end(); ++nit)
 		{
-			it->second->addNeighborCountry(getCountry(*nit), new NeighborCountryInfo());
+      it->second->addNeighborCountry(m_globeModel->getCountryMesh(*nit), new NeighborCountryInfo());
 		}
 	}
 
 	int mapWidth = stream.read<int>();
 	int mapHeight = stream.read<int>();
 
-	_countriesMap = new CountriesMap(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
+	m_globeModel->setCountriesMap(new CountriesMap(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()])));
 
-	ResourceManager::getInstance()->clearCacheResource(countriesBinFilename);
+  ResourceManager::getInstance()->clearCacheResource(filename);
 }
 
 void Simulation::loadSkillsXml(string filename)
 {
 	PropertiesManager::getInstance()->loadPropertiesFromXmlResource(filename);
 
-	int id = _skills.size();
+	int id = m_skills.size();
 	int elements = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->size();
 	for (int i = 0; i < elements; i++)
 	{
@@ -140,87 +138,52 @@ void Simulation::loadSkillsXml(string filename)
 		skill->setAnger(anger);
 		skill->setInterest(interest);
 
-		_skills.insert(AbstractSkill::Map::value_type(id, skill));
+		m_skills.insert(AbstractSkill::Map::value_type(id, skill));
 		id++;
 
 		printf("SKILL LOADED: %s\n", name.c_str());
 	}
 }
 
-const Country::Map& Simulation::getCountryMap()
-{
-	return _countries;
-}
-
-ref_ptr<Country> Simulation::getCountry(unsigned char id)
-{
-	return _countries.find(id)->second;
-}
-
-ref_ptr<Country> Simulation::getCountry(Vec2f coord)
-{
-	unsigned char id = getCountryId(coord);
-
-	if (id == 0)
-		return nullptr;
-
-	return _countries.find(id)->second;
-}
-
-unsigned char Simulation::getCountryId(Vec2f coord)
-{
-	Vec2i mapSize = _countriesMap->getSize();
-
-	int ix = int(coord.x() * float(mapSize.x()));
-	int iy = int(coord.y() * float(mapSize.y()));
-
-	return _countriesMap->getDataAt(ix, iy);
-}
-
-string Simulation::getCountryName(Vec2f coord)
-{
-	Country::Map::iterator it = _countries.find(getCountryId(coord));
-	if (it == _countries.end())
-	{
-		return "No country selected";
-	}
-
-	return it->second->getCountryName();
-}
-
 ref_ptr<AbstractSkill> Simulation::getSkill(int id)
 {
-	return _skills.find(id)->second;
+	return m_skills.find(id)->second;
 }
 
 int Simulation::getNumSkills()
 {
-	return _skills.size();
+	return m_skills.size();
 }
 
 int Simulation::getDay()
 {
-	return _day;
+	return m_day;
+}
+
+void Simulation::setGlobeModel(GlobeModel::Ptr model)
+{
+  m_globeModel = model;
 }
 
 void Simulation::step()
 {
-	for (Country::Map::iterator itcountry = _countries.begin(); itcountry != _countries.end(); ++itcountry)
+  CountryMesh::Map& countries = m_globeModel->getCountryMeshs();
+  for (CountryMesh::Map::iterator itcountry = countries.begin(); itcountry != countries.end(); ++itcountry)
 	{
-		itcountry->second->clearEffects();
+		itcountry->second->getCountryData()->clearEffects();
 
-		for (AbstractSkill::Map::iterator itskill = _skills.begin(); itskill != _skills.end(); ++itskill)
+		for (AbstractSkill::Map::iterator itskill = m_skills.begin(); itskill != m_skills.end(); ++itskill)
 		{
-			if (itskill->second->getActivated() && itcountry->second->getSKillBranchActivated(itskill->second->getBranch()))
+      if (itskill->second->getActivated() && itcountry->second->getCountryData()->getSKillBranchActivated(itskill->second->getBranch()))
 			{
-				itskill->second->takeEffect(itcountry->second);
+				itskill->second->takeEffect(itcountry->second->getCountryData());
 			}
 		}
 
-		itcountry->second->step();
+    itcountry->second->getCountryData()->step();
 	}
 
-	_day++;
+	m_day++;
 }
 
 string fillString(string s, int l, bool rightAligned = false)
@@ -280,22 +243,23 @@ void Simulation::printStats(bool onlyActivated)
 	printf("%s | %s | %s | %s | %s\n", fillString("Country", 22).c_str(), fillString("Wealth", 8).c_str(), fillString("Anger/Balance", 25).c_str(), fillString("Dept/Relative/Balance", 37).c_str(), fillString("Skills", 19).c_str());
 	printf("------------------------------------------------------------------------------------------------------------\n\n");
 
-	for (Country::Map::iterator it = _countries.begin(); it != _countries.end(); ++it)
+  CountryMesh::Map& countries = m_globeModel->getCountryMeshs();
+  for (CountryMesh::Map::iterator it = countries.begin(); it != countries.end(); ++it)
 	{
-		if (!onlyActivated || it->second->anySkillBranchActivated())
+		if (!onlyActivated || it->second->getCountryData()->anySkillBranchActivated())
 		{
 			string skills = "";
 
 			for (int i = 0; i < Country::SkillBranchCount; i++)
 			{
-				skills += string("[") + string(it->second->getSKillBranchActivated(Country::SkillBranchType(i)) ? "x" : " ") + string("] ");
+        skills += string("[") + string(it->second->getCountryData()->getSKillBranchActivated(Country::SkillBranchType(i)) ? "x" : " ") + string("] ");
 			}
 
 			printf("%s | %s | %s | %s | %s\n",
-				fillString(it->second->getCountryName(), 22).c_str(),
-				fillString(str(it->second->getWealth(), 0), 8, true).c_str(),
-				(fillString(str(it->second->getAnger()), 6, true) + " " + progBar(it->second->getAnger()) + fillString(str(it->second->getAngerBalance()), 6, true)).c_str(),
-				(fillString(str(it->second->getDept(), 0), 8, true) + fillString(str(it->second->getRelativeDept()), 6, true) + " " + progBar(it->second->getRelativeDept()) + fillString(str(it->second->getDeptBalance(), 1), 10, true)).c_str(),
+        fillString(it->second->getCountryData()->getCountryName(), 22).c_str(),
+        fillString(str(it->second->getCountryData()->getWealth(), 0), 8, true).c_str(),
+        (fillString(str(it->second->getCountryData()->getAnger()), 6, true) + " " + progBar(it->second->getCountryData()->getAnger()) + fillString(str(it->second->getCountryData()->getAngerBalance()), 6, true)).c_str(),
+        (fillString(str(it->second->getCountryData()->getDept(), 0), 8, true) + fillString(str(it->second->getCountryData()->getRelativeDept()), 6, true) + " " + progBar(it->second->getCountryData()->getRelativeDept()) + fillString(str(it->second->getCountryData()->getDeptBalance(), 1), 10, true)).c_str(),
 				skills.c_str());
 		}
 	}

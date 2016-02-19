@@ -30,7 +30,7 @@ bool CountryOverlay::getEnabled()
 	return _enabled;
 }
 
-void CountryOverlay::setCountryMap(const Country::Map& countryMap)
+void CountryOverlay::setCountryMap(const CountryMesh::Map& countryMap)
 {
 	ref_ptr<osgText::Font> font = osgGaming::ResourceManager::getInstance()->loadFont("./GameData/fonts/coolvetica rg.ttf");
 
@@ -42,15 +42,15 @@ void CountryOverlay::setCountryMap(const Country::Map& countryMap)
 	billboard->setMode(Billboard::Mode::POINT_ROT_EYE);
 
 	int i = 0;
-	for (Country::Map::const_iterator it = _countryMap->cbegin(); it != _countryMap->cend(); ++it)
+  for (CountryMesh::Map::const_iterator it = _countryMap->cbegin(); it != _countryMap->cend(); ++it)
 	{
-		Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCenterLatLong());
+		Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCountryData()->getCenterLatLong());
 		if (!pos.valid())
 		{
 			continue;
 		}
 
-		string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str());
+		string name = osgGaming::utf8ToLatin1(it->second->getCountryData()->getCountryName().c_str());
 		/*std::string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str()) + "\n";
 		Country::Neighbors neighbors = it->second->getNeighborCountries();
 

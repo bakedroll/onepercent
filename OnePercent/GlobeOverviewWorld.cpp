@@ -11,8 +11,8 @@ using namespace osgGaming;
 GlobeOverviewWorld::GlobeOverviewWorld()
 	: World(),
 	  _cameraLatLong(Vec2f(0.0f, 0.0f)),
-	  _cameraDistance(28.0f),
-	  _cameraViewAngle(Vec2f(0.0f, 0.0f))
+	  _cameraViewAngle(Vec2f(0.0f, 0.0f)),
+	  _cameraDistance(28.0f)
 {
 	_simulation = new Simulation();
 
