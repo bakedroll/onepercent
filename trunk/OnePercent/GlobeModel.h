@@ -7,34 +7,39 @@
 
 #include <osgGaming/TransformableCameraManipulator.h>
 #include <osgGaming/Property.h>
+#include "CountryMesh.h"
+#include "CountriesMap.h"
 
 namespace onep
 {
 	class GlobeModel : public osg::Group
 	{
 	public:
+    typedef osg::ref_ptr<GlobeModel> Ptr;
+
 		GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);
 
 		void updateLightDirection(osg::Vec3f direction);
 		void updateClouds(float day);
 
 		void setSelectedCountry(int countryId);
+    void setCountriesMap(CountriesMap::Ptr countriesMap);
 
-    void addCountryTriangles(int id, osg::ref_ptr<osg::DrawElementsUInt> triangles);
+    void addCountry(int id, Country::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles);
+    CountryMesh::Map& getCountryMeshs();
+    CountriesMap::Ptr getCountriesMap();
+
+    CountryMesh::Ptr getCountryMesh(int id);
+    CountryMesh::Ptr getCountryMesh(osg::Vec2f coord);
+    int getCountryId(osg::Vec2f coord);
+    std::string getCountryName(osg::Vec2f coord);
 
 	private:
-    typedef struct _countrySurface
-    {
-      osg::ref_ptr<osg::Switch> switchNode;
-    } CountrySurface;
+		osgGaming::Property<float, Param_SunDistanceName> m_paramSunDistance;
+		osgGaming::Property<float, Param_SunRadiusPm2Name> m_paramSunRadiusMp2;
 
-    typedef std::map<int, CountrySurface> CountrySurfaceMap;
-
-		osgGaming::Property<float, Param_SunDistanceName> _paramSunDistance;
-		osgGaming::Property<float, Param_SunRadiusPm2Name> _paramSunRadiusMp2;
-
-		osgGaming::Property<float, Param_EarthCloudsSpeedName> _paramEarthCloudsSpeed;
-		osgGaming::Property<float, Param_EarthCloudsMorphSpeedName> _paramEarthCloudsMorphSpeed;
+		osgGaming::Property<float, Param_EarthCloudsSpeedName> m_paramEarthCloudsSpeed;
+		osgGaming::Property<float, Param_EarthCloudsMorphSpeedName> m_paramEarthCloudsMorphSpeed;
 
 		void makeEarthModel();
 		void makeCloudsModel();
@@ -46,18 +51,17 @@ namespace onep
 
 		osg::ref_ptr<osg::Geometry> createSphereSegmentMesh(int stacks, int slices, double radius, int firstStack, int lastStack, int firstSlice, int lastSlice);
 
-		osg::ref_ptr<osg::Uniform> _scatteringLightDirUniform;
-		osg::ref_ptr<osg::Uniform> _scatteringLightPosrUniform;
+		osg::ref_ptr<osg::Uniform> m_scatteringLightDirUniform;
+		osg::ref_ptr<osg::Uniform> m_scatteringLightPosrUniform;
 
-		osg::ref_ptr<osg::Uniform> _uniformSelectedCountry;
+		osg::ref_ptr<osg::PositionAttitudeTransform> m_cloudsTransform;
+		osg::ref_ptr<osg::Uniform> m_uniformTime;
 
-		osg::ref_ptr<osg::PositionAttitudeTransform> _cloudsTransform;
-		osg::ref_ptr<osg::Uniform> _uniformTime;
+    osg::ref_ptr<osg::Vec3Array> m_countriesVertices;
+    osg::ref_ptr<osg::Switch> m_countrySurfacesSwitch;
+    CountryMesh::Map m_countryMeshs;
+    CountriesMap::Ptr m_countriesMap;
 
-    osg::ref_ptr<osg::Vec3Array> _countriesVertices;
-    osg::ref_ptr<Group> _countrySurfacesGroup;
-    CountrySurfaceMap _countrySurfaces;
-
-    int _enabledSurface;
+    CountryMesh::List m_visibleCountryMeshs;
 	};
 }

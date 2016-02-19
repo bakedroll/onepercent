@@ -13,7 +13,6 @@
 #include <osgGaming/CameraAlignedQuad.h>
 #include <osgGaming/TextureFactory.h>
 #include <osgGaming/ByteStream.h>
-#include <osg/Point>
 #include <osg/Switch>
 
 using namespace onep;
@@ -22,7 +21,6 @@ using namespace osgGaming;
 using namespace std;
 
 GlobeModel::GlobeModel(osg::ref_ptr<TransformableCameraManipulator> tcm)
-  : _enabledSurface(0)
 {
 	makeEarthModel();
 	makeCloudsModel();
@@ -32,74 +30,115 @@ GlobeModel::GlobeModel(osg::ref_ptr<TransformableCameraManipulator> tcm)
 
 void GlobeModel::updateLightDirection(osg::Vec3f direction)
 {
-	_scatteringLightDirUniform->setElement(0, direction);
-	Vec3f position = -direction * ~_paramSunDistance;
+	m_scatteringLightDirUniform->setElement(0, direction);
+	Vec3f position = -direction * ~m_paramSunDistance;
 
-	_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), ~_paramSunRadiusMp2));
+	m_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), ~m_paramSunRadiusMp2));
 }
 
 void GlobeModel::updateClouds(float day)
 {
-	Quat quat = getQuatFromEuler(0.0, 0.0, fmodf(day * ~_paramEarthCloudsSpeed, C_2PI));
-	_cloudsTransform->setAttitude(quat);
+	Quat quat = getQuatFromEuler(0.0, 0.0, fmodf(day * ~m_paramEarthCloudsSpeed, C_2PI));
+	m_cloudsTransform->setAttitude(quat);
 
-	_uniformTime->set(day * ~_paramEarthCloudsMorphSpeed);
+	m_uniformTime->set(day * ~m_paramEarthCloudsMorphSpeed);
 }
 
 void GlobeModel::setSelectedCountry(int countryId)
 {
-  if (_enabledSurface > 0)
-    _countrySurfaces.find(_enabledSurface)->second.switchNode->setAllChildrenOff();
-
-  _enabledSurface = countryId;
+  for (CountryMesh::List::iterator it = m_visibleCountryMeshs.begin(); it != m_visibleCountryMeshs.end(); ++it)
+    m_countrySurfacesSwitch->setChildValue(*it, false);
 
   if (countryId == 0)
     return;
 
-  _countrySurfaces.find(countryId)->second.switchNode->setAllChildrenOn();
+  CountryMesh::Ptr mesh = m_countryMeshs.find(countryId)->second;
+  mesh->setColorMode(CountryMesh::MODE_SELECTED);
+  m_countrySurfacesSwitch->setChildValue(mesh, true);
+  m_visibleCountryMeshs.push_back(mesh);
 
-	//_uniformSelectedCountry->set(countryId);
+  CountryMesh::NeighborCountryMesh::List& neighbors = mesh->getNeighborCountryMeshs();
+  for (CountryMesh::NeighborCountryMesh::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+  {
+    it->mesh->setColorMode(CountryMesh::MODE_NEIGHBOR);
+    m_countrySurfacesSwitch->setChildValue(it->mesh, true);
+    m_visibleCountryMeshs.push_back(it->mesh);
+  }
 }
 
-void GlobeModel::addCountryTriangles(int id, osg::ref_ptr<osg::DrawElementsUInt> triangles)
+void GlobeModel::setCountriesMap(CountriesMap::Ptr countriesMap)
 {
-  if (_countrySurfaces.find(id) != _countrySurfaces.end())
+  m_countriesMap = countriesMap;
+}
+
+void GlobeModel::addCountry(int id, Country::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles)
+{
+  if (m_countryMeshs.find(id) != m_countryMeshs.end())
     return;
 
-  if (!_countrySurfacesGroup.valid())
+  if (!m_countrySurfacesSwitch.valid())
   {
-    _countrySurfacesGroup = new Group();
-    _countrySurfacesGroup->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
-    _countrySurfacesGroup->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
-    _countrySurfacesGroup->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
-    _countrySurfacesGroup->getOrCreateStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
-    _countrySurfacesGroup->getOrCreateStateSet()->setRenderBinDetails(1, "RenderBin");
+    m_countrySurfacesSwitch = new Switch();
+    m_countrySurfacesSwitch->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
+    m_countrySurfacesSwitch->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
+    m_countrySurfacesSwitch->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
+    m_countrySurfacesSwitch->getOrCreateStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
+    m_countrySurfacesSwitch->getOrCreateStateSet()->setRenderBinDetails(1, "RenderBin");
 
-    addChild(_countrySurfacesGroup);
+    addChild(m_countrySurfacesSwitch);
   }
 
-  ref_ptr<Switch> s = new Switch();
-  ref_ptr<Geode> geode = new Geode();
+  CountryMesh::Ptr mesh = new CountryMesh(m_countriesVertices, triangles);
+  mesh->setCountryData(countryData);
 
-  ref_ptr<Geometry> geo = new Geometry();
-  geo->setVertexArray(_countriesVertices);
-  //geo_points->setColorArray(red, Array::BIND_OVERALL);
-  geo->addPrimitiveSet(triangles);
+  m_countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
+  m_countrySurfacesSwitch->addChild(mesh, false);
+}
 
-  s->addChild(geode, false);
-  geode->addDrawable(geo);
-  _countrySurfacesGroup->addChild(s);
+CountryMesh::Map& GlobeModel::getCountryMeshs()
+{
+  return m_countryMeshs;
+}
 
-  ref_ptr<Material> material = new Material();
-  material->setColorMode(Material::DIFFUSE);
-  material->setDiffuse(Material::FRONT, Vec4f(1.0f, 0.0f, 0.0f, 1.0f));
-  material->setAlpha(Material::FRONT, 0.5f);
-  geode->getOrCreateStateSet()->setAttribute(material, StateAttribute::ON);
+CountriesMap::Ptr GlobeModel::getCountriesMap()
+{
+  return m_countriesMap;
+}
 
-  CountrySurface surface;
-  surface.switchNode = s;
- 
-  _countrySurfaces.insert(CountrySurfaceMap::value_type(id, surface));
+CountryMesh::Ptr GlobeModel::getCountryMesh(int id)
+{
+  return m_countryMeshs.find(id)->second;
+}
+
+CountryMesh::Ptr GlobeModel::getCountryMesh(osg::Vec2f coord)
+{
+  int id = getCountryId(coord);
+
+  if (id == 0)
+    return nullptr;
+
+  return getCountryMesh(id);
+}
+
+int GlobeModel::getCountryId(osg::Vec2f coord)
+{
+  Vec2i mapSize = m_countriesMap->getSize();
+
+  int ix = int(coord.x() * float(mapSize.x()));
+  int iy = int(coord.y() * float(mapSize.y()));
+
+  return m_countriesMap->getDataAt(ix, iy);
+}
+
+std::string GlobeModel::getCountryName(osg::Vec2f coord)
+{
+  CountryMesh::Map::iterator it = m_countryMeshs.find(getCountryId(coord));
+  if (it == m_countryMeshs.end())
+  {
+    return "No country selected";
+  }
+
+  return it->second->getCountryData()->getCountryName();
 }
 
 void GlobeModel::makeEarthModel()
@@ -133,41 +172,17 @@ void GlobeModel::makeEarthModel()
 	pgm->addBindAttribLocation("binormal", 7);
 
 	stateSet->setAttribute(pgm, StateAttribute::ON);
-
-	_uniformSelectedCountry = new Uniform("selected_country_id", 255);
-	stateSet->addUniform(_uniformSelectedCountry);
   //stateSet->setRenderBinDetails(0, "RenderBin");
 
 	earth->setStateSet(stateSet);
 
 	addChild(earth);
-
-
-
-	/*ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
-	ref_ptr<Geode> geode = new Geode();
-
-	ref_ptr<Geometry> geo = createSphereSegmentMesh(24, 48, 10.738, 0, 23, 0, 47);
-	//geo->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
-
-	geode->addDrawable(geo);
-	transform->addChild(geode);
-
-	transform->setPosition(Vec3f(384.4f, 0.0f, 0.0f));
-
-	TextureFactory::make()
-		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/moon/color_1k.png"))
-		->texLayer(0)
-		->assign(geo->getOrCreateStateSet())
-		->build();
-
-	addChild(transform);*/
 }
 
 void GlobeModel::makeCloudsModel()
 {
 	// geometry
-	_cloudsTransform = new PositionAttitudeTransform();
+	m_cloudsTransform = new PositionAttitudeTransform();
 
 	ref_ptr<Geode> atmosphere_geode = createCloudsGeode();
 
@@ -196,15 +211,15 @@ void GlobeModel::makeCloudsModel()
 	pgm->addShader(vert_shader);
 	pgm->addShader(frag_shader);
 
-	_uniformTime = new Uniform("time", 0.0f);
+	m_uniformTime = new Uniform("time", 0.0f);
 
 	stateSet->setAttribute(pgm, StateAttribute::ON);
-	stateSet->addUniform(_uniformTime);
+	stateSet->addUniform(m_uniformTime);
 
 	atmosphere_geode->setStateSet(stateSet);
 
-	_cloudsTransform->addChild(atmosphere_geode);
-	addChild(_cloudsTransform);
+	m_cloudsTransform->addChild(atmosphere_geode);
+	addChild(m_cloudsTransform);
 }
 
 void GlobeModel::makeBoundariesModel()
@@ -214,7 +229,7 @@ void GlobeModel::makeBoundariesModel()
 
   ref_ptr<Geode> geode = new Geode();
 
-  _countriesVertices = new Vec3Array();
+  m_countriesVertices = new Vec3Array();
 
   int nverts = stream.read<int>();
   for (int i = 0; i < nverts; i++)
@@ -223,7 +238,7 @@ void GlobeModel::makeBoundariesModel()
     float y = stream.read<float>();
     float z = stream.read<float>();
 
-    _countriesVertices->push_back(Vec3f(x, y, z));
+    m_countriesVertices->push_back(Vec3f(x, y, z));
   }
 
   int nInnerPoints = stream.read<int>();
@@ -234,14 +249,12 @@ void GlobeModel::makeBoundariesModel()
   for (int i = 0; i < (nverts - nInnerPoints); i++)
     texcoords->push_back(Vec2f(0.0f, 0.0f));
 
-  ref_ptr<DrawElementsUInt> lines = new DrawElementsUInt(GL_LINES, 0);
-
-  int nedges = stream.read<int>();
+  /*int nedges = stream.read<int>();
   for (int i = 0; i < nedges; i++)
   {
-    lines->push_back(stream.read<int>());
-    lines->push_back(stream.read<int>());
-  }
+    stream.read<int>();
+    stream.read<int>();
+  }*/
 
   ref_ptr<DrawElementsUInt> quads = new DrawElementsUInt(GL_QUADS, 0);
 
@@ -252,50 +265,25 @@ void GlobeModel::makeBoundariesModel()
       quads->push_back(stream.read<int>());
   }
 
-  ref_ptr<Vec4Array> white = new Vec4Array();
-  white->push_back(Vec4f(1.0f, 1.0f, 1.0f, 1.0f));
-
-  ref_ptr<Vec4Array> red = new Vec4Array();
-  red->push_back(Vec4f(1.0f, 0.0f, 0.0f, 1.0f));
-
-  ref_ptr<Geometry> geo_lines = new Geometry();
-  geo_lines->setVertexArray(_countriesVertices);
-  geo_lines->setColorArray(white, Array::BIND_OVERALL);
-  geo_lines->addPrimitiveSet(lines);
-
-  ref_ptr<Geometry> geo_points = new Geometry();
-  geo_points->setVertexArray(_countriesVertices);
-  //geo_points->setColorArray(red, Array::BIND_OVERALL);
-  geo_points->addPrimitiveSet(new DrawArrays(GL_POINTS, 0, _countriesVertices->size()));
-
   ref_ptr<Geometry> geo_quads = new Geometry();
-  geo_quads->setVertexArray(_countriesVertices);
+  geo_quads->setVertexArray(m_countriesVertices);
   geo_quads->setTexCoordArray(0, texcoords, Array::BIND_PER_VERTEX);
-  //geo_quads->setColorArray(white, Array::BIND_OVERALL);
   geo_quads->addPrimitiveSet(quads);
 
-  geo_points->getOrCreateStateSet()->setAttribute(new Point(5.0f), StateAttribute::ON);
-
-  //geode->addDrawable(geo_lines);
-  //geode->addDrawable(geo_points);
   geode->addDrawable(geo_quads);
   addChild(geode);
 
   ref_ptr<Program> program = new Program();
-  //ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/boundaries.vert", Shader::VERTEX);
   ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/boundaries.frag", Shader::FRAGMENT);
 
-  //program->addShader(vert_shader);
   program->addShader(frag_shader);
 
-  //geode->getOrCreateStateSet()->setRenderBinDetails(-1, "RenderBin");
   geode->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
   geode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
   geode->getOrCreateStateSet()->setAttribute(program, StateAttribute::ON);
   geode->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
   geode->getOrCreateStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
   geode->getOrCreateStateSet()->setRenderBinDetails(2, "RenderBin");
-
 
   ResourceManager::getInstance()->clearCacheResource("./GameData/data/boundaries.dat");
 }
@@ -331,17 +319,17 @@ void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<TransformableCameraManip
 	stateSet->addUniform(new Uniform("planet_h", atmosphereHeight));
 	stateSet->addUniform(new Uniform("view_depth", scatteringDepth));
 
-	_scatteringLightDirUniform = new Uniform(Uniform::FLOAT_VEC3, "light_dir", 1);
+	m_scatteringLightDirUniform = new Uniform(Uniform::FLOAT_VEC3, "light_dir", 1);
 	ref_ptr<Uniform> light_col_uniform = new Uniform(Uniform::FLOAT_VEC3, "light_col", 1);
-	_scatteringLightPosrUniform = new Uniform(Uniform::FLOAT_VEC4, "light_posr", 1);
+	m_scatteringLightPosrUniform = new Uniform(Uniform::FLOAT_VEC4, "light_posr", 1);
 
 	//light_col_uniform->setElement(0, Vec3f(1.0f, 1.0f, 1.0f));
 	light_col_uniform->setElement(0, Vec3f(0.0f, 0.0f, 0.0f));
 
 	stateSet->addUniform(new Uniform("lights", 1));
-	stateSet->addUniform(_scatteringLightDirUniform);
+	stateSet->addUniform(m_scatteringLightDirUniform);
 	stateSet->addUniform(light_col_uniform);
-	stateSet->addUniform(_scatteringLightPosrUniform);
+	stateSet->addUniform(m_scatteringLightPosrUniform);
 
 	stateSet->addUniform(new Uniform("B0", atmosphereColor * scatteringIntensity));
 
@@ -400,13 +388,11 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 			char nightmap_file[128];
 			char specreliefcitiesboundariesmap_file[128];
 			char normalmap_file[128];
-			char countriesmap_file[128];
 
 			sprintf(colormap_file, "./GameData/textures/earth/color/%s/%dx%d.png", resolutionLevel0, x, y);
 			sprintf(nightmap_file, "./GameData/textures/earth/night/%s/%dx%d.png", resolutionLevel0, x, y);
 			sprintf(specreliefcitiesboundariesmap_file, "./GameData/textures/earth/speccitiesclouds/%s/%dx%d.png", resolutionLevel1, x, y);
 			sprintf(normalmap_file, "./GameData/textures/earth/normal/%s/%dx%d.png", resolutionLevel1, x, y);
-			//sprintf(countriesmap_file, "./GameData/textures/earth/countries/%s/%dx%d.png", resolutionLevel0, x, y);
 
 			TextureFactory::getInstance()->make()
 				->image(ResourceManager::getInstance()->loadImage(colormap_file))
@@ -435,13 +421,6 @@ ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
 				->uniform(stateSet, "normalmap")
 				->assign(stateSet)
 				->build();
-
-			/*TextureFactory::getInstance()->make()
-				->image(ResourceManager::getInstance()->loadImage(countriesmap_file))
-				->texLayer(4)
-				->uniform(stateSet, "countriesmap")
-				->assign(stateSet)
-				->build();*/
 
 			geode->addDrawable(geo);
 		}

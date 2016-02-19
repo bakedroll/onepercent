@@ -5,8 +5,6 @@
 #include <osg/ref_ptr>
 
 #include <string>
-#include <vector>
-#include <map>
 
 namespace onep
 {
@@ -23,15 +21,7 @@ namespace onep
 	class Country : public osg::Referenced
 	{
 	public:
-		typedef struct _neighborCountry
-		{
-			osg::ref_ptr<Country> country;
-			osg::ref_ptr<NeighborCountryInfo> info;
-		} NeighborCountry;
-
 		typedef osg::ref_ptr<Country> Ptr;
-		typedef std::vector<NeighborCountry> Neighbors;
-		typedef std::map<unsigned char, osg::ref_ptr<Country>> Map;
 
 		static const int SkillBranchCount = 5;
 
@@ -45,8 +35,6 @@ namespace onep
 		} SkillBranchType;
 
 		Country(std::string name, unsigned char id, float population, float wealth, osg::Vec2f center, osg::Vec2f size);
-
-		void addNeighborCountry(osg::ref_ptr<Country> country, osg::ref_ptr<NeighborCountryInfo> info);
 
 		void addAngerInfluence(float influence);
 		void addInterestInfluence(float influence);
@@ -66,7 +54,6 @@ namespace onep
 		float getRelativeDept();
 		float getAnger();
 		float getAngerBalance();
-		Neighbors& getNeighborCountries();
 
 		bool getSKillBranchActivated(SkillBranchType type);
 
@@ -95,7 +82,5 @@ namespace onep
 		unsigned char _id;
 		osg::Vec2f _centerLatLong;
 		osg::Vec2f _size;
-
-		Neighbors _neighborCountries;
 	};
 }

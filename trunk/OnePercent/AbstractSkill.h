@@ -3,6 +3,7 @@
 #include "Country.h"
 
 #include <osg/Referenced>
+#include <map>
 
 namespace onep
 {

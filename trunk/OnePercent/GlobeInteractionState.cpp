@@ -55,9 +55,9 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), ~_paramEarthRadius, point, direction, pickResult))
 		{
 			Vec2f polar = getPolarFromCartesian(pickResult);
-			ref_ptr<Country> country = getGlobeOverviewWorld()->getSimulation()->getCountry(polar);
+			ref_ptr<CountryMesh> countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(polar);
 
-			int selected = country == nullptr ? 0 : int(country->getId());
+			int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
 
 			getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
 
@@ -84,7 +84,7 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 
 			updateCountryInfoText();
 
-			if (country != nullptr)
+			if (countryMesh != nullptr)
 			{
 				//Vec2f countrySize = country->getSize();
 				//Vec2f surfaceSize = country->getSurfaceSize();
@@ -108,10 +108,10 @@ void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
 
 
 
-				printf("Selected country (%d): %s\n", _selectedCountry, country->getCountryName().c_str());
+				printf("Selected country (%d): %s\n", _selectedCountry, countryMesh->getCountryData()->getCountryName().c_str());
 
-				setCameraLatLong(country->getCenterLatLong(), getSimulationTime());
-				setCameraDistance(max(country->getOptimalCameraDistance(
+        setCameraLatLong(countryMesh->getCountryData()->getCenterLatLong(), getSimulationTime());
+        setCameraDistance(max(countryMesh->getCountryData()->getOptimalCameraDistance(
 					float(getWorld()->getCameraManipulator()->getProjectionAngle()),
 					float(getWorld()->getCameraManipulator()->getProjectionRatio())), ~_paramCameraMinDistance), getSimulationTime());
 			}
@@ -226,35 +226,35 @@ void GlobeInteractionState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
 	{
 		if (_selectedCountry != 255)
 		{
-			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_BANKS, true);
+      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_BANKS, true);
 		}
 	}
 	else if (uiElement->getUIName() == "button_makePolitics")
 	{
 		if (_selectedCountry != 255)
 		{
-			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_POLITICS, true);
+      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_POLITICS, true);
 		}
 	}
 	else if (uiElement->getUIName() == "button_makeConcerns")
 	{
 		if (_selectedCountry != 255)
 		{
-			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_CONCERNS, true);
+      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_CONCERNS, true);
 		}
 	}
 	else if (uiElement->getUIName() == "button_makeMedia")
 	{
 		if (_selectedCountry != 255)
 		{
-			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_MEDIA, true);
+      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_MEDIA, true);
 		}
 	}
 	else if (uiElement->getUIName() == "button_makeControl")
 	{
 		if (_selectedCountry != 255)
 		{
-			getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry)->setSkillBranchActivated(Country::BRANCH_CONTROL, true);
+      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_CONTROL, true);
 		}
 	}
 }
@@ -275,7 +275,7 @@ void GlobeInteractionState::startSimulation()
 	_textConfirm->setVisible(false);
 	_textProgress->setVisible(true);
 
-	getGlobeOverviewWorld()->getSimulation()->getCountry(unsigned char(_selectedCountry))->setSkillBranchActivated(Country::BRANCH_BANKS, true);
+  getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_BANKS, true);
 
 	_simulationTimer = TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
 	_simulationTimer->start();
@@ -315,7 +315,7 @@ void GlobeInteractionState::updateCountryInfoText()
 	}
 
 	string infoText = "";
-	Country::Ptr country = getGlobeOverviewWorld()->getSimulation()->getCountry(_selectedCountry);
+  Country::Ptr country = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData();
 
 	char buffer[16];
 

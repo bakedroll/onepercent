@@ -2,13 +2,6 @@
 #include "GlobeOverviewWorld.h"
 #include "GlobeInteractionState.h"
 
-#include <osgGaming/Helper.h>
-#include <osgGaming/UIButton.h>
-#include <osgGaming/UIGrid.h>
-#include <osgGaming/UIStackPanel.h>
-#include <osgGaming/UIText.h>
-#include <osgGaming/UIMarkupLoader.h>
-
 using namespace osg;
 using namespace onep;
 using namespace osgGaming;
