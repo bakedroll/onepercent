@@ -109,6 +109,9 @@
     <ClInclude Include="CountryMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ProgressingValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="GameData\shaders\atmosphere.frag">

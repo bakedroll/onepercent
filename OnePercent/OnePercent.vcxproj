@@ -108,6 +108,7 @@
     <ClInclude Include="GlobeOverviewWorld.h" />
     <ClInclude Include="LoadingGlobeOverviewState.h" />
     <ClInclude Include="MainMenuState.h" />
+    <ClInclude Include="ProgressingValue.h" />
     <ClInclude Include="Simulation.h" />
   </ItemGroup>
   <ItemGroup>

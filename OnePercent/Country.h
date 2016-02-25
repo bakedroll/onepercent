@@ -6,6 +6,8 @@
 
 #include <string>
 
+#include "ProgressingValue.h"
+
 namespace onep
 {
 	class NeighborCountryInfo : public osg::Referenced
@@ -37,7 +39,7 @@ namespace onep
 		Country(std::string name, unsigned char id, float population, float wealth, osg::Vec2f center, osg::Vec2f size);
 
 		void addAngerInfluence(float influence);
-		void addInterestInfluence(float influence);
+    void addInterestChange(float change);
 
 		void setSkillBranchActivated(SkillBranchType type, bool activated);
 
@@ -59,28 +61,23 @@ namespace onep
 
 		bool anySkillBranchActivated();
 
-		void clearEffects();
-
 		void step();
 	private:
-		std::string _name;
+		std::string m_name;
 
-		float _populationInMio;
-		float _wealth;
-		float _anger;
-		float _angerBalance;
-		float _buyingPower;
-		float _dept;
-		float _deptBalance;
-		float _interest;
+    ProgressingValue<float>::Ptr m_valueAnger;
+    ProgressingValue<float>::Ptr m_valueDept;
+    ProgressingValue<float>::Ptr m_valueInterest;
+    ProgressingValue<float>::Ptr m_valueBuyingPower;
 
-		float _angerInfluence;
-		float _interestInfluence;
+    ProgressingValueContainer m_valueContainer;
 
-		bool _skillBranchActivated[SkillBranchCount];
+		float m_populationInMio;
 
-		unsigned char _id;
-		osg::Vec2f _centerLatLong;
-		osg::Vec2f _size;
+		bool m_skillBranchActivated[SkillBranchCount];
+
+		unsigned char m_id;
+		osg::Vec2f m_centerLatLong;
+		osg::Vec2f m_size;
 	};
 }
