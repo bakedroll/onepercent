@@ -57,5 +57,5 @@ bool AbstractSkill::getActivated()
 void AbstractSkill::takeEffect(ref_ptr<Country> country)
 {
 	country->addAngerInfluence(_anger);
-	country->addInterestInfluence(_interest);
+	country->addInterestChange(_interest);
 }

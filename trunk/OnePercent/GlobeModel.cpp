@@ -107,6 +107,11 @@ CountriesMap::Ptr GlobeModel::getCountriesMap()
 
 CountryMesh::Ptr GlobeModel::getCountryMesh(int id)
 {
+  CountryMesh::Map::iterator countryMesh = m_countryMeshs.find(id);
+
+  if (countryMesh == m_countryMeshs.end())
+    return nullptr;
+
   return m_countryMeshs.find(id)->second;
 }
 

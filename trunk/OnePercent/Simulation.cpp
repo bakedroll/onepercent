@@ -170,8 +170,6 @@ void Simulation::step()
   CountryMesh::Map& countries = m_globeModel->getCountryMeshs();
   for (CountryMesh::Map::iterator itcountry = countries.begin(); itcountry != countries.end(); ++itcountry)
 	{
-		itcountry->second->getCountryData()->clearEffects();
-
 		for (AbstractSkill::Map::iterator itskill = m_skills.begin(); itskill != m_skills.end(); ++itskill)
 		{
       if (itskill->second->getActivated() && itcountry->second->getCountryData()->getSKillBranchActivated(itskill->second->getBranch()))

@@ -222,40 +222,32 @@ void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::V
 
 void GlobeInteractionState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
 {
+  ref_ptr<Country> selectedCountry = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData();
+
 	if (uiElement->getUIName() == "button_makeBanks")
 	{
-		if (_selectedCountry != 255)
-		{
-      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_BANKS, true);
-		}
+    if (selectedCountry)
+      selectedCountry->setSkillBranchActivated(Country::BRANCH_BANKS, true);
 	}
 	else if (uiElement->getUIName() == "button_makePolitics")
 	{
-		if (_selectedCountry != 255)
-		{
-      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_POLITICS, true);
-		}
+    if (selectedCountry)
+      selectedCountry->setSkillBranchActivated(Country::BRANCH_POLITICS, true);
 	}
 	else if (uiElement->getUIName() == "button_makeConcerns")
 	{
-		if (_selectedCountry != 255)
-		{
-      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_CONCERNS, true);
-		}
+    if (selectedCountry)
+      selectedCountry->setSkillBranchActivated(Country::BRANCH_CONCERNS, true);
 	}
 	else if (uiElement->getUIName() == "button_makeMedia")
 	{
-		if (_selectedCountry != 255)
-		{
-      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_MEDIA, true);
-		}
+    if (selectedCountry)
+      selectedCountry->setSkillBranchActivated(Country::BRANCH_MEDIA, true);
 	}
 	else if (uiElement->getUIName() == "button_makeControl")
 	{
-		if (_selectedCountry != 255)
-		{
-      getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_CONTROL, true);
-		}
+    if (selectedCountry)
+      selectedCountry->setSkillBranchActivated(Country::BRANCH_CONTROL, true);
 	}
 }
 
