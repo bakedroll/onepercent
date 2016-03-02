@@ -20,7 +20,7 @@ void NeighborCountryInfo::setRelation(float relation)
 }
 
 Country::Country(string name, unsigned char id, float population, float wealth, Vec2f centerLatLong, Vec2f size)
-	: Referenced()
+  : Referenced()
   , m_name(name)
   , m_valueAnger(new ProgressingValue<float>(0.0f, 1.0f, 0.0f))
   , m_valueDept(new ProgressingValue<float>(0.0f, wealth, 0.0f))
@@ -34,12 +34,18 @@ Country::Country(string name, unsigned char id, float population, float wealth, 
 	for (int i = 0; i < SkillBranchCount; i++)
 	{
 		m_skillBranchActivated[i] = false;
+
+    m_valueAffectNeighbor[i] = new ProgressingValue<float>(0.0f, 1.0f, 0.0f);
+    m_valueAffectedByNeighbor[i] = new ProgressingValue<float>(0.0f, 1.0f, 0.0f);
+
+    m_valueContainer.registerValue(m_valueAffectNeighbor[i], SkillBranch::getStringFromType(i) + ": Affect");
+    m_valueContainer.registerValue(m_valueAffectedByNeighbor[i], SkillBranch::getStringFromType(i) + ": Affected");
 	}
 
-  m_valueContainer.registerValue(m_valueAnger);
-  m_valueContainer.registerValue(m_valueDept);
-  m_valueContainer.registerValue(m_valueInterest);
-  m_valueContainer.registerValue(m_valueBuyingPower);
+  m_valueContainer.registerValue(m_valueAnger, "Anger");
+  m_valueContainer.registerValue(m_valueDept, "Dept");
+  m_valueContainer.registerValue(m_valueInterest, "Interest");
+  m_valueContainer.registerValue(m_valueBuyingPower, "Buying Power");
 
   m_valueInterest->setValue(0.05f);
   m_valueBuyingPower->setValue(~Property<float, Param_MechanicsStartBuyingPowerName>());
@@ -55,7 +61,7 @@ void Country::addInterestChange(float change)
   m_valueInterest->addChange(change);
 }
 
-void Country::setSkillBranchActivated(SkillBranchType type, bool activated)
+void Country::setSkillBranchActivated(int type, bool activated)
 {
 	m_skillBranchActivated[type] = activated;
 }
@@ -102,37 +108,37 @@ float Country::getOptimalCameraDistance(float angle, float ratio)
 	return max(hdistance, vdistance);
 }
 
-float Country::getWealth()
+ProgressingValue<float>::Ptr Country::getAngerValue()
 {
-	return m_valueDept->getMax();
+  return m_valueAnger;
 }
 
-float Country::getDept()
+ProgressingValue<float>::Ptr Country::getDeptValue()
 {
-	return m_valueDept->getValue();
+  return m_valueDept;
 }
 
-float Country::getDeptBalance()
+ProgressingValue<float>::Ptr Country::getInterestValue()
 {
-	return m_valueDept->getBalance();
+  return m_valueInterest;
 }
 
-float Country::getRelativeDept()
+ProgressingValue<float>::Ptr Country::getBuyingPowerValue()
 {
-	return m_valueDept->getValue() / m_valueDept->getMax();
+  return m_valueBuyingPower;
 }
 
-float Country::getAnger()
+ProgressingValue<float>::Ptr Country::getAffectNeighborValue(SkillBranch::Type type)
 {
-	return m_valueAnger->getValue();
+  return m_valueAffectNeighbor[int(type)];
 }
 
-float Country::getAngerBalance()
+ProgressingValue<float>::Ptr Country::getAffectedByNeighborValue(SkillBranch::Type type)
 {
-	return m_valueAnger->getBalance();
+  return m_valueAffectedByNeighbor[int(type)];
 }
 
-bool Country::getSKillBranchActivated(SkillBranchType type)
+bool Country::getSkillBranchActivated(int type)
 {
 	return m_skillBranchActivated[type];
 }
@@ -152,12 +158,18 @@ bool Country::anySkillBranchActivated()
 
 void Country::step()
 {
-	if (m_skillBranchActivated[BRANCH_BANKS])
+	if (m_skillBranchActivated[SkillBranch::BRANCH_BANKS])
 	{
     m_valueDept->setBalance(m_valueDept->getValue() * m_valueInterest->getValue() + m_valueBuyingPower->getValue());
 	}
 
-	m_valueAnger->setBalance(getRelativeDept() * 0.1f);
+  // rel dept * 0.1
+  m_valueAnger->setBalance(m_valueDept->getValue() / m_valueDept->getMax() * 0.1f);
 
   m_valueContainer.step();
+}
+
+void Country::debugPrintValueString(std::string& str)
+{
+  m_valueContainer.debugPrintToString(str);
 }

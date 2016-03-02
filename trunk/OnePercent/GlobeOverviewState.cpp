@@ -123,7 +123,7 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 		{
 			if (key == GUIEventAdapter::KEY_1 + i)
 			{
-				ref_ptr<AbstractSkill> skill = _globeWorld->getSimulation()->getSkill(i);
+				ref_ptr<Skill> skill = _globeWorld->getSimulation()->getSkill(i);
 				skill->setActivated(!skill->getActivated());
 
 				printf("Skill %s activated: %d\n", skill->getName().c_str(), int(skill->getActivated()));

@@ -1,34 +1,40 @@
 #pragma once
 
-#include "Country.h"
+//#include "Country.h"
 
 #include <osg/Referenced>
-#include <map>
+#include <osg/ref_ptr>
+
+#include <vector>
 
 namespace onep
 {
-	class AbstractSkill : public osg::Referenced
+  class Country;
+
+	class Skill : public osg::Referenced
 	{
 	public:
-		typedef std::map<int, osg::ref_ptr<AbstractSkill>> Map;
+    typedef osg::ref_ptr<Skill> Ptr;
+    typedef std::vector<Ptr> List;
 
-		AbstractSkill(std::string name, Country::SkillBranchType branch);
+		Skill(std::string name);
 
 		void setAnger(float anger);
 		void setInterest(float interest);
+    void setPropagation(float propagation);
 		void setActivated(bool activated);
 
 		std::string getName();
-		Country::SkillBranchType getBranch();
 		float getAnger();
 		float getInterest();
+    float getPropagation();
 		bool getActivated();
 
 		void takeEffect(osg::ref_ptr<Country> country);
-
-		std::string _name;
-		Country::SkillBranchType _branch;
+	  
+	  std::string _name;
 		float _anger;
+    float m_propagation;
 		float _interest;
 
 		bool _activated;

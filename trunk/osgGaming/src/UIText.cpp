@@ -40,6 +40,19 @@ void UIText::setTextAlignment(TextBase::AlignmentType alignment)
 	_alignment = alignment;
 }
 
+void UIText::setOutlineColor(const osg::Vec4f& color)
+{
+  _textNode->setBackdropColor(color);
+}
+
+void UIText::setOutlineEnabled(bool enabled)
+{
+  if (enabled)
+    _textNode->setBackdropType(osgText::Text::OUTLINE);
+  else
+    _textNode->setBackdropType(osgText::Text::NONE);
+}
+
 void UIText::updatedContentOriginSize(Vec2f origin, Vec2f size)
 {
 	Vec2f position;

@@ -57,8 +57,8 @@ void GlobeModel::setSelectedCountry(int countryId)
   m_countrySurfacesSwitch->setChildValue(mesh, true);
   m_visibleCountryMeshs.push_back(mesh);
 
-  CountryMesh::NeighborCountryMesh::List& neighbors = mesh->getNeighborCountryMeshs();
-  for (CountryMesh::NeighborCountryMesh::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+  CountryMesh::Neighbor::List& neighbors = mesh->getNeighborCountryMeshs();
+  for (CountryMesh::Neighbor::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
   {
     it->mesh->setColorMode(CountryMesh::MODE_NEIGHBOR);
     m_countrySurfacesSwitch->setChildValue(it->mesh, true);

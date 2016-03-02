@@ -138,15 +138,18 @@ void UIMarkupLoader::parseXmlText(xml_node<>* node, ref_ptr<UIText> uiText)
 {
 	xml_attribute<>* attrContent = node->first_attribute("content");
 	if (attrContent != nullptr)
-	{
 		uiText->setText(parseXmlAttributeString(attrContent->value()));
-	}
 
 	xml_attribute<>* attrFontsize = node->first_attribute("fontsize");
 	if (attrFontsize != nullptr)
-	{
 		uiText->setFontSize(parseXmlAttributeInt(attrFontsize->value()));
-	}
+
+  xml_attribute<>* attrOutlineColor = node->first_attribute("outlinecolor");
+  if (attrOutlineColor != nullptr)
+  {
+    uiText->setOutlineEnabled(true);
+    uiText->setOutlineColor(parseXmlAttributeVec4(attrOutlineColor->value()));
+  }
 }
 
 UIMarkupLoader::XmlUiElementList UIMarkupLoader::parseXmlChildElements(xml_node<>* node)

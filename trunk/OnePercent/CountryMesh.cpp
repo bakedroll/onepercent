@@ -21,7 +21,7 @@ namespace onep
 
   void CountryMesh::addNeighborCountry(osg::ref_ptr<CountryMesh> mesh, osg::ref_ptr<NeighborCountryInfo> info)
   {
-    NeighborCountryMesh nc;
+    Neighbor nc;
     nc.mesh = mesh;
     nc.info = info;
 
@@ -33,7 +33,7 @@ namespace onep
     return m_countryData;
   }
 
-  CountryMesh::_neighborCountryMesh::List& CountryMesh::getNeighborCountryMeshs()
+  CountryMesh::_neighbor::List& CountryMesh::getNeighborCountryMeshs()
   {
     return m_neighbours;
   }

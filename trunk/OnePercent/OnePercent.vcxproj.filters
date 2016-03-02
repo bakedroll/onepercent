@@ -53,13 +53,16 @@
     <ClCompile Include="Globals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AbstractSkill.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CountryOverlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CountryMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SkillBranch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Skill.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -100,9 +103,6 @@
     <ClInclude Include="Globals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AbstractSkill.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CountryOverlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -110,6 +110,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ProgressingValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillBranch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Skill.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

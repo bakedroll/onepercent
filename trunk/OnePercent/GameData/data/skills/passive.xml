@@ -8,6 +8,7 @@
 			<field name="branch" type="string" />
 			<field name="anger" type="float" default="5.0" />
 			<field name="interest" type="float" default="0.0" />
+			<field name="propagation" type="float" default="0.0" />
 			
 			<element>
 				<property name="name" value="INTEREST I" />
@@ -27,6 +28,12 @@
 				<property name="name" value="ANGER TEST" />
 				<property name="branch" value="banks" />
 				<property name="anger" value="-1.0" />
+			</element>
+			
+			<element>
+				<property name="name" value="propagation banks" />
+				<property name="branch" value="banks" />
+				<property name="propagation" value="0.005" />
 			</element>
 		
 		</array>

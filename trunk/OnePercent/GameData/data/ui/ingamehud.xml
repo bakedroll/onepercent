@@ -23,7 +23,7 @@
 				<button name="button_makeMedia" cell="2" text="Media" />
 				<button name="button_makeControl" cell="1" text="Control" />
 				
-				<text name="text_countryInfo" content="" cell="0" fontsize="14" />
+				<text name="text_countryInfo" content="" cell="0" fontsize="14" outlinecolor="0.0, 0.0, 0.0, 1.0" />
 				
 			</stackpanel>
 			

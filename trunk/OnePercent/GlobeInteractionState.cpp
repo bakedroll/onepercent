@@ -145,10 +145,10 @@ void GlobeInteractionState::onKeyPressedEvent(int key)
 				printf("Simulation started\n");
 			}
 		}
-		else if (key == GUIEventAdapter::KEY_P)
+		/*else if (key == GUIEventAdapter::KEY_P)
 		{
 			getGlobeOverviewWorld()->getSimulation()->printStats();
-		}
+		}*/
 	}
 }
 
@@ -227,27 +227,27 @@ void GlobeInteractionState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
 	if (uiElement->getUIName() == "button_makeBanks")
 	{
     if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(Country::BRANCH_BANKS, true);
+      selectedCountry->setSkillBranchActivated(SkillBranch::BRANCH_BANKS, true);
 	}
 	else if (uiElement->getUIName() == "button_makePolitics")
 	{
     if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(Country::BRANCH_POLITICS, true);
+      selectedCountry->setSkillBranchActivated(SkillBranch::BRANCH_POLITICS, true);
 	}
 	else if (uiElement->getUIName() == "button_makeConcerns")
 	{
     if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(Country::BRANCH_CONCERNS, true);
+      selectedCountry->setSkillBranchActivated(SkillBranch::BRANCH_CONCERNS, true);
 	}
 	else if (uiElement->getUIName() == "button_makeMedia")
 	{
     if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(Country::BRANCH_MEDIA, true);
+      selectedCountry->setSkillBranchActivated(SkillBranch::BRANCH_MEDIA, true);
 	}
 	else if (uiElement->getUIName() == "button_makeControl")
 	{
     if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(Country::BRANCH_CONTROL, true);
+      selectedCountry->setSkillBranchActivated(SkillBranch::BRANCH_CONTROL, true);
 	}
 }
 
@@ -267,7 +267,7 @@ void GlobeInteractionState::startSimulation()
 	_textConfirm->setVisible(false);
 	_textProgress->setVisible(true);
 
-  getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(Country::BRANCH_BANKS, true);
+  getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(SkillBranch::BRANCH_BANKS, true);
 
 	_simulationTimer = TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
 	_simulationTimer->start();
@@ -309,10 +309,10 @@ void GlobeInteractionState::updateCountryInfoText()
 	string infoText = "";
   Country::Ptr country = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData();
 
-	char buffer[16];
+	//char buffer[16];
 
 	infoText += country->getCountryName() + "\n";
-	infoText += "Wealth: " + to_string(country->getWealth()) + "\n";
+	/*infoText += "Wealth: " + to_string(country->getWealth()) + "\n";
 
 	sprintf(buffer, "%.2f", country->getDept());
 	infoText += "Dept: " + string(buffer) + "\n";
@@ -327,7 +327,10 @@ void GlobeInteractionState::updateCountryInfoText()
 	infoText += "Anger: " + string(buffer) + "%\n";
 
 	sprintf(buffer, "%.2f", country->getAngerBalance());
-	infoText += "Anger balance: " + string(buffer) + "\n";
+	infoText += "Anger balance: " + string(buffer) + "\n";*/
+
+
+  country->debugPrintValueString(infoText);
 
 	_textCountryInfo->setText(infoText);
 }
