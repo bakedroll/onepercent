@@ -17,6 +17,8 @@ namespace osgGaming
 		void setFontSize(int size);
 
 		void setTextAlignment(osgText::TextBase::AlignmentType alignment);
+    void setOutlineColor(const osg::Vec4f& color);
+    void setOutlineEnabled(bool enabled);
 
 		virtual void updatedContentOriginSize(osg::Vec2f origin, osg::Vec2f size) override;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 
 #include <osg/Referenced>
 
@@ -12,6 +13,7 @@ namespace onep
     typedef std::vector<osg::ref_ptr<ProgressingValueBase>> List;
 
     virtual void step() = 0;
+    virtual void debugPrintToString(std::string& str) = 0;
   };
 
   template<typename T>
@@ -80,7 +82,26 @@ namespace onep
       return m_value + m_change;
     }
 
+    virtual void debugPrintToString(std::string& str) override
+    {
+      T percent = m_value * static_cast<T>(100) / m_max;
+
+      str += 
+        round(std::to_string(m_value), 2) + "/" + round(std::to_string(m_max), 2) +
+        " [" + round(std::to_string(percent), 2) + "%]\n";
+    }
+
   private:
+
+    std::string round(const std::string& str, int n)
+    {
+      std::size_t pos = str.find('.');
+      if (pos == std::string::npos || str.size() < (pos + 1 + n))
+        return str;
+
+      return str.substr(0, pos + 1 + n);
+    }
+
     T m_min;
     T m_max;
     T m_balance;
@@ -93,18 +114,29 @@ namespace onep
   class ProgressingValueContainer : public osg::Referenced
   {
   public:
-    void registerValue(osg::ref_ptr<ProgressingValueBase> value)
+    void registerValue(osg::ref_ptr<ProgressingValueBase> value, std::string name)
     {
-      m_values.push_back(value);
+      m_values[name] = value;
     }
 
     void step()
     {
-      for (ProgressingValueBase::List::iterator it = m_values.begin(); it != m_values.end(); ++it)
-        it->get()->step();
+      for (ProgressingValuesMap::iterator it = m_values.begin(); it != m_values.end(); ++it)
+        it->second->step();
+    }
+
+    void debugPrintToString(std::string& str)
+    {
+      for (ProgressingValuesMap::iterator it = m_values.begin(); it != m_values.end(); ++it)
+      {
+        str += it->first + ": ";
+        it->second->debugPrintToString(str);
+      }
     }
 
   private:
-    ProgressingValueBase::List m_values;
+    typedef std::map<std::string, osg::ref_ptr<ProgressingValueBase>> ProgressingValuesMap;
+
+    ProgressingValuesMap m_values;
   };
 }

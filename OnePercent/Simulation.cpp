@@ -15,6 +15,11 @@ Simulation::Simulation()
 	: Referenced(),
 	  m_day(0)
 {
+  m_skillBranches[SkillBranch::BRANCH_CONTROL]  = new SkillBranch(SkillBranch::BRANCH_CONTROL);
+  m_skillBranches[SkillBranch::BRANCH_BANKS]    = new SkillBranch(SkillBranch::BRANCH_BANKS);
+  m_skillBranches[SkillBranch::BRANCH_CONCERNS] = new SkillBranch(SkillBranch::BRANCH_CONCERNS);
+  m_skillBranches[SkillBranch::BRANCH_MEDIA]    = new SkillBranch(SkillBranch::BRANCH_MEDIA);
+  m_skillBranches[SkillBranch::BRANCH_POLITICS] = new SkillBranch(SkillBranch::BRANCH_POLITICS);
 }
 
 void Simulation::loadCountries(std::string filename)
@@ -103,56 +108,47 @@ void Simulation::loadSkillsXml(string filename)
 {
 	PropertiesManager::getInstance()->loadPropertiesFromXmlResource(filename);
 
-	int id = m_skills.size();
-	int elements = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->size();
-	for (int i = 0; i < elements; i++)
+	int nelements = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->size();
+	for (int i = 0; i < nelements; i++)
 	{
 		string name = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "name")->get();
-		string type = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "branch")->get();
+		string typeStr = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "branch")->get();
 		float anger = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<float>(i, "anger")->get();
 		float interest = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<float>(i, "interest")->get();
+    float propagation = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<float>(i, "propagation")->get();
 
-		Country::SkillBranchType branch = {};
-		if (type == "banks")
-		{
-			branch = Country::SkillBranchType::BRANCH_BANKS;
-		}
-		else if (type == "control")
-		{
-			branch = Country::SkillBranchType::BRANCH_CONTROL;
-		}
-		else if (type == "concerns")
-		{
-			branch = Country::SkillBranchType::BRANCH_CONCERNS;
-		}
-		else if (type == "media")
-		{
-			branch = Country::SkillBranchType::BRANCH_MEDIA;
-		}
-		else if (type == "politics")
-		{
-			branch = Country::SkillBranchType::BRANCH_POLITICS;
-		}
-
-		ref_ptr<AbstractSkill> skill = new AbstractSkill(name, branch);
+    SkillBranch::Type type = SkillBranch::getTypeFromString(typeStr);
+    ref_ptr<Skill> skill = new Skill(name);
 		skill->setAnger(anger);
 		skill->setInterest(interest);
+    skill->setPropagation(propagation);
 
-		m_skills.insert(AbstractSkill::Map::value_type(id, skill));
-		id++;
+    m_skillBranches[type]->addSkill(skill);
 
 		printf("SKILL LOADED: %s\n", name.c_str());
 	}
 }
 
-ref_ptr<AbstractSkill> Simulation::getSkill(int id)
+ref_ptr<Skill> Simulation::getSkill(int id)
 {
-	return m_skills.find(id)->second;
+  int n = 0;
+  Skill::Ptr result;
+  for (auto& branch : m_skillBranches)
+  {
+    branch.second->forEachSkill([&n, &id, &result](Skill::Ptr skill)
+    {
+      if (id == n)
+        result = skill;
+      n++;
+    });
+  }
+
+  return result;
 }
 
 int Simulation::getNumSkills()
 {
-	return m_skills.size();
+	return m_skillBranches.size();
 }
 
 int Simulation::getDay()
@@ -168,18 +164,30 @@ void Simulation::setGlobeModel(GlobeModel::Ptr model)
 void Simulation::step()
 {
   CountryMesh::Map& countries = m_globeModel->getCountryMeshs();
+
   for (CountryMesh::Map::iterator itcountry = countries.begin(); itcountry != countries.end(); ++itcountry)
 	{
-		for (AbstractSkill::Map::iterator itskill = m_skills.begin(); itskill != m_skills.end(); ++itskill)
-		{
-      if (itskill->second->getActivated() && itcountry->second->getCountryData()->getSKillBranchActivated(itskill->second->getBranch()))
-			{
-				itskill->second->takeEffect(itcountry->second->getCountryData());
-			}
-		}
+    for (SkillBranch::Map::iterator itbranch = m_skillBranches.begin(); itbranch != m_skillBranches.end(); ++itbranch)
+    {
+      if (itcountry->second->getCountryData()->getSkillBranchActivated(itbranch->first))
+      {
+        itbranch->second->forEachActivatedSkill([&itcountry](Skill::Ptr skill)
+        {
+          skill->takeEffect(itcountry->second->getCountryData());
+        });
+      }
+    }
 
-    itcountry->second->getCountryData()->step();
+    CountryMesh::Neighbor::List& neighbors = itcountry->second->getNeighborCountryMeshs();
+    for (CountryMesh::Neighbor::List::iterator itneighbor = neighbors.begin(); itneighbor != neighbors.end(); ++itneighbor)
+    {
+      //itneighbor->mesh->getCountryData()->getAffectedByNeighborValue()
+    }
+
 	}
+
+  for (CountryMesh::Map::iterator itcountry = countries.begin(); itcountry != countries.end(); ++itcountry)
+    itcountry->second->getCountryData()->step();
 
 	m_day++;
 }
@@ -203,20 +211,6 @@ string fillString(string s, int l, bool rightAligned = false)
 	return s;
 }
 
-string str(float value, int round = 2)
-{
-	char roundBuffer[4];
-	sprintf(&roundBuffer[0], "%d", round);
-
-	string format = "%." + string(roundBuffer) + "f";
-
-	char buffer[16];
-
-	sprintf(&buffer[0], format.c_str(), value);
-
-	return buffer;
-}
-
 string progBar(float value, int length = 12)
 {
 	string result = "[";
@@ -234,7 +228,7 @@ string progBar(float value, int length = 12)
 	return result;
 }
 
-void Simulation::printStats(bool onlyActivated)
+/*void Simulation::printStats(bool onlyActivated)
 {
 	printf("\n=========================================\n\n");
 
@@ -263,4 +257,4 @@ void Simulation::printStats(bool onlyActivated)
 	}
 
 	printf("\n=========================================\n");
-}
+}*/

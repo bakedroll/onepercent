@@ -9,13 +9,13 @@ namespace onep
   class CountryMesh : public osg::Geode
   {
   public:
-    typedef struct _neighborCountryMesh
+    typedef struct _neighbor
     {
-      typedef std::vector<_neighborCountryMesh> List;
+      typedef std::vector<_neighbor> List;
 
       osg::ref_ptr<CountryMesh> mesh;
       osg::ref_ptr<NeighborCountryInfo> info;
-    } NeighborCountryMesh;
+    } Neighbor;
 
     typedef osg::ref_ptr<CountryMesh> Ptr;
     typedef std::map<int, Ptr> Map;
@@ -34,7 +34,7 @@ namespace onep
     void addNeighborCountry(osg::ref_ptr<CountryMesh> mesh, osg::ref_ptr<NeighborCountryInfo> info);
 
     Country::Ptr getCountryData();
-    NeighborCountryMesh::List& getNeighborCountryMeshs();
+    Neighbor::List& getNeighborCountryMeshs();
 
     void setColorMode(ColorMode mode);
     void setCountryData(Country::Ptr country);
@@ -43,6 +43,6 @@ namespace onep
     osg::ref_ptr<osg::Material> m_material;
     Country::Ptr m_countryData;
 
-    NeighborCountryMesh::List m_neighbours;
+    Neighbor::List m_neighbours;
   };
 }

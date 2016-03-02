@@ -7,6 +7,7 @@
 #include <string>
 
 #include "ProgressingValue.h"
+#include "SkillBranch.h"
 
 namespace onep
 {
@@ -27,21 +28,12 @@ namespace onep
 
 		static const int SkillBranchCount = 5;
 
-		typedef enum _skillBranchType
-		{
-			BRANCH_BANKS = 0,
-			BRANCH_CONTROL = 1,
-			BRANCH_MEDIA = 2,
-			BRANCH_CONCERNS = 3,
-			BRANCH_POLITICS = 4
-		} SkillBranchType;
-
 		Country(std::string name, unsigned char id, float population, float wealth, osg::Vec2f center, osg::Vec2f size);
 
 		void addAngerInfluence(float influence);
     void addInterestChange(float change);
 
-		void setSkillBranchActivated(SkillBranchType type, bool activated);
+		void setSkillBranchActivated(int type, bool activated);
 
 		std::string getCountryName();
 		unsigned char getId();
@@ -50,18 +42,21 @@ namespace onep
 		osg::Vec2f getSurfaceSize();
 		float getOptimalCameraDistance(float angle, float ratio);
 
-		float getWealth();
-		float getDept();
-		float getDeptBalance();
-		float getRelativeDept();
-		float getAnger();
-		float getAngerBalance();
+    ProgressingValue<float>::Ptr getAngerValue();
+    ProgressingValue<float>::Ptr getDeptValue();
+    ProgressingValue<float>::Ptr getInterestValue();
+    ProgressingValue<float>::Ptr getBuyingPowerValue();
 
-		bool getSKillBranchActivated(SkillBranchType type);
+    ProgressingValue<float>::Ptr getAffectNeighborValue(SkillBranch::Type type);
+    ProgressingValue<float>::Ptr getAffectedByNeighborValue(SkillBranch::Type type);
+
+    bool getSkillBranchActivated(int type);
 
 		bool anySkillBranchActivated();
 
 		void step();
+
+    void debugPrintValueString(std::string& str);
 	private:
 		std::string m_name;
 
@@ -69,6 +64,9 @@ namespace onep
     ProgressingValue<float>::Ptr m_valueDept;
     ProgressingValue<float>::Ptr m_valueInterest;
     ProgressingValue<float>::Ptr m_valueBuyingPower;
+
+    ProgressingValue<float>::Ptr m_valueAffectNeighbor[SkillBranchCount];
+    ProgressingValue<float>::Ptr m_valueAffectedByNeighbor[SkillBranchCount];
 
     ProgressingValueContainer m_valueContainer;
 

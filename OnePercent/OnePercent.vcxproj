@@ -76,7 +76,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AbstractSkill.cpp" />
+    <ClCompile Include="Skill.cpp" />
     <ClCompile Include="BackgroundModel.cpp" />
     <ClCompile Include="CountriesMap.cpp" />
     <ClCompile Include="Country.cpp" />
@@ -92,9 +92,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenuState.cpp" />
     <ClCompile Include="Simulation.cpp" />
+    <ClCompile Include="SkillBranch.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AbstractSkill.h" />
+    <ClInclude Include="Skill.h" />
     <ClInclude Include="BackgroundModel.h" />
     <ClInclude Include="CountriesMap.h" />
     <ClInclude Include="Country.h" />
@@ -110,6 +111,7 @@
     <ClInclude Include="MainMenuState.h" />
     <ClInclude Include="ProgressingValue.h" />
     <ClInclude Include="Simulation.h" />
+    <ClInclude Include="SkillBranch.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GameData\shaders\atmosphere.frag" />
