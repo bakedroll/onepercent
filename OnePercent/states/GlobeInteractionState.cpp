@@ -1,5 +1,6 @@
 #include "GlobeInteractionState.h"
-#include "GlobeModel.h"
+
+#include "nodes/GlobeModel.h"
 
 #include <osgGaming/Helper.h>
 #include <osgGaming/TimerFactory.h>

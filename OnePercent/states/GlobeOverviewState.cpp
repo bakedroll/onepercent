@@ -1,5 +1,6 @@
 #include "GlobeOverviewState.h"
-#include "GlobeModel.h"
+
+#include "nodes/GlobeModel.h"
 
 #include <osgViewer/ViewerEventHandlers>
 

@@ -2,9 +2,10 @@
 
 #include "GlobeModel.h"
 #include "BackgroundModel.h"
-#include "Simulation.h"
-#include "Globals.h"
 #include "CountryOverlay.h"
+
+#include "core/Globals.h"
+#include "simulation/Simulation.h"
 
 #include <osgGaming/World.h>
 #include <osgGaming/Property.h>

@@ -2,7 +2,8 @@
 
 #include <osg/Geode>
 #include <osg/Material>
-#include "Country.h"
+
+#include "simulation/Country.h"
 
 namespace onep
 {

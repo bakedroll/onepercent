@@ -1,7 +1,8 @@
 #include "LoadingGlobeOverviewState.h"
-#include "GlobeModel.h"
-#include "GlobeOverviewWorld.h"
-#include "BackgroundModel.h"
+
+#include "nodes/GlobeModel.h"
+#include "nodes/GlobeOverviewWorld.h"
+#include "nodes/BackgroundModel.h"
 
 #include <osgGaming/UIText.h>
 

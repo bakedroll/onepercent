@@ -1,5 +1,6 @@
 #include "Country.h"
-#include "Globals.h"
+
+#include "core/Globals.h"
 
 #include <osgGaming/Property.h>
 #include <osgGaming/Helper.h>

@@ -1,14 +1,16 @@
 #pragma once
 
-#include "Globals.h"
+#include "core/Globals.h"
 
 #include <osg/Geometry>
 #include <osg/Uniform>
 
 #include <osgGaming/TransformableCameraManipulator.h>
 #include <osgGaming/Property.h>
+
 #include "CountryMesh.h"
-#include "CountriesMap.h"
+
+#include "data/CountriesMap.h"
 
 namespace onep
 {
