@@ -1,7 +1,8 @@
 #include "GlobeCameraState.h"
-#include "GlobeModel.h"
 
 #include <osgGaming/Helper.h>
+
+#include "nodes/GlobeModel.h"
 
 using namespace onep;
 using namespace osg;

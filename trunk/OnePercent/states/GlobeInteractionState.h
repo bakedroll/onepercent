@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GlobeOverviewWorld.h"
 #include "GlobeCameraState.h"
-#include "Globals.h"
 
-#include <osgGaming/Animation.h>
+#include "core/Globals.h"
+#include "nodes/GlobeOverviewWorld.h"
+
 #include <osgGaming/UIText.h>
 #include <osgGaming/Property.h>
 

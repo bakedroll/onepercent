@@ -3,7 +3,8 @@
 #include "Skill.h"
 
 #include <osg/Referenced>
-#include "GlobeModel.h"
+
+#include "nodes/GlobeModel.h"
 #include "SkillBranch.h"
 
 namespace onep

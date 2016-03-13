@@ -1,6 +1,7 @@
 #include "MainMenuState.h"
-#include "GlobeOverviewWorld.h"
 #include "GlobeInteractionState.h"
+
+#include "nodes/GlobeOverviewWorld.h"
 
 using namespace osg;
 using namespace onep;

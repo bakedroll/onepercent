@@ -1,10 +1,8 @@
 #pragma once
 
-#include "GlobeOverviewWorld.h"
+#include "nodes/GlobeOverviewWorld.h"
 
 #include <osgGaming/GameState.h>
-#include <osgGaming/Animation.h>
-#include <osgGaming/UserInteractionModel.h>
 
 namespace onep
 {

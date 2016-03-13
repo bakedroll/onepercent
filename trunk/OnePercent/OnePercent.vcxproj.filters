@@ -1,123 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="shader">
       <UniqueIdentifier>{6594d31d-f1b7-456f-a149-6e4b3c13d79b}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GlobeModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GlobeOverviewState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GlobeOverviewWorld.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LoadingGlobeOverviewState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BackgroundModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Simulation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Country.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CountriesMap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GlobeInteractionState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainMenuState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GlobeCameraState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Globals.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CountryOverlay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CountryMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SkillBranch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Skill.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="GlobeModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobeOverviewState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobeOverviewWorld.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LoadingGlobeOverviewState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BackgroundModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Simulation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Country.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CountriesMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobeInteractionState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MainMenuState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobeCameraState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Globals.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CountryOverlay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CountryMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ProgressingValue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SkillBranch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Skill.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <Filter Include="core">
+      <UniqueIdentifier>{91908ccc-9b8c-4a67-93f0-a2c673e587f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="states">
+      <UniqueIdentifier>{08f9b034-fa40-48e8-b47d-a0a8ba6dd005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{dc56f814-5787-4a24-b1bb-e812cd5a7460}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="simulation">
+      <UniqueIdentifier>{24cb5b6e-9848-478f-a826-4b89b2048017}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="nodes">
+      <UniqueIdentifier>{90d25287-9535-46c3-8eda-9866027de5a8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="GameData\shaders\atmosphere.frag">
@@ -147,5 +48,111 @@
     <None Include="GameData\shaders\boundaries.frag">
       <Filter>shader</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="core\Globals.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="core\main.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="data\CountriesMap.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\BackgroundModel.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\CountryMesh.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\CountryOverlay.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\GlobeModel.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\GlobeOverviewWorld.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="simulation\Country.cpp">
+      <Filter>simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="simulation\Simulation.cpp">
+      <Filter>simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="simulation\Skill.cpp">
+      <Filter>simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="simulation\SkillBranch.cpp">
+      <Filter>simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="states\GlobeCameraState.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="states\GlobeInteractionState.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="states\GlobeOverviewState.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="states\LoadingGlobeOverviewState.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="states\MainMenuState.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\Globals.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="data\CountriesMap.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\BackgroundModel.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\CountryMesh.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\CountryOverlay.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\GlobeModel.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\GlobeOverviewWorld.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\Country.h">
+      <Filter>simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\ProgressingValue.h">
+      <Filter>simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\Simulation.h">
+      <Filter>simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\Skill.h">
+      <Filter>simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\SkillBranch.h">
+      <Filter>simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="states\GlobeCameraState.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="states\GlobeInteractionState.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="states\GlobeOverviewState.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="states\LoadingGlobeOverviewState.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="states\MainMenuState.h">
+      <Filter>states</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
