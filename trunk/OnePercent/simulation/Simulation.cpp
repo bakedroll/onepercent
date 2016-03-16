@@ -12,14 +12,20 @@ using namespace osg;
 using namespace std;
 
 Simulation::Simulation()
-	: Referenced(),
-	  m_day(0)
+	: Group()
+  , SimulationCallback()
+  , m_applySkillsVisitor(new SimulationVisitor(SimulationVisitor::APPLY_SKILLS))
+  , m_affectNeighborsVisitor(new SimulationVisitor(SimulationVisitor::AFFECT_NEIGHBORS))
+  , m_progressCountriesVisitor(new SimulationVisitor(SimulationVisitor::PROGRESS_COUNTRIES))
+  , m_day(0)
 {
-  m_skillBranches[SkillBranch::BRANCH_CONTROL]  = new SkillBranch(SkillBranch::BRANCH_CONTROL);
-  m_skillBranches[SkillBranch::BRANCH_BANKS]    = new SkillBranch(SkillBranch::BRANCH_BANKS);
-  m_skillBranches[SkillBranch::BRANCH_CONCERNS] = new SkillBranch(SkillBranch::BRANCH_CONCERNS);
-  m_skillBranches[SkillBranch::BRANCH_MEDIA]    = new SkillBranch(SkillBranch::BRANCH_MEDIA);
-  m_skillBranches[SkillBranch::BRANCH_POLITICS] = new SkillBranch(SkillBranch::BRANCH_POLITICS);
+  m_skillBranches[BRANCH_CONTROL]  = new SkillBranch(BRANCH_CONTROL);
+  m_skillBranches[BRANCH_BANKS]    = new SkillBranch(BRANCH_BANKS);
+  m_skillBranches[BRANCH_CONCERNS] = new SkillBranch(BRANCH_CONCERNS);
+  m_skillBranches[BRANCH_MEDIA]    = new SkillBranch(BRANCH_MEDIA);
+  m_skillBranches[BRANCH_POLITICS] = new SkillBranch(BRANCH_POLITICS);
+
+  setUpdateCallback(new Callback());
 }
 
 void Simulation::loadCountries(std::string filename)
@@ -49,7 +55,7 @@ void Simulation::loadCountries(std::string filename)
 		float width = stream.read<float>();
 		float height = stream.read<float>();
 
-		ref_ptr<Country> country = new Country(
+		ref_ptr<CountryData> country = new CountryData(
 			name,
 			id,
 			population,
@@ -80,7 +86,11 @@ void Simulation::loadCountries(std::string filename)
       triangles->push_back(v1);
     }
 
+    for (int j = 0; j < NUM_SKILLBRANCHES; j++)
+      country->addChild(m_skillBranches[j]);
+
     m_globeModel->addCountry(int(id), country, triangles);
+    addChild(country);
 
 		delete[] name_p;
 	}
@@ -92,7 +102,7 @@ void Simulation::loadCountries(std::string filename)
 
 		for (NeighborList::iterator nit = neighborList.begin(); nit != neighborList.end(); ++nit)
 		{
-      it->second->addNeighborCountry(m_globeModel->getCountryMesh(*nit), new NeighborCountryInfo());
+      it->second->addNeighbor(m_globeModel->getCountryMesh(*nit), new NeighborCountryInfo());
 		}
 	}
 
@@ -113,17 +123,39 @@ void Simulation::loadSkillsXml(string filename)
 	{
 		string name = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "name")->get();
 		string typeStr = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "branch")->get();
-		float anger = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<float>(i, "anger")->get();
-		float interest = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<float>(i, "interest")->get();
-    float propagation = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<float>(i, "propagation")->get();
 
-    SkillBranch::Type type = SkillBranch::getTypeFromString(typeStr);
+    osg::ref_ptr<PropertyArray> arr = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->array(i, "attributes");
+    int arrsize = arr->size();
+
+    BranchType type = branch_getTypeFromString(typeStr);
     ref_ptr<Skill> skill = new Skill(name);
-		skill->setAnger(anger);
-		skill->setInterest(interest);
-    skill->setPropagation(propagation);
 
-    m_skillBranches[type]->addSkill(skill);
+    for (int j = 0; j < arrsize; j++)
+    {
+      string valuetypeStr = arr->property<string>(j, "valuetype")->get();
+      string methodStr = arr->property<string>(j, "method")->get();
+      float value = arr->property<float>(j, "value")->get();
+      bool branchAttr = arr->property<bool>(j, "branch_attr")->get();
+
+      if (branchAttr)
+      {
+        skill->addBranchAttribute(
+          type,
+          countryValue_getTypeFromString(valuetypeStr),
+          valueMethod_getTypeFromString(methodStr),
+          value);
+      }
+      else
+      {
+        skill->addAttribute(
+          countryValue_getTypeFromString(valuetypeStr),
+          valueMethod_getTypeFromString(methodStr),
+          value);
+      }
+    }
+
+    m_skillBranches[type]->addChild(skill);
+    m_skills.insert(Skill::Map::value_type(i, skill));
 
 		printf("SKILL LOADED: %s\n", name.c_str());
 	}
@@ -131,17 +163,10 @@ void Simulation::loadSkillsXml(string filename)
 
 ref_ptr<Skill> Simulation::getSkill(int id)
 {
-  int n = 0;
   Skill::Ptr result;
-  for (auto& branch : m_skillBranches)
-  {
-    branch.second->forEachSkill([&n, &id, &result](Skill::Ptr skill)
-    {
-      if (id == n)
-        result = skill;
-      n++;
-    });
-  }
+  Skill::Map::iterator it = m_skills.find(id);
+  if (it != m_skills.end())
+    result = it->second;
 
   return result;
 }
@@ -163,98 +188,14 @@ void Simulation::setGlobeModel(GlobeModel::Ptr model)
 
 void Simulation::step()
 {
-  CountryMesh::Map& countries = m_globeModel->getCountryMeshs();
-
-  for (CountryMesh::Map::iterator itcountry = countries.begin(); itcountry != countries.end(); ++itcountry)
-	{
-    for (SkillBranch::Map::iterator itbranch = m_skillBranches.begin(); itbranch != m_skillBranches.end(); ++itbranch)
-    {
-      if (itcountry->second->getCountryData()->getSkillBranchActivated(itbranch->first))
-      {
-        itbranch->second->forEachActivatedSkill([&itcountry](Skill::Ptr skill)
-        {
-          skill->takeEffect(itcountry->second->getCountryData());
-        });
-      }
-    }
-
-    CountryMesh::Neighbor::List& neighbors = itcountry->second->getNeighborCountryMeshs();
-    for (CountryMesh::Neighbor::List::iterator itneighbor = neighbors.begin(); itneighbor != neighbors.end(); ++itneighbor)
-    {
-      //itneighbor->mesh->getCountryData()->getAffectedByNeighborValue()
-    }
-
-	}
-
-  for (CountryMesh::Map::iterator itcountry = countries.begin(); itcountry != countries.end(); ++itcountry)
-    itcountry->second->getCountryData()->step();
+  accept(*m_applySkillsVisitor);
+  accept(*m_affectNeighborsVisitor);
+  accept(*m_progressCountriesVisitor);
 
 	m_day++;
 }
 
-string fillString(string s, int l, bool rightAligned = false)
+bool Simulation::callback(SimulationVisitor* visitor)
 {
-	int fs = l - s.size();
-
-	for (int i = 0; i < fs; i++)
-	{
-		if (rightAligned)
-		{
-			s = " " + s;
-		}
-		else
-		{
-			s += " ";
-		}
-	}
-
-	return s;
+  return true;
 }
-
-string progBar(float value, int length = 12)
-{
-	string result = "[";
-
-	int l = length - 2;
-	int p = l * value;
-
-	for (int i = 0; i < l; i++)
-	{
-		result += ((i + 1) <= p) ? "|" : " ";
-	}
-
-	result += "]";
-
-	return result;
-}
-
-/*void Simulation::printStats(bool onlyActivated)
-{
-	printf("\n=========================================\n\n");
-
-	printf("%s | %s | %s | %s | %s\n", fillString("Country", 22).c_str(), fillString("Wealth", 8).c_str(), fillString("Anger/Balance", 25).c_str(), fillString("Dept/Relative/Balance", 37).c_str(), fillString("Skills", 19).c_str());
-	printf("------------------------------------------------------------------------------------------------------------\n\n");
-
-  CountryMesh::Map& countries = m_globeModel->getCountryMeshs();
-  for (CountryMesh::Map::iterator it = countries.begin(); it != countries.end(); ++it)
-	{
-		if (!onlyActivated || it->second->getCountryData()->anySkillBranchActivated())
-		{
-			string skills = "";
-
-			for (int i = 0; i < Country::SkillBranchCount; i++)
-			{
-        skills += string("[") + string(it->second->getCountryData()->getSKillBranchActivated(Country::SkillBranchType(i)) ? "x" : " ") + string("] ");
-			}
-
-			printf("%s | %s | %s | %s | %s\n",
-        fillString(it->second->getCountryData()->getCountryName(), 22).c_str(),
-        fillString(str(it->second->getCountryData()->getWealth(), 0), 8, true).c_str(),
-        (fillString(str(it->second->getCountryData()->getAnger()), 6, true) + " " + progBar(it->second->getCountryData()->getAnger()) + fillString(str(it->second->getCountryData()->getAngerBalance()), 6, true)).c_str(),
-        (fillString(str(it->second->getCountryData()->getDept(), 0), 8, true) + fillString(str(it->second->getCountryData()->getRelativeDept()), 6, true) + " " + progBar(it->second->getCountryData()->getRelativeDept()) + fillString(str(it->second->getCountryData()->getDeptBalance(), 1), 10, true)).c_str(),
-				skills.c_str());
-		}
-	}
-
-	printf("\n=========================================\n");
-}*/

@@ -3,21 +3,13 @@
 #include <osg/Geode>
 #include <osg/Material>
 
-#include "simulation/Country.h"
+#include "simulation/CountryData.h"
 
 namespace onep
 {
   class CountryMesh : public osg::Geode
   {
   public:
-    typedef struct _neighbor
-    {
-      typedef std::vector<_neighbor> List;
-
-      osg::ref_ptr<CountryMesh> mesh;
-      osg::ref_ptr<NeighborCountryInfo> info;
-    } Neighbor;
-
     typedef osg::ref_ptr<CountryMesh> Ptr;
     typedef std::map<int, Ptr> Map;
     typedef std::vector<Ptr> List;
@@ -32,18 +24,18 @@ namespace onep
       osg::ref_ptr<osg::Vec3Array> vertices,
       osg::ref_ptr<osg::DrawElementsUInt> triangles);
 
-    void addNeighborCountry(osg::ref_ptr<CountryMesh> mesh, osg::ref_ptr<NeighborCountryInfo> info);
+    void addNeighbor(osg::ref_ptr<CountryMesh> mesh, NeighborCountryInfo::Ptr info);
 
-    Country::Ptr getCountryData();
-    Neighbor::List& getNeighborCountryMeshs();
+    CountryData::Ptr getCountryData();
+    List& getNeighborCountryMeshs();
 
     void setColorMode(ColorMode mode);
-    void setCountryData(Country::Ptr country);
+    void setCountryData(CountryData::Ptr country);
 
   private:
     osg::ref_ptr<osg::Material> m_material;
-    Country::Ptr m_countryData;
+    CountryData::Ptr m_countryData;
 
-    Neighbor::List m_neighbours;
+    List m_neighbors;
   };
 }

@@ -52,10 +52,10 @@ void CountryOverlay::setCountryMap(const CountryMesh::Map& countryMap)
 
 		string name = osgGaming::utf8ToLatin1(it->second->getCountryData()->getCountryName().c_str());
 		/*std::string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str()) + "\n";
-		Country::Neighbors neighbors = it->second->getNeighborCountries();
+		CountryData::Neighbors neighbors = it->second->getNeighborCountries();
 
 		bool first = true;
-		for (Country::Neighbors::iterator nit = neighbors.begin(); nit != neighbors.end(); ++nit)
+		for (CountryData::Neighbors::iterator nit = neighbors.begin(); nit != neighbors.end(); ++nit)
 		{
 			name += (first ? "" : "; ") + osgGaming::utf8ToLatin1(nit->country->getCountryName().c_str());
 			first = false;

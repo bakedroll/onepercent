@@ -1,8 +1,6 @@
 #pragma once
 
-#include <string>
 #include <map>
-#include <vector>
 
 #include <rapidxml.hpp>
 
@@ -55,7 +53,7 @@ namespace osgGaming
 		void initializeProperty(std::string path, std::string type, std::string value);;
 		void parseXmlNode(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path, ArrayContext* arrayContext = nullptr);
 		void parseXmlGroup(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path);
-		void parseXmlArray(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path);
+    void parseXmlArray(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyNode> pnode, std::string path, ArrayContext* arrayContext = nullptr);
 		void parseXmlProperty(rapidxml::xml_node<>* node, osg::ref_ptr<PropertyGroup> group, std::string path, ArrayContext* arrayContext = nullptr);
 		void parseXmlArrayFields(rapidxml::xml_node<>* node, const std::string& path, ArrayContext* arrayContext);
 		void parseXmlArrayElements(rapidxml::xml_node<>* node, std::string path, ArrayContext* context);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "simulation/Country.h"
+#include "simulation/CountryData.h"
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/Switch>

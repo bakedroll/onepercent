@@ -74,6 +74,10 @@ void PropertiesManager::initializeProperty(string path, string type, string valu
 	{
 		*getValuePtr<Vec4f>(path) = parseVector<Vec4f>(value);
 	}
+  else if (type == "bool")
+  {
+    *getValuePtr<bool>(path) = value == "true" ? true : false;
+  }
 }
 
 void PropertiesManager::parseXmlNode(xml_node<>* node, ref_ptr<PropertyGroup> group, string path, ArrayContext* arrayContext)
@@ -81,8 +85,12 @@ void PropertiesManager::parseXmlNode(xml_node<>* node, ref_ptr<PropertyGroup> gr
 	if (arrayContext == nullptr)
 	{
 		parseXmlGroup(node, group, path);
-		parseXmlArray(node, group, path);
+    parseXmlArray(node, group, path);
 	}
+  else
+  {
+    parseXmlArray(node, arrayContext->propertyArray, path, arrayContext);
+  }
 
 	parseXmlProperty(node, group, path, arrayContext);
 }
@@ -108,7 +116,7 @@ void PropertiesManager::parseXmlGroup(xml_node<>* node, ref_ptr<PropertyGroup> g
 	}
 }
 
-void PropertiesManager::parseXmlArray(xml_node<>* node, ref_ptr<PropertyGroup> group, string path)
+void PropertiesManager::parseXmlArray(xml_node<>* node, ref_ptr<PropertyNode> pnode, string path, ArrayContext* arrayContext)
 {
 	xml_node<>* arrayChild = node->first_node("array");
 	while (arrayChild != nullptr)
@@ -124,8 +132,15 @@ void PropertiesManager::parseXmlArray(xml_node<>* node, ref_ptr<PropertyGroup> g
 		ArrayContext context;
 		std::string p = path + name;
 
-		group->addArray(name, new PropertyArray());
-		context.propertyArray = group->array(name);
+    context.propertyArray = new PropertyArray();
+
+    PropertyGroup* group = dynamic_cast<PropertyGroup*>(pnode.get());
+    if (group)
+      group->addArray(name, context.propertyArray);
+
+    PropertyArray* arr = dynamic_cast<PropertyArray*>(pnode.get());
+    if (arr && arrayContext)
+      arr->addArray(arrayContext->index, name, context.propertyArray);
 
 		parseXmlArrayFields(arrayChild, p, &context);
 		parseXmlArrayElements(arrayChild, p, &context);
@@ -173,7 +188,10 @@ void PropertiesManager::parseXmlProperty(xml_node<>* node, ref_ptr<PropertyGroup
 			type = string(attr_type->value());
 		}
 
-		initializeProperty(path + name, type, string(attr_value->value()));
+    //bool isSubArray = type == "array";
+
+    //if (!isSubArray)
+		  initializeProperty(path + name, type, string(attr_value->value()));
 
 		AbstractPropertyValue::ValueMap::iterator it = _values.find(path + name);
 		if (arrayContext == nullptr)
@@ -243,13 +261,20 @@ void PropertiesManager::parseXmlArrayElements(rapidxml::xml_node<>* node, std::s
 
 		for (ArrayFieldMap::iterator itfield = context->fields.begin(); itfield != context->fields.end(); ++itfield)
 		{
-			if (itfield->second.defaultValue != "" && !context->propertyArray->hasProperty(context->index, itfield->first))
-			{
-				initializeProperty(p + itfield->first, itfield->second.type, itfield->second.defaultValue);
-				AbstractPropertyValue::ValueMap::iterator itprop = _values.find(p + itfield->first);
+      if (itfield->second.type == "array")
+      {
+        //printf("bla");
+      }
+      else
+      {
+        if (itfield->second.defaultValue != "" && !context->propertyArray->hasProperty(context->index, itfield->first))
+        {
+          initializeProperty(p + itfield->first, itfield->second.type, itfield->second.defaultValue);
+          AbstractPropertyValue::ValueMap::iterator itprop = _values.find(p + itfield->first);
 
-				context->propertyArray->addProperty(context->index, itfield->first, itprop->second);
-			}
+          context->propertyArray->addProperty(context->index, itfield->first, itprop->second);
+        }
+      }
 		}
 
 		counter++;
