@@ -6,6 +6,6 @@ namespace osgGaming
 {
 	class PropertyNode : public osg::Referenced
 	{
-		
+
 	};
 }

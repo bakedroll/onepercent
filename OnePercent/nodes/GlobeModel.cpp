@@ -57,12 +57,12 @@ void GlobeModel::setSelectedCountry(int countryId)
   m_countrySurfacesSwitch->setChildValue(mesh, true);
   m_visibleCountryMeshs.push_back(mesh);
 
-  CountryMesh::Neighbor::List& neighbors = mesh->getNeighborCountryMeshs();
-  for (CountryMesh::Neighbor::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+  CountryMesh::List& neighbors = mesh->getNeighborCountryMeshs();
+  for (CountryMesh::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
   {
-    it->mesh->setColorMode(CountryMesh::MODE_NEIGHBOR);
-    m_countrySurfacesSwitch->setChildValue(it->mesh, true);
-    m_visibleCountryMeshs.push_back(it->mesh);
+    (*it)->setColorMode(CountryMesh::MODE_NEIGHBOR);
+    m_countrySurfacesSwitch->setChildValue(*it, true);
+    m_visibleCountryMeshs.push_back(*it);
   }
 }
 
@@ -71,7 +71,7 @@ void GlobeModel::setCountriesMap(CountriesMap::Ptr countriesMap)
   m_countriesMap = countriesMap;
 }
 
-void GlobeModel::addCountry(int id, Country::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles)
+void GlobeModel::addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles)
 {
   if (m_countryMeshs.find(id) != m_countryMeshs.end())
     return;

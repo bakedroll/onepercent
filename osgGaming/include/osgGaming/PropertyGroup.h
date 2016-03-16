@@ -32,9 +32,9 @@ namespace osgGaming
 		bool hasProperty(std::string name);
 
 	private:
-		typedef std::map<std::string, osg::ref_ptr<PropertyGroup>> GroupMap;
-		typedef std::map<std::string, osg::ref_ptr<PropertyArray>> ArrayMap;
-		typedef std::map<std::string, osg::ref_ptr<AbstractPropertyValue>> PropertyMap;
+    typedef std::map<std::string, osg::ref_ptr<PropertyGroup>> GroupMap;
+    typedef std::map<std::string, osg::ref_ptr<PropertyArray>> ArrayMap;
+    typedef std::map<std::string, osg::ref_ptr<AbstractPropertyValue>> PropertyMap;
 
 		GroupMap _groups;
 		ArrayMap _arrays;

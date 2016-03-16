@@ -19,23 +19,24 @@ namespace onep
     getOrCreateStateSet()->setAttribute(m_material, osg::StateAttribute::ON);
   }
 
-  void CountryMesh::addNeighborCountry(osg::ref_ptr<CountryMesh> mesh, osg::ref_ptr<NeighborCountryInfo> info)
+  void CountryMesh::addNeighbor(osg::ref_ptr<CountryMesh> mesh, NeighborCountryInfo::Ptr info)
   {
-    Neighbor nc;
-    nc.mesh = mesh;
-    nc.info = info;
+    CountryData::Neighbor nb;
+    nb.country = mesh->getCountryData();
+    nb.info = info;
 
-    m_neighbours.push_back(nc);
+    m_neighbors.push_back(mesh);
+    m_countryData->addNeighbor(nb);
   }
 
-  Country::Ptr CountryMesh::getCountryData()
+  CountryData::Ptr CountryMesh::getCountryData()
   {
     return m_countryData;
   }
 
-  CountryMesh::_neighbor::List& CountryMesh::getNeighborCountryMeshs()
+  CountryMesh::List& CountryMesh::getNeighborCountryMeshs()
   {
-    return m_neighbours;
+    return m_neighbors;
   }
 
   void CountryMesh::setColorMode(ColorMode mode)
@@ -53,7 +54,7 @@ namespace onep
     }
   }
 
-  void CountryMesh::setCountryData(Country::Ptr country)
+  void CountryMesh::setCountryData(CountryData::Ptr country)
   {
     m_countryData = country;
   }

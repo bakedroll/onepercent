@@ -74,9 +74,6 @@
     <ClCompile Include="nodes\GlobeOverviewWorld.cpp">
       <Filter>nodes</Filter>
     </ClCompile>
-    <ClCompile Include="simulation\Country.cpp">
-      <Filter>simulation</Filter>
-    </ClCompile>
     <ClCompile Include="simulation\Simulation.cpp">
       <Filter>simulation</Filter>
     </ClCompile>
@@ -101,6 +98,21 @@
     <ClCompile Include="states\MainMenuState.cpp">
       <Filter>states</Filter>
     </ClCompile>
+    <ClCompile Include="simulation\ProgressingValueContainer.cpp">
+      <Filter>simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="simulation\CountryValues.cpp">
+      <Filter>simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="simulation\CountryData.cpp">
+      <Filter>simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="simulation\SimulationVisitor.cpp">
+      <Filter>simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="simulation\SimulationCallback.cpp">
+      <Filter>simulation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\Globals.h">
@@ -123,9 +135,6 @@
     </ClInclude>
     <ClInclude Include="nodes\GlobeOverviewWorld.h">
       <Filter>nodes</Filter>
-    </ClInclude>
-    <ClInclude Include="simulation\Country.h">
-      <Filter>simulation</Filter>
     </ClInclude>
     <ClInclude Include="simulation\ProgressingValue.h">
       <Filter>simulation</Filter>
@@ -153,6 +162,21 @@
     </ClInclude>
     <ClInclude Include="states\MainMenuState.h">
       <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\ProgressingValueContainer.h">
+      <Filter>simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\CountryValues.h">
+      <Filter>simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\CountryData.h">
+      <Filter>simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\SimulationVisitor.h">
+      <Filter>simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="simulation\SimulationCallback.h">
+      <Filter>simulation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

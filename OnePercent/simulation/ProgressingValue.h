@@ -1,9 +1,15 @@
 #pragma once
 
+#include "core/Globals.h"
+
 #include <vector>
 #include <map>
+#include <string>
+#include <assert.h>
 
 #include <osg/Referenced>
+#include <osg/ref_ptr>
+#include <osg/Math>
 
 namespace onep
 {
@@ -11,8 +17,10 @@ namespace onep
   {
   public:
     typedef std::vector<osg::ref_ptr<ProgressingValueBase>> List;
+    typedef std::map<int, osg::ref_ptr<ProgressingValueBase>> Map;
 
     virtual void step() = 0;
+    virtual bool full() = 0;
     virtual void debugPrintToString(std::string& str) = 0;
   };
 
@@ -27,7 +35,9 @@ namespace onep
       , m_max(max)
       , m_balance(init)
       , m_influence(init)
+      , m_lastInfluence(init)
       , m_change(init)
+      , m_lastChange(init)
       , m_value(init)
       , m_init(init)
     {
@@ -36,30 +46,41 @@ namespace onep
     virtual void step() override
     {
       m_value += (m_balance + m_influence);
-      m_value = osg::clampBetween<T>(m_value, m_min, m_max);
+      m_value = osg::clampBetween<T>(m_value, m_min - m_change, m_max - m_change);
+
+      m_lastChange = m_change;
+      m_lastInfluence = m_influence;
 
       m_influence = m_init;
       m_change = m_init;
     }
 
-    void setBalance(T balance)
+    virtual bool full() override
     {
-      m_balance = balance;
+      return getValue() >= m_max;
     }
 
-    void setValue(T value)
+    void prepare(T value, ProgressingValueMethod method)
     {
-      m_value = value;
-    }
-
-    void addInfluence(T influence)
-    {
-      m_influence += influence;
-    }
-
-    void addChange(T change)
-    {
-      m_change = change;
+      switch (method)
+      {
+      case METHOD_SET_BALANCE:
+        m_balance = value;
+        break;
+      case METHOD_SET_VALUE:
+        m_value = value;
+        break;
+      case METHOD_ADD_INFLUENCE:
+        m_influence += value;
+        break;
+      case METHOD_ADD_CHANGE:
+        m_change += value;
+        break;
+      case METHOD_UNDEFINED:
+      default:
+        assert(false);
+        break;
+      }
     }
 
     T getMin()
@@ -74,7 +95,7 @@ namespace onep
 
     T getBalance()
     {
-      return m_balance;
+      return m_balance + m_influence;
     }
 
     T getValue()
@@ -84,11 +105,14 @@ namespace onep
 
     virtual void debugPrintToString(std::string& str) override
     {
-      T percent = m_value * static_cast<T>(100) / m_max;
+      T value = m_value + m_lastChange;
+      T balance = m_balance + m_lastInfluence;
+      T percent = value * static_cast<T>(100) / m_max;
 
       str += 
-        round(std::to_string(m_value), 2) + "/" + round(std::to_string(m_max), 2) +
-        " [" + round(std::to_string(percent), 2) + "%]\n";
+        round(std::to_string(value), 2) + "/" + round(std::to_string(m_max), 2) +
+        " [" + round(std::to_string(percent), 2) + "% | " + (balance >= 0 ? std::string("+") : std::string("")) +
+        round(std::to_string(balance), 2) + "]\n";
     }
 
   private:
@@ -106,37 +130,11 @@ namespace onep
     T m_max;
     T m_balance;
     T m_influence;
+    T m_lastInfluence;
     T m_change;
+    T m_lastChange;
     T m_value;
     T m_init;
   };
 
-  class ProgressingValueContainer : public osg::Referenced
-  {
-  public:
-    void registerValue(osg::ref_ptr<ProgressingValueBase> value, std::string name)
-    {
-      m_values[name] = value;
-    }
-
-    void step()
-    {
-      for (ProgressingValuesMap::iterator it = m_values.begin(); it != m_values.end(); ++it)
-        it->second->step();
-    }
-
-    void debugPrintToString(std::string& str)
-    {
-      for (ProgressingValuesMap::iterator it = m_values.begin(); it != m_values.end(); ++it)
-      {
-        str += it->first + ": ";
-        it->second->debugPrintToString(str);
-      }
-    }
-
-  private:
-    typedef std::map<std::string, osg::ref_ptr<ProgressingValueBase>> ProgressingValuesMap;
-
-    ProgressingValuesMap m_values;
-  };
 }

@@ -27,7 +27,7 @@ namespace onep
 		void setSelectedCountry(int countryId);
     void setCountriesMap(CountriesMap::Ptr countriesMap);
 
-    void addCountry(int id, Country::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles);
+    void addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles);
     CountryMesh::Map& getCountryMeshs();
     CountriesMap::Ptr getCountriesMap();
 

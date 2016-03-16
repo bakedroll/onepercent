@@ -1,68 +1,64 @@
 #include "Skill.h"
 
-#include "Country.h"
-
-using namespace onep;
-using namespace std;
-using namespace osg;
-
-Skill::Skill(string name)
-	: Referenced(),
-	  _name(name),
-	  _anger(0.0f),
-	  _interest(0.0f),
-	  _activated(false)
+namespace onep
 {
-}
 
-void Skill::setAnger(float anger)
-{
-	_anger = anger;
-}
+  Skill::Skill(std::string name)
+    : Node()
+    , m_name(name)
+    , m_activated(false)
+  {
+    setUpdateCallback(new Callback());
+  }
 
-void Skill::setInterest(float interest)
-{
-	_interest = interest;
-}
+  void Skill::addAttribute(CountryValueType valueType, ProgressingValueMethod method, float value)
+  {
+    Attribute attribute;
+    attribute.method = method;
+    attribute.value = value;
+    attribute.valueType = valueType;
 
-void Skill::setPropagation(float propagation)
-{
-  m_propagation = propagation;
-}
+    m_attributes.push_back(attribute);
+  }
 
-void Skill::setActivated(bool activated)
-{
-	_activated = activated;
-}
+  void Skill::addBranchAttribute(BranchType branch, CountryValueType valueType, ProgressingValueMethod method, float value)
+  {
+    BranchAttribute branchAttribute;
+    branchAttribute.branchType = branch;
+    branchAttribute.attribute.method = method;
+    branchAttribute.attribute.value = value;
+    branchAttribute.attribute.valueType = valueType;
 
-string Skill::getName()
-{
-	return _name;
-}
+    m_branchAttributes.push_back(branchAttribute);
+  }
 
-float Skill::getAnger()
-{
-	return _anger;
-}
+  void Skill::setActivated(bool activated)
+  {
+    m_activated = activated;
+  }
 
-float Skill::getInterest()
-{
-	return _interest;
-}
+  std::string Skill::getName()
+  {
+    return m_name;
+  }
 
-float Skill::getPropagation()
-{
-  return m_propagation;
-}
+  bool Skill::getActivated()
+  {
+    return m_activated;
+  }
 
-bool Skill::getActivated()
-{
-	return _activated;
-}
+  bool Skill::callback(SimulationVisitor* visitor)
+  {
+    if (!m_activated)
+      return false;
 
-void Skill::takeEffect(ref_ptr<Country> country)
-{
-	country->addAngerInfluence(_anger);
-	country->addInterestChange(_interest);
-  //country->getAffectNeighborValue()
+    for (Attribute::List::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
+      visitor->getCountryValues()->getValue<float>(it->valueType)->prepare(it->value, it->method);
+
+    for (BranchAttribute::List::iterator it = m_branchAttributes.begin(); it != m_branchAttributes.end(); ++it)
+      visitor->getCountryValues()->getBranchValue<float>(it->attribute.valueType, it->branchType)->prepare(it->attribute.value, it->attribute.method);
+
+    return false;
+  }
+
 }

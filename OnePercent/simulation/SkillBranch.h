@@ -1,45 +1,30 @@
 #pragma once
 
-#include "Skill.h"
+#include "core/Globals.h"
+#include "SimulationCallback.h"
 
-#include <osg/Referenced>
+#include <osg/Group>
 #include <osg/ref_ptr>
 
 #include <map>
-#include <functional>
+
 
 namespace onep
 {
-  class SkillBranch : public osg::Referenced
+  class SkillBranch : public osg::Group, public SimulationCallback
   {
   public:
-    typedef enum _type
-    {
-      BRANCH_BANKS = 0,
-      BRANCH_CONTROL = 1,
-      BRANCH_MEDIA = 2,
-      BRANCH_CONCERNS = 3,
-      BRANCH_POLITICS = 4,
-      BRANCH_UNDEFINED
-    } Type;
-
     typedef osg::ref_ptr<SkillBranch> Ptr;
     typedef std::map<int, Ptr> Map;
 
-    SkillBranch(Type type);
+    SkillBranch(BranchType type);
 
-    void addSkill(Skill::Ptr skill);
+    BranchType getType();
 
-    Type getType();
-
-    void forEachSkill(std::function<void(Skill::Ptr)> func);
-    void forEachActivatedSkill(std::function<void(Skill::Ptr)> func);
-
-    static std::string getStringFromType(int type);
-    static Type getTypeFromString(std::string str);
+    virtual bool callback(SimulationVisitor* visitor) override;
 
   private:
-    Type m_type;
-    Skill::List m_skills;
+    BranchType m_type;
+
   };
 }

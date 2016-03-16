@@ -6,36 +6,94 @@
 			
 			<field name="name" type="string" />
 			<field name="branch" type="string" />
-			<field name="anger" type="float" default="5.0" />
-			<field name="interest" type="float" default="0.0" />
-			<field name="propagation" type="float" default="0.0" />
+			<field name="attributes" type="array" />
 			
 			<element>
 				<property name="name" value="INTEREST I" />
 				<property name="branch" value="banks" />
-				<property name="anger" value="0.001" />
-				<property name="interest" value="0.1" />
+				
+				<array name="attributes">
+					<field name="valuetype" type="string" />
+					<field name="method" type="string" default="add_influence" />
+					<field name="value" type="float" />
+					<field name="branch_attr" type="bool" default="false" />
+				
+					<element>
+						<property name="valuetype" value="anger" />
+						<property name="value" value="0.001" />
+					</element>
+					
+					<element>
+						<property name="valuetype" value="interest" />
+						<property name="method" value="add_change" />
+						<property name="value" value="0.1" />
+					</element>
+				
+				</array>
 			</element>
 			
 			<element>
 				<property name="name" value="INTEREST II" />
 				<property name="branch" value="banks" />
-				<property name="anger" value="0.003" />
-				<property name="interest" value="0.2" />
+				
+				<array name="attributes">
+					<field name="valuetype" type="string" />
+					<field name="method" type="string" default="add_influence" />
+					<field name="value" type="float" />
+					<field name="branch_attr" type="bool" default="false" />
+				
+					<element>
+						<property name="valuetype" value="anger" />
+						<property name="value" value="0.003" />
+					</element>
+					
+					<element>
+						<property name="valuetype" value="interest" />
+						<property name="method" value="add_change" />
+						<property name="value" value="0.2" />
+					</element>
+				
+				</array>
 			</element>
 			
 			<element>
 				<property name="name" value="ANGER TEST" />
 				<property name="branch" value="banks" />
-				<property name="anger" value="-1.0" />
+
+				<array name="attributes">
+					<field name="valuetype" type="string" />
+					<field name="method" type="string" default="add_influence" />
+					<field name="value" type="float" />
+					<field name="branch_attr" type="bool" default="false" />
+				
+					<element>
+						<property name="valuetype" value="anger" />
+						<property name="value" value="-1.0" />
+					</element>
+				</array>
+				
 			</element>
 			
 			<element>
 				<property name="name" value="propagation banks" />
 				<property name="branch" value="banks" />
-				<property name="propagation" value="0.005" />
+
+				<array name="attributes">
+					<field name="valuetype" type="string" />
+					<field name="method" type="string" default="set_value" />
+					<field name="value" type="float" />
+					<field name="branch_attr" type="bool" default="false" />
+				
+					<element>
+						<property name="valuetype" value="propagation" />
+						<property name="value" value="0.02" />
+						<property name="branch_attr" value="true" />
+					</element>
+					
+				</array>
+				
 			</element>
-		
+
 		</array>
 	</group>
 	
