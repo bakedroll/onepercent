@@ -28,6 +28,10 @@ namespace helper
         if (cit == cycles.end() || cycleCountryMap.find(*iit) != cycleCountryMap.end())
           continue;
 
+        // FIX: shift bounding box for specific island
+        if (*iit == 231)
+          cit->second.boundingbox.shift(-graph.boundary.width(), 0.0f);
+
         country.boundingbox.expand(cit->second.boundingbox);
         for (TriangleMap::iterator tit = cit->second.trianlges.begin(); tit != cit->second.trianlges.end(); ++tit)
         {
