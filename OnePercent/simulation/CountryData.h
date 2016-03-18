@@ -5,6 +5,8 @@
 #include <osg/ref_ptr>
 #include <osg/Group>
 
+#include <osgGaming/Observable.h>
+
 #include "CountryValues.h"
 #include "SimulationCallback.h"
 
@@ -51,7 +53,7 @@ namespace onep
     CountryValues::Ptr getValues();
 
     bool getSkillBranchActivated(int type);
-    bool* getSkillBranchsActivated();
+    osgGaming::Observable<bool>::Ptr getSkillBranchActivatedObservable(int type);
 
 		bool anySkillBranchActivated();
 
@@ -65,7 +67,7 @@ namespace onep
 
 		float m_populationInMio;
 
-		bool m_skillBranchActivated[NUM_SKILLBRANCHES];
+    osgGaming::Observable<bool>::Ptr m_oSkillBranchActivated[NUM_SKILLBRANCHES];
 
 		unsigned char m_id;
 		osg::Vec2f m_centerLatLong;

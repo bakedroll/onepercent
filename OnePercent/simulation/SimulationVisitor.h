@@ -2,6 +2,7 @@
 
 #include <osgUtil/UpdateVisitor>
 #include "CountryValues.h"
+#include <osgGaming/Observable.h>
 
 namespace onep
 {
@@ -23,13 +24,13 @@ namespace onep
     CountryValues::Ptr getCountryValues();
     Type getType();
 
-    void setActivatedBranches(bool* branches);
+    void setActivatedBranches(osgGaming::Observable<bool>* branches);
     void setCountryValues(CountryValues::Ptr values);
 
   private:
     Type m_type;
 
-    bool* m_activatedBranches;
+    bool m_activatedBranches[NUM_SKILLBRANCHES];
     CountryValues::Ptr m_countryValues;
   };
 }

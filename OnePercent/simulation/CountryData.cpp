@@ -34,7 +34,7 @@ namespace onep
     , m_size(size)
   {
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
-      m_skillBranchActivated[i] = false;
+      m_oSkillBranchActivated[i] = new osgGaming::Observable<bool>(false);
 
     setUpdateCallback(new Callback());
   }
@@ -46,7 +46,7 @@ namespace onep
 
   void CountryData::setSkillBranchActivated(int type, bool activated)
   {
-    m_skillBranchActivated[type] = activated;
+    m_oSkillBranchActivated[type]->set(activated);
   }
 
   string CountryData::getCountryName()
@@ -98,19 +98,19 @@ namespace onep
 
   bool CountryData::getSkillBranchActivated(int type)
   {
-    return m_skillBranchActivated[type];
+    return m_oSkillBranchActivated[type]->get();
   }
 
-  bool* CountryData::getSkillBranchsActivated()
+  osgGaming::Observable<bool>::Ptr CountryData::getSkillBranchActivatedObservable(int type)
   {
-    return &m_skillBranchActivated[0];
+    return m_oSkillBranchActivated[type];
   }
 
   bool CountryData::anySkillBranchActivated()
   {
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
     {
-      if (m_skillBranchActivated[i])
+      if (m_oSkillBranchActivated[i]->get())
       {
         return true;
       }
@@ -133,7 +133,7 @@ namespace onep
       return false; // don't traverse
     }
 
-    visitor->setActivatedBranches(m_skillBranchActivated);
+    visitor->setActivatedBranches(m_oSkillBranchActivated[0].get());
     visitor->setCountryValues(m_values);
 
     return true;
@@ -146,7 +146,7 @@ namespace onep
     ProgressingValue<float>* interest = m_values->getValue<float>(VALUE_INTEREST);
     ProgressingValue<float>* buyingPower = m_values->getValue<float>(VALUE_BUYING_POWER);
 
-    if (m_skillBranchActivated[BRANCH_BANKS])
+    if (m_oSkillBranchActivated[BRANCH_BANKS]->get())
     {
       dept->prepare(dept->getValue() * interest->getValue() + buyingPower->getValue(), METHOD_SET_BALANCE);
     }
@@ -158,8 +158,8 @@ namespace onep
 
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
     {
-      if (!m_skillBranchActivated[i] && m_values->getBranchValue<float>(VALUE_PROPAGATED, BranchType(i))->full())
-        m_skillBranchActivated[i] = true;
+      if (!m_oSkillBranchActivated[i]->get() && m_values->getBranchValue<float>(VALUE_PROPAGATED, BranchType(i))->full())
+        m_oSkillBranchActivated[i]->set(true);
     }
   }
 
@@ -167,7 +167,7 @@ namespace onep
   {
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
     {
-      if (m_skillBranchActivated[i])
+      if (m_oSkillBranchActivated[i]->get())
       {
         float propagation = m_values->getBranchValue<float>(VALUE_PROPAGATION, BranchType(i))->getValue();
 

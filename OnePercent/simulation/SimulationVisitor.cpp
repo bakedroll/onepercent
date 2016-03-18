@@ -11,7 +11,7 @@ namespace onep
 
   bool* SimulationVisitor::getActivatedBranches()
   {
-    return m_activatedBranches;
+    return &m_activatedBranches[0];
   }
 
   CountryValues::Ptr SimulationVisitor::getCountryValues()
@@ -24,9 +24,10 @@ namespace onep
     return m_type;
   }
 
-  void SimulationVisitor::setActivatedBranches(bool* branches)
+  void SimulationVisitor::setActivatedBranches(osgGaming::Observable<bool>* branches)
   {
-    m_activatedBranches = branches;
+    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
+      m_activatedBranches[i] = branches[i].get();
   }
 
   void SimulationVisitor::setCountryValues(CountryValues::Ptr values)
