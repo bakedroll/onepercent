@@ -338,5 +338,8 @@
     <ClInclude Include="include\osgGaming\PropertyArray.h">
       <Filter>Header Files\Parameters</Filter>
     </ClInclude>
+    <ClInclude Include="include\osgGaming\Observable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

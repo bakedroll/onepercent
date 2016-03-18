@@ -49,6 +49,9 @@ namespace onep
     case MODE_NEIGHBOR:
       m_material->setDiffuse(osg::Material::FRONT, osg::Vec4f(1.0f, 1.0f, 0.0f, 0.3f));
       break;
+    case MODE_HIGHLIGHT_BANKS:
+      m_material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.0f, 0.0f, 0.8f, 0.3f));
+      break;
     default:
       break;
     }

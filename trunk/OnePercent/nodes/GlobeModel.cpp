@@ -21,6 +21,7 @@ using namespace osgGaming;
 using namespace std;
 
 GlobeModel::GlobeModel(osg::ref_ptr<TransformableCameraManipulator> tcm)
+  : m_selectedCountryId(0)
 {
 	makeEarthModel();
 	makeCloudsModel();
@@ -46,11 +47,25 @@ void GlobeModel::updateClouds(float day)
 
 void GlobeModel::setSelectedCountry(int countryId)
 {
+  m_selectedCountryId = countryId;
+
   for (CountryMesh::List::iterator it = m_visibleCountryMeshs.begin(); it != m_visibleCountryMeshs.end(); ++it)
     m_countrySurfacesSwitch->setChildValue(*it, false);
 
   if (countryId == 0)
+  {
+    for (CountryMesh::Map::iterator it = m_countryMeshs.begin(); it != m_countryMeshs.end(); ++it)
+    {
+      if (it->second->getCountryData()->getSkillBranchActivated(BRANCH_BANKS))
+      {
+        it->second->setColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS);
+        m_countrySurfacesSwitch->setChildValue(it->second, true);
+        m_visibleCountryMeshs.push_back(it->second);
+      }
+    }
+
     return;
+  }
 
   CountryMesh::Ptr mesh = m_countryMeshs.find(countryId)->second;
   mesh->setColorMode(CountryMesh::MODE_SELECTED);
@@ -93,6 +108,16 @@ void GlobeModel::addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<o
 
   m_countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
   m_countrySurfacesSwitch->addChild(mesh, false);
+
+  countryData->getSkillBranchActivatedObservable(BRANCH_BANKS)->addNotifyFunc([this, mesh](bool)
+  {
+    if (m_selectedCountryId == 0)
+    {
+      mesh->setColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS);
+      m_countrySurfacesSwitch->setChildValue(mesh, true);
+      m_visibleCountryMeshs.push_back(mesh);
+    }
+  });
 }
 
 CountryMesh::Map& GlobeModel::getCountryMeshs()

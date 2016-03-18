@@ -78,6 +78,7 @@
     <ClInclude Include="include\osgGaming\HighDynamicRangeEffect.h" />
     <ClInclude Include="include\osgGaming\Hud.h" />
     <ClInclude Include="include\osgGaming\InputManager.h" />
+    <ClInclude Include="include\osgGaming\Observable.h" />
     <ClInclude Include="include\osgGaming\PackageResourceLoader.h" />
     <ClInclude Include="include\osgGaming\Property.h" />
     <ClInclude Include="include\osgGaming\PropertiesManager.h" />

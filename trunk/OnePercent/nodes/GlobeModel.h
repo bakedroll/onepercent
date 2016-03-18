@@ -65,5 +65,6 @@ namespace onep
     CountriesMap::Ptr m_countriesMap;
 
     CountryMesh::List m_visibleCountryMeshs;
+    int m_selectedCountryId;
 	};
 }
