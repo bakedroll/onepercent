@@ -36,6 +36,8 @@ namespace onep
     int getCountryId(osg::Vec2f coord);
     std::string getCountryName(osg::Vec2f coord);
 
+    osgGaming::Observable<int>::Ptr getSelectedCountryIdObservable();
+
 	private:
 		osgGaming::Property<float, Param_SunDistanceName> m_paramSunDistance;
 		osgGaming::Property<float, Param_SunRadiusPm2Name> m_paramSunRadiusMp2;
@@ -65,6 +67,6 @@ namespace onep
     CountriesMap::Ptr m_countriesMap;
 
     CountryMesh::List m_visibleCountryMeshs;
-    int m_selectedCountryId;
+    osgGaming::Observable<int>::Ptr m_oSelectedCountryId;
 	};
 }

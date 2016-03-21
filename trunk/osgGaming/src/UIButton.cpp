@@ -5,113 +5,130 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 
-using namespace osgGaming;
-using namespace osg;
-using namespace std;
-using namespace osgText;
-
-UIButton::UIButton()
-	: UIVisualElement(),
-	  UserInteractionModel(),
-	  _text(""),
-	  _fontSize(18.0)
+namespace osgGaming
 {
-	//setWidth(100.0f);
-	//setHeight(26.0f);
 
-	setPadding(6.0f);
+  UIButton::UIButton()
+    : UIVisualElement()
+    , UserInteractionModel()
+    , m_text("")
+    , m_fontSize(18.0)
+    , m_checkable(false)
+    , m_isChecked(false)
+  {
+    setPadding(6.0f);
 
-	ref_ptr<Geode> geode = new Geode();
-	ref_ptr<Geometry> geo = createQuadGeometry(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, XY, true); /*new Geometry();
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+    osg::ref_ptr<osg::Geometry> geo = createQuadGeometry(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, XY, true); 
 
-	ref_ptr<Vec3Array> verts = new Vec3Array();
-	verts->push_back(Vec3(0.0f, 0.0f, -1.0f));
-	verts->push_back(Vec3(1.0f, 0.0f, -1.0f));
-	verts->push_back(Vec3(1.0f, 1.0f, -1.0f));
-	verts->push_back(Vec3(0.0f, 1.0f, -1.0f));
+    geode->addDrawable(geo);
 
-	ref_ptr<DrawElementsUInt> indices = new DrawElementsUInt(PrimitiveSet::POLYGON, 0);
-	indices->push_back(0);
-	indices->push_back(1);
-	indices->push_back(2);
-	indices->push_back(3);
+    m_material = new osg::Material();
+    m_material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    m_material->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    m_material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    m_material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4(1.0f, 0.5f, 0.5f, 1.0f));
+    m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.5f);
+    geode->getOrCreateStateSet()->setAttributeAndModes(m_material, osg::StateAttribute::ON);
 
-	//ref_ptr<Vec4Array> colors = new Vec4Array();
-	//colors->push_back(Vec4(1.0f, 0.5f, 0.5f, 1.0f));
+    getVisualGroup()->addChild(geode);
 
-	ref_ptr<Vec2Array> texcoords = new Vec2Array();
-	texcoords->push_back(Vec2(0.0f, 0.0f));
-	texcoords->push_back(Vec2(1.0f, 0.0f));
-	texcoords->push_back(Vec2(1.0f, 1.0f));
-	texcoords->push_back(Vec2(0.0f, 1.0f));
+    osg::ref_ptr<osg::Geode> textGeode = new osg::Geode();
 
-	geo->setTexCoordArray(0, texcoords);
-	geo->addPrimitiveSet(indices);
-	geo->setVertexArray(verts);
-	//geo->setColorArray(colors);
-	//geo->setColorBinding(osg::Geometry::BIND_OVERALL);
+    m_textNode = createTextNode(m_text, m_fontSize, ResourceManager::getInstance()->loadDefaultFont());
+    m_textNode->setAlignment(osgText::TextBase::CENTER_CENTER);
 
-	*/
+    MatrixTransform::addChild(textGeode);
+    textGeode->addDrawable(m_textNode);
+  }
 
-	geode->addDrawable(geo);
+  void UIButton::setFontSize(float fontSize)
+  {
+    m_fontSize = fontSize;
+    m_textNode->setCharacterSize(fontSize);
+  }
 
-	_material = new Material();
-	_material->setAmbient(Material::FRONT_AND_BACK, Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	_material->setSpecular(Material::FRONT_AND_BACK, Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	_material->setEmission(Material::FRONT_AND_BACK, Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	_material->setDiffuse(Material::FRONT_AND_BACK, Vec4(1.0f, 0.5f, 0.5f, 1.0f));
-	_material->setTransparency(Material::FRONT_AND_BACK, 0.5f);
-	geode->getOrCreateStateSet()->setAttributeAndModes(_material, StateAttribute::ON);
+  void UIButton::setText(std::string text)
+  {
+    m_text = text;
+    m_textNode->setText(text);
+  }
 
-	getVisualGroup()->addChild(geode);
+  void UIButton::onMouseEnter()
+  {
+    if (isEnabled())
+      m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.0f);
+  }
 
+  void UIButton::onMouseLeave()
+  {
+    if (!m_isChecked)
+      m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.5f);
+  }
 
-	ref_ptr<Geode> textGeode = new Geode();
+  void UIButton::onClicked()
+  {
+    if (m_checkable)
+      setChecked(!m_isChecked);
+  }
 
-	_textNode = createTextNode(_text, _fontSize, ResourceManager::getInstance()->loadDefaultFont());
-	_textNode->setAlignment(osgText::TextBase::CENTER_CENTER);
+  void UIButton::onEnabledChanged(bool enabled)
+  {
+    if (enabled)
+    {
+      m_textNode->setColor(osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f));
+    }
+    else
+    {
+      m_textNode->setColor(osg::Vec4f(0.6f, 0.6f, 0.6f, 1.0f));
+    }
+  }
 
-	MatrixTransform::addChild(textGeode);
-	textGeode->addDrawable(_textNode);
-}
+  void UIButton::getAbsoluteOriginSize(osg::Vec2f& origin, osg::Vec2f& size)
+  {
+    osg::Vec4f margin = getMargin();
 
-void UIButton::setFontSize(float fontSize)
-{
-	_fontSize = fontSize;
-	_textNode->setCharacterSize(fontSize);
-}
+    origin = getAbsoluteOrigin();
+    size = getSize() - osg::Vec2f(margin.x() + margin.z(), margin.y() + margin.w());
+  }
 
-void UIButton::setText(string text)
-{
-	_text = text;
-	_textNode->setText(text);
-}
+  void UIButton::updatedContentOriginSize(osg::Vec2f origin, osg::Vec2f size)
+  {
+    osg::Vec2f position = origin + size / 2.0f;
+    m_textNode->setPosition(osg::Vec3f(position.x(), position.y(), 0.0f));
+  }
 
-void UIButton::onMouseEnter()
-{
-	_material->setTransparency(Material::FRONT_AND_BACK, 0.0f);
-}
+  bool UIButton::isCheckable()
+  {
+    return m_checkable;
+  }
 
-void UIButton::onMouseLeave()
-{
-	_material->setTransparency(Material::FRONT_AND_BACK, 0.5f);
-}
+  bool UIButton::isChecked()
+  {
+    return m_isChecked;
+  }
 
-void UIButton::getAbsoluteOriginSize(osg::Vec2f& origin, osg::Vec2f& size)
-{
-	Vec4f margin = getMargin();
+  void UIButton::setCheckable(bool checkable)
+  {
+    m_checkable = checkable;
+    setChecked(false);
+  }
 
-	origin = getAbsoluteOrigin();
-	size = getSize() - Vec2f(margin.x() + margin.z(), margin.y() + margin.w());
-}
+  void UIButton::setChecked(bool checked)
+  {
+    if (!m_checkable)
+      return;
 
-void UIButton::updatedContentOriginSize(Vec2f origin, Vec2f size)
-{
-	Vec2f position = origin + size / 2.0f;
-	_textNode->setPosition(Vec3f(position.x(), position.y(), 0.0f));
-}
+    m_isChecked = checked;
+    if (m_isChecked || getHovered())
+      m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.0f);
+    else
+      m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.5f);
+  }
 
-Vec2f UIButton::calculateMinContentSize()
-{
-	return getTextSize(_textNode);
+  osg::Vec2f UIButton::calculateMinContentSize()
+  {
+    return getTextSize(m_textNode);
+  }
+
 }

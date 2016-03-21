@@ -21,7 +21,7 @@ void UIMCollectorVisitor::apply(Node &node)
 	traverse(node);
 }
 
-UserInteractionModelList UIMCollectorVisitor::getUserInteractionModels()
+UserInteractionModel::List UIMCollectorVisitor::getUserInteractionModels()
 {
 	return _uimList;
 }

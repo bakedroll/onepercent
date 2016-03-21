@@ -24,7 +24,7 @@ namespace osgGaming
 		osg::ref_ptr<osg::Geode> getGeode();
 
 		osg::ref_ptr<UIElement> getRootUIElement();
-		UserInteractionModelList getUserInteractionModels();
+		UserInteractionModel::List& getUserInteractionModels();
 
 		osg::ref_ptr<osgGaming::UIElement> getUIElementByName(std::string name);
 
@@ -52,6 +52,6 @@ namespace osgGaming
 
 		osg::Vec2f _resolution;
 
-		UserInteractionModelList _uimList;
+		UserInteractionModel::List _uimList;
 	};
 }

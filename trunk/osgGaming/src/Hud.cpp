@@ -63,7 +63,7 @@ ref_ptr<UIElement> Hud::getRootUIElement()
 	return _rootUIElement;
 }
 
-UserInteractionModelList Hud::getUserInteractionModels()
+UserInteractionModel::List& Hud::getUserInteractionModels()
 {
 	return _uimList;
 }
@@ -81,7 +81,7 @@ void Hud::updateResolution(Vec2f resolution)
 {
 	_resolution = resolution;
 
-	_projection->setMatrix(Matrix::ortho2D(0.0, (double)_resolution.x() - 1.0, 1.0, (double)_resolution.y() - 1.0));
+	_projection->setMatrix(Matrix::ortho2D(0.0, double(_resolution.x()) - 1.0, 1.0, double(_resolution.y()) - 1.0));
 
 	updateUIElements();
 }
@@ -158,7 +158,7 @@ void Hud::registerUserInteractionModel(UserInteractionModel* model)
 
 bool Hud::anyUserInteractionModelHovered()
 {
-	for (UserInteractionModelList::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
+	for (UserInteractionModel::List::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
 	{
 		if ((*it)->getHovered())
 		{
@@ -171,7 +171,7 @@ bool Hud::anyUserInteractionModelHovered()
 
 void Hud::resetUserInteractionModel()
 {
-	for (UserInteractionModelList::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
+	for (UserInteractionModel::List::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
 	{
 		(*it)->setHovered(false);
 	}

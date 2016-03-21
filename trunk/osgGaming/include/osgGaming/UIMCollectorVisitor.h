@@ -15,9 +15,9 @@ namespace osgGaming
 
 		virtual void apply(osg::Node &node) override;
 
-		UserInteractionModelList getUserInteractionModels();
+		UserInteractionModel::List getUserInteractionModels();
 
 	private:
-		UserInteractionModelList _uimList;
+		UserInteractionModel::List _uimList;
 	};
 }

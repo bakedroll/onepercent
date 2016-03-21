@@ -18,11 +18,16 @@
 				<text name="text_selectCountry" content="{localization/infoText_selectCountry}" />
 				<text name="text_selectCountryAgain" content="{localization/infoText_selectCountryAgain}" fontsize="14" visible="false" />
 				
-				<button name="button_makeBanks" text="Banks" />
-				<button name="button_makePolitics" text="Politics" />
-				<button name="button_makeConcerns" text="Concerns" />
-				<button name="button_makeMedia" text="Media" />
-				<button name="button_makeControl" text="Control" />
+				<stackpanel orientation="vertical" name="panel_branchbuttons" />
+				
+				<!--
+					<button name="button_makeBanks" text="Banks" />
+					<button name="button_makePolitics" text="Politics" />
+					<button name="button_makeConcerns" text="Concerns" />
+					<button name="button_makeMedia" text="Media" />
+					<button name="button_makeControl" text="Control" />
+				</stackpanel>
+				-->
 				
 				<text name="text_countryInfo" content="" fontsize="14" outlinecolor="0.0, 0.0, 0.0, 1.0" />
 				
