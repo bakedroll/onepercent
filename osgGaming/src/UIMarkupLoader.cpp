@@ -51,8 +51,8 @@ void UIMarkupLoader::parseXmlGrid(xml_node<>* node, ref_ptr<UIGrid> uiGrid)
 {
 	XmlUiElementList xmlUiElements = parseXmlChildElements(node);
 
-	parseXmlCellDefinitions(node, "rows", "rowdefinitions", "row", uiGrid->getRows(), true);
-	parseXmlCellDefinitions(node, "columns", "coldefinitions", "column", uiGrid->getColumns(), false);
+	parseXmlCellDefinitions(node, "rows", "rowdefinitions", "row", uiGrid->getRows());
+	parseXmlCellDefinitions(node, "columns", "coldefinitions", "column", uiGrid->getColumns());
 
 	xml_attribute<>* attrSpacing = node->first_attribute("spacing");
 	if (attrSpacing != nullptr)
@@ -67,8 +67,8 @@ void UIMarkupLoader::parseXmlGrid(xml_node<>* node, ref_ptr<UIGrid> uiGrid)
 		xml_attribute<>* attrRow = it->xmlNode->first_attribute("row");
 		if (attrRow != nullptr)
 		{
-      //row = parseXmlAttributeInt(attrRow->value());
-      row = uiGrid->getRows()->getNumCells() - (parseXmlAttributeInt(attrRow->value()) + 1);
+      row = parseXmlAttributeInt(attrRow->value());
+      //row = uiGrid->getRows()->getNumCells() - (parseXmlAttributeInt(attrRow->value()) + 1);
 		}
 
 		xml_attribute<>* attrCol = it->xmlNode->first_attribute("col");
@@ -123,7 +123,7 @@ void UIMarkupLoader::parseXmlStackPanel(xml_node<>* node, ref_ptr<UIStackPanel> 
     }
   }
 
-  parseXmlCellDefinitions(node, "cells", "celldefinitions", "cell", uiStackPanel->getCells(), uiStackPanel->getOrientation() == UIStackPanel::VERTICAL);
+  parseXmlCellDefinitions(node, "cells", "celldefinitions", "cell", uiStackPanel->getCells());
 
 	xml_attribute<>* attrSpacing = node->first_attribute("spacing");
 	if (attrSpacing != nullptr)
@@ -132,8 +132,8 @@ void UIMarkupLoader::parseXmlStackPanel(xml_node<>* node, ref_ptr<UIStackPanel> 
 	}
 
   int cell = 
-    uiStackPanel->getOrientation() == UIStackPanel::VERTICAL ? 
-    uiStackPanel->getCells()->getNumCells() - 1 : 
+    //uiStackPanel->getOrientation() == UIStackPanel::VERTICAL ? 
+    //uiStackPanel->getCells()->getNumCells() - 1 : 
     0;
 
 	for (XmlUiElementList::iterator it = xmlUiElements.begin(); it != xmlUiElements.end(); ++it)
@@ -143,8 +143,8 @@ void UIMarkupLoader::parseXmlStackPanel(xml_node<>* node, ref_ptr<UIStackPanel> 
 		{
       cell = parseXmlAttributeInt(attrCell->value()); 
       
-      if (uiStackPanel->getOrientation() == UIStackPanel::VERTICAL)
-        cell = uiStackPanel->getCells()->getNumCells() - (cell + 1);
+      //if (uiStackPanel->getOrientation() == UIStackPanel::VERTICAL)
+      //  cell = uiStackPanel->getCells()->getNumCells() - (cell + 1);
 
       uiStackPanel->addChild(it->uiElement, cell);
 		}
@@ -152,9 +152,9 @@ void UIMarkupLoader::parseXmlStackPanel(xml_node<>* node, ref_ptr<UIStackPanel> 
     {
       uiStackPanel->addChild(it->uiElement, cell);
 
-      if (uiStackPanel->getOrientation() == UIStackPanel::VERTICAL)
-        cell--;
-      else
+      //if (uiStackPanel->getOrientation() == UIStackPanel::VERTICAL)
+      //  cell--;
+      //else
         cell++;
 
     }
@@ -347,7 +347,7 @@ Vec4f UIMarkupLoader::parseXmlAttributeVec4(string value)
 	return parseXmlAttribute(value) ? ~Property<Vec4f>(value.c_str()) : parseVector<Vec4f>(value);
 }
 
-void UIMarkupLoader::parseXmlCellDefinitions(rapidxml::xml_node<>* node, const char* attrname, const char* defname, const char* tagname, ref_ptr<UICells> cells, bool reverseIdx)
+void UIMarkupLoader::parseXmlCellDefinitions(rapidxml::xml_node<>* node, const char* attrname, const char* defname, const char* tagname, ref_ptr<UICells> cells)
 {
 	xml_attribute<>* attrCells = node->first_attribute(attrname);
 	if (attrCells != nullptr)
@@ -384,10 +384,6 @@ void UIMarkupLoader::parseXmlCellDefinitions(rapidxml::xml_node<>* node, const c
 			}
 
 			int index = parseXmlAttributeInt(indexAttr->value());
-      if (reverseIdx)
-      {
-        index = cells->getNumCells() - (index + 1);
-      }
 
 			xml_attribute<>* sizepolicyAttr = tagnode->first_attribute("sizepolicy");
 			if (sizepolicyAttr != nullptr)
@@ -407,7 +403,7 @@ void UIMarkupLoader::parseXmlCellDefinitions(rapidxml::xml_node<>* node, const c
 					throw GameException("Invalid SizePolicy attribute");
 				}
 
-				cells->setSizePolicy(index, strcmp(parseXmlAttributeString(sizepolicyAttr->value()).c_str(), "content") == 0 ? UICells::CONTENT : UICells::AUTO);
+				// cells->setSizePolicy(index, strcmp(parseXmlAttributeString(sizepolicyAttr->value()).c_str(), "content") == 0 ? UICells::CONTENT : UICells::AUTO);
 			}
 
 			tagnode = tagnode->next_sibling(tagname);

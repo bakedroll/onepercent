@@ -23,7 +23,7 @@ void UIStackPanel::getOriginSizeForLocationInArea(int location, Vec2f area, Vec2
 	{
 	case HORIZONTAL:
 
-		_cells->getActualOriginSize(location, area.x(), _spacing, origin.x(), size.x()/*, false*/);
+		_cells->getActualOriginSize(location, area.x(), _spacing, origin.x(), size.x());
 
 		size.y() = area.y();
 		origin.y() = 0.0f;
@@ -32,7 +32,7 @@ void UIStackPanel::getOriginSizeForLocationInArea(int location, Vec2f area, Vec2
 
 	case VERTICAL:
 
-		_cells->getActualOriginSize(location, area.y(), _spacing, origin.y(), size.y()/*, true*/);
+		_cells->getActualOriginSize(location, area.y(), _spacing, origin.y(), size.y());
 
 		size.x() = area.x();
 		origin.x() = 0.0f;
@@ -54,6 +54,7 @@ void UIStackPanel::setSpacing(float spacing)
 
 void UIStackPanel::setOrientation(Orientation orientation)
 {
+  _cells->setReverseMode(orientation == VERTICAL);
 	_orientation = orientation;
 }
 
