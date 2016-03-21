@@ -44,6 +44,6 @@ namespace osgGaming
 		bool parseXmlAttributeBool(std::string value);
 		osg::Vec4f parseXmlAttributeVec4(std::string value);
 
-		void parseXmlCellDefinitions(rapidxml::xml_node<>* node, const char* attrname, const char* defname, const char* tagname, osg::ref_ptr<UICells> cells, bool reverseIdx);
+		void parseXmlCellDefinitions(rapidxml::xml_node<>* node, const char* attrname, const char* defname, const char* tagname, osg::ref_ptr<UICells> cells);
 	};
 }

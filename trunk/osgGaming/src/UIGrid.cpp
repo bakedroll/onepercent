@@ -24,8 +24,8 @@ UIGrid::UIGrid()
 	: UIContainerElement(),
 	  _spacing(5.0f)
 {
-	_columns = new UICells();
-	_rows = new UICells();
+	_columns = new UICells(false);
+	_rows = new UICells(true);
 
 	_columns->setNumCells(1);
 	_rows->setNumCells(1);
@@ -33,8 +33,8 @@ UIGrid::UIGrid()
 
 void UIGrid::getOriginSizeForLocationInArea(ColRow location, Vec2f area, Vec2f& origin, Vec2f& size)
 {
-	_columns->getActualOriginSize(location.col, area.x(), _spacing, origin.x(), size.x()/*, false*/);
-	_rows->getActualOriginSize(/*_rows->getNumCells() - (location.row + 1)*/ location.row, area.y(), _spacing, origin.y(), size.y()/*, true*/);
+	_columns->getActualOriginSize(location.col, area.x(), _spacing, origin.x(), size.x());
+	_rows->getActualOriginSize(location.row, area.y(), _spacing, origin.y(), size.y());
 }
 
 void UIGrid::setSpacing(float spacing)

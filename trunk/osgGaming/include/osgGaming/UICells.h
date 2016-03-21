@@ -13,7 +13,7 @@ namespace osgGaming
 			CONTENT
 		} SizePolicy;
 
-		UICells();
+		UICells(bool reverse = false);
 		~UICells();
 
 		void expandCell(int index, float size);
@@ -21,12 +21,13 @@ namespace osgGaming
     void setDefaultSizePolicy(SizePolicy sizePolicy);
 		void setNumCells(int num);
 		void setSizePolicy(int cell, SizePolicy sizePolicy);
+    void setReverseMode(bool reverse);
 
 		int getNumCells();
 		SizePolicy getSizePolicy(int cell);
 
 		void getMinSize(int index, float& minSize);
-		void getActualOriginSize(int index, float totalSize, float spacing, float& origin, float& size/*, bool reverseIdx*/);
+		void getActualOriginSize(int index, float totalSize, float spacing, float& origin, float& size);
 
 		void reset();
 
@@ -50,5 +51,6 @@ namespace osgGaming
 		bool _calculatedActualSize;
 		bool _initialized;
     SizePolicy _defaultSizePolicy;
+    bool _reverse;
 	};
 }

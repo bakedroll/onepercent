@@ -7,11 +7,12 @@ using namespace osgGaming;
 using namespace osg;
 using namespace std;
 
-UICells::UICells()
+UICells::UICells(bool reverse)
 	: Referenced()
   , _calculatedActualSize(false)
   , _initialized(false)
   , _defaultSizePolicy(AUTO)
+  , _reverse(reverse)
 {
 }
 
@@ -25,6 +26,9 @@ UICells::~UICells()
 
 void UICells::expandCell(int index, float size)
 {
+  if (_reverse)
+    index = _numCells - (index + 1);
+
 	_cells[index].minSize = fmaxf(_cells[index].minSize, size);
 }
 
@@ -58,7 +62,15 @@ void UICells::setNumCells(int num)
 
 void UICells::setSizePolicy(int cell, SizePolicy sizePolicy)
 {
+  if (_reverse)
+    cell = _numCells - (cell + 1);
+
 	_cells[cell].sizePolicy = sizePolicy;
+}
+
+void UICells::setReverseMode(bool reverse)
+{
+  _reverse = reverse;
 }
 
 int UICells::getNumCells()
@@ -68,18 +80,24 @@ int UICells::getNumCells()
 
 UICells::SizePolicy UICells::getSizePolicy(int cell)
 {
+  if (_reverse)
+    cell = _numCells - (cell + 1);
+
 	return _cells[cell].sizePolicy;
 }
 
 void UICells::getMinSize(int index, float& minSize)
 {
+  if (_reverse)
+    index = _numCells - (index + 1);
+
 	minSize = _cells[index].minSize;
 }
 
-void UICells::getActualOriginSize(int index, float totalSize, float spacing, float& origin, float& size/*, bool reverseIdx*/)
+void UICells::getActualOriginSize(int index, float totalSize, float spacing, float& origin, float& size)
 {
-  //if (reverseIdx)
-  //  index = getNumCells() - (index + 1);
+  if (_reverse)
+    index = _numCells - (index + 1);
 
 	if (_calculatedActualSize == false)
 	{

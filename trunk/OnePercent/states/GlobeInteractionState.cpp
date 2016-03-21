@@ -36,7 +36,7 @@ void GlobeInteractionState::initialize()
 
   int nskills = getGlobeOverviewWorld()->getSimulation()->getNumSkills();
   stackPanel->getCells()->setNumCells(nskills + 1);
-  stackPanel->getCells()->setSizePolicy(0, UICells::AUTO);
+  stackPanel->getCells()->setSizePolicy(nskills, UICells::AUTO);
 
   for (int i = 0; i < nskills; i++)
   {
@@ -45,7 +45,7 @@ void GlobeInteractionState::initialize()
     osg::ref_ptr<UIButton> button = new UIButton();
     button->setText(skill->getName());
 
-    stackPanel->addChild(button, nskills - i);
+    stackPanel->addChild(button, i);
   }
 
 	getHud()->setFpsEnabled(true);
