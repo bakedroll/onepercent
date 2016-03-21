@@ -2,7 +2,6 @@
 
 #include <osgGaming/AbstractGameState.h>
 #include <osgGaming/World.h>
-#include <osgGaming/Hud.h>
 #include <osgGA/GUIEventHandler>
 #include <osgGaming/Viewer.h>
 #include <osgGaming/GameStateStack.h>

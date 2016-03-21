@@ -13,6 +13,39 @@ using namespace std;
 using namespace osgGA;
 using namespace osgGaming;
 
+class DebugButton : public osgGaming::UIButton
+{
+public:
+  typedef enum _type
+  {
+    BRANCH,
+    SKILL
+  } Type;
+
+  DebugButton(Type type, int id)
+    : UIButton()
+    , m_id(id)
+    , m_type(type)
+  {
+    
+  }
+
+  int getId()
+  {
+    return m_id;
+  }
+
+  Type getType()
+  {
+    return m_type;
+  }
+
+private:
+  int m_id;
+  Type m_type;
+
+};
+
 GlobeInteractionState::GlobeInteractionState()
 	: GlobeCameraState(),
 	  _ready(false),
@@ -32,20 +65,46 @@ void GlobeInteractionState::initialize()
 	_textProgress = static_cast<UIText*>(getHud()->getUIElementByName("text_dayProgress").get());
 	_textCountryInfo = static_cast<UIText*>(getHud()->getUIElementByName("text_countryInfo").get());
 
-  UIStackPanel* stackPanel = static_cast<UIStackPanel*>(getHud()->getUIElementByName("panel_skillbuttons").get());
+  UIStackPanel* stackpanelBranches = static_cast<UIStackPanel*>(getHud()->getUIElementByName("panel_branchbuttons").get());
+  UIStackPanel* stackPanelSkills = static_cast<UIStackPanel*>(getHud()->getUIElementByName("panel_skillbuttons").get());
 
+  // Branches
+  stackpanelBranches->getCells()->setNumCells(NUM_SKILLBRANCHES);
+  for (int i = 0; i < NUM_SKILLBRANCHES; i++)
+  {
+    osg::ref_ptr<UIButton> button = new DebugButton(DebugButton::BRANCH, i);
+    button->setText(branch_getStringFromType(i));
+    button->setCheckable(true);
+
+    getHud()->registerUserInteractionModel(button.get());
+    stackpanelBranches->addChild(button, i);
+
+    getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->addFuncAndNotify([this, button, i](int selected)
+    {
+      if (selected > 0)
+        button->setChecked(getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
+      else
+        button->setChecked(false);
+
+      button->setEnabled(selected > 0);
+    });
+  }
+
+  // Skills
   int nskills = getGlobeOverviewWorld()->getSimulation()->getNumSkills();
-  stackPanel->getCells()->setNumCells(nskills + 1);
-  stackPanel->getCells()->setSizePolicy(nskills, UICells::AUTO);
+  stackPanelSkills->getCells()->setNumCells(nskills + 1);
+  stackPanelSkills->getCells()->setSizePolicy(nskills, UICells::AUTO);
 
   for (int i = 0; i < nskills; i++)
   {
     Skill::Ptr skill = getGlobeOverviewWorld()->getSimulation()->getSkill(i);
     
-    osg::ref_ptr<UIButton> button = new UIButton();
+    osg::ref_ptr<UIButton> button = new DebugButton(DebugButton::SKILL, i);
     button->setText(skill->getName());
+    button->setCheckable(true);
 
-    stackPanel->addChild(button, i);
+    getHud()->registerUserInteractionModel(button.get());
+    stackPanelSkills->addChild(button, i);
   }
 
 	getHud()->setFpsEnabled(true);
@@ -240,35 +299,18 @@ void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::V
 
 void GlobeInteractionState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
 {
-  if (_selectedCountry > 0)
+  DebugButton* dbutton = dynamic_cast<DebugButton*>(uiElement.get());
+  if (!dbutton)
+    return;
+
+  if (dbutton->getType() == DebugButton::BRANCH && _selectedCountry > 0)
   {
     ref_ptr<CountryData> selectedCountry = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData();
-
-    if (uiElement->getUIName() == "button_makeBanks")
-    {
-      if (selectedCountry)
-        selectedCountry->setSkillBranchActivated(BRANCH_BANKS, true);
-    }
-    else if (uiElement->getUIName() == "button_makePolitics")
-    {
-      if (selectedCountry)
-        selectedCountry->setSkillBranchActivated(BRANCH_POLITICS, true);
-    }
-    else if (uiElement->getUIName() == "button_makeConcerns")
-    {
-      if (selectedCountry)
-        selectedCountry->setSkillBranchActivated(BRANCH_CONCERNS, true);
-    }
-    else if (uiElement->getUIName() == "button_makeMedia")
-    {
-      if (selectedCountry)
-        selectedCountry->setSkillBranchActivated(BRANCH_MEDIA, true);
-    }
-    else if (uiElement->getUIName() == "button_makeControl")
-    {
-      if (selectedCountry)
-        selectedCountry->setSkillBranchActivated(BRANCH_CONTROL, true);
-    }
+    selectedCountry->setSkillBranchActivated(dbutton->getId(), dbutton->isChecked());
+  }
+  else if (dbutton->getType() == DebugButton::SKILL)
+  {
+    getGlobeOverviewWorld()->getSimulation()->getSkill(dbutton->getId())->setActivated(dbutton->isChecked());
   }
 }
 

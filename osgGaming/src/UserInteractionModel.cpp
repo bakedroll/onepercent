@@ -1,35 +1,47 @@
 #include <osgGaming/UserInteractionModel.h>
 
-using namespace osgGaming;
-using namespace std;
-
-UserInteractionModel::~UserInteractionModel()
+namespace osgGaming
 {
+
+  UserInteractionModel::~UserInteractionModel()
+  {
+  }
+
+  UserInteractionModel::UserInteractionModel()
+    : m_hovered(false)
+    , m_enabled(true)
+  {
+
+  }
+
+  void UserInteractionModel::onClicked()
+  {
+  }
+
+  void UserInteractionModel::onEnabledChanged(bool enabled)
+  {
+
+  }
+
+  bool UserInteractionModel::isEnabled()
+  {
+    return m_enabled;
+  }
+
+  bool UserInteractionModel::getHovered()
+  {
+    return m_hovered;
+  }
+
+  void UserInteractionModel::setEnabled(bool enabled)
+  {
+    m_enabled = enabled;
+    onEnabledChanged(enabled);
+  }
+
+  void UserInteractionModel::setHovered(bool hovered)
+  {
+    m_hovered = hovered;
+  }
+
 }
-
-UserInteractionModel::UserInteractionModel()
-	: _hovered(false)
-{
-
-}
-
-bool UserInteractionModel::getHovered()
-{
-	return _hovered;
-}
-
-/*string UserInteractionModel::getUIMName()
-{
-	return dynamic_cast<UIElement*>(this)->getUIName();
-}*/
-
-void UserInteractionModel::setHovered(bool hovered)
-{
-	_hovered = hovered;
-}
-
-/*void UserInteractionModel::setUIMName(string name)
-{
-	_name = name;
-}
-*/

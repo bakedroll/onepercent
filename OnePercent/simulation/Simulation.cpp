@@ -156,8 +156,6 @@ void Simulation::loadSkillsXml(string filename)
 
     m_skillBranches[type]->addChild(skill);
     m_skills.insert(Skill::Map::value_type(i, skill));
-
-		printf("SKILL LOADED: %s\n", name.c_str());
 	}
 }
 

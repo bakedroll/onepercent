@@ -59,11 +59,12 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 
 				if (ea.getButton() == GUIEventAdapter::LEFT_MOUSE_BUTTON)
 				{
-					UserInteractionModelList uimList = state->getHud()->getUserInteractionModels();
-					for (UserInteractionModelList::iterator uit = uimList.begin(); uit != uimList.end(); ++uit)
+					UserInteractionModel::List& uimList = state->getHud()->getUserInteractionModels();
+					for (UserInteractionModel::List::iterator uit = uimList.begin(); uit != uimList.end(); ++uit)
 					{
-						if ((*uit)->getHovered())
+						if ((*uit)->isEnabled() && (*uit)->getHovered())
 						{
+              (*uit)->onClicked();
 							state->onUIClickedEvent(dynamic_cast<UIElement*>(*uit));
 						}
 					}
@@ -126,11 +127,11 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 
 		Vec2f resolution = _viewer->getResolution();
 
-		_viewer->updateWindowPosition(Vec2f((float)newX, (float)newY));
+		_viewer->updateWindowPosition(Vec2f(float(newX), float(newY)));
 
-		if (newWidth != (int)resolution.x() || newHeight != (int)resolution.y())
+		if (newWidth != int(resolution.x()) || newHeight != int(resolution.y()))
 		{
-			updateResolution(Vec2f((float)newWidth, (float)newHeight));
+			updateResolution(Vec2f(float(newWidth), float(newHeight)));
 
 			_gameStateStack->begin(AbstractGameState::GUIEVENT);
 			while (_gameStateStack->next())
@@ -209,6 +210,7 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 
 		return true;
 	}
+	default: break;
 	}
 
 	return false;
@@ -287,9 +289,9 @@ int InputManager::mousePressed()
 
 void InputManager::handleUserInteractionMove(osg::ref_ptr<AbstractGameState> state, float x, float y)
 {
-	UserInteractionModelList uimList = state->getHud()->getUserInteractionModels();
+	UserInteractionModel::List& uimList = state->getHud()->getUserInteractionModels();
 
-	for (UserInteractionModelList::iterator it = uimList.begin(); it != uimList.end(); ++it)
+	for (UserInteractionModel::List::iterator it = uimList.begin(); it != uimList.end(); ++it)
 	{
 		UserInteractionModel* model = *it;
 
@@ -318,5 +320,5 @@ void InputManager::handleUserInteractionMove(osg::ref_ptr<AbstractGameState> sta
 
 unsigned int InputManager::log_x_2(int x)
 {
-	return int(log((double)x) / log(2.0));
+	return int(log(double(x)) / log(2.0));
 }

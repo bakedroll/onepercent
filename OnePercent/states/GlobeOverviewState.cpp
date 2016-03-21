@@ -117,21 +117,6 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 
     screenCaptureHandler->captureNextFrame(*getViewer());
   }
-	else
-	{
-		int numSkills = _globeWorld->getSimulation()->getNumSkills();
-		for (int i = 0; i < numSkills; i++)
-		{
-			if (key == GUIEventAdapter::KEY_1 + i)
-			{
-				ref_ptr<Skill> skill = _globeWorld->getSimulation()->getSkill(i);
-				skill->setActivated(!skill->getActivated());
-
-				printf("Skill %s activated: %d\n", skill->getName().c_str(), int(skill->getActivated()));
-				break;
-			}
-		}
-	}
 	/*else
 	{
 
