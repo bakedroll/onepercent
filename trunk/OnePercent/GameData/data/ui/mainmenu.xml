@@ -3,12 +3,12 @@
 
 	<grid margin="10" padding="10" columns="2" rows="2">
 		<rowdefinitions>
-			<row index="1" sizepolicy="content" />
+			<row index="0" sizepolicy="content" />
 		</rowdefinitions>
 		
-		<stackpanel col="0" row="1" cells="2" orientation="vertical">
-			<button name="button_endGame" cell="0" text="{localization/buttonText_endGame}" />
-			<button name="button_startGame" cell="1" text="{localization/buttonText_startGame}" />
+		<stackpanel col="0" row="0" cells="2" orientation="vertical">
+			<button name="button_startGame" text="{localization/buttonText_startGame}" />
+			<button name="button_endGame" text="{localization/buttonText_endGame}" />
 		</stackpanel>
 		
 	</grid>

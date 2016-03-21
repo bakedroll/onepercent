@@ -4,7 +4,6 @@
 
 #include <osg/Geode>
 #include <osg/Geometry>
-#include <osgText/Glyph>
 
 using namespace osgGaming;
 using namespace osg;
@@ -14,8 +13,8 @@ using namespace osgText;
 UIButton::UIButton()
 	: UIVisualElement(),
 	  UserInteractionModel(),
-	  _fontSize(18.0),
-	  _text("")
+	  _text(""),
+	  _fontSize(18.0)
 {
 	//setWidth(100.0f);
 	//setHeight(26.0f);

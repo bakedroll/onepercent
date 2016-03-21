@@ -1,7 +1,6 @@
 #pragma once
 
 #include <osg/Referenced>
-#include <osg/Vec2>
 
 namespace osgGaming
 {
@@ -19,6 +18,7 @@ namespace osgGaming
 
 		void expandCell(int index, float size);
 
+    void setDefaultSizePolicy(SizePolicy sizePolicy);
 		void setNumCells(int num);
 		void setSizePolicy(int cell, SizePolicy sizePolicy);
 
@@ -26,7 +26,7 @@ namespace osgGaming
 		SizePolicy getSizePolicy(int cell);
 
 		void getMinSize(int index, float& minSize);
-		void getActualOriginSize(int index, float totalSize, float spacing, float& origin, float& size);
+		void getActualOriginSize(int index, float totalSize, float spacing, float& origin, float& size/*, bool reverseIdx*/);
 
 		void reset();
 
@@ -49,5 +49,6 @@ namespace osgGaming
 
 		bool _calculatedActualSize;
 		bool _initialized;
+    SizePolicy _defaultSizePolicy;
 	};
 }

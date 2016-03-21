@@ -10,14 +10,14 @@ using namespace std;
 
 UIElement::UIElement()
 	: MatrixTransform(),
+	  _calculatedMinContentSize(false),
 	  _width(/*10*/0.0f),
 	  _height(/*10*/0.0f),
+	  _visible(true),
 	  _padding(0.0f, 0.0f, 0.0f, 0.0f),
 	  _margin(0.0f, 0.0f, 0.0f, 0.0f),
 	  _horizontalAlignment(H_STRETCH),
-	  _verticalAlignment(V_STRETCH),
-	  _calculatedMinContentSize(false),
-	  _visible(true)
+	  _verticalAlignment(V_STRETCH)
 	
 {
 	_visualSwitch = new Switch();

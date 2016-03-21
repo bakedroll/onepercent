@@ -10,7 +10,9 @@ namespace osgGaming
 	class UserInteractionModel
 	{
 	public:
-		UserInteractionModel();
+    virtual ~UserInteractionModel();
+
+	  UserInteractionModel();
 
 		virtual void onMouseEnter() = 0;
 		virtual void onMouseLeave() = 0;

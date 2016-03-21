@@ -1,9 +1,11 @@
 #include <osgGaming/UserInteractionModel.h>
 
-#include <osgGaming/UIElement.h>
-
 using namespace osgGaming;
 using namespace std;
+
+UserInteractionModel::~UserInteractionModel()
+{
+}
 
 UserInteractionModel::UserInteractionModel()
 	: _hovered(false)
