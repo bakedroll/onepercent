@@ -1,7 +1,6 @@
 #pragma once
 
 #include <osgGaming/UIElement.h>
-#include <osgGaming/UIGrid.h>
 #include <osgGaming/UserInteractionModel.h>
 
 #include <osg/Referenced>

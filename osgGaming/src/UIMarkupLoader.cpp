@@ -51,8 +51,8 @@ void UIMarkupLoader::parseXmlGrid(xml_node<>* node, ref_ptr<UIGrid> uiGrid)
 {
 	XmlUiElementList xmlUiElements = parseXmlChildElements(node);
 
-	parseXmlCellDefinitions(node, "rows", "rowdefinitions", "row", uiGrid->getRows());
-	parseXmlCellDefinitions(node, "columns", "coldefinitions", "column", uiGrid->getColumns());
+	parseXmlCellDefinitions(node, "rows", "rowdefinitions", "row", uiGrid->getRows(), true);
+	parseXmlCellDefinitions(node, "columns", "coldefinitions", "column", uiGrid->getColumns(), false);
 
 	xml_attribute<>* attrSpacing = node->first_attribute("spacing");
 	if (attrSpacing != nullptr)
@@ -67,7 +67,8 @@ void UIMarkupLoader::parseXmlGrid(xml_node<>* node, ref_ptr<UIGrid> uiGrid)
 		xml_attribute<>* attrRow = it->xmlNode->first_attribute("row");
 		if (attrRow != nullptr)
 		{
-			row = parseXmlAttributeInt(attrRow->value());
+      //row = parseXmlAttributeInt(attrRow->value());
+      row = uiGrid->getRows()->getNumCells() - (parseXmlAttributeInt(attrRow->value()) + 1);
 		}
 
 		xml_attribute<>* attrCol = it->xmlNode->first_attribute("col");
@@ -84,26 +85,45 @@ void UIMarkupLoader::parseXmlStackPanel(xml_node<>* node, ref_ptr<UIStackPanel> 
 {
 	XmlUiElementList xmlUiElements = parseXmlChildElements(node);
 
-	parseXmlCellDefinitions(node, "cells", "celldefinitions", "cell", uiStackPanel->getCells());
+  xml_attribute<>* attrOrientation = node->first_attribute("orientation");
+  if (attrOrientation != nullptr)
+  {
+    std::string orentation = parseXmlAttributeString(attrOrientation->value());
 
-	xml_attribute<>* attrOrientation = node->first_attribute("orientation");
-	if (attrOrientation != nullptr)
-	{
-		std::string orentation = parseXmlAttributeString(attrOrientation->value());
+    if (orentation == "vertical")
+    {
+      uiStackPanel->setOrientation(UIStackPanel::VERTICAL);
+    }
+    else if (orentation == "horizontal")
+    {
+      uiStackPanel->setOrientation(UIStackPanel::HORIZONTAL);
+    }
+    else
+    {
+      throw GameException("Invalid Orientation attribute");
+    }
+  }
 
-		if (orentation == "vertical")
-		{
-			uiStackPanel->setOrientation(UIStackPanel::VERTICAL);
-		}
-		else if (orentation == "horizontal")
-		{
-			uiStackPanel->setOrientation(UIStackPanel::HORIZONTAL);
-		}
-		else
-		{
-			throw GameException("Invalid Orientation attribute");
-		}
-	}
+  xml_attribute<>* attrSizePolicy = node->first_attribute("sizepolicy");
+  if (attrSizePolicy != nullptr)
+  {
+    std::string sizePolizy = parseXmlAttributeString(attrSizePolicy->value());
+    
+    if (sizePolizy == "content")
+    {
+      uiStackPanel->getCells()->setDefaultSizePolicy(UICells::CONTENT);
+    }
+    else if (sizePolizy == "auto")
+    {
+      uiStackPanel->getCells()->setDefaultSizePolicy(UICells::AUTO);
+    }
+    else
+    {
+      throw GameException("Invalid Orientation attribute");
+    }
+  }
+
+  parseXmlCellDefinitions(node, "cells", "celldefinitions", "cell", uiStackPanel->getCells(), uiStackPanel->getOrientation() == UIStackPanel::VERTICAL);
 
 	xml_attribute<>* attrSpacing = node->first_attribute("spacing");
 	if (attrSpacing != nullptr)
@@ -111,17 +131,33 @@ void UIMarkupLoader::parseXmlStackPanel(xml_node<>* node, ref_ptr<UIStackPanel> 
 		uiStackPanel->setSpacing(parseXmlAttributeFloat(attrSpacing->value()));
 	}
 
+  int cell = 
+    uiStackPanel->getOrientation() == UIStackPanel::VERTICAL ? 
+    uiStackPanel->getCells()->getNumCells() - 1 : 
+    0;
+
 	for (XmlUiElementList::iterator it = xmlUiElements.begin(); it != xmlUiElements.end(); ++it)
 	{
-		int cell = 0;
-
 		xml_attribute<>* attrCell = it->xmlNode->first_attribute("cell");
 		if (attrCell != nullptr)
 		{
-			cell = parseXmlAttributeInt(attrCell->value());
-		}
+      cell = parseXmlAttributeInt(attrCell->value()); 
+      
+      if (uiStackPanel->getOrientation() == UIStackPanel::VERTICAL)
+        cell = uiStackPanel->getCells()->getNumCells() - (cell + 1);
 
-		uiStackPanel->addChild(it->uiElement, cell);
+      uiStackPanel->addChild(it->uiElement, cell);
+		}
+    else
+    {
+      uiStackPanel->addChild(it->uiElement, cell);
+
+      if (uiStackPanel->getOrientation() == UIStackPanel::VERTICAL)
+        cell--;
+      else
+        cell++;
+
+    }
 	}
 }
 
@@ -199,6 +235,36 @@ UIMarkupLoader::XmlUiElementList UIMarkupLoader::parseXmlChildElements(xml_node<
 			element.xmlNode = child;
 			xmlUiElements.push_back(element);
 		}
+
+    xml_attribute<>* attrVertAlign = child->first_attribute("vertical_alignment");
+    if (attrVertAlign != nullptr)
+    {
+      if (strcmp(attrVertAlign->value(), "top") == 0)
+        element.uiElement->setVerticalAlignment(UIElement::TOP);
+      else if (strcmp(attrVertAlign->value(), "middle") == 0)
+        element.uiElement->setVerticalAlignment(UIElement::MIDDLE);
+      else if (strcmp(attrVertAlign->value(), "bottom") == 0)
+        element.uiElement->setVerticalAlignment(UIElement::BOTTOM);
+      else if (strcmp(attrVertAlign->value(), "stretch") == 0)
+        element.uiElement->setVerticalAlignment(UIElement::V_STRETCH);
+      else
+        throw GameException("Invalid VerticalAlignment attribute");
+    }
+
+    xml_attribute<>* attrHorAlign = child->first_attribute("horizontal_alignment");
+    if (attrHorAlign != nullptr)
+    {
+      if (strcmp(attrHorAlign->value(), "left") == 0)
+        element.uiElement->setHorizontalAlignment(UIElement::LEFT);
+      else if (strcmp(attrHorAlign->value(), "center") == 0)
+        element.uiElement->setHorizontalAlignment(UIElement::CENTER);
+      else if (strcmp(attrHorAlign->value(), "right") == 0)
+        element.uiElement->setHorizontalAlignment(UIElement::RIGHT);
+      else if (strcmp(attrHorAlign->value(), "stretch") == 0)
+        element.uiElement->setHorizontalAlignment(UIElement::H_STRETCH);
+      else
+        throw GameException("Invalid HorizontalAlignment attribute");
+    }
 
 		child = child->next_sibling();
 	}
@@ -281,13 +347,28 @@ Vec4f UIMarkupLoader::parseXmlAttributeVec4(string value)
 	return parseXmlAttribute(value) ? ~Property<Vec4f>(value.c_str()) : parseVector<Vec4f>(value);
 }
 
-void UIMarkupLoader::parseXmlCellDefinitions(rapidxml::xml_node<>* node, const char* attrname, const char* defname, const char* tagname, ref_ptr<UICells> cells)
+void UIMarkupLoader::parseXmlCellDefinitions(rapidxml::xml_node<>* node, const char* attrname, const char* defname, const char* tagname, ref_ptr<UICells> cells, bool reverseIdx)
 {
 	xml_attribute<>* attrCells = node->first_attribute(attrname);
 	if (attrCells != nullptr)
 	{
 		cells->setNumCells(parseXmlAttributeInt(attrCells->value()));
 	}
+  else
+  {
+    int numCells = 0;
+    xml_node<>* child = node->first_node();
+
+    while (child != nullptr)
+    {
+      if (strcmp(child->name(), defname) != 0)
+        numCells++;
+
+      child = child->next_sibling();
+    }
+
+    cells->setNumCells(numCells);
+  }
 
 	xml_node<>* defnode = node->first_node(defname);
 	if (defnode != nullptr)
@@ -303,6 +384,10 @@ void UIMarkupLoader::parseXmlCellDefinitions(rapidxml::xml_node<>* node, const c
 			}
 
 			int index = parseXmlAttributeInt(indexAttr->value());
+      if (reverseIdx)
+      {
+        index = cells->getNumCells() - (index + 1);
+      }
 
 			xml_attribute<>* sizepolicyAttr = tagnode->first_attribute("sizepolicy");
 			if (sizepolicyAttr != nullptr)

@@ -23,17 +23,17 @@ namespace osgGaming
 		virtual bool addChild(osg::Node* node, UILocationType location) final
 		{
 			osg::ref_ptr<UIElement> uiElement = dynamic_cast<UIElement*>(node);
-			if (uiElement.valid())
+      if (!uiElement.valid())
+        return false;
+
+		  typename ChildLocationMap::iterator it = _childLocationMap.find(uiElement);
+
+			if (it != _childLocationMap.end())
 			{
-				ChildLocationMap::iterator it = _childLocationMap.find(uiElement);
-
-				if (it != _childLocationMap.end())
-				{
-					throw GameException("Inconsistent state at UIContainerElement::addChild()\n");
-				}
-
-				_childLocationMap.insert(ChildLocationMap::value_type(uiElement, location));
+				throw GameException("Inconsistent state at UIContainerElement::addChild()\n");
 			}
+
+			_childLocationMap.insert(ChildLocationMap::value_type(uiElement, location));
 
 			return getChildGroup()->addChild(node);
 		}

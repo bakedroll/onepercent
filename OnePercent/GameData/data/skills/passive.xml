@@ -8,6 +8,7 @@
 			<field name="branch" type="string" />
 			<field name="attributes" type="array" />
 			
+			<!-- INTEREST I -->
 			<element>
 				<property name="name" value="INTEREST I" />
 				<property name="branch" value="banks" />
@@ -32,6 +33,7 @@
 				</array>
 			</element>
 			
+			<!-- INTEREST II -->
 			<element>
 				<property name="name" value="INTEREST II" />
 				<property name="branch" value="banks" />
@@ -56,6 +58,7 @@
 				</array>
 			</element>
 			
+			<!-- ANGER TEST -->
 			<element>
 				<property name="name" value="ANGER TEST" />
 				<property name="branch" value="banks" />
@@ -74,6 +77,7 @@
 				
 			</element>
 			
+			<!-- PROPAGATION BANKS -->
 			<element>
 				<property name="name" value="propagation banks" />
 				<property name="branch" value="banks" />
@@ -82,12 +86,11 @@
 					<field name="valuetype" type="string" />
 					<field name="method" type="string" default="set_value" />
 					<field name="value" type="float" />
-					<field name="branch_attr" type="bool" default="false" />
+					<field name="branch_attr" type="bool" default="true" />
 				
 					<element>
 						<property name="valuetype" value="propagation" />
 						<property name="value" value="0.02" />
-						<property name="branch_attr" value="true" />
 					</element>
 					
 				</array>

@@ -33,8 +33,8 @@ UIGrid::UIGrid()
 
 void UIGrid::getOriginSizeForLocationInArea(ColRow location, Vec2f area, Vec2f& origin, Vec2f& size)
 {
-	_columns->getActualOriginSize(location.col, area.x(), _spacing, origin.x(), size.x());
-	_rows->getActualOriginSize(location.row, area.y(), _spacing, origin.y(), size.y());
+	_columns->getActualOriginSize(location.col, area.x(), _spacing, origin.x(), size.x()/*, false*/);
+	_rows->getActualOriginSize(/*_rows->getNumCells() - (location.row + 1)*/ location.row, area.y(), _spacing, origin.y(), size.y()/*, true*/);
 }
 
 void UIGrid::setSpacing(float spacing)
@@ -71,8 +71,8 @@ Vec2f UIGrid::calculateMinContentSize()
 	}
 
 
-	float minContentWidth = ((float)(_columns->getNumCells() - 1) * _spacing);
-	float minContentHeight = ((float)(_rows->getNumCells() - 1) * _spacing);
+	float minContentWidth = (float(_columns->getNumCells() - 1) * _spacing);
+	float minContentHeight = (float(_rows->getNumCells() - 1) * _spacing);
 
 	for (int c = 0; c < _columns->getNumCells(); c++)
 	{

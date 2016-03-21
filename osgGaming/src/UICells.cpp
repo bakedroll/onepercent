@@ -8,9 +8,10 @@ using namespace osg;
 using namespace std;
 
 UICells::UICells()
-	: Referenced(),
-	  _calculatedActualSize(false),
-	  _initialized(false)
+	: Referenced()
+  , _calculatedActualSize(false)
+  , _initialized(false)
+  , _defaultSizePolicy(AUTO)
 {
 }
 
@@ -25,6 +26,11 @@ UICells::~UICells()
 void UICells::expandCell(int index, float size)
 {
 	_cells[index].minSize = fmaxf(_cells[index].minSize, size);
+}
+
+void UICells::setDefaultSizePolicy(SizePolicy sizePolicy)
+{
+  _defaultSizePolicy = sizePolicy;
 }
 
 void UICells::setNumCells(int num)
@@ -46,7 +52,7 @@ void UICells::setNumCells(int num)
 		_cells[i].minSize = 0.0f;
 		_cells[i].actualSize = 0.0f;
 		_cells[i].actualOrigin = 0.0f;
-		_cells[i].sizePolicy = AUTO;
+    _cells[i].sizePolicy = _defaultSizePolicy;
 	}
 }
 
@@ -70,8 +76,11 @@ void UICells::getMinSize(int index, float& minSize)
 	minSize = _cells[index].minSize;
 }
 
-void UICells::getActualOriginSize(int index, float totalSize, float spacing, float& origin, float& size)
+void UICells::getActualOriginSize(int index, float totalSize, float spacing, float& origin, float& size/*, bool reverseIdx*/)
 {
+  //if (reverseIdx)
+  //  index = getNumCells() - (index + 1);
+
 	if (_calculatedActualSize == false)
 	{
 		calculateActualSize(totalSize, spacing);
@@ -106,8 +115,8 @@ void UICells::calculateActualSize(float totalSize, float spacing)
 	{
 		if (_cells[it->index].sizePolicy == AUTO)
 		{
-			float avSize = (remainingSize - ((float)(_numCells - currentIndex - 1) * spacing))
-				/ (float)(_numCells - currentIndex);
+			float avSize = (remainingSize - (float(_numCells - currentIndex - 1) * spacing))
+				/ float(_numCells - currentIndex);
 
 			_cells[it->index].actualSize = fmaxf(_cells[it->index].minSize, avSize);
 		}

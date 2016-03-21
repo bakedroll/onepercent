@@ -173,7 +173,11 @@ ref_ptr<Skill> Simulation::getSkill(int id)
 
 int Simulation::getNumSkills()
 {
-	return m_skillBranches.size();
+  int nSkills = 0;
+  for (SkillBranch::Map::iterator it = m_skillBranches.begin(); it != m_skillBranches.end(); ++it)
+    nSkills += it->second->getNumChildren();
+
+	return nSkills;
 }
 
 int Simulation::getDay()

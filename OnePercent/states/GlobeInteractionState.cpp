@@ -4,6 +4,8 @@
 
 #include <osgGaming/Helper.h>
 #include <osgGaming/TimerFactory.h>
+#include <osgGaming/UIStackPanel.h>
+#include <osgGaming/UIButton.h>
 
 using namespace onep;
 using namespace osg;
@@ -15,7 +17,7 @@ GlobeInteractionState::GlobeInteractionState()
 	: GlobeCameraState(),
 	  _ready(false),
 	  _started(false),
-	  _selectedCountry(255)
+	  _selectedCountry(0)
 {
 }
 
@@ -30,8 +32,23 @@ void GlobeInteractionState::initialize()
 	_textProgress = static_cast<UIText*>(getHud()->getUIElementByName("text_dayProgress").get());
 	_textCountryInfo = static_cast<UIText*>(getHud()->getUIElementByName("text_countryInfo").get());
 
-	getHud()->setFpsEnabled(true);
+  UIStackPanel* stackPanel = static_cast<UIStackPanel*>(getHud()->getUIElementByName("panel_skillbuttons").get());
 
+  int nskills = getGlobeOverviewWorld()->getSimulation()->getNumSkills();
+  stackPanel->getCells()->setNumCells(nskills + 1);
+  stackPanel->getCells()->setSizePolicy(0, UICells::AUTO);
+
+  for (int i = 0; i < nskills; i++)
+  {
+    Skill::Ptr skill = getGlobeOverviewWorld()->getSimulation()->getSkill(i);
+    
+    osg::ref_ptr<UIButton> button = new UIButton();
+    button->setText(skill->getName());
+
+    stackPanel->addChild(button, nskills - i);
+  }
+
+	getHud()->setFpsEnabled(true);
 
 	setCameraMotionDuration(2.0);
 	setCameraMotionEase(AnimationEase::SMOOTHER);
@@ -223,33 +240,36 @@ void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::V
 
 void GlobeInteractionState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
 {
-  ref_ptr<CountryData> selectedCountry = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData();
+  if (_selectedCountry > 0)
+  {
+    ref_ptr<CountryData> selectedCountry = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData();
 
-	if (uiElement->getUIName() == "button_makeBanks")
-	{
-    if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(BRANCH_BANKS, true);
-	}
-	else if (uiElement->getUIName() == "button_makePolitics")
-	{
-    if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(BRANCH_POLITICS, true);
-	}
-	else if (uiElement->getUIName() == "button_makeConcerns")
-	{
-    if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(BRANCH_CONCERNS, true);
-	}
-	else if (uiElement->getUIName() == "button_makeMedia")
-	{
-    if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(BRANCH_MEDIA, true);
-	}
-	else if (uiElement->getUIName() == "button_makeControl")
-	{
-    if (selectedCountry)
-      selectedCountry->setSkillBranchActivated(BRANCH_CONTROL, true);
-	}
+    if (uiElement->getUIName() == "button_makeBanks")
+    {
+      if (selectedCountry)
+        selectedCountry->setSkillBranchActivated(BRANCH_BANKS, true);
+    }
+    else if (uiElement->getUIName() == "button_makePolitics")
+    {
+      if (selectedCountry)
+        selectedCountry->setSkillBranchActivated(BRANCH_POLITICS, true);
+    }
+    else if (uiElement->getUIName() == "button_makeConcerns")
+    {
+      if (selectedCountry)
+        selectedCountry->setSkillBranchActivated(BRANCH_CONCERNS, true);
+    }
+    else if (uiElement->getUIName() == "button_makeMedia")
+    {
+      if (selectedCountry)
+        selectedCountry->setSkillBranchActivated(BRANCH_MEDIA, true);
+    }
+    else if (uiElement->getUIName() == "button_makeControl")
+    {
+      if (selectedCountry)
+        selectedCountry->setSkillBranchActivated(BRANCH_CONTROL, true);
+    }
+  }
 }
 
 void GlobeInteractionState::dayTimerElapsed()

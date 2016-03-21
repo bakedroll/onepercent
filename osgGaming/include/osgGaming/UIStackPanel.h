@@ -19,6 +19,7 @@ namespace osgGaming
 		osg::ref_ptr<UICells> getCells();
 
 		virtual void getOriginSizeForLocationInArea(int location, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override;
+    Orientation getOrientation();
 
 		void setSpacing(float spacing);
 		void setOrientation(Orientation orientation);
