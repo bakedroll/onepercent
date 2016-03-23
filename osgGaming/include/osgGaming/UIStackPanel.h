@@ -8,6 +8,8 @@ namespace osgGaming
 	class UIStackPanel : public UIContainerElement<int>
 	{
 	public:
+    typedef osg::ref_ptr<UIStackPanel> Ptr;
+
 		typedef enum _orientation
 		{
 			HORIZONTAL,

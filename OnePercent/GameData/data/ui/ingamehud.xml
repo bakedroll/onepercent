@@ -18,7 +18,7 @@
 				<text name="text_selectCountry" content="{localization/infoText_selectCountry}" />
 				<text name="text_selectCountryAgain" content="{localization/infoText_selectCountryAgain}" fontsize="14" visible="false" />
 				
-				<stackpanel orientation="vertical" name="panel_branchbuttons" />
+				<grid name="grid_branchbuttons" />
 				
 				<!--
 					<button name="button_makeBanks" text="Banks" />

@@ -19,7 +19,7 @@ namespace onep
   bool SkillBranch::callback(SimulationVisitor* visitor)
   {
     // traverse if branch activated
-    if (visitor->getActivatedBranches()[int(m_type)])
+    if (visitor->getBranchActivated(m_type))
       return true;
 
     return false;

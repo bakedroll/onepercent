@@ -52,6 +52,18 @@ namespace onep
     case MODE_HIGHLIGHT_BANKS:
       m_material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.0f, 0.0f, 0.8f, 0.3f));
       break;
+    case MODE_HIGHLIGHT_CONTROL:
+      m_material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.635f, 0.439f, 0.031f, 0.3f));
+      break;
+    case MODE_HIGHLIGHT_CONCERNS:
+      m_material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.118f, 0.753f, 0.208f, 0.3f));
+      break;
+    case MODE_HIGHLIGHT_MEDIA:
+      m_material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.902f, 1.0f, 0.357f, 0.3f));
+      break;
+    case MODE_HIGHLIGHT_POLITICS:
+      m_material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.69f, 0.247f, 0.624f, 0.3f));
+      break;
     default:
       break;
     }

@@ -16,9 +16,13 @@ namespace onep
 
     typedef enum _colorMode
     {
-      MODE_SELECTED,
-      MODE_NEIGHBOR,
-      MODE_HIGHLIGHT_BANKS
+      MODE_SELECTED = 1,
+      MODE_NEIGHBOR = 2,
+      MODE_HIGHLIGHT_BANKS = 3,
+      MODE_HIGHLIGHT_CONTROL = 4,
+      MODE_HIGHLIGHT_MEDIA = 5,
+      MODE_HIGHLIGHT_CONCERNS = 6,
+      MODE_HIGHLIGHT_POLITICS = 7,
     } ColorMode;
 
     CountryMesh(

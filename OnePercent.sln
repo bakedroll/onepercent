@@ -15,6 +15,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageBuilder", "PackageBuilder\PackageBuilder.csproj", "{8B4D17B9-1629-4697-B60C-EB0DDC774970}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImageHelperCpp", "ImageHelperCpp\ImageHelperCpp.vcxproj", "{79EC109B-F43C-4F4E-8FA5-E26274E72E6B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A73F05F2-DB1B-4366-A6E7-E063F2A12925} = {A73F05F2-DB1B-4366-A6E7-E063F2A12925}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

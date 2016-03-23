@@ -9,6 +9,7 @@
 #include <osgGaming/Property.h>
 
 #include <osgGaming/Timer.h>
+#include <osgGaming/UIRadioGroup.h>
 
 namespace onep
 {
@@ -18,6 +19,7 @@ namespace onep
 		GlobeInteractionState();
 
 		virtual void initialize() override;
+    void setupUi();
 
 		virtual void onMousePressedEvent(int button, float x, float y) override;
 		virtual void onKeyPressedEvent(int key) override;
@@ -62,5 +64,7 @@ namespace onep
 		int _selectedCountry;
 
 		osg::ref_ptr<osgGaming::Timer> _simulationTimer;
+
+    osgGaming::UIRadioGroup::Ptr m_branchRadioGroup;
 	};
 }
