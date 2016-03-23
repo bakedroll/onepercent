@@ -26,8 +26,9 @@ namespace onep
       OVERLAY
     } Type;
 
-    DebugButton(Type type, int id)
+    DebugButton(Type type, int id, BranchType branch = BRANCH_UNDEFINED)
       : UIButton()
+      , m_branch(branch)
       , m_id(id)
       , m_type(type)
     {
@@ -44,7 +45,13 @@ namespace onep
       return m_type;
     }
 
+    BranchType getBranchType()
+    {
+      return m_branch;
+    }
+
   private:
+    BranchType m_branch;
     int m_id;
     Type m_type;
 
@@ -93,6 +100,9 @@ namespace onep
 
   void GlobeInteractionState::setupUi()
   {
+    GlobeModel::Ptr globeModel = getGlobeOverviewWorld()->getGlobeModel();
+    Simulation::Ptr simulation = getGlobeOverviewWorld()->getSimulation();
+
     _textPleaseSelect = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountry").get());
     _textConfirm = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountryAgain").get());
     _textProgress = static_cast<UIText*>(getHud()->getUIElementByName("text_dayProgress").get());
@@ -105,6 +115,10 @@ namespace onep
     gridBranches->getColumns()->setNumCells(2);
     gridBranches->getRows()->setNumCells(NUM_SKILLBRANCHES);
 
+    stackPanelSkills->getCells()->setNumCells(simulation->getNumSkills() + NUM_SKILLBRANCHES + 1);
+    stackPanelSkills->getCells()->setSizePolicy(simulation->getNumSkills() + NUM_SKILLBRANCHES, UICells::AUTO);
+    int stackPanelSkillsPos = 0;
+
     m_branchRadioGroup = new UIRadioGroup();
 
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
@@ -116,11 +130,11 @@ namespace onep
       osg::ref_ptr<UIButton> buttonOverlay = new DebugButton(DebugButton::OVERLAY, i);
       buttonOverlay->setText("Overlay");
 
-      getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->addFuncAndNotify([this, buttonEnabled, buttonOverlay, i](int selected)
+      globeModel->getSelectedCountryIdObservable()->addFuncAndNotify([globeModel, buttonEnabled, buttonOverlay, i](int selected)
       {
         if (selected > 0)
         {
-          buttonEnabled->setChecked(getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
+          buttonEnabled->setChecked(globeModel->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
         }
         else
         {
@@ -131,12 +145,12 @@ namespace onep
       });
 
       // Countries
-      CountryMesh::Map& countryMeshs = getGlobeOverviewWorld()->getGlobeModel()->getCountryMeshs();
+      CountryMesh::Map& countryMeshs = globeModel->getCountryMeshs();
       for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
       {
-        it->second->getCountryData()->getSkillBranchActivatedObservable(i)->addNotifyFunc([this, buttonEnabled, it](bool activated)
+        it->second->getCountryData()->getSkillBranchActivatedObservable(i)->addNotifyFunc([globeModel, buttonEnabled, it](bool activated)
         {
-          if (it->first == getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryId())
+          if (it->first == globeModel->getSelectedCountryId())
             buttonEnabled->setChecked(activated);
         });
       }
@@ -148,13 +162,36 @@ namespace onep
 
       gridBranches->addChild(buttonEnabled, osgGaming::ColRow(0, i));
       gridBranches->addChild(buttonOverlay, osgGaming::ColRow(1, i));
+
+      // Skills
+      int nskills = simulation->getSkillBranch(BranchType(i))->getNumSkills();
+      UIText::Ptr text = new UIText();
+
+      if (stackPanelSkillsPos > 0)
+        text->setMargin(Vec4f(0.0f, 8.0f, 0.0f, 0.0f));
+      text->setFontSize(13);
+      text->setText(branch_getStringFromType(i));
+
+      stackPanelSkills->addChild(text, stackPanelSkillsPos++);
+
+      for (int j = 0; j < nskills; j++)
+      {
+        Skill::Ptr skill = simulation->getSkillBranch(BranchType(i))->getSkill(j);
+
+        osg::ref_ptr<UIButton> button = new DebugButton(DebugButton::SKILL, j, BranchType(i));
+        button->setText(skill->getName());
+        button->setCheckable(true);
+
+        getHud()->registerUserInteractionModel(button.get());
+        stackPanelSkills->addChild(button, stackPanelSkillsPos++);
+      }
     }
 
-    m_branchRadioGroup->getSelectedButtonObservable()->addNotifyFunc([this](UIButton::Ptr button)
+    m_branchRadioGroup->getSelectedButtonObservable()->addNotifyFunc([globeModel](UIButton::Ptr button)
     {
       if (!button)
       {
-        getGlobeOverviewWorld()->getGlobeModel()->clearHighlightedCountries();
+        globeModel->clearHighlightedCountries();
         return;
       }
 
@@ -162,25 +199,8 @@ namespace onep
       if (!dbutton || dbutton->getType() != DebugButton::OVERLAY)
         return;
 
-      getGlobeOverviewWorld()->getGlobeModel()->setHighlightedSkillBranch(BranchType(dbutton->getId()));
+      globeModel->setHighlightedSkillBranch(BranchType(dbutton->getId()));
     });
-
-    // Skills
-    int nskills = getGlobeOverviewWorld()->getSimulation()->getNumSkills();
-    stackPanelSkills->getCells()->setNumCells(nskills + 1);
-    stackPanelSkills->getCells()->setSizePolicy(nskills, UICells::AUTO);
-
-    for (int i = 0; i < nskills; i++)
-    {
-      Skill::Ptr skill = getGlobeOverviewWorld()->getSimulation()->getSkill(i);
-
-      osg::ref_ptr<UIButton> button = new DebugButton(DebugButton::SKILL, i);
-      button->setText(skill->getName());
-      button->setCheckable(true);
-
-      getHud()->registerUserInteractionModel(button.get());
-      stackPanelSkills->addChild(button, i);
-    }
   }
 
   void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
@@ -344,7 +364,7 @@ namespace onep
     }
     else if (dbutton->getType() == DebugButton::SKILL)
     {
-      getGlobeOverviewWorld()->getSimulation()->getSkill(dbutton->getId())->setActivated(dbutton->isChecked());
+      getGlobeOverviewWorld()->getSimulation()->getSkillBranch(dbutton->getBranchType())->getSkill(dbutton->getId())->setActivated(dbutton->isChecked());
     }
   }
 

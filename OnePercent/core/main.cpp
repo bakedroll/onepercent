@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 
 	app->setDefaultWorld(new GlobeOverviewWorld());
 
-	app->getDefaultGameSettings()->setScreenNum(1);
+	//app->getDefaultGameSettings()->setScreenNum(1);
 	//app->getDefaultGameSettings()->setFullscreenEnabled(true);
 
 	GameState::AbstractGameStateList states;

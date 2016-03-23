@@ -154,28 +154,22 @@ void Simulation::loadSkillsXml(string filename)
       }
     }
 
-    m_skillBranches[type]->addChild(skill);
-    m_skills.insert(Skill::Map::value_type(i, skill));
+    m_skillBranches[type]->addSkill(skill);
 	}
-}
-
-ref_ptr<Skill> Simulation::getSkill(int id)
-{
-  Skill::Ptr result;
-  Skill::Map::iterator it = m_skills.find(id);
-  if (it != m_skills.end())
-    result = it->second;
-
-  return result;
 }
 
 int Simulation::getNumSkills()
 {
   int nSkills = 0;
   for (SkillBranch::Map::iterator it = m_skillBranches.begin(); it != m_skillBranches.end(); ++it)
-    nSkills += it->second->getNumChildren();
+    nSkills += it->second->getNumSkills();
 
 	return nSkills;
+}
+
+SkillBranch::Ptr Simulation::getSkillBranch(BranchType type)
+{
+  return m_skillBranches[type];
 }
 
 int Simulation::getDay()

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Skill.h"
-
 #include "nodes/GlobeModel.h"
 #include "SkillBranch.h"
 #include "SimulationVisitor.h"
@@ -12,13 +10,15 @@ namespace onep
 	class Simulation : public osg::Group, public SimulationCallback
 	{
 	public:
+    typedef osg::ref_ptr<Simulation> Ptr;
+
 		Simulation();
 
     void loadCountries(std::string filename);
 		void loadSkillsXml(std::string filename);
 
-		osg::ref_ptr<Skill> getSkill(int id);
 		int getNumSkills();
+    SkillBranch::Ptr getSkillBranch(BranchType type);
 
 		int getDay();
 
@@ -31,7 +31,6 @@ namespace onep
 		//void printStats(bool onlyActivated = false);
 	private:
 		SkillBranch::Map m_skillBranches;
-    Skill::Map m_skills;
 
     GlobeModel::Ptr m_globeModel;
 
