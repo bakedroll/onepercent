@@ -11,9 +11,25 @@ namespace onep
     setUpdateCallback(new Callback());
   }
 
+  int SkillBranch::getNumSkills()
+  {
+    return int(m_skills.size());
+  }
+
+  Skill::Ptr SkillBranch::getSkill(int i)
+  {
+    return m_skills[i];
+  }
+
   BranchType SkillBranch::getType()
   {
     return m_type;
+  }
+
+  void SkillBranch::addSkill(Skill::Ptr skill)
+  {
+    m_skills.push_back(skill);
+    addChild(skill);
   }
 
   bool SkillBranch::callback(SimulationVisitor* visitor)
