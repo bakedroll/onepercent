@@ -4,13 +4,13 @@
 
 #include <osgText/Text>
 
-#include <string.h>
-
 namespace osgGaming
 {
 	class UIText : public UIVisualElement
 	{
 	public:
+    typedef osg::ref_ptr<UIText> Ptr;
+
 		UIText();
 
 		void setText(std::string text);

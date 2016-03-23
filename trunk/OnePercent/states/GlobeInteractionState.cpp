@@ -6,394 +6,430 @@
 #include <osgGaming/TimerFactory.h>
 #include <osgGaming/UIStackPanel.h>
 #include <osgGaming/UIButton.h>
+#include <simulation/CountryData.h>
+#include <osgGaming/UIGrid.h>
 
-using namespace onep;
 using namespace osg;
 using namespace std;
 using namespace osgGA;
 using namespace osgGaming;
 
-class DebugButton : public osgGaming::UIButton
+namespace onep
 {
-public:
-  typedef enum _type
+  class DebugButton : public osgGaming::UIButton
   {
-    BRANCH,
-    SKILL
-  } Type;
-
-  DebugButton(Type type, int id)
-    : UIButton()
-    , m_id(id)
-    , m_type(type)
-  {
-    
-  }
-
-  int getId()
-  {
-    return m_id;
-  }
-
-  Type getType()
-  {
-    return m_type;
-  }
-
-private:
-  int m_id;
-  Type m_type;
-
-};
-
-GlobeInteractionState::GlobeInteractionState()
-	: GlobeCameraState(),
-	  _ready(false),
-	  _started(false),
-	  _selectedCountry(0)
-{
-}
-
-void GlobeInteractionState::initialize()
-{
-	GlobeCameraState::initialize();
-
-	getHud()->loadMarkupFromXmlResource("./GameData/data/ui/ingamehud.xml");
-
-	_textPleaseSelect = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountry").get());
-	_textConfirm = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountryAgain").get());
-	_textProgress = static_cast<UIText*>(getHud()->getUIElementByName("text_dayProgress").get());
-	_textCountryInfo = static_cast<UIText*>(getHud()->getUIElementByName("text_countryInfo").get());
-
-  UIStackPanel* stackpanelBranches = static_cast<UIStackPanel*>(getHud()->getUIElementByName("panel_branchbuttons").get());
-  UIStackPanel* stackPanelSkills = static_cast<UIStackPanel*>(getHud()->getUIElementByName("panel_skillbuttons").get());
-
-  // Branches
-  stackpanelBranches->getCells()->setNumCells(NUM_SKILLBRANCHES);
-  for (int i = 0; i < NUM_SKILLBRANCHES; i++)
-  {
-    osg::ref_ptr<UIButton> button = new DebugButton(DebugButton::BRANCH, i);
-    button->setText(branch_getStringFromType(i));
-    button->setCheckable(true);
-
-    getHud()->registerUserInteractionModel(button.get());
-    stackpanelBranches->addChild(button, i);
-
-    getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->addFuncAndNotify([this, button, i](int selected)
+  public:
+    typedef enum _type
     {
-      if (selected > 0)
-        button->setChecked(getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
-      else
-        button->setChecked(false);
+      BRANCH,
+      SKILL,
+      OVERLAY
+    } Type;
 
-      button->setEnabled(selected > 0);
-    });
-  }
+    DebugButton(Type type, int id)
+      : UIButton()
+      , m_id(id)
+      , m_type(type)
+    {
 
-  // Skills
-  int nskills = getGlobeOverviewWorld()->getSimulation()->getNumSkills();
-  stackPanelSkills->getCells()->setNumCells(nskills + 1);
-  stackPanelSkills->getCells()->setSizePolicy(nskills, UICells::AUTO);
+    }
 
-  for (int i = 0; i < nskills; i++)
+    int getId()
+    {
+      return m_id;
+    }
+
+    Type getType()
+    {
+      return m_type;
+    }
+
+  private:
+    int m_id;
+    Type m_type;
+
+  };
+
+  GlobeInteractionState::GlobeInteractionState()
+    : GlobeCameraState(),
+    _ready(false),
+    _started(false),
+    _selectedCountry(0)
   {
-    Skill::Ptr skill = getGlobeOverviewWorld()->getSimulation()->getSkill(i);
-    
-    osg::ref_ptr<UIButton> button = new DebugButton(DebugButton::SKILL, i);
-    button->setText(skill->getName());
-    button->setCheckable(true);
-
-    getHud()->registerUserInteractionModel(button.get());
-    stackPanelSkills->addChild(button, i);
   }
 
-	getHud()->setFpsEnabled(true);
+  void GlobeInteractionState::initialize()
+  {
+    GlobeCameraState::initialize();
 
-	setCameraMotionDuration(2.0);
-	setCameraMotionEase(AnimationEase::SMOOTHER);
+    getHud()->loadMarkupFromXmlResource("./GameData/data/ui/ingamehud.xml");
+    getHud()->setFpsEnabled(true);
 
-	setCameraDistance(28.0f, getSimulationTime());
-	setCameraViewAngle(Vec2f(0.0f, 0.0f), getSimulationTime());
-}
+    setupUi();
 
-void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
-{
-	if (!ready())
-	{
-		return;
-	}
+    getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->addNotifyFunc([this](int id)
+    {
+      updateCountryInfoText();
 
-	if (button == GUIEventAdapter::LEFT_MOUSE_BUTTON)
-	{
-		Vec3f point, direction;
-		getWorld()->getCameraManipulator()->getPickRay(x, y, point, direction);
+      if (id > 0)
+      {
+        CountryMesh::Ptr countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(id);
 
-		Vec3f pickResult;
-		if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), ~_paramEarthRadius, point, direction, pickResult))
-		{
-			Vec2f polar = getPolarFromCartesian(pickResult);
-			ref_ptr<CountryMesh> countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(polar);
-
-			int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
-
-			getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
-
-			if (!_started)
-			{
-				if (selected == 0)
-				{
-					_textConfirm->setVisible(false);
-				}
-				else
-				{
-					if (_selectedCountry == selected)
-					{
-						startSimulation();
-					}
-					else
-					{
-						_textConfirm->setVisible(true);
-					}
-				}
-			}
-
-			_selectedCountry = selected;
-
-			updateCountryInfoText();
-
-			if (countryMesh != nullptr)
-			{
-				//Vec2f countrySize = country->getSize();
-				//Vec2f surfaceSize = country->getSurfaceSize();
-				//Vec2f latLong = country->getCenterLatLong();
-
-
-
-				/*ref_ptr<PositionAttitudeTransform> rotation = new PositionAttitudeTransform();
-				rotation->setAttitude(getQuatFromEuler(latLong.x(), 0.0f, latLong.y()));
-
-				ref_ptr<PositionAttitudeTransform> transform = new PositionAttitudeTransform();
-				transform->setPosition(Vec3f(0.0f, GlobeModel::EARTH_RADIUS , 0.0f));
-				transform->setScale(Vec3f(surfaceSize.x(), 1.0f, surfaceSize.y()));
-
-				ref_ptr<Geode> geode = new Geode();
-				geode->addDrawable(createQuadGeometry(-0.5f, 0.5f, -0.5f, 0.5f, 0.0f, XZ, true));
-
-				rotation->addChild(transform);
-				transform->addChild(geode);
-				getWorld()->getRootNode()->addChild(rotation);*/
-
-
-
-				printf("Selected country (%d): %s\n", _selectedCountry, countryMesh->getCountryData()->getCountryName().c_str());
+        printf("Selected country (%d): %s\n", countryMesh->getCountryData()->getId(), countryMesh->getCountryData()->getCountryName().c_str());
 
         setCameraLatLong(countryMesh->getCountryData()->getCenterLatLong(), getSimulationTime());
         setCameraDistance(max(countryMesh->getCountryData()->getOptimalCameraDistance(
-					float(getWorld()->getCameraManipulator()->getProjectionAngle()),
-					float(getWorld()->getCameraManipulator()->getProjectionRatio())), ~_paramCameraMinDistance), getSimulationTime());
-			}
-			
-			
-		}
-	}
-}
+          float(getWorld()->getCameraManipulator()->getProjectionAngle()),
+          float(getWorld()->getCameraManipulator()->getProjectionRatio())), ~_paramCameraMinDistance), getSimulationTime());
+      }
+    });
 
-void GlobeInteractionState::onKeyPressedEvent(int key)
-{
-	/*if (!ready())
-	{
-		return;
-	}*/
+    setCameraMotionDuration(2.0);
+    setCameraMotionEase(AnimationEase::SMOOTHER);
 
-	if (_started)
-	{
-		if (key == GUIEventAdapter::KEY_Space)
-		{
-			if (_simulationTimer->running())
-			{
-				_simulationTimer->stop();
+    setCameraDistance(28.0f, getSimulationTime());
+    setCameraViewAngle(Vec2f(0.0f, 0.0f), getSimulationTime());
+  }
 
-				printf("Simulation stopped\n");
-			}
-			else
-			{
-				_simulationTimer->start();
+  void GlobeInteractionState::setupUi()
+  {
+    _textPleaseSelect = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountry").get());
+    _textConfirm = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountryAgain").get());
+    _textProgress = static_cast<UIText*>(getHud()->getUIElementByName("text_dayProgress").get());
+    _textCountryInfo = static_cast<UIText*>(getHud()->getUIElementByName("text_countryInfo").get());
 
-				printf("Simulation started\n");
-			}
-		}
-		/*else if (key == GUIEventAdapter::KEY_P)
-		{
-			getGlobeOverviewWorld()->getSimulation()->printStats();
-		}*/
-	}
-}
+    UIGrid* gridBranches = static_cast<UIGrid*>(getHud()->getUIElementByName("grid_branchbuttons").get());
+    UIStackPanel* stackPanelSkills = static_cast<UIStackPanel*>(getHud()->getUIElementByName("panel_skillbuttons").get());
 
-void GlobeInteractionState::onScrollEvent(GUIEventAdapter::ScrollingMotion motion)
-{
-	if (!ready())
-	{
-		return;
-	}
+    // Branches
+    gridBranches->getColumns()->setNumCells(2);
+    gridBranches->getRows()->setNumCells(NUM_SKILLBRANCHES);
 
-	float distance = getCameraDistance();
+    m_branchRadioGroup = new UIRadioGroup();
 
-	if (motion == GUIEventAdapter::SCROLL_UP)
-	{
-		distance = distance * ~_paramCameraZoomSpeed;
-	}
-	else if (motion == GUIEventAdapter::SCROLL_DOWN)
-	{
-		distance = distance * (1.0f / ~_paramCameraZoomSpeed);
-	}
-	else
-	{
-		return;
-	}
+    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
+    {
+      osg::ref_ptr<UIButton> buttonEnabled = new DebugButton(DebugButton::BRANCH, i);
+      buttonEnabled->setText(branch_getStringFromType(i));
+      buttonEnabled->setCheckable(true);
 
-	distance = clampBetween(distance, ~_paramCameraMinDistance, ~_paramCameraMaxDistance);
+      osg::ref_ptr<UIButton> buttonOverlay = new DebugButton(DebugButton::OVERLAY, i);
+      buttonOverlay->setText("Overlay");
 
-	setCameraDistance(distance, getSimulationTime());
-}
+      getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->addFuncAndNotify([this, buttonEnabled, buttonOverlay, i](int selected)
+      {
+        if (selected > 0)
+        {
+          buttonEnabled->setChecked(getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
+        }
+        else
+        {
+          buttonEnabled->setChecked(false);
+        }
 
-void GlobeInteractionState::onDragEvent(int button, Vec2f origin, Vec2f position, osg::Vec2f change)
-{
-	if (!ready())
-	{
-		return;
-	}
+        buttonEnabled->setEnabled(selected > 0);
+      });
 
-	Vec2f latLong = getCameraLatLong();
-	float distance = getCameraDistance();
-	Vec2f viewAngle = getCameraViewAngle();
+      // Countries
+      CountryMesh::Map& countryMeshs = getGlobeOverviewWorld()->getGlobeModel()->getCountryMeshs();
+      for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
+      {
+        it->second->getCountryData()->getSkillBranchActivatedObservable(i)->addNotifyFunc([this, buttonEnabled, it](bool activated)
+        {
+          if (it->first == getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryId())
+            buttonEnabled->setChecked(activated);
+        });
+      }
 
-	if (button == GUIEventAdapter::RIGHT_MOUSE_BUTTON)
-	{
-		change *= ((distance - ~_paramEarthRadius) / (~_paramCameraMaxDistance - ~_paramEarthRadius)) * ~_paramCameraZoomSpeedFactor;
+      getHud()->registerUserInteractionModel(buttonEnabled.get());
+      getHud()->registerUserInteractionModel(buttonOverlay.get());
 
-		latLong.set(
-			clampBetween(latLong.x() - change.y() * ~_paramCameraScrollSpeed, -~_paramCameraMaxLatitude, ~_paramCameraMaxLatitude),
-			latLong.y() - change.x() * ~_paramCameraScrollSpeed);
+      m_branchRadioGroup->addButton(buttonOverlay);
 
-		setCameraLatLong(latLong, getSimulationTime());
-	}
-	else if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
-	{
-		float clamp_to = atan(~_paramEarthRadius * 1.3 / distance);
+      gridBranches->addChild(buttonEnabled, osgGaming::ColRow(0, i));
+      gridBranches->addChild(buttonOverlay, osgGaming::ColRow(1, i));
+    }
 
-		viewAngle.set(
-			viewAngle.x() + change.x() * ~_paramCameraRotationSpeed,
-			clampBetween(viewAngle.y() + change.y() * ~_paramCameraRotationSpeed, 0.0f, clamp_to));
+    m_branchRadioGroup->getSelectedButtonObservable()->addNotifyFunc([this](UIButton::Ptr button)
+    {
+      if (!button)
+      {
+        getGlobeOverviewWorld()->getGlobeModel()->clearHighlightedCountries();
+        return;
+      }
 
-		setCameraViewAngle(viewAngle, getSimulationTime());
-	}
-}
+      DebugButton* dbutton = dynamic_cast<DebugButton*>(button.get());
+      if (!dbutton || dbutton->getType() != DebugButton::OVERLAY)
+        return;
 
-void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position)
-{
-	if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
-	{
-		setCameraViewAngle(Vec2f(0.0f, 0.0f), getSimulationTime());
-	}
-}
+      getGlobeOverviewWorld()->getGlobeModel()->setHighlightedSkillBranch(BranchType(dbutton->getId()));
+    });
 
-void GlobeInteractionState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
-{
-  DebugButton* dbutton = dynamic_cast<DebugButton*>(uiElement.get());
-  if (!dbutton)
+    // Skills
+    int nskills = getGlobeOverviewWorld()->getSimulation()->getNumSkills();
+    stackPanelSkills->getCells()->setNumCells(nskills + 1);
+    stackPanelSkills->getCells()->setSizePolicy(nskills, UICells::AUTO);
+
+    for (int i = 0; i < nskills; i++)
+    {
+      Skill::Ptr skill = getGlobeOverviewWorld()->getSimulation()->getSkill(i);
+
+      osg::ref_ptr<UIButton> button = new DebugButton(DebugButton::SKILL, i);
+      button->setText(skill->getName());
+      button->setCheckable(true);
+
+      getHud()->registerUserInteractionModel(button.get());
+      stackPanelSkills->addChild(button, i);
+    }
+  }
+
+  void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
+  {
+    if (!ready())
+    {
+      return;
+    }
+
+    if (button == GUIEventAdapter::LEFT_MOUSE_BUTTON)
+    {
+      Vec3f point, direction;
+      getWorld()->getCameraManipulator()->getPickRay(x, y, point, direction);
+
+      Vec3f pickResult;
+      if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), ~_paramEarthRadius, point, direction, pickResult))
+      {
+        Vec2f polar = getPolarFromCartesian(pickResult);
+        ref_ptr<CountryMesh> countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(polar);
+
+        int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
+
+        getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
+        m_branchRadioGroup->reset();
+
+        if (!_started)
+        {
+          if (selected == 0)
+          {
+            _textConfirm->setVisible(false);
+          }
+          else
+          {
+            if (_selectedCountry == selected)
+            {
+              startSimulation();
+            }
+            else
+            {
+              _textConfirm->setVisible(true);
+            }
+          }
+        }
+
+        _selectedCountry = selected;
+      }
+    }
+  }
+
+  void GlobeInteractionState::onKeyPressedEvent(int key)
+  {
+    /*if (!ready())
+    {
     return;
+    }*/
 
-  if (dbutton->getType() == DebugButton::BRANCH && _selectedCountry > 0)
-  {
-    ref_ptr<CountryData> selectedCountry = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData();
-    selectedCountry->setSkillBranchActivated(dbutton->getId(), dbutton->isChecked());
+    if (_started)
+    {
+      if (key == GUIEventAdapter::KEY_Space)
+      {
+        if (_simulationTimer->running())
+        {
+          _simulationTimer->stop();
+
+          printf("Simulation stopped\n");
+        }
+        else
+        {
+          _simulationTimer->start();
+
+          printf("Simulation started\n");
+        }
+      }
+      /*else if (key == GUIEventAdapter::KEY_P)
+      {
+      getGlobeOverviewWorld()->getSimulation()->printStats();
+      }*/
+    }
   }
-  else if (dbutton->getType() == DebugButton::SKILL)
+
+  void GlobeInteractionState::onScrollEvent(GUIEventAdapter::ScrollingMotion motion)
   {
-    getGlobeOverviewWorld()->getSimulation()->getSkill(dbutton->getId())->setActivated(dbutton->isChecked());
+    if (!ready())
+    {
+      return;
+    }
+
+    float distance = getCameraDistance();
+
+    if (motion == GUIEventAdapter::SCROLL_UP)
+    {
+      distance = distance * ~_paramCameraZoomSpeed;
+    }
+    else if (motion == GUIEventAdapter::SCROLL_DOWN)
+    {
+      distance = distance * (1.0f / ~_paramCameraZoomSpeed);
+    }
+    else
+    {
+      return;
+    }
+
+    distance = clampBetween(distance, ~_paramCameraMinDistance, ~_paramCameraMaxDistance);
+
+    setCameraDistance(distance, getSimulationTime());
   }
-}
 
-void GlobeInteractionState::dayTimerElapsed()
-{
-	getGlobeOverviewWorld()->getSimulation()->step();
-	// getGlobeOverviewWorld()->getSimulation()->printStats(true);
+  void GlobeInteractionState::onDragEvent(int button, Vec2f origin, Vec2f position, osg::Vec2f change)
+  {
+    if (!ready())
+    {
+      return;
+    }
 
-	_textProgress->setText(~Property<string, Param_LocalizationInfoTextDay>() + " " + to_string(getGlobeOverviewWorld()->getSimulation()->getDay()));
+    Vec2f latLong = getCameraLatLong();
+    float distance = getCameraDistance();
+    Vec2f viewAngle = getCameraViewAngle();
 
-	updateCountryInfoText();
-}
+    if (button == GUIEventAdapter::RIGHT_MOUSE_BUTTON)
+    {
+      change *= ((distance - ~_paramEarthRadius) / (~_paramCameraMaxDistance - ~_paramEarthRadius)) * ~_paramCameraZoomSpeedFactor;
 
-void GlobeInteractionState::startSimulation()
-{
-	_textPleaseSelect->setVisible(false);
-	_textConfirm->setVisible(false);
-	_textProgress->setVisible(true);
+      latLong.set(
+        clampBetween(latLong.x() - change.y() * ~_paramCameraScrollSpeed, -~_paramCameraMaxLatitude, ~_paramCameraMaxLatitude),
+        latLong.y() - change.x() * ~_paramCameraScrollSpeed);
 
-  getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData()->setSkillBranchActivated(BRANCH_BANKS, true);
+      setCameraLatLong(latLong, getSimulationTime());
+    }
+    else if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
+    {
+      float clamp_to = atan(~_paramEarthRadius * 1.3 / distance);
 
-	_simulationTimer = TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
-	_simulationTimer->start();
+      viewAngle.set(
+        viewAngle.x() + change.x() * ~_paramCameraRotationSpeed,
+        clampBetween(viewAngle.y() + change.y() * ~_paramCameraRotationSpeed, 0.0f, clamp_to));
 
-	_started = true;
-}
+      setCameraViewAngle(viewAngle, getSimulationTime());
+    }
+  }
 
-/*void GlobeInteractionState::onUIMClickedEvent(UserInteractionModel* model)
-{
-	printf("Clicked UIM: %s\n", model->getUIMName().data());
-}*/
+  void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position)
+  {
+    if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
+    {
+      setCameraViewAngle(Vec2f(0.0f, 0.0f), getSimulationTime());
+    }
+  }
 
-ref_ptr<Hud> GlobeInteractionState::newHud()
-{
-	return new Hud();
-}
+  void GlobeInteractionState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
+  {
+    DebugButton* dbutton = dynamic_cast<DebugButton*>(uiElement.get());
+    if (!dbutton)
+      return;
 
-bool GlobeInteractionState::ready()
-{
-	if (!_ready && !isCameraInMotion())
-	{
-		setCameraMotionDuration(0.5);
-		setCameraMotionEase(AnimationEase::CIRCLE_OUT);
-		_ready = true;
-	}
+    int selectedCountryId = getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryId();
 
-	return _ready;
-}
+    if (dbutton->getType() == DebugButton::BRANCH && selectedCountryId > 0)
+    {
+      ref_ptr<CountryData> selectedCountry = getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryMesh()->getCountryData();
+      selectedCountry->setSkillBranchActivated(dbutton->getId(), dbutton->isChecked());
+    }
+    else if (dbutton->getType() == DebugButton::SKILL)
+    {
+      getGlobeOverviewWorld()->getSimulation()->getSkill(dbutton->getId())->setActivated(dbutton->isChecked());
+    }
+  }
 
-void GlobeInteractionState::updateCountryInfoText()
-{
-	if (_selectedCountry == 0)
-	{
-		_textCountryInfo->setText("");
+  void GlobeInteractionState::dayTimerElapsed()
+  {
+    getGlobeOverviewWorld()->getSimulation()->step();
+    // getGlobeOverviewWorld()->getSimulation()->printStats(true);
 
-		return;
-	}
+    _textProgress->setText(~Property<string, Param_LocalizationInfoTextDay>() + " " + to_string(getGlobeOverviewWorld()->getSimulation()->getDay()));
 
-	string infoText = "";
-  CountryData::Ptr country = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(_selectedCountry)->getCountryData();
+    updateCountryInfoText();
+  }
 
-	//char buffer[16];
+  void GlobeInteractionState::startSimulation()
+  {
+    _textPleaseSelect->setVisible(false);
+    _textConfirm->setVisible(false);
+    _textProgress->setVisible(true);
 
-	infoText += country->getCountryName() + "\n";
-	/*infoText += "Wealth: " + to_string(country->getWealth()) + "\n";
+    getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryMesh()->getCountryData()->setSkillBranchActivated(BRANCH_BANKS, true);
 
-	sprintf(buffer, "%.2f", country->getDept());
-	infoText += "Dept: " + string(buffer) + "\n";
+    _simulationTimer = TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
+    _simulationTimer->start();
 
-	sprintf(buffer, "%.2f", country->getRelativeDept() * 100.0f);
-	infoText += "Rel. Dept: " + string(buffer) + "%\n";
+    _started = true;
+  }
 
-	sprintf(buffer, "%.2f", country->getDeptBalance());
-	infoText += "Dept balance: " + string(buffer) + "\n";
+  /*void GlobeInteractionState::onUIMClickedEvent(UserInteractionModel* model)
+  {
+  printf("Clicked UIM: %s\n", model->getUIMName().data());
+  }*/
 
-	sprintf(buffer, "%.2f", country->getAnger() * 100.0f);
-	infoText += "Anger: " + string(buffer) + "%\n";
+  ref_ptr<Hud> GlobeInteractionState::newHud()
+  {
+    return new Hud();
+  }
 
-	sprintf(buffer, "%.2f", country->getAngerBalance());
-	infoText += "Anger balance: " + string(buffer) + "\n";*/
+  bool GlobeInteractionState::ready()
+  {
+    if (!_ready && !isCameraInMotion())
+    {
+      setCameraMotionDuration(0.5);
+      setCameraMotionEase(AnimationEase::CIRCLE_OUT);
+      _ready = true;
+    }
+
+    return _ready;
+  }
+
+  void GlobeInteractionState::updateCountryInfoText()
+  {
+    if (getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryId() == 0)
+    {
+      _textCountryInfo->setText("");
+
+      return;
+    }
+
+    string infoText = "";
+    CountryData::Ptr country = getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryMesh()->getCountryData();
+
+    //char buffer[16];
+
+    infoText += country->getCountryName() + "\n";
+    /*infoText += "Wealth: " + to_string(country->getWealth()) + "\n";
+
+    sprintf(buffer, "%.2f", country->getDept());
+    infoText += "Dept: " + string(buffer) + "\n";
+
+    sprintf(buffer, "%.2f", country->getRelativeDept() * 100.0f);
+    infoText += "Rel. Dept: " + string(buffer) + "%\n";
+
+    sprintf(buffer, "%.2f", country->getDeptBalance());
+    infoText += "Dept balance: " + string(buffer) + "\n";
+
+    sprintf(buffer, "%.2f", country->getAnger() * 100.0f);
+    infoText += "Anger: " + string(buffer) + "%\n";
+
+    sprintf(buffer, "%.2f", country->getAngerBalance());
+    infoText += "Anger balance: " + string(buffer) + "\n";*/
 
 
-  country->getValues()->getContainer()->debugPrintToString(infoText);
+    country->getValues()->getContainer()->debugPrintToString(infoText);
 
-	_textCountryInfo->setText(infoText);
+    _textCountryInfo->setText(infoText);
+  }
+
 }

@@ -11,6 +11,7 @@
 #include "CountryMesh.h"
 
 #include "data/CountriesMap.h"
+#include "simulation/CountryData.h"
 
 namespace onep
 {
@@ -24,18 +25,23 @@ namespace onep
 		void updateLightDirection(osg::Vec3f direction);
 		void updateClouds(float day);
 
+    void clearHighlightedCountries();
 		void setSelectedCountry(int countryId);
+    void setHighlightedSkillBranch(BranchType type);
+
     void setCountriesMap(CountriesMap::Ptr countriesMap);
 
     void addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles);
     CountryMesh::Map& getCountryMeshs();
     CountriesMap::Ptr getCountriesMap();
 
+    CountryMesh::Ptr getSelectedCountryMesh();
     CountryMesh::Ptr getCountryMesh(int id);
     CountryMesh::Ptr getCountryMesh(osg::Vec2f coord);
     int getCountryId(osg::Vec2f coord);
     std::string getCountryName(osg::Vec2f coord);
 
+    int getSelectedCountryId();
     osgGaming::Observable<int>::Ptr getSelectedCountryIdObservable();
 
 	private:
@@ -49,6 +55,8 @@ namespace onep
 		void makeCloudsModel();
     void makeBoundariesModel();
 		void makeAtmosphericScattering(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);
+
+    void addHighlightedCountry(CountryMesh::Ptr mesh, CountryMesh::ColorMode mode);
 
 		osg::ref_ptr<osg::Geode> createPlanetGeode(int textureResolution);
 		osg::ref_ptr<osg::Geode> createCloudsGeode();
@@ -68,5 +76,7 @@ namespace onep
 
     CountryMesh::List m_visibleCountryMeshs;
     osgGaming::Observable<int>::Ptr m_oSelectedCountryId;
+
+    BranchType m_highlightedBranch;
 	};
 }

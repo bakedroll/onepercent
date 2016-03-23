@@ -2,6 +2,7 @@
 
 #include <osgGaming/UIVisualElement.h>
 #include <osgGaming/UserInteractionModel.h>
+#include <osgGaming/Observable.h>
 
 #include <osg/Material>
 #include <osgText/Text>
@@ -11,6 +12,8 @@ namespace osgGaming
 	class UIButton : public UIVisualElement, public UserInteractionModel
 	{
 	public:
+    typedef osg::ref_ptr<UIButton> Ptr;
+
 		UIButton();
 
 		void setFontSize(float fontSize);
@@ -28,6 +31,8 @@ namespace osgGaming
     bool isCheckable();
     bool isChecked();
 
+    Observable<bool>::Ptr getIsCheckedObservable();
+
     void setCheckable(bool checkable);
     void setChecked(bool checked);
 
@@ -43,6 +48,6 @@ namespace osgGaming
 		osg::ref_ptr<osgText::Text> m_textNode;
 
     bool m_checkable;
-    bool m_isChecked;
+    Observable<bool>::Ptr m_isChecked;
 	};
 }

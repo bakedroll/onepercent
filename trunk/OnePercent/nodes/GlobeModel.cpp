@@ -22,6 +22,7 @@ namespace onep
 
   GlobeModel::GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
     : m_oSelectedCountryId(new osgGaming::Observable<int>(0))
+    , m_highlightedBranch(BRANCH_UNDEFINED)
   {
     makeEarthModel();
     makeCloudsModel();
@@ -45,39 +46,41 @@ namespace onep
     m_uniformTime->set(day * ~m_paramEarthCloudsMorphSpeed);
   }
 
+  void GlobeModel::clearHighlightedCountries()
+  {
+    for (CountryMesh::List::iterator it = m_visibleCountryMeshs.begin(); it != m_visibleCountryMeshs.end(); ++it)
+      m_countrySurfacesSwitch->setChildValue(*it, false);
+  }
+
   void GlobeModel::setSelectedCountry(int countryId)
   {
     m_oSelectedCountryId->set(countryId);
-
-    for (CountryMesh::List::iterator it = m_visibleCountryMeshs.begin(); it != m_visibleCountryMeshs.end(); ++it)
-      m_countrySurfacesSwitch->setChildValue(*it, false);
+    clearHighlightedCountries();
 
     if (countryId == 0)
-    {
-      for (CountryMesh::Map::iterator it = m_countryMeshs.begin(); it != m_countryMeshs.end(); ++it)
-      {
-        if (it->second->getCountryData()->getSkillBranchActivated(BRANCH_BANKS))
-        {
-          it->second->setColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS);
-          m_countrySurfacesSwitch->setChildValue(it->second, true);
-          m_visibleCountryMeshs.push_back(it->second);
-        }
-      }
-
       return;
-    }
+
+    m_highlightedBranch = BRANCH_UNDEFINED;
 
     CountryMesh::Ptr mesh = m_countryMeshs.find(countryId)->second;
-    mesh->setColorMode(CountryMesh::MODE_SELECTED);
-    m_countrySurfacesSwitch->setChildValue(mesh, true);
-    m_visibleCountryMeshs.push_back(mesh);
+    addHighlightedCountry(mesh, CountryMesh::MODE_SELECTED);
 
     CountryMesh::List& neighbors = mesh->getNeighborCountryMeshs();
     for (CountryMesh::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+      addHighlightedCountry(*it, CountryMesh::MODE_NEIGHBOR);
+  }
+
+  void GlobeModel::setHighlightedSkillBranch(BranchType type)
+  {
+    m_oSelectedCountryId->set(0);
+    clearHighlightedCountries();
+
+    m_highlightedBranch = type;
+
+    for (CountryMesh::Map::iterator it = m_countryMeshs.begin(); it != m_countryMeshs.end(); ++it)
     {
-      (*it)->setColorMode(CountryMesh::MODE_NEIGHBOR);
-      m_countrySurfacesSwitch->setChildValue(*it, true);
-      m_visibleCountryMeshs.push_back(*it);
+      if (it->second->getCountryData()->getSkillBranchActivated(type))
+        addHighlightedCountry(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + int(type)));
     }
   }
 
@@ -109,15 +112,17 @@ namespace onep
     m_countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
     m_countrySurfacesSwitch->addChild(mesh, false);
 
-    countryData->getSkillBranchActivatedObservable(BRANCH_BANKS)->addNotifyFunc([this, mesh](bool)
+    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
     {
-      if (m_oSelectedCountryId->get() == 0)
+      countryData->getSkillBranchActivatedObservable(i)->addNotifyFunc([this, mesh, i](bool activated)
       {
-        mesh->setColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS);
-        m_countrySurfacesSwitch->setChildValue(mesh, true);
-        m_visibleCountryMeshs.push_back(mesh);
-      }
-    });
+        if (!activated)
+          return;
+
+        if (m_oSelectedCountryId->get() == 0 && m_highlightedBranch == i)
+          addHighlightedCountry(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
+      });
+    }
   }
 
   CountryMesh::Map& GlobeModel::getCountryMeshs()
@@ -128,6 +133,11 @@ namespace onep
   CountriesMap::Ptr GlobeModel::getCountriesMap()
   {
     return m_countriesMap;
+  }
+
+  CountryMesh::Ptr GlobeModel::getSelectedCountryMesh()
+  {
+    return m_countryMeshs.find(m_oSelectedCountryId->get())->second;
   }
 
   CountryMesh::Ptr GlobeModel::getCountryMesh(int id)
@@ -169,6 +179,11 @@ namespace onep
     }
 
     return it->second->getCountryData()->getCountryName();
+  }
+
+  int GlobeModel::getSelectedCountryId()
+  {
+    return m_oSelectedCountryId->get();
   }
 
   osgGaming::Observable<int>::Ptr GlobeModel::getSelectedCountryIdObservable()
@@ -372,6 +387,13 @@ namespace onep
 
     addChild(caq);
     tcm->addCameraAlignedQuad(caq);
+  }
+
+  void GlobeModel::addHighlightedCountry(CountryMesh::Ptr mesh, CountryMesh::ColorMode mode)
+  {
+    mesh->setColorMode(mode);
+    m_countrySurfacesSwitch->setChildValue(mesh, true);
+    m_visibleCountryMeshs.push_back(mesh);
   }
 
   ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)

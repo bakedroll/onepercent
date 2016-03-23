@@ -84,19 +84,99 @@
 
 				<array name="attributes">
 					<field name="valuetype" type="string" />
-					<field name="method" type="string" default="set_value" />
+					<field name="method" type="string" default="add_change" />
 					<field name="value" type="float" />
 					<field name="branch_attr" type="bool" default="true" />
 				
 					<element>
 						<property name="valuetype" value="propagation" />
-						<property name="value" value="0.02" />
+						<property name="value" value="0.05" />
+					</element>
+					
+				</array>
+				
+			</element>
+			
+			<!-- PROPAGATION CONTROL -->
+			<element>
+				<property name="name" value="propagation control" />
+				<property name="branch" value="control" />
+
+				<array name="attributes">
+					<field name="valuetype" type="string" />
+					<field name="method" type="string" default="add_change" />
+					<field name="value" type="float" />
+					<field name="branch_attr" type="bool" default="true" />
+				
+					<element>
+						<property name="valuetype" value="propagation" />
+						<property name="value" value="0.05" />
+					</element>
+					
+				</array>
+				
+			</element>
+			
+			<!-- PROPAGATION MEDIA -->
+			<element>
+				<property name="name" value="propagation media" />
+				<property name="branch" value="media" />
+
+				<array name="attributes">
+					<field name="valuetype" type="string" />
+					<field name="method" type="string" default="add_change" />
+					<field name="value" type="float" />
+					<field name="branch_attr" type="bool" default="true" />
+				
+					<element>
+						<property name="valuetype" value="propagation" />
+						<property name="value" value="0.05" />
 					</element>
 					
 				</array>
 				
 			</element>
 
+			<!-- PROPAGATION CONCERNS -->
+			<element>
+				<property name="name" value="propagation concerns" />
+				<property name="branch" value="concerns" />
+
+				<array name="attributes">
+					<field name="valuetype" type="string" />
+					<field name="method" type="string" default="add_change" />
+					<field name="value" type="float" />
+					<field name="branch_attr" type="bool" default="true" />
+				
+					<element>
+						<property name="valuetype" value="propagation" />
+						<property name="value" value="0.05" />
+					</element>
+					
+				</array>
+				
+			</element>
+			
+			<!-- PROPAGATION POLITICS -->
+			<element>
+				<property name="name" value="propagation politics" />
+				<property name="branch" value="politics" />
+
+				<array name="attributes">
+					<field name="valuetype" type="string" />
+					<field name="method" type="string" default="add_change" />
+					<field name="value" type="float" />
+					<field name="branch_attr" type="bool" default="true" />
+				
+					<element>
+						<property name="valuetype" value="propagation" />
+						<property name="value" value="0.05" />
+					</element>
+					
+				</array>
+				
+			</element>
+			
 		</array>
 	</group>
 	

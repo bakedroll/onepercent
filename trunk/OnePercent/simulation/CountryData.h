@@ -67,7 +67,7 @@ namespace onep
 
 		float m_populationInMio;
 
-    osgGaming::Observable<bool>::Ptr m_oSkillBranchActivated[NUM_SKILLBRANCHES];
+    SkillBranchesActivated m_skillBranches;
 
 		unsigned char m_id;
 		osg::Vec2f m_centerLatLong;

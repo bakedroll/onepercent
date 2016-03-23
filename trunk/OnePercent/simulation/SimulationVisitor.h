@@ -6,6 +6,11 @@
 
 namespace onep
 {
+  typedef struct _skillBranchesActivated
+  {
+    osg::ref_ptr<osgGaming::Observable<bool>> oActivated[NUM_SKILLBRANCHES];
+  } SkillBranchesActivated;
+
   class SimulationVisitor : public osgUtil::UpdateVisitor
   {
   public:
@@ -20,17 +25,17 @@ namespace onep
 
     SimulationVisitor(Type type);
 
-    bool* getActivatedBranches();
+    bool getBranchActivated(BranchType type);
     CountryValues::Ptr getCountryValues();
     Type getType();
 
-    void setActivatedBranches(osgGaming::Observable<bool>* branches);
+    void setActivatedBranches(SkillBranchesActivated* sba);
     void setCountryValues(CountryValues::Ptr values);
 
   private:
     Type m_type;
 
-    bool m_activatedBranches[NUM_SKILLBRANCHES];
+    SkillBranchesActivated* m_skillBranches;
     CountryValues::Ptr m_countryValues;
   };
 }

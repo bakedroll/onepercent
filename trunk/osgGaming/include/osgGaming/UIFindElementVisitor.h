@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include <osgGaming/UIElement.h>
 
 #include <osg/NodeVisitor>

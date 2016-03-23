@@ -14,7 +14,7 @@ namespace osgGaming
     , m_text("")
     , m_fontSize(18.0)
     , m_checkable(false)
-    , m_isChecked(false)
+    , m_isChecked(new Observable<bool>(false))
   {
     setPadding(6.0f);
 
@@ -56,20 +56,20 @@ namespace osgGaming
 
   void UIButton::onMouseEnter()
   {
-    if (isEnabled())
+    if (isEnabled() && !isCheckable())
       m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.0f);
   }
 
   void UIButton::onMouseLeave()
   {
-    if (!m_isChecked)
+    if (!m_isChecked->get())
       m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.5f);
   }
 
   void UIButton::onClicked()
   {
     if (m_checkable)
-      setChecked(!m_isChecked);
+      setChecked(!m_isChecked->get());
   }
 
   void UIButton::onEnabledChanged(bool enabled)
@@ -105,6 +105,11 @@ namespace osgGaming
 
   bool UIButton::isChecked()
   {
+    return m_isChecked->get();
+  }
+
+  Observable<bool>::Ptr UIButton::getIsCheckedObservable()
+  {
     return m_isChecked;
   }
 
@@ -116,11 +121,14 @@ namespace osgGaming
 
   void UIButton::setChecked(bool checked)
   {
-    if (!m_checkable)
+    if (!m_checkable && getHovered())
+      m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.0f);
+
+    if (!m_checkable || m_isChecked->get() == checked)
       return;
 
-    m_isChecked = checked;
-    if (m_isChecked || getHovered())
+    m_isChecked->set(checked);
+    if (checked)
       m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.0f);
     else
       m_material->setTransparency(osg::Material::FRONT_AND_BACK, 0.5f);

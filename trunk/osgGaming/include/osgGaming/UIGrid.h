@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include <osgGaming/UIContainerElement.h>
 #include <osgGaming/UICells.h>
 
@@ -19,6 +17,8 @@ namespace osgGaming
 	class UIGrid : public UIContainerElement<ColRow>
 	{
 	public:
+    typedef osg::ref_ptr<UIGrid> Ptr;
+
 		UIGrid();
 
 		virtual void getOriginSizeForLocationInArea(ColRow location, osg::Vec2f area, osg::Vec2f& origin, osg::Vec2f& size) override;
