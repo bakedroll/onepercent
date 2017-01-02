@@ -371,7 +371,6 @@ namespace onep
   void GlobeInteractionState::dayTimerElapsed()
   {
     getGlobeOverviewWorld()->getSimulation()->step();
-    // getGlobeOverviewWorld()->getSimulation()->printStats(true);
 
     _textProgress->setText(~Property<string, Param_LocalizationInfoTextDay>() + " " + to_string(getGlobeOverviewWorld()->getSimulation()->getDay()));
 
@@ -391,11 +390,6 @@ namespace onep
 
     _started = true;
   }
-
-  /*void GlobeInteractionState::onUIMClickedEvent(UserInteractionModel* model)
-  {
-  printf("Clicked UIM: %s\n", model->getUIMName().data());
-  }*/
 
   ref_ptr<Hud> GlobeInteractionState::newHud()
   {
@@ -423,32 +417,10 @@ namespace onep
       return;
     }
 
-    string infoText = "";
     CountryData::Ptr country = getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryMesh()->getCountryData();
 
-    //char buffer[16];
-
-    infoText += country->getCountryName() + "\n";
-    /*infoText += "Wealth: " + to_string(country->getWealth()) + "\n";
-
-    sprintf(buffer, "%.2f", country->getDept());
-    infoText += "Dept: " + string(buffer) + "\n";
-
-    sprintf(buffer, "%.2f", country->getRelativeDept() * 100.0f);
-    infoText += "Rel. Dept: " + string(buffer) + "%\n";
-
-    sprintf(buffer, "%.2f", country->getDeptBalance());
-    infoText += "Dept balance: " + string(buffer) + "\n";
-
-    sprintf(buffer, "%.2f", country->getAnger() * 100.0f);
-    infoText += "Anger: " + string(buffer) + "%\n";
-
-    sprintf(buffer, "%.2f", country->getAngerBalance());
-    infoText += "Anger balance: " + string(buffer) + "\n";*/
-
-
+	string infoText = country->getCountryName() + "\n";
     country->getValues()->getContainer()->debugPrintToString(infoText);
-
     _textCountryInfo->setText(infoText);
   }
 

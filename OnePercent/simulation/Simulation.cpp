@@ -188,7 +188,7 @@ void Simulation::step()
   accept(*m_affectNeighborsVisitor);
   accept(*m_progressCountriesVisitor);
 
-	m_day++;
+  m_day++;
 }
 
 bool Simulation::callback(SimulationVisitor* visitor)
