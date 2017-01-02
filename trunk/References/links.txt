@@ -49,3 +49,6 @@ http://www.geeks3d.com/20110405/fxaa-fast-approximate-anti-aliasing-demo-glsl-op
 
 Quadtree:
 https://gist.github.com/tomasbasham/10545966
+
+porting to web browser
+https://www.youtube.com/watch?v=C9t4TwMQRt0
