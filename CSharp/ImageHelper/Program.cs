@@ -383,8 +383,13 @@ namespace ImageHelper
 
         private static void MakeColorMap(string colormapFilename, string specularmapFilename, string reliefmapFilename, string outputFilename)
         {
+            Console.WriteLine("Reading image file {0}", colormapFilename);
             var colormapBitmap = new Bitmap(colormapFilename);
+
+            Console.WriteLine("Reading image file {0}", specularmapFilename);
             var specularmapBitmap = new Bitmap(specularmapFilename);
+
+            Console.WriteLine("Reading image file {0}", reliefmapFilename);
             var reliefmapBitmap = new Bitmap(reliefmapFilename);
 
             var width = Math.Min(Math.Min(colormapBitmap.Width, specularmapBitmap.Width), reliefmapBitmap.Width);
