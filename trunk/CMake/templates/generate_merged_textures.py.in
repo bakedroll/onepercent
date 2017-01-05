@@ -1,0 +1,13 @@
+import subprocess
+import distutils
+from distutils import dir_util
+
+root_path = "${CMAKE_SOURCE_DIR}"
+resources_path = "${TEMPLATE_PATH_RESOURCES}"
+gamedata_path = "${TEMPLATE_PATH_GAMEDATA_SRC}"
+gamedata_path_dst = "${TEMPLATE_PATH_GAMEDATA_DST}"
+
+subprocess.call([root_path + "/CSharp/ImageHelper/bin/x64/Release/ImageHelper.exe", "0", "0", resources_path + "/earth_textures/water_8k.png", resources_path + "/earth_textures/cities_8k.png", resources_path + "/earth_textures/clouds/fair_clouds_8k.png", resources_path + "/earth_textures/clouds/se_asia_clouds_8k.png", resources_path + "/TEMP/speccitiesclouds.png"], shell=True)
+subprocess.call([root_path + "/CSharp/ImageHelper/bin/x64/Release/ImageHelper.exe", "1", "0", resources_path + "/TEMP/speccitiesclouds.png", "2", "1", gamedata_path + "/textures/earth/speccitiesclouds/8k/"], shell=True)
+
+distutils.dir_util.copy_tree(gamedata_path + "/textures/earth/speccitiesclouds/8k/", gamedata_path_dst + "/textures/earth/speccitiesclouds/8k/")
