@@ -23,13 +23,37 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/${PROJECT_LIB_DIR})
 endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 
+# find Qt5
+set(QT5_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "Qt5 root directory")
+if (EXISTS ${QT5_ROOT_DIRECTORY})
+  adjust_cached_path(QT5_ROOT_DIRECTORY "Qt5 root directory" ${QT5_ROOT_DIRECTORY})
+endif()
+
+set(CMAKE_PREFIX_PATH ${QT5_ROOT_DIRECTORY})
+
+set(QT5_MODULES
+  Core
+  Gui
+  Widgets)
+  
+foreach(module ${QT5_MODULES})
+  find_package(Qt5${module})
+endforeach()
+
+#find OpenSceneGraph
 find_package(OpenSceneGraph)
+
+# find rapidxml
 find_package(rapidxml)
 
 # optional for Vectorizer
 find_package(OpenCV)
 
 # Check for existence of required directories
+if ("${Qt5Core_LIBRARIES}" STREQUAL "")
+  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify QT5_ROOT_DIRECTORY\n")
+endif()
+
 if (NOT EXISTS ${OSG_INCLUDE_DIR})
   set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify OSG_INCLUDE_DIR\n")
 else()
@@ -169,6 +193,25 @@ if (WIN32 AND EXISTS ${OSG_BINARY})
     endif()
   endif()
 endif()
+
+
+foreach(module ${QT5_MODULES})
+  get_target_property(MODULE_LOCATION Qt5::${module} LOCATION)
+  get_filename_component(MODULE_DIR ${MODULE_LOCATION} DIRECTORY)
+  get_filename_component(MODULE_FILENAME ${MODULE_LOCATION} NAME)
+  get_filename_component(MODULE_EXT ${MODULE_LOCATION} EXT)
+  get_filename_component(MODULE_NAME_WE ${MODULE_LOCATION} NAME_WE)
+  
+  message(STATUS "copy library ${MODULE_FILENAME}")
+  configure_file(${MODULE_LOCATION} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/${MODULE_FILENAME} COPYONLY)
+  
+  set(MODULE_LOCATION_DBG ${MODULE_DIR}/${MODULE_NAME_WE}d${MODULE_EXT})
+  get_filename_component(MODULE_FILENAME_DBG ${MODULE_LOCATION_DBG} NAME)
+  
+  message(STATUS "copy library ${MODULE_FILENAME_DBG}")
+  configure_file(${MODULE_LOCATION_DBG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/${MODULE_FILENAME_DBG} COPYONLY)
+endforeach()
+
 
 # configure scripts
 set(TEMPLATE_PATH_RESOURCES "${CMAKE_SOURCE_DIR}/Resources")

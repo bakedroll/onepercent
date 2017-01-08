@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <string>
 
 #include <osgViewer/Viewer>
 #include <osg/Texture2D>
