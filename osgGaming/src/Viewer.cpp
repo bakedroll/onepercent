@@ -1,603 +1,606 @@
 #include <osgGaming/Viewer.h>
 
-#include <osg/Projection>
 #include <osgViewer/Renderer>
 
 #include <osgPPU/UnitBypass.h>
 #include <osgPPU/UnitDepthbufferBypass.h>
 #include <osgPPU/Camera.h>
 
-using namespace osgGaming;
 using namespace osgPPU;
 using namespace osg;
 using namespace std;
 
-Viewer::Viewer()
-	: osgViewer::Viewer(),
-	  _ppuInitialized(false),
-	  _fullscreenEnabled(true),
-	  _resolutionInitialized(false),
-	  _screenNum(0)
+namespace osgGaming
 {
-	initialize();
+
+Viewer::Viewer()
+  : osgViewer::Viewer(),
+  _fullscreenEnabled(true),
+  _resolutionInitialized(false),
+  _screenNum(0),
+  _ppuInitialized(false)
+{
+  initialize();
 }
 
 void Viewer::updateResolution(Vec2f resolution)
 {
-	_resolution = resolution;
+  _resolution = resolution;
 
-	if (!_fullscreenEnabled)
-	{
-		_windowRect.z() = _resolution.x();
-		_windowRect.w() = _resolution.y();
-	}
+  if (!_fullscreenEnabled)
+  {
+    _windowRect.z() = _resolution.x();
+    _windowRect.w() = _resolution.y();
+  }
 
-	ref_ptr<osg::Camera> camera = getCamera();
-	ref_ptr<Viewport> vp = new Viewport(0, 0, (int)_resolution.x(), (int)_resolution.y());
+  ref_ptr<osg::Camera> camera = getCamera();
+  ref_ptr<Viewport> vp = new Viewport(0, 0, (int)_resolution.x(), (int)_resolution.y());
 
-	if (_processor.valid())
-	{
-		osgPPU::Camera::resizeViewport(0, 0, (int)_resolution.x(), (int)_resolution.y(), camera);
-		_processor->onViewportChange();
-	}
+  if (_processor.valid())
+  {
+    osgPPU::Camera::resizeViewport(0, 0, (int)_resolution.x(), (int)_resolution.y(), camera);
+    _processor->onViewportChange();
+  }
 
-	camera->setViewport(vp);
+  camera->setViewport(vp);
 
-	updateCameraRenderTextures(true);
+  updateCameraRenderTextures(true);
 }
 
 void Viewer::updateWindowPosition(Vec2f position)
 {
-	if (!_fullscreenEnabled)
-	{
-		_windowRect.x() = position.x();
-		_windowRect.y() = position.y();
-	}
+  if (!_fullscreenEnabled)
+  {
+    _windowRect.x() = position.x();
+    _windowRect.y() = position.y();
+  }
 }
 
 void Viewer::setSceneData(Node* node)
 {
-	if (node == _ppSceneData.get())
-	{
-		return;
-	}
+  if (node == _ppSceneData.get())
+  {
+    return;
+  }
 
-	if (_ppSceneData.valid())
-	{
-		_ppGroup->removeChild(_ppSceneData);
-	}
+  if (_ppSceneData.valid())
+  {
+    _ppGroup->removeChild(_ppSceneData);
+  }
 
-	_ppSceneData = node;
+  _ppSceneData = node;
 
-	if (_ppSceneData.valid())
-	{
-		_ppGroup->addChild(_ppSceneData);
-	}
+  if (_ppSceneData.valid())
+  {
+    _ppGroup->addChild(_ppSceneData);
+  }
 }
 
 void Viewer::setClampColorEnabled(bool enabled)
 {
-	if (!_clampColor.valid())
-	{
-		_clampColor = new ClampColor();
-		_clampColor->setClampVertexColor(GL_FALSE);
-		_clampColor->setClampFragmentColor(GL_FALSE);
-		_clampColor->setClampReadColor(GL_FALSE);
-	}
+  if (!_clampColor.valid())
+  {
+    _clampColor = new ClampColor();
+    _clampColor->setClampVertexColor(GL_FALSE);
+    _clampColor->setClampFragmentColor(GL_FALSE);
+    _clampColor->setClampReadColor(GL_FALSE);
+  }
 
-	_ppGroup->getOrCreateStateSet()->setAttribute(_clampColor, enabled ? StateAttribute::ON : StateAttribute::OFF);
+  _ppGroup->getOrCreateStateSet()->setAttribute(_clampColor, enabled ? StateAttribute::ON : StateAttribute::OFF);
 }
 
 ref_ptr<Group> Viewer::getRootGroup()
 {
-	return _ppGroup;
+  return _ppGroup;
 }
 
 ref_ptr<Hud> Viewer::getHud()
 {
-	return _hud;
+  return _hud;
 }
 
 // TODO: refactor
 void Viewer::setHud(ref_ptr<Hud> hud)
 {
-	if (_hud == hud)
-	{
-		return;
-	}
+  if (_hud == hud)
+  {
+    return;
+  }
 
-	if (_hud.valid())
-	{
-		//_hudSwitch->setChildValue(_hud->getProjection(), false);
-		_hudSwitch->removeChild(_hud->getProjection());
-	}
+  if (_hud.valid())
+  {
+    //_hudSwitch->setChildValue(_hud->getProjection(), false);
+    _hudSwitch->removeChild(_hud->getProjection());
+  }
 
-	_hud = hud;
+  _hud = hud;
 
-	/*if (!_hudSwitch->containsNode(_hud->getProjection()))
-	{
-		_hudSwitch->addChild(_hud->getProjection() , true);
-	}
-	else
-	{
-		_hudSwitch->setChildValue(_hud->getProjection(), true);
-	}*/
+  /*if (!_hudSwitch->containsNode(_hud->getProjection()))
+  {
+  _hudSwitch->addChild(_hud->getProjection() , true);
+  }
+  else
+  {
+  _hudSwitch->setChildValue(_hud->getProjection(), true);
+  }*/
 
-	_hudSwitch->addChild(_hud->getProjection(), true);
+  _hudSwitch->addChild(_hud->getProjection(), true);
 }
 
 void Viewer::addPostProcessingEffect(ref_ptr<PostProcessingEffect> ppe, bool enabled, string name)
 {
-	if (enabled)
-	{
-		resetPostProcessingEffects();
-	}
+  if (enabled)
+  {
+    resetPostProcessingEffects();
+  }
 
-	// ppe->initialize();
+  // ppe->initialize();
 
-	PostProcessingState pps;
-	pps.effect = ppe;
-	pps.enabled = enabled;
+  PostProcessingState pps;
+  pps.effect = ppe;
+  pps.enabled = enabled;
 
-	if (name.empty())
-	{
-		name = ppe->getName();
-	}
+  if (name.empty())
+  {
+    name = ppe->getName();
+  }
 
-	_ppeDictionary.insert(PostProcessingStateDictionary::value_type(name, pps));
+  _ppeDictionary.insert(PostProcessingStateDictionary::value_type(name, pps));
 
-	if (enabled)
-	{
-		setupPostProcessingEffects();
-	}
+  if (enabled)
+  {
+    setupPostProcessingEffects();
+  }
 }
 
 void Viewer::setPostProcessingEffectEnabled(string ppeName, bool enabled)
 {
-	PostProcessingStateDictionary::iterator it = _ppeDictionary.find(ppeName);
+  PostProcessingStateDictionary::iterator it = _ppeDictionary.find(ppeName);
 
-	if (it->second.enabled == enabled)
-	{
-		return;
-	}
+  if (it->second.enabled == enabled)
+  {
+    return;
+  }
 
-	printf("Post processing effect '%s': %s\n", ppeName.c_str(), enabled ? "enabled" : "disabled");
+  printf("Post processing effect '%s': %s\n", ppeName.c_str(), enabled ? "enabled" : "disabled");
 
-	resetPostProcessingEffects();
+  resetPostProcessingEffects();
 
-	it->second.enabled = enabled;
+  it->second.enabled = enabled;
 
-	setupPostProcessingEffects();
+  setupPostProcessingEffects();
 }
 
 void Viewer::setPostProcessingEffectEnabled(unsigned int index, bool enabled)
 {
-	setPostProcessingEffectEnabled(postProcessingEffectName(index), enabled);
+  setPostProcessingEffectEnabled(postProcessingEffectName(index), enabled);
 }
 
 void Viewer::setFullscreenEnabled(bool enabled)
 {
-	if (_fullscreenEnabled == enabled)
-	{
-		return;
-	}
+  if (_fullscreenEnabled == enabled)
+  {
+    return;
+  }
 
-	_fullscreenEnabled = enabled;
+  _fullscreenEnabled = enabled;
 
-	updateWindowRect();
+  updateWindowRect();
 }
 
 void Viewer::setWindowedResolution(Vec2f resolution)
 {
-	_windowRect.z() = resolution.x();
-	_windowRect.w() = resolution.y();
+  _windowRect.z() = resolution.x();
+  _windowRect.w() = resolution.y();
 
-	updateWindowRect();
+  updateWindowRect();
 }
 
 void Viewer::setScreenNum(int screenNum)
 {
-	int numScreens = (int)GraphicsContext::getWindowingSystemInterface()->getNumScreens();
+  int numScreens = (int)GraphicsContext::getWindowingSystemInterface()->getNumScreens();
 
-	if (screenNum >= numScreens)
-	{
-		screenNum = numScreens - 1;
-	}
+  if (screenNum >= numScreens)
+  {
+    screenNum = numScreens - 1;
+  }
 
-	_screenNum = screenNum;
+  _screenNum = screenNum;
 }
 
 ref_ptr<PostProcessingEffect> Viewer::getPostProcessingEffect(string ppeName)
 {
-	return _ppeDictionary.find(ppeName)->second.effect;
+  return _ppeDictionary.find(ppeName)->second.effect;
 }
 
 ref_ptr<PostProcessingEffect> Viewer::getPostProcessingEffect(unsigned int index)
 {
-	return getPostProcessingEffect(postProcessingEffectName(index));
+  return getPostProcessingEffect(postProcessingEffectName(index));
 }
 
 bool Viewer::getFullscreenEnabled()
 {
-	return _fullscreenEnabled;
+  return _fullscreenEnabled;
 }
 
 Vec2f Viewer::getResolution()
 {
-	return _resolution;
+  return _resolution;
 }
 
 int Viewer::getScreenNum()
 {
-	return _screenNum;
+  return _screenNum;
 }
 
 bool Viewer::getPostProcessingEffectEnabled(string ppeName)
 {
-	PostProcessingStateDictionary::iterator it = _ppeDictionary.find(ppeName);
+  PostProcessingStateDictionary::iterator it = _ppeDictionary.find(ppeName);
 
-	return it->second.enabled;
+  return it->second.enabled;
 }
 
 bool Viewer::getPostProcessingEffectEnabled(unsigned int index)
 {
-	return getPostProcessingEffectEnabled(postProcessingEffectName(index));
+  return getPostProcessingEffectEnabled(postProcessingEffectName(index));
 }
 
 bool Viewer::hasPostProcessingEffect(string ppeName)
 {
-	return _ppeDictionary.find(ppeName) != _ppeDictionary.end();
+  return _ppeDictionary.find(ppeName) != _ppeDictionary.end();
 }
 
 void Viewer::setupResolution()
 {
-	unsigned int screenWidth, screenHeight;
-	GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(_screenNum), screenWidth, screenHeight);
+  unsigned int screenWidth, screenHeight;
+  GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(_screenNum), screenWidth, screenHeight);
 
-	_windowRect.x() = (float)screenWidth / 2.0f - _windowRect.z() / 2.0f;
-	_windowRect.y() = (float)screenHeight / 2.0f - _windowRect.w() / 2.0f;
+  _windowRect.x() = (float)screenWidth / 2.0f - _windowRect.z() / 2.0f;
+  _windowRect.y() = (float)screenHeight / 2.0f - _windowRect.w() / 2.0f;
 
-	if (!_fullscreenEnabled)
-	{
-		setUpViewInWindow(
-			(int)_windowRect.x(),
-			(int)_windowRect.y(),
-			(int)_windowRect.z(),
-			(int)_windowRect.w(),
-			_screenNum);
+  if (!_fullscreenEnabled)
+  {
+    setUpViewInWindow(
+      (int)_windowRect.x(),
+      (int)_windowRect.y(),
+      (int)_windowRect.z(),
+      (int)_windowRect.w(),
+      _screenNum);
 
-		_resolution = Vec2f(_windowRect.z(), _windowRect.w());
-	}
-	else
-	{
-		_resolution = Vec2f((float)screenWidth, (float)screenHeight);
-	}
+    _resolution = Vec2f(_windowRect.z(), _windowRect.w());
+  }
+  else
+  {
+    _resolution = Vec2f((float)screenWidth, (float)screenHeight);
+  }
 
-	_resolutionInitialized = true;
+  _resolutionInitialized = true;
 }
 
 void Viewer::initialize()
 {
-	setThreadingModel(ViewerBase::SingleThreaded);
+  setThreadingModel(ViewerBase::SingleThreaded);
 
-	_ppGroup = new Group();
+  _ppGroup = new Group();
 
-	osgViewer::Viewer::setSceneData(_ppGroup);
+  osgViewer::Viewer::setSceneData(_ppGroup);
 
-	ref_ptr<osg::Camera> camera = getCamera();
-	camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::FRAME_BUFFER);
-	camera->setComputeNearFarMode(CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
-	camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	camera->setRenderOrder(osg::Camera::PRE_RENDER);
+  ref_ptr<osg::Camera> camera = getCamera();
+  camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::FRAME_BUFFER);
+  camera->setComputeNearFarMode(CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+  camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  camera->setRenderOrder(osg::Camera::PRE_RENDER);
 
-	_hudCamera = new osg::Camera();
-	_hudCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER, osg::Camera::FRAME_BUFFER);
-	_hudCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
-	_hudCamera->setRenderOrder(osg::Camera::POST_RENDER);
-	_hudCamera->setViewMatrix(Matrixd::identity());
-	_hudCamera->setProjectionMatrix(Matrixd::identity());
+  _hudCamera = new osg::Camera();
+  _hudCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER, osg::Camera::FRAME_BUFFER);
+  _hudCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+  _hudCamera->setRenderOrder(osg::Camera::POST_RENDER);
+  _hudCamera->setViewMatrix(Matrixd::identity());
+  _hudCamera->setProjectionMatrix(Matrixd::identity());
 
-	// implicitly attaches texture to camera
-	ref_ptr<Texture2D> texture = renderTexture(osg::Camera::COLOR_BUFFER).texture;
+  // implicitly attaches texture to camera
+  ref_ptr<Texture2D> texture = renderTexture(osg::Camera::COLOR_BUFFER).texture;
 
-	ref_ptr<Geode> geode = new Geode();
-	geode->addDrawable(createTexturedQuadGeometry(Vec3f(-1.0f, -1.0f, 0.0f), Vec3f(2.0f, 0.0f, 0.0f), Vec3f(0.0f, 2.0f, 0.0f)));
+  ref_ptr<Geode> geode = new Geode();
+  geode->addDrawable(createTexturedQuadGeometry(Vec3f(-1.0f, -1.0f, 0.0f), Vec3f(2.0f, 0.0f, 0.0f), Vec3f(0.0f, 2.0f, 0.0f)));
 
-	_hudStateSet = geode->getOrCreateStateSet();
-	_hudStateSet->setTextureAttributeAndModes(0, texture, StateAttribute::ON);
-	_hudStateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
+  _hudStateSet = geode->getOrCreateStateSet();
+  _hudStateSet->setTextureAttributeAndModes(0, texture, StateAttribute::ON);
+  _hudStateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
 
-	_hudCamera->addChild(geode);
+  _hudCamera->addChild(geode);
 
-	_hudSwitch = new Switch();
-	_hudCamera->addChild(_hudSwitch);
+  _hudSwitch = new Switch();
+  _hudCamera->addChild(_hudSwitch);
 
-	_ppGroup->addChild(_hudCamera);
+  _ppGroup->addChild(_hudCamera);
 }
 
 void Viewer::resetPostProcessingEffects()
 {
-	initializePPU();
+  initializePPU();
 
-	_lastUnit = lastUnit(true);
+  _lastUnit = lastUnit(true);
 
-	for (PostProcessingStateDictionary::iterator it = _ppeDictionary.begin(); it != _ppeDictionary.end(); ++it)
-	{
-		if (!it->second.enabled)
-		{
-			continue;
-		}
+  for (PostProcessingStateDictionary::iterator it = _ppeDictionary.begin(); it != _ppeDictionary.end(); ++it)
+  {
+    if (!it->second.enabled)
+    {
+      continue;
+    }
 
-		ref_ptr<PostProcessingEffect> ppe = it->second.effect;
+    ref_ptr<PostProcessingEffect> ppe = it->second.effect;
 
-		PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
-		for (PostProcessingEffect::InitialUnitList::iterator it = initialUnits.begin(); it != initialUnits.end(); ++it)
-		{
-			unitForType(it->type)->removeChild(it->unit);
-		}
+    PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
+    for (PostProcessingEffect::InitialUnitList::iterator it = initialUnits.begin(); it != initialUnits.end(); ++it)
+    {
+      unitForType(it->type)->removeChild(it->unit);
+    }
 
-		PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
-		for (PostProcessingEffect::InputToUniformList::iterator it = inputToUniformList.begin(); it != inputToUniformList.end(); ++it)
-		{
-			unitForType(it->type)->removeChild(it->unit);
-		}
+    PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
+    for (PostProcessingEffect::InputToUniformList::iterator it = inputToUniformList.begin(); it != inputToUniformList.end(); ++it)
+    {
+      unitForType(it->type)->removeChild(it->unit);
+    }
 
-		_lastUnit = ppe->getResultUnit();
-	}
+    _lastUnit = ppe->getResultUnit();
+  }
 
-	if (_unitOutput.valid())
-	{
-		_lastUnit->removeChild(_unitOutput);
-	}
+  if (_unitOutput.valid())
+  {
+    _lastUnit->removeChild(_unitOutput);
+  }
 
-	_unitOutput = new UnitInOut();
-	_unitOutput->setInputTextureIndexForViewportReference(-1);
-	_hudStateSet->setTextureAttributeAndModes(0, _unitOutput->getOrCreateOutputTexture(0), StateAttribute::ON);
+  _unitOutput = new UnitInOut();
+  _unitOutput->setInputTextureIndexForViewportReference(-1);
+  _hudStateSet->setTextureAttributeAndModes(0, _unitOutput->getOrCreateOutputTexture(0), StateAttribute::ON);
 }
 
 void Viewer::setupPostProcessingEffects()
 {
-	_lastUnit = lastUnit(true);
+  _lastUnit = lastUnit(true);
 
-	for (PostProcessingStateDictionary::iterator it = _ppeDictionary.begin(); it != _ppeDictionary.end(); ++it)
-	{
-		if (!it->second.enabled)
-		{
-			continue;
-		}
+  for (PostProcessingStateDictionary::iterator it = _ppeDictionary.begin(); it != _ppeDictionary.end(); ++it)
+  {
+    if (!it->second.enabled)
+    {
+      continue;
+    }
 
-		ref_ptr<PostProcessingEffect> ppe = it->second.effect;
+    ref_ptr<PostProcessingEffect> ppe = it->second.effect;
 
-		ppe->initialize();
+    ppe->initialize();
 
-		PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
-		for (PostProcessingEffect::InitialUnitList::iterator it = initialUnits.begin(); it != initialUnits.end(); ++it)
-		{
-			unitForType(it->type)->addChild(it->unit);
-		}
+    PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
+    for (PostProcessingEffect::InitialUnitList::iterator it = initialUnits.begin(); it != initialUnits.end(); ++it)
+    {
+      unitForType(it->type)->addChild(it->unit);
+    }
 
-		PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
-		for (PostProcessingEffect::InputToUniformList::iterator it = inputToUniformList.begin(); it != inputToUniformList.end(); ++it)
-		{
-			it->unit->setInputToUniform(unitForType(it->type), it->name, true);
-		}
+    PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
+    for (PostProcessingEffect::InputToUniformList::iterator it = inputToUniformList.begin(); it != inputToUniformList.end(); ++it)
+    {
+      it->unit->setInputToUniform(unitForType(it->type), it->name, true);
+    }
 
-		_lastUnit = ppe->getResultUnit();
-	}
+    _lastUnit = ppe->getResultUnit();
+  }
 
-	_lastUnit->addChild(_unitOutput);
+  _lastUnit->addChild(_unitOutput);
 
-	updateCameraRenderTextures();
-	_processor->dirtyUnitSubgraph();
+  updateCameraRenderTextures();
+  _processor->dirtyUnitSubgraph();
 }
 
 void Viewer::updateCameraRenderTextures(bool recreate)
 {
-	for (RenderTextureDictionary::iterator it = _renderTextures.begin(); it != _renderTextures.end(); ++it)
-	{
-		ref_ptr<Texture2D> tex = renderTexture((osg::Camera::BufferComponent)it->first, recreate).texture;
-		if (it->first == osg::Camera::COLOR_BUFFER && !_processor.valid())
-		{
-			_hudStateSet->setTextureAttributeAndModes(0, tex, StateAttribute::ON);
-		}
-	}
+  for (RenderTextureDictionary::iterator it = _renderTextures.begin(); it != _renderTextures.end(); ++it)
+  {
+    ref_ptr<Texture2D> tex = renderTexture((osg::Camera::BufferComponent)it->first, recreate).texture;
+    if (it->first == osg::Camera::COLOR_BUFFER && !_processor.valid())
+    {
+      _hudStateSet->setTextureAttributeAndModes(0, tex, StateAttribute::ON);
+    }
+  }
 
-	osgViewer::Renderer* renderer = (osgViewer::Renderer*)getCamera()->getRenderer();
-	renderer->getSceneView(0)->getRenderStage()->setCameraRequiresSetUp(true);
-	renderer->getSceneView(0)->getRenderStage()->setFrameBufferObject(NULL);
+  osgViewer::Renderer* renderer = (osgViewer::Renderer*)getCamera()->getRenderer();
+  renderer->getSceneView(0)->getRenderStage()->setCameraRequiresSetUp(true);
+  renderer->getSceneView(0)->getRenderStage()->setFrameBufferObject(NULL);
 }
 
 void Viewer::updateWindowRect()
 {
-	if (_resolutionInitialized)
-	{
-		ViewerBase::Windows windows;
-		getWindows(windows);
+  if (_resolutionInitialized)
+  {
+    ViewerBase::Windows windows;
+    getWindows(windows);
 
-		ref_ptr<osgViewer::GraphicsWindow> graphicsWindow = *windows.begin();
+    ref_ptr<osgViewer::GraphicsWindow> graphicsWindow = *windows.begin();
 
-		if (graphicsWindow.valid())
-		{
-			if (_fullscreenEnabled)
-			{
-				unsigned int screenWidth, screenHeight;
-				GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(_screenNum), screenWidth, screenHeight);
+    if (graphicsWindow.valid())
+    {
+      if (_fullscreenEnabled)
+      {
+        unsigned int screenWidth, screenHeight;
+        GraphicsContext::getWindowingSystemInterface()->getScreenResolution(GraphicsContext::ScreenIdentifier(_screenNum), screenWidth, screenHeight);
 
-				graphicsWindow->setWindowDecoration(false);
-				graphicsWindow->setWindowRectangle(0, 0, screenWidth, screenHeight);
-			}
-			else
-			{
-				graphicsWindow->setWindowDecoration(true);
-				graphicsWindow->setWindowRectangle(
-					(int)_windowRect.x(),
-					(int)_windowRect.y(),
-					(int)_windowRect.z(),
-					(int)_windowRect.w());
-			}
+        graphicsWindow->setWindowDecoration(false);
+        graphicsWindow->setWindowRectangle(0, 0, screenWidth, screenHeight);
+      }
+      else
+      {
+        graphicsWindow->setWindowDecoration(true);
+        graphicsWindow->setWindowRectangle(
+          (int)_windowRect.x(),
+          (int)_windowRect.y(),
+          (int)_windowRect.z(),
+          (int)_windowRect.w());
+      }
 
-			// graphicsWindow->grabFocusIfPointerInWindow();
-		}
-	}
+      // graphicsWindow->grabFocusIfPointerInWindow();
+    }
+  }
 }
 
 Viewer::RenderTexture Viewer::renderTexture(osg::Camera::BufferComponent bufferComponent, bool recreate)
 {
-	RenderTextureDictionary::iterator it = _renderTextures.find(bufferComponent);
-	if (it != _renderTextures.end())
-	{
-		if (recreate)
-		{
-			RenderTexture rt = it->second;
+  RenderTextureDictionary::iterator it = _renderTextures.find(bufferComponent);
+  if (it != _renderTextures.end())
+  {
+    if (recreate)
+    {
+      RenderTexture rt = it->second;
 
-			getCamera()->detach(bufferComponent);
-			rt.texture = createRenderTexture(bufferComponent);
+      getCamera()->detach(bufferComponent);
+      rt.texture = createRenderTexture(bufferComponent);
 
-			_renderTextures[bufferComponent] = rt;
+      _renderTextures[bufferComponent] = rt;
 
-			return rt;
-		}
+      return rt;
+    }
 
-		return it->second;
-	}
+    return it->second;
+  }
 
-	RenderTexture rt;
+  RenderTexture rt;
 
-	rt.texture = createRenderTexture(bufferComponent);
+  rt.texture = createRenderTexture(bufferComponent);
 
-	_renderTextures.insert(RenderTextureDictionary::value_type(bufferComponent, rt));
+  _renderTextures.insert(RenderTextureDictionary::value_type(bufferComponent, rt));
 
-	return rt;
+  return rt;
 }
 
 ref_ptr<Texture2D> Viewer::createRenderTexture(osg::Camera::BufferComponent bufferComponent)
 {
-	ref_ptr<Texture2D> texture = new Texture2D();
+  ref_ptr<Texture2D> texture = new Texture2D();
 
-	texture->setTextureSize((int)_resolution.x(), (int)_resolution.y());
-	texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
-	texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
-	texture->setResizeNonPowerOfTwoHint(false);
-	texture->setWrap(osg::Texture2D::WRAP_S, osg::Texture2D::CLAMP_TO_BORDER);
-	texture->setWrap(osg::Texture2D::WRAP_T, osg::Texture2D::CLAMP_TO_BORDER);
-	texture->setBorderColor(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+  texture->setTextureSize((int)_resolution.x(), (int)_resolution.y());
+  texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
+  texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
+  texture->setResizeNonPowerOfTwoHint(false);
+  texture->setWrap(osg::Texture2D::WRAP_S, osg::Texture2D::CLAMP_TO_BORDER);
+  texture->setWrap(osg::Texture2D::WRAP_T, osg::Texture2D::CLAMP_TO_BORDER);
+  texture->setBorderColor(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
-	switch (bufferComponent)
-	{
-	case osg::Camera::COLOR_BUFFER:
-		texture->setInternalFormat(GL_RGBA16F_ARB);
-		texture->setSourceFormat(GL_RGBA);
-		texture->setSourceType(GL_FLOAT);
+  switch (bufferComponent)
+  {
+  case osg::Camera::COLOR_BUFFER:
+    texture->setInternalFormat(GL_RGBA16F_ARB);
+    texture->setSourceFormat(GL_RGBA);
+    texture->setSourceType(GL_FLOAT);
 
-		break;
+    break;
 
-	case osg::Camera::DEPTH_BUFFER:
-		texture->setInternalFormat(GL_DEPTH_COMPONENT);
+  case osg::Camera::DEPTH_BUFFER:
+    texture->setInternalFormat(GL_DEPTH_COMPONENT);
 
-		break;
-	}
+    break;
+  }
 
-	getCamera()->attach(bufferComponent, texture);
+  getCamera()->attach(bufferComponent, texture);
 
-	return texture;
+  return texture;
 }
 
 ref_ptr<Unit> Viewer::bypassUnit(osg::Camera::BufferComponent bufferComponent)
 {
-	RenderTexture rt = renderTexture(bufferComponent);
+  RenderTexture rt = renderTexture(bufferComponent);
 
-	if (!rt.bypassUnit.valid())
-	{
-		switch (bufferComponent)
-		{
-		case osg::Camera::COLOR_BUFFER:
-			rt.bypassUnit = new osgPPU::UnitBypass();
-			_processor->addChild(rt.bypassUnit);
+  if (!rt.bypassUnit.valid())
+  {
+    switch (bufferComponent)
+    {
+    case osg::Camera::COLOR_BUFFER:
+      rt.bypassUnit = new osgPPU::UnitBypass();
+      _processor->addChild(rt.bypassUnit);
 
-			break;
+      break;
 
-		case osg::Camera::DEPTH_BUFFER:
-			rt.bypassUnit = new osgPPU::UnitDepthbufferBypass();
-			_processor->addChild(rt.bypassUnit);
+    case osg::Camera::DEPTH_BUFFER:
+      rt.bypassUnit = new osgPPU::UnitDepthbufferBypass();
+      _processor->addChild(rt.bypassUnit);
 
-			break;
-		}
+      break;
+    }
 
-		_renderTextures[bufferComponent] = rt;
-	}
+    _renderTextures[bufferComponent] = rt;
+  }
 
-	return rt.bypassUnit;
+  return rt.bypassUnit;
 }
 
 ref_ptr<osgPPU::Unit> Viewer::lastUnit(bool reset)
 {
-	if (!_lastUnit.valid() || reset)
-	{
-		_lastUnit = bypassUnit(osg::Camera::COLOR_BUFFER);
-	}
+  if (!_lastUnit.valid() || reset)
+  {
+    _lastUnit = bypassUnit(osg::Camera::COLOR_BUFFER);
+  }
 
-	return _lastUnit;
+  return _lastUnit;
 }
 
 ref_ptr<osgPPU::Unit> Viewer::unitForType(PostProcessingEffect::UnitType type)
 {
-	ref_ptr<osgPPU::Unit> unit;
+  ref_ptr<osgPPU::Unit> unit;
 
-	switch (type)
-	{
-	case PostProcessingEffect::BYPASS_COLOR:
+  switch (type)
+  {
+  case PostProcessingEffect::BYPASS_COLOR:
 
-		unit = bypassUnit(osg::Camera::COLOR_BUFFER);
-		break;
+    unit = bypassUnit(osg::Camera::COLOR_BUFFER);
+    break;
 
-	case PostProcessingEffect::BYPASS_DEPTH:
+  case PostProcessingEffect::BYPASS_DEPTH:
 
-		unit = bypassUnit(osg::Camera::DEPTH_BUFFER);
-		break;
+    unit = bypassUnit(osg::Camera::DEPTH_BUFFER);
+    break;
 
-	case PostProcessingEffect::ONGOING_COLOR:
+  case PostProcessingEffect::ONGOING_COLOR:
 
-		unit = lastUnit();
-		break;
+    unit = lastUnit();
+    break;
 
-	}
+  }
 
-	return unit;
+  return unit;
 }
 
 string Viewer::postProcessingEffectName(unsigned int index)
 {
-	unsigned int c = 0;
+  unsigned int c = 0;
 
-	for (PostProcessingStateDictionary::iterator it = _ppeDictionary.begin(); it != _ppeDictionary.end(); ++it)
-	{
-		if (c == index)
-		{
-			return it->first;
-		}
+  for (PostProcessingStateDictionary::iterator it = _ppeDictionary.begin(); it != _ppeDictionary.end(); ++it)
+  {
+    if (c == index)
+    {
+      return it->first;
+    }
 
-		c++;
-	}
+    c++;
+  }
 
-	return "";
+  return "";
 }
 
 void Viewer::initializePPU()
 {
-	if (_ppuInitialized)
-	{
-		return;
-	}
+  if (_ppuInitialized)
+  {
+    return;
+  }
 
-	ref_ptr<osg::Camera> camera = getCamera();
+  ref_ptr<osg::Camera> camera = getCamera();
 
-	_processor = new Processor();
-	_processor->setCamera(camera);
+  _processor = new Processor();
+  _processor->setCamera(camera);
 
-	_ppGroup->addChild(_processor);
+  _ppGroup->addChild(_processor);
 
-	osgPPU::Camera::resizeViewport(0, 0, _resolution.x(), _resolution.y(), getCamera());
-	_processor->onViewportChange();
+  osgPPU::Camera::resizeViewport(0, 0, _resolution.x(), _resolution.y(), getCamera());
+  _processor->onViewportChange();
 
-	_ppuInitialized = true;
+  _ppuInitialized = true;
+}
+
 }
