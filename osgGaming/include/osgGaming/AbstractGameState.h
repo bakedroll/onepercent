@@ -5,11 +5,12 @@
 #include <osgGaming/World.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/GameSettings.h>
-#include <osgGaming/Viewer.h>
+#include <osgGaming/View.h>
 #include <osgGaming/UIElement.h>
 
 #include <osg/Referenced>
 #include <osg/ref_ptr>
+#include "Viewer.h"
 
 namespace osgGaming
 {
@@ -90,14 +91,15 @@ namespace osgGaming
 		double getFrameTime();
 		osg::ref_ptr<World> getWorld();
 		osg::ref_ptr<Hud> getHud();
-		osg::ref_ptr<Viewer> getViewer();
+    osg::ref_ptr<osgGaming::Viewer> getViewer();
+    osg::ref_ptr<osgGaming::View> getView(int i);
 		osg::ref_ptr<GameSettings> getGameSettings();
 
 		void setSimulationTime(double simulationTime);
 		void setFrameTime(double frameTime);
 		void setWorld(osg::ref_ptr<World> world);
 		void setHud(osg::ref_ptr<Hud> hud);
-		void setViewer(osg::ref_ptr<Viewer> viewer);
+    void setViewer(osg::ref_ptr<osgGaming::Viewer> viewer);
 		void setGameSettings(osg::ref_ptr<GameSettings> settings);
 
 		StateEvent* stateEvent_default();
@@ -127,7 +129,7 @@ namespace osgGaming
 		double _frameTime;
 		osg::ref_ptr<World> _world;
 		osg::ref_ptr<Hud> _hud;
-		osg::ref_ptr<Viewer> _viewer;
+    osg::ref_ptr<osgGaming::Viewer> _viewer;
 		osg::ref_ptr<GameSettings> _gameSettings;
 
 	};

@@ -216,7 +216,7 @@ bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
 	return false;
 }
 
-void InputManager::setViewer(ref_ptr<osgGaming::Viewer> viewer)
+void InputManager::setView(ref_ptr<osgGaming::View> viewer)
 {
 	_viewer = viewer;
 }

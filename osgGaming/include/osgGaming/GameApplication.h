@@ -5,19 +5,18 @@
 #include <osgGaming/GameSettings.h>
 #include <osgGaming/AbstractGameState.h>
 #include <osgGaming/InputManager.h>
-#include <osgGaming/Viewer.h>
 #include <osgGaming/SimulationCallback.h>
 #include <osgGaming/GameStateStack.h>
 
-#include <vector>
 #include <future>
+#include "Viewer.h"
 
 namespace osgGaming
 {
 	class GameApplication : public SimulationCallback
 	{
 	public:
-		GameApplication();
+    GameApplication(osg::ref_ptr<osgGaming::View> view = nullptr);
 
 		virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override;
 
@@ -27,10 +26,18 @@ namespace osgGaming
 
 		void setDefaultWorld(osg::ref_ptr<World> world);
 		void setDefaultHud(osg::ref_ptr<Hud> hud);
-		void setDefaultGameSettings(osg::ref_ptr<GameSettings> settings);
+    void setDefaultGameSettings(osg::ref_ptr<GameSettings> settings);
 
 		int run(osg::ref_ptr<AbstractGameState> initialState);
 		int run(GameStateStack::AbstractGameStateList initialStates);
+
+    osg::ref_ptr<osgGaming::Viewer> getViewer();
+    osg::ref_ptr<osgGaming::View> getView();
+
+  protected:
+    virtual int mainloop();
+
+    bool isGameRunning() const;
 
 	private:
 		void initializeState(osg::ref_ptr<AbstractGameState> state);
@@ -38,19 +45,20 @@ namespace osgGaming
 		void prepareStateWorldAndHud(AbstractGameState::AbstractGameStateList states);
 		void attachState(osg::ref_ptr<AbstractGameState> state);
 
-		GameStateStack _gameStateStack;
+		GameStateStack m_gameStateStack;
 
-		Viewer _viewer;
+    osg::ref_ptr<osgGaming::Viewer> m_viewer;
+    osg::ref_ptr<osgGaming::View> m_view;
 
-		osg::ref_ptr<InputManager> _inputManager;
+		osg::ref_ptr<InputManager> m_inputManager;
 
-		osg::ref_ptr<World> _defaultWorld;
-		osg::ref_ptr<Hud> _defaultHud;
-		osg::ref_ptr<GameSettings> _defaultGameSettings;
+		osg::ref_ptr<World> m_defaultWorld;
+		osg::ref_ptr<Hud> m_defaultHud;
+		osg::ref_ptr<GameSettings> m_defaultGameSettings;
 
-		bool _gameEnded;
-		bool _isLoading;
+		bool m_gameEnded;
+		bool m_isLoading;
 
-		std::future<void> _loadingThreadFuture;
+		std::future<void> m_loadingThreadFuture;
 	};
 }

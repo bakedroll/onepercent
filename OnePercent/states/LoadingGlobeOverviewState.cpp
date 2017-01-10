@@ -46,11 +46,11 @@ void LoadingGlobeOverviewState::initialize()
 
 	getHud()->getRootUIElement()->addChild(_loadingText);
 
-	getViewer()->setClampColorEnabled(true);
+	getView(0)->setClampColorEnabled(true);
 
-	getViewer()->addPostProcessingEffect(new FastApproximateAntiAliasingEffect(getViewer()->getResolution()));
-	getViewer()->addPostProcessingEffect(new HighDynamicRangeEffect());
-	getViewer()->addPostProcessingEffect(new DepthOfFieldEffect(projNear, projFar), false);
+  //getView(0)->addPostProcessingEffect(new FastApproximateAntiAliasingEffect(getView(0)->getResolution()));
+  //getView(0)->addPostProcessingEffect(new HighDynamicRangeEffect());
+  //getView(0)->addPostProcessingEffect(new DepthOfFieldEffect(projNear, projFar), false);
 }
 
 GameState::StateEvent* LoadingGlobeOverviewState::update()
