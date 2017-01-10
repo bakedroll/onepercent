@@ -155,9 +155,20 @@ ref_ptr<Hud> AbstractGameState::getHud()
 	return _hud;
 }
 
-ref_ptr<Viewer> AbstractGameState::getViewer()
+ref_ptr<osgGaming::Viewer> AbstractGameState::getViewer()
 {
 	return _viewer;
+}
+
+osg::ref_ptr<osgGaming::View> AbstractGameState::getView(int i)
+{
+  osgViewer::View* view = _viewer->getView(i);
+  if (!view)
+    return nullptr;
+
+  osgGaming::View* gview = dynamic_cast<osgGaming::View*>(view);
+
+  return gview;
 }
 
 ref_ptr<GameSettings> AbstractGameState::getGameSettings()
@@ -185,7 +196,7 @@ void AbstractGameState::setHud(ref_ptr<Hud> hud)
 	_hud = hud;
 }
 
-void AbstractGameState::setViewer(ref_ptr<Viewer> viewer)
+void AbstractGameState::setViewer(ref_ptr<osgGaming::Viewer> viewer)
 {
 	_viewer = viewer;
 }

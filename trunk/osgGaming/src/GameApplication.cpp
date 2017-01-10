@@ -7,303 +7,333 @@
 #include <chrono>
 #include <iostream>
 
-using namespace osgGaming;
-using namespace osgViewer;
 using namespace osg;
 using namespace std;
 
-GameApplication::GameApplication()
-	: SimulationCallback(),
-	  _gameEnded(false),
-	  _isLoading(false)
+namespace osgGaming
 {
+
+GameApplication::GameApplication(osg::ref_ptr<osgGaming::View> view)
+  : SimulationCallback()
+  , m_viewer(new osgGaming::Viewer())
+  , m_view(view)
+  , m_gameEnded(false)
+  , m_isLoading(false)
+{
+  if (!m_view)
+    m_view = new osgGaming::View();
+
+  m_viewer->addView(m_view);
 }
 
 void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
 {
-	TimerFactory::getInstance()->updateRegisteredTimers(simTime);
+  TimerFactory::getInstance()->updateRegisteredTimers(simTime);
 
-	if (!_gameStateStack.isEmpty())
-	{
-		bool attach = _gameStateStack.attachRequired();
+  if (!m_gameStateStack.isEmpty())
+  {
+    bool attach = m_gameStateStack.attachRequired();
 
-		_gameStateStack.begin(AbstractGameState::ALL, false);
-		while (_gameStateStack.next())
-		{
-			ref_ptr<AbstractGameState> state = _gameStateStack.get();
+    m_gameStateStack.begin(AbstractGameState::ALL, false);
+    while (m_gameStateStack.next())
+    {
+      ref_ptr<AbstractGameState> state = m_gameStateStack.get();
 
-			state->setSimulationTime(simTime);
-			state->setFrameTime(timeDiff);
+      state->setSimulationTime(simTime);
+      state->setFrameTime(timeDiff);
 
-			bool initialized = state->isInitialized();
+      bool initialized = state->isInitialized();
 
-			if (!initialized)
-			{
-				initializeState(state);
-				state->setInitialized();
-			}
+      if (!initialized)
+      {
+        initializeState(state);
+        state->setInitialized();
+      }
 
-			if (attach && _gameStateStack.isTop())
-			{
-				attachState(state);
-			}
+      if (attach && m_gameStateStack.isTop())
+      {
+        attachState(state);
+      }
 
-			if (!initialized)
-			{
-				if (state->isLoadingState())
-				{
-					if (!_isLoading)
-					{
-						_isLoading = true;
-					}
+      if (!initialized)
+      {
+        if (state->isLoadingState())
+        {
+          if (!m_isLoading)
+          {
+            m_isLoading = true;
+          }
 
-					ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
+          ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
 
-					AbstractGameState::AbstractGameStateList nextStates = loadingState->getNextStates();
-					prepareStateWorldAndHud(nextStates);
+          AbstractGameState::AbstractGameStateList nextStates = loadingState->getNextStates();
+          prepareStateWorldAndHud(nextStates);
 
-					ref_ptr<AbstractGameState> nextState = *nextStates.begin();
+          ref_ptr<AbstractGameState> nextState = *nextStates.begin();
 
-					_loadingThreadFuture = async(launch::async,
-						&GameLoadingState::loading_thread,
-						loadingState,
-						nextState->getWorld(),
-						nextState->getHud(),
-						getDefaultGameSettings());
+          m_loadingThreadFuture = async(launch::async,
+            &GameLoadingState::loading_thread,
+            loadingState,
+            nextState->getWorld(),
+            nextState->getHud(),
+            getDefaultGameSettings());
 
-				}
-				else
-				{
-					if (_isLoading)
-					{
-						_isLoading = false;
-						resetTimeDiff();
-					}
-				}
-			}
+        }
+        else
+        {
+          if (m_isLoading)
+          {
+            m_isLoading = false;
+            resetTimeDiff();
+          }
+        }
+      }
 
-			// update state
-			GameState::StateEvent* se;
-			
-			if (_gameStateStack.hasBehavior(state, AbstractGameState::UPDATE))
-			{
-				se = state->update();
-			}
-			else
-			{
-				se = state->stateEvent_default();
-			}
+      // update state
+      GameState::StateEvent* se;
 
-			if (_isLoading)
-			{
-				if (_loadingThreadFuture.wait_for(chrono::milliseconds(0)) == future_status::ready)
-				{
-					try
-					{
-						_loadingThreadFuture.get();
-					}
-					catch (GameException& e)
-					{
-						throw e;
-					}
-					catch (std::exception& e)
-					{
-						throw e;
-					}
+      if (m_gameStateStack.hasBehavior(state, AbstractGameState::UPDATE))
+      {
+        se = state->update();
+      }
+      else
+      {
+        se = state->stateEvent_default();
+      }
 
-					ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
+      if (m_isLoading)
+      {
+        if (m_loadingThreadFuture.wait_for(chrono::milliseconds(0)) == future_status::ready)
+        {
+          try
+          {
+            m_loadingThreadFuture.get();
+          }
+          catch (GameException& e)
+          {
+            throw e;
+          }
+          catch (std::exception& e)
+          {
+            throw e;
+          }
 
-					_gameStateStack.replaceState(loadingState->getNextStates());
+          ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
 
-					break;
-				}
-			}
-			else if (se != nullptr)
-			{
-				switch (se->type)
-				{
-				case GameState::POP:
-					_gameStateStack.popState();
-					break;
-				case GameState::PUSH:
-					_gameStateStack.pushStates(se->referencedStates);
-					break;
-				case GameState::REPLACE:
-					_gameStateStack.replaceState(se->referencedStates);
-					break;
-				case GameState::END_GAME:
-					_gameEnded = true;
-					break;
-				}
+          m_gameStateStack.replaceState(loadingState->getNextStates());
 
-				delete se;
+          break;
+        }
+      }
+      else if (se != nullptr)
+      {
+        switch (se->type)
+        {
+        case GameState::POP:
+          m_gameStateStack.popState();
+          break;
+        case GameState::PUSH:
+          m_gameStateStack.pushStates(se->referencedStates);
+          break;
+        case GameState::REPLACE:
+          m_gameStateStack.replaceState(se->referencedStates);
+          break;
+        case GameState::END_GAME:
+          m_gameEnded = true;
+          break;
+        }
 
-				break;
-			}
+        delete se;
 
-		}
-	}
-	else
-	{
-		_gameEnded = true;
-	}
+        break;
+      }
 
-	traverse(node, nv);
+    }
+  }
+  else
+  {
+    m_gameEnded = true;
+  }
+
+  traverse(node, nv);
 }
 
 ref_ptr<World> GameApplication::getDefaultWorld()
 {
-	if (!_defaultWorld.valid())
-	{
-		setDefaultWorld(new World());
-	}
+  if (!m_defaultWorld.valid())
+  {
+    setDefaultWorld(new World());
+  }
 
-	return _defaultWorld;
+  return m_defaultWorld;
 }
 
 ref_ptr<Hud> GameApplication::getDefaultHud()
 {
-	if (!_defaultHud.valid())
-	{
-		setDefaultHud(new Hud());
-	}
+  if (!m_defaultHud.valid())
+  {
+    setDefaultHud(new Hud());
+  }
 
-	return _defaultHud;
+  return m_defaultHud;
 }
 
 ref_ptr<GameSettings> GameApplication::getDefaultGameSettings()
 {
-	if (!_defaultGameSettings.valid())
-	{
-		setDefaultGameSettings(new GameSettings());
-	}
+  if (!m_defaultGameSettings.valid())
+  {
+    setDefaultGameSettings(new GameSettings());
+  }
 
-	return _defaultGameSettings;
+  return m_defaultGameSettings;
 }
 
 void GameApplication::setDefaultWorld(ref_ptr<World> world)
 {
-	_defaultWorld = world;
+  m_defaultWorld = world;
 }
 
 void GameApplication::setDefaultHud(ref_ptr<Hud> hud)
 {
-	_defaultHud = hud;
+  m_defaultHud = hud;
 }
 
 void GameApplication::setDefaultGameSettings(ref_ptr<GameSettings> settings)
 {
-	settings->load();
+  settings->load();
 
-	_defaultGameSettings = settings;
+  m_defaultGameSettings = settings;
 }
 
 int GameApplication::run(ref_ptr<AbstractGameState> initialState)
 {
-	GameStateStack::AbstractGameStateList states;
-	states.push_back(initialState);
+  GameStateStack::AbstractGameStateList states;
+  states.push_back(initialState);
 
-	return run(states);
+  return run(states);
 }
 
 int GameApplication::run(GameStateStack::AbstractGameStateList initialStates)
 {
-	try
-	{
-		_gameStateStack.pushStates(initialStates);
+  try
+  {
+    m_gameStateStack.pushStates(initialStates);
+    m_view->getRootGroup()->setUpdateCallback(this);
 
-		ref_ptr<GameSettings> settings = getDefaultGameSettings();
+    return mainloop();
+  }
+  catch (GameException& e)
+  {
+    printf("Exception: %s\n", e.getMessage().c_str());
 
-		_viewer.setFullscreenEnabled(settings->getFullscreenEnabled());
-		_viewer.setWindowedResolution(settings->getWindowedResolution());
-		_viewer.setScreenNum(settings->getScreenNum());
+    std::cin.ignore();
+  }
+  catch (exception& e)
+  {
+    printf("Exception: %s\n", e.what());
 
-		_viewer.setupResolution();
+    std::cin.ignore();
+  }
 
-		_viewer.setKeyEventSetsDone(0);
-		_viewer.getRootGroup()->setUpdateCallback(this);
+  return -1;
+}
 
-		_viewer.realize();
-		while (!_viewer.done() && !_gameEnded)
-		{
-			_viewer.frame();
-		}
+osg::ref_ptr<osgGaming::Viewer> GameApplication::getViewer()
+{
+  return m_viewer;
+}
 
-		return 0;
-	}
-	catch (GameException& e)
-	{
-		printf("Exception: %s\n", e.getMessage().c_str());
+osg::ref_ptr<osgGaming::View> GameApplication::getView()
+{
+  return m_view;
+}
 
-		std::cin.ignore();
-	}
-	catch (exception& e)
-	{
-		printf("Exception: %s\n", e.what());
+int GameApplication::mainloop()
+{
+  ref_ptr<GameSettings> settings = getDefaultGameSettings();
 
-		std::cin.ignore();
-	}
+  m_viewer->setFullscreenEnabled(0, settings->getFullscreenEnabled());
+  m_viewer->setWindowedResolution(0, settings->getWindowedResolution());
+  m_view->setScreenNum(settings->getScreenNum());
 
-	return -1;
+  m_view->setupResolution();
+
+  m_viewer->setKeyEventSetsDone(0);
+
+  m_viewer->realize();
+
+  while (isGameRunning())
+  {
+    m_viewer->frame();
+  }
+
+  return 0;
+}
+
+bool GameApplication::isGameRunning() const
+{
+  return !m_viewer->done() && !m_gameEnded;
 }
 
 void GameApplication::initializeState(ref_ptr<AbstractGameState> state)
 {
-	prepareStateWorldAndHud(state);
+  prepareStateWorldAndHud(state);
 
-	state->setViewer(&_viewer);
-	state->setGameSettings(getDefaultGameSettings());
+  state->setViewer(m_viewer);
+  state->setGameSettings(getDefaultGameSettings());
 
-	state->initialize();
+  state->initialize();
 }
 
 void GameApplication::prepareStateWorldAndHud(ref_ptr<AbstractGameState> state)
 {
-	if (!state->isWorldAndHudPrepared())
-	{
-		state->prepareWorldAndHud();
+  if (!state->isWorldAndHudPrepared())
+  {
+    state->prepareWorldAndHud();
 
-		if (!state->getWorld().valid())
-		{
-			state->setWorld(getDefaultWorld());
-		}
+    if (!state->getWorld().valid())
+    {
+      state->setWorld(getDefaultWorld());
+    }
 
-		if (!state->getHud().valid())
-		{
-			state->setHud(getDefaultHud());
-		}
-	}
+    if (!state->getHud().valid())
+    {
+      state->setHud(getDefaultHud());
+    }
+  }
 }
 
 void GameApplication::prepareStateWorldAndHud(AbstractGameState::AbstractGameStateList states)
 {
-	for (AbstractGameState::AbstractGameStateList::iterator it = states.begin(); it != states.end(); ++it)
-	{
-		prepareStateWorldAndHud(*it);
-	}
+  for (AbstractGameState::AbstractGameStateList::iterator it = states.begin(); it != states.end(); ++it)
+  {
+    prepareStateWorldAndHud(*it);
+  }
 }
 
 void GameApplication::attachState(ref_ptr<AbstractGameState> state)
 {
-	if (!state->isLoadingState())
-	{
-		setDefaultWorld(state->getWorld());
-		setDefaultHud(state->getHud());
-	}
+  if (!state->isLoadingState())
+  {
+    setDefaultWorld(state->getWorld());
+    setDefaultHud(state->getHud());
+  }
 
-	if (!_inputManager.valid())
-	{
-		_inputManager = new InputManager();
-		_inputManager->setGameStateStack(&_gameStateStack);
-		_inputManager->setViewer(&_viewer);
+  if (!m_inputManager.valid())
+  {
+    m_inputManager = new InputManager();
+    m_inputManager->setGameStateStack(&m_gameStateStack);
+    m_inputManager->setView(m_view);
 
-		_viewer.addEventHandler(_inputManager);
-	}
+    m_view->addEventHandler(m_inputManager);
+  }
 
-	_viewer.setSceneData(state->getWorld()->getRootNode());
-	_viewer.setHud(state->getHud());
-	_viewer.setCameraManipulator(state->getWorld()->getCameraManipulator());
+  m_view->setSceneData(state->getWorld()->getRootNode());
+  m_view->setHud(state->getHud());
+  m_view->setCameraManipulator(state->getWorld()->getCameraManipulator());
 
-	_inputManager->updateNewRunningStates();
-	//_inputManager->setCurrentState(state);
+  m_inputManager->updateNewRunningStates();
+  //m_inputManager->setCurrentState(state);
+}
+
 }

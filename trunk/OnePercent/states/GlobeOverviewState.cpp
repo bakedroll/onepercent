@@ -51,41 +51,41 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	}
 	else if (key == GUIEventAdapter::KEY_Q)
 	{
-		if (getViewer()->hasPostProcessingEffect(HighDynamicRangeEffect::NAME))
+		if (getView(0)->hasPostProcessingEffect(HighDynamicRangeEffect::NAME))
 		{
-			bool enabled = !getViewer()->getPostProcessingEffectEnabled(HighDynamicRangeEffect::NAME);
+      bool enabled = !getView(0)->getPostProcessingEffectEnabled(HighDynamicRangeEffect::NAME);
 
-			getViewer()->setPostProcessingEffectEnabled(HighDynamicRangeEffect::NAME, enabled);
+      getView(0)->setPostProcessingEffectEnabled(HighDynamicRangeEffect::NAME, enabled);
 		}
 	}
 	else if (key == GUIEventAdapter::KEY_W)
 	{
-		if (getViewer()->hasPostProcessingEffect(DepthOfFieldEffect::NAME))
+    if (getView(0)->hasPostProcessingEffect(DepthOfFieldEffect::NAME))
 		{
-			bool enabled = !getViewer()->getPostProcessingEffectEnabled(DepthOfFieldEffect::NAME);
+      bool enabled = !getView(0)->getPostProcessingEffectEnabled(DepthOfFieldEffect::NAME);
 
-			getViewer()->setPostProcessingEffectEnabled(DepthOfFieldEffect::NAME, enabled);
+      getView(0)->setPostProcessingEffectEnabled(DepthOfFieldEffect::NAME, enabled);
 		}
 	}
 	else if (key == GUIEventAdapter::KEY_E)
 	{
-		if (getViewer()->hasPostProcessingEffect(FastApproximateAntiAliasingEffect::NAME))
+    if (getView(0)->hasPostProcessingEffect(FastApproximateAntiAliasingEffect::NAME))
 		{
-			bool enabled = !getViewer()->getPostProcessingEffectEnabled(FastApproximateAntiAliasingEffect::NAME);
+      bool enabled = !getView(0)->getPostProcessingEffectEnabled(FastApproximateAntiAliasingEffect::NAME);
 
 			if (enabled)
 			{
-				static_cast<FastApproximateAntiAliasingEffect*>(getViewer()->getPostProcessingEffect(FastApproximateAntiAliasingEffect::NAME).get())->setResolution(getViewer()->getResolution());
+        static_cast<FastApproximateAntiAliasingEffect*>(getView(0)->getPostProcessingEffect(FastApproximateAntiAliasingEffect::NAME).get())->setResolution(getView(0)->getResolution());
 			}
 
-			getViewer()->setPostProcessingEffectEnabled(FastApproximateAntiAliasingEffect::NAME, enabled);
+      getView(0)->setPostProcessingEffectEnabled(FastApproximateAntiAliasingEffect::NAME, enabled);
 		}
 	}
 	else if (key == GUIEventAdapter::KEY_F)
 	{
 		//getViewer()->setWindowedResolution(Vec2f(800, 600));
 
-		getViewer()->setFullscreenEnabled(!getViewer()->getFullscreenEnabled());
+    getViewer()->setFullscreenEnabled(0, !getView(0)->getFullscreenEnabled());
 	}
 	else if (key == GUIEventAdapter::KEY_Minus)
 	{

@@ -2,8 +2,6 @@
 
 #include <osgGaming/Helper.h>
 
-#include "nodes/GlobeModel.h"
-
 using namespace onep;
 using namespace osg;
 using namespace std;
@@ -27,7 +25,7 @@ void GlobeCameraState::initialize()
 	_cameraDistanceAnimation = new Animation<float>(_cameraDistance, 0.5, CIRCLE_OUT);
 	_cameraViewAngleAnimation = new Animation<Vec2f>(_cameraViewAngle, 0.5, CIRCLE_OUT);
 
-	_globeWorld->getBackgroundModel()->updateResolutionHeight(getViewer()->getResolution().y());
+  _globeWorld->getBackgroundModel()->updateResolutionHeight(getView(0)->getResolution().y());
 }
 
 GameState::StateEvent* GlobeCameraState::update()
