@@ -27,7 +27,21 @@ TransformableCameraManipulator::TransformableCameraManipulator()
 
 void TransformableCameraManipulator::updateCamera(osg::Camera &camera)
 {
-  camera.setViewMatrix(getViewMatrix());
+  
+  _camera->setViewMatrix(getViewMatrix());
+  _camera->setProjectionMatrix(_projectionMatrix);
+
+  if (_updateClearColor)
+  {
+    _camera->setClearColor(_clearColor);
+
+    _updateClearColor = false;
+  }
+
+  updateCameraAlignedQuads();
+  
+
+  /*camera.setViewMatrix(getViewMatrix());
   camera.setProjectionMatrix(_projectionMatrix);
 
   if (_updateClearColor)
@@ -37,7 +51,7 @@ void TransformableCameraManipulator::updateCamera(osg::Camera &camera)
     _updateClearColor = false;
   }
 
-  updateCameraAlignedQuads();
+  updateCameraAlignedQuads();*/
 }
 
 Matrixd TransformableCameraManipulator::getMatrix() const
@@ -58,6 +72,11 @@ void TransformableCameraManipulator::setByMatrix(const Matrixd &matrix)
 void TransformableCameraManipulator::setByInverseMatrix(const Matrixd &matrix)
 {
 
+}
+
+void TransformableCameraManipulator::setCamera(osg::ref_ptr<osg::Camera> camera)
+{
+  _camera = camera;
 }
 
 void TransformableCameraManipulator::addCameraAlignedQuad(ref_ptr<CameraAlignedQuad> caq)

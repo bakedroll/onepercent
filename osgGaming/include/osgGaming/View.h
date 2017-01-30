@@ -26,6 +26,7 @@ namespace osgGaming
 
 		osg::ref_ptr<osg::Group> getRootGroup();
 		osg::ref_ptr<Hud> getHud();
+    osg::ref_ptr<osg::Camera> getSceneCamera();
     osg::ref_ptr<osg::Camera> getHudCamera();
 
 		void setHud(osg::ref_ptr<Hud> hud);
