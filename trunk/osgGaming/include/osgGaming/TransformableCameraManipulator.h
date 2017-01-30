@@ -20,6 +20,7 @@ namespace osgGaming
 
 		virtual void setByMatrix(const osg::Matrixd &matrix) override;
 		virtual void setByInverseMatrix(const osg::Matrixd &matrix) override;
+    void setCamera(osg::ref_ptr<osg::Camera> camera);
 
 		void addCameraAlignedQuad(osg::ref_ptr<CameraAlignedQuad> caq);
 		void removeCameraAlignedQuad(osg::ref_ptr<CameraAlignedQuad> caq);
@@ -78,5 +79,7 @@ namespace osgGaming
 		osg::Vec3f _n;
 		osg::Vec3f _v_res[4];
 		osg::Vec3f _n_res[4];
+
+    osg::ref_ptr<osg::Camera> _camera;
 	};
 }

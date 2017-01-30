@@ -328,6 +328,9 @@ void GameApplication::attachState(ref_ptr<AbstractGameState> state)
     m_view->addEventHandler(m_inputManager);
   }
 
+  osg::ref_ptr<TransformableCameraManipulator> manipulator = state->getWorld()->getCameraManipulator();
+  manipulator->setCamera(m_view->getSceneCamera());
+
   m_view->setSceneData(state->getWorld()->getRootNode());
   m_view->setHud(state->getHud());
   m_view->setCameraManipulator(state->getWorld()->getCameraManipulator());
