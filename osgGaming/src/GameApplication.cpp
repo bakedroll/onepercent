@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <osgGaming/NativeInputManager.h>
 
 using namespace osg;
 using namespace std;
@@ -270,6 +271,14 @@ int GameApplication::mainloop()
   return 0;
 }
 
+osg::ref_ptr<InputManager> GameApplication::obtainInputManager(osg::ref_ptr<osgGaming::View> view)
+{
+  NativeInputManager* im = new NativeInputManager();
+  view->addEventHandler(im->handler());
+
+  return im;
+}
+
 bool GameApplication::isGameRunning() const
 {
   return !m_viewer->done() && !m_gameEnded;
@@ -321,11 +330,10 @@ void GameApplication::attachState(ref_ptr<AbstractGameState> state)
 
   if (!m_inputManager.valid())
   {
-    m_inputManager = new InputManager();
+    m_inputManager = obtainInputManager(m_view);
     m_inputManager->setGameStateStack(&m_gameStateStack);
     m_inputManager->setView(m_view);
-
-    m_view->addEventHandler(m_inputManager);
+    m_inputManager->setIsInizialized(true);
   }
 
   osg::ref_ptr<TransformableCameraManipulator> manipulator = state->getWorld()->getCameraManipulator();

@@ -36,6 +36,7 @@ namespace osgGaming
 
   protected:
     virtual int mainloop();
+    virtual osg::ref_ptr<InputManager> obtainInputManager(osg::ref_ptr<osgGaming::View> view);
 
     bool isGameRunning() const;
 

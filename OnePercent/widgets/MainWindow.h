@@ -4,6 +4,8 @@
 #include <memory>
 #include <osgGaming/View.h>
 
+#include "OsgWidget.h"
+
 namespace onep
 {
   class MainWindow : public QMainWindow
@@ -11,6 +13,8 @@ namespace onep
   public:
     MainWindow(osg::ref_ptr<osgViewer::CompositeViewer> viewer);
     ~MainWindow();
+
+    OsgWidget* getViewWidget();
 
   private:
     struct Impl;

@@ -6,11 +6,11 @@
 #include <memory>
 
 #include <osgViewer/CompositeViewer>
-#include <QOpenGLWidget>
+#include <osgGaming/InputManager.h>
 
 namespace onep
 {
-  class OsgWidget : public QGLWidget
+  class OsgWidget : public QGLWidget, public osgGaming::InputManager
   {
     Q_OBJECT
 
@@ -25,9 +25,12 @@ namespace onep
 
     virtual bool event(QEvent* event) override;
 
+    //virtual void resizeEvent(QResizeEvent* event) override;
+
   private:
     struct Impl;
     std::unique_ptr<Impl> m;
+
   };
 
 }
