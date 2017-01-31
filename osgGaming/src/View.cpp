@@ -17,9 +17,6 @@
 #include <assert.h>
 #include <osgGaming/ResourceManager.h>
 
-#include <osg/ShapeDrawable>
-#include <osg/PositionAttitudeTransform>
-
 using namespace osgPPU;
 using namespace osg;
 using namespace std;
@@ -94,6 +91,13 @@ struct View::Impl
     hudCamera->setViewMatrix(Matrixd::identity());
     hudCamera->setProjectionMatrix(Matrixd::identity());
 
+
+
+    //hudCamera->setImplicitBufferAttachmentMask(osg::Camera::IMPLICIT_COLOR_BUFFER_ATTACHMENT, osg::Camera::IMPLICIT_COLOR_BUFFER_ATTACHMENT);
+    //hudCamera->setDrawBuffer(osg::Camera::COLOR_BUFFER0);
+
+
+    
     ppGroup = new Group();
 
     // implicitly attaches texture to camera
@@ -101,6 +105,10 @@ struct View::Impl
 
     ref_ptr<Geode> geode = new Geode();
     geode->addDrawable(createTexturedQuadGeometry(Vec3f(-1.0f, -1.0f, 0.0f), Vec3f(2.0f, 0.0f, 0.0f), Vec3f(0.0f, 2.0f, 0.0f)));
+    
+
+
+
 
     /*
     osg::ref_ptr<osg::PositionAttitudeTransform> transform = new osg::PositionAttitudeTransform();
@@ -126,7 +134,7 @@ struct View::Impl
 
     sceneCamera->addChild(ppGroup);
     */
-
+    
     hudStateSet = geode->getOrCreateStateSet();
     hudStateSet->setTextureAttributeAndModes(0, texture, StateAttribute::ON);
     hudStateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
@@ -137,6 +145,7 @@ struct View::Impl
     hudCamera->addChild(hudSwitch);
 
     ppGroup->addChild(hudCamera);
+    
   }
 
   void resetPostProcessingEffects()
@@ -429,6 +438,8 @@ View::View()
 
 void View::updateResolution(Vec2f resolution)
 {
+  printf("Resize: %f %f\n", resolution.x(), resolution.y());
+
   m->resolution = resolution;
   m->resolutionInitialized = true;
 

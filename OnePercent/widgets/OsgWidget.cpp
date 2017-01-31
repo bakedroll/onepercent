@@ -23,12 +23,16 @@ namespace onep
   };
 
   OsgWidget::OsgWidget(osg::ref_ptr<osgViewer::CompositeViewer> viewer, QWidget* parent, Qt::WindowFlags f)
-    : QOpenGLWidget(parent, f)
+    : QGLWidget(parent, nullptr, f)
     , m(new Impl(viewer))
   {
+    //setWindowFlags(Qt::FramelessWindowHint);
+    //setAttribute(Qt::WA_NoSystemBackground);
+    //setAttribute(Qt::WA_TranslucentBackground);
+
     m->graphicsWindow = new osgViewer::GraphicsWindowEmbedded(x(), y(), width(), height());
-    m->camera = viewer->getView(0)->getCamera();
     m->view = dynamic_cast<osgGaming::View*>(viewer->getView(0));
+    m->camera = m->view->getSceneCamera();
 
     //float aspectRatio = static_cast<float>(this->width() / 2) / static_cast<float>(this->height());
     //m->camera->setClearColor(osg::Vec4(0.f, 0.f, 1.f, 1.f));
@@ -93,7 +97,7 @@ namespace onep
 
   bool OsgWidget::event(QEvent* event)
   {
-    bool handled = QOpenGLWidget::event(event);
+    bool handled = QGLWidget::event(event);
 
     return handled;
   }

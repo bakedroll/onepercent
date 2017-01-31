@@ -25,7 +25,8 @@ Noise3D:
 
 https://github.com/ashima/webgl-noise/blob/master/src/noise3D.glsl
 
-
+Scattering:
+https://www.shadertoy.com/view/lslXDr
 
 Quelle zur Zusammenfassung der Ländergrenzen:
 http://www.luventicus.org/karten/europa/kontinentaleseuropa.html

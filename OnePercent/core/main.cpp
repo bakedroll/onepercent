@@ -25,8 +25,8 @@ int main(int argc, char** argv)
 	ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 
 
-  //ref_ptr<QtGameApplication> app = new QtGameApplication(argc, argv);
-  ref_ptr<GameApplication> app = new GameApplication();
+  ref_ptr<QtGameApplication> app = new QtGameApplication(argc, argv);
+  //ref_ptr<GameApplication> app = new GameApplication();
 
 	app->setDefaultWorld(new GlobeOverviewWorld());
 
@@ -37,8 +37,8 @@ int main(int argc, char** argv)
 	states.push_back(new GlobeOverviewState());
 	states.push_back(new MainMenuState());
 
-  //MainWindow mainwindow(app->getViewer());
-  //mainwindow.show();
+  MainWindow mainwindow(app->getViewer());
+  mainwindow.show();
 
 	return app->run(new LoadingGlobeOverviewState(states));
 }

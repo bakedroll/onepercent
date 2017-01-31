@@ -34,7 +34,8 @@ set(CMAKE_PREFIX_PATH ${QT5_ROOT_DIRECTORY})
 set(QT5_MODULES
   Core
   Gui
-  Widgets)
+  Widgets
+  OpenGL)
   
 foreach(module ${QT5_MODULES})
   find_package(Qt5${module})
