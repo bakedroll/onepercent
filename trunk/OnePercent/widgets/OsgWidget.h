@@ -10,7 +10,7 @@
 
 namespace onep
 {
-  class OsgWidget : public QOpenGLWidget
+  class OsgWidget : public QGLWidget
   {
     Q_OBJECT
 
