@@ -1,46 +1,40 @@
 #pragma once
 
-#include <osgGaming/AbstractGameState.h>
-#include <osgGaming/World.h>
-#include <osgGA/GUIEventHandler>
-#include <osgGaming/View.h>
-#include <osgGaming/GameStateStack.h>
+#include <osg/Referenced>
+#include <osgGA/GUIEventAdapter>
+#include <memory>
 
 namespace osgGaming
 {
-	class InputManager : public osgGA::GUIEventHandler
+  class View;
+  class GameStateStack;
+
+	class InputManager : public osg::Referenced
 	{
 	public:
 		InputManager();
-
-		virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
+    ~InputManager();
 
 		void setView(osg::ref_ptr<osgGaming::View> viewer);
 		void setGameStateStack(GameStateStack* stack);
 
 		void updateNewRunningStates();
 
-	private:
-		void updateResolution(osg::Vec2f resolution);
-		void updateStates(bool onlyDirty, bool onlyResolution);
+    void setIsInizialized(bool initialized);
+    bool isInitialized();
 
-		int mousePressed();
+  protected:
+    bool onKeyPressEvent(const osgGA::GUIEventAdapter& ea);
+    bool onKeyReleaseEvent(const osgGA::GUIEventAdapter& ea);
+    bool onMouseClickEvent(const osgGA::GUIEventAdapter& ea);
+    bool onMouseReleaseEvent(const osgGA::GUIEventAdapter& ea);
+    bool onMouseMoveEvent(const osgGA::GUIEventAdapter& ea);
+    bool onMouseScrollEvent(const osgGA::GUIEventAdapter& ea);
+    bool onResizeEvent(const osgGA::GUIEventAdapter& ea);
 
-		void handleUserInteractionMove(osg::ref_ptr<AbstractGameState> state, float x, float y);
+  private:
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
-		unsigned int log_x_2(int x);
-
-		static const unsigned int _NUM_MOUSE_BUTTONS = 3;
-
-		osg::ref_ptr<osgGaming::View> _viewer;
-
-		bool _mousePressed[_NUM_MOUSE_BUTTONS];
-		int _mouseDragging;
-		osg::Vec2f _dragOrigin;
-		osg::Vec2f _lastDragPosition;
-
-		osg::Vec2f _mousePosition;
-
-		GameStateStack* _gameStateStack;
 	};
 }

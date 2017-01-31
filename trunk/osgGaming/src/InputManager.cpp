@@ -2,323 +2,355 @@
 
 #include <unordered_set>
 #include <osgGaming/Helper.h>
+#include <osgGaming/Hud.h>
+#include <osgGaming/GameStateStack.h>
 
-using namespace osgGaming;
-using namespace osgViewer;
-using namespace osgGA;
-using namespace osg;
-using namespace std;
+namespace osgGaming
+{
+
+struct InputManager::Impl
+{
+  Impl()
+    : mouseDragging(0)
+    , isInitialized(false)
+  {
+    for (int i = 0; i < NUM_MOUSE_BUTTONS; i++)
+      mousePressed[i] = false;
+  }
+
+  void updateResolution(osg::Vec2f resolution)
+  {
+    view->updateResolution(resolution);
+    updateStates(false, true);
+  }
+
+  void updateStates(bool onlyDirty, bool onlyResolution)
+  {
+    osg::Vec2f resolution = view->getResolution();
+
+    typedef std::unordered_set<Hud*> HudSet;
+    HudSet hudSet;
+
+    gameStateStack->begin(AbstractGameState::UIMEVENT);
+    while (gameStateStack->next())
+    {
+      osg::ref_ptr<AbstractGameState> state = gameStateStack->get();
+
+      if (!onlyDirty || state->isDirty(AbstractGameState::UIMEVENT))
+      {
+        osg::ref_ptr<Hud> hud = state->getHud();
+
+        HudSet::iterator it = hudSet.find(hud.get());
+        if (it == hudSet.end())
+        {
+          hudSet.insert(hud.get());
+
+          hud->updateResolution(resolution);
+
+          if (!onlyResolution)
+          {
+            hud->resetUserInteractionModel();
+            handleUserInteractionMove(state, mousePosition.x(), mousePosition.y());
+          }
+        }
+
+        if (gameStateStack->isTop())
+        {
+          state->getWorld()->getCameraManipulator()->updateResolution(resolution);
+        }
+      }
+    }
+  }
+
+  int isMousePressed()
+  {
+    for (int i = 0; i < NUM_MOUSE_BUTTONS; i++)
+    {
+      if (mousePressed[i] == true)
+        return i;
+    }
+
+    return -1;
+  }
+
+  void handleUserInteractionMove(osg::ref_ptr<AbstractGameState> state, float x, float y)
+  {
+    UserInteractionModel::List& uimList = state->getHud()->getUserInteractionModels();
+
+    for (UserInteractionModel::List::iterator it = uimList.begin(); it != uimList.end(); ++it)
+    {
+      UserInteractionModel* model = *it;
+
+      osg::Vec2f origin, size;
+
+      model->getAbsoluteOriginSize(origin, size);
+
+      if (pointInRect(osg::Vec2f(x, y), origin, origin + size))
+      {
+        if (!model->getHovered())
+        {
+          model->setHovered(true);
+          model->onMouseEnter();
+        }
+      }
+      else
+      {
+        if (model->getHovered())
+        {
+          model->setHovered(false);
+          model->onMouseLeave();
+        }
+      }
+    }
+  }
+
+  unsigned int log_x_2(int x)
+  {
+    return int(log(double(x)) / log(2.0));
+  }
+
+  static const unsigned int NUM_MOUSE_BUTTONS = 3;
+
+  osg::ref_ptr<osgGaming::View> view;
+
+  bool mousePressed[NUM_MOUSE_BUTTONS];
+  int mouseDragging;
+  osg::Vec2f dragOrigin;
+  osg::Vec2f lastDragPosition;
+
+  osg::Vec2f mousePosition;
+
+  GameStateStack* gameStateStack;
+
+  bool isInitialized;
+};
 
 InputManager::InputManager()
-	: osgGA::GUIEventHandler(),
-	  _mouseDragging(0)
+  : osg::Referenced()
+  , m(new Impl())
 {
-	for (int i = 0; i < _NUM_MOUSE_BUTTONS; i++)
-	{
-		_mousePressed[i] = false;
-	}
+
 }
 
-bool InputManager::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
+InputManager::~InputManager()
 {
-	switch (ea.getEventType())
-	{
-	case GUIEventAdapter::KEYDOWN:
-	{
-		_gameStateStack->begin(AbstractGameState::GUIEVENT);
-		while (_gameStateStack->next())
-		{
-			_gameStateStack->get()->onKeyPressedEvent(ea.getKey());
-		}
-
-		return true;
-	}
-	case GUIEventAdapter::KEYUP:
-	{
-		_gameStateStack->begin(AbstractGameState::GUIEVENT);
-		while (_gameStateStack->next())
-		{
-			_gameStateStack->get()->onKeyReleasedEvent(ea.getKey());
-		}
-
-		return true;
-	}
-	case GUIEventAdapter::PUSH:
-	case GUIEventAdapter::DOUBLECLICK:
-	{
-		bool anyUIMHovered = false;
-
-		_gameStateStack->begin(AbstractGameState::UIMEVENT);
-		while (_gameStateStack->next())
-		{
-			ref_ptr<AbstractGameState> state = _gameStateStack->get();
-
-			if (state->getHud()->anyUserInteractionModelHovered())
-			{
-				anyUIMHovered = true;
-
-				if (ea.getButton() == GUIEventAdapter::LEFT_MOUSE_BUTTON)
-				{
-					UserInteractionModel::List& uimList = state->getHud()->getUserInteractionModels();
-					for (UserInteractionModel::List::iterator uit = uimList.begin(); uit != uimList.end(); ++uit)
-					{
-						if ((*uit)->isEnabled() && (*uit)->getHovered())
-						{
-              (*uit)->onClicked();
-							state->onUIClickedEvent(dynamic_cast<UIElement*>(*uit));
-						}
-					}
-				}
-			}
-		}
-
-		if (!anyUIMHovered)
-		{
-			_mousePressed[log_x_2(ea.getButton())] = true;
-
-			_gameStateStack->begin(AbstractGameState::GUIEVENT);
-			while (_gameStateStack->next())
-			{
-				_gameStateStack->get()->onMousePressedEvent(ea.getButton(), ea.getX(), ea.getY());
-			}
-		}
-
-		return true;
-	}
-	case GUIEventAdapter::RELEASE:
-	{
-		_mousePressed[log_x_2(ea.getButton())] = false;
-
-		if (_mouseDragging == ea.getButton())
-		{
-			_gameStateStack->begin(AbstractGameState::GUIEVENT);
-			while (_gameStateStack->next())
-			{
-				_gameStateStack->get()->onDragEndEvent(_mouseDragging, _dragOrigin, Vec2f(ea.getX(), ea.getY()));
-			}
-
-			_gameStateStack->begin(AbstractGameState::UIMEVENT);
-			while (_gameStateStack->next())
-			{
-				handleUserInteractionMove(_gameStateStack->get(), ea.getX(), ea.getY());
-			}
-
-			_mouseDragging = 0;
-		}
-
-		_gameStateStack->begin(AbstractGameState::GUIEVENT);
-		while (_gameStateStack->next())
-		{
-			if (!_gameStateStack->get()->getHud()->anyUserInteractionModelHovered())
-			{
-				_gameStateStack->get()->onMouseReleasedEvent(ea.getButton(), ea.getX(), ea.getY());
-			}
-		}
-
-		return true;
-	}
-	case GUIEventAdapter::RESIZE:
-	{
-		int newWidth = ea.getWindowWidth();
-		int newHeight = ea.getWindowHeight();
-
-		int newX = ea.getWindowX();
-		int newY = ea.getWindowY();
-
-		Vec2f resolution = _viewer->getResolution();
-
-		_viewer->updateWindowPosition(Vec2f(float(newX), float(newY)));
-
-		if (newWidth != int(resolution.x()) || newHeight != int(resolution.y()))
-		{
-			updateResolution(Vec2f(float(newWidth), float(newHeight)));
-
-			_gameStateStack->begin(AbstractGameState::GUIEVENT);
-			while (_gameStateStack->next())
-			{
-				_gameStateStack->get()->onResizeEvent(newWidth, newHeight);
-			}
-		}
-
-		return true;
-	}
-	case GUIEventAdapter::DRAG:
-	case GUIEventAdapter::MOVE:
-	{
-		bool anyUIMHovered = false;
-
-		_mousePosition = Vec2f(ea.getX(), ea.getY());
-
-		_gameStateStack->begin(AbstractGameState::GUIEVENT);
-		while (_gameStateStack->next())
-		{
-			_gameStateStack->get()->onMouseMoveEvent(_mousePosition.x(), _mousePosition.y());
-		}
-
-		_gameStateStack->begin(AbstractGameState::UIMEVENT);
-		while (_gameStateStack->next())
-		{
-			if (_mouseDragging == 0)
-			{
-				handleUserInteractionMove(_gameStateStack->get(), _mousePosition.x(), _mousePosition.y());
-			}
-
-			if (_gameStateStack->get()->getHud()->anyUserInteractionModelHovered())
-			{
-				anyUIMHovered = true;
-			}
-		}
-
-		if (_mouseDragging == 0 && !anyUIMHovered)
-		{
-			int pressed = mousePressed();
-
-			if (pressed != -1)
-			{
-				_mouseDragging = 1 << pressed;
-				_dragOrigin = _mousePosition;
-				_lastDragPosition = _dragOrigin;
-
-				_gameStateStack->begin(AbstractGameState::GUIEVENT);
-				while (_gameStateStack->next())
-				{
-					_gameStateStack->get()->onDragBeginEvent(_mouseDragging, _dragOrigin);
-				}
-			}
-		}
-
-		if (_mouseDragging != 0)
-		{
-			_gameStateStack->begin(AbstractGameState::GUIEVENT);
-			while (_gameStateStack->next())
-			{
-				_gameStateStack->get()->onDragEvent(_mouseDragging, _dragOrigin, _mousePosition, _mousePosition - _lastDragPosition);
-			}
-
-			_lastDragPosition = _mousePosition;
-		}
-
-		return true;
-	}
-	case GUIEventAdapter::SCROLL:
-	{
-		_gameStateStack->begin(AbstractGameState::GUIEVENT);
-		while (_gameStateStack->next())
-		{
-			_gameStateStack->get()->onScrollEvent(ea.getScrollingMotion());
-		}
-
-		return true;
-	}
-	default: break;
-	}
-
-	return false;
 }
 
-void InputManager::setView(ref_ptr<osgGaming::View> viewer)
+void InputManager::setView(osg::ref_ptr<osgGaming::View> viewer)
 {
-	_viewer = viewer;
+  m->view = viewer;
 }
 
 void InputManager::setGameStateStack(GameStateStack* stack)
 {
-	_gameStateStack = stack;
+  m->gameStateStack = stack;
 }
 
 void InputManager::updateNewRunningStates()
 {
-	updateStates(true, false);
+  m->updateStates(true, false);
 }
 
-void InputManager::updateResolution(Vec2f resolution)
+void InputManager::setIsInizialized(bool initialized)
 {
-	_viewer->updateResolution(resolution);
-
-	updateStates(false, true);
+  m->isInitialized = initialized;
 }
 
-void InputManager::updateStates(bool onlyDirty, bool onlyResolution)
+bool InputManager::isInitialized()
 {
-	Vec2f resolution = _viewer->getResolution();
-
-	typedef unordered_set<Hud*> HudSet;
-	HudSet hudSet;
-
-	_gameStateStack->begin(AbstractGameState::UIMEVENT);
-	while (_gameStateStack->next())
-	{
-		ref_ptr<AbstractGameState> state = _gameStateStack->get();
-
-		if (!onlyDirty || state->isDirty(AbstractGameState::UIMEVENT))
-		{
-			ref_ptr<Hud> hud = state->getHud();
-
-			HudSet::iterator it = hudSet.find(hud.get());
-			if (it == hudSet.end())
-			{
-				hudSet.insert(hud.get());
-
-				hud->updateResolution(resolution);
-
-				if (!onlyResolution)
-				{
-					hud->resetUserInteractionModel();
-					handleUserInteractionMove(state, _mousePosition.x(), _mousePosition.y());
-				}
-			}
-
-			if (_gameStateStack->isTop())
-			{
-				state->getWorld()->getCameraManipulator()->updateResolution(resolution);
-			}
-		}
-	}
+  return m->isInitialized;
 }
 
-int InputManager::mousePressed()
+bool InputManager::onKeyPressEvent(const osgGA::GUIEventAdapter& ea)
 {
-	for (int i = 0; i < _NUM_MOUSE_BUTTONS; i++)
-	{
-		if (_mousePressed[i] == true)
-			return i;
-	}
+  m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+  while (m->gameStateStack->next())
+  {
+    m->gameStateStack->get()->onKeyPressedEvent(ea.getKey());
+  }
 
-	return -1;
+  return true;
 }
 
-void InputManager::handleUserInteractionMove(osg::ref_ptr<AbstractGameState> state, float x, float y)
+bool InputManager::onKeyReleaseEvent(const osgGA::GUIEventAdapter& ea)
 {
-	UserInteractionModel::List& uimList = state->getHud()->getUserInteractionModels();
+  m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+  while (m->gameStateStack->next())
+  {
+    m->gameStateStack->get()->onKeyReleasedEvent(ea.getKey());
+  }
 
-	for (UserInteractionModel::List::iterator it = uimList.begin(); it != uimList.end(); ++it)
-	{
-		UserInteractionModel* model = *it;
-
-		Vec2f origin, size;
-
-		model->getAbsoluteOriginSize(origin, size);
-
-		if (pointInRect(Vec2f(x, y), origin, origin + size))
-		{
-			if (!model->getHovered())
-			{
-				model->setHovered(true);
-				model->onMouseEnter();
-			}
-		}
-		else
-		{
-			if (model->getHovered())
-			{
-				model->setHovered(false);
-				model->onMouseLeave();
-			}
-		}
-	}
+  return true;
 }
 
-unsigned int InputManager::log_x_2(int x)
+bool InputManager::onMouseClickEvent(const osgGA::GUIEventAdapter& ea)
 {
-	return int(log(double(x)) / log(2.0));
+  bool anyUIMHovered = false;
+
+  m->gameStateStack->begin(AbstractGameState::UIMEVENT);
+  while (m->gameStateStack->next())
+  {
+    osg::ref_ptr<AbstractGameState> state = m->gameStateStack->get();
+
+    if (state->getHud()->anyUserInteractionModelHovered())
+    {
+      anyUIMHovered = true;
+
+      if (ea.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
+      {
+        UserInteractionModel::List& uimList = state->getHud()->getUserInteractionModels();
+        for (UserInteractionModel::List::iterator uit = uimList.begin(); uit != uimList.end(); ++uit)
+        {
+          if ((*uit)->isEnabled() && (*uit)->getHovered())
+          {
+            (*uit)->onClicked();
+            state->onUIClickedEvent(dynamic_cast<UIElement*>(*uit));
+          }
+        }
+      }
+    }
+  }
+
+  if (!anyUIMHovered)
+  {
+    m->mousePressed[m->log_x_2(ea.getButton())] = true;
+
+    m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+    while (m->gameStateStack->next())
+    {
+      m->gameStateStack->get()->onMousePressedEvent(ea.getButton(), ea.getX(), ea.getY());
+    }
+  }
+
+  return true;
+}
+
+bool InputManager::onMouseReleaseEvent(const osgGA::GUIEventAdapter& ea)
+{
+  m->mousePressed[m->log_x_2(ea.getButton())] = false;
+
+  if (m->mouseDragging == ea.getButton())
+  {
+    m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+    while (m->gameStateStack->next())
+    {
+      m->gameStateStack->get()->onDragEndEvent(m->mouseDragging, m->dragOrigin, osg::Vec2f(ea.getX(), ea.getY()));
+    }
+
+    m->gameStateStack->begin(AbstractGameState::UIMEVENT);
+    while (m->gameStateStack->next())
+    {
+      m->handleUserInteractionMove(m->gameStateStack->get(), ea.getX(), ea.getY());
+    }
+
+    m->mouseDragging = 0;
+  }
+
+  m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+  while (m->gameStateStack->next())
+  {
+    if (!m->gameStateStack->get()->getHud()->anyUserInteractionModelHovered())
+    {
+      m->gameStateStack->get()->onMouseReleasedEvent(ea.getButton(), ea.getX(), ea.getY());
+    }
+  }
+
+  return true;
+}
+
+bool InputManager::onMouseMoveEvent(const osgGA::GUIEventAdapter& ea)
+{
+  bool anyUIMHovered = false;
+
+  m->mousePosition = osg::Vec2f(ea.getX(), ea.getY());
+
+  m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+  while (m->gameStateStack->next())
+  {
+    m->gameStateStack->get()->onMouseMoveEvent(m->mousePosition.x(), m->mousePosition.y());
+  }
+
+  m->gameStateStack->begin(AbstractGameState::UIMEVENT);
+  while (m->gameStateStack->next())
+  {
+    if (m->mouseDragging == 0)
+    {
+      m->handleUserInteractionMove(m->gameStateStack->get(), m->mousePosition.x(), m->mousePosition.y());
+    }
+
+    if (m->gameStateStack->get()->getHud()->anyUserInteractionModelHovered())
+    {
+      anyUIMHovered = true;
+    }
+  }
+
+  if (m->mouseDragging == 0 && !anyUIMHovered)
+  {
+    int pressed = m->isMousePressed();
+
+    if (pressed != -1)
+    {
+      m->mouseDragging = 1 << pressed;
+      m->dragOrigin = m->mousePosition;
+      m->lastDragPosition = m->dragOrigin;
+
+      m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+      while (m->gameStateStack->next())
+      {
+        m->gameStateStack->get()->onDragBeginEvent(m->mouseDragging, m->dragOrigin);
+      }
+    }
+  }
+
+  if (m->mouseDragging != 0)
+  {
+    m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+    while (m->gameStateStack->next())
+    {
+      m->gameStateStack->get()->onDragEvent(m->mouseDragging, m->dragOrigin, m->mousePosition, m->mousePosition - m->lastDragPosition);
+    }
+
+    m->lastDragPosition = m->mousePosition;
+  }
+
+  return true;
+}
+
+bool InputManager::onMouseScrollEvent(const osgGA::GUIEventAdapter& ea)
+{
+  m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+  while (m->gameStateStack->next())
+  {
+    m->gameStateStack->get()->onScrollEvent(ea.getScrollingMotion());
+  }
+
+  return true;
+}
+
+bool InputManager::onResizeEvent(const osgGA::GUIEventAdapter& ea)
+{
+  int newWidth = ea.getWindowWidth();
+  int newHeight = ea.getWindowHeight();
+
+  int newX = ea.getWindowX();
+  int newY = ea.getWindowY();
+
+  osg::Vec2f resolution = m->view->getResolution();
+
+  m->view->updateWindowPosition(osg::Vec2f(float(newX), float(newY)));
+
+  if (newWidth != int(resolution.x()) || newHeight != int(resolution.y()))
+  {
+    m->updateResolution(osg::Vec2f(float(newWidth), float(newHeight)));
+
+    m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+    while (m->gameStateStack->next())
+    {
+      m->gameStateStack->get()->onResizeEvent(newWidth, newHeight);
+    }
+  }
+
+  return true;
+}
+
 }

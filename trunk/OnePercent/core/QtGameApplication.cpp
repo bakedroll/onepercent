@@ -2,16 +2,29 @@
 
 namespace onep
 {
-  QtGameApplication::QtGameApplication(int argc, char** argv)
-    : GameApplication()
-    , m_qapplication(new QApplication(argc, argv))
-  {
-  }
 
-  int QtGameApplication::mainloop()
-  {
-    getViewer()->realize();
+QtGameApplication::QtGameApplication(int argc, char** argv)
+  : GameApplication()
+  , m_qapplication(new QApplication(argc, argv))
+{
+}
 
-    return m_qapplication->exec();
-  }
+void QtGameApplication::setInputManager(osg::ref_ptr<osgGaming::InputManager> im)
+{
+  m_inputManager = im;
+}
+
+int QtGameApplication::mainloop()
+{
+  getViewer()->realize();
+
+  return m_qapplication->exec();
+}
+
+/*osg::ref_ptr<osgGaming::InputManager> QtGameApplication::obtainInputManager(osg::ref_ptr<osgGaming::View> view)
+{
+  assert(m_inputManager);
+  return m_inputManager;
+}*/
+
 }

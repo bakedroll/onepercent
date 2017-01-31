@@ -4,13 +4,21 @@
 
 #include <osgGaming/View.h>
 #include <QTimer>
+#include <QResizeEvent>
 
 namespace onep
 {
+  class EventAdapter : public osgGA::GUIEventAdapter
+  {
+  public:
+    EventAdapter() : osgGA::GUIEventAdapter() {}
+  };
+
   struct OsgWidget::Impl
   {
     Impl(osg::ref_ptr<osgViewer::CompositeViewer> viewer)
       : viewer(viewer)
+      , isInitialized(false)
     {
     }
 
@@ -20,10 +28,13 @@ namespace onep
     osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> graphicsWindow;
 
     QTimer updateTimer;
+
+    bool isInitialized;
   };
 
   OsgWidget::OsgWidget(osg::ref_ptr<osgViewer::CompositeViewer> viewer, QWidget* parent, Qt::WindowFlags f)
     : QGLWidget(parent, nullptr, f)
+    , InputManager()
     , m(new Impl(viewer))
   {
     //setWindowFlags(Qt::FramelessWindowHint);
@@ -93,6 +104,16 @@ namespace onep
 
     m->camera->setViewport(0, 0, width, height);
     m->view->updateResolution(osg::Vec2f(width, height));
+
+    if (isInitialized())
+    {
+      EventAdapter ea;
+      ea.setWindowX(geometry().x());
+      ea.setWindowY(geometry().y());
+      ea.setWindowWidth(width);
+      ea.setWindowHeight(height);
+      onResizeEvent(ea);
+    }
   }
 
   bool OsgWidget::event(QEvent* event)
@@ -101,4 +122,18 @@ namespace onep
 
     return handled;
   }
+
+  /*void OsgWidget::resizeEvent(QResizeEvent* event)
+  {
+    if (!isInitialized())
+      return;
+
+    EventAdapter ea;
+    ea.setWindowX(geometry().x());
+    ea.setWindowY(geometry().y());
+    ea.setWindowWidth(event->size().width());
+    ea.setWindowHeight(event->size().height());
+
+    onResizeEvent(ea);
+  }*/
 }

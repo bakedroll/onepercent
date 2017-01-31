@@ -39,6 +39,7 @@ int main(int argc, char** argv)
 
   MainWindow mainwindow(app->getViewer());
   mainwindow.show();
+  // app->setInputManager(mainwindow.getViewWidget());
 
 	return app->run(new LoadingGlobeOverviewState(states));
 }
