@@ -8,7 +8,8 @@ namespace osgGaming
 	class SimulationCallback : public osg::NodeCallback
 	{
 	public:
-		SimulationCallback();
+	  SimulationCallback();
+    virtual ~SimulationCallback();
 
 		virtual void operator()(osg::Node* node, osg::NodeVisitor* nv) override final;
 		void resetTimeDiff();

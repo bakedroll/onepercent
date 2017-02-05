@@ -1,6 +1,6 @@
 #include <osgGaming/ResourceManager.h>
 
-#include "core/QtGameApplication.h"
+#include "core/OnePercentApplication.h"
 
 #include "states/LoadingGlobeOverviewState.h"
 #include "states/GlobeOverviewState.h"
@@ -23,29 +23,29 @@ int main(int argc, char** argv)
 	resourceLoader->registerPackage("./GameData/Shader.pak");
 
 	ResourceManager::getInstance()->setResourceLoader(resourceLoader);*/
-	ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 
 
 #ifdef INITIALIZE_QT
-  ref_ptr<QtGameApplication> app = new QtGameApplication(argc, argv);
+
+  ref_ptr<OnePercentApplication> app = new OnePercentApplication(argc, argv);
+  return app->run();
+
 #else
+
   ref_ptr<GameApplication> app = new GameApplication();
+
+  ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
+
+  app->setDefaultWorld(new GlobeOverviewWorld());
+
+  //app->getDefaultGameSettings()->setScreenNum(1);
+  //app->getDefaultGameSettings()->setFullscreenEnabled(true);
+
+  GameState::AbstractGameStateList states;
+  states.push_back(new GlobeOverviewState());
+  states.push_back(new MainMenuState());
+
+  return app->run(new LoadingGlobeOverviewState(states));
+
 #endif
-
-	app->setDefaultWorld(new GlobeOverviewWorld());
-
-	//app->getDefaultGameSettings()->setScreenNum(1);
-	//app->getDefaultGameSettings()->setFullscreenEnabled(true);
-
-	GameState::AbstractGameStateList states;
-	states.push_back(new GlobeOverviewState());
-	states.push_back(new MainMenuState());
-
-#ifdef INITIALIZE_QT
-  MainWindow mainwindow(app->getViewer());
-  mainwindow.show();
-  app->setInputManager(mainwindow.getViewWidget());
-#endif
-
-	return app->run(new LoadingGlobeOverviewState(states));
 }

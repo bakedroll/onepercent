@@ -16,8 +16,7 @@ namespace onep
 
     OsgWidget* getViewWidget();
 
-  protected:
-    virtual void closeEvent(QCloseEvent *event) override;
+    void shutdown();
 
   private:
     struct Impl;

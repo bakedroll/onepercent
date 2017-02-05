@@ -53,11 +53,6 @@ void Hud::loadMarkupFromXmlResource(string resourceKey)
 	setRootUIElement(element);
 }
 
-ref_ptr<Geode> Hud::getGeode()
-{
-	return _geode;
-}
-
 ref_ptr<UIElement> Hud::getRootUIElement()
 {
 	return _rootUIElement;

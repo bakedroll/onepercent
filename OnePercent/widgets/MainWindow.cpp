@@ -49,9 +49,10 @@ OsgWidget* MainWindow::getViewWidget()
   return m->osgWidget;
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
+void MainWindow::shutdown()
 {
-  
+  m->osgWidget->setParent(nullptr);
+  close();
 }
 
 }
