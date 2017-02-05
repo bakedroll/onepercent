@@ -3,6 +3,7 @@
 
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QFrame>
 
 namespace onep
 {
@@ -16,28 +17,41 @@ MainWindow::MainWindow(osg::ref_ptr<osgViewer::CompositeViewer> viewer)
   : QMainWindow()
   , m(new Impl())
 {
+  QVBoxLayout* frameLayout = new QVBoxLayout();
+  frameLayout->setContentsMargins(0, 0, 0, 0);
+
+  QFrame* frame = new QFrame();
+  frame->setLayout(frameLayout);
+
   QPushButton* button = new QPushButton();
   button->setWindowFlags(Qt::FramelessWindowHint);
   button->setAttribute(Qt::WA_NoSystemBackground);
   button->setAttribute(Qt::WA_TranslucentBackground);
 
   QVBoxLayout* mainLayout = new QVBoxLayout();
-  mainLayout->addWidget(button);
 
   m->osgWidget = new OsgWidget(viewer);
   m->osgWidget->setLayout(mainLayout);
 
-  setMinimumSize(1024, 768);
-  setCentralWidget(m->osgWidget);
+  frameLayout->addWidget(m->osgWidget);
+
+  setMinimumSize(1280, 768);
+  setCentralWidget(frame);
 }
 
 MainWindow::~MainWindow()
 {
+  m->osgWidget->setParent(nullptr);
 }
 
 OsgWidget* MainWindow::getViewWidget()
 {
   return m->osgWidget;
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+  
 }
 
 }

@@ -14,6 +14,8 @@ using namespace osgGaming;
 using namespace onep;
 using namespace osg;
 
+#define INITIALIZE_QT
+
 int main(int argc, char** argv)
 {
 
@@ -25,8 +27,11 @@ int main(int argc, char** argv)
 	ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 
 
+#ifdef INITIALIZE_QT
   ref_ptr<QtGameApplication> app = new QtGameApplication(argc, argv);
-  //ref_ptr<GameApplication> app = new GameApplication();
+#else
+  ref_ptr<GameApplication> app = new GameApplication();
+#endif
 
 	app->setDefaultWorld(new GlobeOverviewWorld());
 
@@ -37,9 +42,11 @@ int main(int argc, char** argv)
 	states.push_back(new GlobeOverviewState());
 	states.push_back(new MainMenuState());
 
+#ifdef INITIALIZE_QT
   MainWindow mainwindow(app->getViewer());
   mainwindow.show();
-  // app->setInputManager(mainwindow.getViewWidget());
+  app->setInputManager(mainwindow.getViewWidget());
+#endif
 
 	return app->run(new LoadingGlobeOverviewState(states));
 }

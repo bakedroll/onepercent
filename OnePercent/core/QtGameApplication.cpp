@@ -21,10 +21,10 @@ int QtGameApplication::mainloop()
   return m_qapplication->exec();
 }
 
-/*osg::ref_ptr<osgGaming::InputManager> QtGameApplication::obtainInputManager(osg::ref_ptr<osgGaming::View> view)
+osg::ref_ptr<osgGaming::InputManager> QtGameApplication::obtainInputManager(osg::ref_ptr<osgGaming::View> view)
 {
   assert(m_inputManager);
   return m_inputManager;
-}*/
+}
 
 }
