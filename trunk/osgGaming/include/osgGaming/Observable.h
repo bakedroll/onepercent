@@ -31,49 +31,86 @@ namespace osgGaming
     NotifyFunc execute;
   };
 
+  namespace __ObservableInternals
+  {
+    template<typename T>
+    class ObservableBase : public osg::Referenced
+    {
+    public:
+      typedef std::function<void(T)> NotifyFunc;
+
+      ObservableBase() : osg::Referenced() {}
+
+      typename Observer<T>::Ptr connect(NotifyFunc func)
+      {
+        typename Observer<T>::Ptr observer = new Observer<T>(func);
+        observers().push_back(observer);
+
+        return observer;
+      }
+
+      typename Observer<T>::Ptr connectAndNotify(NotifyFunc func)
+      {
+        typename Observer<T>::Ptr observer = connect(func);
+        notify(observer);
+
+        return observer;
+      }
+
+    protected:
+      typedef std::vector<osg::observer_ptr<Observer<T>>> ObserverList;
+
+      ObserverList& observers()
+      {
+        typename ObserverList::iterator it = m_observers.begin();
+        while (it != m_observers.end())
+        {
+          typename Observer<T>::Ptr obs;
+          if (!it->lock(obs))
+            it = m_observers.erase(it);
+          else
+            ++it;
+        }
+
+        return m_observers;
+      }
+
+      virtual void notify(typename Observer<T>::Ptr obs) = 0;
+
+      void notifyAll()
+      {
+        ObserverList& obs = observers();
+        for (typename ObserverList::iterator it = obs.begin(); it != obs.end(); ++it)
+          notify(*it);
+      }
+
+    private:
+      ObserverList m_observers;
+    };
+
+  }
+
   template<typename T>
-  class Observable : public osg::Referenced
+  class Observable : public __ObservableInternals::ObservableBase<T>
   {
   public:
     typedef osg::ref_ptr<Observable<T>> Ptr;
-    typedef std::function<void(T)> NotifyFunc;
 
     Observable()
+      : __ObservableInternals::ObservableBase<T>()
     {
-      
     }
 
     Observable(T initial)
-      : m_value(initial)
+      : __ObservableInternals::ObservableBase<T>()
+      , m_value(initial)
     {
-      
-    }
-
-    typename Observer<T>::Ptr connect(NotifyFunc func)
-    {
-      typename Observer<T>::Ptr observer = new Observer<T>(func);
-      observers().push_back(observer);
-
-      return observer;
-    }
-
-    typename Observer<T>::Ptr connectAndNotify(NotifyFunc func)
-    {
-      typename Observer<T>::Ptr observer = new Observer<T>(func);
-      observers().push_back(observer);
-
-      func(m_value);
-
-      return observer;
     }
 
     void set(T value)
     {
       m_value = value;
-
-      ObserverList& obs = observers();
-      for (typename ObserverList::iterator it = obs.begin(); it != obs.end(); ++it)
-        (*it)->execute(m_value);
+      notifyAll();
     }
 
     T get()
@@ -82,26 +119,34 @@ namespace osgGaming
     }
 
   protected:
-    typedef std::vector<osg::observer_ptr<Observer<T>>> ObserverList;
-
-    ObserverList& observers()
+    virtual void notify(typename Observer<T>::Ptr obs) override
     {
-      typename ObserverList::iterator it = m_observers.begin();
-      while (it != m_observers.end())
-      {
-        typename Observer<T>::Ptr obs;
-        if (!it->lock(obs))
-          it = m_observers.erase(it);
-        else
-          ++it;
-      }
-
-      return m_observers;
+      obs->execute(m_value);
     }
 
   private:
     T m_value;
-    ObserverList m_observers;
+
+  };
+
+  class Signal : public __ObservableInternals::ObservableBase<void>
+  {
+  public:
+    Signal()
+      : __ObservableInternals::ObservableBase<void>()
+    {
+    }
+
+    void trigger()
+    {
+      notifyAll();
+    }
+
+  protected:
+    virtual void notify(Observer<void>::Ptr obs) override
+    {
+      obs->execute();
+    }
 
   };
 }
