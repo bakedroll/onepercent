@@ -27,7 +27,6 @@ TransformableCameraManipulator::TransformableCameraManipulator()
 
 void TransformableCameraManipulator::updateCamera(osg::Camera &camera)
 {
-  
   _camera->setViewMatrix(getViewMatrix());
   _camera->setProjectionMatrix(_projectionMatrix);
 

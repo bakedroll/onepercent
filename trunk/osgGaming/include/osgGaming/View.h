@@ -29,6 +29,9 @@ namespace osgGaming
     osg::ref_ptr<osg::Camera> getSceneCamera();
     osg::ref_ptr<osg::Camera> getHudCamera();
 
+    // TODO: REFACTOR
+    osg::ref_ptr<osg::Geode> getCanvasGeode();
+
 		void setHud(osg::ref_ptr<Hud> hud);
 
 		void addPostProcessingEffect(osg::ref_ptr<PostProcessingEffect> ppe, bool enabled = true, std::string name = "");

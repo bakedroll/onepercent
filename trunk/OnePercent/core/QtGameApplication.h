@@ -15,7 +15,7 @@ namespace onep
 
   protected:
     virtual int mainloop() override;
-    //virtual osg::ref_ptr<osgGaming::InputManager> obtainInputManager(osg::ref_ptr<osgGaming::View> view) override;
+    virtual osg::ref_ptr<osgGaming::InputManager> obtainInputManager(osg::ref_ptr<osgGaming::View> view) override;
 
   private:
     std::shared_ptr<QApplication> m_qapplication;

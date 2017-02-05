@@ -16,6 +16,8 @@
 
 #include <assert.h>
 #include <osgGaming/ResourceManager.h>
+#include <osg/MatrixTransform>
+#include <osgGaming/Helper.h>
 
 using namespace osgPPU;
 using namespace osg;
@@ -62,9 +64,10 @@ struct View::Impl
   osg::ref_ptr<osg::Switch> hudSwitch;
   osg::ref_ptr<Hud> hud;
 
+  osg::ref_ptr<osg::Geode> canvasGeode;
+
   osg::ref_ptr<osgPPU::Processor> processor;
   osg::ref_ptr<osg::Group> ppGroup;
-  osg::ref_ptr<osg::Group> hudGroup;
   osg::ref_ptr<osg::ClampColor> clampColor;
 
   osg::ref_ptr<osgPPU::Unit> lastUnit;
@@ -76,70 +79,43 @@ struct View::Impl
 
   void initialize(osg::ref_ptr<osg::Camera> camera)
   {
-    //sceneCamera = new osg::Camera();
     sceneCamera = camera;
     sceneCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::FRAME_BUFFER);
     sceneCamera->setComputeNearFarMode(CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
     sceneCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     sceneCamera->setRenderOrder(osg::Camera::PRE_RENDER);
 
-    //hudCamera = camera;
     hudCamera = new osg::Camera();
     hudCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER, osg::Camera::FRAME_BUFFER);
     hudCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
     hudCamera->setRenderOrder(osg::Camera::POST_RENDER);
     hudCamera->setViewMatrix(Matrixd::identity());
     hudCamera->setProjectionMatrix(Matrixd::identity());
-
-
-
-    //hudCamera->setImplicitBufferAttachmentMask(osg::Camera::IMPLICIT_COLOR_BUFFER_ATTACHMENT, osg::Camera::IMPLICIT_COLOR_BUFFER_ATTACHMENT);
-    //hudCamera->setDrawBuffer(osg::Camera::COLOR_BUFFER0);
-
-
     
     ppGroup = new Group();
 
     // implicitly attaches texture to camera
     ref_ptr<Texture2D> texture = renderTexture(osg::Camera::COLOR_BUFFER).texture;
 
-    ref_ptr<Geode> geode = new Geode();
-    geode->addDrawable(createTexturedQuadGeometry(Vec3f(-1.0f, -1.0f, 0.0f), Vec3f(2.0f, 0.0f, 0.0f), Vec3f(0.0f, 2.0f, 0.0f)));
+    canvasGeode = new Geode();
+    canvasGeode->addDrawable(createTexturedQuadGeometry(Vec3f(-1.0f, -1.0f, 0.0f), Vec3f(2.0f, 0.0f, 0.0f), Vec3f(0.0f, 2.0f, 0.0f)));
     
-
-
-
-
-    /*
-    osg::ref_ptr<osg::PositionAttitudeTransform> transform = new osg::PositionAttitudeTransform();
-    transform->addChild(geode);
-    //transform->setPosition(Vec3d(50, 0, 0));
-
-    osg::ref_ptr<osg::ShapeDrawable> shapedr = new osg::ShapeDrawable(new osg::Sphere());
-    geode->addDrawable(shapedr);
-
-
-
-    hudStateSet = geode->getOrCreateStateSet();
-    hudStateSet->setTextureAttributeAndModes(0, texture, StateAttribute::ON);
-    hudStateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
-    hudStateSet->setMode(GL_CULL_FACE, StateAttribute::OFF);
-
-    hudSwitch = new Switch();
-
-    hudGroup = new Group();
-    hudGroup->addChild(transform);
-    hudGroup->addChild(hudSwitch);
-    hudGroup->addChild(sceneCamera);
-
-    sceneCamera->addChild(ppGroup);
-    */
-    
-    hudStateSet = geode->getOrCreateStateSet();
+    hudStateSet = canvasGeode->getOrCreateStateSet();
     hudStateSet->setTextureAttributeAndModes(0, texture, StateAttribute::ON);
     hudStateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
 
-    hudCamera->addChild(geode);
+
+
+
+    osg::ref_ptr<osg::MatrixTransform> geodeTransform = new osg::MatrixTransform();
+    geodeTransform->setMatrix(Matrix::identity());
+    geodeTransform->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+    geodeTransform->addChild(canvasGeode);
+
+    osg::ref_ptr<Projection> geodeProjection = new osg::Projection();
+    geodeProjection->setMatrix(Matrix::ortho2D(0.0, double(1024.0) - 1.0, 1.0, double(768.0) - 1.0));
+    
+    hudCamera->addChild(canvasGeode);
 
     hudSwitch = new Switch();
     hudCamera->addChild(hudSwitch);
@@ -519,7 +495,12 @@ osg::ref_ptr<osg::Camera> View::getHudCamera()
   return m->hudCamera;
 }
 
-// TODO: refactor
+osg::ref_ptr<osg::Geode> View::getCanvasGeode()
+{
+  return m->canvasGeode;
+}
+
+  // TODO: refactor
 void View::setHud(ref_ptr<Hud> hud)
 {
   if (m->hud == hud)
