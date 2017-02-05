@@ -78,5 +78,7 @@ namespace onep
     osgGaming::Observable<int>::Ptr m_oSelectedCountryId;
 
     BranchType m_highlightedBranch;
+
+    osgGaming::Observer<bool>::Ptr m_skillBranchActivatedObserver;
 	};
 }

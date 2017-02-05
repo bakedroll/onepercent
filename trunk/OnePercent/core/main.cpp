@@ -18,6 +18,25 @@ using namespace osg;
 
 int main(int argc, char** argv)
 {
+  // Observer test
+  osgGaming::Observable<int> observable(5);
+
+  osgGaming::Observer<int>::Ptr obs1 = observable.connect([](int value)
+  {
+    printf("Obs1 value: %d\n", value);
+  });
+
+  osgGaming::Observer<int>::Ptr obs2 = observable.connect([](int value)
+  {
+    printf("Obs2 value: %d\n", value);
+  });
+
+  observable.set(2);
+
+  obs1.release();
+
+  observable.set(3);
+
 
 	/*ref_ptr<PackageResourceLoader> resourceLoader = new PackageResourceLoader();
 	resourceLoader->registerPackage("./GameData/Data.pak");

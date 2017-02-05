@@ -14,7 +14,7 @@ namespace osgGaming
     button->setCheckable(true);
     m_buttons.push_back(button);
 
-    button->getIsCheckedObservable()->addNotifyFunc([this, button](bool checked)
+    m_isCheckedObserver = button->getIsCheckedObservable()->connect([this, button](bool checked)
     {
       if (m_resetting)
         return;

@@ -13,6 +13,10 @@ GlobeCameraState::GlobeCameraState()
 {
 }
 
+GlobeCameraState::~GlobeCameraState()
+{
+}
+
 void GlobeCameraState::initialize()
 {
 	_globeWorld = static_cast<GlobeOverviewWorld*>(getWorld().get());
