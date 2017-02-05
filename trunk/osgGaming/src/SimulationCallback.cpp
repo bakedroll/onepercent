@@ -11,6 +11,10 @@ SimulationCallback::SimulationCallback()
 
 }
 
+SimulationCallback::~SimulationCallback()
+{
+}
+
 void SimulationCallback::operator()(Node* node, NodeVisitor* nv)
 {
 	double time = nv->getFrameStamp()->getSimulationTime();

@@ -1,5 +1,9 @@
 #include "QtGameApplication.h"
 
+#include <osgGaming/InputManager.h>
+
+#include <assert.h>
+
 namespace onep
 {
 

@@ -20,9 +20,6 @@ namespace osgGaming
 
 		void loadMarkupFromXmlResource(std::string resourceKey);
 
-		// TODO: remove later
-		osg::ref_ptr<osg::Geode> getGeode();
-
 		osg::ref_ptr<UIElement> getRootUIElement();
 		UserInteractionModel::List& getUserInteractionModels();
 
