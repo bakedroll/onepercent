@@ -27,5 +27,6 @@ namespace osgGaming
 
     bool  m_resetting;
 
+    Observer<bool>::Ptr m_isCheckedObserver;
   };
 }

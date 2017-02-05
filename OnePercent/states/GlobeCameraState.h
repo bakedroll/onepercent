@@ -10,7 +10,8 @@ namespace onep
 	class GlobeCameraState : public osgGaming::GameState
 	{
 	public:
-		GlobeCameraState();
+	  GlobeCameraState();
+    virtual ~GlobeCameraState();
 
 		virtual void initialize() override;
 

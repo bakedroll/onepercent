@@ -66,5 +66,11 @@ namespace onep
 		osg::ref_ptr<osgGaming::Timer> _simulationTimer;
 
     osgGaming::UIRadioGroup::Ptr m_branchRadioGroup;
+
+    osgGaming::Observer<int>::Ptr m_selectedCountryObserver;
+    osgGaming::Observer<bool>::Ptr m_skillBranchActivatedObserver;
+    osgGaming::Observer<osgGaming::UIButton::Ptr>::Ptr m_selectedButtonObserver;
+
+    osgGaming::Observer<int>::Ptr m_selectedCountryIdObserver;
 	};
 }

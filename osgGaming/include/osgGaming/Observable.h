@@ -8,6 +8,30 @@
 namespace osgGaming
 {
   template<typename T>
+  class Observer : public osg::Referenced
+  {
+  public:
+    typedef osg::ref_ptr<Observer<T>> Ptr;
+    typedef std::function<void(T)> NotifyFunc;
+
+    Observer(NotifyFunc func) : execute(func) { }
+
+    NotifyFunc execute;
+  };
+
+  template<>
+  class Observer<void> : public osg::Referenced
+  {
+  public:
+    typedef osg::ref_ptr<Observer> Ptr;
+    typedef std::function<void()> NotifyFunc;
+
+    Observer(NotifyFunc func) : execute(func) { }
+
+    NotifyFunc execute;
+  };
+
+  template<typename T>
   class Observable : public osg::Referenced
   {
   public:
@@ -25,23 +49,31 @@ namespace osgGaming
       
     }
 
-    void addNotifyFunc(NotifyFunc func)
+    typename Observer<T>::Ptr connect(NotifyFunc func)
     {
-      m_notifyFuncs.push_back(func);
+      typename Observer<T>::Ptr observer = new Observer<T>(func);
+      observers().push_back(observer);
+
+      return observer;
     }
 
-    void addFuncAndNotify(NotifyFunc func)
+    typename Observer<T>::Ptr connectAndNotify(NotifyFunc func)
     {
-      m_notifyFuncs.push_back(func);
+      typename Observer<T>::Ptr observer = new Observer<T>(func);
+      observers().push_back(observer);
+
       func(m_value);
+
+      return observer;
     }
 
     void set(T value)
     {
       m_value = value;
 
-      for (typename NotifyFuncList::iterator it = m_notifyFuncs.begin(); it != m_notifyFuncs.end(); ++it)
-        (*it)(m_value);
+      ObserverList& obs = observers();
+      for (typename ObserverList::iterator it = obs.begin(); it != obs.end(); ++it)
+        (*it)->execute(m_value);
     }
 
     T get()
@@ -49,11 +81,27 @@ namespace osgGaming
       return m_value;
     }
 
-  private:
-    typedef std::vector<NotifyFunc> NotifyFuncList;
+  protected:
+    typedef std::vector<osg::observer_ptr<Observer<T>>> ObserverList;
 
+    ObserverList& observers()
+    {
+      typename ObserverList::iterator it = m_observers.begin();
+      while (it != m_observers.end())
+      {
+        typename Observer<T>::Ptr obs;
+        if (!it->lock(obs))
+          it = m_observers.erase(it);
+        else
+          ++it;
+      }
+
+      return m_observers;
+    }
+
+  private:
     T m_value;
-    NotifyFuncList m_notifyFuncs;
+    ObserverList m_observers;
 
   };
 }

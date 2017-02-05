@@ -74,7 +74,7 @@ namespace onep
 
     setupUi();
 
-    getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->addNotifyFunc([this](int id)
+    m_selectedCountryObserver = getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->connect([this](int id)
     {
       updateCountryInfoText();
 
@@ -130,7 +130,7 @@ namespace onep
       osg::ref_ptr<UIButton> buttonOverlay = new DebugButton(DebugButton::OVERLAY, i);
       buttonOverlay->setText("Overlay");
 
-      globeModel->getSelectedCountryIdObservable()->addFuncAndNotify([globeModel, buttonEnabled, buttonOverlay, i](int selected)
+      m_selectedCountryIdObserver = globeModel->getSelectedCountryIdObservable()->connectAndNotify([globeModel, buttonEnabled, buttonOverlay, i](int selected)
       {
         if (selected > 0)
         {
@@ -148,7 +148,7 @@ namespace onep
       CountryMesh::Map& countryMeshs = globeModel->getCountryMeshs();
       for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
       {
-        it->second->getCountryData()->getSkillBranchActivatedObservable(i)->addNotifyFunc([globeModel, buttonEnabled, it](bool activated)
+        m_skillBranchActivatedObserver = it->second->getCountryData()->getSkillBranchActivatedObservable(i)->connect([globeModel, buttonEnabled, it](bool activated)
         {
           if (it->first == globeModel->getSelectedCountryId())
             buttonEnabled->setChecked(activated);
@@ -187,7 +187,7 @@ namespace onep
       }
     }
 
-    m_branchRadioGroup->getSelectedButtonObservable()->addNotifyFunc([globeModel](UIButton::Ptr button)
+    m_selectedButtonObserver = m_branchRadioGroup->getSelectedButtonObservable()->connect([globeModel](UIButton::Ptr button)
     {
       if (!button)
       {

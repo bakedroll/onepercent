@@ -114,7 +114,7 @@ namespace onep
 
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
     {
-      countryData->getSkillBranchActivatedObservable(i)->addNotifyFunc([this, mesh, i](bool activated)
+      m_skillBranchActivatedObserver = countryData->getSkillBranchActivatedObservable(i)->connect([this, mesh, i](bool activated)
       {
         if (!activated)
           return;
