@@ -160,13 +160,13 @@ ref_ptr<osgGaming::Viewer> AbstractGameState::getViewer()
 	return _viewer;
 }
 
-osg::ref_ptr<osgGaming::View> AbstractGameState::getView(int i)
+osg::ref_ptr<osgGaming::NativeView> AbstractGameState::getView(int i)
 {
   osgViewer::View* view = _viewer->getView(i);
   if (!view)
     return nullptr;
 
-  osgGaming::View* gview = dynamic_cast<osgGaming::View*>(view);
+  osgGaming::NativeView* gview = dynamic_cast<osgGaming::NativeView*>(view);
 
   return gview;
 }

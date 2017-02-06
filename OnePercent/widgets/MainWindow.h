@@ -2,7 +2,7 @@
 
 #include <QMainWindow>
 #include <memory>
-#include <osgGaming/View.h>
+#include <osgGaming/NativeView.h>
 
 #include "OsgWidget.h"
 

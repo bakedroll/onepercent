@@ -26,7 +26,7 @@ namespace osgGaming
       , isLoading(false)
     {
       if (!view)
-        view = new osgGaming::View();
+        view = new osgGaming::NativeView();
 
       viewer->addView(view);
     }
@@ -67,6 +67,18 @@ namespace osgGaming
       }
     }
 
+    osg::ref_ptr<InputManager> obtainInputManager(osg::ref_ptr<osgGaming::View> view)
+    {
+      InputManager::Ptr im;
+      InputManagerMap::iterator it = inputManagers.find(view);
+      if (it == inputManagers.end())
+        im = base->createInputManager(view);
+      else
+        im = it->second;
+
+      return im;
+    }
+
     void attachState(osg::ref_ptr<AbstractGameState> state)
     {
       if (!state->isLoadingState())
@@ -77,7 +89,7 @@ namespace osgGaming
 
       if (!inputManager.valid())
       {
-        inputManager = base->obtainInputManager(view);
+        inputManager = obtainInputManager(view);
         inputManager->setGameStateStack(&gameStateStack);
         inputManager->setView(view);
         inputManager->setIsInizialized(true);
@@ -93,6 +105,8 @@ namespace osgGaming
       inputManager->updateNewRunningStates();
       //inputManager->setCurrentState(state);
     }
+
+    typedef std::map<osgGaming::View::Ptr, osgGaming::InputManager::Ptr> InputManagerMap;
 
     GameApplication* base;
     GameStateStack gameStateStack;
@@ -112,6 +126,8 @@ namespace osgGaming
     std::future<void> loadingThreadFuture;
 
     osgGaming::Signal onEndGameSignal;
+
+    InputManagerMap inputManagers;
   };
 
   GameApplication::GameApplication(osg::ref_ptr<osgGaming::View> view)
@@ -352,44 +368,9 @@ namespace osgGaming
     return m->viewer;
   }
 
-  osg::ref_ptr<osgGaming::View> GameApplication::getView()
+  bool GameApplication::isGameEnded() const
   {
-    return m->view;
-  }
-
-  int GameApplication::mainloop()
-  {
-    ref_ptr<GameSettings> settings = getDefaultGameSettings();
-
-    m->viewer->setFullscreenEnabled(0, settings->getFullscreenEnabled());
-    m->viewer->setWindowedResolution(0, settings->getWindowedResolution());
-    m->view->setScreenNum(settings->getScreenNum());
-
-    m->view->setupResolution();
-
-    m->viewer->setKeyEventSetsDone(0);
-
-    m->viewer->realize();
-
-    while (isGameRunning())
-    {
-      m->viewer->frame();
-    }
-
-    return 0;
-  }
-
-  osg::ref_ptr<InputManager> GameApplication::obtainInputManager(osg::ref_ptr<osgGaming::View> view)
-  {
-    NativeInputManager* im = new NativeInputManager();
-    view->addEventHandler(im->handler());
-
-    return im;
-  }
-
-  bool GameApplication::isGameRunning() const
-  {
-    return !m->viewer->done() && !m->gameEnded;
+    return m->gameEnded;
   }
 
 }
