@@ -2,20 +2,24 @@
 
 #include <osg/Referenced>
 #include <osgGA/GUIEventAdapter>
+#include <osgGaming/View.h>
+
 #include <memory>
 
 namespace osgGaming
 {
-  class View;
+  class NativeView;
   class GameStateStack;
 
 	class InputManager : public osg::Referenced
 	{
 	public:
+    typedef osg::ref_ptr<InputManager> Ptr;
+
 		InputManager();
     ~InputManager();
 
-		void setView(osg::ref_ptr<osgGaming::View> viewer);
+    void setView(osg::ref_ptr<osgGaming::View> viewer);
 		void setGameStateStack(GameStateStack* stack);
 
 		void updateNewRunningStates();

@@ -5,7 +5,7 @@
 #include <osgGaming/World.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/GameSettings.h>
-#include <osgGaming/View.h>
+#include <osgGaming/NativeView.h>
 #include <osgGaming/UIElement.h>
 
 #include <osg/Referenced>
@@ -92,7 +92,7 @@ namespace osgGaming
 		osg::ref_ptr<World> getWorld();
 		osg::ref_ptr<Hud> getHud();
     osg::ref_ptr<osgGaming::Viewer> getViewer();
-    osg::ref_ptr<osgGaming::View> getView(int i);
+    osg::ref_ptr<osgGaming::NativeView> getView(int i);
 		osg::ref_ptr<GameSettings> getGameSettings();
 
 		void setSimulationTime(double simulationTime);

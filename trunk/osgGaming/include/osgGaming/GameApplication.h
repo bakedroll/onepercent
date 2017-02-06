@@ -35,13 +35,12 @@ namespace osgGaming
 
     osgGaming::Signal& onEndGameSignal();
     osg::ref_ptr<osgGaming::Viewer> getViewer();
-    osg::ref_ptr<osgGaming::View> getView();
 
   protected:
-    virtual int mainloop();
-    virtual osg::ref_ptr<InputManager> obtainInputManager(osg::ref_ptr<osgGaming::View> view);
+    virtual int mainloop() = 0;
+    virtual osg::ref_ptr<InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) = 0;
 
-    bool isGameRunning() const;
+    bool isGameEnded() const;
 
 	private:
     struct Impl;

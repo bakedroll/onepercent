@@ -1,4 +1,5 @@
 #include <osgGaming/ResourceManager.h>
+#include <osgGaming/NativeGameApplication.h>
 
 #include "core/OnePercentApplication.h"
 
@@ -7,8 +8,6 @@
 #include "states/MainMenuState.h"
 
 #include "nodes/GlobeOverviewWorld.h"
-
-#include "widgets/MainWindow.h"
 
 using namespace osgGaming;
 using namespace onep;
@@ -32,7 +31,7 @@ int main(int argc, char** argv)
 
 #else
 
-  ref_ptr<GameApplication> app = new GameApplication();
+  ref_ptr<NativeGameApplication> app = new NativeGameApplication();
 
   ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 

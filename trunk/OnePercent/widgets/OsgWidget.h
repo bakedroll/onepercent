@@ -2,7 +2,7 @@
 
 //#include <QtWidgets/QOpenGLWidget>
 #include <QtOpenGL/QGLWidget>
-#include <osgGaming/View.h>
+#include <osgGaming/NativeView.h>
 #include <memory>
 
 #include <osgViewer/CompositeViewer>
