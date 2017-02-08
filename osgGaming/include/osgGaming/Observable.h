@@ -1,6 +1,7 @@
 #pragma once
 
 #include <osg/Referenced>
+#include <osg/observer_ptr>
 
 #include <functional>
 #include <vector>

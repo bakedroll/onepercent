@@ -17,7 +17,7 @@ namespace osgGaming
   class GameApplication : public SimulationCallback
 	{
 	public:
-    GameApplication(osg::ref_ptr<osgGaming::View> view = nullptr);
+    GameApplication();
     ~GameApplication();
 
 		virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override;

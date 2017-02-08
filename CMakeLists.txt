@@ -50,6 +50,17 @@ find_package(rapidxml)
 # optional for Vectorizer
 find_package(OpenCV)
 
+# optional for Tests
+set(GTEST_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "gtest root directory")
+if (EXISTS ${GTEST_ROOT_DIRECTORY})
+  adjust_cached_path(GTEST_ROOT_DIRECTORY "gtest root directory" ${GTEST_ROOT_DIRECTORY})
+endif()
+
+set(GTEST_ROOT ${QT5_ROOT_DIRECTORY})
+
+enable_testing()
+find_package(GTest)
+
 # Check for existence of required directories
 if ("${Qt5Core_LIBRARIES}" STREQUAL "")
   set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify QT5_ROOT_DIRECTORY\n")
@@ -164,6 +175,12 @@ if (OPENCV_FOUND)
   add_subdirectory(Vectorizer)
 else()
   message(WARNING "OpenCV not found: ignoring project Vectorizer")
+endif()
+
+if (GTEST_FOUND)
+  add_subdirectory(osgGamingTest)
+else()
+  message(WARNING "GTest not found: ignoring project osgGamingTest")
 endif()
 
 # copy shared dlls
