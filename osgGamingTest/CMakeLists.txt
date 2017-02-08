@@ -5,7 +5,7 @@ add_executable(osgGamingTest ${OSG_GAMING_TEST_SOURCE})
 set_target_properties(osgGamingTest PROPERTIES DEBUG_POSTFIX "d")
 
 # specify needed osg libraries
-set(TEST_OSG_LIBRARIES_TMP "osg")
+set(TEST_OSG_LIBRARIES_TMP "osg OpenThreads")
 
 get_libraries(TEST_OSG_LIBRARIES ${OSG_LIBRARY} "" ${TEST_OSG_LIBRARIES_TMP})
 get_libraries(TEST_OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${TEST_OSG_LIBRARIES_TMP})
