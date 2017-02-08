@@ -18,17 +18,12 @@ namespace osgGaming
 
   struct GameApplication::Impl
   {
-    Impl(GameApplication* app, osg::ref_ptr<osgGaming::View> v)
+    Impl(GameApplication* app)
       : base(app)
       , viewer(new osgGaming::Viewer())
-      , view(v)
       , gameEnded(false)
       , isLoading(false)
     {
-      if (!view)
-        view = new osgGaming::NativeView();
-
-      viewer->addView(view);
     }
 
     void initializeState(osg::ref_ptr<AbstractGameState> state)
@@ -130,9 +125,9 @@ namespace osgGaming
     InputManagerMap inputManagers;
   };
 
-  GameApplication::GameApplication(osg::ref_ptr<osgGaming::View> view)
+  GameApplication::GameApplication()
     : SimulationCallback()
-    , m(new Impl(this, view))
+    , m(new Impl(this))
   {
   }
 
@@ -337,6 +332,9 @@ namespace osgGaming
   {
     try
     {
+      m->view = dynamic_cast<View*>(m->viewer->getView(0));
+      assert(m->view.valid());
+
       m->gameStateStack.pushStates(initialStates);
       m->view->getRootGroup()->setUpdateCallback(this);
 

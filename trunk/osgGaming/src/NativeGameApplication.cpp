@@ -6,8 +6,12 @@
 namespace osgGaming
 {
   NativeGameApplication::NativeGameApplication(osg::ref_ptr<View> view)
-    : GameApplication(view)
+    : GameApplication()
   {
+    if (!view)
+      view = new osgGaming::NativeView();
+
+    getViewer()->addView(view);
   }
 
   int NativeGameApplication::mainloop()
