@@ -58,7 +58,6 @@ endif()
 
 set(GTEST_ROOT ${QT5_ROOT_DIRECTORY})
 
-enable_testing()
 find_package(GTest)
 
 # Check for existence of required directories

@@ -27,12 +27,12 @@ namespace osgGaming
 
 		typedef enum _stateProperties
 		{
-			PROP_UPDATE_TOP = 0x01,
-			PROP_UPDATE_ALWAYS = 0x02,
-			PROP_GUIEVENTS_TOP = 0x04,
-			PROP_GUIEVENTS_ALWAYS = 0x08,
-			PROP_UIMEVENTS_TOP = 0x16,
-			PROP_UIMEVENTS_ALWAYS = 0x32
+			PROP_UPDATE_TOP = 1,
+			PROP_UPDATE_ALWAYS = 2,
+			PROP_GUIEVENTS_TOP = 4,
+			PROP_GUIEVENTS_ALWAYS = 8,
+			PROP_UIMEVENTS_TOP = 16,
+			PROP_UIMEVENTS_ALWAYS = 32
 		} StateProperties;
 
 		typedef enum _stateBahavior

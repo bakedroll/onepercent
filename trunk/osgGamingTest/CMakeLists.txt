@@ -1,17 +1,19 @@
-add_source_directory(OSG_GAMING_TEST_SOURCE src)
+add_source_directory(OSG_GAMING_TEST_SOURCE mock)
+add_source_directory(OSG_GAMING_TEST_SOURCE test)
 
 add_executable(osgGamingTest ${OSG_GAMING_TEST_SOURCE})
 
 set_target_properties(osgGamingTest PROPERTIES DEBUG_POSTFIX "d")
 
 # specify needed osg libraries
-set(TEST_OSG_LIBRARIES_TMP "osg OpenThreads")
+set(TEST_OSG_LIBRARIES_TMP "osg osgViewer osgUtil osgGA osgDB osgText osgPPU OpenThreads")
 
 get_libraries(TEST_OSG_LIBRARIES ${OSG_LIBRARY} "" ${TEST_OSG_LIBRARIES_TMP})
 get_libraries(TEST_OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${TEST_OSG_LIBRARIES_TMP})
 
 
 include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
   ${GTEST_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/osgGaming/include)
 
