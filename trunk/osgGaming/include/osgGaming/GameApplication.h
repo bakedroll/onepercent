@@ -13,6 +13,7 @@ namespace osgGaming
   class InputManager;
   class AbstractGameState;
   class GameSettings;
+  class View;
 
   class GameApplication : public SimulationCallback
 	{

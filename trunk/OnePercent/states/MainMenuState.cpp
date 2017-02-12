@@ -3,6 +3,8 @@
 
 #include "nodes/GlobeOverviewWorld.h"
 
+#include <osgGaming/Hud.h>
+
 using namespace osg;
 using namespace onep;
 using namespace osgGaming;
@@ -45,7 +47,7 @@ void MainMenuState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
 	}
 }
 
-ref_ptr<Hud> MainMenuState::newHud()
+ref_ptr<Hud> MainMenuState::overrideHud()
 {
 	return new Hud();
 }

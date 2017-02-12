@@ -36,7 +36,7 @@ namespace onep
 		void startSimulation();
 
 	protected:
-		virtual osg::ref_ptr<osgGaming::Hud> newHud() override;
+		virtual osg::ref_ptr<osgGaming::Hud> overrideHud() override;
 
 	private:
 		osgGaming::Property<float, Param_EarthRadiusName> _paramEarthRadius;

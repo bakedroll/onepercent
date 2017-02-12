@@ -7,7 +7,11 @@ namespace osgGamingTest
   class MockedState : public osgGaming::AbstractGameState
   {
   public:
-    MockedState(std::function<StateEvent*(MockedState*, double)> func, unsigned char properties = PROP_GUIEVENTS_TOP | PROP_UIMEVENTS_TOP | PROP_UPDATE_TOP);
+    MockedState(
+      std::function<StateEvent*(MockedState*, double)> func,
+      unsigned char properties = PROP_GUIEVENTS_TOP | PROP_UIMEVENTS_TOP | PROP_UPDATE_TOP,
+      osg::ref_ptr<osgGaming::World> overrideWorld = nullptr);
+
     ~MockedState();
 
     bool deliveredTick(double tick);
@@ -16,6 +20,8 @@ namespace osgGamingTest
 
     virtual StateEvent* update() override;
     virtual unsigned char getProperties() override;
+
+    virtual osg::ref_ptr<osgGaming::World> overrideWorld() override;
 
     StateEvent* stateEvent_push(osg::ref_ptr<AbstractGameState> state);
     StateEvent* stateEvent_push(AbstractGameStateList states);

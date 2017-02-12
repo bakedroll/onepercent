@@ -1,21 +1,28 @@
 #include "MockedGameState.h"
 
+#include <osgGaming/World.h>
+
 namespace osgGamingTest
 {
   struct MockedState::Impl
   {
     std::function<StateEvent*(MockedState*, double)> func;
     unsigned char properties;
+    osg::ref_ptr<osgGaming::World> overrideWorld;
 
     std::set<double> deliveredTicks;
   };
 
-  MockedState::MockedState(std::function<StateEvent*(MockedState*, double)> func, unsigned char properties)
+  MockedState::MockedState(
+    std::function<StateEvent*(MockedState*, double)> func,
+    unsigned char properties,
+    osg::ref_ptr<osgGaming::World> overrideWorld)
     : osgGaming::AbstractGameState()
     , m(new Impl())
   {
     m->func = func;
     m->properties = properties;
+    m->overrideWorld = overrideWorld;
   }
 
   MockedState::~MockedState()
@@ -46,6 +53,11 @@ namespace osgGamingTest
     return m->properties;
   }
 
+  osg::ref_ptr<osgGaming::World> MockedState::overrideWorld()
+  {
+    return m->overrideWorld;
+  }
+  
   osgGaming::AbstractGameState::StateEvent* MockedState::stateEvent_push(osg::ref_ptr<AbstractGameState> state)
   {
     return osgGaming::AbstractGameState::stateEvent_push(state);

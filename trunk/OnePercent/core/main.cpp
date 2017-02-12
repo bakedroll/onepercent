@@ -1,5 +1,6 @@
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/NativeGameApplication.h>
+#include <osgGaming/View.h>
 
 #include "core/OnePercentApplication.h"
 

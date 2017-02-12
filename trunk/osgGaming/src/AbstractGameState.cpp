@@ -1,304 +1,340 @@
 #include <osgGaming/AbstractGameState.h>
 
+#include <osgGaming/World.h>
+#include <osgGaming/Hud.h>
+#include <osgGaming/GameSettings.h>
+#include <osgGaming/NativeView.h>
+#include <osgGaming/UIElement.h>
+
 using namespace osgGaming;
 using namespace osg;
 
-AbstractGameState::AbstractGameState()
-	: Referenced(),
-	  _initialized(false),
-	  _worldHudPrepared(false),
-	  _stateEvent(NULL),
-	  _firstUpdate(true)
+namespace osgGaming
 {
-	for (int i = 0; i < _stateBehaviorCount; i++)
-	{
-		_dirty[i] = true;
-	}
-}
+  struct AbstractGameState::Impl
+  {
+    Impl()
+      : initialized(false)
+      , firstUpdate(true)
+      , worldHudPrepared(false)
+      , stateEvent(nullptr)
+    {
+      for (int i = 0; i < stateBehaviorCount; i++)
+        dirty[i] = true;
+    }
 
-bool AbstractGameState::isInitialized()
-{
-	return _initialized;
-}
+    static const int stateBehaviorCount = 3;
 
-bool AbstractGameState::isWorldAndHudPrepared()
-{
-	return _worldHudPrepared;
-}
+    bool initialized;
+    bool firstUpdate;
+    bool worldHudPrepared;
+    bool dirty[stateBehaviorCount];
 
-bool AbstractGameState::isFirstUpdate()
-{
-	bool first = _firstUpdate;
+    StateEvent* stateEvent;
 
-	if (first)
-	{
-		_firstUpdate = false;
-	}
+    double simulationTime;
+    double frameTime;
+    osg::ref_ptr<World> world;
+    osg::ref_ptr<Hud> hud;
+    osg::ref_ptr<osgGaming::Viewer> viewer;
+    osg::ref_ptr<GameSettings> gameSettings;
+  };
 
-	return first;
-}
+  AbstractGameState::AbstractGameState()
+    : Referenced()
+    , m(new Impl())
+  {
+  }
 
-void AbstractGameState::setInitialized()
-{
-	_initialized = true;
-}
+  AbstractGameState::~AbstractGameState()
+  {
+  }
 
-void AbstractGameState::dirty(StateBehavior behavior)
-{
-	_dirty[(int)behavior] = true;
-}
+  bool AbstractGameState::isInitialized()
+  {
+    return m->initialized;
+  }
 
-bool AbstractGameState::isDirty(StateBehavior behavior)
-{
-	bool dirty = _dirty[(int)behavior];
+  bool AbstractGameState::isWorldAndHudPrepared()
+  {
+    return m->worldHudPrepared;
+  }
 
-	_dirty[(int)behavior] = false;
+  bool AbstractGameState::isFirstUpdate()
+  {
+    bool first = m->firstUpdate;
 
-	return dirty;
-}
+    if (first)
+    {
+      m->firstUpdate = false;
+    }
 
-void AbstractGameState::initialize()
-{
+    return first;
+  }
 
-}
+  void AbstractGameState::setInitialized()
+  {
+    m->initialized = true;
+  }
 
-AbstractGameState::StateEvent* AbstractGameState::update()
-{
-	return stateEvent_default();
-}
+  void AbstractGameState::setDirty(StateBehavior behavior)
+  {
+    m->dirty[int(behavior)] = true;
+  }
 
-unsigned char AbstractGameState::getProperties()
-{
-	return AbstractGameState::PROP_GUIEVENTS_TOP | AbstractGameState::PROP_UIMEVENTS_TOP | AbstractGameState::PROP_UPDATE_TOP;
-}
+  bool AbstractGameState::isDirty(StateBehavior behavior)
+  {
+    bool dirty = m->dirty[int(behavior)];
 
-void AbstractGameState::onKeyPressedEvent(int key)
-{
+    m->dirty[int(behavior)] = false;
 
-}
+    return dirty;
+  }
 
-void AbstractGameState::onKeyReleasedEvent(int key)
-{
+  void AbstractGameState::initialize()
+  {
 
-}
+  }
 
-void AbstractGameState::onMousePressedEvent(int button, float x, float y)
-{
+  AbstractGameState::StateEvent* AbstractGameState::update()
+  {
+    return stateEvent_default();
+  }
 
-}
+  unsigned char AbstractGameState::getProperties()
+  {
+    return AbstractGameState::PROP_GUIEVENTS_TOP | AbstractGameState::PROP_UIMEVENTS_TOP | AbstractGameState::PROP_UPDATE_TOP;
+  }
 
-void AbstractGameState::onMouseReleasedEvent(int button, float x, float y)
-{
+  void AbstractGameState::onKeyPressedEvent(int key)
+  {
 
-}
+  }
 
-void AbstractGameState::onMouseMoveEvent(float x, float y)
-{
+  void AbstractGameState::onKeyReleasedEvent(int key)
+  {
 
-}
+  }
 
-void AbstractGameState::onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion)
-{
+  void AbstractGameState::onMousePressedEvent(int button, float x, float y)
+  {
 
-}
+  }
 
-void AbstractGameState::onDragEvent(int button, Vec2f origin, Vec2f position, osg::Vec2f change)
-{
+  void AbstractGameState::onMouseReleasedEvent(int button, float x, float y)
+  {
 
-}
+  }
 
-void AbstractGameState::onDragBeginEvent(int button, Vec2f origin)
-{
+  void AbstractGameState::onMouseMoveEvent(float x, float y)
+  {
 
-}
+  }
 
-void AbstractGameState::onDragEndEvent(int button, Vec2f origin, Vec2f position)
-{
+  void AbstractGameState::onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion)
+  {
 
-}
+  }
 
-void AbstractGameState::onUIClickedEvent(osg::ref_ptr<UIElement> uiElement)
-{
+  void AbstractGameState::onDragEvent(int button, Vec2f origin, Vec2f position, osg::Vec2f change)
+  {
 
-}
+  }
 
-void AbstractGameState::onResizeEvent(float width, float height)
-{
+  void AbstractGameState::onDragBeginEvent(int button, Vec2f origin)
+  {
 
-}
+  }
 
-void AbstractGameState::prepareWorldAndHud()
-{
-	setWorld(newWorld());
-	setHud(newHud());
+  void AbstractGameState::onDragEndEvent(int button, Vec2f origin, Vec2f position)
+  {
 
-	_worldHudPrepared = true;
-}
+  }
 
-double AbstractGameState::getSimulationTime()
-{
-	return _simulationTime;
-}
+  void AbstractGameState::onUIClickedEvent(osg::ref_ptr<UIElement> uiElement)
+  {
 
-double AbstractGameState::getFrameTime()
-{
-	return _frameTime;
-}
+  }
 
-ref_ptr<World> AbstractGameState::getWorld()
-{
-	return _world;
-}
+  void AbstractGameState::onResizeEvent(float width, float height)
+  {
 
-ref_ptr<Hud> AbstractGameState::getHud()
-{
-	return _hud;
-}
+  }
 
-ref_ptr<osgGaming::Viewer> AbstractGameState::getViewer()
-{
-	return _viewer;
-}
+  void AbstractGameState::prepareWorldAndHud()
+  {
+    setWorld(overrideWorld());
+    setHud(overrideHud());
 
-osg::ref_ptr<osgGaming::NativeView> AbstractGameState::getView(int i)
-{
-  osgViewer::View* view = _viewer->getView(i);
-  if (!view)
+    m->worldHudPrepared = true;
+  }
+
+  double AbstractGameState::getSimulationTime()
+  {
+    return m->simulationTime;
+  }
+
+  double AbstractGameState::getFrameTime()
+  {
+    return m->frameTime;
+  }
+
+  ref_ptr<World> AbstractGameState::getWorld()
+  {
+    return m->world;
+  }
+
+  ref_ptr<Hud> AbstractGameState::getHud()
+  {
+    return m->hud;
+  }
+
+  ref_ptr<osgGaming::Viewer> AbstractGameState::getViewer()
+  {
+    return m->viewer;
+  }
+
+  osg::ref_ptr<osgGaming::NativeView> AbstractGameState::getView(int i)
+  {
+    osgViewer::View* view = m->viewer->getView(i);
+    if (!view)
+      return nullptr;
+
+    osgGaming::NativeView* gview = dynamic_cast<osgGaming::NativeView*>(view);
+
+    return gview;
+  }
+
+  ref_ptr<GameSettings> AbstractGameState::getGameSettings()
+  {
+    return m->gameSettings;
+  }
+
+  void AbstractGameState::setSimulationTime(double simulationTime)
+  {
+    m->simulationTime = simulationTime;
+  }
+
+  void AbstractGameState::setFrameTime(double frameTime)
+  {
+    m->frameTime = frameTime;
+  }
+
+  void AbstractGameState::setWorld(ref_ptr<World> world)
+  {
+    m->world = world;
+  }
+
+  void AbstractGameState::setHud(ref_ptr<Hud> hud)
+  {
+    m->hud = hud;
+  }
+
+  void AbstractGameState::setViewer(ref_ptr<osgGaming::Viewer> viewer)
+  {
+    m->viewer = viewer;
+  }
+
+  void AbstractGameState::setGameSettings(ref_ptr<GameSettings> settings)
+  {
+    m->gameSettings = settings;
+  }
+
+  AbstractGameState::StateEvent* AbstractGameState::stateEvent_default()
+  {
+    return m->stateEvent;
+  }
+
+  ref_ptr<World> AbstractGameState::overrideWorld()
+  {
     return nullptr;
+  }
 
-  osgGaming::NativeView* gview = dynamic_cast<osgGaming::NativeView*>(view);
+  ref_ptr<Hud> AbstractGameState::overrideHud()
+  {
+    return nullptr;
+  }
 
-  return gview;
-}
+  AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(ref_ptr<AbstractGameState> state)
+  {
+    if (m->stateEvent != NULL)
+    {
+      return m->stateEvent;
+    }
 
-ref_ptr<GameSettings> AbstractGameState::getGameSettings()
-{
-	return _gameSettings;
-}
+    m->stateEvent = new StateEvent();
+    m->stateEvent->type = PUSH;
+    m->stateEvent->referencedStates.push_back(state);
 
-void AbstractGameState::setSimulationTime(double simulationTime)
-{
-	_simulationTime = simulationTime;
-}
+    return m->stateEvent;
+  }
 
-void AbstractGameState::setFrameTime(double frameTime)
-{
-	_frameTime = frameTime;
-}
+  AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(AbstractGameStateList states)
+  {
+    if (m->stateEvent != NULL)
+    {
+      return m->stateEvent;
+    }
 
-void AbstractGameState::setWorld(ref_ptr<World> world)
-{
-	_world = world;
-}
+    m->stateEvent = new StateEvent();
+    m->stateEvent->type = PUSH;
+    m->stateEvent->referencedStates = states;
 
-void AbstractGameState::setHud(ref_ptr<Hud> hud)
-{
-	_hud = hud;
-}
+    return m->stateEvent;
+  }
 
-void AbstractGameState::setViewer(ref_ptr<osgGaming::Viewer> viewer)
-{
-	_viewer = viewer;
-}
+  AbstractGameState::StateEvent* AbstractGameState::stateEvent_pop()
+  {
+    if (m->stateEvent != NULL)
+    {
+      return m->stateEvent;
+    }
 
-void AbstractGameState::setGameSettings(ref_ptr<GameSettings> settings)
-{
-	_gameSettings = settings;
-}
+    m->stateEvent = new StateEvent();
+    m->stateEvent->type = POP;
 
-AbstractGameState::StateEvent* AbstractGameState::stateEvent_default()
-{
-	return _stateEvent;
-}
+    return m->stateEvent;
+  }
 
-ref_ptr<World> AbstractGameState::newWorld()
-{
-	return NULL;
-}
+  AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(ref_ptr<AbstractGameState> state)
+  {
+    if (m->stateEvent != NULL)
+    {
+      return m->stateEvent;
+    }
 
-ref_ptr<Hud> AbstractGameState::newHud()
-{
-	return NULL;
-}
+    m->stateEvent = new StateEvent();
+    m->stateEvent->type = REPLACE;
+    m->stateEvent->referencedStates.push_back(state);
 
-AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(ref_ptr<AbstractGameState> state)
-{
-	if (_stateEvent != NULL)
-	{
-		return _stateEvent;
-	}
+    return m->stateEvent;
+  }
 
-	_stateEvent = new StateEvent();
-	_stateEvent->type = PUSH;
-	_stateEvent->referencedStates.push_back(state);
+  AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(AbstractGameStateList states)
+  {
+    if (m->stateEvent != NULL)
+    {
+      return m->stateEvent;
+    }
 
-	return _stateEvent;
-}
+    m->stateEvent = new StateEvent();
+    m->stateEvent->type = REPLACE;
+    m->stateEvent->referencedStates = states;
 
-AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(AbstractGameStateList states)
-{
-	if (_stateEvent != NULL)
-	{
-		return _stateEvent;
-	}
+    return m->stateEvent;
+  }
 
-	_stateEvent = new StateEvent();
-	_stateEvent->type = PUSH;
-	_stateEvent->referencedStates = states;
+  AbstractGameState::StateEvent* AbstractGameState::stateEvent_endGame()
+  {
+    if (m->stateEvent != NULL)
+    {
+      return m->stateEvent;
+    }
 
-	return _stateEvent;
-}
+    m->stateEvent = new StateEvent();
+    m->stateEvent->type = END_GAME;
 
-AbstractGameState::StateEvent* AbstractGameState::stateEvent_pop()
-{
-	if (_stateEvent != NULL)
-	{
-		return _stateEvent;
-	}
+    return m->stateEvent;
+  }
 
-	_stateEvent = new StateEvent();
-	_stateEvent->type = POP;
-
-	return _stateEvent;
-}
-
-AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(ref_ptr<AbstractGameState> state)
-{
-	if (_stateEvent != NULL)
-	{
-		return _stateEvent;
-	}
-
-	_stateEvent = new StateEvent();
-	_stateEvent->type = REPLACE;
-	_stateEvent->referencedStates.push_back(state);
-
-	return _stateEvent;
-}
-
-AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(AbstractGameStateList states)
-{
-	if (_stateEvent != NULL)
-	{
-		return _stateEvent;
-	}
-
-	_stateEvent = new StateEvent();
-	_stateEvent->type = REPLACE;
-	_stateEvent->referencedStates = states;
-
-	return _stateEvent;
-}
-
-AbstractGameState::StateEvent* AbstractGameState::stateEvent_endGame()
-{
-	if (_stateEvent != NULL)
-	{
-		return _stateEvent;
-	}
-
-	_stateEvent = new StateEvent();
-	_stateEvent->type = END_GAME;
-
-	return _stateEvent;
 }

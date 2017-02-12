@@ -1,6 +1,7 @@
 #include "GlobeCameraState.h"
 
 #include <osgGaming/Helper.h>
+#include <osgGaming/NativeView.h>
 
 using namespace onep;
 using namespace osg;

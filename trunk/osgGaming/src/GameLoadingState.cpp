@@ -1,4 +1,8 @@
 #include <osgGaming/GameLoadingState.h>
+#include <osgGaming/GameSettings.h>
+#include <osgGaming/GameState.h>
+#include <osgGaming/Hud.h>
+#include <osgGaming/World.h>
 
 using namespace osg;
 using namespace osgGaming;
@@ -26,12 +30,12 @@ bool GameLoadingState::isLoadingState()
 	return true;
 }
 
-ref_ptr<World> GameLoadingState::newWorld()
+ref_ptr<World> GameLoadingState::overrideWorld()
 {
 	return new World();
 }
 
-ref_ptr<Hud> GameLoadingState::newHud()
+ref_ptr<Hud> GameLoadingState::overrideHud()
 {
 	return new Hud();
 }

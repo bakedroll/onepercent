@@ -18,6 +18,6 @@ namespace onep
 		virtual void onUIClickedEvent(osg::ref_ptr<osgGaming::UIElement> uiElement) override;
 
 	protected:
-		virtual osg::ref_ptr<osgGaming::Hud> newHud() override;
+		virtual osg::ref_ptr<osgGaming::Hud> overrideHud() override;
 	};
 }

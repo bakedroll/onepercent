@@ -1,14 +1,18 @@
-#include <osgGaming/GameApplication.h>
+#include "osgGaming/GameApplication.h"
+
 #include <osgGaming/GameException.h>
 #include <osgGaming/GameLoadingState.h>
+#include <osgGaming/GameSettings.h>
+#include <osgGaming/GameState.h>
+#include <osgGaming/NativeInputManager.h>
+#include <osgGaming/Observable.h>
 #include <osgGaming/TransformableCameraManipulator.h>
 #include <osgGaming/TimerFactory.h>
+#include <osgGaming/World.h>
 
 #include <chrono>
 #include <future>
 #include <iostream>
-#include <osgGaming/NativeInputManager.h>
-#include <osgGaming/Observable.h>
 
 using namespace osg;
 using namespace std;
