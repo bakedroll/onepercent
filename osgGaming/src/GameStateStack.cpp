@@ -43,7 +43,7 @@ bool GameStateStack::next()
 			break;
 		}
 
-		_itNext->get()->dirty(_itBehavior);
+		_itNext->get()->setDirty(_itBehavior);
 		++_itNext;
 	}
 

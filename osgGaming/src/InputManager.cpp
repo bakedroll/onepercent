@@ -1,9 +1,11 @@
 #include <osgGaming/InputManager.h>
 
 #include <unordered_set>
+
+#include <osgGaming/GameStateStack.h>
 #include <osgGaming/Helper.h>
 #include <osgGaming/Hud.h>
-#include <osgGaming/GameStateStack.h>
+#include <osgGaming/World.h>
 
 namespace osgGaming
 {

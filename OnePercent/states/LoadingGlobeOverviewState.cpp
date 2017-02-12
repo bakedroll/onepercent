@@ -4,10 +4,9 @@
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/BackgroundModel.h"
 
-#include <osgGaming/UIText.h>
-
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/PropertiesManager.h>
+#include <osgGaming/NativeView.h>
 
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>

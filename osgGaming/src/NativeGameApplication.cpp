@@ -1,5 +1,8 @@
 #include "osgGaming/NativeGameApplication.h"
-#include "osgGaming/NativeInputManager.h"
+
+#include <osgGaming/GameSettings.h>
+#include <osgGaming/NativeInputManager.h>
+#include <osgGaming/NativeView.h>
 
 #include <assert.h>
 

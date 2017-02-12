@@ -8,6 +8,7 @@
 #include <osgGaming/UIButton.h>
 #include <simulation/CountryData.h>
 #include <osgGaming/UIGrid.h>
+#include <osgGaming/Hud.h>
 
 using namespace osg;
 using namespace std;
@@ -391,7 +392,7 @@ namespace onep
     _started = true;
   }
 
-  ref_ptr<Hud> GlobeInteractionState::newHud()
+  ref_ptr<Hud> GlobeInteractionState::overrideHud()
   {
     return new Hud();
   }

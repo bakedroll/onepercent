@@ -4,6 +4,8 @@
 
 #include <osgViewer/ViewerEventHandlers>
 
+#include <osgGaming/NativeView.h>
+
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>

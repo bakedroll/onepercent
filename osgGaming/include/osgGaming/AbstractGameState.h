@@ -1,19 +1,21 @@
 #pragma once
 
-#include <vector>
+#include "Viewer.h"
 
-#include <osgGaming/World.h>
-#include <osgGaming/Hud.h>
-#include <osgGaming/GameSettings.h>
-#include <osgGaming/NativeView.h>
-#include <osgGaming/UIElement.h>
+#include <vector>
+#include <memory>
 
 #include <osg/Referenced>
 #include <osg/ref_ptr>
-#include "Viewer.h"
 
 namespace osgGaming
 {
+  class GameSettings;
+  class Hud;
+  class NativeView;
+  class UIElement;
+  class World;
+
 	class AbstractGameState : public osg::Referenced
 	{
 	public:
@@ -52,13 +54,14 @@ namespace osgGaming
 		} StateEvent;
 
 		AbstractGameState();
+    ~AbstractGameState();
 
 		bool isInitialized();
 		bool isWorldAndHudPrepared();
 		bool isFirstUpdate();
 		void setInitialized();
 
-		void dirty(StateBehavior behavior);
+		void setDirty(StateBehavior behavior);
 		bool isDirty(StateBehavior behavior);
 
 		virtual void initialize();
@@ -105,8 +108,8 @@ namespace osgGaming
 		StateEvent* stateEvent_default();
 
 	protected:
-		virtual osg::ref_ptr<World> newWorld();
-		virtual osg::ref_ptr<Hud> newHud();
+		virtual osg::ref_ptr<World> overrideWorld();
+		virtual osg::ref_ptr<Hud> overrideHud();
 
 		StateEvent* stateEvent_push(osg::ref_ptr<AbstractGameState> state);
 		StateEvent* stateEvent_push(AbstractGameStateList states);
@@ -116,21 +119,8 @@ namespace osgGaming
 		StateEvent* stateEvent_endGame();
 
 	private:
-		static const int _stateBehaviorCount = 3;
-
-		bool _initialized;
-		bool _firstUpdate;
-		bool _worldHudPrepared;
-		bool _dirty[_stateBehaviorCount];
-
-		StateEvent* _stateEvent;
-
-		double _simulationTime;
-		double _frameTime;
-		osg::ref_ptr<World> _world;
-		osg::ref_ptr<Hud> _hud;
-    osg::ref_ptr<osgGaming::Viewer> _viewer;
-		osg::ref_ptr<GameSettings> _gameSettings;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
 	};
 }

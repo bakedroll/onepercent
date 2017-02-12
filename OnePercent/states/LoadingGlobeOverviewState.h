@@ -1,9 +1,10 @@
 #pragma once
 
 #include <osgGaming/GameLoadingState.h>
-#include <osgGaming/World.h>
 #include <osgGaming/GameSettings.h>
+#include <osgGaming/GameState.h>
 #include <osgGaming/UIText.h>
+#include <osgGaming/World.h>
 
 namespace onep
 {
