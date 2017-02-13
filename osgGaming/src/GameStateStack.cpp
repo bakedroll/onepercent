@@ -14,9 +14,7 @@ bool GameStateStack::attachRequired()
 	bool res = _attachRequired;
 
 	if (res)
-	{
 		_attachRequired = false;
-	}
 
 	return res;
 }
