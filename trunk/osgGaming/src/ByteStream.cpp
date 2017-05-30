@@ -1,6 +1,9 @@
 #include <osgGaming/ByteStream.h>
 
-using namespace osgGaming;
+#include <cstring>
+
+namespace osgGaming
+{
 
 ByteStream::ByteStream(char* data)
 	: _data(data),
@@ -12,7 +15,7 @@ ByteStream::ByteStream(char* data)
 char* ByteStream::readString(int size)
 {
 	char* s = new char[size + 1];
-	memcpy(&s[0], &_data[_pos], size);
+	std::memcpy(&s[0], &_data[_pos], size);
 	s[size] = '\0';
 
 	_pos += size;
@@ -23,4 +26,6 @@ char* ByteStream::readString(int size)
 int ByteStream::getPos()
 {
 	return _pos;
+}
+
 }

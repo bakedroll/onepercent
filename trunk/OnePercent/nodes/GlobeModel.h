@@ -45,11 +45,11 @@ namespace onep
     osgGaming::Observable<int>::Ptr getSelectedCountryIdObservable();
 
 	private:
-		osgGaming::Property<float, Param_SunDistanceName> m_paramSunDistance;
-		osgGaming::Property<float, Param_SunRadiusPm2Name> m_paramSunRadiusMp2;
+    float m_paramSunDistance;
+    float m_paramSunRadiusMp2;
 
-		osgGaming::Property<float, Param_EarthCloudsSpeedName> m_paramEarthCloudsSpeed;
-		osgGaming::Property<float, Param_EarthCloudsMorphSpeedName> m_paramEarthCloudsMorphSpeed;
+    float m_paramEarthCloudsSpeed;
+    float m_paramEarthCloudsMorphSpeed;
 
 		void makeEarthModel();
 		void makeCloudsModel();

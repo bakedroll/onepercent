@@ -4,6 +4,7 @@ using namespace std;
 using namespace osg;
 using namespace osgGaming;
 
+template<>
 ref_ptr<ShaderFactory> Singleton<ShaderFactory>::_instance;
 
 ref_ptr<Shader> ShaderFactory::fromSourceText(string key, string source, Shader::Type type)

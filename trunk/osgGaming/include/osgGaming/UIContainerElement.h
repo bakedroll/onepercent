@@ -33,7 +33,11 @@ namespace osgGaming
 				throw GameException("Inconsistent state at UIContainerElement::addChild()\n");
 			}
 
-			_childLocationMap.insert(ChildLocationMap::value_type(uiElement, location));
+			std::pair<osg::ref_ptr<UIElement>, UILocationType> value;
+			value.first = uiElement;
+			value.second = location;
+
+			_childLocationMap.insert(value);
 
 			return getChildGroup()->addChild(node);
 		}

@@ -13,6 +13,7 @@ using namespace std;
 using namespace osgGaming;
 using namespace osgText;
 
+template<>
 ref_ptr<ResourceManager> Singleton<ResourceManager>::_instance;
 
 ResourceManager::ResourceManager()

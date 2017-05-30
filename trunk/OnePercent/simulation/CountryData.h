@@ -73,6 +73,9 @@ namespace onep
 		osg::Vec2f m_centerLatLong;
 		osg::Vec2f m_size;
 
+		float m_earthRadius;
+		float m_cameraZoom;
+
     void step();
     void affectNeighbors();
 	};

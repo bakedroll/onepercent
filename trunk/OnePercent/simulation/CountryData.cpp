@@ -32,6 +32,8 @@ namespace onep
     , m_id(id)
     , m_centerLatLong(centerLatLong)
     , m_size(size)
+    , m_earthRadius(PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName))
+    , m_cameraZoom(PropertiesManager::getInstance()->getValue<float>(Param_CameraCountryZoomName))
   {
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
       m_skillBranches.oActivated[i] = new osgGaming::Observable<bool>(false);
@@ -71,22 +73,17 @@ namespace onep
 
   Vec2f CountryData::getSurfaceSize()
   {
-    float earthRadius = ~Property<float, Param_EarthRadiusName>();
-
     return Vec2f(
-      2.0f * C_PI * sin(C_PI / 2.0f - abs(m_centerLatLong.x())) * earthRadius * m_size.x(),
-      C_PI * earthRadius * m_size.y());
+      2.0f * C_PI * sin(C_PI / 2.0f - abs(m_centerLatLong.x())) * m_earthRadius * m_size.x(),
+      C_PI * m_earthRadius * m_size.y());
   }
 
   float CountryData::getOptimalCameraDistance(float angle, float ratio)
   {
-    float cameraZoom = ~Property<float, Param_CameraCountryZoomName>();
-    float earthRadius = ~Property<float, Param_EarthRadiusName>();
-
     Vec2f surfaceSize = getSurfaceSize();
 
-    float hdistance = surfaceSize.x() * cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + earthRadius;
-    float vdistance = surfaceSize.y() * cameraZoom / (2.0f * tan(angle * C_PI / 360.0f)) + earthRadius;
+    float hdistance = surfaceSize.x() * m_cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + m_earthRadius;
+    float vdistance = surfaceSize.y() * m_cameraZoom / (2.0f * tan(angle * C_PI / 360.0f)) + m_earthRadius;
 
     return max(hdistance, vdistance);
   }

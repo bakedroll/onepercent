@@ -34,7 +34,7 @@ namespace onep
 
 		void updateCameraPosition(osg::Vec2f latLong, osg::Vec2f viewAngle, float distance);
 	private:
-		osgGaming::Property<float, Param_EarthRadiusName> _paramEarthRadius;
+		float m_paramEarthRadius;
 
 		void updateSun(osg::Vec3f sunDirection);
 

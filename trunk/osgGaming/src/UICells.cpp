@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <math.h>
 
 using namespace osgGaming;
 using namespace osg;
@@ -13,6 +14,7 @@ UICells::UICells(bool reverse)
   , _initialized(false)
   , _defaultSizePolicy(AUTO)
   , _reverse(reverse)
+  , _cells(nullptr)
 {
 }
 

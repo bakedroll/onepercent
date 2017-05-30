@@ -265,7 +265,7 @@ namespace osgGaming
 
 			for (int i = 0; i < T::num_components; i++)
 			{
-				result._v[i] = relocateValue(from._v[i], to._v[i], _min._v[i], _max._v[i], elapsed);
+				result._v[i] = RepeatedSpaceAnimation<T>::relocateValue(from._v[i], to._v[i], RepeatedSpaceAnimation <T>::_min._v[i], RepeatedSpaceAnimation <T>::_max._v[i], elapsed);
 			}
 
 			return result;

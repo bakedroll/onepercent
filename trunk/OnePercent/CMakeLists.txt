@@ -24,7 +24,6 @@ set(OSG_LIBRARIES_TMP "osg osgViewer osgUtil osgGA osgDB osgText osgPPU OpenThre
 get_libraries(OSG_LIBRARIES ${OSG_LIBRARY} "" ${OSG_LIBRARIES_TMP})
 get_libraries(OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${OSG_LIBRARIES_TMP})
 
-
 # set include directories
 target_include_directories(OnePercent PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -36,15 +35,20 @@ target_include_directories(OnePercent PUBLIC
 target_link_libraries(OnePercent
   osgGaming)
   
-foreach(lib ${OSG_LIBRARIES})
-  target_link_libraries(OnePercent
-    optimized ${lib})
-endforeach()
+if (MSVC)
+  foreach(lib ${OSG_LIBRARIES})
+    target_link_libraries(OnePercent
+      optimized ${lib})
+  endforeach()
 
-foreach(lib ${OSG_LIBRARIES_DEBUG})
-  target_link_libraries(OnePercent
-    debug ${lib})
-endforeach()
+  foreach(lib ${OSG_LIBRARIES_DEBUG})
+    target_link_libraries(OnePercent
+      debug ${lib})
+  endforeach()
+else()
+  #TODO: write find script for osgPPU
+  target_link_libraries(OnePercent ${OPENSCENEGRAPH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} /usr/local/lib64/libosgPPU.so.0.5.9)
+endif()
 
 # copy GameData
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/GameData DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

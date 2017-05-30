@@ -9,6 +9,7 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <osgGaming/ResourceManager.h>
+#include <osgGaming/PropertiesManager.h>
 #include <osgGaming/Helper.h>
 #include <osg/Switch>
 #include <osgGaming/ByteStream.h>
@@ -23,6 +24,10 @@ namespace onep
   GlobeModel::GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
     : m_oSelectedCountryId(new osgGaming::Observable<int>(0))
     , m_highlightedBranch(BRANCH_UNDEFINED)
+    , m_paramSunDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_SunDistanceName))
+    , m_paramSunRadiusMp2(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_SunRadiusPm2Name))
+    , m_paramEarthCloudsSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsSpeedName))
+    , m_paramEarthCloudsMorphSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsMorphSpeedName))
   {
     makeEarthModel();
     makeCloudsModel();
@@ -33,17 +38,17 @@ namespace onep
   void GlobeModel::updateLightDirection(osg::Vec3f direction)
   {
     m_scatteringLightDirUniform->setElement(0, direction);
-    Vec3f position = -direction * ~m_paramSunDistance;
+    Vec3f position = -direction * m_paramSunDistance;
 
-    m_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), ~m_paramSunRadiusMp2));
+    m_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), m_paramSunRadiusMp2));
   }
 
   void GlobeModel::updateClouds(float day)
   {
-    Quat quat = osgGaming::getQuatFromEuler(0.0, 0.0, fmodf(day * ~m_paramEarthCloudsSpeed, C_2PI));
+    Quat quat = osgGaming::getQuatFromEuler(0.0, 0.0, fmodf(day * m_paramEarthCloudsSpeed, C_2PI));
     m_cloudsTransform->setAttitude(quat);
 
-    m_uniformTime->set(day * ~m_paramEarthCloudsMorphSpeed);
+    m_uniformTime->set(day * m_paramEarthCloudsMorphSpeed);
   }
 
   void GlobeModel::clearHighlightedCountries()
@@ -114,14 +119,14 @@ namespace onep
 
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
     {
-      m_skillBranchActivatedObserver = countryData->getSkillBranchActivatedObservable(i)->connect([this, mesh, i](bool activated)
+      m_skillBranchActivatedObserver = countryData->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([this, mesh, i](bool activated)
       {
         if (!activated)
           return;
 
         if (m_oSelectedCountryId->get() == 0 && m_highlightedBranch == i)
           addHighlightedCountry(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
-      });
+      }));
     }
   }
 
@@ -340,11 +345,11 @@ namespace onep
 
   void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
   {
-    float earthRadius = ~osgGaming::Property<float, Param_EarthRadiusName>();
-    float atmosphereHeight = ~osgGaming::Property<float, Param_EarthAtmosphereHeightName>();
-    float scatteringDepth = ~osgGaming::Property<float, Param_EarthScatteringDepthName>();
-    float scatteringIntensity = ~osgGaming::Property<float, Param_EarthScatteringIntensityName>();
-    Vec4f atmosphereColor = ~osgGaming::Property<Vec4f, Param_EarthAtmosphereColorName>();
+    float earthRadius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
+    float atmosphereHeight = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthAtmosphereHeightName);
+    float scatteringDepth = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthScatteringDepthName);
+    float scatteringIntensity = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthScatteringIntensityName);
+    Vec4f atmosphereColor = osgGaming::PropertiesManager::getInstance()->getValue<Vec4f>(Param_EarthAtmosphereColorName);
 
     // atmospheric scattering geometry
     ref_ptr<osgGaming::CameraAlignedQuad> caq = new osgGaming::CameraAlignedQuad();
@@ -421,9 +426,9 @@ namespace onep
       break;
     };
 
-    int stacks = ~osgGaming::Property<int, Param_EarthSphereStacksName>();
-    int slices = ~osgGaming::Property<int, Param_EarthSphereSlicesName>();
-    float radius = ~osgGaming::Property<float, Param_EarthRadiusName>();
+    int stacks = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereStacksName);
+    int slices = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereSlicesName);
+    float radius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
 
     int stacksPerSegment = stacks / m;
     int slicesPerSegment = slices / n;
@@ -493,10 +498,10 @@ namespace onep
     int n = 2;
     int m = 1;
 
-    int stacks = ~osgGaming::Property<int, Param_EarthSphereStacksName>();
-    int slices = ~osgGaming::Property<int, Param_EarthSphereSlicesName>();
-    float radius = ~osgGaming::Property<float, Param_EarthRadiusName>();
-    float cloudsHeight = ~osgGaming::Property<float, Param_EarthCloudsHeightName>();
+    int stacks = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereStacksName);
+    int slices = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereSlicesName);
+    float radius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
+    float cloudsHeight = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsHeightName);
 
     int stacksPerSegment = stacks / m;
     int slicesPerSegment = slices / n;

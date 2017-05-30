@@ -13,6 +13,7 @@ GlobeOverviewWorld::GlobeOverviewWorld()
 	  _cameraLatLong(Vec2f(0.0f, 0.0f)),
 	  _cameraViewAngle(Vec2f(0.0f, 0.0f)),
 	  _cameraDistance(28.0f)
+	, m_paramEarthRadius(PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName))
 {
 	_simulation = new Simulation();
 
@@ -82,7 +83,8 @@ void GlobeOverviewWorld::setBackgroundModel(ref_ptr<BackgroundModel> backgroundM
 
 void GlobeOverviewWorld::setDay(float day)
 {
-	float year = day / ~Property<float, Param_MechanicsDaysInYearName>();
+	float daysInYear = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_MechanicsDaysInYearName);
+	float year = day / daysInYear;
 
 	Matrix yearMat = getMatrixFromEuler(0.0f, 0.0f, - year * 2.0f * C_PI) *
 		getMatrixFromEuler(-sin(year * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);
@@ -148,7 +150,7 @@ void GlobeOverviewWorld::updateSun(Vec3f sunDirection)
 		float range = 0.3f;
 
 		float dist = pointLineDistance(getCameraManipulator()->getPosition(), sunDirection, Vec3f(0.0f, 0.0f, 0.0f));
-		float scale = clampBetween(dist - ~_paramEarthRadius, 0.0f, range);
+		float scale = clampBetween(dist - m_paramEarthRadius, 0.0f, range);
 		scale /= range;
 		scale *= 2.5f;
 

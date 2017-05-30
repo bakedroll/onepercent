@@ -1,11 +1,11 @@
 #pragma once
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 namespace osgGaming
 {
-	class GameException : public std::exception
+	class GameException : public std::runtime_error
 	{
 	public:
 		GameException(std::string message);
