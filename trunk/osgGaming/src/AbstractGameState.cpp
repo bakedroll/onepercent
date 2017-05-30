@@ -6,9 +6,6 @@
 #include <osgGaming/NativeView.h>
 #include <osgGaming/UIElement.h>
 
-using namespace osgGaming;
-using namespace osg;
-
 namespace osgGaming
 {
   struct AbstractGameState::Impl
@@ -34,10 +31,15 @@ namespace osgGaming
 
     double simulationTime;
     double frameTime;
-    osg::ref_ptr<World> world;
-    osg::ref_ptr<Hud> hud;
     osg::ref_ptr<osgGaming::Viewer> viewer;
     osg::ref_ptr<GameSettings> gameSettings;
+
+    // TODO: delete dead views
+    typedef std::map<osgGaming::View::WeakPtr, osgGaming::World::Ptr> ViewWorldMap;
+    ViewWorldMap overriddenWorlds;
+
+    typedef std::map<osgGaming::View::WeakPtr, osgGaming::Hud::Ptr> ViewHudMap;
+    ViewHudMap overriddenHuds;
   };
 
   AbstractGameState::AbstractGameState()
@@ -58,6 +60,11 @@ namespace osgGaming
   bool AbstractGameState::isWorldAndHudPrepared()
   {
     return m->worldHudPrepared;
+  }
+
+  void AbstractGameState::setWorldAndHudPrepared()
+  {
+    m->worldHudPrepared = true;
   }
 
   bool AbstractGameState::isFirstUpdate()
@@ -136,17 +143,17 @@ namespace osgGaming
 
   }
 
-  void AbstractGameState::onDragEvent(int button, Vec2f origin, Vec2f position, osg::Vec2f change)
+  void AbstractGameState::onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change)
   {
 
   }
 
-  void AbstractGameState::onDragBeginEvent(int button, Vec2f origin)
+  void AbstractGameState::onDragBeginEvent(int button, osg::Vec2f origin)
   {
 
   }
 
-  void AbstractGameState::onDragEndEvent(int button, Vec2f origin, Vec2f position)
+  void AbstractGameState::onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position)
   {
 
   }
@@ -161,12 +168,35 @@ namespace osgGaming
 
   }
 
-  void AbstractGameState::prepareWorldAndHud()
+  void AbstractGameState::prepareWorldAndHud(osg::ref_ptr<View> view)
   {
-    setWorld(overrideWorld());
-    setHud(overrideHud());
+    Impl::ViewWorldMap::iterator wit = m->overriddenWorlds.find(view);
+    World::Ptr world;
+    if (wit != m->overriddenWorlds.end())
+    {
+      world = wit->second;
+    }
+    else
+    {
+      world = overrideWorld(view);
+      m->overriddenWorlds[view] = world;
+    }
 
-    m->worldHudPrepared = true;
+    setWorld(view, world);
+
+    Impl::ViewHudMap::iterator hit = m->overriddenHuds.find(view);
+    Hud::Ptr hud;
+    if (hit != m->overriddenHuds.end())
+    {
+      hud = hit->second;
+    }
+    else
+    {
+      hud = overrideHud(view);
+      m->overriddenHuds[view] = hud;
+    }
+
+    setHud(view, hud);
   }
 
   double AbstractGameState::getSimulationTime()
@@ -179,33 +209,35 @@ namespace osgGaming
     return m->frameTime;
   }
 
-  ref_ptr<World> AbstractGameState::getWorld()
+  osg::ref_ptr<World> AbstractGameState::getWorld(osg::ref_ptr<View> view)
   {
-    return m->world;
+    Impl::ViewWorldMap::iterator it = m->overriddenWorlds.find(view);
+    if (it != m->overriddenWorlds.end())
+      return it->second;
+
+    return nullptr;
   }
 
-  ref_ptr<Hud> AbstractGameState::getHud()
+  osg::ref_ptr<Hud> AbstractGameState::getHud(osg::ref_ptr<View> view)
   {
-    return m->hud;
+    Impl::ViewHudMap::iterator it = m->overriddenHuds.find(view);
+    if (it != m->overriddenHuds.end())
+      return it->second;
+
+    return nullptr;
   }
 
-  ref_ptr<osgGaming::Viewer> AbstractGameState::getViewer()
+  osg::ref_ptr<osgGaming::Viewer> AbstractGameState::getViewer()
   {
     return m->viewer;
   }
 
-  osg::ref_ptr<osgGaming::NativeView> AbstractGameState::getView(int i)
+  osg::ref_ptr<osgGaming::View> AbstractGameState::getView(int i)
   {
-    osgViewer::View* view = m->viewer->getView(i);
-    if (!view)
-      return nullptr;
-
-    osgGaming::NativeView* gview = dynamic_cast<osgGaming::NativeView*>(view);
-
-    return gview;
+    return m->viewer->getView(0);
   }
 
-  ref_ptr<GameSettings> AbstractGameState::getGameSettings()
+  osg::ref_ptr<GameSettings> AbstractGameState::getGameSettings()
   {
     return m->gameSettings;
   }
@@ -220,22 +252,22 @@ namespace osgGaming
     m->frameTime = frameTime;
   }
 
-  void AbstractGameState::setWorld(ref_ptr<World> world)
+  void AbstractGameState::setWorld(osg::ref_ptr<View> view, osg::ref_ptr<World> world)
   {
-    m->world = world;
+    m->overriddenWorlds[view] = world;
   }
 
-  void AbstractGameState::setHud(ref_ptr<Hud> hud)
+  void AbstractGameState::setHud(osg::ref_ptr<View> view, osg::ref_ptr<Hud> hud)
   {
-    m->hud = hud;
+    m->overriddenHuds[view] = hud;
   }
 
-  void AbstractGameState::setViewer(ref_ptr<osgGaming::Viewer> viewer)
+  void AbstractGameState::setViewer(osg::ref_ptr<osgGaming::Viewer> viewer)
   {
     m->viewer = viewer;
   }
 
-  void AbstractGameState::setGameSettings(ref_ptr<GameSettings> settings)
+  void AbstractGameState::setGameSettings(osg::ref_ptr<GameSettings> settings)
   {
     m->gameSettings = settings;
   }
@@ -245,17 +277,17 @@ namespace osgGaming
     return m->stateEvent;
   }
 
-  ref_ptr<World> AbstractGameState::overrideWorld()
+  osg::ref_ptr<World> AbstractGameState::overrideWorld(osg::ref_ptr<View> view)
   {
     return nullptr;
   }
 
-  ref_ptr<Hud> AbstractGameState::overrideHud()
+  osg::ref_ptr<Hud> AbstractGameState::overrideHud(osg::ref_ptr<View> view)
   {
     return nullptr;
   }
 
-  AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(ref_ptr<AbstractGameState> state)
+  AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(osg::ref_ptr<AbstractGameState> state)
   {
     if (m->stateEvent != NULL)
     {
@@ -296,7 +328,7 @@ namespace osgGaming
     return m->stateEvent;
   }
 
-  AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(ref_ptr<AbstractGameState> state)
+  AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(osg::ref_ptr<AbstractGameState> state)
   {
     if (m->stateEvent != NULL)
     {

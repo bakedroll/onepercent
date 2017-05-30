@@ -161,7 +161,7 @@ namespace onep
     }
 
     osg::ref_ptr<osgViewer::CompositeViewer> viewer;
-    osg::ref_ptr<osgGaming::NativeView> view;
+    osg::ref_ptr<osgGaming::View> view;
     osg::ref_ptr<osg::Camera> camera;
     osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> graphicsWindow;
 
@@ -184,7 +184,8 @@ namespace onep
     //setAttribute(Qt::WA_TranslucentBackground);
 
     m->graphicsWindow = new osgViewer::GraphicsWindowEmbedded(x(), y(), width(), height());
-    m->view = dynamic_cast<osgGaming::NativeView*>(viewer->getView(0));
+
+    m->view = dynamic_cast<osgGaming::View*>(viewer->getView(0));
     m->camera = m->view->getSceneCamera();
 
     if (!m->camera || !m->view)

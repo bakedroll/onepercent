@@ -21,20 +21,23 @@ namespace osgGaming
   {
     osg::ref_ptr<GameSettings> settings = getDefaultGameSettings();
 
-    
-    getViewer()->setFullscreenEnabled(0, settings->getFullscreenEnabled());
-    getViewer()->setWindowedResolution(0, settings->getWindowedResolution());
-
-    View* view = dynamic_cast<View*>(getViewer()->getView(0));
-
-    if (!view)
+    unsigned int nviews = getViewer()->getNumViews();
+    for (unsigned int i = 0; i < nviews; i++)
     {
-      assert(false);
-      return -1;
-    }
+      getViewer()->setFullscreenEnabled(i, settings->getFullscreenEnabled());
+      getViewer()->setWindowedResolution(i, settings->getWindowedResolution());
 
-    view->setScreenNum(settings->getScreenNum());
-    view->setupResolution();
+      View* view = getViewer()->getView(i);
+
+      if (!view)
+      {
+        assert(false);
+        return -1;
+      }
+
+      view->setScreenNum(settings->getScreenNum());
+      view->setupResolution();
+    }
 
     getViewer()->setKeyEventSetsDone(0);
     getViewer()->realize();

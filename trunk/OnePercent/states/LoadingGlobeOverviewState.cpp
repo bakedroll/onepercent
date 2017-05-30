@@ -35,8 +35,8 @@ namespace onep
   {
     PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/localization/en.xml");
 
-    float projNear = float(getWorld()->getCameraManipulator()->getProjectionNear());
-    float projFar = float(getWorld()->getCameraManipulator()->getProjectionFar());
+    float projNear = float(getWorld(getView(0))->getCameraManipulator()->getProjectionNear());
+    float projFar = float(getWorld(getView(0))->getCameraManipulator()->getProjectionFar());
 
     std::string loadingTextString = osgGaming::PropertiesManager::getInstance()->getValue<std::string>(Param_LocalizationInfoTextLoading);
 
@@ -46,7 +46,7 @@ namespace onep
     _loadingText->setVerticalAlignment(UIElement::BOTTOM);
     _loadingText->setMargin(10.0f);
 
-    getHud()->getRootUIElement()->addChild(_loadingText);
+    getHud(getView(0))->getRootUIElement()->addChild(_loadingText);
 
     getView(0)->setClampColorEnabled(true);
 

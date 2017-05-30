@@ -40,7 +40,7 @@ struct InputManager::Impl
 
       if (!onlyDirty || state->isDirty(AbstractGameState::UIMEVENT))
       {
-        osg::ref_ptr<Hud> hud = state->getHud();
+        osg::ref_ptr<Hud> hud = state->getHud(view);
 
         HudSet::iterator it = hudSet.find(hud.get());
         if (it == hudSet.end())
@@ -58,7 +58,7 @@ struct InputManager::Impl
 
         if (gameStateStack->isTop())
         {
-          state->getWorld()->getCameraManipulator()->updateResolution(resolution);
+          state->getWorld(view)->getCameraManipulator()->updateResolution(resolution);
         }
       }
     }
@@ -77,7 +77,7 @@ struct InputManager::Impl
 
   void handleUserInteractionMove(osg::ref_ptr<AbstractGameState> state, float x, float y)
   {
-    UserInteractionModel::List& uimList = state->getHud()->getUserInteractionModels();
+    UserInteractionModel::List& uimList = state->getHud(view)->getUserInteractionModels();
 
     for (UserInteractionModel::List::iterator it = uimList.begin(); it != uimList.end(); ++it)
     {
@@ -194,13 +194,13 @@ bool InputManager::onMouseClickEvent(const osgGA::GUIEventAdapter& ea)
   {
     osg::ref_ptr<AbstractGameState> state = m->gameStateStack->get();
 
-    if (state->getHud()->anyUserInteractionModelHovered())
+    if (state->getHud(m->view)->anyUserInteractionModelHovered())
     {
       anyUIMHovered = true;
 
       if (ea.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
       {
-        UserInteractionModel::List& uimList = state->getHud()->getUserInteractionModels();
+        UserInteractionModel::List& uimList = state->getHud(m->view)->getUserInteractionModels();
         for (UserInteractionModel::List::iterator uit = uimList.begin(); uit != uimList.end(); ++uit)
         {
           if ((*uit)->isEnabled() && (*uit)->getHovered())
@@ -251,7 +251,7 @@ bool InputManager::onMouseReleaseEvent(const osgGA::GUIEventAdapter& ea)
   m->gameStateStack->begin(AbstractGameState::GUIEVENT);
   while (m->gameStateStack->next())
   {
-    if (!m->gameStateStack->get()->getHud()->anyUserInteractionModelHovered())
+    if (!m->gameStateStack->get()->getHud(m->view)->anyUserInteractionModelHovered())
     {
       m->gameStateStack->get()->onMouseReleasedEvent(ea.getButton(), ea.getX(), ea.getY());
     }
@@ -280,7 +280,7 @@ bool InputManager::onMouseMoveEvent(const osgGA::GUIEventAdapter& ea)
       m->handleUserInteractionMove(m->gameStateStack->get(), m->mousePosition.x(), m->mousePosition.y());
     }
 
-    if (m->gameStateStack->get()->getHud()->anyUserInteractionModelHovered())
+    if (m->gameStateStack->get()->getHud(m->view)->anyUserInteractionModelHovered())
     {
       anyUIMHovered = true;
     }

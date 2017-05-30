@@ -14,6 +14,7 @@ namespace osgGaming
   {
   public:
     typedef osg::ref_ptr<View> Ptr;
+    typedef osg::observer_ptr<View> WeakPtr;
 
     View();
     ~View();

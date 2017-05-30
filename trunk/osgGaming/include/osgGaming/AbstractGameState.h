@@ -14,6 +14,7 @@ namespace osgGaming
   class Hud;
   class NativeView;
   class UIElement;
+  class View;
   class World;
 
 	class AbstractGameState : public osg::Referenced
@@ -58,6 +59,7 @@ namespace osgGaming
 
 		bool isInitialized();
 		bool isWorldAndHudPrepared();
+    void setWorldAndHudPrepared();
 		bool isFirstUpdate();
 		void setInitialized();
 
@@ -88,28 +90,28 @@ namespace osgGaming
 
 		virtual void onResizeEvent(float width, float height);
 
-		void prepareWorldAndHud();
+    void prepareWorldAndHud(osg::ref_ptr<View> view);
 
 		double getSimulationTime();
 		double getFrameTime();
-		osg::ref_ptr<World> getWorld();
-		osg::ref_ptr<Hud> getHud();
+    osg::ref_ptr<World> getWorld(osg::ref_ptr<View> view);
+    osg::ref_ptr<Hud> getHud(osg::ref_ptr<View> view);
     osg::ref_ptr<osgGaming::Viewer> getViewer();
-    osg::ref_ptr<osgGaming::NativeView> getView(int i);
+    osg::ref_ptr<osgGaming::View> getView(int i);
 		osg::ref_ptr<GameSettings> getGameSettings();
 
 		void setSimulationTime(double simulationTime);
 		void setFrameTime(double frameTime);
-		void setWorld(osg::ref_ptr<World> world);
-		void setHud(osg::ref_ptr<Hud> hud);
+		void setWorld(osg::ref_ptr<View> view, osg::ref_ptr<World> world);
+    void setHud(osg::ref_ptr<View> view, osg::ref_ptr<Hud> hud);
     void setViewer(osg::ref_ptr<osgGaming::Viewer> viewer);
 		void setGameSettings(osg::ref_ptr<GameSettings> settings);
 
 		StateEvent* stateEvent_default();
 
 	protected:
-		virtual osg::ref_ptr<World> overrideWorld();
-		virtual osg::ref_ptr<Hud> overrideHud();
+		virtual osg::ref_ptr<World> overrideWorld(osg::ref_ptr<View> view);
+    virtual osg::ref_ptr<Hud> overrideHud(osg::ref_ptr<View> view);
 
 		StateEvent* stateEvent_push(osg::ref_ptr<AbstractGameState> state);
 		StateEvent* stateEvent_push(AbstractGameStateList states);

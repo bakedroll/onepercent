@@ -44,4 +44,11 @@ namespace osgGaming
 
     gview->setWindowedResolution(resolution, windows);
   }
+
+  osg::ref_ptr<View> Viewer::getView(unsigned i)
+  {
+    View::Ptr view = dynamic_cast<View*>(osgViewer::CompositeViewer::getView(i));
+    assert(view);
+    return view;
+  }
 }

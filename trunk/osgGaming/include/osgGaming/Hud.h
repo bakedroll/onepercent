@@ -14,6 +14,8 @@ namespace osgGaming
 	class Hud : public osg::Referenced
 	{
 	public:
+    typedef osg::ref_ptr<Hud> Ptr;
+
 		Hud();
 
 		osg::ref_ptr<osg::Projection> getProjection();
