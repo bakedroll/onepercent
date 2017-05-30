@@ -20,6 +20,8 @@ namespace osgGaming
 	class World : public osg::Referenced
 	{
 	public:
+    typedef osg::ref_ptr<World> Ptr;
+
 		World();
 
 		osg::ref_ptr<osg::Group> getRootNode();

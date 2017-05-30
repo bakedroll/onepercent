@@ -1,6 +1,6 @@
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/NativeGameApplication.h>
-#include <osgGaming/View.h>
+#include <osgGaming/NativeView.h>
 
 #include "core/OnePercentApplication.h"
 
@@ -14,7 +14,7 @@ using namespace osgGaming;
 using namespace onep;
 using namespace osg;
 
-// #define INITIALIZE_QT
+#define INITIALIZE_QT
 
 int main(int argc, char** argv)
 {
@@ -33,6 +33,7 @@ int main(int argc, char** argv)
 #else
 
   ref_ptr<NativeGameApplication> app = new NativeGameApplication();
+  //app->getViewer()->addView(new osgGaming::NativeView());
 
   ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 

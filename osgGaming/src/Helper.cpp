@@ -97,8 +97,15 @@ Vec2f osgGaming::getTextSize(ref_ptr<Text> text)
 	for (Text::TextureGlyphQuadMap::iterator it = glyphs.begin(); it != glyphs.end(); ++it)
 	{
 		Text::GlyphQuads::Coords2 quads = it->second.getCoords();
+#if OSG_MIN_VERSION_REQUIRED(3, 4, 0)
 		for (int i=0; i<quads->size(); i++)
 		  bb.expandBy((*quads)[i].x(), (*quads)[i].y(), 0.0f);
+else
+		for (Text::GlyphQuads::Coords2::iterator qit = quads.begin(); qit != quads.end(); ++qit)
+		{
+			bb.expandBy(qit->x(), qit->y(), 0.0f);
+		}
+#endif
 	}
 
 	float width = bb.xMax() - bb.xMin();
@@ -190,7 +197,12 @@ StateAttribute::GLModeValue osgGaming::glModeValueFromBool(bool on)
 
 string osgGaming::lowerString(string str)
 {
+#ifdef WIN32
+	transform(str.begin(), str.end(), str.begin(), tolower);
+#else
 	std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+#endif
+
 	return str;
 }
 

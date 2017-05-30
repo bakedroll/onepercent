@@ -20,7 +20,7 @@ GlobeCameraState::~GlobeCameraState()
 
 void GlobeCameraState::initialize()
 {
-	_globeWorld = static_cast<GlobeOverviewWorld*>(getWorld().get());
+	_globeWorld = static_cast<GlobeOverviewWorld*>(getWorld(getView(0)).get());
 
 	_cameraLatLong = _globeWorld->getCameraLatLong();
 	_cameraDistance = _globeWorld->getCameraDistance();

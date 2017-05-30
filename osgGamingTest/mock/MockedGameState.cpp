@@ -1,5 +1,6 @@
 #include "MockedGameState.h"
 
+#include <osgGaming/View.h>
 #include <osgGaming/World.h>
 
 namespace osgGamingTest
@@ -53,7 +54,7 @@ namespace osgGamingTest
     return m->properties;
   }
 
-  osg::ref_ptr<osgGaming::World> MockedState::overrideWorld()
+  osg::ref_ptr<osgGaming::World> MockedState::overrideWorld(osg::ref_ptr<osgGaming::View> view)
   {
     return m->overrideWorld;
   }

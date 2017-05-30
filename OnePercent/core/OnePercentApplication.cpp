@@ -28,6 +28,8 @@ namespace onep
   {
     osgGaming::ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 
+    getViewer()->addView(new osgGaming::View());
+
     m->mainWindow = new MainWindow(getViewer());
     m->mainWindow->show();
     setInputManager(m->mainWindow->getViewWidget());

@@ -20,8 +20,8 @@ namespace osgGaming
 		AbstractGameStateList getNextStates();
 
 	protected:
-		virtual osg::ref_ptr<World> overrideWorld() override;
-		virtual osg::ref_ptr<Hud> overrideHud() override;
+		virtual osg::ref_ptr<World> overrideWorld(osg::ref_ptr<View> view) override;
+    virtual osg::ref_ptr<Hud> overrideHud(osg::ref_ptr<View> view) override;
 
 	private:
 		AbstractGameStateList _nextStates;

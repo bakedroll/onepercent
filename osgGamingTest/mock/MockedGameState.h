@@ -21,7 +21,7 @@ namespace osgGamingTest
     virtual StateEvent* update() override;
     virtual unsigned char getProperties() override;
 
-    virtual osg::ref_ptr<osgGaming::World> overrideWorld() override;
+    virtual osg::ref_ptr<osgGaming::World> overrideWorld(osg::ref_ptr<osgGaming::View> view) override;
 
     StateEvent* stateEvent_push(osg::ref_ptr<AbstractGameState> state);
     StateEvent* stateEvent_push(AbstractGameStateList states);

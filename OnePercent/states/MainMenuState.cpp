@@ -4,6 +4,7 @@
 #include "nodes/GlobeOverviewWorld.h"
 
 #include <osgGaming/Hud.h>
+#include <osgGaming/View.h>
 
 using namespace osg;
 using namespace onep;
@@ -23,9 +24,9 @@ void MainMenuState::initialize()
 	setCameraViewAngle(Vec2f(-0.9f, 0.6f));
 	setCameraLatLong(Vec2f(0.5f, 1.2f));
 
-	getHud()->loadMarkupFromXmlResource("./GameData/data/ui/mainmenu.xml");
+  getHud(getView(0))->loadMarkupFromXmlResource("./GameData/data/ui/mainmenu.xml");
 
-	getHud()->setFpsEnabled(true);
+  getHud(getView(0))->setFpsEnabled(true);
 }
 
 GameState::StateEvent* MainMenuState::update()
@@ -47,7 +48,7 @@ void MainMenuState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
 	}
 }
 
-ref_ptr<Hud> MainMenuState::overrideHud()
+ref_ptr<Hud> MainMenuState::overrideHud(osg::ref_ptr<osgGaming::View> view)
 {
 	return new Hud();
 }

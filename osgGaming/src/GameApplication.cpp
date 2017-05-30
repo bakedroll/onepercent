@@ -46,17 +46,26 @@ namespace osgGaming
     {
       if (!state->isWorldAndHudPrepared())
       {
-        state->prepareWorldAndHud();
-
-        if (!state->getWorld().valid())
+        int nviews = viewer->getNumViews();
+        for (int i = 0; i < nviews; i++)
         {
-          state->setWorld(base->getDefaultWorld());
+          View::Ptr view = viewer->getView(i);
+          if (!view)
+          {
+            assert(false);
+            continue;
+          }
+
+          state->prepareWorldAndHud(view);
+
+          if (!state->getWorld(view).valid())
+            state->setWorld(view, base->getDefaultWorld());
+
+          if (!state->getHud(view).valid())
+            state->setHud(view, base->getDefaultHud());
         }
 
-        if (!state->getHud().valid())
-        {
-          state->setHud(base->getDefaultHud());
-        }
+        state->setWorldAndHudPrepared();
       }
     }
 
@@ -68,43 +77,48 @@ namespace osgGaming
       }
     }
 
-    osg::ref_ptr<InputManager> obtainInputManager(osg::ref_ptr<osgGaming::View> view)
-    {
-      InputManager::Ptr im;
-      InputManagerMap::iterator it = inputManagers.find(view);
-      if (it == inputManagers.end())
-        im = base->createInputManager(view);
-      else
-        im = it->second;
-
-      return im;
-    }
-
     void attachState(osg::ref_ptr<AbstractGameState> state)
     {
       if (!state->isLoadingState())
       {
-        base->setDefaultWorld(state->getWorld());
-        base->setDefaultHud(state->getHud());
+        // TODO: what does that do?
+
+        //base->setDefaultWorld(state->getWorld());
+        //base->setDefaultHud(state->getHud());
       }
 
-      if (!inputManager.valid())
+      int nviews = viewer->getNumViews();
+      for (int i = 0; i < nviews; i++)
       {
-        inputManager = obtainInputManager(view);
-        inputManager->setGameStateStack(&gameStateStack);
-        inputManager->setView(view);
-        inputManager->setIsInizialized(true);
+        View::Ptr view = viewer->getView(i);
+        if (!view)
+        {
+          assert(false);
+          continue;
+        }
+
+        InputManager::Ptr inputManager = inputManagers[view];
+        if (!inputManager.valid())
+        {
+          inputManager = base->createInputManager(view);
+
+          inputManagers[view] = inputManager;
+          inputManager->setGameStateStack(&gameStateStack);
+          inputManager->setView(view);
+          inputManager->setIsInizialized(true);
+        }
+
+        osg::ref_ptr<TransformableCameraManipulator> manipulator = state->getWorld(view)->getCameraManipulator();
+        manipulator->setCamera(view->getSceneCamera());
+
+        view->setSceneData(state->getWorld(view)->getRootNode());
+        view->setHud(state->getHud(view));
+        view->setCameraManipulator(state->getWorld(view)->getCameraManipulator());
+
+        inputManager->updateNewRunningStates();
+        //inputManager->setCurrentState(state);
+
       }
-
-      osg::ref_ptr<TransformableCameraManipulator> manipulator = state->getWorld()->getCameraManipulator();
-      manipulator->setCamera(view->getSceneCamera());
-
-      view->setSceneData(state->getWorld()->getRootNode());
-      view->setHud(state->getHud());
-      view->setCameraManipulator(state->getWorld()->getCameraManipulator());
-
-      inputManager->updateNewRunningStates();
-      //inputManager->setCurrentState(state);
     }
 
     typedef std::map<osgGaming::View::Ptr, osgGaming::InputManager::Ptr> InputManagerMap;
@@ -114,8 +128,6 @@ namespace osgGaming
 
     osg::ref_ptr<osgGaming::Viewer> viewer;
     osg::ref_ptr<osgGaming::View> view;
-
-    osg::ref_ptr<InputManager> inputManager;
 
     osg::ref_ptr<World> defaultWorld;
     osg::ref_ptr<Hud> defaultHud;
@@ -192,11 +204,16 @@ namespace osgGaming
 
             ref_ptr<AbstractGameState> nextState = *nextStates.begin();
 
+            // TODO: refactor
+            View::Ptr view = m->viewer->getView(0);
+            if (!view)
+              assert(false);
+           
             m->loadingThreadFuture = async(launch::async,
               &GameLoadingState::loading_thread,
               loadingState,
-              nextState->getWorld(),
-              nextState->getHud(),
+              nextState->getWorld(view),
+              nextState->getHud(view),
               getDefaultGameSettings());
 
           }
@@ -338,7 +355,7 @@ namespace osgGaming
   {
     try
     {
-      m->view = dynamic_cast<View*>(m->viewer->getView(0));
+      m->view = m->viewer->getView(0);
       assert(m->view.valid());
 
       m->gameStateStack.pushStates(initialStates);

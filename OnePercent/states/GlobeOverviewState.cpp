@@ -27,7 +27,7 @@ GlobeOverviewState::GlobeOverviewState()
 
 void GlobeOverviewState::initialize()
 {
-	_globeWorld = static_cast<GlobeOverviewWorld*>(getWorld().get());
+  _globeWorld = static_cast<GlobeOverviewWorld*>(getWorld(getView(0)).get());
 }
 
 unsigned char GlobeOverviewState::getProperties()

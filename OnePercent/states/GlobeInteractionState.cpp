@@ -9,6 +9,7 @@
 #include <simulation/CountryData.h>
 #include <osgGaming/UIGrid.h>
 #include <osgGaming/Hud.h>
+#include <osgGaming/View.h>
 
 using namespace osg;
 using namespace std;
@@ -78,8 +79,8 @@ namespace onep
   {
     GlobeCameraState::initialize();
 
-    getHud()->loadMarkupFromXmlResource("./GameData/data/ui/ingamehud.xml");
-    getHud()->setFpsEnabled(true);
+    getHud(getView(0))->loadMarkupFromXmlResource("./GameData/data/ui/ingamehud.xml");
+    getHud(getView(0))->setFpsEnabled(true);
 
     setupUi();
 
@@ -95,8 +96,8 @@ namespace onep
 
         setCameraLatLong(countryMesh->getCountryData()->getCenterLatLong(), getSimulationTime());
         setCameraDistance(max(countryMesh->getCountryData()->getOptimalCameraDistance(
-          float(getWorld()->getCameraManipulator()->getProjectionAngle()),
-          float(getWorld()->getCameraManipulator()->getProjectionRatio())), m_paramCameraMinDistance), getSimulationTime());
+          float(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle()),
+          float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio())), m_paramCameraMinDistance), getSimulationTime());
       }
     }));
 
@@ -112,13 +113,13 @@ namespace onep
     GlobeModel::Ptr globeModel = getGlobeOverviewWorld()->getGlobeModel();
     Simulation::Ptr simulation = getGlobeOverviewWorld()->getSimulation();
 
-    _textPleaseSelect = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountry").get());
-    _textConfirm = static_cast<UIText*>(getHud()->getUIElementByName("text_selectCountryAgain").get());
-    _textProgress = static_cast<UIText*>(getHud()->getUIElementByName("text_dayProgress").get());
-    _textCountryInfo = static_cast<UIText*>(getHud()->getUIElementByName("text_countryInfo").get());
+    _textPleaseSelect = static_cast<UIText*>(getHud(getView(0))->getUIElementByName("text_selectCountry").get());
+    _textConfirm = static_cast<UIText*>(getHud(getView(0))->getUIElementByName("text_selectCountryAgain").get());
+    _textProgress = static_cast<UIText*>(getHud(getView(0))->getUIElementByName("text_dayProgress").get());
+    _textCountryInfo = static_cast<UIText*>(getHud(getView(0))->getUIElementByName("text_countryInfo").get());
 
-    UIGrid* gridBranches = static_cast<UIGrid*>(getHud()->getUIElementByName("grid_branchbuttons").get());
-    UIStackPanel* stackPanelSkills = static_cast<UIStackPanel*>(getHud()->getUIElementByName("panel_skillbuttons").get());
+    UIGrid* gridBranches = static_cast<UIGrid*>(getHud(getView(0))->getUIElementByName("grid_branchbuttons").get());
+    UIStackPanel* stackPanelSkills = static_cast<UIStackPanel*>(getHud(getView(0))->getUIElementByName("panel_skillbuttons").get());
 
     // Branches
     gridBranches->getColumns()->setNumCells(2);
@@ -164,8 +165,8 @@ namespace onep
         }));
       }
 
-      getHud()->registerUserInteractionModel(buttonEnabled.get());
-      getHud()->registerUserInteractionModel(buttonOverlay.get());
+      getHud(getView(0))->registerUserInteractionModel(buttonEnabled.get());
+      getHud(getView(0))->registerUserInteractionModel(buttonOverlay.get());
 
       m_branchRadioGroup->addButton(buttonOverlay);
 
@@ -191,7 +192,7 @@ namespace onep
         button->setText(skill->getName());
         button->setCheckable(true);
 
-        getHud()->registerUserInteractionModel(button.get());
+        getHud(getView(0))->registerUserInteractionModel(button.get());
         stackPanelSkills->addChild(button, stackPanelSkillsPos++);
       }
     }
@@ -222,7 +223,7 @@ namespace onep
     if (button == GUIEventAdapter::LEFT_MOUSE_BUTTON)
     {
       Vec3f point, direction;
-      getWorld()->getCameraManipulator()->getPickRay(x, y, point, direction);
+      getWorld(getView(0))->getCameraManipulator()->getPickRay(x, y, point, direction);
 
       Vec3f pickResult;
       if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), m_paramEarthRadius, point, direction, pickResult))
@@ -401,7 +402,7 @@ namespace onep
     _started = true;
   }
 
-  ref_ptr<Hud> GlobeInteractionState::overrideHud()
+  ref_ptr<Hud> GlobeInteractionState::overrideHud(osg::ref_ptr<osgGaming::View> view)
   {
     return new Hud();
   }
