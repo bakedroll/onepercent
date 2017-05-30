@@ -42,10 +42,14 @@ foreach(module ${QT5_MODULES})
 endforeach()
 
 #find OpenSceneGraph
-find_package(OpenSceneGraph)
+find_package(OpenSceneGraph COMPONENTS
+  osg osgViewer osgUtil osgGA osgDB osgText osgPPU OpenThreads)
 
 # find rapidxml
 find_package(rapidxml)
+
+# pthread
+find_package(Threads)
 
 # optional for Vectorizer
 find_package(OpenCV)
@@ -211,23 +215,24 @@ if (WIN32 AND EXISTS ${OSG_BINARY})
   endif()
 endif()
 
-
-foreach(module ${QT5_MODULES})
-  get_target_property(MODULE_LOCATION Qt5::${module} LOCATION)
-  get_filename_component(MODULE_DIR ${MODULE_LOCATION} DIRECTORY)
-  get_filename_component(MODULE_FILENAME ${MODULE_LOCATION} NAME)
-  get_filename_component(MODULE_EXT ${MODULE_LOCATION} EXT)
-  get_filename_component(MODULE_NAME_WE ${MODULE_LOCATION} NAME_WE)
-  
-  message(STATUS "copy library ${MODULE_FILENAME}")
-  configure_file(${MODULE_LOCATION} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/${MODULE_FILENAME} COPYONLY)
-  
-  set(MODULE_LOCATION_DBG ${MODULE_DIR}/${MODULE_NAME_WE}d${MODULE_EXT})
-  get_filename_component(MODULE_FILENAME_DBG ${MODULE_LOCATION_DBG} NAME)
-  
-  message(STATUS "copy library ${MODULE_FILENAME_DBG}")
-  configure_file(${MODULE_LOCATION_DBG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/${MODULE_FILENAME_DBG} COPYONLY)
-endforeach()
+if (WIN32)
+  foreach(module ${QT5_MODULES})
+    get_target_property(MODULE_LOCATION Qt5::${module} LOCATION)
+    get_filename_component(MODULE_DIR ${MODULE_LOCATION} DIRECTORY)
+    get_filename_component(MODULE_FILENAME ${MODULE_LOCATION} NAME)
+    get_filename_component(MODULE_EXT ${MODULE_LOCATION} EXT)
+    get_filename_component(MODULE_NAME_WE ${MODULE_LOCATION} NAME_WE)
+    
+    message(STATUS "copy library ${MODULE_FILENAME}")
+    configure_file(${MODULE_LOCATION} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/${MODULE_FILENAME} COPYONLY)
+    
+    set(MODULE_LOCATION_DBG ${MODULE_DIR}/${MODULE_NAME_WE}d${MODULE_EXT})
+    get_filename_component(MODULE_FILENAME_DBG ${MODULE_LOCATION_DBG} NAME)
+    
+    message(STATUS "copy library ${MODULE_FILENAME_DBG}")
+    configure_file(${MODULE_LOCATION_DBG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/${MODULE_FILENAME_DBG} COPYONLY)
+  endforeach()
+endif()
 
 
 # configure scripts

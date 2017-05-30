@@ -16,7 +16,7 @@ namespace osgGaming
 		PropertiesManager();
 
 		template <typename T>
-		T* getValuePtr(std::string name)
+		T* getValuePtr(const std::string& name)
 		{
 			AbstractPropertyValue::ValueMap::iterator it = _values.find(name);
 			if (it == _values.end())
@@ -28,6 +28,12 @@ namespace osgGaming
 			}
 
 			return static_cast<PropertyValue<T>*>(it->second.get())->getPtr();
+		}
+
+		template <typename T>
+		T getValue(const std::string& name)
+		{
+		  return *getValuePtr<T>(name);
 		}
 
 		osg::ref_ptr<PropertyGroup> root();

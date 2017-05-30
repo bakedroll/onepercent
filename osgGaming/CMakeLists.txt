@@ -7,6 +7,7 @@ set(OSGGAMING_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_library(osgGaming ${OSG_GAMING_SOURCE})
 
 set_target_properties(osgGaming PROPERTIES DEBUG_POSTFIX "d")
+target_compile_options(osgGaming PRIVATE "-fpermissive")
 
 # set include directories
 target_include_directories(osgGaming PUBLIC

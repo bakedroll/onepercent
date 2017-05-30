@@ -9,15 +9,45 @@
 namespace osgGaming
 {
   template<typename T>
+  class Func
+  {
+  public:
+    Func(const std::function<void(T)>& func)
+      : m_func(func)
+    {
+    }
+
+    void exec(T arg) { m_func(arg); }
+
+  private:
+    std::function<void(T)> m_func;
+  };
+
+  template<>
+  class Func<void>
+  {
+  public:
+    Func(const std::function<void()>& func)
+      : m_func(func)
+    {
+    }
+
+    void exec() { m_func(); }
+
+  private:
+    std::function<void()> m_func;
+  };
+
+
+  template<typename T>
   class Observer : public osg::Referenced
   {
   public:
     typedef osg::ref_ptr<Observer<T>> Ptr;
-    typedef std::function<void(T)> NotifyFunc;
 
-    Observer(NotifyFunc func) : execute(func) { }
+    Observer(const Func<T>& func) : func(func) { }
 
-    NotifyFunc execute;
+    Func<T> func;
   };
 
   template<>
@@ -25,11 +55,10 @@ namespace osgGaming
   {
   public:
     typedef osg::ref_ptr<Observer> Ptr;
-    typedef std::function<void()> NotifyFunc;
 
-    Observer(NotifyFunc func) : execute(func) { }
+    Observer(const Func<void>& func) : func(func) { }
 
-    NotifyFunc execute;
+    Func<void> func;
   };
 
   namespace __ObservableInternals
@@ -38,11 +67,9 @@ namespace osgGaming
     class ObservableBase : public osg::Referenced
     {
     public:
-      typedef std::function<void(T)> NotifyFunc;
-
       ObservableBase() : osg::Referenced() {}
 
-      typename Observer<T>::Ptr connect(NotifyFunc func)
+      typename Observer<T>::Ptr connect(const Func<T>& func)
       {
         typename Observer<T>::Ptr observer = new Observer<T>(func);
         observers().push_back(observer);
@@ -50,7 +77,7 @@ namespace osgGaming
         return observer;
       }
 
-      typename Observer<T>::Ptr connectAndNotify(NotifyFunc func)
+      typename Observer<T>::Ptr connectAndNotify(const Func<T>& func)
       {
         typename Observer<T>::Ptr observer = connect(func);
         notify(observer);
@@ -85,16 +112,17 @@ namespace osgGaming
           notify(*it);
       }
 
-    private:
+    //private:
       ObserverList m_observers;
     };
-
   }
 
   template<typename T>
   class Observable : public __ObservableInternals::ObservableBase<T>
   {
   public:
+	virtual ~Observable() {}
+
     typedef osg::ref_ptr<Observable<T>> Ptr;
 
     Observable()
@@ -111,7 +139,7 @@ namespace osgGaming
     void set(T value)
     {
       m_value = value;
-      notifyAll();
+      __ObservableInternals::ObservableBase<T>::notifyAll();
     }
 
     T get()
@@ -120,9 +148,10 @@ namespace osgGaming
     }
 
   protected:
+
     virtual void notify(typename Observer<T>::Ptr obs) override
     {
-      obs->execute(m_value);
+      obs->func.exec(m_value);
     }
 
   private:
@@ -146,7 +175,7 @@ namespace osgGaming
   protected:
     virtual void notify(Observer<void>::Ptr obs) override
     {
-      obs->execute();
+      obs->func.exec();
     }
 
   };

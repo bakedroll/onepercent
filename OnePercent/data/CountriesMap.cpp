@@ -1,6 +1,7 @@
 #include "CountriesMap.h"
 
 #include <string>
+#include <cstring>
 
 using namespace osg;
 using namespace std;
@@ -13,7 +14,7 @@ CountriesMap::CountriesMap(int width, int height, unsigned char* data)
 {
 	_data = new unsigned char[_width * _height];
 
-	memcpy(&_data[0], data, _width * _height);
+	std::memcpy(&_data[0], data, _width * _height);
 }
 
 CountriesMap::~CountriesMap()

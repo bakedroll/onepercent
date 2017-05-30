@@ -24,4 +24,7 @@ namespace osgGaming
 
 	};
 
+	template <class T>
+	osg::ref_ptr<T> Singleton<T>::_instance;
+
 }

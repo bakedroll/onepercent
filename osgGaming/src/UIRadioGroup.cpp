@@ -14,7 +14,7 @@ namespace osgGaming
     button->setCheckable(true);
     m_buttons.push_back(button);
 
-    m_isCheckedObserver = button->getIsCheckedObservable()->connect([this, button](bool checked)
+    m_isCheckedObserver = button->getIsCheckedObservable()->connect(Func<bool>([this, button](bool checked)
     {
       if (m_resetting)
         return;
@@ -35,7 +35,7 @@ namespace osgGaming
       {
         m_selected->set(nullptr);
       }
-    });
+    }));
   }
 
   UIButton::Ptr UIRadioGroup::getSelectedButton()

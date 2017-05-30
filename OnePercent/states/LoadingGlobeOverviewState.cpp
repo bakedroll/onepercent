@@ -38,8 +38,10 @@ namespace onep
     float projNear = float(getWorld()->getCameraManipulator()->getProjectionNear());
     float projFar = float(getWorld()->getCameraManipulator()->getProjectionFar());
 
+    std::string loadingTextString = osgGaming::PropertiesManager::getInstance()->getValue<std::string>(Param_LocalizationInfoTextLoading);
+
     _loadingText = new UIText();
-    _loadingText->setText(~Property<string, Param_LocalizationInfoTextLoading>());
+    _loadingText->setText(loadingTextString);
     _loadingText->setFontSize(25);
     _loadingText->setVerticalAlignment(UIElement::BOTTOM);
     _loadingText->setMargin(10.0f);
@@ -56,7 +58,8 @@ namespace onep
   GameState::StateEvent* LoadingGlobeOverviewState::update()
   {
     int dotCount = int(getSimulationTime() * 10.0) % 4;
-    string loadingTextString = ~Property<string, Param_LocalizationInfoTextLoading>();
+    std::string loadingTextString = osgGaming::PropertiesManager::getInstance()->getValue<std::string>(Param_LocalizationInfoTextLoading);
+
     for (int i = 0; i < dotCount; i++)
       loadingTextString += ".";
 

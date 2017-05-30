@@ -59,10 +59,18 @@ namespace onep
   };
 
   GlobeInteractionState::GlobeInteractionState()
-    : GlobeCameraState(),
-    _ready(false),
-    _started(false),
-    _selectedCountry(0)
+    : GlobeCameraState()
+    , _ready(false)
+    , _started(false)
+    , _selectedCountry(0)
+    , m_paramEarthRadius(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName))
+    , m_paramCameraMinDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraMinDistanceName))
+    , m_paramCameraMaxDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraMaxDistanceName))
+    , m_paramCameraMaxLatitude(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraMaxLatitudeName))
+    , m_paramCameraZoomSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraZoomSpeedName))
+    , m_paramCameraZoomSpeedFactor(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraZoomSpeedFactorName))
+    , m_paramCameraScrollSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraScrollSpeedName))
+    , m_paramCameraRotationSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraRotationSpeedName))
   {
   }
 
@@ -75,7 +83,7 @@ namespace onep
 
     setupUi();
 
-    m_selectedCountryObserver = getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->connect([this](int id)
+    m_selectedCountryObserver = getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->connect(osgGaming::Func<int>([this](int id)
     {
       updateCountryInfoText();
 
@@ -88,9 +96,9 @@ namespace onep
         setCameraLatLong(countryMesh->getCountryData()->getCenterLatLong(), getSimulationTime());
         setCameraDistance(max(countryMesh->getCountryData()->getOptimalCameraDistance(
           float(getWorld()->getCameraManipulator()->getProjectionAngle()),
-          float(getWorld()->getCameraManipulator()->getProjectionRatio())), ~_paramCameraMinDistance), getSimulationTime());
+          float(getWorld()->getCameraManipulator()->getProjectionRatio())), m_paramCameraMinDistance), getSimulationTime());
       }
-    });
+    }));
 
     setCameraMotionDuration(2.0);
     setCameraMotionEase(AnimationEase::SMOOTHER);
@@ -131,7 +139,7 @@ namespace onep
       osg::ref_ptr<UIButton> buttonOverlay = new DebugButton(DebugButton::OVERLAY, i);
       buttonOverlay->setText("Overlay");
 
-      m_selectedCountryIdObserver = globeModel->getSelectedCountryIdObservable()->connectAndNotify([globeModel, buttonEnabled, buttonOverlay, i](int selected)
+      m_selectedCountryIdObserver = globeModel->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([globeModel, buttonEnabled, buttonOverlay, i](int selected)
       {
         if (selected > 0)
         {
@@ -143,17 +151,17 @@ namespace onep
         }
 
         buttonEnabled->setEnabled(selected > 0);
-      });
+      }));
 
       // Countries
       CountryMesh::Map& countryMeshs = globeModel->getCountryMeshs();
       for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
       {
-        m_skillBranchActivatedObserver = it->second->getCountryData()->getSkillBranchActivatedObservable(i)->connect([globeModel, buttonEnabled, it](bool activated)
+        m_skillBranchActivatedObserver = it->second->getCountryData()->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([globeModel, buttonEnabled, it](bool activated)
         {
           if (it->first == globeModel->getSelectedCountryId())
             buttonEnabled->setChecked(activated);
-        });
+        }));
       }
 
       getHud()->registerUserInteractionModel(buttonEnabled.get());
@@ -188,7 +196,7 @@ namespace onep
       }
     }
 
-    m_selectedButtonObserver = m_branchRadioGroup->getSelectedButtonObservable()->connect([globeModel](UIButton::Ptr button)
+    m_selectedButtonObserver = m_branchRadioGroup->getSelectedButtonObservable()->connect(osgGaming::Func<UIButton::Ptr>([globeModel](UIButton::Ptr button)
     {
       if (!button)
       {
@@ -201,7 +209,7 @@ namespace onep
         return;
 
       globeModel->setHighlightedSkillBranch(BranchType(dbutton->getId()));
-    });
+    }));
   }
 
   void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
@@ -217,7 +225,7 @@ namespace onep
       getWorld()->getCameraManipulator()->getPickRay(x, y, point, direction);
 
       Vec3f pickResult;
-      if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), ~_paramEarthRadius, point, direction, pickResult))
+      if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), m_paramEarthRadius, point, direction, pickResult))
       {
         Vec2f polar = getPolarFromCartesian(pickResult);
         ref_ptr<CountryMesh> countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(polar);
@@ -293,18 +301,18 @@ namespace onep
 
     if (motion == GUIEventAdapter::SCROLL_UP)
     {
-      distance = distance * ~_paramCameraZoomSpeed;
+      distance = distance * m_paramCameraZoomSpeed;
     }
     else if (motion == GUIEventAdapter::SCROLL_DOWN)
     {
-      distance = distance * (1.0f / ~_paramCameraZoomSpeed);
+      distance = distance * (1.0f / m_paramCameraZoomSpeed);
     }
     else
     {
       return;
     }
 
-    distance = clampBetween(distance, ~_paramCameraMinDistance, ~_paramCameraMaxDistance);
+    distance = clampBetween(distance, m_paramCameraMinDistance, m_paramCameraMaxDistance);
 
     setCameraDistance(distance, getSimulationTime());
   }
@@ -322,21 +330,21 @@ namespace onep
 
     if (button == GUIEventAdapter::RIGHT_MOUSE_BUTTON)
     {
-      change *= ((distance - ~_paramEarthRadius) / (~_paramCameraMaxDistance - ~_paramEarthRadius)) * ~_paramCameraZoomSpeedFactor;
+      change *= ((distance - m_paramEarthRadius) / (m_paramCameraMaxDistance - m_paramEarthRadius)) * m_paramCameraZoomSpeedFactor;
 
       latLong.set(
-        clampBetween(latLong.x() - change.y() * ~_paramCameraScrollSpeed, -~_paramCameraMaxLatitude, ~_paramCameraMaxLatitude),
-        latLong.y() - change.x() * ~_paramCameraScrollSpeed);
+        clampBetween(latLong.x() - change.y() * m_paramCameraScrollSpeed, -m_paramCameraMaxLatitude, m_paramCameraMaxLatitude),
+        latLong.y() - change.x() * m_paramCameraScrollSpeed);
 
       setCameraLatLong(latLong, getSimulationTime());
     }
     else if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
     {
-      float clamp_to = atan(~_paramEarthRadius * 1.3 / distance);
+      float clamp_to = atan(m_paramEarthRadius * 1.3 / distance);
 
       viewAngle.set(
-        viewAngle.x() + change.x() * ~_paramCameraRotationSpeed,
-        clampBetween(viewAngle.y() + change.y() * ~_paramCameraRotationSpeed, 0.0f, clamp_to));
+        viewAngle.x() + change.x() * m_paramCameraRotationSpeed,
+        clampBetween(viewAngle.y() + change.y() * m_paramCameraRotationSpeed, 0.0f, clamp_to));
 
       setCameraViewAngle(viewAngle, getSimulationTime());
     }
@@ -373,7 +381,8 @@ namespace onep
   {
     getGlobeOverviewWorld()->getSimulation()->step();
 
-    _textProgress->setText(~Property<string, Param_LocalizationInfoTextDay>() + " " + to_string(getGlobeOverviewWorld()->getSimulation()->getDay()));
+    std::string dayText = osgGaming::PropertiesManager::getInstance()->getValue<std::string>(Param_LocalizationInfoTextDay);
+    _textProgress->setText(dayText + " " + to_string(getGlobeOverviewWorld()->getSimulation()->getDay()));
 
     updateCountryInfoText();
   }

@@ -17,7 +17,7 @@ namespace onep
 
 		void updateResolutionHeight(float height);
 
-		virtual bool BackgroundModel::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
+		virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
 
 	private:
 		void makeStars();

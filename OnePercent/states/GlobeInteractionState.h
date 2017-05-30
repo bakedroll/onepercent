@@ -39,15 +39,14 @@ namespace onep
 		virtual osg::ref_ptr<osgGaming::Hud> overrideHud() override;
 
 	private:
-		osgGaming::Property<float, Param_EarthRadiusName> _paramEarthRadius;
-
-		osgGaming::Property<float, Param_CameraMinDistanceName> _paramCameraMinDistance;
-		osgGaming::Property<float, Param_CameraMaxDistanceName> _paramCameraMaxDistance;
-		osgGaming::Property<float, Param_CameraMaxLatitudeName> _paramCameraMaxLatitude;
-		osgGaming::Property<float, Param_CameraZoomSpeedName> _paramCameraZoomSpeed;
-		osgGaming::Property<float, Param_CameraZoomSpeedFactorName> _paramCameraZoomSpeedFactor;
-		osgGaming::Property<float, Param_CameraScrollSpeedName> _paramCameraScrollSpeed;
-		osgGaming::Property<float, Param_CameraRotationSpeedName> _paramCameraRotationSpeed;
+		float m_paramEarthRadius;
+		float m_paramCameraMinDistance;
+		float m_paramCameraMaxDistance;
+		float m_paramCameraMaxLatitude;
+		float m_paramCameraZoomSpeed;
+		float m_paramCameraZoomSpeedFactor;
+		float m_paramCameraScrollSpeed;
+		float m_paramCameraRotationSpeed;
 
 		bool ready();
 

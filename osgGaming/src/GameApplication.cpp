@@ -14,6 +14,8 @@
 #include <future>
 #include <iostream>
 
+#include <assert.h>
+
 using namespace osg;
 using namespace std;
 

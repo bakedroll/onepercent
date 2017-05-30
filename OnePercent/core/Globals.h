@@ -1,42 +1,43 @@
 #pragma once
 
 #include <string>
+#include <QString>
 
 namespace onep
 {
-	char Param_CameraMinDistanceName[];
-	char Param_CameraMaxDistanceName[];
-	char Param_CameraMaxLatitudeName[];
-	char Param_CameraZoomSpeedName[];
-	char Param_CameraZoomSpeedFactorName[];
-	char Param_CameraScrollSpeedName[];
-	char Param_CameraRotationSpeedName[];
-	char Param_CameraCountryZoomName[];
+  static const std::string Param_CameraMinDistanceName = "camera/min_distance";
+  static const std::string Param_CameraMaxDistanceName = "camera/max_distance";
+  static const std::string Param_CameraMaxLatitudeName = "camera/max_latitude";
+  static const std::string Param_CameraZoomSpeedName = "camera/zoom_speed";
+  static const std::string Param_CameraZoomSpeedFactorName = "camera/zoom_speed_factor";
+  static const std::string Param_CameraScrollSpeedName = "camera/scroll_speed";
+  static const std::string Param_CameraRotationSpeedName = "camera/rotation_speed";
+  static const std::string Param_CameraCountryZoomName = "camera/country_zoom";
 
-	char Param_EarthRadiusName[];
-	char Param_EarthSphereStacksName[];
-	char Param_EarthSphereSlicesName[];
+  static const std::string Param_EarthRadiusName = "earth/radius";
+  static const std::string Param_EarthSphereStacksName = "earth/sphere_stacks";
+  static const std::string Param_EarthSphereSlicesName = "earth/sphere_slices";
 
-	char Param_EarthCloudsHeightName[];
-	char Param_EarthCloudsSpeedName[];
-	char Param_EarthCloudsMorphSpeedName[];
+  static const std::string Param_EarthCloudsHeightName = "earth/clouds_height";
+  static const std::string Param_EarthCloudsSpeedName = "earth/clouds_speed";
+  static const std::string Param_EarthCloudsMorphSpeedName = "earth/clouds_morph_speed";
 
-	char Param_EarthAtmosphereHeightName[];
-	char Param_EarthAtmosphereColorName[];
+  static const std::string Param_EarthAtmosphereHeightName = "earth/atmosphere_height";
+  static const std::string Param_EarthAtmosphereColorName = "earth/atmosphere_color";
 
-	char Param_EarthScatteringDepthName[];
-	char Param_EarthScatteringIntensityName[];
+  static const std::string Param_EarthScatteringDepthName = "earth/scattering_depth";
+  static const std::string Param_EarthScatteringIntensityName = "earth/scattering_intensity";
 
-	char Param_SunDistanceName[];
-	char Param_SunRadiusPm2Name[];
+  static const std::string Param_SunDistanceName = "sun/distance";
+  static const std::string Param_SunRadiusPm2Name = "sun/radius_pm2";
 
-	char Param_MechanicsDaysInYearName[];
-	char Param_MechanicsStartBuyingPowerName[];
+  static const std::string Param_MechanicsDaysInYearName = "mechanics/days_in_year";
+  static const std::string Param_MechanicsStartBuyingPowerName = "mechanics/start_buying_power";
 
-	char Param_LocalizationInfoTextDay[];
-	char Param_LocalizationInfoTextLoading[];
+  static const std::string Param_LocalizationInfoTextDay = "localization/infoText_day";
+  static const std::string Param_LocalizationInfoTextLoading = "localization/infoText_loading";
 
-  const int NUM_SKILLBRANCHES = 5;
+  static const int NUM_SKILLBRANCHES = 5;
 
   typedef enum _branchType
   {

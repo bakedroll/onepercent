@@ -1,8 +1,9 @@
-#include <osgGaming\TimerFactory.h>
+#include <osgGaming/TimerFactory.h>
 
 using namespace osgGaming;
 using namespace osg;
 
+template<>
 ref_ptr<TimerFactory> Singleton<TimerFactory>::_instance;
 
 TimerFactory::TimerFactory()

@@ -1,28 +1,34 @@
 #include <osgGaming/GameException.h>
 
-using namespace osgGaming;
+#include <string>
+#include <exception>
 
-GameException::GameException(std::string message)
-	: exception(message.c_str()),
-	  _message(message)
+namespace osgGaming
 {
 
-}
+    GameException::GameException(std::string message)
+        : std::runtime_error(message.c_str())
+        , _message(message)
+    {
 
-GameException::GameException(std::string message, std::string description)
-	: exception(message.c_str()),
-	  _message(message),
-	  _description(description)
-{
+    }
 
-}
+    GameException::GameException(std::string message, std::string description)
+        : std::runtime_error(message.c_str())
+        , _message(message)
+        , _description(description)
+    {
 
-std::string GameException::getMessage()
-{
-	return _message;
-}
+    }
 
-std::string GameException::getDescription()
-{
-	return _description;
+    std::string GameException::getMessage()
+    {
+        return _message;
+    }
+
+    std::string GameException::getDescription()
+    {
+        return _description;
+    }
+
 }

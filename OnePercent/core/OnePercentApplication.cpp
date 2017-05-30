@@ -34,10 +34,10 @@ namespace onep
 
     setDefaultWorld(new GlobeOverviewWorld());
 
-    m->endGameObserver = onEndGameSignal().connect([this]()
+    m->endGameObserver = onEndGameSignal().connect(osgGaming::Func<void>([this]()
     {
       m->mainWindow->shutdown();
-    });
+    }));
   }
 
   int OnePercentApplication::run()

@@ -7,22 +7,22 @@ TEST(ObservableTest, Observers)
   osgGaming::Observable<int> observedNumber(5);
 
   bool obs1Notified = false;
-  osgGaming::Observer<int>::Ptr obs1 = observedNumber.connect([&obs1Notified](int value)
+  osgGaming::Observer<int>::Ptr obs1 = observedNumber.connect(osgGaming::Func<int>([&obs1Notified](int value)
   {
     obs1Notified = true;
-  });
+  }));
 
   bool obs2Notified = false;
-  osgGaming::Observer<int>::Ptr obs2 = observedNumber.connect([&obs2Notified](int value)
+  osgGaming::Observer<int>::Ptr obs2 = observedNumber.connect(osgGaming::Func<int>([&obs2Notified](int value)
   {
     obs2Notified = true;
-  });
+  }));
 
   bool obs3Notified = false;
-  osgGaming::Observer<int>::Ptr obs3 = observedNumber.connectAndNotify([&obs3Notified](int value)
+  osgGaming::Observer<int>::Ptr obs3 = observedNumber.connectAndNotify(osgGaming::Func<int>([&obs3Notified](int value)
   {
     obs3Notified = true;
-  });
+  }));
 
   EXPECT_EQ(observedNumber.get(), 5) << "observedNumber should be 5 here";
   EXPECT_FALSE(obs1Notified) << "obs1Notified should not have been notified here";

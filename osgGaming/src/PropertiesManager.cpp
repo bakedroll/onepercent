@@ -8,6 +8,7 @@ using namespace osg;
 using namespace std;
 using namespace rapidxml;
 
+template<>
 ref_ptr<PropertiesManager> Singleton<PropertiesManager>::_instance;
 
 PropertiesManager::PropertiesManager()

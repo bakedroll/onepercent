@@ -9,6 +9,7 @@ using namespace osg;
 using namespace std;
 using namespace rapidxml;
 
+template<>
 ref_ptr<UIMarkupLoader> Singleton<UIMarkupLoader>::_instance;
 
 ref_ptr<UIElement> UIMarkupLoader::loadMarkupFromXmlResource(string resourceKey)

@@ -1,41 +1,9 @@
-#include "Globals.h"
+#include "core/Globals.h"
 
 #include <assert.h>
 
 namespace onep
 {
-  char Param_CameraMinDistanceName[] = "camera/min_distance";
-  char Param_CameraMaxDistanceName[] = "camera/max_distance";
-  char Param_CameraMaxLatitudeName[] = "camera/max_latitude";
-  char Param_CameraZoomSpeedName[] = "camera/zoom_speed";
-  char Param_CameraZoomSpeedFactorName[] = "camera/zoom_speed_factor";
-  char Param_CameraScrollSpeedName[] = "camera/scroll_speed";
-  char Param_CameraRotationSpeedName[] = "camera/rotation_speed";
-  char Param_CameraCountryZoomName[] = "camera/country_zoom";
-
-  char Param_EarthRadiusName[] = "earth/radius";
-  char Param_EarthSphereStacksName[] = "earth/sphere_stacks";
-  char Param_EarthSphereSlicesName[] = "earth/sphere_slices";
-
-  char Param_EarthCloudsHeightName[] = "earth/clouds_height";
-  char Param_EarthCloudsSpeedName[] = "earth/clouds_speed";
-  char Param_EarthCloudsMorphSpeedName[] = "earth/clouds_morph_speed";
-
-  char Param_EarthAtmosphereHeightName[] = "earth/atmosphere_height";
-  char Param_EarthAtmosphereColorName[] = "earth/atmosphere_color";
-
-  char Param_EarthScatteringDepthName[] = "earth/scattering_depth";
-  char Param_EarthScatteringIntensityName[] = "earth/scattering_intensity";
-
-  char Param_SunDistanceName[] = "sun/distance";
-  char Param_SunRadiusPm2Name[] = "sun/radius_pm2";
-
-  char Param_MechanicsDaysInYearName[] = "mechanics/days_in_year";
-  char Param_MechanicsStartBuyingPowerName[] = "mechanics/start_buying_power";
-
-  char Param_LocalizationInfoTextDay[] = "localization/infoText_day";
-  char Param_LocalizationInfoTextLoading[] = "localization/infoText_loading";
-
   std::string branch_getStringFromType(int type)
   {
     switch (type)

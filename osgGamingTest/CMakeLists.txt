@@ -21,12 +21,17 @@ target_link_libraries(osgGamingTest
   osgGaming
   ${GTEST_BOTH_LIBRARIES})
   
-foreach(lib ${TEST_OSG_LIBRARIES})
-  target_link_libraries(osgGamingTest
-    optimized ${lib})
-endforeach()
+if (MSVC)
+  foreach(lib ${TEST_OSG_LIBRARIES})
+    target_link_libraries(osgGamingTest
+      optimized ${lib})
+  endforeach()
 
-foreach(lib ${TEST_OSG_LIBRARIES_DEBUG})
-  target_link_libraries(osgGamingTest
-    debug ${lib})
-endforeach()
+  foreach(lib ${TEST_OSG_LIBRARIES_DEBUG})
+    target_link_libraries(osgGamingTest
+      debug ${lib})
+  endforeach()
+else()
+  #TODO: write find script for osgPPU
+  target_link_libraries(osgGamingTest ${CMAKE_THREAD_LIBS_INIT} ${OPENSCENEGRAPH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} /usr/local/lib64/libosgPPU.so.0.5.9)
+endif()

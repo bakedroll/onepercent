@@ -34,7 +34,7 @@ void CountryOverlay::setCountryMap(const CountryMesh::Map& countryMap)
 {
 	ref_ptr<osgText::Font> font = osgGaming::ResourceManager::getInstance()->loadFont("./GameData/fonts/coolvetica rg.ttf");
 
-	float earthRadius = ~osgGaming::Property<float, Param_EarthRadiusName>();
+	float earthRadius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
 
 	_countryMap = &countryMap;
 
