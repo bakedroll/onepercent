@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <osg/Geode>
+#include <osg/Version>
 #include <osgUtil/TangentSpaceGenerator>
 
 using namespace osg;
@@ -100,7 +101,7 @@ Vec2f osgGaming::getTextSize(ref_ptr<Text> text)
 #if OSG_MIN_VERSION_REQUIRED(3, 4, 0)
 		for (int i=0; i<quads->size(); i++)
 		  bb.expandBy((*quads)[i].x(), (*quads)[i].y(), 0.0f);
-else
+#else
 		for (Text::GlyphQuads::Coords2::iterator qit = quads.begin(); qit != quads.end(); ++qit)
 		{
 			bb.expandBy(qit->x(), qit->y(), 0.0f);
