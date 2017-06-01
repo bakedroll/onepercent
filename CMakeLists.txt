@@ -100,10 +100,11 @@ else()
   adjust_cached_path(OSG_LIBRARY "Path to a library." ${OSG_LIBRARY})
 endif()
 
+set(RAPIDXML_INCLUDE_DIR "NOTFOUND" CACHE STRING "rapidxml include dir")
 if (NOT EXISTS ${RAPIDXML_INCLUDE_DIR})
   set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify RAPIDXML_INCLUDE_DIR\n")
 else()
-  adjust_cached_path(RAPIDXML_INCLUDE_DIR "Path to a file." ${RAPIDXML_INCLUDE_DIR})
+  adjust_cached_path(RAPIDXML_INCLUDE_DIR "rapidxml include dir" ${RAPIDXML_INCLUDE_DIR})
 endif()
 
 # check for debug libraries
