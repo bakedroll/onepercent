@@ -43,10 +43,7 @@ endforeach()
 
 #find OpenSceneGraph
 find_package(OpenSceneGraph COMPONENTS
-  osg osgViewer osgUtil osgGA osgDB osgText osgPPU OpenThreads)
-
-# find rapidxml
-find_package(rapidxml)
+  osg osgViewer osgUtil osgGA osgDB osgText OpenThreads)
 
 # pthread
 find_package(Threads)
@@ -63,6 +60,28 @@ endif()
 set(GTEST_ROOT ${QT5_ROOT_DIRECTORY})
 
 find_package(GTest)
+
+# osgPPU
+set(OSGPPU_INCLUDE_DIR "NOTFOUND" CACHE STRING "osgPPU include directory")
+if (EXISTS ${OSGPPU_INCLUDE_DIR})
+  adjust_cached_path(OSGPPU_INCLUDE_DIR "osgPPU include directory" ${OSGPPU_INCLUDE_DIR})
+else()
+  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify OSGPPU_INCLUDE_DIR\n")
+endif()
+
+set(OSGPPU_LIBRARY_RELEASE "NOTFOUND" CACHE STRING "osgPPU library")
+if (EXISTS ${OSGPPU_LIBRARY_RELEASE})
+  adjust_cached_path(OSGPPU_LIBRARY_RELEASE "osgPPU library" ${OSGPPU_LIBRARY_RELEASE})
+else()
+  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify OSGPPU_LIBRARY_RELEASE\n")
+endif()
+
+set(OSGPPU_LIBRARY_DEBUG "NOTFOUND" CACHE STRING "osgPPU debug library")
+if (EXISTS ${OSGPPU_LIBRARY_DEBUG})
+  adjust_cached_path(OSGPPU_LIBRARY_DEBUG "osgPPU debug library" ${OSGPPU_LIBRARY_DEBUG})
+else()
+  set(OSGPPU_LIBRARY_DEBUG ${OSGPPU_LIBRARY_RELEASE})
+endif()
 
 # Check for existence of required directories
 if ("${Qt5Core_LIBRARIES}" STREQUAL "")
@@ -108,39 +127,41 @@ else()
 endif()
 
 # find osg binary directory
-set(OSG_BINARY "NOTFOUND" CACHE STRING "OSG binary directory")
-set(OSG_BINARY_DEBUG "NOTFOUND" CACHE STRING "OSG debug binary directory")
+if (WIN32)
+  set(OSG_BINARY "NOTFOUND" CACHE STRING "OSG binary directory")
+  set(OSG_BINARY_DEBUG "NOTFOUND" CACHE STRING "OSG debug binary directory")
 
-if (NOT EXISTS ${OSG_BINARY})
-  if (EXISTS ${OSG_LIBRARY}/../bin)
-    set(OSG_BINARY_TMP ${OSG_LIBRARY}/../bin)
-    
-    adjust_cached_path(OSG_BINARY "OSG binary directory" ${OSG_BINARY_TMP})
-  else()
-    message(WARNING "OSG binary directory not found")
+  if (NOT EXISTS ${OSG_BINARY})
+    if (EXISTS ${OSG_LIBRARY}/../bin)
+      set(OSG_BINARY_TMP ${OSG_LIBRARY}/../bin)
+      
+      adjust_cached_path(OSG_BINARY "OSG binary directory" ${OSG_BINARY_TMP})
+    else()
+      message(WARNING "OSG binary directory not found")
+    endif()
   endif()
-endif()
 
-adjust_cached_path(OSG_BINARY "OSG binary directory" ${OSG_BINARY})
-if (NOT EXISTS ${OSG_BINARY_DEBUG} AND EXISTS ${OSG_BINARY})
-  adjust_cached_path(OSG_BINARY_DEBUG "OSG debug binary directory" ${OSG_BINARY})
-endif()
-
-# find osg plugins directory
-set(OSG_PLUGINS "NOTFOUND" CACHE STRING "OSG plugins directory")
-set(OSG_PLUGINS_DEBUG "NOTFOUND" CACHE STRING "OSG plugins directory")
-
-if (EXISTS ${OSG_BINARY} AND NOT EXISTS ${OSG_PLUGINS})  
-  if (EXISTS ${OSG_BINARY}/osgPlugins)
-    adjust_cached_path(OSG_PLUGINS "OSG plugins directory" ${OSG_BINARY}/osgPlugins-${OPENSCENEGRAPH_VERSION})
-  else()
-    message(WARNING "OSG plugins directory not found")
+  adjust_cached_path(OSG_BINARY "OSG binary directory" ${OSG_BINARY})
+  if (NOT EXISTS ${OSG_BINARY_DEBUG} AND EXISTS ${OSG_BINARY})
+    adjust_cached_path(OSG_BINARY_DEBUG "OSG debug binary directory" ${OSG_BINARY})
   endif()
-endif()
 
-adjust_cached_path(OSG_PLUGINS "OSG plugins directory" ${OSG_PLUGINS})
-if (NOT EXISTS ${OSG_PLUGINS_DEBUG} AND EXISTS ${OSG_PLUGINS})
-  adjust_cached_path(OSG_PLUGINS_DEBUG "OSG debug binary directory" ${OSG_PLUGINS})
+  # find osg plugins directory
+  set(OSG_PLUGINS "NOTFOUND" CACHE STRING "OSG plugins directory")
+  set(OSG_PLUGINS_DEBUG "NOTFOUND" CACHE STRING "OSG plugins directory")
+
+  if (EXISTS ${OSG_BINARY} AND NOT EXISTS ${OSG_PLUGINS})  
+    if (EXISTS ${OSG_BINARY}/osgPlugins)
+      adjust_cached_path(OSG_PLUGINS "OSG plugins directory" ${OSG_BINARY}/osgPlugins-${OPENSCENEGRAPH_VERSION})
+    else()
+      message(WARNING "OSG plugins directory not found")
+    endif()
+  endif()
+
+  adjust_cached_path(OSG_PLUGINS "OSG plugins directory" ${OSG_PLUGINS})
+  if (NOT EXISTS ${OSG_PLUGINS_DEBUG} AND EXISTS ${OSG_PLUGINS})
+    adjust_cached_path(OSG_PLUGINS_DEBUG "OSG debug binary directory" ${OSG_PLUGINS})
+  endif()
 endif()
 
 # find OpenCV directories
