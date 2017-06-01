@@ -32,6 +32,5 @@ if (MSVC)
       debug ${lib})
   endforeach()
 else()
-  #TODO: write find script for osgPPU
-  target_link_libraries(osgGamingTest ${CMAKE_THREAD_LIBS_INIT} ${OPENSCENEGRAPH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} /usr/local/lib64/libosgPPU.so.0.5.9)
+  target_link_libraries(osgGamingTest ${CMAKE_THREAD_LIBS_INIT} ${OPENSCENEGRAPH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 endif()
