@@ -159,35 +159,37 @@ void osgGaming::generateTangentAndBinormal(Node* node)
 	ref_ptr<Group> group = node->asGroup();
 	ref_ptr<Geode> geode = node->asGeode();
 
-	if (group)
+  if (geode)
+  {
+    for (unsigned int i = 0; i<geode->getNumDrawables(); i++)
+    {
+      Geometry *geometry = geode->getDrawable(i)->asGeometry();
+      if (geometry)
+      {
+        ref_ptr<osgUtil::TangentSpaceGenerator> tsg = new osgUtil::TangentSpaceGenerator();
+        tsg->generate(geometry);
+
+        osg::Vec4Array* arr = tsg->getTangentArray();
+
+        geometry->setVertexAttribArray(6, tsg->getTangentArray());
+        geometry->setVertexAttribBinding(6, osg::Geometry::BIND_PER_VERTEX);
+
+        geometry->setVertexAttribArray(7, tsg->getBinormalArray());
+        geometry->setVertexAttribBinding(7, osg::Geometry::BIND_PER_VERTEX);
+        geometry->setVertexAttribNormalize(7, GL_FALSE);
+
+        geometry->setUseVertexBufferObjects(true);
+        //geometry->getVertexAttribArray(6)->dirty();
+        //geometry->getVertexAttribArray(7)->dirty();
+
+        tsg.release();
+      }
+    }
+  }
+  else if (group)
 	{
 		for (unsigned int i = 0; i<group->getNumChildren(); i++)
 			generateTangentAndBinormal(group->getChild(i));
-	}
-	else if (geode)
-	{
-		for (unsigned int i = 0; i<geode->getNumDrawables(); i++)
-		{
-			Geometry *geometry = geode->getDrawable(i)->asGeometry();
-			if (geometry)
-			{
-				ref_ptr<osgUtil::TangentSpaceGenerator> tsg = new osgUtil::TangentSpaceGenerator();
-				tsg->generate(geometry);
-
-				geometry->setVertexAttribArray(6, tsg->getTangentArray());
-				geometry->setVertexAttribBinding(6, osg::Geometry::BIND_PER_VERTEX);
-
-				geometry->setVertexAttribArray(7, tsg->getBinormalArray());
-				geometry->setVertexAttribBinding(7, osg::Geometry::BIND_PER_VERTEX);
-				geometry->setVertexAttribNormalize(7, GL_FALSE);
-
-				geometry->setUseVertexBufferObjects(true);
-				//geometry->getVertexAttribArray(6)->dirty();
-				//geometry->getVertexAttribArray(7)->dirty();
-
-				tsg.release();
-			}
-		}
 	}
 }
 
