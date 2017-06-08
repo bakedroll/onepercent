@@ -4,6 +4,8 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QFrame>
+#include <QApplication>
+#include <QDesktopWidget>
 
 namespace onep
 {
@@ -35,7 +37,13 @@ MainWindow::MainWindow(osg::ref_ptr<osgViewer::CompositeViewer> viewer)
 
   frameLayout->addWidget(m->osgWidget);
 
-  setMinimumSize(1280, 768);
+  QRect desktopRect = QApplication::desktop()->screenGeometry();
+  int winWidth = 1280;
+  int winHeight = 768;
+
+  setGeometry(QRect(desktopRect.width() / 2 - winWidth / 2, desktopRect.height() / 2 - winHeight / 2, winWidth, winHeight));
+
+  setMinimumSize(winWidth, winHeight);
   setCentralWidget(frame);
 }
 

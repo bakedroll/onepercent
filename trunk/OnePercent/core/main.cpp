@@ -14,7 +14,7 @@ using namespace osgGaming;
 using namespace onep;
 using namespace osg;
 
-#define INITIALIZE_QT
+// #define INITIALIZE_QT
 
 int main(int argc, char** argv)
 {
@@ -28,6 +28,8 @@ int main(int argc, char** argv)
 #ifdef INITIALIZE_QT
 
   ref_ptr<OnePercentApplication> app = new OnePercentApplication(argc, argv);
+  setlocale(LC_NUMERIC, "en_US");
+
   return app->run();
 
 #else

@@ -89,8 +89,8 @@ void Hud::updateUIElements()
 	_rootUIElement->setOrigin(origin);
 	_rootUIElement->setSize(_resolution);
 
-	UIUpdateVisitor updateVisitor;
-	_rootUIElement->accept(updateVisitor);
+	UIUpdateVisitor uiUpdateVisitor;
+	_rootUIElement->accept(uiUpdateVisitor);
 }
 
 void Hud::setFpsEnabled(bool enabled)
