@@ -14,7 +14,7 @@ using namespace osgGaming;
 using namespace onep;
 using namespace osg;
 
-// #define INITIALIZE_QT
+#define INITIALIZE_QT
 
 int main(int argc, char** argv)
 {
