@@ -24,10 +24,8 @@ target_link_libraries(osgGamingTest
 target_link_libraries(osgGamingTest
   optimized ${OSGPPU_LIBRARY_RELEASE})
   
-if (NOT ${OSGPPU_LIBRARY_RELEASE} STREQUAL ${OSGPPU_LIBRARY_DEBUG})
-  target_link_libraries(osgGamingTest
-    debug ${OSGPPU_LIBRARY_DEBUG})
-endif()
+target_link_libraries(osgGamingTest
+  debug ${OSGPPU_LIBRARY_DEBUG})
   
 if (MSVC)
   foreach(lib ${TEST_OSG_LIBRARIES})

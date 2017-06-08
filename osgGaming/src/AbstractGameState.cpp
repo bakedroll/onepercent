@@ -234,7 +234,7 @@ namespace osgGaming
 
   osg::ref_ptr<osgGaming::View> AbstractGameState::getView(int i)
   {
-    return m->viewer->getView(0);
+    return m->viewer->getView(i);
   }
 
   osg::ref_ptr<GameSettings> AbstractGameState::getGameSettings()

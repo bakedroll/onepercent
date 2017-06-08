@@ -53,15 +53,15 @@ void PropertiesManager::initializeProperty(string path, string type, string valu
 	}
 	else if (type == "int")
 	{
-		*getValuePtr<int>(path) = atoi(value.c_str());
+		*getValuePtr<int>(path) = stoi(value);
 	}
 	else if (type == "float")
 	{
-		*getValuePtr<float>(path) = float(atof(value.c_str()));
+		*getValuePtr<float>(path) = stof(value);
 	}
 	else if (type == "double")
 	{
-		*getValuePtr<double>(path) = atof(value.c_str());
+		*getValuePtr<double>(path) = stod(value);
 	}
 	else if (type == "vec2")
 	{

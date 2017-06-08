@@ -41,10 +41,8 @@ target_link_libraries(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   optimized ${OSGPPU_LIBRARY_RELEASE})
   
-if (NOT ${OSGPPU_LIBRARY_RELEASE} STREQUAL ${OSGPPU_LIBRARY_DEBUG})
-  target_link_libraries(${PROJECT_NAME}
-    debug ${OSGPPU_LIBRARY_DEBUG})
-endif()
+target_link_libraries(${PROJECT_NAME}
+  debug ${OSGPPU_LIBRARY_DEBUG})
 
 if (MSVC)
   foreach(lib ${OSG_LIBRARIES})
