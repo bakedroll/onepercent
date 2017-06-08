@@ -390,7 +390,7 @@ namespace onep
 
     stateSet->setAttribute(pgm, StateAttribute::ON);
 
-    addChild(caq);
+    //addChild(caq);
     tcm->addCameraAlignedQuad(caq);
   }
 
