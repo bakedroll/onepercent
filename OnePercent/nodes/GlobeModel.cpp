@@ -361,7 +361,7 @@ namespace onep
     ref_ptr<Program> pgm = new Program();
 
     ref_ptr<Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.vert", Shader::VERTEX);
-    ref_ptr<Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere2.frag", Shader::FRAGMENT);
+    ref_ptr<Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.frag", Shader::FRAGMENT);
 
     pgm->addShader(vert_shader);
     pgm->addShader(frag_shader);
@@ -390,7 +390,7 @@ namespace onep
 
     stateSet->setAttribute(pgm, StateAttribute::ON);
 
-    //addChild(caq);
+    addChild(caq);
     tcm->addCameraAlignedQuad(caq);
   }
 
