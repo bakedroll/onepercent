@@ -134,7 +134,8 @@ void main()
 {  
 	// default ray dir
 	//vec3 dir = ray_dir( 45.0, vec2(1.0, 1.0), fragCoord.xy );
-	vec3 dir = ray_dir( 45.0, vec2(1.0, 1.0), pixel_scr.xy + vec2(0.5, 0.5) );
+	//vec3 dir = ray_dir( 45.0, vec2(1.0, 1.0), pixel_scr.xy + vec2(0.5, 0.5) );
+  vec3 dir = ray_dir( 45.0, vec2(1.0, 768.0 / 1280.0), pixel_scr.xy + vec2(0.5, 0.5));
   
 	// default ray origin
 	vec3 eye = vec3( 0.0, 0.0, 2.4 );
@@ -145,11 +146,11 @@ void main()
 	eye = rot * eye;
 	
 	// sun light dir
-	vec3 l = vec3( 0, 0, 1 );
+	vec3 l = vec3( 1, 0, 0 );
 			  
 	vec2 e = ray_vs_sphere( eye, dir, R );
 	if ( e.x > e.y ) {
-		discard;
+		//discard;
 	}
 	
 	vec2 f = ray_vs_sphere( eye, dir, R_INNER );
@@ -159,4 +160,9 @@ void main()
 	
   float alpha = (I.r + I.g + I.b) / 6.0;
 	gl_FragColor = vec4( I, alpha );
+
+  //if (pixel_scr.x < 0.0 || pixel_scr.x > 1.0 || pixel_scr.y < 0.0 || pixel_scr.y > 1.0)
+  //  discard;
+
+  //gl_FragColor = vec4(step(pixel_scr.x, 0.5), step(pixel_scr.y, 0.5), 0.0, 0.3);
 }

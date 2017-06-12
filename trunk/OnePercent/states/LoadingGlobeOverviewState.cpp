@@ -5,7 +5,6 @@
 #include "nodes/BackgroundModel.h"
 
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/PropertiesManager.h>
 #include <osgGaming/NativeView.h>
 
 #include <osgGaming/HighDynamicRangeEffect.h>
@@ -33,8 +32,6 @@ namespace onep
 
   void LoadingGlobeOverviewState::initialize()
   {
-    PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/localization/en.xml");
-
     float projNear = float(getWorld(getView(0))->getCameraManipulator()->getProjectionNear());
     float projFar = float(getWorld(getView(0))->getCameraManipulator()->getProjectionFar());
 
@@ -70,8 +67,6 @@ namespace onep
 
   void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud, ref_ptr<GameSettings> settings)
   {
-    PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/game_parameters.xml");
-
     ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
     ref_ptr<GlobeModel> globe = new GlobeModel(world->getCameraManipulator());

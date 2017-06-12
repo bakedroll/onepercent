@@ -7,6 +7,7 @@
 #include "states/LoadingGlobeOverviewState.h"
 #include "osgGaming/ResourceManager.h"
 #include "osgGaming/Observable.h"
+#include "osgGaming/PropertiesManager.h"
 
 namespace onep
 {
@@ -26,7 +27,11 @@ namespace onep
 
   void OnePercentApplication::initialize()
   {
+    setlocale(LC_NUMERIC, "en_US");
+
     osgGaming::ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
+    osgGaming::PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/game_parameters.xml");
+    osgGaming::PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/localization/en.xml");
 
     getViewer()->addView(new osgGaming::View());
 
