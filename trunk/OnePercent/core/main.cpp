@@ -1,4 +1,5 @@
 #include <osgGaming/ResourceManager.h>
+#include <osgGaming/PropertiesManager.h>
 #include <osgGaming/NativeGameApplication.h>
 #include <osgGaming/NativeView.h>
 
@@ -37,6 +38,8 @@ int main(int argc, char** argv)
   //app->getViewer()->addView(new osgGaming::NativeView());
 
   ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
+  osgGaming::PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/game_parameters.xml");
+  osgGaming::PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/localization/en.xml");
 
   app->setDefaultWorld(new GlobeOverviewWorld());
 
