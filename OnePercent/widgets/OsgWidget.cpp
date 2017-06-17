@@ -1,7 +1,10 @@
 #include "OsgWidget.h"
 
+#include "widgets/VirtualOverlay.h"
+
 #include <assert.h>
 
+#include <osgGaming/Helper.h>
 #include <osgGaming/NativeView.h>
 #include <QTimer>
 #include <QResizeEvent>
@@ -157,6 +160,7 @@ namespace onep
     Impl(osg::ref_ptr<osgViewer::CompositeViewer> viewer)
       : viewer(viewer)
       , isInitialized(false)
+      , virtualOverlay(nullptr)
     {
     }
 
@@ -168,6 +172,9 @@ namespace onep
     QTimer updateTimer;
 
     bool isInitialized;
+
+    VirtualOverlay* virtualOverlay;
+    osg::ref_ptr<osg::Geode> virtualOverlayGeode;
   };
 
   OsgWidget::OsgWidget(osg::ref_ptr<osgViewer::CompositeViewer> viewer, QWidget* parent, Qt::WindowFlags f)
@@ -178,10 +185,10 @@ namespace onep
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
 
-    //setWindowFlags(Qt::FramelessWindowHint);
-    //setAttribute(Qt::WA_NoSystemBackground);
-    //setAttribute(Qt::WA_OpaquePaintEvent);
-    //setAttribute(Qt::WA_TranslucentBackground);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    setAttribute(Qt::WA_NoSystemBackground);
+    setAttribute( Qt::WA_OpaquePaintEvent, false );
+    setAutoFillBackground(false);
 
     m->graphicsWindow = new osgViewer::GraphicsWindowEmbedded(x(), y(), width(), height());
 
@@ -214,8 +221,21 @@ namespace onep
   {
   }
 
+  void OsgWidget::setVirtualOverlay(VirtualOverlay* overlay)
+  {
+    m->virtualOverlay = overlay;
+  }
+
+  void OsgWidget::setVirtualOverlayGeode(osg::ref_ptr<osg::Geode> geode)
+  {
+    m->virtualOverlayGeode = geode;
+  }
+
   void OsgWidget::paintGL()
   {
+    if (m->virtualOverlay)
+      m->virtualOverlay->renderToTexture();
+
     m->viewer->frame();
   }
 
@@ -244,6 +264,18 @@ namespace onep
     osg::ref_ptr<osg::Geode> geode = m->view->getCanvasGeode();
     geode->removeDrawable(geode->getDrawable(0));
     geode->addDrawable(osg::createTexturedQuadGeometry(osg::Vec3f(-factor, -1.0f, 0.0f), osg::Vec3f(2.0f * factor, 0.0f, 0.0f), osg::Vec3f(0.0f, 2.0f, 0.0f)));
+
+    // resize virtual overlay
+    if (m->virtualOverlayGeode.valid())
+    {
+      m->virtualOverlayGeode->removeDrawable(m->virtualOverlayGeode->getDrawable(0));
+
+      osg::ref_ptr<osg::Geometry> geometry = osgGaming::createQuadGeometry(0.0f, float(width) - 1.0f, 0.0f, float(height) - 1.0f, 0.0f, osgGaming::QuadOrientation::XY, false);
+      m->virtualOverlayGeode->addDrawable(geometry);
+    }
+
+    if (m->virtualOverlay)
+      m->virtualOverlay->getTexture()->setTextureSize(width, height);
   }
 
   void OsgWidget::keyPressEvent(QKeyEvent* event)

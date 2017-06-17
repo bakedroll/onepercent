@@ -5,6 +5,7 @@
 #include <osgGaming/GameStateStack.h>
 #include <osgGaming/Helper.h>
 #include <osgGaming/Hud.h>
+#include <osgGaming/UIElement.h>
 #include <osgGaming/World.h>
 
 namespace osgGaming
@@ -15,6 +16,7 @@ struct InputManager::Impl
   Impl()
     : mouseDragging(0)
     , isInitialized(false)
+    , gameStateStack(nullptr)
   {
     for (int i = 0; i < NUM_MOUSE_BUTTONS; i++)
       mousePressed[i] = false;
@@ -215,7 +217,9 @@ bool InputManager::onMouseClickEvent(const osgGA::GUIEventAdapter& ea)
 
   if (!anyUIMHovered)
   {
-    m->mousePressed[m->log_x_2(ea.getButton())] = true;
+    int button = ea.getButton();
+    int mb = m->log_x_2(button);
+    m->mousePressed[mb] = true;
 
     m->gameStateStack->begin(AbstractGameState::GUIEVENT);
     while (m->gameStateStack->next())

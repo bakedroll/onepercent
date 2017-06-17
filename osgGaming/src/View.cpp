@@ -2,6 +2,7 @@
 
 #include <osg/ClampColor>
 #include <osg/MatrixTransform>
+#include <osg/Texture2D>
 
 #include <osgViewer/Renderer>
 

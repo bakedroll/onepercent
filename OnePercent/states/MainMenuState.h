@@ -13,9 +13,9 @@ namespace onep
 
 		virtual void initialize() override;
 
-		virtual osgGaming::GameState::StateEvent* update() override;
+		virtual VirtualOverlay* createVirtualOverlay() override;
 
-		virtual void onUIClickedEvent(osg::ref_ptr<osgGaming::UIElement> uiElement) override;
+		virtual osgGaming::GameState::StateEvent* update() override;
 
 	protected:
 		virtual osg::ref_ptr<osgGaming::Hud> overrideHud(osg::ref_ptr<osgGaming::View> view) override;

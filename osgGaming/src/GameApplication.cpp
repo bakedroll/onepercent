@@ -186,6 +186,7 @@ namespace osgGaming
         if (attach && m->gameStateStack.isTop())
         {
           m->attachState(state);
+          stateAttachedEvent(state);
         }
 
         if (!initialized)
@@ -387,6 +388,10 @@ namespace osgGaming
   osg::ref_ptr<osgGaming::Viewer> GameApplication::getViewer()
   {
     return m->viewer;
+  }
+
+  void GameApplication::stateAttachedEvent(osg::ref_ptr<AbstractGameState> state)
+  {
   }
 
   bool GameApplication::isGameEnded() const

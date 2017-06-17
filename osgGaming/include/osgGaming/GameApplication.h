@@ -41,6 +41,8 @@ namespace osgGaming
     virtual int mainloop() = 0;
     virtual osg::ref_ptr<InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) = 0;
 
+    virtual void stateAttachedEvent(osg::ref_ptr<AbstractGameState> state);
+
     bool isGameEnded() const;
 
 	private:

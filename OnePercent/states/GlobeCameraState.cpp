@@ -10,7 +10,8 @@ using namespace osgGA;
 using namespace osgGaming;
 
 GlobeCameraState::GlobeCameraState()
-	: GameState()
+	: QtGameState()
+  , _cameraDistance(0.0f)
 {
 }
 

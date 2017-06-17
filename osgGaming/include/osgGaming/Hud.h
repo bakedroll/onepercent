@@ -1,24 +1,27 @@
 #pragma once
 
-#include <osgGaming/UIElement.h>
 #include <osgGaming/UserInteractionModel.h>
 
 #include <osg/Referenced>
 #include <osg/Projection>
-#include <osg/Geode>
+#include <osg/MatrixTransform>
 
-#include <osgText/Text>
+#include <memory>
 
 namespace osgGaming
 {
+  class UIElement;
+
 	class Hud : public osg::Referenced
 	{
 	public:
     typedef osg::ref_ptr<Hud> Ptr;
 
 		Hud();
+		~Hud();
 
 		osg::ref_ptr<osg::Projection> getProjection();
+		osg::ref_ptr<osg::MatrixTransform> getModelViewTransform();
 
 		void loadMarkupFromXmlResource(std::string resourceKey);
 
@@ -40,17 +43,8 @@ namespace osgGaming
 		void resetUserInteractionModel();
 
 	private:
-		osg::ref_ptr<osg::Projection> _projection;
-		osg::ref_ptr<osg::Geode> _geode;
+		struct Impl;
+		std::unique_ptr<Impl> m;
 
-		osg::ref_ptr<UIElement> _rootUIElement;
-		osg::ref_ptr<osg::MatrixTransform> _matrixTransform;
-
-		osg::ref_ptr<osgText::Text> _fpsText;
-		bool _fpsEnabled;
-
-		osg::Vec2f _resolution;
-
-		UserInteractionModel::List _uimList;
 	};
 }

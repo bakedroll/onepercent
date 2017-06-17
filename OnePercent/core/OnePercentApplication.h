@@ -9,12 +9,7 @@ namespace onep
   public:
     OnePercentApplication(int argc, char** argv);
 
-    void initialize();
-
     int run();
 
-  private:
-    struct Impl;
-    std::unique_ptr<Impl> m;
   };
 }

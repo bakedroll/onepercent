@@ -1,11 +1,10 @@
 #include "MainWindow.h"
 #include "OsgWidget.h"
 
-#include <QVBoxLayout>
-#include <QPushButton>
 #include <QFrame>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QVBoxLayout>
 
 namespace onep
 {
@@ -25,16 +24,7 @@ MainWindow::MainWindow(osg::ref_ptr<osgViewer::CompositeViewer> viewer)
   QFrame* frame = new QFrame();
   frame->setLayout(frameLayout);
 
-  QPushButton* button = new QPushButton();
-  button->setWindowFlags(Qt::FramelessWindowHint);
-  button->setAttribute(Qt::WA_NoSystemBackground);
-  button->setAttribute(Qt::WA_TranslucentBackground);
-
-  QVBoxLayout* mainLayout = new QVBoxLayout();
-
   m->osgWidget = new OsgWidget(viewer);
-  m->osgWidget->setLayout(mainLayout);
-
   frameLayout->addWidget(m->osgWidget);
 
   QRect desktopRect = QApplication::desktop()->screenGeometry();
