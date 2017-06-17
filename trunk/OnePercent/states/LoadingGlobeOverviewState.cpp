@@ -65,7 +65,7 @@ namespace onep
   VirtualOverlay* LoadingGlobeOverviewState::createVirtualOverlay()
   {
     m->labelLoadingText = new QLabel(QString());
-    m->labelLoadingText->setStyleSheet("font-size: 20pt; margin: 10px;");
+	m->labelLoadingText->setStyleSheet("font-size: 20pt; margin: 10px; color: #fff;");
 
     VirtualOverlay* overlay = new VirtualOverlay();
 

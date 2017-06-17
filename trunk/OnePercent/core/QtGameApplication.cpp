@@ -118,7 +118,7 @@ void QtGameApplication::stateAttachedEvent(osg::ref_ptr<osgGaming::AbstractGameS
   if (!hud.valid())
     return;
 
-  for (int i=0; i<hud->getModelViewTransform()->getNumChildren(); i++)
+  for (int i=0; i<int(hud->getModelViewTransform()->getNumChildren()); i++)
   {
     if (hud->getModelViewTransform()->getChild(i) == m->overlayGeode.get())
     {

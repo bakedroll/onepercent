@@ -1,10 +1,5 @@
 #include "VirtualOverlay.h"
 
-#include <QVBoxLayout>
-#include <QPushButton>
-
-#include <QFile>
-
 #include <assert.h>
 
 namespace onep
@@ -24,6 +19,7 @@ namespace onep
     }
 
     osg::ref_ptr<osg::Texture2D> texture;
+    QImage image;
   };
 
   VirtualOverlay::VirtualOverlay()
@@ -55,11 +51,8 @@ namespace onep
 
     osg::Image* image = m->texture->getImage();
     assert(image);
-    image->setImage(width, height, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, pix.toImage().convertToFormat(QImage::Format_RGBA8888).bits(), osg::Image::NO_DELETE);
-  }
 
-  void VirtualOverlay::test()
-  {
-    printf("bla\n");
+    m->image = pix.toImage().convertToFormat(QImage::Format_RGBA8888);
+    image->setImage(width, height, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, m->image.bits(), osg::Image::NO_DELETE);
   }
 }

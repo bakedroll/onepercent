@@ -4,7 +4,6 @@
 
 #include <osgGaming/GameSettings.h>
 #include <osgGaming/GameState.h>
-#include <osgGaming/UIText.h>
 #include <osgGaming/World.h>
 
 #include <memory>
