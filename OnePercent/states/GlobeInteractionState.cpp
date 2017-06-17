@@ -202,14 +202,14 @@ namespace onep
   VirtualOverlay* GlobeInteractionState::createVirtualOverlay()
   {
     m->labelClickCountry = new QLabel(QObject::tr("Please select a country."));
-    m->labelClickCountry->setStyleSheet("font-size: 18pt;");
+	m->labelClickCountry->setStyleSheet("font-size: 18pt; color: #fff;");
 
     m->labelClickAgain = new QLabel(QObject::tr("Click again to confirm your selection."));
-    m->labelClickAgain->setStyleSheet("font-size: 12pt;");
+    m->labelClickAgain->setStyleSheet("font-size: 12pt; color: #fff;");
     m->labelClickAgain->setVisible(false);
 
     m->labelDays = new QLabel(QString());
-    m->labelDays->setStyleSheet("font-size: 18pt;");
+    m->labelDays->setStyleSheet("font-size: 18pt; color: #fff;");
     m->labelDays->setVisible(false);
 
     QVBoxLayout* headerLayout = new QVBoxLayout();
