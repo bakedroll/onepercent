@@ -91,8 +91,6 @@ QtGameApplication::QtGameApplication(int argc, char** argv)
   m->mainWindow = new MainWindow(getViewer());
   m->mainWindow->show();
 
-  setDefaultWorld(new GlobeOverviewWorld());
-
   m->endGameObserver = onEndGameSignal().connect(osgGaming::Func<void>([this]()
   {
     m->mainWindow->shutdown();
