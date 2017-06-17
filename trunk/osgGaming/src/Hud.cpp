@@ -4,170 +4,202 @@
 #include <osgGaming/UIMCollectorVisitor.h>
 #include <osgGaming/UIFindElementVisitor.h>
 #include <osgGaming/UIMarkupLoader.h>
+#include <osgGaming/UIElement.h>
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/Helper.h>
 
-#include <osg/MatrixTransform>
+#include <osg/Geode>
 
-using namespace osgGaming;
-using namespace osgText;
-using namespace osg;
-using namespace std;
+#include <osgText/Text>
 
-Hud::Hud()
-	: Referenced(),
-	_fpsEnabled(false)
+namespace osgGaming
 {
-	ref_ptr<StateSet> stateSet = new StateSet();
-	stateSet->setMode(GL_BLEND, StateAttribute::ON);
-	stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
-	stateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
-	stateSet->setRenderingHint(StateSet::TRANSPARENT_BIN);
-	stateSet->setRenderBinDetails(10, "RenderBin");
+
+  struct Hud::Impl
+  {
+    Impl()
+      : fpsEnabled(false)
+    {}
+
+    osg::ref_ptr<osg::Projection> projection;
+    osg::ref_ptr<osg::Geode> geode;
+
+    osg::ref_ptr<UIElement> rootUIElement;
+    osg::ref_ptr<osg::MatrixTransform> modelViewTransform;
+
+    osg::ref_ptr<osgText::Text> fpsText;
+    bool fpsEnabled;
+
+    osg::Vec2f resolution;
+
+    UserInteractionModel::List uimList;
+  };
+
+  Hud::Hud()
+    : Referenced()
+    , m(new Impl())
+  {
+    osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
+    stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+    stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+    stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+    stateSet->setRenderBinDetails(10, "RenderBin");
 
 
-	_geode = new Geode();
+    m->geode = new osg::Geode();
 
-	_rootUIElement = new UIGrid();
+    m->rootUIElement = new UIGrid();
 
-	ref_ptr<MatrixTransform> modelViewMatrix = new MatrixTransform();
-	modelViewMatrix->setMatrix(Matrix::identity());
-	modelViewMatrix->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-	modelViewMatrix->addChild(_geode);
-	modelViewMatrix->addChild(_rootUIElement);
+    m->modelViewTransform = new osg::MatrixTransform();
+    m->modelViewTransform->setMatrix(osg::Matrix::identity());
+    m->modelViewTransform->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+    m->modelViewTransform->addChild(m->geode);
+    m->modelViewTransform->addChild(m->rootUIElement);
 
-	_projection = new Projection();
-	_projection->addChild(modelViewMatrix);
-	_projection->setStateSet(stateSet);
-}
+    m->projection = new osg::Projection();
+    m->projection->addChild(m->modelViewTransform);
+    m->projection->setStateSet(stateSet);
+  }
 
-ref_ptr<Projection> Hud::getProjection()
-{
-	return _projection;
-}
+  Hud::~Hud()
+  {
+  }
 
-void Hud::loadMarkupFromXmlResource(string resourceKey)
-{
-	ref_ptr<UIElement> element = UIMarkupLoader::getInstance()->loadMarkupFromXmlResource(resourceKey);
+  osg::ref_ptr<osg::Projection> Hud::getProjection()
+  {
+    return m->projection;
+  }
 
-	setRootUIElement(element);
-}
+  osg::ref_ptr<osg::MatrixTransform> Hud::getModelViewTransform()
+  {
+    return m->modelViewTransform;
+  }
 
-ref_ptr<UIElement> Hud::getRootUIElement()
-{
-	return _rootUIElement;
-}
+  void Hud::loadMarkupFromXmlResource(std::string resourceKey)
+  {
+    osg::ref_ptr<UIElement> element = UIMarkupLoader::getInstance()->loadMarkupFromXmlResource(resourceKey);
 
-UserInteractionModel::List& Hud::getUserInteractionModels()
-{
-	return _uimList;
-}
+    setRootUIElement(element);
+  }
 
-ref_ptr<UIElement> Hud::getUIElementByName(string name)
-{
-	UIFindElementVisitor visitor(name);
+  osg::ref_ptr<UIElement> Hud::getRootUIElement()
+  {
+    return m->rootUIElement;
+  }
 
-	_rootUIElement->accept(visitor);
+  UserInteractionModel::List& Hud::getUserInteractionModels()
+  {
+    return m->uimList;
+  }
 
-	return visitor.getResult();
-}
+  osg::ref_ptr<UIElement> Hud::getUIElementByName(std::string name)
+  {
+    UIFindElementVisitor visitor(name);
 
-void Hud::updateResolution(Vec2f resolution)
-{
-	_resolution = resolution;
+    m->rootUIElement->accept(visitor);
 
-	_projection->setMatrix(Matrix::ortho2D(0.0, double(_resolution.x()) - 1.0, 1.0, double(_resolution.y()) - 1.0));
+    return visitor.getResult();
+  }
 
-	updateUIElements();
-}
+  void Hud::updateResolution(osg::Vec2f resolution)
+  {
+    m->resolution = resolution;
 
-void Hud::updateUIElements()
-{
-	Vec2f origin(0.0f, 0.0f);
+    m->projection->setMatrix(osg::Matrix::ortho2D(0.0, double(m->resolution.x()) - 1.0, 0.0, double(m->resolution.y()) - 1.0));
 
-	_rootUIElement->setAbsoluteOrigin(origin);
-	_rootUIElement->setOrigin(origin);
-	_rootUIElement->setSize(_resolution);
+    updateUIElements();
+  }
 
-	UIUpdateVisitor uiUpdateVisitor;
-	_rootUIElement->accept(uiUpdateVisitor);
-}
+  void Hud::updateUIElements()
+  {
+    osg::Vec2f origin(0.0f, 0.0f);
 
-void Hud::setFpsEnabled(bool enabled)
-{
-	if (enabled == _fpsEnabled)
-	{
-		return;
-	}
+    m->rootUIElement->setAbsoluteOrigin(origin);
+    m->rootUIElement->setOrigin(origin);
+    m->rootUIElement->setSize(m->resolution);
 
-	_fpsEnabled = enabled;
+    UIUpdateVisitor uiUpdateVisitor;
+    m->rootUIElement->accept(uiUpdateVisitor);
+  }
 
-	if (!_fpsText.valid())
-	{
-		_fpsText = createTextNode("", 25.0f, ResourceManager::getInstance()->loadDefaultFont());
-		_fpsText->setAlignment(TextBase::LEFT_BOTTOM);
-		_fpsText->setPosition(Vec3f(10.0f, 10.0f, 0.0f));
-		_fpsText->setDataVariance(Object::DYNAMIC);
-		_fpsText->setUpdateCallback(new FpsTextCallback());
-	}
+  void Hud::setFpsEnabled(bool enabled)
+  {
+    if (enabled == m->fpsEnabled)
+    {
+      return;
+    }
 
-	if (_fpsEnabled == true)
-	{
-		_geode->addDrawable(_fpsText);
-	}
-	else
-	{
-		_geode->removeDrawable(_fpsText);
-	}
-}
+    m->fpsEnabled = enabled;
 
-void Hud::setRootUIElement(osg::ref_ptr<UIElement> element)
-{
-	if (_rootUIElement == element)
-	{
-		return;
-	}
+    if (!m->fpsText.valid())
+    {
+      m->fpsText = createTextNode("", 25.0f, ResourceManager::getInstance()->loadDefaultFont());
+      m->fpsText->setAlignment(osgText::TextBase::LEFT_BOTTOM);
+      m->fpsText->setPosition(osg::Vec3f(10.0f, 10.0f, 0.0f));
+      m->fpsText->setDataVariance(osg::Object::DYNAMIC);
+      m->fpsText->setUpdateCallback(new FpsTextCallback());
+    }
 
-	ref_ptr<Group> parent = _rootUIElement->getParent(0);
-	parent->removeChild(_rootUIElement);
+    if (m->fpsEnabled == true)
+    {
+      m->geode->addDrawable(m->fpsText);
+    }
+    else
+    {
+      m->geode->removeDrawable(m->fpsText);
+    }
+  }
 
-	_rootUIElement = element;
+  void Hud::setRootUIElement(osg::ref_ptr<UIElement> element)
+  {
+    if (m->rootUIElement == element)
+    {
+      return;
+    }
 
-	parent->addChild(_rootUIElement);
+    osg::ref_ptr<osg::Group> parent = m->rootUIElement->getParent(0);
+    parent->removeChild(m->rootUIElement);
 
-	resetUserInteractionModel();
-	_uimList.clear();
+    m->rootUIElement = element;
 
-	UIMCollectorVisitor visitor;
-	_rootUIElement->accept(visitor);
+    parent->addChild(m->rootUIElement);
 
-	_uimList = visitor.getUserInteractionModels();
+    resetUserInteractionModel();
+    m->uimList.clear();
 
-	updateUIElements();
-}
+    UIMCollectorVisitor visitor;
+    m->rootUIElement->accept(visitor);
 
-void Hud::registerUserInteractionModel(UserInteractionModel* model)
-{
-	_uimList.push_back(model);
-}
+    m->uimList = visitor.getUserInteractionModels();
 
-bool Hud::anyUserInteractionModelHovered()
-{
-	for (UserInteractionModel::List::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
-	{
-		if ((*it)->getHovered())
-		{
-			return true;
-		}
-	}
+    updateUIElements();
+  }
 
-	return false;
-}
+  void Hud::registerUserInteractionModel(UserInteractionModel* model)
+  {
+    m->uimList.push_back(model);
+  }
 
-void Hud::resetUserInteractionModel()
-{
-	for (UserInteractionModel::List::iterator it = _uimList.begin(); it != _uimList.end(); ++it)
-	{
-		(*it)->setHovered(false);
-	}
+  bool Hud::anyUserInteractionModelHovered()
+  {
+    for (UserInteractionModel::List::iterator it = m->uimList.begin(); it != m->uimList.end(); ++it)
+    {
+      if ((*it)->getHovered())
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void Hud::resetUserInteractionModel()
+  {
+    for (UserInteractionModel::List::iterator it = m->uimList.begin(); it != m->uimList.end(); ++it)
+    {
+      (*it)->setHovered(false);
+    }
+  }
+
 }

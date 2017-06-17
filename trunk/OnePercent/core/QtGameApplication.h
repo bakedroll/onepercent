@@ -1,8 +1,9 @@
 #pragma once
 
 #include <osgGaming/GameApplication.h>
+#include <osgGaming/AbstractGameState.h>
 
-#include <QtWidgets/QApplication>
+#include <memory>
 
 namespace onep
 {
@@ -10,15 +11,17 @@ namespace onep
   {
   public:
     QtGameApplication(int argc, char** argv);
-
-    void setInputManager(osg::ref_ptr<osgGaming::InputManager> im);
+    ~QtGameApplication();
 
   protected:
+    virtual void stateAttachedEvent(osg::ref_ptr<osgGaming::AbstractGameState> state) override;
+
     virtual int mainloop() override;
     virtual osg::ref_ptr<osgGaming::InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) override;
 
   private:
-    std::shared_ptr<QApplication> m_qapplication;
-    osg::ref_ptr<osgGaming::InputManager> m_inputManager;
+    struct Impl;
+    std::unique_ptr<Impl> m;
+
   };
 }

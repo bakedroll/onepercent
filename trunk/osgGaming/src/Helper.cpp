@@ -286,10 +286,10 @@ ref_ptr<Geometry> osgGaming::createQuadGeometry(float left, float right, float b
 	//colors->push_back(color);
 
 	ref_ptr<Vec2Array> texcoords = new Vec2Array();
+	texcoords->push_back(Vec2(0.0f, 1.0f));
 	texcoords->push_back(Vec2(0.0f, 0.0f));
 	texcoords->push_back(Vec2(1.0f, 0.0f));
-	texcoords->push_back(Vec2(1.0f, 1.0f));
-	texcoords->push_back(Vec2(0.0f, 1.0f));
+  texcoords->push_back(Vec2(1.0f, 1.0f));
 
 	geo->setTexCoordArray(0, texcoords);
 	geo->addPrimitiveSet(indices);

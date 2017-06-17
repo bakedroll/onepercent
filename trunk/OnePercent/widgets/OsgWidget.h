@@ -8,8 +8,12 @@
 #include <osgViewer/CompositeViewer>
 #include <osgGaming/InputManager.h>
 
+#include <osg/Geode>
+
 namespace onep
 {
+  class VirtualOverlay;
+
   class OsgWidget : public QGLWidget, public osgGaming::InputManager
   {
     Q_OBJECT
@@ -17,6 +21,9 @@ namespace onep
   public:
     OsgWidget(osg::ref_ptr<osgViewer::CompositeViewer> viewer, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
     ~OsgWidget();
+
+    void setVirtualOverlay(VirtualOverlay* overlay);
+    void setVirtualOverlayGeode(osg::ref_ptr<osg::Geode> geode);
 
   protected:
     //virtual void paintEvent(QPaintEvent* paintEvent) override;

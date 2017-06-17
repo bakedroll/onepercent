@@ -1,13 +1,13 @@
 #pragma once
 
 #include "nodes/GlobeOverviewWorld.h"
+#include "states/QtGameState.h"
 
-#include <osgGaming/GameState.h>
 #include <osgGaming/Animation.h>
 
 namespace onep
 {
-	class GlobeCameraState : public osgGaming::GameState
+	class GlobeCameraState : public QtGameState
 	{
 	public:
 	  GlobeCameraState();

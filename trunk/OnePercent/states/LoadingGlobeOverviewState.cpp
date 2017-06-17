@@ -3,6 +3,7 @@
 #include "nodes/GlobeModel.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/BackgroundModel.h"
+#include "widgets/VirtualOverlay.h"
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/NativeView.h>
@@ -11,6 +12,9 @@
 #include <osgGaming/DepthOfFieldEffect.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>
 
+#include <QVBoxLayout>
+#include <QLabel>
+
 using namespace osg;
 using namespace osgGaming;
 using namespace osgText;
@@ -18,14 +22,30 @@ using namespace std;
 
 namespace onep
 {
-  LoadingGlobeOverviewState::LoadingGlobeOverviewState(ref_ptr<GameState> nextState)
-    : GameLoadingState(nextState)
+  struct LoadingGlobeOverviewState::Impl
   {
+    Impl()
+      : labelLoadingText(nullptr)
+    {
 
+    }
+
+    QLabel* labelLoadingText;
+  };
+
+  LoadingGlobeOverviewState::LoadingGlobeOverviewState(ref_ptr<GameState> nextState)
+    : QtGameLoadingState(nextState)
+    , m(new Impl())
+  {
   }
 
   LoadingGlobeOverviewState::LoadingGlobeOverviewState(AbstractGameState::AbstractGameStateList nextStates)
-    : GameLoadingState(nextStates)
+    : QtGameLoadingState(nextStates)
+    , m(new Impl())
+  {
+  }
+
+  LoadingGlobeOverviewState::~LoadingGlobeOverviewState()
   {
 
   }
@@ -35,16 +55,6 @@ namespace onep
     float projNear = float(getWorld(getView(0))->getCameraManipulator()->getProjectionNear());
     float projFar = float(getWorld(getView(0))->getCameraManipulator()->getProjectionFar());
 
-    std::string loadingTextString = osgGaming::PropertiesManager::getInstance()->getValue<std::string>(Param_LocalizationInfoTextLoading);
-
-    _loadingText = new UIText();
-    _loadingText->setText(loadingTextString);
-    _loadingText->setFontSize(25);
-    _loadingText->setVerticalAlignment(UIElement::BOTTOM);
-    _loadingText->setMargin(10.0f);
-
-    getHud(getView(0))->getRootUIElement()->addChild(_loadingText);
-
     getView(0)->setClampColorEnabled(true);
 
     getView(0)->addPostProcessingEffect(new FastApproximateAntiAliasingEffect(getView(0)->getResolution()));
@@ -52,15 +62,31 @@ namespace onep
     getView(0)->addPostProcessingEffect(new DepthOfFieldEffect(projNear, projFar), false);
   }
 
+  VirtualOverlay* LoadingGlobeOverviewState::createVirtualOverlay()
+  {
+    m->labelLoadingText = new QLabel(QString());
+    m->labelLoadingText->setStyleSheet("font-size: 20pt; margin: 10px;");
+
+    VirtualOverlay* overlay = new VirtualOverlay();
+
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->addStretch(1);
+    layout->addWidget(m->labelLoadingText);
+
+    overlay->setLayout(layout);
+
+    return overlay;
+  }
+
   GameState::StateEvent* LoadingGlobeOverviewState::update()
   {
     int dotCount = int(getSimulationTime() * 10.0) % 4;
-    std::string loadingTextString = osgGaming::PropertiesManager::getInstance()->getValue<std::string>(Param_LocalizationInfoTextLoading);
+    QString loadingTextString = QObject::tr("Loading");
 
     for (int i = 0; i < dotCount; i++)
       loadingTextString += ".";
 
-    _loadingText->setText(loadingTextString);
+    m->labelLoadingText->setText(loadingTextString);
 
     return stateEvent_default();
   }
