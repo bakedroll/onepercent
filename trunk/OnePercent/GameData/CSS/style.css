@@ -1,0 +1,46 @@
+*
+{
+  color: #fff;
+}
+
+QLabel#LabelLoadingText
+{
+  font-size: 20pt;
+  margin: 10px;
+}
+
+QPushButton#ButtonMainMenu
+{
+  min-width: 400px;
+  min-height: 45px;
+  max-width: 400px;
+  max-height: 45px;
+}
+
+QLabel#LabelSelectCountry
+{
+  font-size: 18pt;
+}
+
+QLabel#LabelClickAgain
+{
+  font-size: 12pt;
+}
+
+QLabel#LabelDays
+{
+  font-size: 18pt;
+  margin-bottom: 38px;
+}
+
+QWidget#WidgetLeftPanel
+{
+  min-width: 320px;
+  max-width: 320px;
+}
+
+QWidget#WidgetRightPanel
+{
+  min-width: 200px;
+  max-width: 200px;
+}
