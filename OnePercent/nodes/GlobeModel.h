@@ -79,6 +79,6 @@ namespace onep
 
     BranchType m_highlightedBranch;
 
-    osgGaming::Observer<bool>::Ptr m_skillBranchActivatedObserver;
+    std::vector<osgGaming::Observer<bool>::Ptr> m_skillBranchActivatedObservers;
 	};
 }

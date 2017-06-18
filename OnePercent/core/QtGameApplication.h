@@ -3,6 +3,8 @@
 #include <osgGaming/GameApplication.h>
 #include <osgGaming/AbstractGameState.h>
 
+#include <QtWidgets/QApplication>
+
 #include <memory>
 
 namespace onep
@@ -18,6 +20,8 @@ namespace onep
 
     virtual int mainloop() override;
     virtual osg::ref_ptr<osgGaming::InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) override;
+
+    std::shared_ptr<QApplication> qApplication();
 
   private:
     struct Impl;

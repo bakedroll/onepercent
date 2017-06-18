@@ -37,6 +37,9 @@ VirtualOverlay* MainMenuState::createVirtualOverlay()
   QPushButton* buttonStart = new QPushButton(QObject::tr("Start Game"));
   QPushButton* buttonEnd = new QPushButton(QObject::tr("End Game"));
 
+  buttonStart->setObjectName("ButtonMainMenu");
+  buttonEnd->setObjectName("ButtonMainMenu");
+
   QConnectFunctor::connect(buttonStart, SIGNAL(clicked()), [this]()
   {
     stateEvent_replace(new GlobeInteractionState());
@@ -46,9 +49,6 @@ VirtualOverlay* MainMenuState::createVirtualOverlay()
   {
     stateEvent_endGame();
   });
-
-  buttonStart->setFixedSize(400, 45);
-  buttonEnd->setFixedSize(400, 45);
 
   VirtualOverlay* overlay = new VirtualOverlay();
 

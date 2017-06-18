@@ -55,6 +55,8 @@ namespace onep
   {
     for (CountryMesh::List::iterator it = m_visibleCountryMeshs.begin(); it != m_visibleCountryMeshs.end(); ++it)
       m_countrySurfacesSwitch->setChildValue(*it, false);
+
+    m_highlightedBranch = BranchType::BRANCH_UNDEFINED;
   }
 
   void GlobeModel::setSelectedCountry(int countryId)
@@ -119,14 +121,14 @@ namespace onep
 
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
     {
-      m_skillBranchActivatedObserver = countryData->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([this, mesh, i](bool activated)
+      m_skillBranchActivatedObservers.push_back(countryData->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([this, mesh, i](bool activated)
       {
         if (!activated)
           return;
 
         if (m_oSelectedCountryId->get() == 0 && m_highlightedBranch == i)
           addHighlightedCountry(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
-      }));
+      })));
     }
   }
 

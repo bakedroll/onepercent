@@ -6,7 +6,6 @@
 #include "widgets/MainWindow.h"
 #include "widgets/VirtualOverlay.h"
 
-#include <QtWidgets/QApplication>
 #include <QGridLayout>
 #include <QLayoutItem>
 
@@ -175,6 +174,11 @@ osg::ref_ptr<osgGaming::InputManager> QtGameApplication::createInputManager(osg:
 {
   assert(m->mainWindow->getViewWidget());
   return m->mainWindow->getViewWidget();
+}
+
+std::shared_ptr<QApplication> QtGameApplication::qApplication()
+{
+  return m->qapplication;
 }
 
 }

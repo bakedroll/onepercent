@@ -18,7 +18,6 @@ namespace onep
 
 		virtual void initialize() override;
 		virtual VirtualOverlay* createVirtualOverlay() override;
-    void setupUi();
 
 		virtual void onMousePressedEvent(int button, float x, float y) override;
 		virtual void onKeyPressedEvent(int key) override;
@@ -27,8 +26,6 @@ namespace onep
 
 		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change) override;
 		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position) override;
-
-		virtual void onUIClickedEvent(osg::ref_ptr<osgGaming::UIElement> uiElement) override;
 
 		void dayTimerElapsed();
 

@@ -6,6 +6,9 @@
 #include "osgGaming/ResourceManager.h"
 #include "osgGaming/PropertiesManager.h"
 
+#include <QApplication>
+#include <QFile>
+
 namespace onep
 {
   OnePercentApplication::OnePercentApplication(int argc, char** argv)
@@ -16,6 +19,18 @@ namespace onep
     osgGaming::PropertiesManager::getInstance()->loadPropertiesFromXmlResource("./GameData/data/localization/en.xml");
 
     setDefaultWorld(new GlobeOverviewWorld());
+
+    // load CSS
+    QFile file("./GameData/CSS/style.css");
+    if (!file.open(QIODevice::ReadOnly))
+    {
+      assert(false);
+    }
+    else
+    {
+      qApplication()->setStyleSheet(QString(file.readAll()));
+      file.close();
+    }
   }
 
   int OnePercentApplication::run()

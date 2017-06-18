@@ -34,4 +34,29 @@ namespace osgGaming
     , m_funcWithSender(func)
   {
   }
+
+  void QConnectBoolFunctor::run(bool i)
+  {
+    m_func(i);
+  }
+
+  bool QConnectBoolFunctor::connect(
+    QObject* sender,
+    const char* signal,
+    const std::function<void(bool)>& receiver,
+    QObject* parent,
+    Qt::ConnectionType connectionType)
+  {
+    if (!parent)
+      parent = sender;
+
+    return QObject::connect(sender, signal, new QConnectBoolFunctor(parent, receiver), SLOT(run(bool)), connectionType);
+  }
+
+  QConnectBoolFunctor::QConnectBoolFunctor(QObject* parent, const std::function<void(bool)>& func)
+  : QObject(parent)
+  , m_func(func)
+  {
+    // empty
+  }
 }

@@ -29,4 +29,25 @@ namespace osgGaming
     std::function<void(QObject*)> m_funcWithSender;
 
   };
+
+  class QConnectBoolFunctor : public QObject
+  {
+    Q_OBJECT
+
+  public:
+    static bool connect(
+      QObject* sender,
+      const char* signal,
+      const std::function<void(bool)>& receiver,
+      QObject* parent = nullptr,
+      Qt::ConnectionType connectionType = Qt::AutoConnection);
+
+  protected slots:
+    void run(bool);
+
+  private:
+    QConnectBoolFunctor(QObject* parent, const std::function<void(bool)>& func);
+
+    std::function<void(bool)> m_func;
+  };
 }
