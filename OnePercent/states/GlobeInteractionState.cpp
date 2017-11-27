@@ -5,32 +5,25 @@
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/GlobeModel.h"
 #include "widgets/VirtualOverlay.h"
+#include "widgets/CountryMenuWidget.h"
+
+#include <osgGA/GUIEventAdapter>
 
 #include <osgGaming/Helper.h>
 #include <osgGaming/TimerFactory.h>
-#include <osgGaming/UIStackPanel.h>
 #include <osgGaming/UIButton.h>
 #include <simulation/CountryData.h>
-#include <osgGaming/UIGrid.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/View.h>
-#include <osgGaming/UIText.h>
 #include <osgGaming/PropertiesManager.h>
 #include <osgGaming/Timer.h>
-#include <osgGaming/UIRadioGroup.h>
 
 #include <QLabel>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QCheckBox>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QButtonGroup>
-
-using namespace osg;
-using namespace std;
-using namespace osgGA;
-using namespace osgGaming;
 
 namespace onep
 {
@@ -79,9 +72,6 @@ namespace onep
   {
     Impl(GlobeInteractionState* b)
     : base(b)
-    , bReady(false)
-    , bStarted(false)
-    , selectedCountry(0)
     , paramEarthRadius(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName))
     , paramCameraMinDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraMinDistanceName))
     , paramCameraMaxDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraMaxDistanceName))
@@ -90,11 +80,15 @@ namespace onep
     , paramCameraZoomSpeedFactor(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraZoomSpeedFactorName))
     , paramCameraScrollSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraScrollSpeedName))
     , paramCameraRotationSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraRotationSpeedName))
-    , labelClickCountry(nullptr)
+    , bReady(false)
+    , bStarted(false)
+    , selectedCountry(0)
     , labelDays(nullptr)
+    , labelClickCountry(nullptr)
     , labelClickAgain(nullptr)
     , labelStats(nullptr)
     , radioNoOverlay(nullptr)
+    , countryMenuWidget(nullptr)
     {
 
     }
@@ -127,12 +121,14 @@ namespace onep
     QLabel* labelStats;
     QRadioButton* radioNoOverlay;
 
+    CountryMenuWidget* countryMenuWidget;
+
     bool ready()
     {
       if (!bReady && !base->isCameraInMotion())
       {
         base->setCameraMotionDuration(0.5);
-        base->setCameraMotionEase(AnimationEase::CIRCLE_OUT);
+        base->setCameraMotionEase(osgGaming::AnimationEase::CIRCLE_OUT);
         bReady = true;
       }
 
@@ -152,6 +148,23 @@ namespace onep
       std::string infoText = country->getCountryName() + "\n";
       country->getValues()->getContainer()->debugPrintToString(infoText);
       labelStats->setText(QString::fromStdString(infoText));
+    }
+
+    void updateCountryMenuWidgetPosition(int id)
+    {
+      osg::ref_ptr<CountryData> data = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(id)->getCountryData();
+      osg::Vec2f latLong = data->getCenterLatLong();
+
+      osg::Vec3f position = osgGaming::getVec3FromEuler(latLong.x(), 0.0, latLong.y()) * paramEarthRadius;
+
+      osg::ref_ptr<osg::Camera> cam = base->getView(0)->getSceneCamera();
+      osg::Matrix win = cam->getViewport()->computeWindowMatrix();
+      osg::Matrix view = base->getGlobeOverviewWorld()->getCameraManipulator()->getViewMatrix(); //cam->getViewMatrix();
+      osg::Matrix proj = cam->getProjectionMatrix();
+
+      osg::Vec3 screen = position * view * proj * win;
+
+      countryMenuWidget->setCenterPosition(int(screen.x()), int(base->getView(0)->getResolution().y() - screen.y()));
     }
   };
 
@@ -183,17 +196,24 @@ namespace onep
         printf("Selected country (%d): %s\n", countryMesh->getCountryData()->getId(), countryMesh->getCountryData()->getCountryName().c_str());
 
         setCameraLatLong(countryMesh->getCountryData()->getCenterLatLong(), getSimulationTime());
-        setCameraDistance(max(countryMesh->getCountryData()->getOptimalCameraDistance(
+        setCameraDistance(std::max<float>(countryMesh->getCountryData()->getOptimalCameraDistance(
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle()),
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio())), m->paramCameraMinDistance), getSimulationTime());
+
+        m->countryMenuWidget->setVisible(true);
+        m->updateCountryMenuWidgetPosition(id);
+      }
+      else
+      {
+        m->countryMenuWidget->setVisible(false);
       }
     }));
 
     setCameraMotionDuration(2.0);
-    setCameraMotionEase(AnimationEase::SMOOTHER);
+    setCameraMotionEase(osgGaming::AnimationEase::SMOOTHER);
 
     setCameraDistance(28.0f, getSimulationTime());
-    setCameraViewAngle(Vec2f(0.0f, 0.0f), getSimulationTime());
+    setCameraViewAngle(osg::Vec2f(0.0f, 0.0f), getSimulationTime());
   }
 
   VirtualOverlay* GlobeInteractionState::createVirtualOverlay()
@@ -226,7 +246,7 @@ namespace onep
     m->radioNoOverlay->setChecked(true);
     radioGroup->addButton(m->radioNoOverlay);
 
-    QConnectBoolFunctor::connect(m->radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
+    osgGaming::QConnectBoolFunctor::connect(m->radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
     {
       if (checked)
         globeModel->clearHighlightedCountries();
@@ -242,16 +262,16 @@ namespace onep
       branchesLayout->addWidget(checkBox, 1 + i, 0);
       branchesLayout->addWidget(radioButton, 1 + i, 1);
 
-      QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
+      osgGaming::QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
       {
-        ref_ptr<CountryData> selectedCountry = globeModel->getSelectedCountryMesh()->getCountryData();
+        osg::ref_ptr<CountryData> selectedCountry = globeModel->getSelectedCountryMesh()->getCountryData();
         if (!selectedCountry.valid())
           return;
 
         selectedCountry->setSkillBranchActivated(i, checked);
       });
 
-      QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
+      osgGaming::QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
       {
         globeModel->setHighlightedSkillBranch(BranchType(i));
       });
@@ -311,7 +331,7 @@ namespace onep
         QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getName()));
         rightLayout->addWidget(checkBox);
 
-        QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
+        osgGaming::QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
         {
           simulation->getSkillBranch(BranchType(i))->getSkill(j)->setActivated(checked);
         });
@@ -342,7 +362,22 @@ namespace onep
 
     overlay->setLayout(layout);
 
+	  m->countryMenuWidget = new CountryMenuWidget();
+    m->countryMenuWidget->setParent(overlay);
+    m->countryMenuWidget->setCenterPosition(500, 500);
+    m->countryMenuWidget->setVisible(false);
+
     return overlay;
+  }
+
+  osgGaming::AbstractGameState::StateEvent* GlobeInteractionState::update()
+  {
+    StateEvent* e = GlobeCameraState::update();
+
+    if (m->selectedCountry > 0)
+      m->updateCountryMenuWidgetPosition(m->selectedCountry);
+
+    return e;
   }
 
   void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
@@ -352,16 +387,16 @@ namespace onep
       return;
     }
 
-    if (button == GUIEventAdapter::LEFT_MOUSE_BUTTON)
+    if (button == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
     {
-      Vec3f point, direction;
+      osg::Vec3f point, direction;
       getWorld(getView(0))->getCameraManipulator()->getPickRay(x, y, point, direction);
 
-      Vec3f pickResult;
-      if (sphereLineIntersection(Vec3f(0.0f, 0.0f, 0.0f), m->paramEarthRadius, point, direction, pickResult))
+      osg::Vec3f pickResult;
+      if (osgGaming::sphereLineIntersection(osg::Vec3f(0.0f, 0.0f, 0.0f), m->paramEarthRadius, point, direction, pickResult))
       {
-        Vec2f polar = getPolarFromCartesian(pickResult);
-        ref_ptr<CountryMesh> countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(polar);
+        osg::Vec2f polar = osgGaming::getPolarFromCartesian(pickResult);
+        osg::ref_ptr<CountryMesh> countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(polar);
 
         int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
 
@@ -401,7 +436,7 @@ namespace onep
 
     if (m->bStarted)
     {
-      if (key == GUIEventAdapter::KEY_Space)
+      if (key == osgGA::GUIEventAdapter::KEY_Space)
       {
         if (m->simulationTimer->running())
         {
@@ -423,7 +458,7 @@ namespace onep
     }
   }
 
-  void GlobeInteractionState::onScrollEvent(GUIEventAdapter::ScrollingMotion motion)
+  void GlobeInteractionState::onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion)
   {
     if (!m->ready())
     {
@@ -432,11 +467,11 @@ namespace onep
 
     float distance = getCameraDistance();
 
-    if (motion == GUIEventAdapter::SCROLL_UP)
+    if (motion == osgGA::GUIEventAdapter::SCROLL_UP)
     {
       distance = distance * m->paramCameraZoomSpeed;
     }
-    else if (motion == GUIEventAdapter::SCROLL_DOWN)
+    else if (motion == osgGA::GUIEventAdapter::SCROLL_DOWN)
     {
       distance = distance * (1.0f / m->paramCameraZoomSpeed);
     }
@@ -445,39 +480,39 @@ namespace onep
       return;
     }
 
-    distance = clampBetween(distance, m->paramCameraMinDistance, m->paramCameraMaxDistance);
+    distance = osg::clampBetween<float>(distance, m->paramCameraMinDistance, m->paramCameraMaxDistance);
 
     setCameraDistance(distance, getSimulationTime());
   }
 
-  void GlobeInteractionState::onDragEvent(int button, Vec2f origin, Vec2f position, osg::Vec2f change)
+  void GlobeInteractionState::onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change)
   {
     if (!m->ready())
     {
       return;
     }
 
-    Vec2f latLong = getCameraLatLong();
+    osg::Vec2f latLong = getCameraLatLong();
     float distance = getCameraDistance();
-    Vec2f viewAngle = getCameraViewAngle();
+    osg::Vec2f viewAngle = getCameraViewAngle();
 
-    if (button == GUIEventAdapter::RIGHT_MOUSE_BUTTON)
+    if (button == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON)
     {
       change *= ((distance - m->paramEarthRadius) / (m->paramCameraMaxDistance - m->paramEarthRadius)) * m->paramCameraZoomSpeedFactor;
 
       latLong.set(
-        clampBetween(latLong.x() - change.y() * m->paramCameraScrollSpeed, -m->paramCameraMaxLatitude, m->paramCameraMaxLatitude),
+        osg::clampBetween<float>(latLong.x() - change.y() * m->paramCameraScrollSpeed, -m->paramCameraMaxLatitude, m->paramCameraMaxLatitude),
         latLong.y() - change.x() * m->paramCameraScrollSpeed);
 
       setCameraLatLong(latLong, getSimulationTime());
     }
-    else if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
+    else if (button == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
     {
       float clamp_to = atan(m->paramEarthRadius * 1.3 / distance);
 
       viewAngle.set(
         viewAngle.x() + change.x() * m->paramCameraRotationSpeed,
-        clampBetween(viewAngle.y() + change.y() * m->paramCameraRotationSpeed, 0.0f, clamp_to));
+        osg::clampBetween<float>(viewAngle.y() + change.y() * m->paramCameraRotationSpeed, 0.0f, clamp_to));
 
       setCameraViewAngle(viewAngle, getSimulationTime());
     }
@@ -485,9 +520,9 @@ namespace onep
 
   void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position)
   {
-    if (button == GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
+    if (button == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
     {
-      setCameraViewAngle(Vec2f(0.0f, 0.0f), getSimulationTime());
+      setCameraViewAngle(osg::Vec2f(0.0f, 0.0f), getSimulationTime());
     }
   }
 
@@ -509,15 +544,15 @@ namespace onep
 
     getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryMesh()->getCountryData()->setSkillBranchActivated(BRANCH_BANKS, true);
 
-    m->simulationTimer = TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
+    m->simulationTimer = osgGaming::TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
     m->simulationTimer->start();
 
     m->bStarted = true;
   }
 
-  ref_ptr<Hud> GlobeInteractionState::overrideHud(osg::ref_ptr<osgGaming::View> view)
+  osg::ref_ptr<osgGaming::Hud> GlobeInteractionState::overrideHud(osg::ref_ptr<osgGaming::View> view)
   {
-    return new Hud();
+    return new osgGaming::Hud();
   }
 
 }

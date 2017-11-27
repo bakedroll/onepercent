@@ -1,4 +1,5 @@
 #include "CountryMesh.h"
+
 #include <osg/Geometry>
 
 namespace onep
@@ -6,7 +7,7 @@ namespace onep
   CountryMesh::CountryMesh(
     osg::ref_ptr<osg::Vec3Array> vertices,
     osg::ref_ptr<osg::DrawElementsUInt> triangles)
-    : Geode()
+    : osg::Geode()
   {
     osg::ref_ptr<osg::Geometry> geo = new osg::Geometry();
     geo->setVertexArray(vertices);
