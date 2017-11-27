@@ -10,6 +10,7 @@
 
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QtWidgets/QFrame>
 
 using namespace osg;
 using namespace onep;

@@ -55,7 +55,7 @@ namespace osgGaming
 		} StateEvent;
 
 		AbstractGameState();
-    ~AbstractGameState();
+	  virtual ~AbstractGameState();
 
 		bool isInitialized();
 		bool isWorldAndHudPrepared();

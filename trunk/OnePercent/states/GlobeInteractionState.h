@@ -2,7 +2,7 @@
 
 #include "GlobeCameraState.h"
 
-#include <osgGaming/UIElement.h>
+#include <osgGA/GUIEventAdapter>
 
 #include <memory>
 
@@ -18,6 +18,8 @@ namespace onep
 
 		virtual void initialize() override;
 		virtual VirtualOverlay* createVirtualOverlay() override;
+
+    virtual StateEvent* update() override;
 
 		virtual void onMousePressedEvent(int button, float x, float y) override;
 		virtual void onKeyPressedEvent(int key) override;
