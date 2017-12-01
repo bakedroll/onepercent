@@ -219,13 +219,17 @@ bool InputManager::onMouseClickEvent(const osgGA::GUIEventAdapter& ea)
   {
     int button = ea.getButton();
     int mb = m->log_x_2(button);
-    m->mousePressed[mb] = true;
 
-    m->gameStateStack->begin(AbstractGameState::GUIEVENT);
-    while (m->gameStateStack->next())
-    {
-      m->gameStateStack->get()->onMousePressedEvent(ea.getButton(), ea.getX(), ea.getY());
-    }
+	  if (mb >= 0 && mb < 3)
+	  {
+		  m->mousePressed[mb] = true;
+
+		  m->gameStateStack->begin(AbstractGameState::GUIEVENT);
+		  while (m->gameStateStack->next())
+		  {
+			  m->gameStateStack->get()->onMousePressedEvent(ea.getButton(), ea.getX(), ea.getY());
+		  }
+	  }
   }
 
   return true;
@@ -233,7 +237,11 @@ bool InputManager::onMouseClickEvent(const osgGA::GUIEventAdapter& ea)
 
 bool InputManager::onMouseReleaseEvent(const osgGA::GUIEventAdapter& ea)
 {
-  m->mousePressed[m->log_x_2(ea.getButton())] = false;
+  int mb = m->log_x_2(ea.getButton());
+  if (mb < 0 || mb > 2)
+    return true;
+
+  m->mousePressed[mb] = false;
 
   if (m->mouseDragging == ea.getButton())
   {
