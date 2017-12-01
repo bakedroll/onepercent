@@ -220,7 +220,7 @@ bool InputManager::onMouseClickEvent(const osgGA::GUIEventAdapter& ea)
     int button = ea.getButton();
     int mb = m->log_x_2(button);
 
-	  if (mb >= 0 && mb < 3)
+    if (mb >= 0 && mb < Impl::NUM_MOUSE_BUTTONS)
 	  {
 		  m->mousePressed[mb] = true;
 
@@ -238,7 +238,7 @@ bool InputManager::onMouseClickEvent(const osgGA::GUIEventAdapter& ea)
 bool InputManager::onMouseReleaseEvent(const osgGA::GUIEventAdapter& ea)
 {
   int mb = m->log_x_2(ea.getButton());
-  if (mb < 0 || mb > 2)
+  if (mb < 0 || mb >= Impl::NUM_MOUSE_BUTTONS)
     return true;
 
   m->mousePressed[mb] = false;
