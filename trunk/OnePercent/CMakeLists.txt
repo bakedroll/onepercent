@@ -21,7 +21,7 @@ qt5_use_modules(${PROJECT_NAME} ${QT5_MODULES})
 source_group(GeneratedFiles FILES ${CMAKE_CURRENT_BINARY_DIR}/OnePercent_automoc.cpp)
 
 # specify needed osg libraries
-set(OSG_LIBRARIES_TMP "osg osgViewer osgUtil osgGA osgDB osgText osgPPU OpenThreads")
+set(OSG_LIBRARIES_TMP "osg osgViewer osgUtil osgGA osgDB osgText OpenThreads")
 
 get_libraries(OSG_LIBRARIES ${OSG_LIBRARY} "" ${OSG_LIBRARIES_TMP})
 get_libraries(OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${OSG_LIBRARIES_TMP})
