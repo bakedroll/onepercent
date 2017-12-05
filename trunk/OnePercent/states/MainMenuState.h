@@ -10,14 +10,21 @@ namespace onep
 	{
 	public:
 		MainMenuState();
+    ~MainMenuState();
 
 		virtual void initialize() override;
 
-		virtual VirtualOverlay* createVirtualOverlay() override;
-
 		virtual osgGaming::GameState::StateEvent* update() override;
+    virtual void onResizeEvent(float width, float height) override;
+    virtual void onKeyPressedEvent(int key) override;
 
 	protected:
 		virtual osg::ref_ptr<osgGaming::Hud> overrideHud(osg::ref_ptr<osgGaming::View> view) override;
+
+    void setupUi();
+
+  private:
+    struct Impl;
+    std::unique_ptr<Impl> m;
 	};
 }

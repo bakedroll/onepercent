@@ -13,8 +13,8 @@ namespace onep
 		Impl() {}
 	};
 
-	CountryMenuWidget::CountryMenuWidget(QWidget* parent)
-		: QFrame(parent)
+	CountryMenuWidget::CountryMenuWidget()
+		: VirtualOverlay()
 		, m(new Impl())
 	{
     QSize size(400, 400);

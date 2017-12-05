@@ -22,17 +22,25 @@ namespace osgGaming
     {}
 
     osg::ref_ptr<osg::Projection> projection;
-    osg::ref_ptr<osg::Geode> geode;
+    osg::ref_ptr<osg::MatrixTransform> textTransform;
 
-    osg::ref_ptr<UIElement> rootUIElement;
+    osg::ref_ptr<UIElement> rootUiElement;
     osg::ref_ptr<osg::MatrixTransform> modelViewTransform;
 
-    osg::ref_ptr<osgText::Text> fpsText;
     bool fpsEnabled;
 
     osg::Vec2f resolution;
 
     UserInteractionModel::List uimList;
+
+    void ensureRootUiElement()
+    {
+      if (rootUiElement.valid())
+        return;
+
+      rootUiElement = new UIGrid();
+      modelViewTransform->addChild(rootUiElement);
+    }
   };
 
   Hud::Hud()
@@ -46,16 +54,9 @@ namespace osgGaming
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     stateSet->setRenderBinDetails(10, "RenderBin");
 
-
-    m->geode = new osg::Geode();
-
-    m->rootUIElement = new UIGrid();
-
     m->modelViewTransform = new osg::MatrixTransform();
     m->modelViewTransform->setMatrix(osg::Matrix::identity());
     m->modelViewTransform->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    m->modelViewTransform->addChild(m->geode);
-    m->modelViewTransform->addChild(m->rootUIElement);
 
     m->projection = new osg::Projection();
     m->projection->addChild(m->modelViewTransform);
@@ -85,7 +86,8 @@ namespace osgGaming
 
   osg::ref_ptr<UIElement> Hud::getRootUIElement()
   {
-    return m->rootUIElement;
+    m->ensureRootUiElement();
+    return m->rootUiElement;
   }
 
   UserInteractionModel::List& Hud::getUserInteractionModels()
@@ -95,81 +97,93 @@ namespace osgGaming
 
   osg::ref_ptr<UIElement> Hud::getUIElementByName(std::string name)
   {
-    UIFindElementVisitor visitor(name);
+    m->ensureRootUiElement();
 
-    m->rootUIElement->accept(visitor);
+    UIFindElementVisitor visitor(name);
+    m->rootUiElement->accept(visitor);
 
     return visitor.getResult();
   }
 
   void Hud::updateResolution(osg::Vec2f resolution)
   {
+    printf("osgGaming::Hud::updateResolution %d %d\n", int(resolution.x()), int (resolution.y()));
+
     m->resolution = resolution;
 
-    m->projection->setMatrix(osg::Matrix::ortho2D(0.0, double(m->resolution.x()) - 1.0, 0.0, double(m->resolution.y()) - 1.0));
+    m->projection->setMatrix(osg::Matrix::ortho2D(0.0, double(m->resolution.x()) - 1.0, double(m->resolution.y()) - 1.0, 0.0));
 
     updateUIElements();
   }
 
   void Hud::updateUIElements()
   {
+    if (!m->rootUiElement.valid())
+      return;
+
     osg::Vec2f origin(0.0f, 0.0f);
 
-    m->rootUIElement->setAbsoluteOrigin(origin);
-    m->rootUIElement->setOrigin(origin);
-    m->rootUIElement->setSize(m->resolution);
+    m->rootUiElement->setAbsoluteOrigin(origin);
+    m->rootUiElement->setOrigin(origin);
+    m->rootUiElement->setSize(m->resolution);
 
     UIUpdateVisitor uiUpdateVisitor;
-    m->rootUIElement->accept(uiUpdateVisitor);
+    m->rootUiElement->accept(uiUpdateVisitor);
   }
 
   void Hud::setFpsEnabled(bool enabled)
   {
     if (enabled == m->fpsEnabled)
-    {
       return;
-    }
 
     m->fpsEnabled = enabled;
 
-    if (!m->fpsText.valid())
+    if (!m->textTransform.valid())
     {
-      m->fpsText = createTextNode("", 25.0f, ResourceManager::getInstance()->loadDefaultFont());
-      m->fpsText->setAlignment(osgText::TextBase::LEFT_BOTTOM);
-      m->fpsText->setPosition(osg::Vec3f(10.0f, 10.0f, 0.0f));
-      m->fpsText->setDataVariance(osg::Object::DYNAMIC);
-      m->fpsText->setUpdateCallback(new FpsTextCallback());
+      osg::Matrix mat = osg::Matrix::identity();
+      mat.makeScale(1.0f, -1.0f, 1.0f);
+      mat.setTrans(10.0f, 10.0f, 0.0f);
+
+      osg::ref_ptr<osgText::Text> fpsText = createTextNode("", 25.0f, ResourceManager::getInstance()->loadDefaultFont());
+      fpsText->setAlignment(osgText::TextBase::LEFT_TOP);
+      fpsText->setAxisAlignment(osgText::Text::AxisAlignment::XY_PLANE);
+      fpsText->setPosition(osg::Vec3f(0.0f, 0.0f, 0.0f));
+      fpsText->setDataVariance(osg::Object::DYNAMIC);
+      fpsText->setUpdateCallback(new FpsTextCallback());
+
+      osg::ref_ptr<osg::Geode> textGeode = new osg::Geode();
+      textGeode->addDrawable(fpsText);
+
+      m->textTransform = new osg::MatrixTransform();
+      m->textTransform->setMatrix(mat);
+      m->textTransform->addChild(textGeode);
     }
 
     if (m->fpsEnabled == true)
-    {
-      m->geode->addDrawable(m->fpsText);
-    }
+      m->modelViewTransform->addChild(m->textTransform);
     else
-    {
-      m->geode->removeDrawable(m->fpsText);
-    }
+      m->modelViewTransform->removeChild(m->textTransform);
   }
 
   void Hud::setRootUIElement(osg::ref_ptr<UIElement> element)
   {
-    if (m->rootUIElement == element)
-    {
+    m->ensureRootUiElement();
+
+    if (m->rootUiElement == element)
       return;
-    }
 
-    osg::ref_ptr<osg::Group> parent = m->rootUIElement->getParent(0);
-    parent->removeChild(m->rootUIElement);
+    osg::ref_ptr<osg::Group> parent = m->rootUiElement->getParent(0);
+    parent->removeChild(m->rootUiElement);
 
-    m->rootUIElement = element;
+    m->rootUiElement = element;
 
-    parent->addChild(m->rootUIElement);
+    parent->addChild(m->rootUiElement);
 
     resetUserInteractionModel();
     m->uimList.clear();
 
     UIMCollectorVisitor visitor;
-    m->rootUIElement->accept(visitor);
+    m->rootUiElement->accept(visitor);
 
     m->uimList = visitor.getUserInteractionModels();
 

@@ -18,10 +18,11 @@ namespace onep
 		~LoadingGlobeOverviewState();
 
 		virtual void initialize() override;
-		virtual VirtualOverlay* createVirtualOverlay() override;
 		virtual osgGaming::GameState::StateEvent* update() override;
 
 		virtual void load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings) override;
+
+    virtual void onResizeEvent(float width, float height) override;
 
 	private:
 		struct Impl;

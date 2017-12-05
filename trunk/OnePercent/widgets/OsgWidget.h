@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <QtWidgets/QOpenGLWidget>
 #include <QtOpenGL/QGLWidget>
 #include <osgGaming/NativeView.h>
 #include <memory>
@@ -8,10 +7,9 @@
 #include <osgViewer/CompositeViewer>
 #include <osgGaming/InputManager.h>
 
-#include <osg/Geode>
-
 namespace onep
 {
+  class OverlayCompositor;
   class VirtualOverlay;
 
   class OsgWidget : public QGLWidget, public osgGaming::InputManager
@@ -22,11 +20,9 @@ namespace onep
     OsgWidget(osg::ref_ptr<osgViewer::CompositeViewer> viewer, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
     ~OsgWidget();
 
-    void setVirtualOverlay(VirtualOverlay* overlay);
-    void setVirtualOverlayGeode(osg::ref_ptr<osg::Geode> geode);
+    void setOverlayCompositor(std::shared_ptr<OverlayCompositor> compositor);
 
   protected:
-    //virtual void paintEvent(QPaintEvent* paintEvent) override;
     virtual void paintGL() override;
     virtual void resizeGL(int width, int height) override;
 

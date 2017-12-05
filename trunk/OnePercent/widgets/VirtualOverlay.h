@@ -2,6 +2,7 @@
 
 #include <QWidget>
 
+#include <osg/MatrixTransform>
 #include <osg/Texture2D>
 
 #include <memory>
@@ -16,8 +17,15 @@ namespace onep
     VirtualOverlay();
     ~VirtualOverlay();
 
-    osg::ref_ptr<osg::Texture2D> getTexture();
+    osg::ref_ptr<osg::Node> getOsgNode();
+
     void renderToTexture();
+
+    void setGeometry(const QRect& geometry);
+    void setGeometry(int x, int y, int w, int h);
+
+    virtual void setVisible(bool visible) override;
+    bool shouldBeVisible();
 
   private:
     struct Impl;
