@@ -17,7 +17,6 @@ namespace onep
 		~GlobeInteractionState();
 
 		virtual void initialize() override;
-		virtual VirtualOverlay* createVirtualOverlay() override;
 
     virtual StateEvent* update() override;
 
@@ -29,12 +28,15 @@ namespace onep
 		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change) override;
 		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position) override;
 
+    virtual void onResizeEvent(float width, float height) override;
+
 		void dayTimerElapsed();
 
 		void startSimulation();
 
 	protected:
 		virtual osg::ref_ptr<osgGaming::Hud> overrideHud(osg::ref_ptr<osgGaming::View> view) override;
+    void setupUi();
 
 	private:
 		struct Impl;

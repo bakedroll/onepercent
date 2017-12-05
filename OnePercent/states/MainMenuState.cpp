@@ -3,6 +3,7 @@
 
 #include "core/QConnectFunctor.h"
 #include "nodes/GlobeOverviewWorld.h"
+#include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 
 #include <osgGaming/Hud.h>
@@ -10,16 +11,29 @@
 
 #include <QVBoxLayout>
 #include <QPushButton>
-#include <QtWidgets/QFrame>
 
 using namespace osg;
 using namespace onep;
 using namespace osgGaming;
 
+struct MainMenuState::Impl
+{
+  Impl() 
+    : overlay(nullptr)
+  {}
+
+  VirtualOverlay* overlay;
+};
+
 MainMenuState::MainMenuState()
 	: GlobeCameraState()
+  , m(new Impl())
 {
 
+}
+
+MainMenuState::~MainMenuState()
+{
 }
 
 void MainMenuState::initialize()
@@ -31,9 +45,36 @@ void MainMenuState::initialize()
 	setCameraLatLong(Vec2f(0.5f, 1.2f));
 
   getHud(getView(0))->setFpsEnabled(true);
+
+  setupUi();
 }
 
-VirtualOverlay* MainMenuState::createVirtualOverlay()
+GameState::StateEvent* MainMenuState::update()
+{
+	setCameraLatLong(getCameraLatLong() + Vec2f(0.0f, -getFrameTime() * 0.02f));
+
+	return GlobeCameraState::update();
+}
+
+void MainMenuState::onResizeEvent(float width, float height)
+{
+  m->overlay->setGeometry(0, 0, width, height);
+}
+
+void MainMenuState::onKeyPressedEvent(int key)
+{
+  if (key == 's')
+  {
+    stateEvent_replace(new GlobeInteractionState());
+  }
+}
+
+ref_ptr<Hud> MainMenuState::overrideHud(osg::ref_ptr<osgGaming::View> view)
+{
+	return new Hud();
+}
+
+void MainMenuState::setupUi()
 {
   QPushButton* buttonStart = new QPushButton(QObject::tr("Start Game"));
   QPushButton* buttonEnd = new QPushButton(QObject::tr("End Game"));
@@ -51,7 +92,10 @@ VirtualOverlay* MainMenuState::createVirtualOverlay()
     stateEvent_endGame();
   });
 
-  VirtualOverlay* overlay = new VirtualOverlay();
+  osg::Vec2f resolution = getView(0)->getResolution();
+
+  m->overlay = new VirtualOverlay();
+  m->overlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
 
   QVBoxLayout* layout = new QVBoxLayout();
   layout->addStretch(5);
@@ -61,19 +105,7 @@ VirtualOverlay* MainMenuState::createVirtualOverlay()
 
   layout->setAlignment(Qt::AlignHCenter);
 
-  overlay->setLayout(layout);
+  m->overlay->setLayout(layout);
 
-  return overlay;
-}
-
-GameState::StateEvent* MainMenuState::update()
-{
-	setCameraLatLong(getCameraLatLong() + Vec2f(0.0f, -getFrameTime() * 0.02f));
-
-	return GlobeCameraState::update();
-}
-
-ref_ptr<Hud> MainMenuState::overrideHud(osg::ref_ptr<osgGaming::View> view)
-{
-	return new Hud();
+  getOverlayCompositor()->addVirtualOverlay(m->overlay);
 }

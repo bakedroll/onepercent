@@ -4,12 +4,8 @@
 #include "states/QtGameState.h"
 #include "states/QtGameLoadingState.h"
 #include "widgets/MainWindow.h"
-#include "widgets/VirtualOverlay.h"
+#include "widgets/OverlayCompositor.h"
 
-#include <QGridLayout>
-#include <QLayoutItem>
-
-#include <osgGaming/Helper.h>
 #include <osgGaming/InputManager.h>
 #include <osgGaming/Observable.h>
 
@@ -22,59 +18,16 @@ struct QtGameApplication::Impl
 {
   Impl()
     : mainWindow(nullptr)
+    , overlayCompositor(nullptr)
   {
   }
 
   std::shared_ptr<QApplication> qapplication;
 
   MainWindow* mainWindow;
+  std::shared_ptr<OverlayCompositor> overlayCompositor;
+
   osgGaming::Observer<void>::Ptr endGameObserver;
-
-  osg::ref_ptr<osg::Geode> overlayGeode;
-
-  void ensureOverlayGeode(osg::ref_ptr<osgGaming::Hud> hud, int width, int height)
-  {
-    if (!overlayGeode.valid())
-    {
-      overlayGeode = new osg::Geode();
-      mainWindow->getViewWidget()->setVirtualOverlayGeode(overlayGeode);
-    }
-    else
-    {
-      overlayGeode->removeDrawable(overlayGeode->getDrawable(0));
-    }
-
-    osg::ref_ptr<osg::Geometry> geometry = osgGaming::createQuadGeometry(0.0f, float(width) - 1.0f, 0.0f, float(height) - 1.0f, 0.0f, osgGaming::QuadOrientation::XY, false);
-    overlayGeode->addDrawable(geometry);
-
-    hud->getModelViewTransform()->addChild(overlayGeode);
-  }
-
-  void deleteLayout(QLayout* layout)
-  {
-    QLayoutItem* item;
-    QLayout* sublayout;
-    QWidget* widget;
-    while ((item = layout->takeAt(0)))
-    {
-      if ((sublayout = item->layout()) != nullptr)
-      {
-        deleteLayout(sublayout);
-      }
-      else if
-      ((widget = item->widget()) != nullptr)
-      {
-        widget->hide();
-        delete widget;
-      }
-      else
-      {
-        delete item;
-      }
-    }
-
-    delete layout;
-  }
 };
 
 QtGameApplication::QtGameApplication(int argc, char** argv)
@@ -90,6 +43,10 @@ QtGameApplication::QtGameApplication(int argc, char** argv)
   m->mainWindow = new MainWindow(getViewer());
   m->mainWindow->show();
 
+  m->overlayCompositor.reset(new OverlayCompositor());
+  m->overlayCompositor->setRootWidget(m->mainWindow->getViewWidget());
+  m->mainWindow->getViewWidget()->setOverlayCompositor(m->overlayCompositor);
+
   m->endGameObserver = onEndGameSignal().connect(osgGaming::Func<void>([this]()
   {
     m->mainWindow->shutdown();
@@ -100,67 +57,34 @@ QtGameApplication::~QtGameApplication()
 {
 }
 
+void QtGameApplication::newStateEvent(osg::ref_ptr<osgGaming::AbstractGameState> state)
+{
+  m->overlayCompositor->clear();
+
+  QtGameState* qtState = dynamic_cast<QtGameState*>(state.get());
+  if (qtState)
+  {
+    qtState->setOverlayCompositor(m->overlayCompositor);
+  }
+  else
+  {
+    QtGameLoadingState* qtLoadingState = dynamic_cast<QtGameLoadingState*>(state.get());
+    qtLoadingState->setOverlayCompositor(m->overlayCompositor);
+  }
+}
+
 void QtGameApplication::stateAttachedEvent(osg::ref_ptr<osgGaming::AbstractGameState> state)
 {
-  // delete previous overlays
-  QLayout* layout = m->mainWindow->getViewWidget()->layout();
-  if (layout)
-    m->deleteLayout(layout);
-
-  m->mainWindow->getViewWidget()->setVirtualOverlay(nullptr);
-
   osg::ref_ptr<osgGaming::View> view = getViewer()->getView(0);
   osg::ref_ptr<osgGaming::Hud> hud = state->getHud(view);
 
   if (!hud.valid())
     return;
 
-  for (int i=0; i<int(hud->getModelViewTransform()->getNumChildren()); i++)
-  {
-    if (hud->getModelViewTransform()->getChild(i) == m->overlayGeode.get())
-    {
-      hud->getModelViewTransform()->removeChild(m->overlayGeode);
-      break;
-    }
-  }
+  if (m->overlayCompositor->getContainer()->getNumParents() > 0)
+    m->overlayCompositor->getContainer()->getParent(0)->removeChild(m->overlayCompositor->getContainer());
 
-  VirtualOverlay* overlay = nullptr;
-  QtGameState* qtState = dynamic_cast<QtGameState*>(state.get());
-  if (qtState)
-  {
-    overlay = qtState->createVirtualOverlay();
-  }
-  else
-  {
-    QtGameLoadingState* qtLoadingState = dynamic_cast<QtGameLoadingState*>(state.get());
-    overlay = qtLoadingState->createVirtualOverlay();
-  }
-
-  if (!overlay)
-    return;
-
-  QGridLayout* viewLayout = new QGridLayout();
-  viewLayout->setContentsMargins(0, 0, 0, 0);
-  viewLayout->setSpacing(0);
-
-  viewLayout->addWidget(overlay, 0 , 0);
-
-  m->mainWindow->getViewWidget()->setLayout(viewLayout);
-  m->mainWindow->getViewWidget()->setVirtualOverlay(overlay);
-
-  //prepare Hud
-  assert(hud.valid());
-
-  int width = int(view->getResolution().x());
-  int height = int(view->getResolution().y());
-
-  m->ensureOverlayGeode(hud, width, height);
-
-  overlay->getTexture()->setTextureSize(width, height);
-  m->overlayGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0, overlay->getTexture(), osg::StateAttribute::ON);
-
-  // first frame
-  overlay->renderToTexture();
+  hud->getModelViewTransform()->addChild(m->overlayCompositor->getContainer());
 }
 
 int QtGameApplication::mainloop()

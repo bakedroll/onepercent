@@ -179,6 +179,7 @@ namespace osgGaming
 
         if (!initialized)
         {
+          newStateEvent(state);
           m->initializeState(state);
           state->setInitialized();
         }
@@ -388,6 +389,10 @@ namespace osgGaming
   osg::ref_ptr<osgGaming::Viewer> GameApplication::getViewer()
   {
     return m->viewer;
+  }
+
+  void GameApplication::newStateEvent(osg::ref_ptr<AbstractGameState> state)
+  {
   }
 
   void GameApplication::stateAttachedEvent(osg::ref_ptr<AbstractGameState> state)

@@ -1,14 +1,15 @@
 #pragma once
 
-#include <QFrame>
+#include "widgets/VirtualOverlay.h"
+
 #include <memory>
 
 namespace onep
 {
-	class CountryMenuWidget : public QFrame
+	class CountryMenuWidget : public VirtualOverlay
 	{
 	public:
-		CountryMenuWidget(QWidget* parent = nullptr);
+		CountryMenuWidget();
 		~CountryMenuWidget();
 
 		void setCenterPosition(int x, int y);

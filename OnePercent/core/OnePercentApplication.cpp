@@ -6,7 +6,6 @@
 #include "osgGaming/ResourceManager.h"
 #include "osgGaming/PropertiesManager.h"
 
-#include <QApplication>
 #include <QFile>
 
 namespace onep

@@ -4,6 +4,7 @@
 #include "core/QConnectFunctor.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/GlobeModel.h"
+#include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 #include "widgets/CountryMenuWidget.h"
 
@@ -123,6 +124,8 @@ namespace onep
 
     CountryMenuWidget* countryMenuWidget;
 
+    VirtualOverlay* mainOverlay;
+
     bool ready()
     {
       if (!bReady && !base->isCameraInMotion())
@@ -214,160 +217,8 @@ namespace onep
 
     setCameraDistance(28.0f, getSimulationTime());
     setCameraViewAngle(osg::Vec2f(0.0f, 0.0f), getSimulationTime());
-  }
 
-  VirtualOverlay* GlobeInteractionState::createVirtualOverlay()
-  {
-    GlobeModel::Ptr globeModel = getGlobeOverviewWorld()->getGlobeModel();
-    Simulation::Ptr simulation = getGlobeOverviewWorld()->getSimulation();
-
-    VirtualOverlay* overlay = new VirtualOverlay();
-    overlay->setContentsMargins(5, 5, 5, 5);
-
-    m->labelClickCountry = new QLabel(QObject::tr("Please select a country."));
-    m->labelClickCountry->setObjectName("LabelSelectCountry");
-
-    m->labelClickAgain = new QLabel(QString());
-    m->labelClickAgain->setObjectName("LabelClickAgain");
-
-    m->labelDays = new QLabel(QString());
-    m->labelDays->setObjectName("LabelDays");
-    m->labelDays->setVisible(false);
-
-    QVBoxLayout* headerLayout = new QVBoxLayout();
-    headerLayout->addWidget(m->labelClickCountry);
-    headerLayout->addWidget(m->labelClickAgain);
-
-    QGridLayout* branchesLayout = new QGridLayout();
-
-    QButtonGroup* radioGroup = new QButtonGroup(overlay);
-
-    m->radioNoOverlay = new QRadioButton(QObject::tr("No Overlay"));
-    m->radioNoOverlay->setChecked(true);
-    radioGroup->addButton(m->radioNoOverlay);
-
-    osgGaming::QConnectBoolFunctor::connect(m->radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
-    {
-      if (checked)
-        globeModel->clearHighlightedCountries();
-    });
-
-    branchesLayout->addWidget(m->radioNoOverlay, 0, 1);
-    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
-    {
-      QCheckBox* checkBox = new QCheckBox(QString::fromStdString(branch_getStringFromType(i)));
-      QRadioButton* radioButton = new QRadioButton(QObject::tr("Overlay"));
-      radioGroup->addButton(radioButton);
-
-      branchesLayout->addWidget(checkBox, 1 + i, 0);
-      branchesLayout->addWidget(radioButton, 1 + i, 1);
-
-      osgGaming::QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
-      {
-        osg::ref_ptr<CountryData> selectedCountry = globeModel->getSelectedCountryMesh()->getCountryData();
-        if (!selectedCountry.valid())
-          return;
-
-        selectedCountry->setSkillBranchActivated(i, checked);
-      });
-
-      osgGaming::QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
-      {
-        globeModel->setHighlightedSkillBranch(BranchType(i));
-      });
-
-      m->selectedCountryIdObservers.push_back(globeModel->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
-      {
-        if (selected > 0)
-        {
-          checkBox->setChecked(globeModel->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
-        }
-        else
-        {
-          checkBox->setChecked(false);
-        }
-
-        checkBox->setEnabled(selected > 0);
-      })));
-
-      CountryMesh::Map& countryMeshs = globeModel->getCountryMeshs();
-      for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
-      {
-        m->skillBranchActivatedObservers.push_back(it->second->getCountryData()->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([=](bool activated)
-        {
-          if (it->first == globeModel->getSelectedCountryId())
-            checkBox->setChecked(activated);
-        })));
-      }
-    }
-
-    m->labelStats = new QLabel(QString());
-
-    QVBoxLayout* leftLayout = new QVBoxLayout();
-    leftLayout->addLayout(branchesLayout);
-    leftLayout->addWidget(m->labelStats);
-    leftLayout->addStretch(1);
-
-    QWidget* leftWidget = new QWidget();
-    leftWidget->setContentsMargins(0, 0, 0, 0);
-    leftWidget->setObjectName("WidgetLeftPanel");
-    leftWidget->setLayout(leftLayout);
-
-    QVBoxLayout* rightLayout = new QVBoxLayout();
-
-    // Skills
-    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
-    {
-      // Skills
-      int nskills = simulation->getSkillBranch(BranchType(i))->getNumSkills();
-
-      QLabel* label = new QLabel(QString::fromStdString(branch_getStringFromType(i)));
-      rightLayout->addWidget(label);
-
-      for (int j = 0; j < nskills; j++)
-      {
-        Skill::Ptr skill = simulation->getSkillBranch(BranchType(i))->getSkill(j);
-
-        QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getName()));
-        rightLayout->addWidget(checkBox);
-
-        osgGaming::QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
-        {
-          simulation->getSkillBranch(BranchType(i))->getSkill(j)->setActivated(checked);
-        });
-      }
-    }
-
-    rightLayout->addStretch(1);
-
-    QWidget* rightWidget = new QWidget();
-    rightWidget->setContentsMargins(0, 0, 0, 0);
-    rightWidget->setObjectName("WidgetRightPanel");
-    rightWidget->setLayout(rightLayout);
-
-    QHBoxLayout* centralLayout = new QHBoxLayout();
-    centralLayout->addWidget(leftWidget);
-    centralLayout->addStretch(1);
-    centralLayout->addWidget(rightWidget);
-
-    QHBoxLayout* footerLayout = new QHBoxLayout();
-    footerLayout->addWidget(m->labelDays);
-    footerLayout->addStretch(1);
-
-    QVBoxLayout* layout = new QVBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addLayout(headerLayout);
-    layout->addLayout(centralLayout, 1);
-    layout->addLayout(footerLayout);
-
-    overlay->setLayout(layout);
-
-	  m->countryMenuWidget = new CountryMenuWidget();
-    m->countryMenuWidget->setParent(overlay);
-    m->countryMenuWidget->setCenterPosition(500, 500);
-    m->countryMenuWidget->setVisible(false);
-
-    return overlay;
+    setupUi();
   }
 
   osgGaming::AbstractGameState::StateEvent* GlobeInteractionState::update()
@@ -526,6 +377,12 @@ namespace onep
     }
   }
 
+  void GlobeInteractionState::onResizeEvent(float width, float height)
+  {
+    printf("RESIZE TO: %d %d\n", int(width), int(height));
+    m->mainOverlay->setGeometry(0, 0, int(width), int(height));
+  }
+
   void GlobeInteractionState::dayTimerElapsed()
   {
     getGlobeOverviewWorld()->getSimulation()->step();
@@ -555,4 +412,161 @@ namespace onep
     return new osgGaming::Hud();
   }
 
+  void GlobeInteractionState::setupUi()
+  {
+    osg::Vec2f resolution = getView(0)->getResolution();
+
+    GlobeModel::Ptr globeModel = getGlobeOverviewWorld()->getGlobeModel();
+    Simulation::Ptr simulation = getGlobeOverviewWorld()->getSimulation();
+
+    m->mainOverlay = new VirtualOverlay();
+    m->mainOverlay->setContentsMargins(5, 5, 5, 5);
+    m->mainOverlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
+
+    m->labelClickCountry = new QLabel(QObject::tr("Please select a country."));
+    m->labelClickCountry->setObjectName("LabelSelectCountry");
+
+    m->labelClickAgain = new QLabel(QString());
+    m->labelClickAgain->setObjectName("LabelClickAgain");
+
+    m->labelDays = new QLabel(QString());
+    m->labelDays->setObjectName("LabelDays");
+    m->labelDays->setVisible(false);
+
+    QVBoxLayout* headerLayout = new QVBoxLayout();
+    headerLayout->addWidget(m->labelClickCountry);
+    headerLayout->addWidget(m->labelClickAgain);
+
+    QGridLayout* branchesLayout = new QGridLayout();
+
+    QButtonGroup* radioGroup = new QButtonGroup(m->mainOverlay);
+
+    m->radioNoOverlay = new QRadioButton(QObject::tr("No Overlay"));
+    m->radioNoOverlay->setChecked(true);
+    radioGroup->addButton(m->radioNoOverlay);
+
+    osgGaming::QConnectBoolFunctor::connect(m->radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
+    {
+      if (checked)
+        globeModel->clearHighlightedCountries();
+    });
+
+    branchesLayout->addWidget(m->radioNoOverlay, 0, 1);
+    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
+    {
+      QCheckBox* checkBox = new QCheckBox(QString::fromStdString(branch_getStringFromType(i)));
+      QRadioButton* radioButton = new QRadioButton(QObject::tr("Overlay"));
+      radioGroup->addButton(radioButton);
+
+      branchesLayout->addWidget(checkBox, 1 + i, 0);
+      branchesLayout->addWidget(radioButton, 1 + i, 1);
+
+      osgGaming::QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
+      {
+        osg::ref_ptr<CountryData> selectedCountry = globeModel->getSelectedCountryMesh()->getCountryData();
+        if (!selectedCountry.valid())
+          return;
+
+        selectedCountry->setSkillBranchActivated(i, checked);
+      });
+
+      osgGaming::QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
+      {
+        globeModel->setHighlightedSkillBranch(BranchType(i));
+      });
+
+      m->selectedCountryIdObservers.push_back(globeModel->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
+      {
+        if (selected > 0)
+        {
+          checkBox->setChecked(globeModel->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
+        }
+        else
+        {
+          checkBox->setChecked(false);
+        }
+
+        checkBox->setEnabled(selected > 0);
+      })));
+
+      CountryMesh::Map& countryMeshs = globeModel->getCountryMeshs();
+      for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
+      {
+        m->skillBranchActivatedObservers.push_back(it->second->getCountryData()->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([=](bool activated)
+        {
+          if (it->first == globeModel->getSelectedCountryId())
+            checkBox->setChecked(activated);
+        })));
+      }
+    }
+
+    m->labelStats = new QLabel(QString());
+
+    QVBoxLayout* leftLayout = new QVBoxLayout();
+    leftLayout->addLayout(branchesLayout);
+    leftLayout->addWidget(m->labelStats);
+    leftLayout->addStretch(1);
+
+    QWidget* leftWidget = new QWidget();
+    leftWidget->setContentsMargins(0, 0, 0, 0);
+    leftWidget->setObjectName("WidgetLeftPanel");
+    leftWidget->setLayout(leftLayout);
+
+    QVBoxLayout* rightLayout = new QVBoxLayout();
+
+    // Skills
+    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
+    {
+      // Skills
+      int nskills = simulation->getSkillBranch(BranchType(i))->getNumSkills();
+
+      QLabel* label = new QLabel(QString::fromStdString(branch_getStringFromType(i)));
+      rightLayout->addWidget(label);
+
+      for (int j = 0; j < nskills; j++)
+      {
+        Skill::Ptr skill = simulation->getSkillBranch(BranchType(i))->getSkill(j);
+
+        QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getName()));
+        rightLayout->addWidget(checkBox);
+
+        osgGaming::QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
+        {
+          simulation->getSkillBranch(BranchType(i))->getSkill(j)->setActivated(checked);
+        });
+      }
+    }
+
+    rightLayout->addStretch(1);
+
+    QWidget* rightWidget = new QWidget();
+    rightWidget->setContentsMargins(0, 0, 0, 0);
+    rightWidget->setObjectName("WidgetRightPanel");
+    rightWidget->setLayout(rightLayout);
+
+    QHBoxLayout* centralLayout = new QHBoxLayout();
+    centralLayout->addWidget(leftWidget);
+    centralLayout->addStretch(1);
+    centralLayout->addWidget(rightWidget);
+
+    QHBoxLayout* footerLayout = new QHBoxLayout();
+    footerLayout->addWidget(m->labelDays);
+    footerLayout->addStretch(1);
+
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addLayout(headerLayout);
+    layout->addLayout(centralLayout, 1);
+    layout->addLayout(footerLayout);
+
+    m->mainOverlay->setLayout(layout);
+
+    m->countryMenuWidget = new CountryMenuWidget();
+    m->countryMenuWidget->setCenterPosition(500, 500);
+
+    getOverlayCompositor()->addVirtualOverlay(m->mainOverlay);
+    getOverlayCompositor()->addVirtualOverlay(m->countryMenuWidget);
+
+    m->countryMenuWidget->setVisible(false);
+  }
 }

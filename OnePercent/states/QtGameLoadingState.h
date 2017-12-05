@@ -5,6 +5,7 @@
 
 namespace onep
 {
+  class OverlayCompositor;
   class VirtualOverlay;
 
   class QtGameLoadingState : public osgGaming::GameLoadingState
@@ -14,6 +15,10 @@ namespace onep
     QtGameLoadingState(AbstractGameStateList nextStates);
     ~QtGameLoadingState();
 
-    virtual VirtualOverlay* createVirtualOverlay();
+    std::shared_ptr<OverlayCompositor> getOverlayCompositor();
+    void setOverlayCompositor(std::shared_ptr<OverlayCompositor> compositor);
+
+  private:
+    std::shared_ptr<OverlayCompositor> m_compositor;
   };
 }

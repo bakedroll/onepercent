@@ -3,6 +3,7 @@
 #include "nodes/GlobeModel.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/BackgroundModel.h"
+#include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 
 #include <osgGaming/ResourceManager.h>
@@ -15,25 +16,22 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
-using namespace osg;
-using namespace osgGaming;
-using namespace osgText;
-using namespace std;
-
 namespace onep
 {
   struct LoadingGlobeOverviewState::Impl
   {
     Impl()
       : labelLoadingText(nullptr)
+      , overlay(nullptr)
     {
 
     }
 
     QLabel* labelLoadingText;
+    VirtualOverlay* overlay;
   };
 
-  LoadingGlobeOverviewState::LoadingGlobeOverviewState(ref_ptr<GameState> nextState)
+  LoadingGlobeOverviewState::LoadingGlobeOverviewState(osg::ref_ptr<osgGaming:: GameState> nextState)
     : QtGameLoadingState(nextState)
     , m(new Impl())
   {
@@ -57,28 +55,30 @@ namespace onep
 
     getView(0)->setClampColorEnabled(true);
 
-    getView(0)->addPostProcessingEffect(new FastApproximateAntiAliasingEffect(getView(0)->getResolution()));
-    getView(0)->addPostProcessingEffect(new HighDynamicRangeEffect());
-    getView(0)->addPostProcessingEffect(new DepthOfFieldEffect(projNear, projFar), false);
-  }
+    getView(0)->addPostProcessingEffect(new osgGaming::FastApproximateAntiAliasingEffect(getView(0)->getResolution()));
+    getView(0)->addPostProcessingEffect(new osgGaming::HighDynamicRangeEffect());
+    getView(0)->addPostProcessingEffect(new osgGaming::DepthOfFieldEffect(projNear, projFar), false);
 
-  VirtualOverlay* LoadingGlobeOverviewState::createVirtualOverlay()
-  {
+    osg::Vec2f resolution = getView(0)->getResolution();
+
+    // initialize ui
     m->labelLoadingText = new QLabel(QString());
     m->labelLoadingText->setObjectName("LabelLoadingText");
 
-    VirtualOverlay* overlay = new VirtualOverlay();
+    m->overlay = new VirtualOverlay();
+
+    m->overlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
 
     QVBoxLayout* layout = new QVBoxLayout();
     layout->addStretch(1);
     layout->addWidget(m->labelLoadingText);
 
-    overlay->setLayout(layout);
+    m->overlay->setLayout(layout);
 
-    return overlay;
+    getOverlayCompositor()->addVirtualOverlay(m->overlay);
   }
 
-  GameState::StateEvent* LoadingGlobeOverviewState::update()
+  osgGaming::GameState::StateEvent* LoadingGlobeOverviewState::update()
   {
     int dotCount = int(getSimulationTime() * 10.0) % 4;
     QString loadingTextString = QObject::tr("Loading");
@@ -91,20 +91,20 @@ namespace onep
     return stateEvent_default();
   }
 
-  void LoadingGlobeOverviewState::load(ref_ptr<World> world, osg::ref_ptr<Hud> hud, ref_ptr<GameSettings> settings)
+  void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
-    ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
+    osg::ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
-    ref_ptr<GlobeModel> globe = new GlobeModel(world->getCameraManipulator());
+    osg::ref_ptr<GlobeModel> globe = new GlobeModel(world->getCameraManipulator());
 
 
-    ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel();
+    osg::ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel();
 
     globeWorld->getSimulation()->setGlobeModel(globe);
     globeWorld->getSimulation()->loadCountries("./GameData/data/countries.dat");
     globeWorld->getSimulation()->loadSkillsXml("./GameData/data/skills/passive.xml");
 
-    ref_ptr<CountryOverlay> countryOverlay = new CountryOverlay();
+    osg::ref_ptr<CountryOverlay> countryOverlay = new CountryOverlay();
     countryOverlay->setEnabled(false);
     countryOverlay->setCountryMap(globe->getCountryMeshs());
 
@@ -113,4 +113,8 @@ namespace onep
     globeWorld->setBackgroundModel(backgroundModel);
   }
 
+  void LoadingGlobeOverviewState::onResizeEvent(float width, float height)
+  {
+    m->overlay->setGeometry(0, 0, int(width), int(height));
+  }
 }

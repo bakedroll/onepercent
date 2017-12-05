@@ -16,6 +16,7 @@ namespace onep
     ~QtGameApplication();
 
   protected:
+    virtual void newStateEvent(osg::ref_ptr<osgGaming::AbstractGameState> state) override;
     virtual void stateAttachedEvent(osg::ref_ptr<osgGaming::AbstractGameState> state) override;
 
     virtual int mainloop() override;
