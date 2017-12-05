@@ -171,6 +171,7 @@ namespace osgGaming
       while (m->gameStateStack.next())
       {
         ref_ptr<AbstractGameState> state = m->gameStateStack.get();
+        bool bIsTop = m->gameStateStack.isTop();
 
         state->setSimulationTime(simTime);
         state->setFrameTime(timeDiff);
@@ -184,7 +185,7 @@ namespace osgGaming
           state->setInitialized();
         }
 
-        if (attach && m->gameStateStack.isTop())
+        if (attach && bIsTop)
         {
           m->attachState(state);
           stateAttachedEvent(state);
