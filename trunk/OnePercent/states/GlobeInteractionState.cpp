@@ -90,6 +90,7 @@ namespace onep
     , labelStats(nullptr)
     , radioNoOverlay(nullptr)
     , countryMenuWidget(nullptr)
+    , countryMenuWidgetFadeAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
     {
 
     }
@@ -125,6 +126,8 @@ namespace onep
     CountryMenuWidget* countryMenuWidget;
 
     VirtualOverlay* mainOverlay;
+
+    osg::ref_ptr<osgGaming::Animation<float>> countryMenuWidgetFadeAnimation;
 
     bool ready()
     {
@@ -162,12 +165,13 @@ namespace onep
 
       osg::ref_ptr<osg::Camera> cam = base->getView(0)->getSceneCamera();
       osg::Matrix win = cam->getViewport()->computeWindowMatrix();
-      osg::Matrix view = base->getGlobeOverviewWorld()->getCameraManipulator()->getViewMatrix(); //cam->getViewMatrix();
+      osg::Matrix view = base->getGlobeOverviewWorld()->getCameraManipulator()->getViewMatrix();
       osg::Matrix proj = cam->getProjectionMatrix();
 
       osg::Vec3 screen = position * view * proj * win;
 
       countryMenuWidget->setCenterPosition(int(screen.x()), int(base->getView(0)->getResolution().y() - screen.y()));
+      countryMenuWidget->setColor(osg::Vec4f(1.0f, 1.0f, 1.0f, countryMenuWidgetFadeAnimation->getValue(base->getSimulationTime())));
     }
   };
 
@@ -202,6 +206,8 @@ namespace onep
         setCameraDistance(std::max<float>(countryMesh->getCountryData()->getOptimalCameraDistance(
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle()),
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio())), m->paramCameraMinDistance), getSimulationTime());
+
+        m->countryMenuWidgetFadeAnimation->beginAnimation(0.0f, 0.8f, getSimulationTime());
 
         m->countryMenuWidget->setVisible(true);
         m->updateCountryMenuWidgetPosition(id);

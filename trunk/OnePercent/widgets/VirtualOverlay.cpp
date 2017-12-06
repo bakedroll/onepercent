@@ -2,6 +2,7 @@
 
 #include <osg/Geode>
 #include <osg/Switch>
+#include <osg/Material>
 
 #include <osgGaming/Helper.h>
 
@@ -16,6 +17,7 @@ namespace onep
       , transform(new osg::MatrixTransform())
       , geode(new osg::Geode())
       , texture(new osg::Texture2D())
+      , material(new osg::Material())
       , bShouldBeVisible(true)
     {
       texture->setDataVariance(osg::Object::DYNAMIC);
@@ -26,7 +28,10 @@ namespace onep
       texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::NEAREST);
       texture->setResizeNonPowerOfTwoHint(false);
 
+      material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4(1.0, 1.0, 1.0, 1.0));
+
       geode->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
+      geode->getOrCreateStateSet()->setAttributeAndModes(material, osg::StateAttribute::ON);
 
       transform->addChild(geode);
       rootNode->addChild(transform, false);
@@ -57,6 +62,7 @@ namespace onep
     osg::ref_ptr<osg::MatrixTransform> transform;
     osg::ref_ptr<osg::Geode> geode;
     osg::ref_ptr<osg::Texture2D> texture;
+    osg::ref_ptr<osg::Material> material;
     QPixmap pixmap;
     QImage image;
 
@@ -131,5 +137,10 @@ namespace onep
   bool VirtualOverlay::shouldBeVisible()
   {
     return m->bShouldBeVisible;
+  }
+
+  void VirtualOverlay::setColor(osg::Vec4f color)
+  {
+    m->material->setDiffuse(osg::Material::FRONT_AND_BACK, color);
   }
 }
