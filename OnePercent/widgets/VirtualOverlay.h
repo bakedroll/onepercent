@@ -27,6 +27,8 @@ namespace onep
     virtual void setVisible(bool visible) override;
     bool shouldBeVisible();
 
+    void setColor(osg::Vec4f color);
+
   private:
     struct Impl;
     std::unique_ptr<Impl> m;
