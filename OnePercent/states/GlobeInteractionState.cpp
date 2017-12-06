@@ -385,7 +385,6 @@ namespace onep
 
   void GlobeInteractionState::onResizeEvent(float width, float height)
   {
-    printf("RESIZE TO: %d %d\n", int(width), int(height));
     m->mainOverlay->setGeometry(0, 0, int(width), int(height));
   }
 
