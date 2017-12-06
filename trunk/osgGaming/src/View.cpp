@@ -408,8 +408,6 @@ namespace osgGaming
 
   void View::updateResolution(osg::Vec2f resolution)
   {
-    printf("Resize: %f %f\n", resolution.x(), resolution.y());
-
     m->resolution = resolution;
     m->resolutionInitialized = true;
 
