@@ -107,8 +107,6 @@ namespace osgGaming
 
   void Hud::updateResolution(osg::Vec2f resolution)
   {
-    printf("osgGaming::Hud::updateResolution %d %d\n", int(resolution.x()), int (resolution.y()));
-
     m->resolution = resolution;
 
     m->projection->setMatrix(osg::Matrix::ortho2D(0.0, double(m->resolution.x()) - 1.0, double(m->resolution.y()) - 1.0, 0.0));

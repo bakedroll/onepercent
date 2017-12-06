@@ -19,6 +19,7 @@ struct QtGameApplication::Impl
   Impl()
     : mainWindow(nullptr)
     , overlayCompositor(nullptr)
+    , oFullscreenEnabled(new osgGaming::Observable<bool>(false))
   {
   }
 
@@ -27,7 +28,10 @@ struct QtGameApplication::Impl
   MainWindow* mainWindow;
   std::shared_ptr<OverlayCompositor> overlayCompositor;
 
+  osgGaming::Observable<bool>::Ptr oFullscreenEnabled;
+
   osgGaming::Observer<void>::Ptr endGameObserver;
+  osgGaming::Observer<bool>::Ptr fullscreenEnabledObserver;
 };
 
 QtGameApplication::QtGameApplication(int argc, char** argv)
@@ -41,6 +45,7 @@ QtGameApplication::QtGameApplication(int argc, char** argv)
   getViewer()->addView(new osgGaming::View());
 
   m->mainWindow = new MainWindow(getViewer());
+
   m->mainWindow->show();
 
   m->overlayCompositor.reset(new OverlayCompositor());
@@ -50,6 +55,17 @@ QtGameApplication::QtGameApplication(int argc, char** argv)
   m->endGameObserver = onEndGameSignal().connect(osgGaming::Func<void>([this]()
   {
     m->mainWindow->shutdown();
+  }));
+
+  m->fullscreenEnabledObserver = m->oFullscreenEnabled->connect(osgGaming::Func<bool>([this](bool enabled)
+  {
+    if (m->mainWindow->isFullScreen() == enabled)
+      return;
+
+    if (enabled)
+      m->mainWindow->showFullScreen();
+    else
+      m->mainWindow->showNormal();
   }));
 }
 
@@ -65,11 +81,13 @@ void QtGameApplication::newStateEvent(osg::ref_ptr<osgGaming::AbstractGameState>
   if (qtState)
   {
     qtState->setOverlayCompositor(m->overlayCompositor);
+    qtState->setFullscreenEnabledObs(m->oFullscreenEnabled);
   }
   else
   {
     QtGameLoadingState* qtLoadingState = dynamic_cast<QtGameLoadingState*>(state.get());
     qtLoadingState->setOverlayCompositor(m->overlayCompositor);
+    qtLoadingState->setFullscreenEnabledObs(m->oFullscreenEnabled);
   }
 }
 

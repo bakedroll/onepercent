@@ -2,6 +2,7 @@
 
 #include <osgGaming/GameLoadingState.h>
 #include <osgGaming/GameState.h>
+#include <osgGaming/Observable.h>
 
 namespace onep
 {
@@ -15,10 +16,14 @@ namespace onep
     QtGameLoadingState(AbstractGameStateList nextStates);
     ~QtGameLoadingState();
 
+    osgGaming::Observable<bool>::Ptr getFullscreenEnabledObs();
     std::shared_ptr<OverlayCompositor> getOverlayCompositor();
+
+    void setFullscreenEnabledObs(osgGaming::Observable<bool>::Ptr oFullscreenEnabled);
     void setOverlayCompositor(std::shared_ptr<OverlayCompositor> compositor);
 
   private:
-    std::shared_ptr<OverlayCompositor> m_compositor;
+    struct Impl;
+    std::unique_ptr<Impl> m;
   };
 }

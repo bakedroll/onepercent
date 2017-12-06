@@ -85,9 +85,8 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	}
 	else if (key == GUIEventAdapter::KEY_F)
 	{
-		//getViewer()->setWindowedResolution(Vec2f(800, 600));
-
-    getViewer()->setFullscreenEnabled(0, !getView(0)->getFullscreenEnabled());
+    bool bFullscreenEnabled = getFullscreenEnabledObs()->get();
+    getFullscreenEnabledObs()->set(!bFullscreenEnabled);
 	}
 	else if (key == GUIEventAdapter::KEY_Minus)
 	{
@@ -193,8 +192,3 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	}
 	*/
 }
-
-/*void GlobeOverviewState::onUIClickedEvent(ref_ptr<UIElement> uiElement)
-{
-	printf("Clicked UIM: %s\n", uiElement->getUIName().c_str());
-}*/
