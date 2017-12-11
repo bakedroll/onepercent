@@ -20,6 +20,12 @@ add_executable(${PROJECT_NAME} ${ONE_PERCENT_SOURCE})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
 
+if (WIN32)
+  if(NOT BUILD_ENABLE_CONSOLE)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY WIN32_EXECUTABLE true)
+  endif()
+endif()
+
 qt5_use_modules(${PROJECT_NAME} ${QT5_MODULES})
 source_group(GeneratedFiles FILES ${CMAKE_CURRENT_BINARY_DIR}/OnePercent_automoc.cpp)
 
