@@ -19,7 +19,7 @@ namespace helper
     return cv::Vec3b(rand() % 100 + 155, rand() % 100 + 155, rand() % 100 + 155);
   }
 
-  void checkPixel(cv::Mat& image, BoolArray& aVisited, IntArray* aPointIds, PointValueList& points, int* neighbourId, int x, int y, bool repeat)
+  void checkPixel(cv::Mat& image, BoolMatrix& aVisited, IntMatrix* aPointIds, PointValueList& points, int* neighbourId, int x, int y, bool repeat)
   {
     if (x < 0) if (repeat) x += image.cols; else return;
     if (y < 0) if (repeat) y += image.rows; else return;
@@ -41,7 +41,7 @@ namespace helper
     }
   }
 
-  void checkPixelsAround(cv::Mat& image, BoolArray& aVisited, IntArray* aPointIds, PointValueList& points, int* neighbourId, int x, int y, bool repeat = true)
+  void checkPixelsAround(cv::Mat& image, BoolMatrix& aVisited, IntMatrix* aPointIds, PointValueList& points, int* neighbourId, int x, int y, bool repeat = true)
   {
     if (neighbourId != nullptr)
       *neighbourId = -1;
@@ -71,7 +71,7 @@ namespace helper
 
     BoundingBox<int> fieldAabb(pointList);
     cv::Mat field(fieldAabb.height(), fieldAabb.width(), CV_8UC1);
-    BoolArray visited(fieldAabb.width(), fieldAabb.height(), false);
+    BoolMatrix visited(fieldAabb.width(), fieldAabb.height(), false);
 
     field.setTo(0);
 
@@ -113,7 +113,7 @@ namespace helper
     }
   }
 
-  void addToResults(int& idCounter, int connectTo, IntArray& aPointIds, Graph& outGraph, const PointListi& points, uchar edgeVal = 255)
+  void addToResults(int& idCounter, int connectTo, IntMatrix& aPointIds, Graph& outGraph, const PointListi& points, uchar edgeVal = 255)
   {
     cv::Point2f p(0, 0);
 
@@ -144,7 +144,7 @@ namespace helper
     return false;
   }
 
-  bool checkStagesCollide(Stage& stage, StageList& nextStage, int& idCounter, IntArray& aPointIds, Graph& outGraph)
+  bool checkStagesCollide(Stage& stage, StageList& nextStage, int& idCounter, IntMatrix& aPointIds, Graph& outGraph)
   {
     for (StageList::iterator it = nextStage.begin(); it != nextStage.end(); ++it)
     {
@@ -164,13 +164,13 @@ namespace helper
     return false;
   }
 
-  void checkEndOfLine(Stage& stage, StageList& nextStage, int& idCounter, IntArray& aPointIds, Graph& outGraph)
+  void checkEndOfLine(Stage& stage, StageList& nextStage, int& idCounter, IntMatrix& aPointIds, Graph& outGraph)
   {
     if (!checkStagesCollide(stage, nextStage, idCounter, aPointIds, outGraph))
       addToResults(idCounter, stage.currentId, aPointIds, outGraph, stage.points, stage.edgeValue);
   }
 
-  void findNeighbours(cv::Mat& image, cv::Mat& display, BoolArray& aVisited, IntArray& aPointIds, Graph& outGraph, int x, int y, uchar edgeVal, int depth, int& idCounter)
+  void findNeighbours(cv::Mat& image, cv::Mat& display, BoolMatrix& aVisited, IntMatrix& aPointIds, Graph& outGraph, int x, int y, uchar edgeVal, int depth, int& idCounter)
   {
     StageList lCurrentStage;
 
@@ -360,8 +360,8 @@ namespace helper
   {
     ProgressPrinter progress("Detect lines");
 
-    BoolArray aVisited(inputImage.cols, inputImage.rows, false);
-    IntArray aPointIds(inputImage.cols, inputImage.rows, -1);
+    BoolMatrix aVisited(inputImage.cols, inputImage.rows, false);
+    IntMatrix aPointIds(inputImage.cols, inputImage.rows, -1);
     int idCounter = 0;
 
     outGraph.boundary = BoundingBox<float>(cv::Point2f(0.0f, 0.0f), cv::Point2f(float(inputImage.cols - 1), float(inputImage.rows - 1)));

@@ -3,13 +3,16 @@
 
 namespace helper
 {
+  typedef std::map<int, EdgeList> NeighbourEdgesMap;
+  typedef std::map<int, NeighbourEdgesMap> CountryCycleMap;
+
   void makeCountries(Graph& graph, CyclesMap& cycles, CountriesTable& table, float mapscale, CountriesMap& countries, cv::Mat& countriesMap)
   {
     countriesMap = cv::Mat(int(graph.boundary.height() * mapscale), int(graph.boundary.width() * mapscale), CV_8U);
     countriesMap.setTo(0);
 
     IdMap cycleCountryMap;
-    IdIdMap countryCycleNeighboursMap;
+    CountryCycleMap countryCycleNeighboursMap;
     for (CountriesTable::iterator it = table.begin(); it != table.end(); ++it)
     {
       // add only countries which have cycleIds defined
@@ -19,7 +22,7 @@ namespace helper
       Country country;
       country.data = it->data;
 
-      IdSet neighboursSet;
+      NeighbourEdgesMap neighboursEdges;
 
       // add triangles
       for (IdSet::iterator iit = it->cycleIds.begin(); iit != it->cycleIds.end(); ++iit)
@@ -39,13 +42,18 @@ namespace helper
           drawFilledTriangle(countriesMap, graph, tit->second.idx, mapscale, uchar(country.data.id));
         }
 
+        // add cycle neighbours to map
         cycleCountryMap.insert(IdMap::value_type(*iit, country.data.id));
         for (NeighbourEdgesMap::iterator eit = cit->second.edges.begin(); eit != cit->second.edges.end(); ++eit)
         {
-          if (eit->first < 0 || neighboursSet.find(eit->first) != neighboursSet.end() || it->cycleIds.find(eit->first) != it->cycleIds.end())
+          // ignore adjacent cycles of same country
+          if (it->cycleIds.find(eit->first) != it->cycleIds.end())
             continue;
 
-          neighboursSet.insert(eit->first);
+          for (EdgeList::iterator nit = eit->second.begin(); nit != eit->second.end(); ++nit)
+          {
+            neighboursEdges[eit->first].push_back(*nit);
+          }
         }
       }
 
@@ -55,7 +63,7 @@ namespace helper
       country.boundingbox.scale(1.0f / graph.boundary.width(), 1.0f / graph.boundary.height());
 
       countries.insert(CountriesMap::value_type(country.data.id, country));
-      countryCycleNeighboursMap.insert(IdIdMap::value_type(country.data.id, neighboursSet));
+      countryCycleNeighboursMap.insert(CountryCycleMap::value_type(country.data.id, neighboursEdges));
     }
 
     for (CountriesTable::iterator it = table.begin(); it != table.end(); ++it)
@@ -83,11 +91,22 @@ namespace helper
 
     for (CountriesMap::iterator it = countries.begin(); it != countries.end(); ++it)
     {
-      IdIdMap::iterator ccit = countryCycleNeighboursMap.find(it->first);
+      CountryCycleMap::iterator ccit = countryCycleNeighboursMap.find(it->first);
 
-      for (IdSet::iterator iit = ccit->second.begin(); iit != ccit->second.end(); ++iit)
+      for (NeighbourEdgesMap::iterator iit = ccit->second.begin(); iit != ccit->second.end(); ++iit)
       {
-        IdMap::iterator idit = cycleCountryMap.find(*iit);
+        IdMap::iterator idit = cycleCountryMap.find(iit->first);
+
+        // append EdgeList
+        int cid;
+        if (iit->first < 0 || idit == cycleCountryMap.end())
+          cid = -1;
+        else
+          cid = idit->second;
+
+        it->second.neighbourEdges[cid].insert(
+          it->second.neighbourEdges[cid].begin(), iit->second.begin(), iit->second.end());
+
         if (idit == cycleCountryMap.end() ||
           it->second.neighbours.find(idit->second) != it->second.neighbours.end() ||
           countryCycleNeighboursMap.find(idit->second) == countryCycleNeighboursMap.end())

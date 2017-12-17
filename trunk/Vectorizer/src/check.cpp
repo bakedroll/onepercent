@@ -45,9 +45,9 @@ namespace helper
     }
   }
 
-  bool checkEdgeSet(IdIdMap& map, int p1, int p2)
+  bool checkEdgeSet(IdIdSetMap& map, int p1, int p2)
   {
-    IdIdMap::iterator itp1 = map.find(p1);
+    IdIdSetMap::iterator itp1 = map.find(p1);
     if (itp1 != map.end())
     {
       if (itp1->second.find(p2) != itp1->second.end())
@@ -59,7 +59,7 @@ namespace helper
     {
       IdSet set;
       set.insert(p2);
-      map.insert(IdIdMap::value_type(p1, set));
+      map.insert(IdIdSetMap::value_type(p1, set));
     }
 
     return false;
@@ -67,7 +67,7 @@ namespace helper
 
   void checkDuplicateEdges(Graph& graph)
   {
-    IdIdMap map;
+    IdIdSetMap map;
 
     EdgeValueList::iterator it = graph.edges.begin();
     while (it != graph.edges.end())
@@ -112,6 +112,66 @@ namespace helper
       else
       {
         ++nit;
+      }
+    }
+  }
+
+  void splitSingleEdges(Graph& graph)
+  {
+    std::set<std::set<int>> processedEdges;
+
+    NeighbourMap neighbours;
+    neighbourMapFromEdges(graph.edges, neighbours);
+
+    // get current id
+    int id = -1;
+    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+      id = std::max(id, it->first);
+
+    for (NeighbourMap::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
+    {
+      int pointId = it->first;
+      if (it->second.size() > 2)
+      {
+        for (NeighbourValueList::iterator nit = it->second.begin(); nit != it->second.end(); ++nit)
+        {
+          int neighbourId = nit->first;
+          uchar nvalue = nit->second;
+
+          std::set<int> e;
+          e.insert(pointId);
+          e.insert(neighbourId);
+
+          if (neighbours[neighbourId].size() > 2 && processedEdges.find(e) == processedEdges.end())
+          {
+            printf("Split edge: (%d, %d)\n", pointId, neighbourId);
+
+            // found single egde that connects two nodals
+            cv::Point2i p1 = graph.points[pointId];
+            cv::Point2i p2 = graph.points[neighbourId];
+
+            int newid = ++id;
+            cv::Point2i pnew = (p1 + p2) / 2.0f;
+
+            graph.points[newid] = pnew;
+
+            graph.edges.push_back(EdgeValue(Edge(pointId, newid), nvalue));
+            graph.edges.push_back(EdgeValue(Edge(newid, neighbourId), nvalue));
+
+            // remove edge
+            for (EdgeValueList::iterator eit = graph.edges.begin(); eit != graph.edges.end(); ++eit)
+            {
+              if ((eit->first.first == pointId && eit->first.second == neighbourId) ||
+                (eit->first.first == neighbourId && eit->first.second == pointId))
+              {
+                graph.edges.erase(eit);
+                break;
+              }
+            }
+
+            processedEdges.insert(e);
+          }
+        }
       }
     }
   }

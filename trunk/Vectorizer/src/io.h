@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+
 #include <chrono>
 
 namespace helper
@@ -21,10 +22,10 @@ namespace helper
   };
 
   void writePolyFile(Graph& graph, const char* filename);
-  void writeBoundariesFile(SphericalMesh& mesh, const char* filename);
+  void writeBoundariesFile(BoundariesMeshData& meshdata, const char* filename);
 
   void readGraphFiles(Graph& graph, const char* filename, int iteration);
 
   void readCountriesTable(const char* filename, CountriesTable& countries);
-  void writeCountriesFile(const char* filename, Graph& graph, CountriesMap& countries, cv::Mat& countriesMap, BoundingBox<float> graphBb, float shift);
+  void writeCountriesFile(const char* filename, Graph& graph, CountriesMap& countries, cv::Mat& countriesMap, float shift);
 }

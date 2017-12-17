@@ -23,7 +23,7 @@ namespace onep
     _relation = relation;
   }
 
-  CountryData::CountryData(string name, unsigned char id, float population, float wealth, Vec2f centerLatLong, Vec2f size)
+  CountryData::CountryData(string name, int id, float population, float wealth, Vec2f centerLatLong, Vec2f size)
     : Group()
     , SimulationCallback()
     , m_name(name)
@@ -56,7 +56,7 @@ namespace onep
     return m_name;
   }
 
-  unsigned char CountryData::getId()
+  int CountryData::getId()
   {
     return m_id;
   }

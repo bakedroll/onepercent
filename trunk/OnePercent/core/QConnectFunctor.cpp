@@ -1,6 +1,6 @@
 #include "QConnectFunctor.h"
 
-namespace osgGaming
+namespace onep
 {
   void QConnectFunctor::run()
   {

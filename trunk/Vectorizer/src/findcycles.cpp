@@ -262,7 +262,7 @@ namespace helper
 
         // merge
         AnglePointIdValueMap pangles;
-        makeAnglePointMap(graph, nit->second, ait->second.first, originId, pangles);
+        makeAnglePointMap(graph.points, nit->second, ait->second.first, originId, pangles);
 
         assert(pangles.size() > 0);
 
@@ -322,7 +322,7 @@ namespace helper
 
   void debugStage(cv::Mat& image, Graph& graph, CycleStageList& results, CycleStageList& stage, float scale)
   {
-    drawGraph(image, graph, scale, false);
+    drawGraph(image, graph, scale, false, true);
 
     for (CycleStageList::iterator it = results.begin(); it != results.end(); ++it)
     {
@@ -436,7 +436,7 @@ namespace helper
       visited.insert(nit->first);
 
       AnglePointIdValueMap angles;
-      makeAnglePointMap(graph, nit->second, nit->first, -1, angles);
+      makeAnglePointMap(graph.points, nit->second, nit->first, -1, angles);
 
       CycleStageList currentStage;
       IdSet processed;
@@ -454,7 +454,7 @@ namespace helper
           NeighbourValueList nextNeighbours = neighbourMap.find(sit->directedEdge.second)->second;
 
           AnglePointIdValueMap nextAngles;
-          makeAnglePointMap(graph, nextNeighbours, sit->directedEdge.second, sit->directedEdge.first, nextAngles);
+          makeAnglePointMap(graph.points, nextNeighbours, sit->directedEdge.second, sit->directedEdge.first, nextAngles);
           makeNextStages(
             graph,
             nextAngles,

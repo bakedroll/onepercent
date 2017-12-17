@@ -142,6 +142,13 @@ namespace onep
       setY(height - event->y() - 1);
       setButton(c_buttons[event->button()]);
     }
+    EventAdapter(QMouseEvent* event, int button, int height)
+      : osgGA::GUIEventAdapter()
+    {
+      setX(event->x());
+      setY(height - event->y() - 1);
+      setButton(c_buttons[button]);
+    }
     EventAdapter(QWheelEvent* event)
       : osgGA::GUIEventAdapter()
     {
@@ -156,11 +163,36 @@ namespace onep
 
   struct OsgWidget::Impl
   {
-    Impl(osg::ref_ptr<osgViewer::CompositeViewer> viewer)
-      : viewer(viewer)
+    Impl(OsgWidget* b, osg::ref_ptr<osgViewer::CompositeViewer> viewer)
+      : base(b)
+      , viewer(viewer)
       , isInitialized(false)
     {
+      for (IntMap::iterator it = c_buttons.begin(); it != c_buttons.end(); ++it)
+      {
+        mouseButtons.push_back(it->first);
+        mouseButtonsState.push_back(false);
+      }
     }
+
+    void mouseEvent(QMouseEvent* event, int height)
+    {
+      for (unsigned int i = 0; i < mouseButtons.size(); i++)
+      {
+        bool flag = event->buttons().testFlag(Qt::MouseButton(mouseButtons[i]));
+        if (mouseButtonsState[i] != flag)
+        {
+          if (flag)
+            base->onMouseClickEvent(EventAdapter(event, mouseButtons[i], height));
+          else
+            base->onMouseReleaseEvent(EventAdapter(event, mouseButtons[i], height));
+
+          mouseButtonsState[i] = flag;
+        }
+      }
+    }
+
+    OsgWidget* base;
 
     osg::ref_ptr<osgViewer::CompositeViewer> viewer;
     osg::ref_ptr<osgGaming::View> view;
@@ -172,12 +204,15 @@ namespace onep
     bool isInitialized;
 
     std::shared_ptr<OverlayCompositor> compositor;
+
+    std::vector<int> mouseButtons;
+    std::vector<bool> mouseButtonsState;
   };
 
   OsgWidget::OsgWidget(osg::ref_ptr<osgViewer::CompositeViewer> viewer, QWidget* parent, Qt::WindowFlags f)
     : QGLWidget(parent, nullptr, f)
     , InputManager()
-    , m(new Impl(viewer))
+    , m(new Impl(this, viewer))
   {
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
@@ -278,14 +313,12 @@ namespace onep
 
   void OsgWidget::mousePressEvent(QMouseEvent* event)
   {
-    EventAdapter ea(event, height());
-    onMouseClickEvent(ea);
+    m->mouseEvent(event, height());
   }
 
   void OsgWidget::mouseReleaseEvent(QMouseEvent* event)
   {
-    EventAdapter ea(event, height());
-    onMouseReleaseEvent(ea);
+    m->mouseEvent(event, height());
   }
 
   void OsgWidget::wheelEvent(QWheelEvent* event)
