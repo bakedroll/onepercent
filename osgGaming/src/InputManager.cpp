@@ -15,8 +15,8 @@ struct InputManager::Impl
 {
   Impl()
     : mouseDragging(0)
-    , isInitialized(false)
     , gameStateStack(nullptr)
+    , isInitialized(false)
   {
     for (int i = 0; i < NUM_MOUSE_BUTTONS; i++)
       mousePressed[i] = false;

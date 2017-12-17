@@ -1,0 +1,6 @@
+Id	Name	Population	Gross domestic product	Cycle Ids	Additional Neighbour Ids	Color				
+1	Afghanistan	33,4	20735	0		#5B827D				
+2	Ägypten	82,3	271427	1		#10E0B0				
+3	Algerien	37,4	206095	5		#3A7B52				
+5	Arabische Halbinsel	65,5	1293446	8		#FA3A02				
+6	Argentinien	40,8	488213	15		#3FD852				

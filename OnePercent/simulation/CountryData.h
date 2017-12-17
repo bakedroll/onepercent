@@ -37,14 +37,14 @@ namespace onep
       osg::ref_ptr<NeighborCountryInfo> info;
     } Neighbor;
 
-		CountryData(std::string name, unsigned char id, float population, float wealth, osg::Vec2f center, osg::Vec2f size);
+		CountryData(std::string name, int id, float population, float wealth, osg::Vec2f center, osg::Vec2f size);
 
     void addNeighbor(Neighbor neighbor);
 
 		void setSkillBranchActivated(int type, bool activated);
 
 		std::string getCountryName();
-		unsigned char getId();
+    int getId();
 		osg::Vec2f getCenterLatLong();
 		osg::Vec2f getSize();
 		osg::Vec2f getSurfaceSize();
@@ -69,7 +69,7 @@ namespace onep
 
     SkillBranchesActivated m_skillBranches;
 
-		unsigned char m_id;
+    int m_id;
 		osg::Vec2f m_centerLatLong;
 		osg::Vec2f m_size;
 

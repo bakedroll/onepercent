@@ -131,7 +131,7 @@ namespace helper
     fs.close();
   }
 
-  void writeBoundariesFile(SphericalMesh& mesh, const char* filename)
+  void writeBoundariesFile(BoundariesMeshData& meshdata, const char* filename)
   {
     printf("Write to boundary file: %s\n", filename);
 
@@ -141,35 +141,74 @@ namespace helper
       return;
 
     IdMap ids;
+    ids[-1] = -1;
     int i = 0;
-    int psize = int(mesh.points.size());
+    int psize = int(meshdata.points.size());
     writeFile<int>(file, psize);
-    for (IdPoint3DMap::iterator it = mesh.points.begin(); it != mesh.points.end(); ++it)
+    for (IdPoint3DMap::iterator it = meshdata.points.begin(); it != meshdata.points.end(); ++it)
     {
-      writeFile<float>(file, it->second.x());
-      writeFile<float>(file, it->second.y());
-      writeFile<float>(file, it->second.z());
+      writeFile<float>(file, it->second.value[0]);
+      writeFile<float>(file, it->second.value[1]);
+      writeFile<float>(file, it->second.value[2]);
+      writeFile<int>(file, ids.find(it->second.originId)->second);
 
       ids.insert(IdMap::value_type(it->first, i));
       i++;
     }
 
-    writeFile<int>(file, mesh.nInnerPoints);
-
-    /*int esize = int(mesh.edges.size());
-    writeFile<int>(file, esize);
-    for (EdgeValueList::iterator it = mesh.edges.begin(); it != mesh.edges.end(); ++it)
+    writeFile<int>(file, int(meshdata.boundarySegments.size()));
+    for (IdQuadListMap::iterator it = meshdata.boundarySegments.begin(); it != meshdata.boundarySegments.end(); ++it)
     {
-      writeFile<int>(file, ids.find(it->first.first)->second);
-      writeFile<int>(file, ids.find(it->first.second)->second);
-    }*/
+      writeFile<int>(file, it->first);
+      writeFile<int>(file, int(it->second.size()));
+      for (QuadList::iterator qit = it->second.begin(); qit != it->second.end(); ++qit)
+      {
+        writeFile<int>(file, ids.find(qit->idx[0])->second);
+        writeFile<int>(file, ids.find(qit->idx[1])->second);
+        writeFile<int>(file, ids.find(qit->idx[2])->second);
+        writeFile<int>(file, ids.find(qit->idx[3])->second);
+      }
+    }
 
-    int qsize = int(mesh.quads.size());
-    writeFile<int>(file, qsize);
-    for (QuadList::iterator it = mesh.quads.begin(); it != mesh.quads.end(); ++it)
+    writeFile<int>(file, int(meshdata.boundaryNodalsFull.size()));
+    for (IdQuadListMap::iterator it = meshdata.boundaryNodalsFull.begin(); it != meshdata.boundaryNodalsFull.end(); ++it)
     {
-      for (int j = 0; j < 4; j++)
-        writeFile<int>(file, ids.find(it->idx[j])->second);
+      writeFile<int>(file, int(it->second.size()));
+      for (QuadList::iterator qit = it->second.begin(); qit != it->second.end(); ++qit)
+      {
+        writeFile<int>(file, ids.find(qit->idx[0])->second);
+        writeFile<int>(file, ids.find(qit->idx[1])->second);
+        writeFile<int>(file, ids.find(qit->idx[2])->second);
+        writeFile<int>(file, ids.find(qit->idx[3])->second);
+      }
+    }
+
+    writeFile<int>(file, int(meshdata.borders.size()));
+    for (IdBorderMap::iterator it = meshdata.borders.begin(); it != meshdata.borders.end(); ++it)
+    {
+      writeFile<int>(file, it->first); // ID
+      writeFile<int>(file, it->second.countryId);
+      writeFile<int>(file, it->second.neighbourId);
+      writeFile<int>(file, it->second.boundarySegmentId);
+      writeFile<bool>(file, it->second.bIsCycle);
+
+      writeFile<int>(file, int(it->second.nextBorderIds.size()));
+      for (IdList::iterator iit = it->second.nextBorderIds.begin(); iit != it->second.nextBorderIds.end(); ++iit)
+        writeFile<int>(file, *iit);
+    }
+
+    writeFile<int>(file, int(meshdata.boundaryNodals.size()));
+    for (BoundaryNodalMap::iterator it = meshdata.boundaryNodals.begin(); it != meshdata.boundaryNodals.end(); ++it)
+    {
+      writeFile<int>(file, it->first.first); // fromBorder
+      writeFile<int>(file, it->first.second); // toBorder
+
+      writeFile<int>(file, int(it->second.size()));
+      for (QuadList::iterator qit = it->second.begin(); qit != it->second.end(); ++qit)
+      {
+        for (int j = 0; j < 4; j++)
+          writeFile<int>(file, ids.find(qit->idx[j])->second);
+      }
     }
 
     fclose(file);
@@ -359,8 +398,8 @@ namespace helper
       CountryRow row;
       row.data.id = atoi(elems[0].c_str());
       row.data.name = elems[1];
-      row.data.population = atof(elems[2].c_str());
-      row.data.gdp = atof(elems[3].c_str());
+      row.data.population = float(atof(elems[2].c_str()));
+      row.data.gdp = float(atof(elems[3].c_str()));
 
       if (elems.size() >= 5)
       {
@@ -388,7 +427,7 @@ namespace helper
     }
   }
 
-  void writeCountriesFile(const char* filename, Graph& graph, CountriesMap& countries, cv::Mat& countriesMap, BoundingBox<float> graphBb, float shift)
+  void writeCountriesFile(const char* filename, Graph& graph, CountriesMap& countries, cv::Mat& countriesMap, float shift)
   {
     printf("Write to countries file: %s\n", filename);
 
@@ -405,7 +444,7 @@ namespace helper
       i++;
     }
 
-    float sx = shift / graphBb.width();
+    float sx = shift / graph.boundary.width();
 
     writeFile<int>(file, int(countries.size()));
     for (CountriesMap::iterator it = countries.begin(); it != countries.end(); ++it)
@@ -416,7 +455,7 @@ namespace helper
       writeFileString(file, it->second.data.name);
       writeFile<float>(file, it->second.data.population);
       writeFile<int>(file, int(it->second.data.gdp));
-      writeFile<uchar>(file, uchar(it->second.data.id));
+      writeFile<int>(file, it->second.data.id);
       writeFile<float>(file, bb.center().x);
       writeFile<float>(file, bb.center().y);
       writeFile<float>(file, bb.width(false));
@@ -424,7 +463,16 @@ namespace helper
 
       writeFile<int>(file, int(it->second.neighbours.size()));
       for (IdSet::iterator iit = it->second.neighbours.begin(); iit != it->second.neighbours.end(); ++iit)
-        writeFile<uchar>(file, uchar(*iit));
+        writeFile<int>(file, *iit);
+
+      writeFile<int>(file, int(it->second.borders.size()));
+      for (IdBorderIdListMap::iterator nit = it->second.borders.begin(); nit != it->second.borders.end(); ++nit)
+      {
+        writeFile<int>(file, nit->first);
+        writeFile<int>(file, int(nit->second.size()));
+        for (IdList::iterator bit = nit->second.begin(); bit != nit->second.end(); ++bit)
+          writeFile<int>(file, *bit);
+      }
 
       writeFile<int>(file, int(it->second.triangles.size()));
       for (TriangleMap::iterator tit = it->second.triangles.begin(); tit != it->second.triangles.end(); ++tit)
@@ -438,7 +486,7 @@ namespace helper
     writeFile<int>(file, countriesMap.cols);
     writeFile<int>(file, countriesMap.rows);
 
-    int xms = int(float(countriesMap.cols) * shift / graphBb.width());
+    int xms = int(float(countriesMap.cols) * shift / graph.boundary.width());
 
     for (int y = 0; y < countriesMap.rows; y++)
     {

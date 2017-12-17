@@ -1,4 +1,5 @@
 #include "types.h"
+#include <osgGaming/Helper.h>
 
 namespace helper
 {
@@ -40,6 +41,15 @@ namespace helper
         insertNeighbour(neighbourMap, eit->first, eit->second, it->first > -1 ? 255 : 128);
         insertNeighbour(neighbourMap, eit->second, eit->first, eit->second);
       }
+    }
+  }
+
+  void neighbourMapFromEdges(EdgeList& edges, NeighbourMap& neighbourMap)
+  {
+    for (EdgeList::iterator it = edges.begin(); it != edges.end(); ++it)
+    {
+      insertNeighbour(neighbourMap, it->first, it->second, 0);
+      insertNeighbour(neighbourMap, it->second, it->first, 0);
     }
   }
 
@@ -93,17 +103,17 @@ namespace helper
     return angle;
   }
 
-  void makeAnglePointMap(Graph& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles)
+  void makeAnglePointMap(IdPointMap& points, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles)
   {
     cv::Vec2f p1;
     if (p1Id < 0)
       p1 = cv::Vec2f(-1.0f, 0.0f);
     else
-      p1 = graph.points[p1Id] - graph.points[originId];
+      p1 = points[p1Id] - points[originId];
 
     for (NeighbourValueList::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
       if (it->first != p1Id)
-        angles.insert(AnglePointIdValueMap::value_type(angleBetween(p1, graph.points[it->first] - graph.points[originId]), PointIdValue(it->first, it->second)));
+        angles.insert(AnglePointIdValueMap::value_type(angleBetween(p1, points[it->first] - points[originId]), PointIdValue(it->first, it->second)));
   }
 
   void makePointTriangleMap(Graph& graph, PointTriangleMap& map)
@@ -147,5 +157,90 @@ namespace helper
 
     for (IdSet::iterator it = ids.begin(); it != ids.end(); ++it)
       results.insert(IdPoint3DMap::value_type(*it, points.find(*it)->second));
+  }
+
+  void trace(NeighbourMap& neighbours, int p1id, int p2id, IdSet& visited, EdgeList& segment)
+  {
+    visited.insert(p2id);
+    segment.push_back(Edge(p1id, p2id));
+
+    NeighbourValueList& nlist = neighbours.find(p2id)->second;
+
+    for (NeighbourValueList::iterator it = nlist.begin(); it != nlist.end(); ++it)
+    {
+      int pnext = it->first;
+      if (pnext != p1id)
+      {
+        if (visited.count(pnext) == 0)
+          trace(neighbours, p2id, pnext, visited, segment);
+      }
+    }
+  }
+
+  void findSegments(EdgeList& edges, EdgeListList& results)
+  {
+    NeighbourMap neighbours;
+    neighbourMapFromEdges(edges, neighbours);
+
+    IdSet visited;
+
+    for (NeighbourMap::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
+    {
+      int p1id = it->first;
+
+      if (visited.count(p1id) > 0)
+        continue;
+
+      visited.insert(p1id);
+      EdgeList segment;
+      for (NeighbourValueList::iterator nit = it->second.begin(); nit != it->second.end(); ++nit)
+      {
+        int p2id = nit->first;
+        trace(neighbours, p1id, p2id, visited, segment);
+      }
+
+      results.push_back(segment);
+    }
+  }
+
+  void makeCartesianPoints(Graph& graph, IdPoint3DMap& points, float radius, float shift)
+  {
+    float width = graph.boundary.width();
+    float height = graph.boundary.height();
+
+    float pi2 = 2.0f * C_PI;
+    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+    {
+      float x = (it->second.x + shift) / width;
+      float y = it->second.y / height;
+
+      osg::Vec3f vec = osgGaming::getCartesianFromPolar(osg::Vec2f((0.5f - y) * C_PI, x * pi2 - C_PI)) * radius;
+      points.insert(IdPoint3DMap::value_type(it->first, Point3D(vec.x(), vec.y(), vec.z())));
+    }
+  }
+
+  void makePolarPoints(IdPoint3DMap& input, IdPoint3DMap& output, int width, int height, float shift)
+  {
+    for (IdPoint3DMap::iterator it = input.begin(); it != input.end(); ++it)
+    {
+      int id = it->first;
+      const Point3D& p3D = it->second;
+      osg::Vec3f p(p3D.value[0], p3D.value[1], p3D.value[2]);
+
+      if (p3D.originId > -1)
+      {
+        IdPoint3DMap::iterator pit = input.find(p3D.originId);
+        osg::Vec3f porigin(pit->second.value[0], pit->second.value[1], pit->second.value[2]);
+
+        p = porigin + (p * 0.1f);
+      }
+
+      osg::Vec2f result = osgGaming::getPolarFromCartesian(p);
+
+      float x = result.x() * width - shift;
+      float y = result.y() * height;
+
+      output.insert(IdPoint3DMap::value_type(id, Point3D(x, y, 0.0f)));
+    }
   }
 }

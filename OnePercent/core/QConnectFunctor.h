@@ -4,7 +4,7 @@
 
 #include <functional>
 
-namespace osgGaming
+namespace onep
 {
   class QConnectFunctor : public QObject
   {

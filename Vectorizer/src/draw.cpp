@@ -32,7 +32,7 @@ namespace helper
     fillConvexPoly(mat, points, 3, color);
   }
 
-  void drawGraph(cv::Mat& mat, Graph& graph, float scale, bool drawTriangles)
+  void drawGraph(cv::Mat& mat, Graph& graph, float scale, bool drawTriangles, bool drawIds)
   {
     mat.setTo(cv::Scalar(0, 0, 0));
 
@@ -45,6 +45,10 @@ namespace helper
 
     for (IdPointMap::iterator rIt = graph.points.begin(); rIt != graph.points.end(); ++rIt)
       mat.at<cv::Vec3b>(rIt->second * scale) = cv::Vec3b(255, 0, 0);
+
+    if (drawIds)
+      for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+        cv::putText(mat, std::to_string(it->first), it->second *scale, cv::FONT_HERSHEY_DUPLEX, 0.25, cv::Scalar(255, 255, 255));
   }
 
   void drawCycles(cv::Mat& mat, Graph& graph, CyclesMap& cycles, float scale)
@@ -79,5 +83,19 @@ namespace helper
 
     for (CyclesMap::iterator it = cycles.begin(); it != cycles.end(); ++it)
       cv::putText(mat, std::to_string(it->first), it->second.boundingbox.center() * scale, cv::FONT_HERSHEY_DUPLEX, 0.5, color);
+  }
+
+  void drawBoundaries(cv::Mat& mat, Graph& graph, BoundariesMeshData boundaries, float scale)
+  {
+    mat.setTo(cv::Scalar(0, 0, 0));
+
+    IdPoint3DMap pointsPolar;
+    makePolarPoints(boundaries.points, pointsPolar, int(mat.rows / scale), int(mat.cols / scale), 0.0f);
+
+    for (EdgeValueList::iterator eIt = graph.edges.begin(); eIt != graph.edges.end(); ++eIt)
+      drawEdge(mat, graph, eIt->first.first, eIt->first.second, scale, cv::Scalar(0, 0, eIt->second));
+
+    for (IdPoint3DMap::iterator it = pointsPolar.begin(); it != pointsPolar.end(); ++it)
+      mat.at<cv::Vec3b>(cv::Point2i(int(it->second.value[0]), int(it->second.value[1])) * scale) = cv::Vec3b(0, 255, 0);
   }
 }

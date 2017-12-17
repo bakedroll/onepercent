@@ -1,9 +1,7 @@
 #include "GlobeModel.h"
 
 #include <osg/Geode>
-#include <osg/Material>
 #include <osg/Texture2D>
-#include <osg/BlendFunc>
 
 #include <osgDB/ReadFile>
 #include <osg/PositionAttitudeTransform>
@@ -12,149 +10,540 @@
 #include <osgGaming/PropertiesManager.h>
 #include <osgGaming/Helper.h>
 #include <osg/Switch>
-#include <osgGaming/ByteStream.h>
 #include <osgGaming/TextureFactory.h>
-
-using namespace osg;
-using namespace std;
+#include <osg/Material>
+#include <osg/BlendFunc>
 
 namespace onep
 {
+  struct GlobeModel::Impl
+  {
+    Impl(GlobeModel* b)
+      : base(b)
+      , paramSunDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_SunDistanceName))
+      , paramSunRadiusMp2(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_SunRadiusPm2Name))
+      , paramEarthCloudsSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsSpeedName))
+      , paramEarthCloudsMorphSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsMorphSpeedName))
+      , oSelectedCountryId(new osgGaming::Observable<int>(0))
+      , highlightedBranch(BRANCH_UNDEFINED)
+      , boundariesMesh(new BoundariesMesh())
+    {
+      base->addChild(boundariesMesh);
+    }
+
+    void makeEarthModel()
+    {
+      // planet geometry
+      osg::ref_ptr<Node> earth = createPlanetGeode(0);
+      osgGaming::generateTangentAndBinormal(earth);
+
+      // stateset
+      osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
+
+      osg::ref_ptr<osg::Material> material = new osg::Material();
+      material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.1, 0.1, 0.1, 1.0));
+      material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.0, 1.0, 1.0, 1.0));
+      material->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.5, 0.5, 0.5, 1.0));
+      material->setShininess(osg::Material::FRONT_AND_BACK, 16);
+      material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.0, 0.0, 0.0, 1.0));
+
+      stateSet->setAttribute(material);
+
+      // shader
+      osg::ref_ptr<osg::Program> pgm = new osg::Program();
+
+      osg::ref_ptr<osg::Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/globe.vert", osg::Shader::VERTEX);
+      osg::ref_ptr<osg::Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/globe.frag", osg::Shader::FRAGMENT);
+
+      pgm->addShader(vert_shader);
+      pgm->addShader(frag_shader);
+
+      pgm->addBindAttribLocation("tangent", 6);
+      pgm->addBindAttribLocation("binormal", 7);
+
+      stateSet->setAttribute(pgm, osg::StateAttribute::ON);
+      //stateSet->setRenderBinDetails(0, "RenderBin");
+
+      earth->setStateSet(stateSet);
+
+      base->addChild(earth);
+    }
+
+    void makeCloudsModel()
+    {
+      // geometry
+      cloudsTransform = new osg::PositionAttitudeTransform();
+
+      osg::ref_ptr<osg::Geode> atmosphere_geode = createCloudsGeode();
+
+      // stateset
+      osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
+
+      osg::ref_ptr<osg::Material> material = new osg::Material();
+      material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.2, 0.2, 0.2, 1.0));
+      material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.0, 1.0, 1.0, 1.0));
+      material->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.2, 0.2, 0.2, 1.0));
+      material->setShininess(osg::Material::FRONT_AND_BACK, 32);
+      material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.0, 0.0, 0.0, 1.0));
+
+      stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+      stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+      stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+      stateSet->setRenderBinDetails(0, "RenderBin");
+      stateSet->setAttribute(material);
+
+      // shader
+      osg::ref_ptr<osg::Program> pgm = new osg::Program();
+
+      osg::ref_ptr<osg::Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/clouds.vert", osg::Shader::VERTEX);
+      osg::ref_ptr<osg::Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/clouds.frag", osg::Shader::FRAGMENT);
+
+      pgm->addShader(vert_shader);
+      pgm->addShader(frag_shader);
+
+      uniformTime = new osg::Uniform("time", 0.0f);
+
+      stateSet->setAttribute(pgm, osg::StateAttribute::ON);
+      stateSet->addUniform(uniformTime);
+
+      atmosphere_geode->setStateSet(stateSet);
+
+      cloudsTransform->addChild(atmosphere_geode);
+      base->addChild(cloudsTransform);
+    }
+
+    void makeAtmosphericScattering(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
+    {
+      float earthRadius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
+      float atmosphereHeight = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthAtmosphereHeightName);
+      float scatteringDepth = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthScatteringDepthName);
+      float scatteringIntensity = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthScatteringIntensityName);
+      osg::Vec4f atmosphereColor = osgGaming::PropertiesManager::getInstance()->getValue<osg::Vec4f>(Param_EarthAtmosphereColorName);
+
+      // atmospheric scattering geometry
+      osg::ref_ptr<osgGaming::CameraAlignedQuad> caq = new osgGaming::CameraAlignedQuad();
+
+      // shader
+      osg::ref_ptr<osg::StateSet> stateSet = caq->getOrCreateStateSet();
+      stateSet->setAttributeAndModes(new osg::BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), osg::StateAttribute::ON);
+
+      osg::ref_ptr<osg::Program> pgm = new osg::Program();
+
+      osg::ref_ptr<osg::Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.vert", osg::Shader::VERTEX);
+      osg::ref_ptr<osg::Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.frag", osg::Shader::FRAGMENT);
+
+      pgm->addShader(vert_shader);
+      pgm->addShader(frag_shader);
+
+      double earth_rad = pow(earthRadius * 0.9999, -2.0f);
+      double atmos_rad = pow(earthRadius + atmosphereHeight, -2.0f);
+
+      stateSet->addUniform(new osg::Uniform("planet_r", osg::Vec3f(earth_rad, earth_rad, earth_rad)));
+      stateSet->addUniform(new osg::Uniform("planet_R", osg::Vec3f(atmos_rad, atmos_rad, atmos_rad)));
+      stateSet->addUniform(new osg::Uniform("planet_h", atmosphereHeight));
+      stateSet->addUniform(new osg::Uniform("view_depth", scatteringDepth));
+
+      scatteringLightDirUniform = new osg::Uniform(osg::Uniform::FLOAT_VEC3, "light_dir", 1);
+      osg::ref_ptr<osg::Uniform> light_col_uniform = new osg::Uniform(osg::Uniform::FLOAT_VEC3, "light_col", 1);
+      scatteringLightPosrUniform = new osg::Uniform(osg::Uniform::FLOAT_VEC4, "light_posr", 1);
+
+      //light_col_uniform->setElement(0, Vec3f(1.0f, 1.0f, 1.0f));
+      light_col_uniform->setElement(0, osg::Vec3f(0.0f, 0.0f, 0.0f));
+
+      stateSet->addUniform(new osg::Uniform("lights", 1));
+      stateSet->addUniform(scatteringLightDirUniform);
+      stateSet->addUniform(light_col_uniform);
+      stateSet->addUniform(scatteringLightPosrUniform);
+
+      stateSet->addUniform(new osg::Uniform("B0", atmosphereColor * scatteringIntensity));
+
+      stateSet->setAttribute(pgm, osg::StateAttribute::ON);
+
+      base->addChild(caq);
+      tcm->addCameraAlignedQuad(caq);
+    }
+
+    void addHighlightedCountry(CountryMesh::Ptr mesh, CountryMesh::ColorMode mode)
+    {
+      mesh->setColorMode(mode);
+      countrySurfacesSwitch->setChildValue(mesh, true);
+      visibleCountryMeshs.push_back(mesh);
+    }
+
+    osg::ref_ptr<osg::Geode> createPlanetGeode(int textureResolution)
+    {
+      osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+
+      std::string resolutionLevel0;
+      std::string resolutionLevel1;
+      int n, m;
+
+      switch (textureResolution)
+      {
+      default:
+      case 0:
+        n = 2;
+        m = 1;
+        resolutionLevel0 = "8k";
+        resolutionLevel1 = "8k";
+        break;
+      case 1:
+        n = 4;
+        m = 2;
+        resolutionLevel0 = "16k";
+        resolutionLevel1 = "8k_4x2";
+        break;
+      };
+
+      int stacks = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereStacksName);
+      int slices = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereSlicesName);
+      float radius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
+
+      int stacksPerSegment = stacks / m;
+      int slicesPerSegment = slices / n;
+
+      for (int y = 0; y < m; y++)
+      {
+        for (int x = 0; x < n; x++)
+        {
+          osg::ref_ptr<osg::Geometry> geo = createSphereSegmentMesh(
+            stacks, slices, radius,
+            y * stacksPerSegment,
+            (y + 1) * stacksPerSegment - 1,
+            x * slicesPerSegment,
+            (x + 1) * slicesPerSegment - 1);
+
+          osg::ref_ptr<osg::StateSet> stateSet = geo->getOrCreateStateSet();
+
+          char colormap_file[128];
+          char nightmap_file[128];
+          char specreliefcitiesboundariesmap_file[128];
+          char normalmap_file[128];
+
+          sprintf(colormap_file, "./GameData/textures/earth/color/%s/%dx%d.png", resolutionLevel0.c_str(), x, y);
+          sprintf(nightmap_file, "./GameData/textures/earth/night/%s/%dx%d.png", resolutionLevel0.c_str(), x, y);
+          sprintf(specreliefcitiesboundariesmap_file, "./GameData/textures/earth/speccitiesclouds/%s/%dx%d.png", resolutionLevel1.c_str(), x, y);
+          sprintf(normalmap_file, "./GameData/textures/earth/normal/%s/%dx%d.png", resolutionLevel1.c_str(), x, y);
+
+          osgGaming::TextureFactory::getInstance()->make()
+            ->image(osgGaming::ResourceManager::getInstance()->loadImage(colormap_file))
+            ->texLayer(0)
+            ->uniform(stateSet, "colormap")
+            ->assign(stateSet)
+            ->build();
+
+          osgGaming::TextureFactory::getInstance()->make()
+            ->image(osgGaming::ResourceManager::getInstance()->loadImage(nightmap_file))
+            ->texLayer(1)
+            ->uniform(stateSet, "nightmap")
+            ->assign(stateSet)
+            ->build();
+
+          osgGaming::TextureFactory::getInstance()->make()
+            ->image(osgGaming::ResourceManager::getInstance()->loadImage(specreliefcitiesboundariesmap_file))
+            ->texLayer(2)
+            ->uniform(stateSet, "speccitiescloudsmap")
+            ->assign(stateSet)
+            ->build();
+
+          osgGaming::TextureFactory::getInstance()->make()
+            ->image(osgGaming::ResourceManager::getInstance()->loadImage(normalmap_file))
+            ->texLayer(3)
+            ->uniform(stateSet, "normalmap")
+            ->assign(stateSet)
+            ->build();
+
+          geode->addDrawable(geo);
+        }
+      }
+
+      return geode;
+    }
+
+    osg::ref_ptr<osg::Geode> createCloudsGeode()
+    {
+      osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+
+      int n = 2;
+      int m = 1;
+
+      int stacks = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereStacksName);
+      int slices = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereSlicesName);
+      float radius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
+      float cloudsHeight = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsHeightName);
+
+      int stacksPerSegment = stacks / m;
+      int slicesPerSegment = slices / n;
+
+      for (int y = 0; y < m; y++)
+      {
+        for (int x = 0; x < n; x++)
+        {
+          osg::ref_ptr<osg::Geometry> geo = createSphereSegmentMesh(
+            stacks, slices, radius + cloudsHeight,
+            y * stacksPerSegment,
+            (y + 1) * stacksPerSegment - 1,
+            x * slicesPerSegment,
+            (x + 1) * slicesPerSegment - 1);
+
+          osg::ref_ptr<osg::StateSet> stateSet = geo->getOrCreateStateSet();
+
+          char colormap_file[128];
+          sprintf(colormap_file, "./GameData/textures/earth/speccitiesclouds/8k/%dx%d.png", x, y);
+
+          osgGaming::TextureFactory::getInstance()->make()
+            ->image(osgGaming::ResourceManager::getInstance()->loadImage(colormap_file))
+            ->texLayer(0)
+            ->uniform(stateSet, "colormap")
+            ->assign(stateSet)
+            ->build();
+
+          geode->addDrawable(geo);
+        }
+      }
+
+      return geode;
+    }
+
+    osg::ref_ptr<osg::Geometry> createSphereSegmentMesh(int stacks, int slices, double radius, int firstStack, int lastStack, int firstSlice, int lastSlice)
+    {
+      osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+
+      osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
+      osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array();
+      osg::ref_ptr<osg::Vec2Array> texcoords = new osg::Vec2Array();
+      osg::ref_ptr<osg::DrawElementsUInt> triangles = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
+
+      for (int slice = firstSlice; slice <= lastSlice + 1; slice++)
+      {
+        for (int stack = firstStack; stack <= lastStack + 1; stack++)
+        {
+          osg::Vec3 point = osgGaming::getVec3FromEuler(double(stack) * (C_PI / double(stacks)), 0.0, double(slice) * (2.0 * C_PI / double(slices)), osg::Vec3(0.0, 0.0, 1.0));
+
+          vertices->push_back(point * radius);
+          normals->push_back(point);
+
+          double u = double(slice - firstSlice) / double(lastSlice - firstSlice + 1);
+          double v = double(stack - firstStack) / double(lastStack - firstStack + 1);
+
+          texcoords->push_back(osg::Vec2(u, 1.0 - v));
+        }
+      }
+
+      int nSlices = lastSlice - firstSlice + 1;
+      int nStacks = lastStack - firstStack + 1;
+
+      for (int slice = 0; slice < nSlices; slice++)
+      {
+        int slice_i = (nStacks + 1) * slice;
+        int next_slice_i = slice_i + nStacks + 1;
+
+        for (int stack = 0; stack < nStacks; stack++)
+        {
+          if (stack == 0 && firstStack == 0)
+          {
+            triangles->push_back(slice_i);
+            triangles->push_back(slice_i + 1);
+            triangles->push_back(next_slice_i + 1);
+          }
+          else if (stack == nStacks - 1 && lastStack == stacks - 1)
+          {
+            triangles->push_back(slice_i + nStacks);
+            triangles->push_back(next_slice_i + nStacks - 1);
+            triangles->push_back(slice_i + nStacks - 1);
+          }
+          else
+          {
+            triangles->push_back(slice_i + stack);
+            triangles->push_back(slice_i + stack + 1);
+            triangles->push_back(next_slice_i + stack);
+
+            triangles->push_back(next_slice_i + stack);
+            triangles->push_back(slice_i + stack + 1);
+            triangles->push_back(next_slice_i + stack + 1);
+          }
+        }
+      }
+
+      osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+      colors->push_back(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+
+      geometry->setVertexArray(vertices);
+      geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
+      geometry->setTexCoordArray(0, texcoords, osg::Array::BIND_PER_VERTEX);
+      geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+      geometry->addPrimitiveSet(triangles);
+
+      return geometry;
+    }
+
+    GlobeModel* base;
+
+    float paramSunDistance;
+    float paramSunRadiusMp2;
+
+    float paramEarthCloudsSpeed;
+    float paramEarthCloudsMorphSpeed;
+
+    osg::ref_ptr<osg::Uniform> scatteringLightDirUniform;
+    osg::ref_ptr<osg::Uniform> scatteringLightPosrUniform;
+
+    osg::ref_ptr<osg::PositionAttitudeTransform> cloudsTransform;
+    osg::ref_ptr<osg::Uniform> uniformTime;
+
+    // osg::ref_ptr<osg::Vec3Array> countriesVertices;
+    osg::ref_ptr<osg::Switch> countrySurfacesSwitch;
+    CountryMesh::Map countryMeshs;
+    CountriesMap::Ptr countriesMap;
+
+    CountryMesh::List visibleCountryMeshs;
+    osgGaming::Observable<int>::Ptr oSelectedCountryId;
+
+    BranchType highlightedBranch;
+
+    std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
+
+    osg::ref_ptr<BoundariesMesh> boundariesMesh;
+  };
 
   GlobeModel::GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
-    : m_oSelectedCountryId(new osgGaming::Observable<int>(0))
-    , m_highlightedBranch(BRANCH_UNDEFINED)
-    , m_paramSunDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_SunDistanceName))
-    , m_paramSunRadiusMp2(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_SunRadiusPm2Name))
-    , m_paramEarthCloudsSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsSpeedName))
-    , m_paramEarthCloudsMorphSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsMorphSpeedName))
+    : osg::Group()
+    , m(new Impl(this))
   {
-    makeEarthModel();
-    makeCloudsModel();
-    makeBoundariesModel();
-    makeAtmosphericScattering(tcm);
+    m->makeEarthModel();
+    m->makeCloudsModel();
+    m->makeAtmosphericScattering(tcm);
+  }
+
+  GlobeModel::~GlobeModel()
+  {
   }
 
   void GlobeModel::updateLightDirection(osg::Vec3f direction)
   {
-    m_scatteringLightDirUniform->setElement(0, direction);
-    Vec3f position = -direction * m_paramSunDistance;
+    m->scatteringLightDirUniform->setElement(0, direction);
+    osg::Vec3f position = -direction * m->paramSunDistance;
 
-    m_scatteringLightPosrUniform->setElement(0, Vec4f(position.x(), position.y(), position.z(), m_paramSunRadiusMp2));
+    m->scatteringLightPosrUniform->setElement(0, osg::Vec4f(position.x(), position.y(), position.z(), m->paramSunRadiusMp2));
   }
 
   void GlobeModel::updateClouds(float day)
   {
-    Quat quat = osgGaming::getQuatFromEuler(0.0, 0.0, fmodf(day * m_paramEarthCloudsSpeed, C_2PI));
-    m_cloudsTransform->setAttitude(quat);
+    osg::Quat quat = osgGaming::getQuatFromEuler(0.0, 0.0, fmodf(day * m->paramEarthCloudsSpeed, C_2PI));
+    m->cloudsTransform->setAttitude(quat);
 
-    m_uniformTime->set(day * m_paramEarthCloudsMorphSpeed);
+    m->uniformTime->set(day * m->paramEarthCloudsMorphSpeed);
   }
 
   void GlobeModel::clearHighlightedCountries()
   {
-    for (CountryMesh::List::iterator it = m_visibleCountryMeshs.begin(); it != m_visibleCountryMeshs.end(); ++it)
-      m_countrySurfacesSwitch->setChildValue(*it, false);
+    for (CountryMesh::List::iterator it = m->visibleCountryMeshs.begin(); it != m->visibleCountryMeshs.end(); ++it)
+      m->countrySurfacesSwitch->setChildValue(*it, false);
 
-    m_highlightedBranch = BranchType::BRANCH_UNDEFINED;
+    m->highlightedBranch = BranchType::BRANCH_UNDEFINED;
   }
 
   void GlobeModel::setSelectedCountry(int countryId)
   {
-    m_oSelectedCountryId->set(countryId);
+    m->oSelectedCountryId->set(countryId);
     clearHighlightedCountries();
 
     if (countryId == 0)
       return;
 
-    m_highlightedBranch = BRANCH_UNDEFINED;
+    m->highlightedBranch = BRANCH_UNDEFINED;
 
-    CountryMesh::Ptr mesh = m_countryMeshs.find(countryId)->second;
-    addHighlightedCountry(mesh, CountryMesh::MODE_SELECTED);
+    CountryMesh::Ptr mesh = m->countryMeshs.find(countryId)->second;
+    m->addHighlightedCountry(mesh, CountryMesh::MODE_SELECTED);
 
     CountryMesh::List& neighbors = mesh->getNeighborCountryMeshs();
     for (CountryMesh::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
-      addHighlightedCountry(*it, CountryMesh::MODE_NEIGHBOR);
+      m->addHighlightedCountry(*it, CountryMesh::MODE_NEIGHBOR);
   }
 
   void GlobeModel::setHighlightedSkillBranch(BranchType type)
   {
-    m_oSelectedCountryId->set(0);
+    m->oSelectedCountryId->set(0);
     clearHighlightedCountries();
 
-    m_highlightedBranch = type;
+    m->highlightedBranch = type;
 
-    for (CountryMesh::Map::iterator it = m_countryMeshs.begin(); it != m_countryMeshs.end(); ++it)
+    for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
     {
       if (it->second->getCountryData()->getSkillBranchActivated(type))
-        addHighlightedCountry(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + int(type)));
+        m->addHighlightedCountry(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + int(type)));
     }
   }
 
   void GlobeModel::setCountriesMap(CountriesMap::Ptr countriesMap)
   {
-    m_countriesMap = countriesMap;
+    m->countriesMap = countriesMap;
   }
 
-  void GlobeModel::addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles)
+  void GlobeModel::addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles, CountryMesh::BorderIdMap& neighborBorders)
   {
-    if (m_countryMeshs.find(id) != m_countryMeshs.end())
+    if (m->countryMeshs.find(id) != m->countryMeshs.end())
       return;
 
-    if (!m_countrySurfacesSwitch.valid())
+    if (!m->countrySurfacesSwitch.valid())
     {
-      m_countrySurfacesSwitch = new Switch();
-      m_countrySurfacesSwitch->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
-      m_countrySurfacesSwitch->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
-      m_countrySurfacesSwitch->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
-      m_countrySurfacesSwitch->getOrCreateStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
-      m_countrySurfacesSwitch->getOrCreateStateSet()->setRenderBinDetails(1, "RenderBin");
+      m->countrySurfacesSwitch = new osg::Switch();
+      m->countrySurfacesSwitch->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+      m->countrySurfacesSwitch->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+      m->countrySurfacesSwitch->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
+      m->countrySurfacesSwitch->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+      m->countrySurfacesSwitch->getOrCreateStateSet()->setRenderBinDetails(1, "RenderBin");
 
-      addChild(m_countrySurfacesSwitch);
+      addChild(m->countrySurfacesSwitch);
     }
 
-    CountryMesh::Ptr mesh = new CountryMesh(m_countriesVertices, triangles);
+    CountryMesh::Ptr mesh = new CountryMesh(m->boundariesMesh->getCountryVertices(), triangles, neighborBorders);
     mesh->setCountryData(countryData);
 
-    m_countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
-    m_countrySurfacesSwitch->addChild(mesh, false);
+    m->countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
+    m->countrySurfacesSwitch->addChild(mesh, false);
 
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
     {
-      m_skillBranchActivatedObservers.push_back(countryData->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([this, mesh, i](bool activated)
+      m->skillBranchActivatedObservers.push_back(countryData->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([this, mesh, i](bool activated)
       {
         if (!activated)
           return;
 
-        if (m_oSelectedCountryId->get() == 0 && m_highlightedBranch == i)
-          addHighlightedCountry(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
+        if (m->oSelectedCountryId->get() == 0 && m->highlightedBranch == i)
+          m->addHighlightedCountry(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
       })));
     }
   }
 
   CountryMesh::Map& GlobeModel::getCountryMeshs()
   {
-    return m_countryMeshs;
+    return m->countryMeshs;
   }
 
   CountriesMap::Ptr GlobeModel::getCountriesMap()
   {
-    return m_countriesMap;
+    return m->countriesMap;
+  }
+
+  BoundariesMesh::Ptr GlobeModel::getBoundariesMesh()
+  {
+    return m->boundariesMesh;
   }
 
   CountryMesh::Ptr GlobeModel::getSelectedCountryMesh()
   {
-    return m_countryMeshs.find(m_oSelectedCountryId->get())->second;
+    return m->countryMeshs.find(m->oSelectedCountryId->get())->second;
   }
 
   CountryMesh::Ptr GlobeModel::getCountryMesh(int id)
   {
-    CountryMesh::Map::iterator countryMesh = m_countryMeshs.find(id);
+    CountryMesh::Map::iterator countryMesh = m->countryMeshs.find(id);
 
-    if (countryMesh == m_countryMeshs.end())
+    if (countryMesh == m->countryMeshs.end())
       return nullptr;
 
-    return m_countryMeshs.find(id)->second;
+    return m->countryMeshs.find(id)->second;
   }
 
   CountryMesh::Ptr GlobeModel::getCountryMesh(osg::Vec2f coord)
@@ -169,18 +558,18 @@ namespace onep
 
   int GlobeModel::getCountryId(osg::Vec2f coord)
   {
-    Vec2i mapSize = m_countriesMap->getSize();
+    osg::Vec2i mapSize = m->countriesMap->getSize();
 
     int ix = int(coord.x() * float(mapSize.x()));
     int iy = int(coord.y() * float(mapSize.y()));
 
-    return m_countriesMap->getDataAt(ix, iy);
+    return m->countriesMap->getDataAt(ix, iy);
   }
 
   std::string GlobeModel::getCountryName(osg::Vec2f coord)
   {
-    CountryMesh::Map::iterator it = m_countryMeshs.find(getCountryId(coord));
-    if (it == m_countryMeshs.end())
+    CountryMesh::Map::iterator it = m->countryMeshs.find(getCountryId(coord));
+    if (it == m->countryMeshs.end())
     {
       return "No country selected";
     }
@@ -190,424 +579,12 @@ namespace onep
 
   int GlobeModel::getSelectedCountryId()
   {
-    return m_oSelectedCountryId->get();
+    return m->oSelectedCountryId->get();
   }
 
   osgGaming::Observable<int>::Ptr GlobeModel::getSelectedCountryIdObservable()
   {
-    return m_oSelectedCountryId;
-  }
-
-  void GlobeModel::makeEarthModel()
-  {
-    // planet geometry
-    ref_ptr<Node> earth = createPlanetGeode(0);
-    osgGaming::generateTangentAndBinormal(earth);
-
-    // stateset
-    ref_ptr<StateSet> stateSet = new StateSet();
-
-    ref_ptr<Material> material = new Material();
-    material->setAmbient(Material::FRONT_AND_BACK, Vec4f(0.1, 0.1, 0.1, 1.0));
-    material->setDiffuse(Material::FRONT_AND_BACK, Vec4f(1.0, 1.0, 1.0, 1.0));
-    material->setSpecular(Material::FRONT_AND_BACK, Vec4f(0.5, 0.5, 0.5, 1.0));
-    material->setShininess(Material::FRONT_AND_BACK, 16);
-    material->setEmission(Material::FRONT_AND_BACK, Vec4f(0.0, 0.0, 0.0, 1.0));
-
-    stateSet->setAttribute(material);
-
-    // shader
-    ref_ptr<Program> pgm = new Program();
-
-    ref_ptr<Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/globe.vert", Shader::VERTEX);
-    ref_ptr<Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/globe.frag", Shader::FRAGMENT);
-
-    pgm->addShader(vert_shader);
-    pgm->addShader(frag_shader);
-
-    pgm->addBindAttribLocation("tangent", 6);
-    pgm->addBindAttribLocation("binormal", 7);
-
-    stateSet->setAttribute(pgm, StateAttribute::ON);
-    //stateSet->setRenderBinDetails(0, "RenderBin");
-
-    earth->setStateSet(stateSet);
-
-    addChild(earth);
-  }
-
-  void GlobeModel::makeCloudsModel()
-  {
-    // geometry
-    m_cloudsTransform = new PositionAttitudeTransform();
-
-    ref_ptr<Geode> atmosphere_geode = createCloudsGeode();
-
-    // stateset
-    ref_ptr<StateSet> stateSet = new StateSet();
-
-    ref_ptr<Material> material = new Material();
-    material->setAmbient(Material::FRONT_AND_BACK, Vec4f(0.2, 0.2, 0.2, 1.0));
-    material->setDiffuse(Material::FRONT_AND_BACK, Vec4f(1.0, 1.0, 1.0, 1.0));
-    material->setSpecular(Material::FRONT_AND_BACK, Vec4f(0.2, 0.2, 0.2, 1.0));
-    material->setShininess(Material::FRONT_AND_BACK, 32);
-    material->setEmission(Material::FRONT_AND_BACK, Vec4f(0.0, 0.0, 0.0, 1.0));
-
-    stateSet->setMode(GL_BLEND, StateAttribute::ON);
-    stateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
-    stateSet->setRenderingHint(StateSet::TRANSPARENT_BIN);
-    stateSet->setRenderBinDetails(0, "RenderBin");
-    stateSet->setAttribute(material);
-
-    // shader
-    ref_ptr<Program> pgm = new Program();
-
-    ref_ptr<Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/clouds.vert", Shader::VERTEX);
-    ref_ptr<Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/clouds.frag", Shader::FRAGMENT);
-
-    pgm->addShader(vert_shader);
-    pgm->addShader(frag_shader);
-
-    m_uniformTime = new Uniform("time", 0.0f);
-
-    stateSet->setAttribute(pgm, StateAttribute::ON);
-    stateSet->addUniform(m_uniformTime);
-
-    atmosphere_geode->setStateSet(stateSet);
-
-    m_cloudsTransform->addChild(atmosphere_geode);
-    addChild(m_cloudsTransform);
-  }
-
-  void GlobeModel::makeBoundariesModel()
-  {
-    char* bytes = osgGaming::ResourceManager::getInstance()->loadBinary("./GameData/data/boundaries.dat");
-    osgGaming::ByteStream stream(bytes);
-
-    ref_ptr<Geode> geode = new Geode();
-
-    m_countriesVertices = new Vec3Array();
-
-    int nverts = stream.read<int>();
-    for (int i = 0; i < nverts; i++)
-    {
-      float x = stream.read<float>();
-      float y = stream.read<float>();
-      float z = stream.read<float>();
-
-      m_countriesVertices->push_back(Vec3f(x, y, z));
-    }
-
-    int nInnerPoints = stream.read<int>();
-    ref_ptr<Vec2Array> texcoords = new Vec2Array();
-    for (int i = 0; i < nInnerPoints; i++)
-      texcoords->push_back(Vec2f(1.0f, 0.0f));
-
-    for (int i = 0; i < (nverts - nInnerPoints); i++)
-      texcoords->push_back(Vec2f(0.0f, 0.0f));
-
-    /*int nedges = stream.read<int>();
-    for (int i = 0; i < nedges; i++)
-    {
-    stream.read<int>();
-    stream.read<int>();
-    }*/
-
-    ref_ptr<DrawElementsUInt> quads = new DrawElementsUInt(GL_QUADS, 0);
-
-    int nquads = stream.read<int>();
-    for (int i = 0; i < nquads; i++)
-    {
-      for (int j = 0; j < 4; j++)
-        quads->push_back(stream.read<int>());
-    }
-
-    ref_ptr<Geometry> geo_quads = new Geometry();
-    geo_quads->setVertexArray(m_countriesVertices);
-    geo_quads->setTexCoordArray(0, texcoords, Array::BIND_PER_VERTEX);
-    geo_quads->addPrimitiveSet(quads);
-
-    geode->addDrawable(geo_quads);
-    addChild(geode);
-
-    ref_ptr<Program> program = new Program();
-    ref_ptr<Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/boundaries.frag", Shader::FRAGMENT);
-
-    program->addShader(frag_shader);
-
-    geode->getOrCreateStateSet()->setMode(GL_LIGHTING, StateAttribute::OFF);
-    geode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
-    geode->getOrCreateStateSet()->setAttribute(program, StateAttribute::ON);
-    geode->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
-    geode->getOrCreateStateSet()->setRenderingHint(StateSet::TRANSPARENT_BIN);
-    geode->getOrCreateStateSet()->setRenderBinDetails(2, "RenderBin");
-
-    osgGaming::ResourceManager::getInstance()->clearCacheResource("./GameData/data/boundaries.dat");
-  }
-
-  void GlobeModel::makeAtmosphericScattering(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
-  {
-    float earthRadius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
-    float atmosphereHeight = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthAtmosphereHeightName);
-    float scatteringDepth = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthScatteringDepthName);
-    float scatteringIntensity = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthScatteringIntensityName);
-    Vec4f atmosphereColor = osgGaming::PropertiesManager::getInstance()->getValue<Vec4f>(Param_EarthAtmosphereColorName);
-
-    // atmospheric scattering geometry
-    ref_ptr<osgGaming::CameraAlignedQuad> caq = new osgGaming::CameraAlignedQuad();
-
-    // shader
-    ref_ptr<StateSet> stateSet = caq->getOrCreateStateSet();
-    stateSet->setAttributeAndModes(new BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), StateAttribute::ON);
-
-    ref_ptr<Program> pgm = new Program();
-
-    ref_ptr<Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.vert", Shader::VERTEX);
-    ref_ptr<Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.frag", Shader::FRAGMENT);
-
-    pgm->addShader(vert_shader);
-    pgm->addShader(frag_shader);
-
-    double earth_rad = pow(earthRadius * 0.9999, -2.0f);
-    double atmos_rad = pow(earthRadius + atmosphereHeight, -2.0f);
-
-    stateSet->addUniform(new Uniform("planet_r", Vec3f(earth_rad, earth_rad, earth_rad)));
-    stateSet->addUniform(new Uniform("planet_R", Vec3f(atmos_rad, atmos_rad, atmos_rad)));
-    stateSet->addUniform(new Uniform("planet_h", atmosphereHeight));
-    stateSet->addUniform(new Uniform("view_depth", scatteringDepth));
-
-    m_scatteringLightDirUniform = new Uniform(Uniform::FLOAT_VEC3, "light_dir", 1);
-    ref_ptr<Uniform> light_col_uniform = new Uniform(Uniform::FLOAT_VEC3, "light_col", 1);
-    m_scatteringLightPosrUniform = new Uniform(Uniform::FLOAT_VEC4, "light_posr", 1);
-
-    //light_col_uniform->setElement(0, Vec3f(1.0f, 1.0f, 1.0f));
-    light_col_uniform->setElement(0, Vec3f(0.0f, 0.0f, 0.0f));
-
-    stateSet->addUniform(new Uniform("lights", 1));
-    stateSet->addUniform(m_scatteringLightDirUniform);
-    stateSet->addUniform(light_col_uniform);
-    stateSet->addUniform(m_scatteringLightPosrUniform);
-
-    stateSet->addUniform(new Uniform("B0", atmosphereColor * scatteringIntensity));
-
-    stateSet->setAttribute(pgm, StateAttribute::ON);
-
-    addChild(caq);
-    tcm->addCameraAlignedQuad(caq);
-  }
-
-  void GlobeModel::addHighlightedCountry(CountryMesh::Ptr mesh, CountryMesh::ColorMode mode)
-  {
-    mesh->setColorMode(mode);
-    m_countrySurfacesSwitch->setChildValue(mesh, true);
-    m_visibleCountryMeshs.push_back(mesh);
-  }
-
-  ref_ptr<Geode> GlobeModel::createPlanetGeode(int textureResolution)
-  {
-    ref_ptr<Geode> geode = new Geode();
-
-    std::string resolutionLevel0;
-    std::string resolutionLevel1;
-    int n, m;
-
-    switch (textureResolution)
-    {
-    default:
-    case 0:
-      n = 2;
-      m = 1;
-      resolutionLevel0 = "8k";
-      resolutionLevel1 = "8k";
-      break;
-    case 1:
-      n = 4;
-      m = 2;
-      resolutionLevel0 = "16k";
-      resolutionLevel1 = "8k_4x2";
-      break;
-    };
-
-    int stacks = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereStacksName);
-    int slices = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereSlicesName);
-    float radius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
-
-    int stacksPerSegment = stacks / m;
-    int slicesPerSegment = slices / n;
-
-    for (int y = 0; y < m; y++)
-    {
-      for (int x = 0; x < n; x++)
-      {
-        ref_ptr<Geometry> geo = createSphereSegmentMesh(
-          stacks, slices, radius,
-          y * stacksPerSegment,
-          (y + 1) * stacksPerSegment - 1,
-          x * slicesPerSegment,
-          (x + 1) * slicesPerSegment - 1);
-
-        ref_ptr<StateSet> stateSet = geo->getOrCreateStateSet();
-
-        char colormap_file[128];
-        char nightmap_file[128];
-        char specreliefcitiesboundariesmap_file[128];
-        char normalmap_file[128];
-
-        sprintf(colormap_file, "./GameData/textures/earth/color/%s/%dx%d.png", resolutionLevel0.c_str(), x, y);
-        sprintf(nightmap_file, "./GameData/textures/earth/night/%s/%dx%d.png", resolutionLevel0.c_str(), x, y);
-        sprintf(specreliefcitiesboundariesmap_file, "./GameData/textures/earth/speccitiesclouds/%s/%dx%d.png", resolutionLevel1.c_str(), x, y);
-        sprintf(normalmap_file, "./GameData/textures/earth/normal/%s/%dx%d.png", resolutionLevel1.c_str(), x, y);
-
-        osgGaming::TextureFactory::getInstance()->make()
-          ->image(osgGaming::ResourceManager::getInstance()->loadImage(colormap_file))
-          ->texLayer(0)
-          ->uniform(stateSet, "colormap")
-          ->assign(stateSet)
-          ->build();
-
-        osgGaming::TextureFactory::getInstance()->make()
-          ->image(osgGaming::ResourceManager::getInstance()->loadImage(nightmap_file))
-          ->texLayer(1)
-          ->uniform(stateSet, "nightmap")
-          ->assign(stateSet)
-          ->build();
-
-        osgGaming::TextureFactory::getInstance()->make()
-          ->image(osgGaming::ResourceManager::getInstance()->loadImage(specreliefcitiesboundariesmap_file))
-          ->texLayer(2)
-          ->uniform(stateSet, "speccitiescloudsmap")
-          ->assign(stateSet)
-          ->build();
-
-        osgGaming::TextureFactory::getInstance()->make()
-          ->image(osgGaming::ResourceManager::getInstance()->loadImage(normalmap_file))
-          ->texLayer(3)
-          ->uniform(stateSet, "normalmap")
-          ->assign(stateSet)
-          ->build();
-
-        geode->addDrawable(geo);
-      }
-    }
-
-    return geode;
-  }
-
-  ref_ptr<Geode> GlobeModel::createCloudsGeode()
-  {
-    ref_ptr<Geode> geode = new Geode();
-
-    int n = 2;
-    int m = 1;
-
-    int stacks = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereStacksName);
-    int slices = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereSlicesName);
-    float radius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
-    float cloudsHeight = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsHeightName);
-
-    int stacksPerSegment = stacks / m;
-    int slicesPerSegment = slices / n;
-
-    for (int y = 0; y < m; y++)
-    {
-      for (int x = 0; x < n; x++)
-      {
-        ref_ptr<Geometry> geo = createSphereSegmentMesh(
-          stacks, slices, radius + cloudsHeight,
-          y * stacksPerSegment,
-          (y + 1) * stacksPerSegment - 1,
-          x * slicesPerSegment,
-          (x + 1) * slicesPerSegment - 1);
-
-        ref_ptr<StateSet> stateSet = geo->getOrCreateStateSet();
-
-        char colormap_file[128];
-        sprintf(colormap_file, "./GameData/textures/earth/speccitiesclouds/8k/%dx%d.png", x, y);
-
-        osgGaming::TextureFactory::getInstance()->make()
-          ->image(osgGaming::ResourceManager::getInstance()->loadImage(colormap_file))
-          ->texLayer(0)
-          ->uniform(stateSet, "colormap")
-          ->assign(stateSet)
-          ->build();
-
-        geode->addDrawable(geo);
-      }
-    }
-
-    return geode;
-  }
-
-  ref_ptr<Geometry> GlobeModel::createSphereSegmentMesh(int stacks, int slices, double radius, int firstStack, int lastStack, int firstSlice, int lastSlice)
-  {
-    ref_ptr<Geometry> geometry = new Geometry();
-
-    ref_ptr<Vec3Array> vertices = new Vec3Array();
-    ref_ptr<Vec3Array> normals = new Vec3Array();
-    ref_ptr<Vec2Array> texcoords = new Vec2Array();
-    ref_ptr<DrawElementsUInt> triangles = new DrawElementsUInt(PrimitiveSet::TRIANGLES, 0);
-
-    for (int slice = firstSlice; slice <= lastSlice + 1; slice++)
-    {
-      for (int stack = firstStack; stack <= lastStack + 1; stack++)
-      {
-        Vec3 point = osgGaming::getVec3FromEuler(double(stack) * (C_PI / double(stacks)), 0.0, double(slice) * (2.0 * C_PI / double(slices)), Vec3(0.0, 0.0, 1.0));
-
-        vertices->push_back(point * radius);
-        normals->push_back(point);
-
-        double u = double(slice - firstSlice) / double(lastSlice - firstSlice + 1);
-        double v = double(stack - firstStack) / double(lastStack - firstStack + 1);
-
-        texcoords->push_back(Vec2(u, 1.0 - v));
-      }
-    }
-
-    int nSlices = lastSlice - firstSlice + 1;
-    int nStacks = lastStack - firstStack + 1;
-
-    for (int slice = 0; slice < nSlices; slice++)
-    {
-      int slice_i = (nStacks + 1) * slice;
-      int next_slice_i = slice_i + nStacks + 1;
-
-      for (int stack = 0; stack < nStacks; stack++)
-      {
-        if (stack == 0 && firstStack == 0)
-        {
-          triangles->push_back(slice_i);
-          triangles->push_back(slice_i + 1);
-          triangles->push_back(next_slice_i + 1);
-        }
-        else if (stack == nStacks - 1 && lastStack == stacks - 1)
-        {
-          triangles->push_back(slice_i + nStacks);
-          triangles->push_back(next_slice_i + nStacks - 1);
-          triangles->push_back(slice_i + nStacks - 1);
-        }
-        else
-        {
-          triangles->push_back(slice_i + stack);
-          triangles->push_back(slice_i + stack + 1);
-          triangles->push_back(next_slice_i + stack);
-
-          triangles->push_back(next_slice_i + stack);
-          triangles->push_back(slice_i + stack + 1);
-          triangles->push_back(next_slice_i + stack + 1);
-        }
-      }
-    }
-
-    ref_ptr<Vec4Array> colors = new Vec4Array();
-    colors->push_back(Vec4(1.0, 1.0, 1.0, 1.0));
-
-    geometry->setVertexArray(vertices);
-    geometry->setNormalArray(normals, Array::BIND_PER_VERTEX);
-    geometry->setTexCoordArray(0, texcoords, Array::BIND_PER_VERTEX);
-    geometry->setColorArray(colors, Array::BIND_OVERALL);
-    geometry->addPrimitiveSet(triangles);
-
-    return geometry;
+    return m->oSelectedCountryId;
   }
 
 }

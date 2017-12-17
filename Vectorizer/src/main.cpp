@@ -8,8 +8,8 @@
 #include "draw.h"
 #include "check.h"
 #include "findcycles.h"
-#include "mesh.h"
 #include "countries.h"
+#include "boundaries.h"
 
 typedef std::vector<std::string> StringList;
 typedef std::map<std::string, StringList> ArgumentMap;
@@ -130,7 +130,6 @@ int detectLines(int argc, char** argv)
   float displayScale, reduce;
   int depth, minAngle;
   bool useThres, dbgCycles;
-  float thickness;
   float shift;
   float countriesMapScale;
 
@@ -141,15 +140,14 @@ int detectLines(int argc, char** argv)
     polyfile = getStringArgument(arguments, "p", true);
     trianglecommand = getStringArgument(arguments, "t", true);
     outputFilename = getStringArgument(arguments, "o", true);
-    countriesTableFilename = getStringArgument(arguments, "c", false);
-    countriesFilename = getStringArgument(arguments, "co", false);
+    countriesTableFilename = getStringArgument(arguments, "c", true);
+    countriesFilename = getStringArgument(arguments, "co", true);
     displayScale = getFloatArgument(arguments, "s", 1.0f);
     reduce = getFloatArgument(arguments, "r", 0.7f);
     depth = getIntArgument(arguments, "d", 10);
     minAngle = getIntArgument(arguments, "a", 15);
     useThres = getBoolArgument(arguments, "T");
     dbgCycles = getBoolArgument(arguments, "C");
-    thickness = getFloatArgument(arguments, "l", 0.005f);
     shift = getFloatArgument(arguments, "S", 255.0f);
     countriesMapScale = getFloatArgument(arguments, "ms", 0.25f);
   }
@@ -180,6 +178,7 @@ int detectLines(int argc, char** argv)
   cv::Mat finalImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
   cv::Mat cycleImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
   cv::Mat filledCycleImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
+  //cv::Mat boundariesImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
 
   cvtColor(image, displayImage, CV_GRAY2RGB);
 
@@ -198,6 +197,9 @@ int detectLines(int argc, char** argv)
 
   // reduce
   helper::reducePoints(graph, reduce);
+
+  // split single edges that connect two nodals
+  helper::splitSingleEdges(graph);
 
   // write to poly file and draw debug image
   helper::writePolyFile(graph, polyfile.c_str());
@@ -224,23 +226,24 @@ int detectLines(int argc, char** argv)
   helper::drawFilledCycles(filledCycleImage, triGraph, cycles, displayScale);
   helper::drawCycleNumbers(filledCycleImage, triGraph, cycles, displayScale);
 
-  // make mesh
-  helper::SphericalMesh mesh;
-  helper::makeSphericalMesh(triGraph, mesh, thickness, shift);
-  helper::writeBoundariesFile(mesh, outputFilename.c_str());
+  // make countries
+  helper::CountriesTable table;
+  helper::readCountriesTable(countriesTableFilename.c_str(), table);
 
-  if (!countriesTableFilename.empty() && !countriesFilename.empty())
-  {
-    // make countries
-    helper::CountriesTable table;
-    helper::readCountriesTable(countriesTableFilename.c_str(), table);
-
-    helper::CountriesMap countries;
-    cv::Mat countriesMap;
-    helper::makeCountries(triGraph, cycles, table, countriesMapScale, countries, countriesMap);
-    helper::writeCountriesFile(countriesFilename.c_str(), triGraph, countries, countriesMap, triGraph.boundary, shift);
-  }
+  helper::CountriesMap countries;
+  cv::Mat countriesMap;
+  helper::makeCountries(triGraph, cycles, table, countriesMapScale, countries, countriesMap);
   
+  // make boundaries
+  helper::WorldData world;
+  world.countries = countries;
+
+  helper::makeBoundaries(triGraph, world.countries, world.boundariesMeshData, shift);
+  //helper::drawBoundaries(boundariesImage, triGraph, world.boundariesMeshData, displayScale);
+
+  helper::writeCountriesFile(countriesFilename.c_str(), triGraph, world.countries, countriesMap, shift);
+  helper::writeBoundariesFile(world.boundariesMeshData, outputFilename.c_str());
+
   if (!dbgimage.empty())
   {
     imshow("Lines", displayImage);
@@ -248,11 +251,13 @@ int detectLines(int argc, char** argv)
     imshow("Final", finalImage);
     imshow("Cycles", cycleImage);
     imshow("Filled cycles", filledCycleImage);
+    //imshow("Boundaries", boundariesImage);
     imwrite(std::string(dbgimage) + ".steps.png", displayImage);
     imwrite(std::string(dbgimage) + ".edges.png", resultImage);
     imwrite(std::string(dbgimage) + ".triangles.png", finalImage);
     imwrite(std::string(dbgimage) + ".cycles.png", cycleImage);
     imwrite(std::string(dbgimage) + ".filled.png", filledCycleImage);
+    //imwrite(std::string(dbgimage) + ".bounds.png", boundariesImage);
   }
 
   return 0;

@@ -30,8 +30,8 @@ Simulation::Simulation()
 
 void Simulation::loadCountries(std::string filename)
 {
-	typedef vector<unsigned char> NeighborList;
-	typedef map<unsigned char, NeighborList> NeighborMap;
+	typedef vector<int> NeighborList;
+	typedef map<int, NeighborList> NeighborMap;
 
   char* bytes = ResourceManager::getInstance()->loadBinary(filename);
 
@@ -49,7 +49,7 @@ void Simulation::loadCountries(std::string filename)
 		
 		float population = stream.read<float>();
 		float wealth = float(stream.read<int>());
-		unsigned char id = stream.read<unsigned char>();
+		int id = stream.read<int>();
 		float centerX = stream.read<float>();
 		float centerY = stream.read<float>();
 		float width = stream.read<float>();
@@ -67,11 +67,24 @@ void Simulation::loadCountries(std::string filename)
 
 		int neighbors_count = stream.read<int>();
 		for (int j = 0; j < neighbors_count; j++)
-		{
-			neighborList.push_back(stream.read<unsigned char>());
-		}
+			neighborList.push_back(stream.read<int>());
 
     neighborMap.insert(NeighborMap::value_type(id, neighborList));
+
+    CountryMesh::BorderIdMap neighborBorderMap;
+    int neighborBorderCount = stream.read<int>();
+    for (int j = 0; j < neighborBorderCount; j++)
+    {
+      std::vector<int> borders;
+
+      int nid = stream.read<int>();
+      int bcount = stream.read<int>();
+      for (int k = 0; k < bcount; k++)
+        borders.push_back(stream.read<int>());
+
+      neighborBorderMap[nid] = borders;
+    }
+
 
     ref_ptr<DrawElementsUInt> triangles = new DrawElementsUInt(GL_TRIANGLES, 0);
     int triangles_count = stream.read<int>();
@@ -89,7 +102,7 @@ void Simulation::loadCountries(std::string filename)
     for (int j = 0; j < NUM_SKILLBRANCHES; j++)
       country->addChild(m_skillBranches[j]);
 
-    m_globeModel->addCountry(int(id), country, triangles);
+    m_globeModel->addCountry(int(id), country, triangles, neighborBorderMap);
     addChild(country);
 
 		delete[] name_p;

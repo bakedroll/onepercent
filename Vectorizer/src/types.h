@@ -5,15 +5,14 @@
 #include <vector>
 #include <map>
 #include <set>
-#include <osg/Vec3f>
 
 namespace helper
 {
   template<typename T>
-  class Array
+  class Matrix
   {
   public:
-    Array(int cols, int rows, T initialValue)
+    Matrix(int cols, int rows, T initialValue)
       : m_cols(cols)
       , m_rows(rows)
     {
@@ -29,7 +28,7 @@ namespace helper
       }
     }
 
-    ~Array()
+    ~Matrix()
     {
       for (int x = 0; x < m_cols; x++)
         delete[] m_data[x];
@@ -62,14 +61,22 @@ namespace helper
     int m_rows;
   };
 
-  typedef struct _triangle
+  struct Triangle
   {
-    int idx[3];
-  } Triangle;
+    Triangle() {}
+    Triangle(int p1, int p2, int p3)
+    {
+      idx[0] = p1;
+      idx[1] = p2;
+      idx[2] = p3;
+    }
 
-  typedef struct _quad
+    int idx[3];
+  };
+
+  struct Quad
   {
-    _quad(int p1, int p2, int p3, int p4)
+    Quad(int p1, int p2, int p3, int p4)
     {
       idx[0] = p1;
       idx[1] = p2;
@@ -78,10 +85,25 @@ namespace helper
     }
 
     int idx[4];
-  } Quad;
+  };
 
-  typedef Array<bool> BoolArray;
-  typedef Array<int> IntArray;
+  struct Point3D
+  {
+    Point3D() : originId(-1) {}
+    Point3D(float x, float y, float z, int oid = -1)
+      : originId(oid)
+    {
+      value[0] = x;
+      value[1] = y;
+      value[2] = z;
+    }
+
+    float value[3];
+    int originId;
+  };
+
+  typedef Matrix<bool> BoolMatrix;
+  typedef Matrix<int> IntMatrix;
   typedef std::pair<cv::Point2i, uchar> PointValue;
 
   typedef std::vector<cv::Point2i> PointListi;
@@ -90,14 +112,17 @@ namespace helper
   typedef std::vector<PointValueList> PointValueListGroup;
   typedef std::pair<int, int> Edge;
   typedef std::vector<Edge> EdgeList;
+  typedef std::vector<EdgeList> EdgeListList;
   typedef std::pair<Edge, uchar> EdgeValue;
   typedef std::map<int, cv::Point2f> IdPointMap;
-  typedef std::map<int, osg::Vec3f> IdPoint3DMap;
+  typedef std::map<int, Point3D> IdPoint3DMap;
   typedef std::vector<EdgeValue> EdgeValueList;
   typedef std::map<int, EdgeList> NeighbourEdgesMap;
   typedef std::map<int, int> IdMap;
+  typedef std::vector<int> IdList;
   typedef std::map<int, Triangle> TriangleMap;
   typedef std::vector<Quad> QuadList;
+  typedef std::map<int, QuadList> IdQuadListMap;
   typedef std::pair<int, uchar> NeighbourValue;
   typedef std::vector<NeighbourValue> NeighbourValueList;
   typedef std::map<int, NeighbourValueList> NeighbourMap;
@@ -106,13 +131,14 @@ namespace helper
   typedef std::map<float, int> FloatIdMap;
   typedef std::map<float, FloatIdMap> FloatFloatIdMap;
 
-
   typedef std::pair<int, uchar> PointIdValue;
   typedef std::multimap<double, PointIdValue> AnglePointIdValueMap;
   typedef std::set<int> IdSet;
-  typedef std::map<int, IdSet> IdIdMap;
+  typedef std::map<int, IdSet> IdIdSetMap;
 
   typedef std::map<int, IdSet> PointTriangleMap;
+
+  typedef std::map<std::pair<int, int>, QuadList> BoundaryNodalMap;
 
   template<typename T>
   class BoundingBox
@@ -211,68 +237,107 @@ namespace helper
     cv::Point_<T> m_max;
   };
 
-  typedef struct _graph
+  struct Graph
   {
     IdPointMap points;
     EdgeValueList edges;
     TriangleMap triangles;
     BoundingBox<float> boundary;
-  } Graph;
+  };
 
-  typedef struct _cycle
+  struct Border
+  {
+    int boundarySegmentId;
+    int countryId;
+    int neighbourId;
+    IdSet points;
+    IdList nextBorderIds;
+    std::pair<int, int> startInnerOuterPointId;
+    std::pair<int, int> endInnerOuterPointId;
+    bool bIsCycle;
+  };
+
+  typedef std::vector<Border> BorderList;
+  typedef std::map<int, Border> IdBorderMap;
+  typedef std::map<int, IdList> IdBorderIdListMap;
+
+  struct Cycle
   {
     NeighbourEdgesMap edges;
     TriangleMap trianlges;
     BoundingBox<float> boundingbox;
-  } Cycle;
+  };
 
   typedef std::map<int, Cycle> CyclesMap;
 
-  typedef struct _sphericalMesh
+  struct SphericalMesh
   {
     IdPoint3DMap points;
     EdgeValueList edges;
     QuadList quads;
     int nInnerPoints;
-  } SphericalMesh;
+  };
 
-  typedef struct _countryData
+  struct CountryData
   {
     int id;
     std::string name;
     float population;
     float gdp;
-  } CountryData;
+  };
 
-  typedef struct _countryRow
+  struct CountryRow
   {
     CountryData data;
     IdSet cycleIds;
     IdSet additionalNeighbourIds;
-  } CountryRow;
+  };
 
   typedef std::vector<CountryRow> CountriesTable;
 
-  typedef struct _country
+  struct Country
   {
     CountryData data;
     BoundingBox<float> boundingbox;
     TriangleMap triangles;
     IdSet neighbours;
-  } Country;
+    NeighbourEdgesMap neighbourEdges;
+    IdBorderIdListMap borders;
+  };
 
   typedef std::map<int, Country> CountriesMap;
 
+  struct BoundariesMeshData
+  {
+    IdPoint3DMap points;
+    IdQuadListMap boundarySegments;
+    IdQuadListMap boundaryNodalsFull;
+    BoundaryNodalMap boundaryNodals;
+    IdBorderMap borders;
+  };
+
+  struct WorldData
+  {
+    CountriesMap countries;
+    BoundariesMeshData boundariesMeshData;
+  };
+
   void neighbourMapFromEdges(EdgeValueList& edges, NeighbourMap& neighbourMap);
   void neighbourMapFromEdges(NeighbourEdgesMap& edges, NeighbourMap& neighbourMap);
+  void neighbourMapFromEdges(EdgeList& edges, NeighbourMap& neighbourMap);
 
   void removeNeighbourFromList(NeighbourValueList& list, int id);
   bool removeNeighbourMapPoint(NeighbourMap& neighbourMap, int pointId, int& endpoint1, int& endpoint2, uchar& value);
 
-  void makeAnglePointMap(Graph& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles);
+  void makeAnglePointMap(IdPointMap& graph, NeighbourValueList& neighbours, int originId, int p1Id, AnglePointIdValueMap& angles);
   void makePointTriangleMap(Graph& graph, PointTriangleMap& map);
 
   void makePointList(IdPointMap& points, IdSet& ids, PointListf& result);
 
   void removeUnusedPoints(IdPoint3DMap& points, EdgeValueList& edges, IdPoint3DMap& results);
+
+  void findSegments(EdgeList& edges, EdgeListList& results);
+
+  void makeCartesianPoints(Graph& graph, IdPoint3DMap& points, float radius, float shift);
+  void makePolarPoints(IdPoint3DMap& input, IdPoint3DMap& output, int width, int height, float shift);
 }

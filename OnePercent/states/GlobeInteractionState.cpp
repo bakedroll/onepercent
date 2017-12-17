@@ -7,6 +7,7 @@
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 #include "widgets/CountryMenuWidget.h"
+#include "widgets/DebugWindow.h"
 
 #include <osgGA/GUIEventAdapter>
 
@@ -90,6 +91,7 @@ namespace onep
     , labelStats(nullptr)
     , radioNoOverlay(nullptr)
     , countryMenuWidget(nullptr)
+    , debugWindow(nullptr)
     , countryMenuWidgetFadeAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
     {
 
@@ -126,6 +128,8 @@ namespace onep
     CountryMenuWidget* countryMenuWidget;
 
     VirtualOverlay* mainOverlay;
+
+    DebugWindow* debugWindow;
 
     osg::ref_ptr<osgGaming::Animation<float>> countryMenuWidgetFadeAnimation;
 
@@ -450,7 +454,7 @@ namespace onep
     m->radioNoOverlay->setChecked(true);
     radioGroup->addButton(m->radioNoOverlay);
 
-    osgGaming::QConnectBoolFunctor::connect(m->radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
+    QConnectBoolFunctor::connect(m->radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
     {
       if (checked)
         globeModel->clearHighlightedCountries();
@@ -466,7 +470,7 @@ namespace onep
       branchesLayout->addWidget(checkBox, 1 + i, 0);
       branchesLayout->addWidget(radioButton, 1 + i, 1);
 
-      osgGaming::QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
+      QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
       {
         osg::ref_ptr<CountryData> selectedCountry = globeModel->getSelectedCountryMesh()->getCountryData();
         if (!selectedCountry.valid())
@@ -475,7 +479,7 @@ namespace onep
         selectedCountry->setSkillBranchActivated(i, checked);
       });
 
-      osgGaming::QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
+      QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
       {
         globeModel->setHighlightedSkillBranch(BranchType(i));
       });
@@ -507,10 +511,22 @@ namespace onep
 
     m->labelStats = new QLabel(QString());
 
+    QPushButton* debugButton = new QPushButton("Debug Window");
+    debugButton->setMaximumWidth(180);
+
+    QConnectFunctor::connect(debugButton, SIGNAL(clicked()), [this]()
+    {
+      if (m->debugWindow == nullptr)
+        m->debugWindow = new DebugWindow(getGlobeOverviewWorld(), m->mainOverlay);
+
+      m->debugWindow->show();
+    });
+
     QVBoxLayout* leftLayout = new QVBoxLayout();
     leftLayout->addLayout(branchesLayout);
     leftLayout->addWidget(m->labelStats);
     leftLayout->addStretch(1);
+    leftLayout->addWidget(debugButton);
 
     QWidget* leftWidget = new QWidget();
     leftWidget->setContentsMargins(0, 0, 0, 0);
@@ -535,7 +551,7 @@ namespace onep
         QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getName()));
         rightLayout->addWidget(checkBox);
 
-        osgGaming::QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
+        QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
         {
           simulation->getSkillBranch(BranchType(i))->getSkill(j)->setActivated(checked);
         });
