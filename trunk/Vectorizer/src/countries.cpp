@@ -32,7 +32,7 @@ namespace helper
           continue;
 
         // FIX: shift bounding box for specific island
-        if (*iit == 231)
+        if (*iit == 230)
           cit->second.boundingbox.shift(-graph.boundary.width(), 0.0f);
 
         country.boundingbox.expand(cit->second.boundingbox);

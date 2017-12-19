@@ -308,21 +308,16 @@ namespace onep
     {
       CountryMesh::Ptr cmesh = *it;
 
-      int startBorderId = -1;
+      std::vector<int> startIds;
 
-      if (cmesh->getIsOnOcean())
+      const std::vector<int>& neighbors = cmesh->getNeighborBorderIds(-1);
+      for (std::vector<int>::const_iterator nit = neighbors.begin(); nit != neighbors.end(); ++nit)
       {
-        const std::vector<int>& neighbors = cmesh->getNeighborBorderIds(-1);
-        for (std::vector<int>::const_iterator nit = neighbors.begin(); nit != neighbors.end(); ++nit)
-        {
-          if (visited.count(*nit) == 0)
-          {
-            startBorderId = *nit;
-            break;
-          }
-        }
+        if (visited.count(*nit) == 0)
+          startIds.push_back(*nit);
       }
-      else
+
+      if (!cmesh->getIsOnOcean())
       {
         const CountryMesh::BorderIdMap& nborders = cmesh->getNeighborBorders();
         for (CountryMesh::BorderIdMap::const_iterator nit = nborders.begin(); nit != nborders.end(); ++nit)
@@ -335,7 +330,7 @@ namespace onep
             {
               if (visited.count(*nnit) == 0)
               {
-                startBorderId = *nnit;
+                startIds.push_back(*nnit);
                 found = true;
                 break;
               }
@@ -347,8 +342,12 @@ namespace onep
         }
       }
 
-      if (startBorderId > -1)
+      for (IdList::iterator iit = startIds.begin(); iit != startIds.end(); ++iit)
       {
+        int startBorderId = *iit;
+        if (startBorderId == -1 || visited.count(startBorderId) > 0)
+          continue;
+
         int currentBorderId = startBorderId;
         do
         {
