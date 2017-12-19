@@ -1,4 +1,5 @@
 #include "boundaries.h"
+#include "io.h"
 
 #include <osgGaming/Helper.h>
 
@@ -167,7 +168,50 @@ namespace helper
     }
   }
 
-  bool isCycle(EdgeList& edges, std::set<std::pair<int, int>>& endpoints)
+  void cleanEdges(EdgeList& edges, NeighbourMap& neighbours)
+  {
+    IdSet visited;
+
+    for (NeighbourMap::iterator it = neighbours.begin(); it != neighbours.end(); ++it)
+    {
+      NeighbourValueList& nlist = it->second;
+      int currentId = it->first;
+
+      if (nlist.size() == 1 && visited.count(currentId) == 0)
+      {
+        int lastId = currentId;
+
+        do
+        {
+          visited.insert(currentId);
+
+          for (EdgeList::iterator eit = edges.begin(); eit != edges.end(); ++eit)
+          {
+            if (currentId == eit->first || currentId == eit->second)
+            {
+              edges.erase(eit);
+              break;
+            }
+          }
+
+          for (NeighbourValueList::iterator nit = nlist.begin(); nit != nlist.end(); ++nit)
+          {
+            if (nit->first != lastId)
+            {
+              lastId = currentId;
+              currentId = nit->first;
+              break;
+            }
+          }
+
+          nlist = neighbours[currentId];
+
+        } while (nlist.size() == 2);
+      }
+    }
+  }
+
+  bool checkCycle(EdgeList& edges, std::set<std::pair<int, int>>& endpoints)
   {
     NeighbourMap neighbours;
     neighbourMapFromEdges(edges, neighbours);
@@ -177,7 +221,13 @@ namespace helper
     {
       int size = it->second.size();
 
-      assert(size < 3);
+      if (size > 2)
+      {
+        endpoints.clear();
+        cleanEdges(edges, neighbours);
+        return true;
+      }
+
       if (size == 1)
       {
         std::pair<int, int> innerOuter;
@@ -189,7 +239,9 @@ namespace helper
       }
     }
 
+#ifdef _DEBUG
     assert(isCycle || endpoints.size() == 2);
+#endif
     return isCycle;
   }
 
@@ -213,7 +265,9 @@ namespace helper
     int pOuterOther = endit->second;
 
     NeighbourMap::iterator nit = neighbours.find(pOuter);
+#ifdef _DEBUG
     assert(nit->second.size() > 2);
+#endif
 
     AnglePointIdValueMap angles;
     makeAnglePointMap(points, nit->second, pOuter, pInner, angles);
@@ -292,6 +346,8 @@ namespace helper
 
   void makeBoundaries(Graph& graph, CountriesMap& countries, BoundariesMeshData& boundaries, float shift)
   {
+    ProgressPrinter countriesProgress("Assign countries");
+
     typedef std::set<int> Set;
     typedef std::pair<Set, std::set<std::pair<int, int>>> SetPair;
     typedef std::map<SetPair, int> BoundaryMap;
@@ -313,6 +369,7 @@ namespace helper
     neighbourMapFromEdges(graph.edges, neighbours);
 
     // for each country
+    int i = 0;
     for (CountriesMap::iterator it = countries.begin(); it != countries.end(); ++it)
     {
       int countryId = it->first;
@@ -337,7 +394,7 @@ namespace helper
           std::set<std::pair<int, int>> endpoints;
 
           // create boundary to neighbour only if it not already exists
-          bool bIsCycle = isCycle(*eit, endpoints);
+          bool bIsCycle = checkCycle(*eit, endpoints);
           if (bIsCycle || boundaryMap.count(SetPair(cset, endpoints)) == 0)
           {
             QuadList boundaryQuads;
@@ -377,9 +434,14 @@ namespace helper
           country.borders[neighbourId].push_back(boid);
         }
       }
+
+      i++;
+      countriesProgress.update(i, countries.size());
     }
 
     // assign border ends
+    i = 0;
+    ProgressPrinter boundsProgress("Generate nodals");
     for (IdBorderMap::iterator it = boundaries.borders.begin(); it != boundaries.borders.end(); ++it)
     {
       // ignore cycles
@@ -438,6 +500,9 @@ namespace helper
         boundDir.second = cand->first;
         boundaries.boundaryNodals[boundDir] = quads;
       }
+
+      i++;
+      boundsProgress.update(i, boundaries.borders.size());
     }
   }
 }

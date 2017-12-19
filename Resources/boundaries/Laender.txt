@@ -1,117 +1,117 @@
 Id	Name	Population	Gross domestic product	Cycle Ids	Additional Neighbour Ids	Color				
-1	Afghanistan	33,4	20735	88		#5B827D				
-2	Ägypten	82,3	271427	86		#10E0B0				
-3	Algerien	37,4	206095	109		#3A7B52				
-4	Angola	20,9	121704	139		#A6FFEF				
-5	Arabische Halbinsel	65,5	1293446	"80; 302"		#FA3A02				
-6	Argentinien	40,8	488213	"210; 215; 374"		#3FD852				
-7	Äthiopien	87	48145	93		#0151F9				
-8	Australien	22	1505277	"361; 362; 364; 371; 373"		#476D72				
-9	Balkanstaaten	38,26	437307	"44; 273; 274; 276"		#DD854D				
-10	Bangladesch	152,9	141275	157		#015DA4				
-11	Benelux	28,09	1366405	54		#95F58F				
-12	Benin	9,4	8310	119		#4066CE				
-13	Bhutan	0,7	1985	150		#7F63F9				
-14	Bolivien	10,8	29802	208		#1404DA				
-15	Botswana	1,9	14837	172		#AFDA60				
-16	Brasilien	194,3	2242854	213		#782517				
-17	Burkina Faso	17,5	12247	111		#7D688A				
-18	Chile	17,4	276975	207		#03BBA1				
-19	China	1381,3	9181377	"102; 293"		#E33E08				
-20	Dänemark	5,52	330958	"48; 247; 248"	"70; 84"	#0647FB				
-21	Deutschland	80,62	3635959	52	84	#DE16A9				
-22	Ecuador	14,9	94144	201		#CAF719				
-23	Elfenbeinküste	20,6	28288	138		#3E6332				
-24	Estland	1,32	24484	"29; 241"		#744DD1				
-25	Finnland	5,44	256922	"27; 238"		#97AA68				
-26	Frankreich	63,6	2737361	"66;  268"		#1A3FBC				
-27	Gabun	1,6	19228	"131; 317"		#22249C				
-28	Georgien	16,4	20000	64		#A42EDC				BIP prüfen
-29	Ghana	25,5	44223	121		#6FB819				
-30	Grönland	0,56	37400	"0; 189"		#8DD54E				
-31	Großbritannien	64,1	2535761	"240; 249; 246; 243; 236"	26	#40EEA2				
-32	Guinea	10000	6282	134		#FB2FFA				
-33	Indien	1252	1870651	"170; 301"		#0F0620				
-34	Indonesien	241	870275	"313; 315; 316; 318; 319; 320; 321; 322; 323; 324; 326; 327; 328; 329; 330; 331; 332; 333; 334; 336; 337; 338; 340; 344; 346; 348; 350; 351; 352; 353; 354; 358; 360"		#AAA727				
-35	Iran	77,45	366259	69		#DD361E				
-36	Irak	33,42	229327	72		#2A9EBF				
-37	Irland	4,6	217884	251		#845FCB				
-38	Italien	59,83	2071955	"53; 270; 272"		#FF7340				
-39	Japan	127,6	4901532	"264; 265; 266; 267; 269; 278"		#56E43F				
-40	Kambodscha	15	15659	164		#F894D1				
-41	Kamerun	20,9	27957	116		#138DA1				
-42	Kanada	35,16	1825096	"1; 14; 18; 20; 21; 22; 23; 24; 177; 178; 179; 181; 182; 183; 185; 186; 188; 190; 193; 216; 221; 224; 225; 226; 227; 229; 230; 232; 233; 234; 235; 245; 255; 258; 259; 261; 262; 263 "		#2343F2				
-43	Kasachstan	16,8	220347	75		#DFD3A3				
-44	Kenia	43,9	45082			#C9EEAD				
-45	Kolumbien	47,4	381822	199		#7C43DC				
-46	Kongo	73,3	43781	137		#90259C				
-47	Laos	6,5	10002	174		#DCAC3D				
-48	Lettland	2,01	30953	30		#B9A190				
-49	Liberia	4,2	1933	143		#9B9A44				
-50	Libyen	6,5	67622	89		#4AD0E8				
-51	Litauen	2,96	47560	32		#89675C				
-52	Madagaskar	21,9	11210	363		#0FA914				
-53	Malawi	15,9	3814	145		#F0FB27				
-54	Malaysia	29	312433	"175; 312"		#1B7392				
-55	Mali	16	11070	104		#BAD723				
-56	Marokko	32,6	105101	112		#C64D7F				
-57	Mauretanien	3,6	4187	108		#BABD2A				
-58	Mexiko	116,1	1258544	196		#5A5BBA				
-59	Mittelamerika	75,4	217288	197		#A5F99B				
-60	Moldawien	3,1	7935	46		#B0504A				
-61	Mongolei	2,9	11516	128		#AC83E7				
-62	Mosambik	23,7	15329	136		#ADBEC5				
-63	Myanmar	54,6	56408	168		#56C643				
-64	Namibia	2,4	12318	152		#D65EBD				
-65	Nepal	30,9	19341	135		#CEA5ED				
-66	Neuseeland	4,4	181330	"370; 372; 375"		#9B59D9				
-67	Niger	16,3	7359	97		#95AFEB				
-68	Nigeria	152,2	286470	122		#E11FB7				
-69	Nordkorea	24,6	1800	71		#067AEF				
-70	Norwegen	5,08	511252	"26; 11; 13; 15; 19"		#4D7172				
-71	Österreich	8,47	415366	47		#708F15				
-72	Pakistan	182,1	238737	94		#2078DB				
-73	Palästina	12,84	291500	84		#E02FD4				
-74	Papua-Neuguinea	7	15973	"325; 335; 339; 341; 342; 343; 356"		#30678F				
-75	Paraguay	6,7	28333	211		#971637				
-76	Peru	30,1	206542	203		#9EFC47				
-77	Philippinen	92,3	272018	"296; 299; 300; 303; 304; 305; 306; 307; 309; 311"		#4B2131				
-78	Polen	38,53	516128	35		#B9EBAD				
-79	Portugal	10,46	219972	83		#B410FC				
-80	Rumänien	20,1	189659	42		#3BE4AC				
-81	Russland	143,5	2118006	"2; 3; 4; 5; 6; 7; 8; 9; 10; 12; 16; 17; 33; 123; 180; 184; 187; 191; 192; 217; 218; 219; 220; 223; 239; 252; 253; 254; 260"		#0FD0AD				
-82	Salomonen	0,6	1097	"345; 347; 349; 355; 357; 359; 365; 366; 367; 368; 369"		#18210B				
-83	Sambia	13,7	22416	142		#A265F2				
-84	Schweden	9,59	557938	"28; 244"		#5C49DA				
-85	Schweiz	8,21	650814	59		#822F39				
-86	Senegal	13,1	15154	129		#45478B				
-87	Sierra Leone	6,1	4788	147		#B0ECB1				
-88	Simbabwe	12,6	12951	160		#116C0F				
-89	Slowakei	5,4	95805	40		#59AAA0				
-90	Somalia	10,1	600	99		#97E726				
-91	Spanien	47,27	1358687	"74; 271; 282; 283; 284"		#5CD228				
-92	Sri Lanka	21,2	65833	310		#23FA7B				
-93	Südafrika	51,1	350779	156		#46397D				
-94	Sudan	38,3	70127	91		#093757				
-95	Südkorea	48,9	31200	"78; 281"		#5A7814				
-96	Syrien	19	5100	77		#1469AE				
-97	Taiwan	23,3	37700	285		#32AD73				
-98	Tansania	47,7	32536	115		#C8970E				
-99	Thailand	69,9	387156	169		#849F1C				
-100	Tschad	11,8	13411	95		#0F5E4B				
-101	Tschechien	10,52	198312	43		#A05451				
-102	Tunesien	10,8	47439	101		#9DE73F				
-103	Türkei	75,6	827209	"67; 275"		#7B40CF				
-104	Uganda	35,6	23053	118		#8ADF08				
-105	Ukraine	45,43	177834	37		#A3A7DD				
-106	Ungarn	9,9	132426	41		#962AE2				
-107	Uruguay	3,4	56345	214		#7B5373				
-108	USA	318,9	16799700	"231; 194; 195; 237; 242; 256; 257; 288; 290; 291; 292"		#74943B				
-109	Venezuela	28,86	373978	200		#18D059				
-110	Vietnam	89	170565	141		#A21E0B				
-111	Weißrussland	9,5	71710	31		#B17DA3				
-112	Zentralafrika	4,6	1538	103		#0196C6				
-113	Zentralasien	47,8	112767	87		#7D2C3D				
-114	Zypern	1,2	21827			#AF90DA				
-115	Island	1000	1000	228		#B63252				
-116	Karibische Inseln	1000	1000	"286; 287; 289; 294; 295; 297; 298; 308"		#2D8512				
+1	Afghanistan	33,4	20735	88		#NAME?				
+2	Ägypten	82,3	271427	85		#NAME?				
+3	Algerien	37,4	206095	109		#NAME?				
+4	Angola	20,9	121704	140		#NAME?				
+5	Arabische Halbinsel	65,5	1293446	"80; 301"		#NAME?				
+6	Argentinien	40,8	488213	"209; 214; 373"		#NAME?				
+7	Äthiopien	87	48145	94		#NAME?				
+8	Australien	22	1505277	"361; 363; 360; 370; 372"		#NAME?				
+9	Balkanstaaten	38,26	437307	"45; 273; 272"		#NAME?				
+10	Bangladesch	152,9	141275	156		#NAME?				
+11	Benelux	28,09	1366405	53		#NAME?				
+12	Benin	9,4	8310	118		#NAME?				
+13	Bhutan	0,7	1985	149		#NAME?				
+14	Bolivien	10,8	29802	207		#NAME?				
+15	Botswana	1,9	14837	162		#NAME?				
+16	Brasilien	194,3	2242854	212		#NAME?				
+17	Burkina Faso	17,5	12247	111		#NAME?				
+18	Chile	17,4	276975	206		#NAME?				
+19	China	1381,3	9181377	"73; 292"		#NAME?				
+20	Dänemark	5,52	330958	"48; 247; 246"	"70; 84"	#NAME?				
+21	Deutschland	80,62	3635959	51	84	#NAME?				
+22	Ecuador	14,9	94144	200		#NAME?				
+23	Elfenbeinküste	20,6	28288	137		#NAME?				
+24	Estland	1,32	24484	"29; 240"		#NAME?				
+25	Finnland	5,44	256922	"27; 237"		#NAME?				
+26	Frankreich	63,6	2737361	"62; 267; 368"		#NAME?				
+27	Gabun	1,6	19228	132		#NAME?				
+28	Georgien	16,4	20000	64		#NAME?				BIP prüfen
+29	Ghana	25,5	44223	121		#NAME?				
+30	Grönland	0,56	37400	"0; 188"		#NAME?				
+31	Großbritannien	64,1	2535761	"248; 239; 245; 242; 235"	26	#NAME?				
+32	Guinea	10000	6282	134		#NAME?				
+33	Indien	1252	1870651	"98; 300"		#NAME?				
+34	Indonesien	241	870275	"323; 331; 325; 322; 332; 345; 337; 339; 317; 318; 319; 328; 330; 333; 327; 320; 312; 347; 352; 353; 359; 351; 357; 349; 350; 335; 329; 336; 326; 321; 314; 315"		#NAME?				
+35	Iran	77,45	366259	69		#NAME?				
+36	Irak	33,42	229327	72		#NAME?				
+37	Irland	4,6	217884	250		#NAME?				
+38	Italien	59,83	2071955	"55; 269; 271"		#NAME?				
+39	Japan	127,6	4901532	"265; 266; 264; 268; 277; 278"		#NAME?				
+40	Kambodscha	15	15659	163		#NAME?				
+41	Kamerun	20,9	27957	107		#NAME?				
+42	Kanada	35,16	1825096	"1; 14; 18; 21; 23; 177; 184; 180; 22; 24; 20; 176; 178; 185; 182; 187; 215; 181; 24; 181; 184; 189; 192; 220; 223; 225; 224; 226; 234; 229; 231; 228; 232; 233; 244; 257; 258; 260; 261; 262; 254"		#NAME?				
+43	Kasachstan	16,8	220347	75		#NAME?				
+44	Kenia	43,9	45082			#NAME?				
+45	Kolumbien	47,4	381822	198		#NAME?				
+46	Kongo	73,3	43781	125		#NAME?				
+47	Laos	6,5	10002	173		#NAME?				
+48	Lettland	2,01	30953	30		#NAME?				
+49	Liberia	4,2	1933	141		#NAME?				
+50	Libyen	6,5	67622	89		#NAME?				
+51	Litauen	2,96	47560	32		#NAME?				
+52	Madagaskar	21,9	11210	362		#NAME?				
+53	Malawi	15,9	3814	144		#NAME?				
+54	Malaysia	29	312433	"174; 311"		#NAME?				
+55	Mali	16	11070	104		#NAME?				
+56	Marokko	32,6	105101	112		#NAME?				
+57	Mauretanien	3,6	4187	108		#NAME?				
+58	Mexiko	116,1	1258544	195		#NAME?				
+59	Mittelamerika	75,4	217288	196		#NAME?				
+60	Moldawien	3,1	7935	46		#NAME?				
+61	Mongolei	2,9	11516	96		#NAME?				
+62	Mosambik	23,7	15329	136		#NAME?				
+63	Myanmar	54,6	56408	154		#NAME?				
+64	Namibia	2,4	12318	151		#NAME?				
+65	Nepal	30,9	19341	135		#NAME?				
+66	Neuseeland	4,4	181330	"369; 371; 374"		#NAME?				
+67	Niger	16,3	7359	97		#NAME?				
+68	Nigeria	152,2	286470	122		#NAME?				
+69	Nordkorea	24,6	1800	71		#NAME?				
+70	Norwegen	5,08	511252	"26; 19; 15; 11; 13"		#NAME?				
+71	Österreich	8,47	415366	49		#NAME?				
+72	Pakistan	182,1	238737	92		#NAME?				
+73	Palästina	12,84	291500	84		#NAME?				
+74	Papua-Neuguinea	7	15973	"342; 340; 338; 341; 334; 324; 355"		#NAME?				
+75	Paraguay	6,7	28333	210		#NAME?				
+76	Peru	30,1	206542	202		#NAME?				
+77	Philippinen	92,3	272018	"295; 298; 299; 303; 302; 304; 306; 308; 310; 305"		#NAME?				
+78	Polen	38,53	516128	35		#NAME?				
+79	Portugal	10,46	219972	79		#NAME?				
+80	Rumänien	20,1	189659	42		#NAME?				
+81	Russland	143,5	2118006	"33; 25; 222; 179; 9; 8; 16; 12; 4; 10; 2; 7; 6; 3; 217; 218; 5; 17; 190; 183; 191; 216; 186; 219; 238; 251; 259; 252; 253; 263"		#NAME?				
+82	Salomonen	0,6	1097	"356; 358; 354; 346; 348; 344"		#NAME?				
+83	Sambia	13,7	22416	143		#NAME?				
+84	Schweden	9,59	557938	"28; 243"		#NAME?				
+85	Schweiz	8,21	650814	58		#NAME?				
+86	Senegal	13,1	15154	129		#NAME?				
+87	Sierra Leone	6,1	4788	145		#NAME?				
+88	Simbabwe	12,6	12951	165		#NAME?				
+89	Slowakei	5,4	95805	40		#NAME?				
+90	Somalia	10,1	600	99		#NAME?				
+91	Spanien	47,27	1358687	"282; 283; 281; 74; 270"		#NAME?				
+92	Sri Lanka	21,2	65833	309		#NAME?				
+93	Südafrika	51,1	350779	155		#NAME?				
+94	Sudan	38,3	70127	90		#NAME?				
+95	Südkorea	48,9	31200	"78; 280"		#NAME?				
+96	Syrien	19	5100	77		#NAME?				
+97	Taiwan	23,3	37700	284		#NAME?				
+98	Tansania	47,7	32536	116		#NAME?				
+99	Thailand	69,9	387156	168		#NAME?				
+100	Tschad	11,8	13411	95		#NAME?				
+101	Tschechien	10,52	198312	43		#NAME?				
+102	Tunesien	10,8	47439	101		#NAME?				
+103	Türkei	75,6	827209	57		#NAME?				
+104	Uganda	35,6	23053	119		#NAME?				
+105	Ukraine	45,43	177834	37		#NAME?				
+106	Ungarn	9,9	132426	41		#NAME?				
+107	Uruguay	3,4	56345	213		#NAME?				
+108	USA	318,9	16799700	"193; 241; 255; 256; 236; 194; 291;290; 289; 287; 230"		#NAME?				
+109	Venezuela	28,86	373978	199		#NAME?				
+110	Vietnam	89	170565	142		#NAME?				
+111	Weißrussland	9,5	71710	31		#NAME?				
+112	Zentralafrika	4,6	1538	103		#NAME?				
+113	Zentralasien	47,8	112767	86		#NAME?				
+114	Zypern	1,2	21827			#NAME?				
+115	Island	1000	1000	227		#NAME?				
+116	Karibische Inseln	1000	1000	"285; 286; 288; 296; 293; 294; 297; 307"		#NAME?				

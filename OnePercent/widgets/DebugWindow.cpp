@@ -44,7 +44,7 @@ namespace onep
       for (CountryMesh::Map::iterator cit = selectedCountries.begin(); cit != selectedCountries.end(); ++cit)
         meshlist.push_back(cit->second);
 
-      world->getGlobeModel()->getBoundariesMesh()->makeCountryBoundaries(meshlist, osg::Vec3f(1.0f, 0.5, 0.1f), 0.18f);
+      world->getGlobeModel()->getBoundariesMesh()->makeCountryBoundaries(meshlist, osg::Vec3f(1.0f, 0.5, 0.1f), 0.009f);
 
       auto duration = std::chrono::high_resolution_clock::now() - start_time;
 
