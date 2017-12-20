@@ -310,14 +310,16 @@ namespace onep
 
       std::vector<int> startIds;
 
-      const std::vector<int>& neighbors = cmesh->getNeighborBorderIds(-1);
-      for (std::vector<int>::const_iterator nit = neighbors.begin(); nit != neighbors.end(); ++nit)
+      if (cmesh->getNeighborBorders().count(-1) > 0)
       {
-        if (visited.count(*nit) == 0)
-          startIds.push_back(*nit);
+        const std::vector<int>& neighbors = cmesh->getNeighborBorderIds(-1);
+        for (std::vector<int>::const_iterator nit = neighbors.begin(); nit != neighbors.end(); ++nit)
+        {
+          if (visited.count(*nit) == 0)
+            startIds.push_back(*nit);
+        }
       }
-
-      if (!cmesh->getIsOnOcean())
+      else
       {
         const CountryMesh::BorderIdMap& nborders = cmesh->getNeighborBorders();
         for (CountryMesh::BorderIdMap::const_iterator nit = nborders.begin(); nit != nborders.end(); ++nit)

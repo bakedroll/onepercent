@@ -444,6 +444,7 @@ namespace helper
     ProgressPrinter boundsProgress("Generate nodals");
     for (IdBorderMap::iterator it = boundaries.borders.begin(); it != boundaries.borders.end(); ++it)
     {
+      i++;
       // ignore cycles
       if (it->second.bIsCycle)
         continue;
@@ -501,7 +502,6 @@ namespace helper
         boundaries.boundaryNodals[boundDir] = quads;
       }
 
-      i++;
       boundsProgress.update(i, boundaries.borders.size());
     }
   }
