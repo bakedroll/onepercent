@@ -5,7 +5,7 @@ resources_path = "${TEMPLATE_PATH_RESOURCES}"
 gamedata_path = "${TEMPLATE_PATH_GAMEDATA_SRC}"
 gamedata_path_dst = "${TEMPLATE_PATH_GAMEDATA_DST}"
 
-subprocess.call(["Vectorizer", "-i", resources_path + "/earth_textures/boundaries.png", "-p", resources_path + "/TEMP/countries", "-t", resources_path + "/triangle/bin/triangle", "-D", resources_path + "/TEMP/dbg", "-d", "10", "-a" , "15" , "-r", "0.7" , "-o", gamedata_path + "/data/boundaries.dat", "-c", resources_path + "/boundaries/Laender.txt", "-co", gamedata_path + "/data/countries.dat"], shell=True)
+subprocess.call(["Vectorizer", "-i", resources_path + "/earth_textures/boundaries.png", "-p", resources_path + "/TEMP/countries", "-t", resources_path + "/triangle/bin/triangle", "-D", resources_path + "/TEMP/dbg", "-d", "10", "-a" , "15" , "-r", "0.7" , "-o", gamedata_path + "/data/boundaries.dat", "-c", resources_path + "/boundaries/Laender.txt", "-co", gamedata_path + "/data/countries.dat", "-dm", gamedata_path + "/textures/earth/distance.png", "-dms", "0.125", "-dmm", "10.0"], shell=True)
 
 shutil.copy(gamedata_path + "/data/boundaries.dat", gamedata_path_dst + "/data/boundaries.dat")
 shutil.copy(gamedata_path + "/data/countries.dat", gamedata_path_dst + "/data/countries.dat")

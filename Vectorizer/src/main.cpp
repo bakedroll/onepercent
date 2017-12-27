@@ -10,6 +10,7 @@
 #include "findcycles.h"
 #include "countries.h"
 #include "boundaries.h"
+#include "distancemap.h"
 
 typedef std::vector<std::string> StringList;
 typedef std::map<std::string, StringList> ArgumentMap;
@@ -127,11 +128,14 @@ int detectLines(int argc, char** argv)
   std::string outputFilename;
   std::string countriesTableFilename;
   std::string countriesFilename;
+  std::string distanceMapFilename;
   float displayScale, reduce;
   int depth, minAngle;
   bool useThres, dbgCycles;
   float shift;
   float countriesMapScale;
+  float distanceMapScale;
+  float distanceMapMaxDist;
 
   try
   {
@@ -142,6 +146,7 @@ int detectLines(int argc, char** argv)
     outputFilename = getStringArgument(arguments, "o", true);
     countriesTableFilename = getStringArgument(arguments, "c", true);
     countriesFilename = getStringArgument(arguments, "co", true);
+    distanceMapFilename = getStringArgument(arguments, "dm", true);
     displayScale = getFloatArgument(arguments, "s", 1.0f);
     reduce = getFloatArgument(arguments, "r", 0.7f);
     depth = getIntArgument(arguments, "d", 10);
@@ -150,6 +155,8 @@ int detectLines(int argc, char** argv)
     dbgCycles = getBoolArgument(arguments, "C");
     shift = getFloatArgument(arguments, "S", 255.0f);
     countriesMapScale = getFloatArgument(arguments, "ms", 0.25f);
+    distanceMapScale = getFloatArgument(arguments, "dms", 1.0f);
+    distanceMapMaxDist = getFloatArgument(arguments, "dmm", 10.0f);
   }
   catch (std::exception& e)
   {
@@ -211,10 +218,6 @@ int detectLines(int argc, char** argv)
   // read result and draw debug image
   helper::Graph triGraph;
   helper::readGraphFiles(triGraph, polyfile.c_str(), 1);
-
-  // remove single points
-  //helper::removeSinglePoints(graph);
-
   helper::drawGraph(finalImage, triGraph, displayScale);
 
   triGraph.boundary = graph.boundary;
@@ -225,6 +228,11 @@ int detectLines(int argc, char** argv)
   helper::drawCycles(cycleImage, triGraph, cycles, displayScale);
   helper::drawFilledCycles(filledCycleImage, triGraph, cycles, displayScale);
   helper::drawCycleNumbers(filledCycleImage, triGraph, cycles, displayScale);
+
+  // make distance map
+  cv::Mat distanceMap;
+  helper::makeDistanceMap(triGraph, distanceMap, distanceMapScale, distanceMapMaxDist);
+  imwrite(distanceMapFilename.c_str(), distanceMap);
 
   // make countries
   helper::CountriesTable table;
