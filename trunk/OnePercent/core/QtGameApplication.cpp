@@ -96,11 +96,11 @@ void QtGameApplication::stateAttachedEvent(osg::ref_ptr<osgGaming::AbstractGameS
   osg::ref_ptr<osgGaming::View> view = getViewer()->getView(0);
   osg::ref_ptr<osgGaming::Hud> hud = state->getHud(view);
 
-  if (!hud.valid())
-    return;
-
   if (m->overlayCompositor->getContainer()->getNumParents() > 0)
     m->overlayCompositor->getContainer()->getParent(0)->removeChild(m->overlayCompositor->getContainer());
+
+  if (!hud.valid())
+    return;
 
   hud->getModelViewTransform()->addChild(m->overlayCompositor->getContainer());
 }

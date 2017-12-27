@@ -518,8 +518,13 @@ namespace onep
     {
       if (m->debugWindow == nullptr)
         m->debugWindow = new DebugWindow(getGlobeOverviewWorld(), m->mainOverlay);
-
-      m->debugWindow->show();
+       
+      if (!m->debugWindow->isVisible())
+      {
+        QRect geo = m->debugWindow->geometry();
+        m->debugWindow->setGeometry(20, 100, geo.width(), geo.height());
+        m->debugWindow->show();
+      }
     });
 
     QVBoxLayout* leftLayout = new QVBoxLayout();
