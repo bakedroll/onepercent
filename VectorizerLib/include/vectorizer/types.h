@@ -2,6 +2,8 @@
 
 #include <opencv2/core/core.hpp>
 
+#include <osg/Vec3f>
+
 #include <vector>
 #include <map>
 #include <set>
@@ -338,6 +340,7 @@ namespace helper
 
   void findSegments(EdgeList& edges, EdgeListList& results);
 
+  void makeCartesianPoint(cv::Point2f p, float width, float height, osg::Vec3f& p3d, float radius, float shift);
   void makeCartesianPoints(Graph& graph, IdPoint3DMap& points, float radius, float shift);
   void makePolarPoints(IdPoint3DMap& input, IdPoint3DMap& output, int width, int height, float shift);
 }

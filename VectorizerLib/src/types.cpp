@@ -2,6 +2,8 @@
 
 #include <osgGaming/Helper.h>
 
+#define PI_2 C_PI * 2.0f
+
 namespace helper
 {
   void insertNeighbour(NeighbourMap& map, int p1, int p2, uchar attr)
@@ -204,18 +206,26 @@ namespace helper
     }
   }
 
+  void makeCartesianPoint(cv::Point2f p, float width, float height, osg::Vec3f& p3d, float radius, float shift)
+  {
+    float x = (p.x + shift) / width;
+    float y = p.y / height;
+
+    p3d = osgGaming::getCartesianFromPolar(osg::Vec2f((0.5f - y) * C_PI, x * PI_2 - C_PI)) * radius;
+  }
+
+
   void makeCartesianPoints(Graph& graph, IdPoint3DMap& points, float radius, float shift)
   {
     float width = graph.boundary.width();
     float height = graph.boundary.height();
 
-    float pi2 = 2.0f * C_PI;
     for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
     {
       float x = (it->second.x + shift) / width;
       float y = it->second.y / height;
 
-      osg::Vec3f vec = osgGaming::getCartesianFromPolar(osg::Vec2f((0.5f - y) * C_PI, x * pi2 - C_PI)) * radius;
+      osg::Vec3f vec = osgGaming::getCartesianFromPolar(osg::Vec2f((0.5f - y) * C_PI, x * PI_2 - C_PI)) * radius;
       points.insert(IdPoint3DMap::value_type(it->first, Point3D(vec.x(), vec.y(), vec.z())));
     }
   }
