@@ -1,31 +1,34 @@
 #include "vectorizer/distancemap.h"
-#include "vectorizer/quadtree.h"
+#include "vectorizer/octtree.h"
 #include "vectorizer/io.h"
+#include "vectorizer/types.h"
 
 namespace helper
 {
-  void checkRadius(Graph& graph, QuadTreeNode<int>& quadtree, cv::Mat& img, float x, float y, int ix, int iy, float maxDistance, float radius)
+  void checkRadius(Graph& graph, OctTreeNode<int>& octtree, cv::Mat& img, float x, float y, int ix, int iy, int width, int height, float maxDistance, float radius)
   {
-    BoundingBox<float> bb(cv::Point2f(x - radius, y - radius), cv::Point2f(x + radius, y + radius));
-    QuadTreeNode<int>::Data data;
+    osg::Vec3f p3d;
+    osg::Vec3f r(radius, radius, radius);
+    makeCartesianPoint(cv::Point2f(float(ix), float(iy)), float(width), float(height), p3d, 500.0f, 0.0f);
 
-    quadtree.gatherDataWithinBoundary(bb, data);
+    osg::BoundingBox bb(p3d - r, p3d + r);
+    OctTreeNode<int>::Data data;
+
+    octtree.gatherDataWithinBoundary(bb, data);
     if (data.size() == 0)
     {
-      checkRadius(graph, quadtree, img, x, y, ix, iy, maxDistance, radius * 2.0f);
+      checkRadius(graph, octtree, img, x, y, ix, iy, width, height, maxDistance, radius * 2.0f);
       return;
     }
 
     std::map<float, int> nearestPoints;
-    for (QuadTreeNode<int>::Data::iterator it = data.begin(); it != data.end(); ++it)
+    for (OctTreeNode<int>::Data::iterator it = data.begin(); it != data.end(); ++it)
     {
-      float dx = it->point().x - x;
-      float dy = it->point().y - y;
-      float distance2 = dx * dx + dy * dy;
-      nearestPoints[distance2] = it->data();
+      osg::Vec3f delta = it->point() - p3d;
+      nearestPoints[delta.length2()] = it->data();
     }
 
-    int nearestPointId = nearestPoints.begin()->second;
+    // int nearestPointId = nearestPoints.begin()->second;
     float dist2 = nearestPoints.begin()->first;
 
     float dist = sqrt(dist2);
@@ -51,9 +54,20 @@ namespace helper
     NeighbourMap neighbours;
     neighbourMapFromEdges(graph.edges, neighbours);
 
-    QuadTreeNode<int> quadtree(graph.boundary, 10);
-    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
-      quadtree.insert(QuadTreeNodeData<int>(it->second, it->first));
+    IdPoint3DMap points3D;
+    makeCartesianPoints(graph, points3D, 500.0f, 0.0f);
+
+    osg::BoundingBox bb(osg::Vec3f(-600.0f, -600.0f, -600.0f), osg::Vec3f(600.0f, 600.0f, 600.0f));
+    OctTreeNode<int> octtree(bb, 10);
+    for (IdPoint3DMap::iterator it = points3D.begin(); it != points3D.end(); ++it)
+    {
+      helper::Point3D p3d = it->second;
+      if (p3d.originId > -1 || neighbours.count(it->first) == 0)
+        continue;
+
+      osg::Vec3f p(p3d.value[0], p3d.value[1], p3d.value[2]);
+      octtree.insert(OctTreeNodeData<int>(p, it->first));
+    }
 
     int max = width * height;
     int i = 0;
@@ -65,7 +79,7 @@ namespace helper
         float px = float(x) / scale;
         float py = float(y) / scale;
 
-        checkRadius(graph, quadtree, result, px, py, x, y, maxDistance, maxDistance);
+        checkRadius(graph, octtree, result, px, py, x, y, width, height, maxDistance, maxDistance);
 
         i++;
         progress.update(i, max);

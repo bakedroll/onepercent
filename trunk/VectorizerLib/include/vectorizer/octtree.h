@@ -171,19 +171,19 @@ namespace helper
 
       // Create the north west back bounding box.
       osg::BoundingBox northWestBackbb(osg::Vec3f(box.xMin(), box.yMin(), zMid), osg::Vec3f(xMid, yMid, box.zMax()));
-      m_northWestFront = new OctTreeNode(northWestBackbb, m_capacity);
+      m_northWestBack = new OctTreeNode(northWestBackbb, m_capacity);
 
       // Create the north east back bounding box.
       osg::BoundingBox northEastBackbb(osg::Vec3f(xMid, box.yMin(), zMid), osg::Vec3f(box.xMax(), yMid, box.zMax()));
-      m_northEastFront = new OctTreeNode(northEastBackbb, m_capacity);
+      m_northEastBack = new OctTreeNode(northEastBackbb, m_capacity);
 
       // Create the south west back bounding box.
       osg::BoundingBox southWestBackbb(osg::Vec3f(box.xMin(), yMid, zMid), osg::Vec3f(xMid, box.yMax(), box.zMax()));
-      m_southWestFront = new OctTreeNode(southWestBackbb, m_capacity);
+      m_southWestBack = new OctTreeNode(southWestBackbb, m_capacity);
 
       // Create the south east back bounding box.
       osg::BoundingBox southEastBackbb(osg::Vec3f(xMid, yMid, zMid), osg::Vec3f(box.xMax(), box.yMax(), box.zMax()));
-      m_southEastFront = new OctTreeNode(southEastBackbb, m_capacity);
+      m_southEastBack = new OctTreeNode(southEastBackbb, m_capacity);
     }
 
   protected:
