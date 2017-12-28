@@ -199,6 +199,7 @@ add_subdirectory(osgGaming)
 add_subdirectory(OnePercent)
 
 if (OPENCV_FOUND)
+  add_subdirectory(VectorizerLib)
   add_subdirectory(Vectorizer)
 else()
   message(WARNING "OpenCV not found: ignoring project Vectorizer")
@@ -206,6 +207,10 @@ endif()
 
 if (GTEST_FOUND)
   add_subdirectory(osgGamingTest)
+  
+  if (OPENCV_FOUND)
+    add_subdirectory(VectorizerLibTest)
+  endif()
 else()
   message(WARNING "GTest not found: ignoring project osgGamingTest")
 endif()
@@ -236,6 +241,25 @@ if (WIN32 AND EXISTS ${OSG_BINARY})
       copy_dlls(${OSG_PLUGINS_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osgdb_" ${OSG_LIBRARY_SUFFIX}
         "freetype glsl jpeg png")
     endif()
+  endif()
+  
+  if (GTEST_FOUND)
+    get_filename_component(GTEST_LIBRARY_DLL_PATH ${GTEST_LIBRARY} DIRECTORY)
+    get_filename_component(GTEST_LIBRARY_DLL_FILEWE ${GTEST_LIBRARY} NAME_WE)
+    
+    get_filename_component(GTEST_LIBRARY_DEBUG_DLL_PATH ${GTEST_LIBRARY_DEBUG} DIRECTORY)
+    get_filename_component(GTEST_LIBRARY_DEBUG_DLL_FILEWE ${GTEST_LIBRARY_DEBUG} NAME_WE)
+    
+    get_filename_component(GTEST_MAIN_LIBRARY_DLL_PATH ${GTEST_MAIN_LIBRARY} DIRECTORY)
+    get_filename_component(GTEST_MAIN_LIBRARY_DLL_FILEWE ${GTEST_MAIN_LIBRARY} NAME_WE)
+    
+    get_filename_component(GTEST_MAIN_LIBRARY_DEBUG_DLL_PATH ${GTEST_MAIN_LIBRARY_DEBUG} DIRECTORY)
+    get_filename_component(GTEST_MAIN_LIBRARY_DEBUG_DLL_FILEWE ${GTEST_MAIN_LIBRARY_DEBUG} NAME_WE)
+    
+    copy_dlls(${GTEST_LIBRARY_DLL_PATH} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "" "" ${GTEST_LIBRARY_DLL_FILEWE})
+    copy_dlls(${GTEST_LIBRARY_DEBUG_DLL_PATH} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "" "" ${GTEST_LIBRARY_DEBUG_DLL_FILEWE})
+    copy_dlls(${GTEST_MAIN_LIBRARY_DLL_PATH} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "" "" ${GTEST_MAIN_LIBRARY_DLL_FILEWE})
+    copy_dlls(${GTEST_MAIN_LIBRARY_DEBUG_DLL_PATH} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "" "" ${GTEST_MAIN_LIBRARY_DEBUG_DLL_FILEWE})
   endif()
 endif()
 

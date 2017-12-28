@@ -1,6 +1,6 @@
-#include "distancemap.h"
-#include "quadtree.h"
-#include "io.h"
+#include "vectorizer/distancemap.h"
+#include "vectorizer/quadtree.h"
+#include "vectorizer/io.h"
 
 namespace helper
 {
@@ -47,6 +47,9 @@ namespace helper
     int width = int(graph.boundary.width() * scale);
 
     result = cv::Mat(height, width, CV_8UC1);
+
+    NeighbourMap neighbours;
+    neighbourMapFromEdges(graph.edges, neighbours);
 
     QuadTreeNode<int> quadtree(graph.boundary, 10);
     for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)

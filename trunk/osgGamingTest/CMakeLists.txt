@@ -15,7 +15,7 @@ get_libraries(TEST_OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${GTEST_INCLUDE_DIRS}
-  ${CMAKE_SOURCE_DIR}/osgGaming/include)
+  ${OSGGAMING_INCLUDE_DIR})
 
 target_link_libraries(osgGamingTest
   osgGaming

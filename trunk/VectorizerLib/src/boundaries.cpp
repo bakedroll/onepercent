@@ -1,5 +1,5 @@
-#include "boundaries.h"
-#include "io.h"
+#include "vectorizer/boundaries.h"
+#include "vectorizer/io.h"
 
 #include <osgGaming/Helper.h>
 

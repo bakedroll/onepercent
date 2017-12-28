@@ -1,12 +1,12 @@
-#include "findcycles.h"
+#include "vectorizer/findcycles.h"
 
-#include "draw.h"
-#include "quadtree.h"
+#include "vectorizer/draw.h"
+#include "vectorizer/io.h"
+#include "vectorizer/quadtree.h"
 
 #include <set>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "io.h"
 
 namespace helper
 {

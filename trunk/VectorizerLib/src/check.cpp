@@ -1,4 +1,5 @@
-#include "check.h"
+#include "vectorizer/check.h"
+
 #include <set>
 
 namespace helper
