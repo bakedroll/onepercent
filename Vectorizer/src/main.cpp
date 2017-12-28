@@ -2,15 +2,15 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "detect.h"
-#include "reduce.h"
-#include "io.h"
-#include "draw.h"
-#include "check.h"
-#include "findcycles.h"
-#include "countries.h"
-#include "boundaries.h"
-#include "distancemap.h"
+#include <vectorizer/detect.h>
+#include <vectorizer/reduce.h>
+#include <vectorizer/io.h>
+#include <vectorizer/draw.h>
+#include <vectorizer/check.h>
+#include <vectorizer/findcycles.h>
+#include <vectorizer/countries.h>
+#include <vectorizer/boundaries.h>
+#include <vectorizer/distancemap.h>
 
 typedef std::vector<std::string> StringList;
 typedef std::map<std::string, StringList> ArgumentMap;

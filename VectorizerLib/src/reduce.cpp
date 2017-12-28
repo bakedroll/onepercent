@@ -1,5 +1,5 @@
-#include "reduce.h"
-#include "io.h"
+#include "vectorizer/reduce.h"
+#include "vectorizer/io.h"
 
 namespace helper
 {

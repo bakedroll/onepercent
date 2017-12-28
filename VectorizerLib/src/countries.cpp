@@ -1,5 +1,5 @@
-#include "countries.h"
-#include "draw.h"
+#include "vectorizer/countries.h"
+#include "vectorizer/draw.h"
 
 namespace helper
 {

@@ -1,5 +1,5 @@
-#include "detect.h"
-#include "io.h"
+#include "vectorizer/detect.h"
+#include "vectorizer/io.h"
 
 namespace helper
 {

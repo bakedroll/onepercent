@@ -1,4 +1,5 @@
-#include "types.h"
+#include "vectorizer/types.h"
+
 #include <osgGaming/Helper.h>
 
 namespace helper
