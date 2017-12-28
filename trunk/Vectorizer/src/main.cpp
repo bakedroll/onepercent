@@ -146,7 +146,7 @@ int detectLines(int argc, char** argv)
     outputFilename = getStringArgument(arguments, "o", true);
     countriesTableFilename = getStringArgument(arguments, "c", true);
     countriesFilename = getStringArgument(arguments, "co", true);
-    distanceMapFilename = getStringArgument(arguments, "dm", true);
+    distanceMapFilename = getStringArgument(arguments, "dm", false);
     displayScale = getFloatArgument(arguments, "s", 1.0f);
     reduce = getFloatArgument(arguments, "r", 0.7f);
     depth = getIntArgument(arguments, "d", 10);
@@ -229,11 +229,6 @@ int detectLines(int argc, char** argv)
   helper::drawFilledCycles(filledCycleImage, triGraph, cycles, displayScale);
   helper::drawCycleNumbers(filledCycleImage, triGraph, cycles, displayScale);
 
-  // make distance map
-  cv::Mat distanceMap;
-  helper::makeDistanceMap(triGraph, distanceMap, distanceMapScale, distanceMapMaxDist);
-  imwrite(distanceMapFilename.c_str(), distanceMap);
-
   // make countries
   helper::CountriesTable table;
   helper::readCountriesTable(countriesTableFilename.c_str(), table);
@@ -241,6 +236,14 @@ int detectLines(int argc, char** argv)
   helper::CountriesMap countries;
   cv::Mat countriesMap;
   helper::makeCountries(triGraph, cycles, table, countriesMapScale, countries, countriesMap);
+
+  // make distance map
+  if (!distanceMapFilename.empty())
+  {
+    cv::Mat distanceMap;
+    helper::makeDistanceMap(triGraph, distanceMap, distanceMapScale, distanceMapMaxDist, countriesMap);
+    imwrite(distanceMapFilename.c_str(), distanceMap);
+  }
   
   // make boundaries
   helper::WorldData world;
