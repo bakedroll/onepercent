@@ -48,30 +48,18 @@ namespace helper
     osg::BoundingBox bb(p3d - r, p3d + r);
     OctTreeNode<int>::Data data;
 
-    octtree.gatherDataWithinBoundary(bb, data);
-    if (data.size() == 0)
+    OctTreeNode<int>::ArcDataSet arcs;
+    octtree.gatherArcDataWithinBoundary(bb, arcs);
+    if (arcs.size() == 0)
     {
-      checkRadius(points3D, neighbours, octtree, img, x, y, ix, iy, width, height, maxDistance, radius * 2.0f);
+      img.at<uchar>(cv::Point2i(ix, iy)) = 0;
       return;
     }
 
-    std::map<float, int> nearestPoints;
-    for (OctTreeNode<int>::Data::iterator it = data.begin(); it != data.end(); ++it)
-    {
-      osg::Vec3f delta = it->point() - p3d;
-      nearestPoints[delta.length2()] = it->data();
-    }
-
     float dist = std::numeric_limits<float>::max();
-    for (std::map<float, int>::iterator nit = nearestPoints.begin(); nit != nearestPoints.end(); ++nit)
-    {
-      NeighbourValueList& nlist = neighbours[nit->second];
-      assert(nlist.size() > 0);
-      for (NeighbourValueList::iterator it = nlist.begin(); it != nlist.end(); ++it)
-        dist = std::min<float>(dist, distanceTo(points3D, p3d, nit->second, it->first));
-    }
+    for (OctTreeNode<int>::ArcDataSet::iterator it = arcs.begin(); it != arcs.end(); ++it)
+      dist = std::min<float>(dist, distanceTo(points3D, p3d, it->first, it->second));
 
-    //float dist = sqrt(dist2);
     if (dist > maxDistance)
       img.at<uchar>(cv::Point2i(ix, iy)) = 0;
     else
@@ -103,15 +91,32 @@ namespace helper
     float bbHalfLength = C_RADIUS * 1.1f;
 
     osg::BoundingBox bb(osg::Vec3f(-bbHalfLength, -bbHalfLength, -bbHalfLength), osg::Vec3f(bbHalfLength, bbHalfLength, bbHalfLength));
-    OctTreeNode<int> octtree(bb, 10);
+    OctTreeNode<int> octtree(bb, 1);
     for (IdPoint3DMap::iterator it = points3D.begin(); it != points3D.end(); ++it)
     {
-      helper::Point3D p3d = it->second;
+      Point3D& p3d = it->second;
       if (p3d.originId > -1 || neighbours.count(it->first) == 0)
         continue;
 
       osg::Vec3f p(p3d.value[0], p3d.value[1], p3d.value[2]);
       octtree.insert(OctTreeNodeData<int>(p, it->first));
+    }
+
+    for (EdgeValueList::iterator it = graph.edges.begin(); it != graph.edges.end(); ++it)
+    {
+      int p1Id = it->first.first;
+      int p2Id = it->first.second;
+
+      assert(points3D.count(p1Id) > 0);
+      assert(points3D.count(p2Id) > 0);
+
+      Point3D p13D = points3D[p1Id];
+      Point3D p23D = points3D[p2Id];
+
+      osg::Vec3f p1(p13D.value[0], p13D.value[1], p13D.value[2]);
+      osg::Vec3f p2(p23D.value[0], p23D.value[1], p23D.value[2]);
+
+      octtree.insertCenteredSphereArc(p1, p1Id, p2, p2Id, C_RADIUS);
     }
 
     int max = width * height;
@@ -128,10 +133,10 @@ namespace helper
 
           checkRadius(points3D, neighbours, octtree, result, px, py, x, y, width, height, maxDistance, maxDistance);
         }
-        /*else
-        {
-          result.at<uchar>(cv::Point2i(x, y)) = 0;
-        }*/
+        //else
+        //{
+        //  result.at<uchar>(cv::Point2i(x, y)) = 0;
+        //}
 
         i++;
         progress.update(i, max);
