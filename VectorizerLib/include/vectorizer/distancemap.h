@@ -4,5 +4,5 @@
 
 namespace helper
 {
-  void makeDistanceMap(Graph& graph, cv::Mat& result, float scale, float maxDistance, cv::Mat& countriesMap);
+  void makeDistanceMap(Graph& graph, cv::Mat& result, float scale, float maxDistance);
 }

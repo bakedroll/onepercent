@@ -1,0 +1,7 @@
+Debug image:
+
+-i "${CMAKE_SOURCE_DIR}/Resources/earth_textures/img3.png" -d 10 -s 3.0 -r 0.7 -p "${CMAKE_SOURCE_DIR}/Resources/DEBUG/countries" -t "${CMAKE_SOURCE_DIR_BACKSLASH}\Resources\triangle\bin\triangle.exe" -a 15 -D "${CMAKE_SOURCE_DIR}/Resources/DEBUG/dbg" -o "${CMAKE_SOURCE_DIR}/Resources/DEBUG/boundaries.dat" -c "${CMAKE_SOURCE_DIR}/Resources/boundaries/Debug.txt" -co "${CMAKE_SOURCE_DIR}/Resources/DEBUG/countries.dat" -dm "${CMAKE_SOURCE_DIR}/Resources/DEBUG/distanceMap.png" -dmm 64.0 -dms 2.0 -ms 2.0
+
+Boundaries:
+
+-i "${CMAKE_SOURCE_DIR}/Resources/earth_textures/boundaries.png" -d 10 -s 1.0 -r 0.7 -p "${CMAKE_SOURCE_DIR}/Resources/DEBUG/countries" -t "${CMAKE_SOURCE_DIR_BACKSLASH}\Resources\triangle\bin\triangle.exe" -a 15 -D "${CMAKE_SOURCE_DIR}/Resources/DEBUG/dbg" -o "${CMAKE_SOURCE_DIR}/Resources/DEBUG/boundaries.dat" -c "${CMAKE_SOURCE_DIR}/Resources/boundaries/Laender.txt" -co "${CMAKE_SOURCE_DIR}/Resources/DEBUG/countries.dat" -dm "${CMAKE_SOURCE_DIR}/Resources/DEBUG/distanceMap.png" -dms 0.125
