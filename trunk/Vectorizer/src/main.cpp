@@ -241,7 +241,7 @@ int detectLines(int argc, char** argv)
   if (!distanceMapFilename.empty())
   {
     cv::Mat distanceMap;
-    helper::makeDistanceMap(triGraph, distanceMap, distanceMapScale, distanceMapMaxDist, countriesMap);
+    helper::makeDistanceMap(triGraph, distanceMap, distanceMapScale, distanceMapMaxDist);
     imwrite(distanceMapFilename.c_str(), distanceMap);
   }
   

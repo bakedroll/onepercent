@@ -66,19 +66,12 @@ namespace helper
       img.at<uchar>(cv::Point2i(ix, iy)) = 255 - uchar(255.0f * dist / maxDistance);
   }
 
-  void makeDistanceMap(Graph& graph, cv::Mat& result, float scale, float maxDistance, cv::Mat& countriesMap)
+  void makeDistanceMap(Graph& graph, cv::Mat& result, float scale, float maxDistance)
   {
     ProgressPrinter progress("Make distance map");
 
     int height = int(graph.boundary.height() * scale);
     int width = int(graph.boundary.width() * scale);
-
-    bool bOptimze = true;
-    if (countriesMap.cols < width)
-    {
-      bOptimze = false;
-      printf("Warning: Countries map smaller than distant map. Cannot be used for optimization.\n");
-    }
 
     result = cv::Mat(height, width, CV_8UC1);
 
@@ -126,17 +119,10 @@ namespace helper
     {
       for (int x = 0; x < width; x++)
       {
-        //if (!bOptimze || countriesMap.at<uchar>(y * countriesMap.rows / height, x * countriesMap.cols / width) > 0)
-        {
-          float px = float(x) / scale;
-          float py = float(y) / scale;
+        float px = float(x) / scale;
+        float py = float(y) / scale;
 
-          checkRadius(points3D, neighbours, octtree, result, px, py, x, y, width, height, maxDistance, maxDistance);
-        }
-        //else
-        //{
-        //  result.at<uchar>(cv::Point2i(x, y)) = 0;
-        //}
+        checkRadius(points3D, neighbours, octtree, result, px, py, x, y, width, height, maxDistance, maxDistance);
 
         i++;
         progress.update(i, max);

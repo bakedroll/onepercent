@@ -51,3 +51,7 @@ if (WIN32 AND EXISTS ${OPENCV_BIN_DIR_OPT})
       "core300 highgui300 imgcodecs300 imgproc300 videoio300")
   endif()
 endif()
+
+# copy debug args file
+string(REPLACE "/" "\\" CMAKE_SOURCE_DIR_BACKSLASH ${CMAKE_SOURCE_DIR})
+configure_file("${CMAKE_SOURCE_DIR}/CMake/templates/VectorizerDebugArgs.txt.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/VectorizerDebugArgs.txt")
