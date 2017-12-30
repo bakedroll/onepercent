@@ -7,9 +7,9 @@
 
 namespace helper
 {
-  float getArcLength(osg::Vec3f p1, osg::Vec3f p2)
+  float getArcLength(const osg::Vec3f& p1, const osg::Vec3f& p2)
   {
-    return C_RADIUS * acos((p1 * p2) / (p1.length() * p2.length()));
+    return C_RADIUS * acos(osg::clampBetween((p1 * p2) / (p1.length() * p2.length()), 0.0f, 1.0f));
   }
 
   float distanceTo(IdPoint3DMap& points3D, const osg::Vec3f& point, int p1Id, int p2Id)

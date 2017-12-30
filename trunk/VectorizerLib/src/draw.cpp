@@ -84,18 +84,4 @@ namespace helper
     for (CyclesMap::iterator it = cycles.begin(); it != cycles.end(); ++it)
       cv::putText(mat, std::to_string(it->first), it->second.boundingbox.center() * scale, cv::FONT_HERSHEY_DUPLEX, 0.5, color);
   }
-
-  void drawBoundaries(cv::Mat& mat, Graph& graph, BoundariesMeshData boundaries, float scale)
-  {
-    mat.setTo(cv::Scalar(0, 0, 0));
-
-    IdPoint3DMap pointsPolar;
-    makePolarPoints(boundaries.points, pointsPolar, int(mat.rows / scale), int(mat.cols / scale), 0.0f);
-
-    for (EdgeValueList::iterator eIt = graph.edges.begin(); eIt != graph.edges.end(); ++eIt)
-      drawEdge(mat, graph, eIt->first.first, eIt->first.second, scale, cv::Scalar(0, 0, eIt->second));
-
-    for (IdPoint3DMap::iterator it = pointsPolar.begin(); it != pointsPolar.end(); ++it)
-      mat.at<cv::Vec3b>(cv::Point2i(int(it->second.value[0]), int(it->second.value[1])) * scale) = cv::Vec3b(0, 255, 0);
-  }
 }
