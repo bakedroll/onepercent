@@ -1,17 +1,17 @@
 #pragma once
 
 #include "simulation/CountryData.h"
+#include "nodes/CountryMesh.h"
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/Switch>
-#include "CountryMesh.h"
 
 namespace onep
 {
-	class CountryOverlay : public osg::PositionAttitudeTransform
+	class CountryNameOverlay : public osg::PositionAttitudeTransform
 	{
 	public:
-		CountryOverlay();
+		CountryNameOverlay();
 
 		bool getEnabled();
 

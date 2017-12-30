@@ -3,157 +3,184 @@
 #include "BackgroundModel.h"
 
 #include <osgGaming/Helper.h>
+#include <osgGaming/PropertiesManager.h>
 
-using namespace onep;
-using namespace osg;
-using namespace osgGaming;
-
-GlobeOverviewWorld::GlobeOverviewWorld()
-	: World(),
-	  _cameraLatLong(Vec2f(0.0f, 0.0f)),
-	  _cameraViewAngle(Vec2f(0.0f, 0.0f)),
-	  _cameraDistance(28.0f)
-	, m_paramEarthRadius(PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName))
+namespace onep
 {
-	_simulation = new Simulation();
+  struct GlobeOverviewWorld::Impl
+  {
+    Impl(GlobeOverviewWorld* b) 
+      : base(b)
+      , paramEarthRadius(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName))
+      , simulation(new Simulation())
+      , cameraLatLong(osg::Vec2f(0.0f, 0.0f))
+      , cameraViewAngle(osg::Vec2f(0.0f, 0.0f))
+      , cameraDistance(28.0f)
+    {}
 
-	getGlobalLightModel()->setAmbientIntensity(Vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
-	setLightEnabled(0, true);
+    void updateSun(osg::Vec3f sunDirection)
+    {
+      osg::Vec3f look = base->getCameraManipulator()->getLookDirection();
+      // look to sun
+      if (look * sunDirection < 0.0f)
+      {
+        float range = 0.3f;
 
-	ref_ptr<Light> light = getLight(0);
+        float dist = osgGaming::pointLineDistance(base->getCameraManipulator()->getPosition(), sunDirection, osg::Vec3f(0.0f, 0.0f, 0.0f));
+        float scale = osg::clampBetween(dist - paramEarthRadius, 0.0f, range);
+        scale /= range;
+        scale *= 2.5f;
 
-	light->setDiffuse(Vec4(1.0, 1.0, 1.0, 1.0));
-	light->setSpecular(Vec4(1.0, 1.0, 1.0, 1.0));
-	light->setAmbient(Vec4(0.0, 0.0, 0.0, 1.0));
-}
+        backgroundModel->getSunGlowTransform()->setScale(osg::Vec3f(scale, scale, scale));
+      }
+    }
 
-ref_ptr<GlobeModel> GlobeOverviewWorld::getGlobeModel()
-{
-	return _globeModel;
-}
+    GlobeOverviewWorld* base;
 
-ref_ptr<CountryOverlay> GlobeOverviewWorld::getCountryOverlay()
-{
-	return _countryOverlay;
-}
+    float paramEarthRadius;
 
-ref_ptr<BackgroundModel> GlobeOverviewWorld::getBackgroundModel()
-{
-	return _backgroundModel;
-}
+    osg::ref_ptr<GlobeModel> globeModel;
+    osg::ref_ptr<CountryNameOverlay> countryOverlay;
+    osg::ref_ptr<BackgroundModel> backgroundModel;
 
-ref_ptr<Simulation> GlobeOverviewWorld::getSimulation()
-{
-	return _simulation;
-}
+    osg::ref_ptr<Simulation> simulation;
 
-void GlobeOverviewWorld::setGlobeModel(ref_ptr<GlobeModel> globeModel)
-{
-	if (_globeModel.valid())
-	{
-		getRootNode()->removeChild(_globeModel);
-	}
+    osg::Vec2f cameraLatLong;
+    osg::Vec2f cameraViewAngle;
+    float cameraDistance;
+  };
 
-	getRootNode()->addChild(globeModel);
-	_globeModel = globeModel;
-}
+  GlobeOverviewWorld::GlobeOverviewWorld()
+    : World()
+    , m(new Impl(this))
+  {
+    getGlobalLightModel()->setAmbientIntensity(osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
-void GlobeOverviewWorld::setCountryOverlay(osg::ref_ptr<CountryOverlay> countryOverlay)
-{
-	if (_countryOverlay.valid())
-	{
-		getRootNode()->removeChild(_countryOverlay);
-	}
+    setLightEnabled(0, true);
 
-	getRootNode()->addChild(countryOverlay);
-	_countryOverlay = countryOverlay;
-}
+    osg::ref_ptr<osg::Light> light = getLight(0);
 
-void GlobeOverviewWorld::setBackgroundModel(ref_ptr<BackgroundModel> backgroundModel)
-{
-	if (_backgroundModel.valid())
-	{
-		getRootNode()->removeChild(_backgroundModel->getTransform());
-	}
+    light->setDiffuse(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+    light->setSpecular(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+    light->setAmbient(osg::Vec4(0.0, 0.0, 0.0, 1.0));
+  }
 
-	getRootNode()->addChild(backgroundModel->getTransform());
-	_backgroundModel = backgroundModel;
-}
+  GlobeOverviewWorld::~GlobeOverviewWorld()
+  {
+  }
 
-void GlobeOverviewWorld::setDay(float day)
-{
-	float daysInYear = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_MechanicsDaysInYearName);
-	float year = day / daysInYear;
+  osg::ref_ptr<GlobeModel> GlobeOverviewWorld::getGlobeModel()
+  {
+    return m->globeModel;
+  }
 
-	Matrix yearMat = getMatrixFromEuler(0.0f, 0.0f, - year * 2.0f * C_PI) *
-		getMatrixFromEuler(-sin(year * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);
-	Matrix dayMat = getMatrixFromEuler(0.0f, 0.0f, day * 2.0f * C_PI);
+  osg::ref_ptr<CountryNameOverlay> GlobeOverviewWorld::getCountryOverlay()
+  {
+    return m->countryOverlay;
+  }
 
-	Matrix yearDayMat = dayMat * yearMat;
+  osg::ref_ptr<BackgroundModel> GlobeOverviewWorld::getBackgroundModel()
+  {
+    return m->backgroundModel;
+  }
 
-	Vec3f direction = yearDayMat * Vec3f(0.0f, 1.0f, 0.0f);
+  osg::ref_ptr<Simulation> GlobeOverviewWorld::getSimulation()
+  {
+    return m->simulation;
+  }
 
-	getLight(0)->setPosition(Vec4f(direction, 0.0f));
-	_globeModel->updateLightDirection(direction);
+  void GlobeOverviewWorld::setGlobeModel(osg::ref_ptr<GlobeModel> globeModel)
+  {
+    if (m->globeModel.valid())
+    {
+      getRootNode()->removeChild(m->globeModel);
+    }
 
-	_backgroundModel->getTransform()->setAttitude(Matrix::inverse(dayMat).getRotate());
-	_backgroundModel->getSunTransform()->setAttitude(Matrix::inverse(yearMat).getRotate());
+    getRootNode()->addChild(globeModel);
+    m->globeModel = globeModel;
+  }
 
-	_globeModel->updateClouds(day);
-	updateSun(direction);
-}
+  void GlobeOverviewWorld::setCountryOverlay(osg::ref_ptr<CountryNameOverlay> countryOverlay)
+  {
+    if (m->countryOverlay.valid())
+    {
+      getRootNode()->removeChild(m->countryOverlay);
+    }
 
-Vec2f GlobeOverviewWorld::getCameraLatLong()
-{
-	return _cameraLatLong;
-}
+    getRootNode()->addChild(countryOverlay);
+    m->countryOverlay = countryOverlay;
+  }
 
-Vec2f GlobeOverviewWorld::getCameraViewAngle()
-{
-	return _cameraViewAngle;
-}
+  void GlobeOverviewWorld::setBackgroundModel(osg::ref_ptr<BackgroundModel> backgroundModel)
+  {
+    if (m->backgroundModel.valid())
+    {
+      getRootNode()->removeChild(m->backgroundModel->getTransform());
+    }
 
-float GlobeOverviewWorld::getCameraDistance()
-{
-	return _cameraDistance;
-}
+    getRootNode()->addChild(backgroundModel->getTransform());
+    m->backgroundModel = backgroundModel;
+  }
 
-void GlobeOverviewWorld::updateCameraPosition(Vec2f latLong, Vec2f viewAngle, float distance)
-{
-	_cameraLatLong = latLong;
-	_cameraViewAngle = viewAngle;
-	_cameraDistance = distance;
+  void GlobeOverviewWorld::setDay(float day)
+  {
+    float daysInYear = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_MechanicsDaysInYearName);
+    float year = day / daysInYear;
 
-	// update camera position
-	Vec3f position = getVec3FromEuler(latLong.x(), 0.0, latLong.y()) * _cameraDistance;
+    osg::Matrix yearMat = osgGaming::getMatrixFromEuler(0.0f, 0.0f, -year * 2.0f * C_PI) *
+      osgGaming::getMatrixFromEuler(-sin(year * 2.0f * C_PI) * 23.5f * C_PI / 180.0f, 0.0f, 0.0f);
+    osg::Matrix dayMat = osgGaming::getMatrixFromEuler(0.0f, 0.0f, day * 2.0f * C_PI);
 
-	getCameraManipulator()->setPosition(position);
+    osg::Matrix yearDayMat = dayMat * yearMat;
 
-	_backgroundModel->getTransform()->setPosition(position);
+    osg::Vec3f direction = yearDayMat * osg::Vec3f(0.0f, 1.0f, 0.0f);
 
-	// update camera attitude
-	Matrix latLongMat = Matrix::rotate(getQuatFromEuler(-latLong.x(), 0.0f, fmodf(latLong.y() + C_PI, C_PI * 2.0f)));
-	Matrix viewAngleMat = Matrix::rotate(getQuatFromEuler(viewAngle.y(), viewAngle.x(), 0.0f));
+    getLight(0)->setPosition(osg::Vec4f(direction, 0.0f));
+    m->globeModel->updateLightDirection(direction);
 
-	Matrix mat = viewAngleMat * latLongMat;
+    m->backgroundModel->getTransform()->setAttitude(osg::Matrix::inverse(dayMat).getRotate());
+    m->backgroundModel->getSunTransform()->setAttitude(osg::Matrix::inverse(yearMat).getRotate());
 
-	getCameraManipulator()->setAttitude(mat.getRotate());
-}
+    m->globeModel->updateClouds(day);
+    m->updateSun(direction);
+  }
 
-void GlobeOverviewWorld::updateSun(Vec3f sunDirection)
-{
-	Vec3f look = getCameraManipulator()->getLookDirection();
-	// look to sun
-	if (look * sunDirection < 0.0f)
-	{
-		float range = 0.3f;
+  osg::Vec2f GlobeOverviewWorld::getCameraLatLong()
+  {
+    return m->cameraLatLong;
+  }
 
-		float dist = pointLineDistance(getCameraManipulator()->getPosition(), sunDirection, Vec3f(0.0f, 0.0f, 0.0f));
-		float scale = clampBetween(dist - m_paramEarthRadius, 0.0f, range);
-		scale /= range;
-		scale *= 2.5f;
+  osg::Vec2f GlobeOverviewWorld::getCameraViewAngle()
+  {
+    return m->cameraViewAngle;
+  }
 
-		_backgroundModel->getSunGlowTransform()->setScale(Vec3f(scale, scale, scale));
-	}
+  float GlobeOverviewWorld::getCameraDistance()
+  {
+    return m->cameraDistance;
+  }
+
+  void GlobeOverviewWorld::updateCameraPosition(osg::Vec2f latLong, osg::Vec2f viewAngle, float distance)
+  {
+    m->cameraLatLong = latLong;
+    m->cameraViewAngle = viewAngle;
+    m->cameraDistance = distance;
+
+    // update camera position
+    osg::Vec3f position = osgGaming::getVec3FromEuler(latLong.x(), 0.0, latLong.y()) * m->cameraDistance;
+
+    getCameraManipulator()->setPosition(position);
+
+    m->backgroundModel->getTransform()->setPosition(position);
+
+    // update camera attitude
+    osg::Matrix latLongMat = osg::Matrix::rotate(osgGaming::getQuatFromEuler(-latLong.x(), 0.0f, fmodf(latLong.y() + C_PI, C_PI * 2.0f)));
+    osg::Matrix viewAngleMat = osg::Matrix::rotate(osgGaming::getQuatFromEuler(viewAngle.y(), viewAngle.x(), 0.0f));
+
+    osg::Matrix mat = viewAngleMat * latLongMat;
+
+    getCameraManipulator()->setAttitude(mat.getRotate());
+  }
+
 }

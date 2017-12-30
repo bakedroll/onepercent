@@ -103,7 +103,7 @@ void GlobeOverviewState::onKeyPressedEvent(int key)
 	}
 	else if (key == GUIEventAdapter::KEY_O)
 	{
-		ref_ptr<CountryOverlay> overlay = _globeWorld->getCountryOverlay();
+		ref_ptr<CountryNameOverlay> overlay = _globeWorld->getCountryOverlay();
 
 		overlay->setEnabled(!overlay->getEnabled());
 	}
