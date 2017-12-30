@@ -167,7 +167,9 @@ namespace onep
     {
       mesh->setColorMode(mode);
       countrySurfacesSwitch->setChildValue(mesh, true);
-      visibleCountryMeshs.push_back(mesh);
+
+      if (highlightedCountries.count(mesh) == 0)
+        highlightedCountries.insert(mesh);
     }
 
     osg::ref_ptr<osg::Geode> createPlanetGeode(int textureResolution)
@@ -396,7 +398,8 @@ namespace onep
     CountryMesh::Map countryMeshs;
     CountriesMap::Ptr countriesMap;
 
-    CountryMesh::List visibleCountryMeshs;
+    osg::ref_ptr<osg::Program> countryProgram;
+
     osgGaming::Observable<int>::Ptr oSelectedCountryId;
 
     BranchType highlightedBranch;
@@ -404,6 +407,9 @@ namespace onep
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
 
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
+
+    std::set<CountryMesh::Ptr> highlightedCountries;
+    CountryMesh::Ptr hoveredCountryMesh;
   };
 
   GlobeModel::GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
@@ -437,10 +443,10 @@ namespace onep
 
   void GlobeModel::clearHighlightedCountries()
   {
-    for (CountryMesh::List::iterator it = m->visibleCountryMeshs.begin(); it != m->visibleCountryMeshs.end(); ++it)
-      m->countrySurfacesSwitch->setChildValue(*it, false);
-
+    setAllCountriesVisibility(false);
     m->highlightedBranch = BranchType::BRANCH_UNDEFINED;
+
+    m->highlightedCountries.clear();
   }
 
   void GlobeModel::setSelectedCountry(int countryId)
@@ -475,15 +481,74 @@ namespace onep
     }
   }
 
+  void GlobeModel::setHoveredCountry(CountryMesh::Ptr countryMesh)
+  {
+    if (countryMesh != m->hoveredCountryMesh)
+    {
+      if (m->hoveredCountryMesh)
+      {
+        m->hoveredCountryMesh->setDistanceShaderEnabled(false);
+
+        if (m->highlightedCountries.count(m->hoveredCountryMesh) == 0)
+          m->countrySurfacesSwitch->setChildValue(m->hoveredCountryMesh, false);
+      }
+
+      m->hoveredCountryMesh = countryMesh;
+
+      if (!m->hoveredCountryMesh.valid())
+        return;
+
+      if (getSelectedCountryId() == m->hoveredCountryMesh->getCountryData()->getId())
+      {
+        m->hoveredCountryMesh->setDistanceShaderEnabled(false);
+        m->hoveredCountryMesh.release();
+        return;
+      }
+
+      m->hoveredCountryMesh->setDistanceShaderEnabled(true);
+      m->countrySurfacesSwitch->setChildValue(m->hoveredCountryMesh, true);
+    }
+    // disable shader after selection
+    else if (m->hoveredCountryMesh && getSelectedCountryId() == m->hoveredCountryMesh->getCountryData()->getId())
+    {
+      m->hoveredCountryMesh->setDistanceShaderEnabled(false);
+      m->hoveredCountryMesh.release();
+    }
+  }
+
   void GlobeModel::setCountriesMap(CountriesMap::Ptr countriesMap)
   {
     m->countriesMap = countriesMap;
   }
 
-  void GlobeModel::addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles, CountryMesh::BorderIdMap& neighborBorders)
+  /*void GlobeModel::setCountryVisibility(CountryMesh::Ptr countryMesh, bool visibility)
+  {
+
+
+    m->countrySurfacesSwitch->setChildValue(countryMesh, visibility);
+  }*/
+
+  void GlobeModel::setAllCountriesVisibility(bool visibility)
+  {
+    if (visibility)
+      m->countrySurfacesSwitch->setAllChildrenOn();
+    else
+      m->countrySurfacesSwitch->setAllChildrenOff();
+  }
+
+  void GlobeModel::addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles, osg::ref_ptr<osg::Texture2D> distanceTexture, CountryMesh::BorderIdMap& neighborBorders)
   {
     if (m->countryMeshs.find(id) != m->countryMeshs.end())
       return;
+
+    if (!m->countryProgram.valid())
+    {
+      m->countryProgram = new osg::Program();
+      osg::ref_ptr<osg::Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/country.frag", osg::Shader::FRAGMENT);
+      osg::ref_ptr<osg::Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
+      m->countryProgram->addShader(frag_shader);
+      m->countryProgram->addShader(vert_shader);
+    }
 
     if (!m->countrySurfacesSwitch.valid())
     {
@@ -494,10 +559,14 @@ namespace onep
       m->countrySurfacesSwitch->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
       m->countrySurfacesSwitch->getOrCreateStateSet()->setRenderBinDetails(1, "RenderBin");
 
+
+      m->countrySurfacesSwitch->getOrCreateStateSet()->setTextureAttributeAndModes(0, distanceTexture, osg::StateAttribute::ON);
+      m->countrySurfacesSwitch->getOrCreateStateSet()->addUniform(new osg::Uniform("distancemap", 0));
+
       addChild(m->countrySurfacesSwitch);
     }
 
-    CountryMesh::Ptr mesh = new CountryMesh(m->boundariesMesh->getCountryVertices(), triangles, neighborBorders);
+    CountryMesh::Ptr mesh = new CountryMesh(m->boundariesMesh->getCountryVertices(), m->boundariesMesh->getCountryTexcoords(), triangles, m->countryProgram, neighborBorders);
     mesh->setCountryData(countryData);
 
     m->countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
@@ -587,4 +656,8 @@ namespace onep
     return m->oSelectedCountryId;
   }
 
+  //osg::ref_ptr<osg::Program> GlobeModel::getCountriesShader()
+  //{
+  //  return m->countryProgram;
+  //}
 }

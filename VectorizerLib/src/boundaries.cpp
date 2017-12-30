@@ -447,7 +447,10 @@ namespace helper
       i++;
       // ignore cycles
       if (it->second.bIsCycle)
+      {
+        boundsProgress.update(i, boundaries.borders.size());
         continue;
+      }
 
       int pInner = it->second.endInnerOuterPointId.first;
       int pOuter = it->second.endInnerOuterPointId.second;

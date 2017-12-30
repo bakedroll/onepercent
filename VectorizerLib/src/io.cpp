@@ -131,7 +131,7 @@ namespace helper
     fs.close();
   }
 
-  void writeBoundariesFile(BoundariesMeshData& meshdata, const char* filename)
+  void writeBoundariesFile(Graph& graph, BoundariesMeshData& meshdata, const char* filename)
   {
     printf("Write to boundary file: %s\n", filename);
 
@@ -139,6 +139,9 @@ namespace helper
     file = fopen(filename, "w+b");
     if (!file)
       return;
+
+    float width = graph.boundary.width();
+    float height = graph.boundary.height();
 
     IdMap ids;
     ids[-1] = -1;
@@ -151,6 +154,20 @@ namespace helper
       writeFile<float>(file, it->second.value[1]);
       writeFile<float>(file, it->second.value[2]);
       writeFile<int>(file, ids.find(it->second.originId)->second);
+
+      // texcoord
+      float u = 0.0f;
+      float v = 0.0f;
+      if (graph.points.count(it->first) > 0)
+      {
+        cv::Point2f& point = graph.points[it->first];
+
+        u = point.x / width;
+        v = point.y / height;
+      }
+
+      writeFile<float>(file, u);
+      writeFile<float>(file, v);
 
       ids.insert(IdMap::value_type(it->first, i));
       i++;

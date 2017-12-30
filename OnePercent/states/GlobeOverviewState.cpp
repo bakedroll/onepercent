@@ -28,6 +28,9 @@ GlobeOverviewState::GlobeOverviewState()
 void GlobeOverviewState::initialize()
 {
   _globeWorld = static_cast<GlobeOverviewWorld*>(getWorld(getView(0)).get());
+
+  //_globeWorld->getGlobeModel()->getCountriesShader()->compileGLObjects(
+  //  *getViewer()->getView(0)->getSceneCamera()->getGraphicsContext()->getState());
 }
 
 unsigned char GlobeOverviewState::getProperties()

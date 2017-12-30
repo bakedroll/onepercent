@@ -22,6 +22,7 @@ namespace onep
 
 		virtual void onMousePressedEvent(int button, float x, float y) override;
 		virtual void onKeyPressedEvent(int key) override;
+    virtual void onMouseMoveEvent(float x, float y) override;
 
 		virtual void onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion) override;
 

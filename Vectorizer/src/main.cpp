@@ -242,6 +242,8 @@ int detectLines(int argc, char** argv)
   {
     cv::Mat distanceMap;
     helper::makeDistanceMap(triGraph, distanceMap, distanceMapScale, distanceMapMaxDist);
+
+    printf("Write distance map: %s\n", distanceMapFilename.c_str());
     imwrite(distanceMapFilename.c_str(), distanceMap);
   }
   
@@ -253,7 +255,7 @@ int detectLines(int argc, char** argv)
     //helper::drawBoundaries(boundariesImage, triGraph, world.boundariesMeshData, displayScale);
 
   helper::writeCountriesFile(countriesFilename.c_str(), triGraph, world.countries, countriesMap, shift);
-  helper::writeBoundariesFile(world.boundariesMeshData, outputFilename.c_str());
+  helper::writeBoundariesFile(triGraph, world.boundariesMeshData, outputFilename.c_str());
 
   if (!dbgimage.empty())
   {

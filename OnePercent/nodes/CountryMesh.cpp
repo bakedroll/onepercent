@@ -2,6 +2,7 @@
 
 #include <osg/Geometry>
 #include <osg/Material>
+#include <osgGaming/ResourceManager.h>
 
 namespace onep
 {
@@ -14,11 +15,19 @@ namespace onep
 
     List neighbors;
     BorderIdMap neighbourBorders;
+
+    osg::ref_ptr<osg::Program> distanceProgram;
+
+    osg::ref_ptr<osg::StateSet> stateSet;
+
+    bool bShaderEnabled;
   };
 
   CountryMesh::CountryMesh(
     osg::ref_ptr<osg::Vec3Array> vertices,
+    osg::ref_ptr<osg::Vec2Array> texcoords,
     osg::ref_ptr<osg::DrawElementsUInt> triangles,
+    osg::ref_ptr<osg::Program> program,
     BorderIdMap& neighbourBorders)
     : osg::Geode()
     , m(new Impl())
@@ -27,13 +36,21 @@ namespace onep
 
     osg::ref_ptr<osg::Geometry> geo = new osg::Geometry();
     geo->setVertexArray(vertices);
+    geo->setTexCoordArray(0, texcoords, osg::Array::BIND_OVERALL);
     geo->addPrimitiveSet(triangles);
 
     addDrawable(geo);
 
     m->material = new osg::Material();
     m->material->setColorMode(osg::Material::DIFFUSE);
-    getOrCreateStateSet()->setAttribute(m->material, osg::StateAttribute::ON);
+
+    m->distanceProgram = program;
+    
+    m->stateSet = getOrCreateStateSet();
+    //m->stateSet->setAttributeAndModes(m->distanceProgram, osg::StateAttribute::OFF);
+    m->stateSet->setAttributeAndModes(m->material, osg::StateAttribute::ON);
+
+    m->bShaderEnabled = false;
   }
 
   CountryMesh::~CountryMesh()
@@ -115,5 +132,17 @@ namespace onep
   void CountryMesh::setCountryData(CountryData::Ptr country)
   {
     m->countryData = country;
+  }
+
+  void CountryMesh::setDistanceShaderEnabled(bool enabled)
+  {
+    if (m->bShaderEnabled == enabled)
+      return;
+
+    m->bShaderEnabled = enabled;
+    if (m->bShaderEnabled)
+      m->stateSet->setAttribute(m->distanceProgram, osg::StateAttribute::ON);
+    else
+      m->stateSet->removeAttribute(m->distanceProgram);
   }
 }

@@ -29,9 +29,14 @@ namespace onep
 		void setSelectedCountry(int countryId);
     void setHighlightedSkillBranch(BranchType type);
 
+    void setHoveredCountry(CountryMesh::Ptr countryMesh);
+
     void setCountriesMap(CountriesMap::Ptr countriesMap);
 
-    void addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles, CountryMesh::BorderIdMap& neighborBorders);
+    // void setCountryVisibility(CountryMesh::Ptr countryMesh, bool visibility);
+    void setAllCountriesVisibility(bool visibility);
+
+    void addCountry(int id, CountryData::Ptr countryData, osg::ref_ptr<osg::DrawElementsUInt> triangles, osg::ref_ptr<osg::Texture2D> distanceTexture, CountryMesh::BorderIdMap& neighborBorders);
     CountryMesh::Map& getCountryMeshs();
     CountriesMap::Ptr getCountriesMap();
     BoundariesMesh::Ptr getBoundariesMesh();
@@ -44,6 +49,8 @@ namespace onep
 
     int getSelectedCountryId();
     osgGaming::Observable<int>::Ptr getSelectedCountryIdObservable();
+
+    //osg::ref_ptr<osg::Program> getCountriesShader();
 
 	private:
     struct Impl;
