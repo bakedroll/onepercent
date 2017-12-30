@@ -7,7 +7,7 @@ Id	Name	Population	Gross domestic product	Cycle Ids	Additional Neighbour Ids	Col
 6	Argentinien	40,8	488213	"209; 214; 373"		#NAME?				
 7	Äthiopien	87	48145	94		#NAME?				
 8	Australien	22	1505277	"361; 363; 360; 370; 372"		#NAME?				
-9	Balkanstaaten	38,26	437307	"45; 273; 272"		#NAME?				
+9	Balkanstaaten	38,26	437307	"45; 273; 272; 275"		#NAME?				
 10	Bangladesch	152,9	141275	156		#NAME?				
 11	Benelux	28,09	1366405	53		#NAME?				
 12	Benin	9,4	8310	118		#NAME?				
@@ -24,15 +24,15 @@ Id	Name	Population	Gross domestic product	Cycle Ids	Additional Neighbour Ids	Col
 23	Elfenbeinküste	20,6	28288	137		#NAME?				
 24	Estland	1,32	24484	"29; 240"		#NAME?				
 25	Finnland	5,44	256922	"27; 237"		#NAME?				
-26	Frankreich	63,6	2737361	"62; 267; 368"		#NAME?				
-27	Gabun	1,6	19228	132		#NAME?				
+26	Frankreich	63,6	2737361	"62; 267"		#NAME?				
+27	Gabun	1,6	19228	"132; 316"		#NAME?				
 28	Georgien	16,4	20000	64		#NAME?				BIP prüfen
 29	Ghana	25,5	44223	121		#NAME?				
 30	Grönland	0,56	37400	"0; 188"		#NAME?				
 31	Großbritannien	64,1	2535761	"248; 239; 245; 242; 235"	26	#NAME?				
 32	Guinea	10000	6282	134		#NAME?				
 33	Indien	1252	1870651	"98; 300"		#NAME?				
-34	Indonesien	241	870275	"323; 331; 325; 322; 332; 345; 337; 339; 317; 318; 319; 328; 330; 333; 327; 320; 312; 347; 352; 353; 359; 351; 357; 349; 350; 335; 329; 336; 326; 321; 314; 315"		#NAME?				
+34	Indonesien	241	870275	"323; 331; 325; 322; 332; 345; 337; 339; 317; 318; 319; 328; 330; 333; 327; 320; 312; 347; 352; 353; 359; 351; 357; 349; 350; 335; 329; 336; 326; 321; 314; 315; 343"		#NAME?				
 35	Iran	77,45	366259	69		#NAME?				
 36	Irak	33,42	229327	72		#NAME?				
 37	Irland	4,6	217884	250		#NAME?				
@@ -40,7 +40,7 @@ Id	Name	Population	Gross domestic product	Cycle Ids	Additional Neighbour Ids	Col
 39	Japan	127,6	4901532	"265; 266; 264; 268; 277; 278"		#NAME?				
 40	Kambodscha	15	15659	163		#NAME?				
 41	Kamerun	20,9	27957	107		#NAME?				
-42	Kanada	35,16	1825096	"1; 14; 18; 21; 23; 177; 184; 180; 22; 24; 20; 176; 178; 185; 182; 187; 215; 181; 24; 181; 184; 189; 192; 220; 223; 225; 224; 226; 234; 229; 231; 228; 232; 233; 244; 257; 258; 260; 261; 262; 254"		#NAME?				
+42	Kanada	35,16	1825096	"1; 14; 18; 21; 23; 177; 184; 180; 22; 24; 20; 176; 178; 185; 182; 187; 215; 181; 189; 192; 220; 223; 225; 224; 226; 234; 229; 231; 228; 232; 233; 244; 257; 258; 260; 261; 262; 254"		#NAME?				
 43	Kasachstan	16,8	220347	75		#NAME?				
 44	Kenia	43,9	45082			#NAME?				
 45	Kolumbien	47,4	381822	198		#NAME?				
@@ -80,7 +80,7 @@ Id	Name	Population	Gross domestic product	Cycle Ids	Additional Neighbour Ids	Col
 79	Portugal	10,46	219972	79		#NAME?				
 80	Rumänien	20,1	189659	42		#NAME?				
 81	Russland	143,5	2118006	"33; 25; 222; 179; 9; 8; 16; 12; 4; 10; 2; 7; 6; 3; 217; 218; 5; 17; 190; 183; 191; 216; 186; 219; 238; 251; 259; 252; 253; 263"		#NAME?				
-82	Salomonen	0,6	1097	"356; 358; 354; 346; 348; 344"		#NAME?				
+82	Salomonen	0,6	1097	"356; 358; 354; 346; 348; 344; 364; 365; 366; 367; 368"		#NAME?				
 83	Sambia	13,7	22416	143		#NAME?				
 84	Schweden	9,59	557938	"28; 243"		#NAME?				
 85	Schweiz	8,21	650814	58		#NAME?				

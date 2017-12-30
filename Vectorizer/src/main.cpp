@@ -210,7 +210,7 @@ int detectLines(int argc, char** argv)
 
   // write to poly file and draw debug image
   helper::writePolyFile(graph, polyfile.c_str());
-  helper::drawGraph(resultImage, graph, displayScale);
+  helper::drawGraph(resultImage, graph, displayScale, true, true);
 
   // triangulate
   triangulate(trianglecommand.c_str(), polyfile.c_str(), minAngle);
@@ -252,8 +252,6 @@ int detectLines(int argc, char** argv)
   world.countries = countries;
 
   helper::makeBoundaries(triGraph, world.countries, world.boundariesMeshData, shift);
-    //helper::drawBoundaries(boundariesImage, triGraph, world.boundariesMeshData, displayScale);
-
   helper::writeCountriesFile(countriesFilename.c_str(), triGraph, world.countries, countriesMap, shift);
   helper::writeBoundariesFile(triGraph, world.boundariesMeshData, outputFilename.c_str());
 

@@ -12,5 +12,4 @@ namespace helper
   void drawFilledTriangle(cv::Mat& mat, Graph& graph, int* idx, float scale, cv::Scalar color);
   void drawFilledCycles(cv::Mat& mat, Graph& graph, CyclesMap& cycles, float scale = 1.0f);
   void drawCycleNumbers(cv::Mat& map, Graph& graph, CyclesMap& cycles, float scale = 1.0f);
-  void drawBoundaries(cv::Mat& mat, Graph& graph, BoundariesMeshData boundaries, float scale = 1.0f);
 }
