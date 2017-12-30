@@ -1,4 +1,4 @@
-#include "CountryOverlay.h"
+#include "CountryNameOverlay.h"
 
 #include "core/Globals.h"
 
@@ -11,7 +11,7 @@ using namespace onep;
 using namespace std;
 using namespace osg;
 
-CountryOverlay::CountryOverlay()
+CountryNameOverlay::CountryNameOverlay()
 	: PositionAttitudeTransform(),
 	  _enabled(true)
 {
@@ -25,12 +25,12 @@ CountryOverlay::CountryOverlay()
 	setScale(Vec3f(0.01, 0.01, 0.01));
 }
 
-bool CountryOverlay::getEnabled()
+bool CountryNameOverlay::getEnabled()
 {
 	return _enabled;
 }
 
-void CountryOverlay::setCountryMap(const CountryMesh::Map& countryMap)
+void CountryNameOverlay::setCountryMap(const CountryMesh::Map& countryMap)
 {
 	ref_ptr<osgText::Font> font = osgGaming::ResourceManager::getInstance()->loadFont("./GameData/fonts/coolvetica rg.ttf");
 
@@ -83,7 +83,7 @@ void CountryOverlay::setCountryMap(const CountryMesh::Map& countryMap)
 	_switch->addChild(billboard);
 }
 
-void CountryOverlay::setEnabled(bool enabled)
+void CountryNameOverlay::setEnabled(bool enabled)
 {
 	if (_enabled == enabled)
 	{
