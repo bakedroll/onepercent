@@ -133,6 +133,24 @@ namespace onep
 
     osg::ref_ptr<osgGaming::Animation<float>> countryMenuWidgetFadeAnimation;
 
+    osg::Vec2i mousePos;
+
+    CountryMesh::Ptr pickCountryMeshAt(const osg::Vec2i& pos)
+    {
+      osg::Vec3f point, direction, pickResult;
+      base->getWorld(base->getView(0))->getCameraManipulator()->getPickRay(float(pos.x()), float(pos.y()), point, direction);
+
+      if (osgGaming::sphereLineIntersection(osg::Vec3f(0.0f, 0.0f, 0.0f), paramEarthRadius, point, direction, pickResult))
+      {
+        osg::Vec2f polar = osgGaming::getPolarFromCartesian(pickResult);
+        osg::ref_ptr<CountryMesh> countryMesh = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(polar);
+
+        return countryMesh;
+      }
+
+      return nullptr;
+    }
+
     bool ready()
     {
       if (!bReady && !base->isCameraInMotion())
@@ -238,6 +256,9 @@ namespace onep
     if (m->selectedCountry > 0)
       m->updateCountryMenuWidgetPosition(m->selectedCountry);
 
+    CountryMesh::Ptr hovered = m->pickCountryMeshAt(m->mousePos);
+    getGlobeOverviewWorld()->getGlobeModel()->setHoveredCountry(hovered);
+
     return e;
   }
 
@@ -250,41 +271,33 @@ namespace onep
 
     if (button == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
     {
-      osg::Vec3f point, direction;
-      getWorld(getView(0))->getCameraManipulator()->getPickRay(x, y, point, direction);
+      CountryMesh::Ptr countryMesh = m->pickCountryMeshAt(m->mousePos);
 
-      osg::Vec3f pickResult;
-      if (osgGaming::sphereLineIntersection(osg::Vec3f(0.0f, 0.0f, 0.0f), m->paramEarthRadius, point, direction, pickResult))
+      int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
+
+      getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
+      m->radioNoOverlay->setChecked(true);
+
+      if (!m->bStarted)
       {
-        osg::Vec2f polar = osgGaming::getPolarFromCartesian(pickResult);
-        osg::ref_ptr<CountryMesh> countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(polar);
-
-        int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
-
-        getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
-        m->radioNoOverlay->setChecked(true);
-
-        if (!m->bStarted)
+        if (selected == 0)
         {
-          if (selected == 0)
+          m->labelClickAgain->setText(QString());
+        }
+        else
+        {
+          if (m->selectedCountry == selected)
           {
-            m->labelClickAgain->setText(QString());
+            startSimulation();
           }
           else
           {
-            if (m->selectedCountry == selected)
-            {
-              startSimulation();
-            }
-            else
-            {
-              m->labelClickAgain->setText(QObject::tr("Click again to confirm your selection."));
-            }
+            m->labelClickAgain->setText(QObject::tr("Click again to confirm your selection."));
           }
         }
-
-        m->selectedCountry = selected;
       }
+
+      m->selectedCountry = selected;
     }
   }
 
@@ -317,6 +330,11 @@ namespace onep
       getGlobeOverviewWorld()->getSimulation()->printStats();
       }*/
     }
+  }
+
+  void GlobeInteractionState::onMouseMoveEvent(float x, float y)
+  {
+    m->mousePos.set(x, y);
   }
 
   void GlobeInteractionState::onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion)
@@ -537,6 +555,8 @@ namespace onep
     leftWidget->setContentsMargins(0, 0, 0, 0);
     leftWidget->setObjectName("WidgetLeftPanel");
     leftWidget->setLayout(leftLayout);
+
+    // getView(0)->getSceneCamera()->getGraphicsContext()->getState()
 
     QVBoxLayout* rightLayout = new QVBoxLayout();
 

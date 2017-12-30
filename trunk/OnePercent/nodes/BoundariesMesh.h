@@ -18,6 +18,7 @@ namespace onep
     void loadBoundaries(const std::string& filename);
 
     osg::ref_ptr<osg::Vec3Array> getCountryVertices();
+    osg::ref_ptr<osg::Vec2Array> getCountryTexcoords();
 
     void makeOverallBoundaries(float thickness = 0.005f);
     void makeCountryBoundaries(

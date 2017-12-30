@@ -30,7 +30,9 @@ namespace onep
 
     CountryMesh(
       osg::ref_ptr<osg::Vec3Array> vertices,
+      osg::ref_ptr<osg::Vec2Array> texcoords,
       osg::ref_ptr<osg::DrawElementsUInt> triangles,
+      osg::ref_ptr<osg::Program> program,
       BorderIdMap& neighbourBorders);
 
     ~CountryMesh();
@@ -47,6 +49,8 @@ namespace onep
 
     void setColorMode(ColorMode mode);
     void setCountryData(CountryData::Ptr country);
+
+    void setDistanceShaderEnabled(bool enabled);
 
   private:
     struct Impl;

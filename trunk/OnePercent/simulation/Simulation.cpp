@@ -5,6 +5,7 @@
 #include <osgGaming/Helper.h>
 #include <osg/Image>
 #include <osgGaming/PropertiesManager.h>
+#include <osgGaming/TextureFactory.h>
 
 using namespace osgGaming;
 using namespace onep;
@@ -39,8 +40,11 @@ void Simulation::loadCountries(std::string filename)
 
 	NeighborMap neighborMap;
 
-	int ncountries = stream.read<int>();
+  osg::ref_ptr<Texture2D> distanceTexture = osgGaming::TextureFactory::getInstance()->make()
+    ->image(osgGaming::ResourceManager::getInstance()->loadImage("./GameData/textures/earth/distance.png"))
+    ->build();
 
+	int ncountries = stream.read<int>();
 	for (int i = 0; i < ncountries; i++)
 	{
 		int name_length = stream.read<int>();
@@ -102,7 +106,7 @@ void Simulation::loadCountries(std::string filename)
     for (int j = 0; j < NUM_SKILLBRANCHES; j++)
       country->addChild(m_skillBranches[j]);
 
-    m_globeModel->addCountry(int(id), country, triangles, neighborBorderMap);
+    m_globeModel->addCountry(int(id), country, triangles, distanceTexture, neighborBorderMap);
     addChild(country);
 
 		delete[] name_p;

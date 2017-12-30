@@ -22,7 +22,7 @@ namespace helper
   };
 
   void writePolyFile(Graph& graph, const char* filename);
-  void writeBoundariesFile(BoundariesMeshData& meshdata, const char* filename);
+  void writeBoundariesFile(Graph& graph, BoundariesMeshData& meshdata, const char* filename);
 
   void readGraphFiles(Graph& graph, const char* filename, int iteration);
 

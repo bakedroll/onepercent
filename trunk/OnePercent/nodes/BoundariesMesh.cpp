@@ -20,12 +20,14 @@ namespace onep
     typedef std::map<int, Point> Map;
 
     Point() {}
-    Point(osg::Vec3d c, int o)
+    Point(osg::Vec3f c, osg::Vec2f t, int o)
       : coords(c)
+      , texcoord(t)
       , originId(o)
     {}
 
     osg::Vec3f coords;
+    osg::Vec2f texcoord;
     int originId;
   };
 
@@ -105,6 +107,7 @@ namespace onep
     NodalsMap nodals;
 
     osg::ref_ptr<osg::Vec3Array> vertices;
+    osg::ref_ptr<osg::Vec2Array> texcoords;
 
     osg::ref_ptr<osg::Geode> overallBoundsGeode;
     osg::ref_ptr<osg::Geode> countriesBoundsGeode;
@@ -147,7 +150,10 @@ namespace onep
       float z = stream.read<float>();
       int originId = stream.read<int>();
 
-      m->pointsMap[i] = Point(osg::Vec3f(x, y, z), originId);
+      float u = stream.read<float>();
+      float v = stream.read<float>();
+
+      m->pointsMap[i] = Point(osg::Vec3f(x, y, z), osg::Vec2f(u, 1.0f - v), originId);
     }
 
     int nsegments = stream.read<int>();
@@ -242,6 +248,24 @@ namespace onep
     }
 
     return m->vertices;
+  }
+
+  osg::ref_ptr<osg::Vec2Array> BoundariesMesh::getCountryTexcoords()
+  {
+    if (!m->texcoords.valid())
+    {
+      m->texcoords = new osg::Vec2Array();
+
+      for (Point::Map::iterator it = m->pointsMap.begin(); it != m->pointsMap.end(); ++it)
+      {
+        if (it->second.originId == -1)
+          m->texcoords->push_back(it->second.texcoord);
+        else
+          break;
+      }
+    }
+
+    return m->texcoords;
   }
 
   void BoundariesMesh::makeOverallBoundaries(float thickness)
