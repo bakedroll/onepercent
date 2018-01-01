@@ -50,8 +50,6 @@ namespace onep
     int getSelectedCountryId();
     osgGaming::Observable<int>::Ptr getSelectedCountryIdObservable();
 
-    //osg::ref_ptr<osg::Program> getCountriesShader();
-
 	private:
     struct Impl;
     std::unique_ptr<Impl> m;

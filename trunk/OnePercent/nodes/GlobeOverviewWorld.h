@@ -22,7 +22,7 @@ namespace onep
 		osg::ref_ptr<Simulation> getSimulation();
 		
 		void setGlobeModel(osg::ref_ptr<GlobeModel> globeModel);
-		void setCountryOverlay(osg::ref_ptr<CountryNameOverlay> countryOverlay);
+		void setCountryNameOverlay(osg::ref_ptr<CountryNameOverlay> countryOverlay);
 		void setBackgroundModel(osg::ref_ptr<BackgroundModel> backgroundModel);
 
 		void setDay(float day);

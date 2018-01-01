@@ -41,7 +41,7 @@ namespace onep
     float paramEarthRadius;
 
     osg::ref_ptr<GlobeModel> globeModel;
-    osg::ref_ptr<CountryNameOverlay> countryOverlay;
+    osg::ref_ptr<CountryNameOverlay> countryNameOverlay;
     osg::ref_ptr<BackgroundModel> backgroundModel;
 
     osg::ref_ptr<Simulation> simulation;
@@ -77,7 +77,7 @@ namespace onep
 
   osg::ref_ptr<CountryNameOverlay> GlobeOverviewWorld::getCountryOverlay()
   {
-    return m->countryOverlay;
+    return m->countryNameOverlay;
   }
 
   osg::ref_ptr<BackgroundModel> GlobeOverviewWorld::getBackgroundModel()
@@ -101,15 +101,15 @@ namespace onep
     m->globeModel = globeModel;
   }
 
-  void GlobeOverviewWorld::setCountryOverlay(osg::ref_ptr<CountryNameOverlay> countryOverlay)
+  void GlobeOverviewWorld::setCountryNameOverlay(osg::ref_ptr<CountryNameOverlay> countryNameOverlay)
   {
-    if (m->countryOverlay.valid())
+    if (m->countryNameOverlay.valid())
     {
-      getRootNode()->removeChild(m->countryOverlay);
+      getRootNode()->removeChild(m->countryNameOverlay);
     }
 
-    getRootNode()->addChild(countryOverlay);
-    m->countryOverlay = countryOverlay;
+    getRootNode()->addChild(countryNameOverlay);
+    m->countryNameOverlay = countryNameOverlay;
   }
 
   void GlobeOverviewWorld::setBackgroundModel(osg::ref_ptr<BackgroundModel> backgroundModel)

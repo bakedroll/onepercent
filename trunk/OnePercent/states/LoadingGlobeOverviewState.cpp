@@ -105,12 +105,12 @@ namespace onep
     globeWorld->getSimulation()->loadCountries("./GameData/data/countries.dat");
     globeWorld->getSimulation()->loadSkillsXml("./GameData/data/skills/passive.xml");
 
-    osg::ref_ptr<CountryNameOverlay> countryOverlay = new CountryNameOverlay();
-    countryOverlay->setEnabled(false);
-    countryOverlay->setCountryMap(globe->getCountryMeshs());
+    osg::ref_ptr<CountryNameOverlay> countryNameOverlay = new CountryNameOverlay();
+    countryNameOverlay->setEnabled(false);
+    countryNameOverlay->setCountryMap(globe->getCountryMeshs());
 
     globeWorld->setGlobeModel(globe);
-    globeWorld->setCountryOverlay(countryOverlay);
+    globeWorld->setCountryNameOverlay(countryNameOverlay);
     globeWorld->setBackgroundModel(backgroundModel);
   }
 
