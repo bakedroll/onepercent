@@ -143,7 +143,7 @@ namespace onep
       if (osgGaming::sphereLineIntersection(osg::Vec3f(0.0f, 0.0f, 0.0f), paramEarthRadius, point, direction, pickResult))
       {
         osg::Vec2f polar = osgGaming::getPolarFromCartesian(pickResult);
-        osg::ref_ptr<CountryMesh> countryMesh = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(polar);
+        osg::ref_ptr<CountryMesh> countryMesh = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getCountryMesh(polar);
 
         return countryMesh;
       }
@@ -165,13 +165,13 @@ namespace onep
 
     void updateCountryInfoText()
     {
-      if (base->getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryId() == 0)
+      if (base->getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryId() == 0)
       {
         labelStats->setText("");
         return;
       }
 
-      CountryData::Ptr country = base->getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryMesh()->getCountryData();
+      CountryData::Ptr country = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryMesh()->getCountryData();
 
       std::string infoText = country->getCountryName() + "\n";
       country->getValues()->getContainer()->debugPrintToString(infoText);
@@ -180,7 +180,7 @@ namespace onep
 
     void updateCountryMenuWidgetPosition(int id)
     {
-      osg::ref_ptr<CountryData> data = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(id)->getCountryData();
+      osg::ref_ptr<CountryData> data = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getCountryMesh(id)->getCountryData();
       osg::Vec2f latLong = data->getCenterLatLong();
 
       osg::Vec3f position = osgGaming::getVec3FromEuler(latLong.x(), 0.0, latLong.y()) * paramEarthRadius;
@@ -214,13 +214,13 @@ namespace onep
 
     getHud(getView(0))->setFpsEnabled(true);
 
-    m->selectedCountryObserver = getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryIdObservable()->connect(osgGaming::Func<int>([this](int id)
+    m->selectedCountryObserver = getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryIdObservable()->connect(osgGaming::Func<int>([this](int id)
     {
       m->updateCountryInfoText();
 
       if (id > 0)
       {
-        CountryMesh::Ptr countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryMesh(id);
+        CountryMesh::Ptr countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getCountryMesh(id);
 
         printf("Selected country (%d): %s\n", countryMesh->getCountryData()->getId(), countryMesh->getCountryData()->getCountryName().c_str());
 
@@ -257,7 +257,7 @@ namespace onep
       m->updateCountryMenuWidgetPosition(m->selectedCountry);
 
     CountryMesh::Ptr hovered = m->pickCountryMeshAt(m->mousePos);
-    getGlobeOverviewWorld()->getGlobeModel()->setHoveredCountry(hovered);
+    getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->setHoveredCountry(hovered);
 
     return e;
   }
@@ -275,7 +275,7 @@ namespace onep
 
       int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
 
-      getGlobeOverviewWorld()->getGlobeModel()->setSelectedCountry(selected);
+      getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->setSelectedCountry(selected);
       m->radioNoOverlay->setChecked(true);
 
       if (!m->bStarted)
@@ -426,7 +426,7 @@ namespace onep
     m->labelClickAgain->setText(QString());
     m->labelDays->setVisible(true);
 
-    getGlobeOverviewWorld()->getGlobeModel()->getSelectedCountryMesh()->getCountryData()->setSkillBranchActivated(BRANCH_BANKS, true);
+    getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryMesh()->getCountryData()->setSkillBranchActivated(BRANCH_BANKS, true);
 
     m->simulationTimer = osgGaming::TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
     m->simulationTimer->start();
@@ -475,7 +475,7 @@ namespace onep
     QConnectBoolFunctor::connect(m->radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
     {
       if (checked)
-        globeModel->clearHighlightedCountries();
+        globeModel->getCountryOverlay()->clearHighlightedCountries();
     });
 
     branchesLayout->addWidget(m->radioNoOverlay, 0, 1);
@@ -490,7 +490,7 @@ namespace onep
 
       QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
       {
-        osg::ref_ptr<CountryData> selectedCountry = globeModel->getSelectedCountryMesh()->getCountryData();
+        osg::ref_ptr<CountryData> selectedCountry = globeModel->getCountryOverlay()->getSelectedCountryMesh()->getCountryData();
         if (!selectedCountry.valid())
           return;
 
@@ -499,14 +499,14 @@ namespace onep
 
       QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
       {
-        globeModel->setHighlightedSkillBranch(BranchType(i));
+        globeModel->getCountryOverlay()->setHighlightedSkillBranch(BranchType(i));
       });
 
-      m->selectedCountryIdObservers.push_back(globeModel->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
+      m->selectedCountryIdObservers.push_back(globeModel->getCountryOverlay()->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
       {
         if (selected > 0)
         {
-          checkBox->setChecked(globeModel->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
+          checkBox->setChecked(globeModel->getCountryOverlay()->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
         }
         else
         {
@@ -516,12 +516,12 @@ namespace onep
         checkBox->setEnabled(selected > 0);
       })));
 
-      CountryMesh::Map& countryMeshs = globeModel->getCountryMeshs();
+      CountryMesh::Map& countryMeshs = globeModel->getCountryOverlay()->getCountryMeshs();
       for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
       {
         m->skillBranchActivatedObservers.push_back(it->second->getCountryData()->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([=](bool activated)
         {
-          if (it->first == globeModel->getSelectedCountryId())
+          if (it->first == globeModel->getCountryOverlay()->getSelectedCountryId())
             checkBox->setChecked(activated);
         })));
       }

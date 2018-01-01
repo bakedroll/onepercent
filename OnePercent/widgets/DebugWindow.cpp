@@ -30,7 +30,7 @@ namespace onep
     {
       auto start_time = std::chrono::high_resolution_clock::now();
 
-      CountryMesh::Ptr mesh = world->getGlobeModel()->getSelectedCountryMesh();
+      CountryMesh::Ptr mesh = world->getGlobeModel()->getCountryOverlay()->getSelectedCountryMesh();
       if (!mesh.valid())
         return;
 
@@ -79,7 +79,7 @@ namespace onep
 
     m->setupUi();
 
-    m->notifySelectedCountry = m->world->getGlobeModel()->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([this](int selected)
+    m->notifySelectedCountry = m->world->getGlobeModel()->getCountryOverlay()->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([this](int selected)
     {
       m->toggleCountryButton->setEnabled(selected > 0);
     }));

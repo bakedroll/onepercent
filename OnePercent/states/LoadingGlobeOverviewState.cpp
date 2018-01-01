@@ -93,21 +93,26 @@ namespace onep
 
   void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
+    osg::ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel();
+
     osg::ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
     osg::ref_ptr<GlobeModel> globe = new GlobeModel(world->getCameraManipulator());
     globe->getBoundariesMesh()->loadBoundaries("./GameData/data/boundaries.dat");
     globe->getBoundariesMesh()->makeOverallBoundaries(0.005f);
 
-    osg::ref_ptr<BackgroundModel> backgroundModel = new BackgroundModel();
+    globe->getCountryOverlay()->loadCountries(
+      "./GameData/data/countries.dat",
+      "./GameData/textures/earth/distance.png",
+      globe->getBoundariesMesh()->getCountryVertices(),
+      globe->getBoundariesMesh()->getCountryTexcoords());
 
-    globeWorld->getSimulation()->setGlobeModel(globe);
-    globeWorld->getSimulation()->loadCountries("./GameData/data/countries.dat");
     globeWorld->getSimulation()->loadSkillsXml("./GameData/data/skills/passive.xml");
+    globeWorld->getSimulation()->attachCountries(globe->getCountryOverlay()->getCountryMeshs());
 
     osg::ref_ptr<CountryNameOverlay> countryNameOverlay = new CountryNameOverlay();
     countryNameOverlay->setEnabled(false);
-    countryNameOverlay->setCountryMap(globe->getCountryMeshs());
+    countryNameOverlay->setCountryMap(globe->getCountryOverlay()->getCountryMeshs());
 
     globeWorld->setGlobeModel(globe);
     globeWorld->setCountryNameOverlay(countryNameOverlay);
