@@ -1,11 +1,7 @@
 #include "Simulation.h"
 
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/ByteStream.h>
-#include <osgGaming/Helper.h>
-#include <osg/Image>
 #include <osgGaming/PropertiesManager.h>
-#include <osgGaming/TextureFactory.h>
 
 using namespace osgGaming;
 using namespace onep;
@@ -27,108 +23,6 @@ Simulation::Simulation()
   m_skillBranches[BRANCH_POLITICS] = new SkillBranch(BRANCH_POLITICS);
 
   setUpdateCallback(new Callback());
-}
-
-void Simulation::loadCountries(std::string filename)
-{
-	typedef vector<int> NeighborList;
-	typedef map<int, NeighborList> NeighborMap;
-
-  char* bytes = ResourceManager::getInstance()->loadBinary(filename);
-
-	ByteStream stream(bytes);
-
-	NeighborMap neighborMap;
-
-  osg::ref_ptr<Texture2D> distanceTexture = osgGaming::TextureFactory::getInstance()->make()
-    ->image(osgGaming::ResourceManager::getInstance()->loadImage("./GameData/textures/earth/distance.png"))
-    ->build();
-
-	int ncountries = stream.read<int>();
-	for (int i = 0; i < ncountries; i++)
-	{
-		int name_length = stream.read<int>();
-		char* name_p = stream.readString(name_length);
-		string name = name_p;
-		
-		float population = stream.read<float>();
-		float wealth = float(stream.read<int>());
-		int id = stream.read<int>();
-		float centerX = stream.read<float>();
-		float centerY = stream.read<float>();
-		float width = stream.read<float>();
-		float height = stream.read<float>();
-
-		ref_ptr<CountryData> country = new CountryData(
-			name,
-			id,
-			population,
-			wealth,
-			Vec2f((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI),
-			Vec2f(width, height));
-
-		NeighborList neighborList;
-
-		int neighbors_count = stream.read<int>();
-		for (int j = 0; j < neighbors_count; j++)
-			neighborList.push_back(stream.read<int>());
-
-    neighborMap.insert(NeighborMap::value_type(id, neighborList));
-
-    CountryMesh::BorderIdMap neighborBorderMap;
-    int neighborBorderCount = stream.read<int>();
-    for (int j = 0; j < neighborBorderCount; j++)
-    {
-      std::vector<int> borders;
-
-      int nid = stream.read<int>();
-      int bcount = stream.read<int>();
-      for (int k = 0; k < bcount; k++)
-        borders.push_back(stream.read<int>());
-
-      neighborBorderMap[nid] = borders;
-    }
-
-
-    ref_ptr<DrawElementsUInt> triangles = new DrawElementsUInt(GL_TRIANGLES, 0);
-    int triangles_count = stream.read<int>();
-    for (int j = 0; j < triangles_count; j++)
-    {
-      int v0 = stream.read<int>();
-      int v1 = stream.read<int>();
-      int v2 = stream.read<int>();
-
-      triangles->push_back(v0);
-      triangles->push_back(v2);
-      triangles->push_back(v1);
-    }
-
-    for (int j = 0; j < NUM_SKILLBRANCHES; j++)
-      country->addChild(m_skillBranches[j]);
-
-    m_globeModel->addCountry(int(id), country, triangles, distanceTexture, neighborBorderMap);
-    addChild(country);
-
-		delete[] name_p;
-	}
-
-  CountryMesh::Map& countries = m_globeModel->getCountryMeshs();
-  for (CountryMesh::Map::iterator it = countries.begin(); it != countries.end(); ++it)
-	{
-		NeighborList neighborList = neighborMap.find(it->second->getCountryData()->getId())->second;
-
-		for (NeighborList::iterator nit = neighborList.begin(); nit != neighborList.end(); ++nit)
-		{
-      it->second->addNeighbor(m_globeModel->getCountryMesh(*nit), new NeighborCountryInfo());
-		}
-	}
-
-	int mapWidth = stream.read<int>();
-	int mapHeight = stream.read<int>();
-
-	m_globeModel->setCountriesMap(new CountriesMap(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()])));
-
-  ResourceManager::getInstance()->clearCacheResource(filename);
 }
 
 void Simulation::loadSkillsXml(string filename)
@@ -175,6 +69,17 @@ void Simulation::loadSkillsXml(string filename)
 	}
 }
 
+void Simulation::attachCountries(CountryMesh::Map& countries)
+{
+  for (CountryMesh::Map::iterator it = countries.begin(); it != countries.end(); ++it)
+  {
+    for (int j = 0; j < NUM_SKILLBRANCHES; j++)
+      it->second->getCountryData()->addChild(m_skillBranches[j]);
+
+    addChild(it->second->getCountryData());
+  }
+}
+
 int Simulation::getNumSkills()
 {
   int nSkills = 0;
@@ -192,11 +97,6 @@ SkillBranch::Ptr Simulation::getSkillBranch(BranchType type)
 int Simulation::getDay()
 {
 	return m_day;
-}
-
-void Simulation::setGlobeModel(GlobeModel::Ptr model)
-{
-  m_globeModel = model;
 }
 
 void Simulation::step()

@@ -14,15 +14,14 @@ namespace onep
 
 		Simulation();
 
-    void loadCountries(std::string filename);
 		void loadSkillsXml(std::string filename);
+
+    void attachCountries(CountryMesh::Map& countries);
 
 		int getNumSkills();
     SkillBranch::Ptr getSkillBranch(BranchType type);
 
 		int getDay();
-
-    void setGlobeModel(GlobeModel::Ptr model);
 
 		void step();
 
