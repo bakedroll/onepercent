@@ -101,7 +101,7 @@ Id	Name	Population	Gross domestic product	Cycle Ids	Additional Neighbour Ids	Col
 100	Tschad	11,8	13411	95		#NAME?				
 101	Tschechien	10,52	198312	43		#NAME?				
 102	Tunesien	10,8	47439	101		#NAME?				
-103	Türkei	75,6	827209	57		#NAME?				
+103	Türkei	75,6	827209	"57; 274"		#NAME?				
 104	Uganda	35,6	23053	119		#NAME?				
 105	Ukraine	45,43	177834	37		#NAME?				
 106	Ungarn	9,9	132426	41		#NAME?				
