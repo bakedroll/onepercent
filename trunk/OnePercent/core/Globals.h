@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <QString>
 
 namespace onep
 {
@@ -33,9 +32,6 @@ namespace onep
 
   static const std::string Param_MechanicsDaysInYearName = "mechanics/days_in_year";
   static const std::string Param_MechanicsStartBuyingPowerName = "mechanics/start_buying_power";
-
-  static const std::string Param_LocalizationInfoTextDay = "localization/infoText_day";
-  static const std::string Param_LocalizationInfoTextLoading = "localization/infoText_loading";
 
   static const int NUM_SKILLBRANCHES = 5;
 

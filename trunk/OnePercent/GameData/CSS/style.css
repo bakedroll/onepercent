@@ -1,5 +1,6 @@
 QLabel#LabelLoadingText
 {
+  color: #fff;
   font-size: 20pt;
   margin: 10px;
 }
@@ -14,35 +15,21 @@ QPushButton#ButtonMainMenu
 
 QLabel#LabelSelectCountry
 {
+  color: #fff;
   font-size: 18pt;
 }
 
 QLabel#LabelClickAgain
 {
+  color: #fff;
   font-size: 12pt;
 }
 
 QLabel#LabelDays
 {
-  font-size: 18pt;
-  margin-bottom: 38px;
-}
-
-QWidget#WidgetLeftPanel
-{
-  min-width: 320px;
-  max-width: 320px;
-}
-
-QWidget#WidgetRightPanel
-{
-  min-width: 200px;
-  max-width: 200px;
-}
-
-QCheckBox,
-QRadioButton,
-QLabel
-{
   color: #fff;
+  font-size: 18pt;
+  margin-left: 5px;
+  margin-bottom: 5px;
 }
+
