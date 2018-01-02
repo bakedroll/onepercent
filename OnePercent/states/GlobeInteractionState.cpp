@@ -18,14 +18,10 @@
 #include <osgGaming/Hud.h>
 #include <osgGaming/View.h>
 #include <osgGaming/PropertiesManager.h>
-#include <osgGaming/Timer.h>
 
 #include <QLabel>
 #include <QPushButton>
-#include <QRadioButton>
-#include <QCheckBox>
 #include <QVBoxLayout>
-#include <QButtonGroup>
 
 namespace onep
 {
@@ -88,8 +84,6 @@ namespace onep
     , labelDays(nullptr)
     , labelClickCountry(nullptr)
     , labelClickAgain(nullptr)
-    , labelStats(nullptr)
-    , radioNoOverlay(nullptr)
     , countryMenuWidget(nullptr)
     , debugWindow(nullptr)
     , countryMenuWidgetFadeInAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
@@ -115,17 +109,12 @@ namespace onep
 
     int selectedCountry;
 
-    osg::ref_ptr<osgGaming::Timer> simulationTimer;
     osgGaming::Observer<int>::Ptr selectedCountryObserver;
-
-    std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
-    std::vector<osgGaming::Observer<int>::Ptr> selectedCountryIdObservers;
+    osgGaming::Observer<int>::Ptr dayObserver;
 
     QLabel* labelDays;
     QLabel* labelClickCountry;
     QLabel* labelClickAgain;
-    QLabel* labelStats;
-    QRadioButton* radioNoOverlay;
 
     CountryMenuWidget* countryMenuWidget;
 
@@ -166,21 +155,6 @@ namespace onep
       }
 
       return bReady;
-    }
-
-    void updateCountryInfoText()
-    {
-      if (base->getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryId() == 0)
-      {
-        labelStats->setText("");
-        return;
-      }
-
-      CountryData::Ptr country = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryMesh()->getCountryData();
-
-      std::string infoText = country->getCountryName() + "\n";
-      country->getValues()->getContainer()->debugPrintToString(infoText);
-      labelStats->setText(QString::fromStdString(infoText));
     }
 
     void updateCountryMenuWidgetPosition(int id)
@@ -228,10 +202,13 @@ namespace onep
 
     getHud(getView(0))->setFpsEnabled(true);
 
+    m->dayObserver = getGlobeOverviewWorld()->getSimulation()->getDayObs()->connect(osgGaming::Func<int>([this](int day)
+    {
+      m->labelDays->setText(QObject::tr("Day %1").arg(day));
+    }));
+
     m->selectedCountryObserver = getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryIdObservable()->connect(osgGaming::Func<int>([this](int id)
     {
-      m->updateCountryInfoText();
-
       if (id > 0)
       {
         CountryMesh::Ptr countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getCountryMesh(id);
@@ -291,7 +268,6 @@ namespace onep
       int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
 
       getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->setSelectedCountry(selected);
-      m->radioNoOverlay->setChecked(true);
 
       if (!m->bStarted)
       {
@@ -318,32 +294,23 @@ namespace onep
 
   void GlobeInteractionState::onKeyPressedEvent(int key)
   {
-    /*if (!ready())
-    {
-    return;
-    }*/
-
     if (m->bStarted)
     {
+      Simulation::Ptr simulation = getGlobeOverviewWorld()->getSimulation();
+
       if (key == osgGA::GUIEventAdapter::KEY_Space)
       {
-        if (m->simulationTimer->running())
+        if (simulation->running())
         {
-          m->simulationTimer->stop();
-
+          simulation->stop();
           printf("Simulation stopped\n");
         }
         else
         {
-          m->simulationTimer->start();
-
+          simulation->start();
           printf("Simulation started\n");
         }
       }
-      /*else if (key == GUIEventAdapter::KEY_P)
-      {
-      getGlobeOverviewWorld()->getSimulation()->printStats();
-      }*/
     }
   }
 
@@ -433,16 +400,6 @@ namespace onep
     m->mainOverlay->setGeometry(0, 0, int(width), int(height));
   }
 
-  void GlobeInteractionState::dayTimerElapsed()
-  {
-    getGlobeOverviewWorld()->getSimulation()->step();
-
-    std::string dayText = osgGaming::PropertiesManager::getInstance()->getValue<std::string>(Param_LocalizationInfoTextDay);
-    m->labelDays->setText(QObject::tr("Day %1").arg(getGlobeOverviewWorld()->getSimulation()->getDay()));
-
-    m->updateCountryInfoText();
-  }
-
   void GlobeInteractionState::startSimulation()
   {
     m->labelClickCountry->setText(QString());
@@ -450,10 +407,8 @@ namespace onep
     m->labelDays->setVisible(true);
 
     getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryMesh()->getCountryData()->setSkillBranchActivated(BRANCH_BANKS, true);
-
-    m->simulationTimer = osgGaming::TimerFactory::getInstance()->create<GlobeInteractionState>(&GlobeInteractionState::dayTimerElapsed, this, 1.0, false);
-    m->simulationTimer->start();
-
+    getGlobeOverviewWorld()->getSimulation()->start();
+    
     m->bStarted = true;
   }
 
@@ -487,71 +442,6 @@ namespace onep
     headerLayout->addWidget(m->labelClickCountry);
     headerLayout->addWidget(m->labelClickAgain);
 
-    QGridLayout* branchesLayout = new QGridLayout();
-
-    QButtonGroup* radioGroup = new QButtonGroup(m->mainOverlay);
-
-    m->radioNoOverlay = new QRadioButton(QObject::tr("No Overlay"));
-    m->radioNoOverlay->setChecked(true);
-    radioGroup->addButton(m->radioNoOverlay);
-
-    QConnectBoolFunctor::connect(m->radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
-    {
-      if (checked)
-        globeModel->getCountryOverlay()->clearHighlightedCountries();
-    });
-
-    branchesLayout->addWidget(m->radioNoOverlay, 0, 1);
-    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
-    {
-      QCheckBox* checkBox = new QCheckBox(QString::fromStdString(branch_getStringFromType(i)));
-      QRadioButton* radioButton = new QRadioButton(QObject::tr("Overlay"));
-      radioGroup->addButton(radioButton);
-
-      branchesLayout->addWidget(checkBox, 1 + i, 0);
-      branchesLayout->addWidget(radioButton, 1 + i, 1);
-
-      QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
-      {
-        osg::ref_ptr<CountryData> selectedCountry = globeModel->getCountryOverlay()->getSelectedCountryMesh()->getCountryData();
-        if (!selectedCountry.valid())
-          return;
-
-        selectedCountry->setSkillBranchActivated(i, checked);
-      });
-
-      QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
-      {
-        globeModel->getCountryOverlay()->setHighlightedSkillBranch(BranchType(i));
-      });
-
-      m->selectedCountryIdObservers.push_back(globeModel->getCountryOverlay()->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
-      {
-        if (selected > 0)
-        {
-          checkBox->setChecked(globeModel->getCountryOverlay()->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
-        }
-        else
-        {
-          checkBox->setChecked(false);
-        }
-
-        checkBox->setEnabled(selected > 0);
-      })));
-
-      CountryMesh::Map& countryMeshs = globeModel->getCountryOverlay()->getCountryMeshs();
-      for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
-      {
-        m->skillBranchActivatedObservers.push_back(it->second->getCountryData()->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([=](bool activated)
-        {
-          if (it->first == globeModel->getCountryOverlay()->getSelectedCountryId())
-            checkBox->setChecked(activated);
-        })));
-      }
-    }
-
-    m->labelStats = new QLabel(QString());
-
     QPushButton* debugButton = new QPushButton("Debug Window");
     debugButton->setMaximumWidth(180);
 
@@ -569,8 +459,6 @@ namespace onep
     });
 
     QVBoxLayout* leftLayout = new QVBoxLayout();
-    leftLayout->addLayout(branchesLayout);
-    leftLayout->addWidget(m->labelStats);
     leftLayout->addStretch(1);
     leftLayout->addWidget(debugButton);
 
@@ -579,44 +467,9 @@ namespace onep
     leftWidget->setObjectName("WidgetLeftPanel");
     leftWidget->setLayout(leftLayout);
 
-    // getView(0)->getSceneCamera()->getGraphicsContext()->getState()
-
-    QVBoxLayout* rightLayout = new QVBoxLayout();
-
-    // Skills
-    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
-    {
-      // Skills
-      int nskills = simulation->getSkillBranch(BranchType(i))->getNumSkills();
-
-      QLabel* label = new QLabel(QString::fromStdString(branch_getStringFromType(i)));
-      rightLayout->addWidget(label);
-
-      for (int j = 0; j < nskills; j++)
-      {
-        Skill::Ptr skill = simulation->getSkillBranch(BranchType(i))->getSkill(j);
-
-        QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getName()));
-        rightLayout->addWidget(checkBox);
-
-        QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
-        {
-          simulation->getSkillBranch(BranchType(i))->getSkill(j)->setActivated(checked);
-        });
-      }
-    }
-
-    rightLayout->addStretch(1);
-
-    QWidget* rightWidget = new QWidget();
-    rightWidget->setContentsMargins(0, 0, 0, 0);
-    rightWidget->setObjectName("WidgetRightPanel");
-    rightWidget->setLayout(rightLayout);
-
     QHBoxLayout* centralLayout = new QHBoxLayout();
     centralLayout->addWidget(leftWidget);
     centralLayout->addStretch(1);
-    centralLayout->addWidget(rightWidget);
 
     QHBoxLayout* footerLayout = new QHBoxLayout();
     footerLayout->addWidget(m->labelDays);

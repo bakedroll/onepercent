@@ -199,7 +199,7 @@ namespace onep
     int enabled;
     m->uniformHoverEnabled->get(enabled);
 
-    if (bHoverEnabled == bool(enabled))
+    if (int(bHoverEnabled) == enabled)
       return;
 
     m->uniformHoverEnabled->set(bHoverEnabled ? 1 : 0);

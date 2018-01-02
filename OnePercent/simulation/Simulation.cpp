@@ -1,114 +1,159 @@
 #include "Simulation.h"
+#include "core/QConnectFunctor.h"
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/PropertiesManager.h>
 
-using namespace osgGaming;
-using namespace onep;
-using namespace osg;
-using namespace std;
+#include <QTimer>
 
-Simulation::Simulation()
-	: Group()
-  , SimulationCallback()
-  , m_applySkillsVisitor(new SimulationVisitor(SimulationVisitor::APPLY_SKILLS))
-  , m_affectNeighborsVisitor(new SimulationVisitor(SimulationVisitor::AFFECT_NEIGHBORS))
-  , m_progressCountriesVisitor(new SimulationVisitor(SimulationVisitor::PROGRESS_COUNTRIES))
-  , m_day(0)
+namespace onep
 {
-  m_skillBranches[BRANCH_CONTROL]  = new SkillBranch(BRANCH_CONTROL);
-  m_skillBranches[BRANCH_BANKS]    = new SkillBranch(BRANCH_BANKS);
-  m_skillBranches[BRANCH_CONCERNS] = new SkillBranch(BRANCH_CONCERNS);
-  m_skillBranches[BRANCH_MEDIA]    = new SkillBranch(BRANCH_MEDIA);
-  m_skillBranches[BRANCH_POLITICS] = new SkillBranch(BRANCH_POLITICS);
-
-  setUpdateCallback(new Callback());
-}
-
-void Simulation::loadSkillsXml(string filename)
-{
-	PropertiesManager::getInstance()->loadPropertiesFromXmlResource(filename);
-
-	int nelements = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->size();
-	for (int i = 0; i < nelements; i++)
-	{
-		string name = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "name")->get();
-		string typeStr = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<string>(i, "branch")->get();
-
-    osg::ref_ptr<PropertyArray> arr = PropertiesManager::getInstance()->root()->group("skills")->array("passive")->array(i, "attributes");
-    int arrsize = arr->size();
-
-    BranchType type = branch_getTypeFromString(typeStr);
-    ref_ptr<Skill> skill = new Skill(name);
-
-    for (int j = 0; j < arrsize; j++)
-    {
-      string valuetypeStr = arr->property<string>(j, "valuetype")->get();
-      string methodStr = arr->property<string>(j, "method")->get();
-      float value = arr->property<float>(j, "value")->get();
-      bool branchAttr = arr->property<bool>(j, "branch_attr")->get();
-
-      if (branchAttr)
-      {
-        skill->addBranchAttribute(
-          type,
-          countryValue_getTypeFromString(valuetypeStr),
-          valueMethod_getTypeFromString(methodStr),
-          value);
-      }
-      else
-      {
-        skill->addAttribute(
-          countryValue_getTypeFromString(valuetypeStr),
-          valueMethod_getTypeFromString(methodStr),
-          value);
-      }
-    }
-
-    m_skillBranches[type]->addSkill(skill);
-	}
-}
-
-void Simulation::attachCountries(CountryMesh::Map& countries)
-{
-  for (CountryMesh::Map::iterator it = countries.begin(); it != countries.end(); ++it)
+  struct Simulation::Impl
   {
-    for (int j = 0; j < NUM_SKILLBRANCHES; j++)
-      it->second->getCountryData()->addChild(m_skillBranches[j]);
+    Impl()
+      : applySkillsVisitor(new SimulationVisitor(SimulationVisitor::APPLY_SKILLS))
+      , affectNeighborsVisitor(new SimulationVisitor(SimulationVisitor::AFFECT_NEIGHBORS))
+      , progressCountriesVisitor(new SimulationVisitor(SimulationVisitor::PROGRESS_COUNTRIES))
+      , oDay(new osgGaming::Observable<int>(0))
+    {}
 
-    addChild(it->second->getCountryData());
+    SkillBranch::Map skillBranches;
+
+    GlobeModel::Ptr globeModel;
+
+    SimulationVisitor::Ptr applySkillsVisitor;
+    SimulationVisitor::Ptr affectNeighborsVisitor;
+    SimulationVisitor::Ptr progressCountriesVisitor;
+
+    osgGaming::Observable<int>::Ptr oDay;
+
+    QTimer timer;
+  };
+
+  Simulation::Simulation()
+    : Group()
+    , SimulationCallback()
+    , m(new Impl())
+
+  {
+    m->skillBranches[BRANCH_CONTROL] = new SkillBranch(BRANCH_CONTROL);
+    m->skillBranches[BRANCH_BANKS] = new SkillBranch(BRANCH_BANKS);
+    m->skillBranches[BRANCH_CONCERNS] = new SkillBranch(BRANCH_CONCERNS);
+    m->skillBranches[BRANCH_MEDIA] = new SkillBranch(BRANCH_MEDIA);
+    m->skillBranches[BRANCH_POLITICS] = new SkillBranch(BRANCH_POLITICS);
+
+    m->timer.setSingleShot(false);
+    m->timer.setInterval(1000);
+
+    setUpdateCallback(new Callback());
+
+    QConnectFunctor::connect(&m->timer, SIGNAL(timeout()), [this]()
+    {
+      accept(*m->applySkillsVisitor);
+      accept(*m->affectNeighborsVisitor);
+      accept(*m->progressCountriesVisitor);
+
+      // increment day
+      m->oDay->set(m->oDay->get() + 1);
+    });
   }
-}
 
-int Simulation::getNumSkills()
-{
-  int nSkills = 0;
-  for (SkillBranch::Map::iterator it = m_skillBranches.begin(); it != m_skillBranches.end(); ++it)
-    nSkills += it->second->getNumSkills();
+  Simulation::~Simulation()
+  {
+  }
 
-	return nSkills;
-}
+  void Simulation::loadSkillsXml(std::string filename)
+  {
+    osgGaming::PropertiesManager::getInstance()->loadPropertiesFromXmlResource(filename);
 
-SkillBranch::Ptr Simulation::getSkillBranch(BranchType type)
-{
-  return m_skillBranches[type];
-}
+    int nelements = osgGaming::PropertiesManager::getInstance()->root()->group("skills")->array("passive")->size();
+    for (int i = 0; i < nelements; i++)
+    {
+      std::string name = osgGaming::PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<std::string>(i, "name")->get();
+      std::string typeStr = osgGaming::PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<std::string>(i, "branch")->get();
 
-int Simulation::getDay()
-{
-	return m_day;
-}
+      osg::ref_ptr<osgGaming::PropertyArray> arr = osgGaming::PropertiesManager::getInstance()->root()->group("skills")->array("passive")->array(i, "attributes");
+      int arrsize = arr->size();
 
-void Simulation::step()
-{
-  accept(*m_applySkillsVisitor);
-  accept(*m_affectNeighborsVisitor);
-  accept(*m_progressCountriesVisitor);
+      BranchType type = branch_getTypeFromString(typeStr);
+      osg::ref_ptr<Skill> skill = new Skill(name);
 
-  m_day++;
-}
+      for (int j = 0; j < arrsize; j++)
+      {
+        std::string valuetypeStr = arr->property<std::string>(j, "valuetype")->get();
+        std::string methodStr = arr->property<std::string>(j, "method")->get();
+        float value = arr->property<float>(j, "value")->get();
+        bool branchAttr = arr->property<bool>(j, "branch_attr")->get();
 
-bool Simulation::callback(SimulationVisitor* visitor)
-{
-  return true;
+        if (branchAttr)
+        {
+          skill->addBranchAttribute(
+            type,
+            countryValue_getTypeFromString(valuetypeStr),
+            valueMethod_getTypeFromString(methodStr),
+            value);
+        }
+        else
+        {
+          skill->addAttribute(
+            countryValue_getTypeFromString(valuetypeStr),
+            valueMethod_getTypeFromString(methodStr),
+            value);
+        }
+      }
+
+      m->skillBranches[type]->addSkill(skill);
+    }
+  }
+
+  void Simulation::attachCountries(CountryMesh::Map& countries)
+  {
+    for (CountryMesh::Map::iterator it = countries.begin(); it != countries.end(); ++it)
+    {
+      for (int j = 0; j < NUM_SKILLBRANCHES; j++)
+        it->second->getCountryData()->addChild(m->skillBranches[j]);
+
+      addChild(it->second->getCountryData());
+    }
+  }
+
+  int Simulation::getNumSkills()
+  {
+    int nSkills = 0;
+    for (SkillBranch::Map::iterator it = m->skillBranches.begin(); it != m->skillBranches.end(); ++it)
+      nSkills += it->second->getNumSkills();
+
+    return nSkills;
+  }
+
+  SkillBranch::Ptr Simulation::getSkillBranch(BranchType type)
+  {
+    return m->skillBranches[type];
+  }
+
+  osgGaming::Observable<int>::Ptr Simulation::getDayObs()
+  {
+    return m->oDay;
+  }
+
+  void Simulation::start()
+  {
+    m->timer.start();
+  }
+
+  void Simulation::stop()
+  {
+    m->timer.stop();
+  }
+
+  bool Simulation::running() const
+  {
+    return m->timer.isActive();
+  }
+
+  bool Simulation::callback(SimulationVisitor* visitor)
+  {
+    return true;
+  }
+
 }
