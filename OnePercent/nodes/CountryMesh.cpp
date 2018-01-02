@@ -1,38 +1,88 @@
 #include "CountryMesh.h"
 
 #include <osg/Geometry>
-#include <osg/Material>
 #include <osgGaming/ResourceManager.h>
+#include <osgGaming/SimulationCallback.h>
+#include <osgGaming/Animation.h>
 
 namespace onep
 {
+  class UpdateHoverIntensityCallback : public osgGaming::SimulationCallback
+  {
+  public:
+    UpdateHoverIntensityCallback(osg::ref_ptr<osg::Uniform> u)
+      : osgGaming::SimulationCallback()
+      , uniform(u)
+      , animationHover(new osgGaming::Animation<float>(0.0f, 0.2f, osgGaming::AnimationEase::CIRCLE_OUT))
+      , bEnabled(false)
+      , bStarted(false)
+    {}
+
+    void setEnabled(bool e)
+    {
+      if (bEnabled == e)
+        return;
+
+      bEnabled = e;
+      if (bEnabled)
+        bStarted = true;
+
+    }
+
+  protected:
+    virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override
+    {
+      if (!bEnabled)
+        return;
+
+      if (bStarted)
+      {
+        bStarted = false;
+        animationHover->beginAnimation(0.0f, 1.0f, simTime);
+      }
+
+      uniform->set(animationHover->getValue(simTime));
+    }
+
+  private:
+    osg::ref_ptr<osg::Uniform> uniform;
+    osg::ref_ptr<osgGaming::Animation<float>> animationHover;
+    bool bEnabled;
+    bool bStarted;
+  };
+
   struct CountryMesh::Impl
   {
     Impl() {}
 
-    osg::ref_ptr<osg::Material> material;
     CountryData::Ptr countryData;
 
     List neighbors;
     BorderIdMap neighbourBorders;
 
-    osg::ref_ptr<osg::Program> distanceProgram;
-
     osg::ref_ptr<osg::StateSet> stateSet;
 
     bool bShaderEnabled;
+
+    osg::ref_ptr<osg::Uniform> uniformColor;
+    osg::ref_ptr<osg::Uniform> uniformAlpha;
+    osg::ref_ptr<osg::Uniform> uniformHoverEnabled;
+    osg::ref_ptr<osg::Uniform> uniformHoverIntensity;
+
+    osg::ref_ptr<UpdateHoverIntensityCallback> callback;
   };
 
   CountryMesh::CountryMesh(
+    CountryData::Ptr data,
     osg::ref_ptr<osg::Vec3Array> vertices,
     osg::ref_ptr<osg::Vec2Array> texcoords,
     osg::ref_ptr<osg::DrawElementsUInt> triangles,
-    osg::ref_ptr<osg::Program> program,
     BorderIdMap& neighbourBorders)
     : osg::Geode()
     , m(new Impl())
   {
     m->neighbourBorders = neighbourBorders;
+    m->countryData = data;
 
     osg::ref_ptr<osg::Geometry> geo = new osg::Geometry();
     geo->setVertexArray(vertices);
@@ -41,16 +91,21 @@ namespace onep
 
     addDrawable(geo);
 
-    m->material = new osg::Material();
-    m->material->setColorMode(osg::Material::DIFFUSE);
-
-    m->distanceProgram = program;
+    m->uniformHoverEnabled = new osg::Uniform("bHoverEnabled", 0);
+    m->uniformAlpha = new osg::Uniform("alpha", 0.0f);
+    m->uniformColor = new osg::Uniform("color", osg::Vec3f(0.0f, 0.0f, 0.0f));
+    m->uniformHoverIntensity = new osg::Uniform("hoverIntensity", 0.0f);
     
     m->stateSet = getOrCreateStateSet();
-    //m->stateSet->setAttributeAndModes(m->distanceProgram, osg::StateAttribute::OFF);
-    m->stateSet->setAttributeAndModes(m->material, osg::StateAttribute::ON);
+    m->stateSet->addUniform(m->uniformHoverEnabled);
+    m->stateSet->addUniform(m->uniformAlpha);
+    m->stateSet->addUniform(m->uniformColor);
+    m->stateSet->addUniform(m->uniformHoverIntensity);
 
     m->bShaderEnabled = false;
+
+    m->callback = new UpdateHoverIntensityCallback(m->uniformHoverIntensity);
+    addUpdateCallback(m->callback);
   }
 
   CountryMesh::~CountryMesh()
@@ -104,45 +159,50 @@ namespace onep
     switch (mode)
     {
     case MODE_SELECTED:
-      m->material->setDiffuse(osg::Material::FRONT, osg::Vec4f(1.0f, 0.0f, 0.0f, 0.5f));
+      m->uniformAlpha->set(0.5f);
+      m->uniformColor->set(osg::Vec3f(0.5f, 0.69f, 1.0f));
       break;
     case MODE_NEIGHBOR:
-      m->material->setDiffuse(osg::Material::FRONT, osg::Vec4f(1.0f, 1.0f, 0.0f, 0.3f));
+      m->uniformAlpha->set(0.4f);
+      m->uniformColor->set(osg::Vec3f(0.5f, 0.5f, 0.5f));
       break;
     case MODE_HIGHLIGHT_BANKS:
-      m->material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.0f, 0.0f, 0.8f, 0.3f));
+      m->uniformAlpha->set(0.3f);
+      m->uniformColor->set(osg::Vec3f(0.0f, 0.0f, 0.8f));
       break;
     case MODE_HIGHLIGHT_CONTROL:
-      m->material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.635f, 0.439f, 0.031f, 0.3f));
+      m->uniformAlpha->set(0.3f);
+      m->uniformColor->set(osg::Vec3f(0.635f, 0.439f, 0.031f));
       break;
     case MODE_HIGHLIGHT_CONCERNS:
-      m->material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.118f, 0.753f, 0.208f, 0.3f));
+      m->uniformAlpha->set(0.3f);
+      m->uniformColor->set(osg::Vec3f(0.118f, 0.753f, 0.208f));
       break;
     case MODE_HIGHLIGHT_MEDIA:
-      m->material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.902f, 1.0f, 0.357f, 0.3f));
+      m->uniformAlpha->set(0.3f);
+      m->uniformColor->set(osg::Vec3f(0.902f, 1.0f, 0.357f));
       break;
     case MODE_HIGHLIGHT_POLITICS:
-      m->material->setDiffuse(osg::Material::FRONT, osg::Vec4f(0.69f, 0.247f, 0.624f, 0.3f));
+      m->uniformAlpha->set(0.3f);
+      m->uniformColor->set(osg::Vec3f(0.69f, 0.247f, 0.624f));
       break;
+    case MODE_HOVER:
+      m->uniformAlpha->set(0.0f);
+      m->uniformColor->set(osg::Vec3f(0.5f, 0.5f, 0.5f));
     default:
       break;
     }
   }
 
-  void CountryMesh::setCountryData(CountryData::Ptr country)
+  void CountryMesh::setHoverMode(bool bHoverEnabled)
   {
-    m->countryData = country;
-  }
+    int enabled;
+    m->uniformHoverEnabled->get(enabled);
 
-  void CountryMesh::setDistanceShaderEnabled(bool enabled)
-  {
-    if (m->bShaderEnabled == enabled)
+    if (bHoverEnabled == bool(enabled))
       return;
 
-    m->bShaderEnabled = enabled;
-    if (m->bShaderEnabled)
-      m->stateSet->setAttribute(m->distanceProgram, osg::StateAttribute::ON);
-    else
-      m->stateSet->removeAttribute(m->distanceProgram);
+    m->uniformHoverEnabled->set(bHoverEnabled ? 1 : 0);
+    m->callback->setEnabled(bHoverEnabled);
   }
 }

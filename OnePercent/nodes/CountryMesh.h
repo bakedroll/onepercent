@@ -26,13 +26,14 @@ namespace onep
       MODE_HIGHLIGHT_MEDIA = 5,
       MODE_HIGHLIGHT_CONCERNS = 6,
       MODE_HIGHLIGHT_POLITICS = 7,
+      MODE_HOVER = 8
     } ColorMode;
 
     CountryMesh(
+      CountryData::Ptr data,
       osg::ref_ptr<osg::Vec3Array> vertices,
       osg::ref_ptr<osg::Vec2Array> texcoords,
       osg::ref_ptr<osg::DrawElementsUInt> triangles,
-      osg::ref_ptr<osg::Program> program,
       BorderIdMap& neighbourBorders);
 
     ~CountryMesh();
@@ -48,9 +49,7 @@ namespace onep
     bool getIsOnOcean() const;
 
     void setColorMode(ColorMode mode);
-    void setCountryData(CountryData::Ptr country);
-
-    void setDistanceShaderEnabled(bool enabled);
+    void setHoverMode(bool bHoverEnabled);
 
   private:
     struct Impl;
