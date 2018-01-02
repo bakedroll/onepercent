@@ -92,7 +92,9 @@ namespace onep
     , radioNoOverlay(nullptr)
     , countryMenuWidget(nullptr)
     , debugWindow(nullptr)
-    , countryMenuWidgetFadeAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
+    , countryMenuWidgetFadeInAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
+    , countryMenuWidgetFadeOutAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_OUT))
+    , bFadingOutCountryMenu(false)
     {
 
     }
@@ -131,9 +133,12 @@ namespace onep
 
     DebugWindow* debugWindow;
 
-    osg::ref_ptr<osgGaming::Animation<float>> countryMenuWidgetFadeAnimation;
+    osg::ref_ptr<osgGaming::Animation<float>> countryMenuWidgetFadeInAnimation;
+    osg::ref_ptr<osgGaming::Animation<float>> countryMenuWidgetFadeOutAnimation;
 
     osg::Vec2i mousePos;
+
+    bool bFadingOutCountryMenu;
 
     CountryMesh::Ptr pickCountryMeshAt(const osg::Vec2i& pos)
     {
@@ -192,8 +197,17 @@ namespace onep
 
       osg::Vec3 screen = position * view * proj * win;
 
+      float alpha;
+      if (bFadingOutCountryMenu)
+        alpha = countryMenuWidgetFadeOutAnimation->getValue(base->getSimulationTime());
+      else
+        alpha = countryMenuWidgetFadeInAnimation->getValue(base->getSimulationTime());
+
       countryMenuWidget->setCenterPosition(int(screen.x()), int(base->getView(0)->getResolution().y() - screen.y()));
-      countryMenuWidget->setColor(osg::Vec4f(1.0f, 1.0f, 1.0f, countryMenuWidgetFadeAnimation->getValue(base->getSimulationTime())));
+      countryMenuWidget->setColor(osg::Vec4f(1.0f, 1.0f, 1.0f, alpha));
+
+      if (bFadingOutCountryMenu && alpha == 0.0f)
+        countryMenuWidget->setVisible(false);
     }
   };
 
@@ -229,7 +243,8 @@ namespace onep
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle()),
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio())), m->paramCameraMinDistance), getSimulationTime());
 
-        m->countryMenuWidgetFadeAnimation->beginAnimation(0.0f, 0.8f, getSimulationTime());
+        m->countryMenuWidgetFadeInAnimation->beginAnimation(0.0f, 0.8f, getSimulationTime());
+        m->bFadingOutCountryMenu = false;
 
         m->countryMenuWidget->setVisible(true);
         m->updateCountryMenuWidgetPosition(id);
@@ -253,7 +268,7 @@ namespace onep
   {
     StateEvent* e = GlobeCameraState::update();
 
-    if (m->selectedCountry > 0)
+    if (m->selectedCountry > 0 && m->countryMenuWidget->isVisible())
       m->updateCountryMenuWidgetPosition(m->selectedCountry);
 
     CountryMesh::Ptr hovered = m->pickCountryMeshAt(m->mousePos);
@@ -367,13 +382,21 @@ namespace onep
   void GlobeInteractionState::onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change)
   {
     if (!m->ready())
-    {
       return;
-    }
 
     osg::Vec2f latLong = getCameraLatLong();
     float distance = getCameraDistance();
     osg::Vec2f viewAngle = getCameraViewAngle();
+
+    if (button != osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
+    {
+      if (m->selectedCountry > 0 && !m->bFadingOutCountryMenu)
+      {
+        double time = getSimulationTime();
+        m->bFadingOutCountryMenu = true;
+        m->countryMenuWidgetFadeOutAnimation->beginAnimation(m->countryMenuWidgetFadeInAnimation->getValue(time), 0.0f, time);
+      }
+    }
 
     if (button == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON)
     {
