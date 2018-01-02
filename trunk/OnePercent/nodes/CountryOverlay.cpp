@@ -30,8 +30,7 @@ namespace onep
       if (countryMeshs.find(id) != countryMeshs.end())
         return;
 
-      CountryMesh::Ptr mesh = new CountryMesh(vertices, texcoords, triangles, countriesProgram, neighborBorders);
-      mesh->setCountryData(countryData);
+      CountryMesh::Ptr mesh = new CountryMesh(countryData, vertices, texcoords, triangles, neighborBorders);
 
       countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
       base->addChild(mesh, false);
@@ -60,8 +59,6 @@ namespace onep
 
     CountryOverlay* base;
 
-    osg::ref_ptr<osg::Program> countriesProgram;
-
     CountryMesh::Map countryMeshs;
     CountriesMap::Ptr countriesMap;
 
@@ -79,14 +76,15 @@ namespace onep
     : osg::Switch()
     , m(new Impl(this))
   {
-    m->countriesProgram = new osg::Program();
+    osg::ref_ptr<osg::Program> program = new osg::Program();
     osg::ref_ptr<osg::Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/country.frag", osg::Shader::FRAGMENT);
     osg::ref_ptr<osg::Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
-    m->countriesProgram->addShader(frag_shader);
-    m->countriesProgram->addShader(vert_shader);
+    program->addShader(frag_shader);
+    program->addShader(vert_shader);
 
     osg::ref_ptr<osg::StateSet> stateSet = getOrCreateStateSet();
 
+    stateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
     stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
     stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
@@ -239,37 +237,29 @@ namespace onep
 
   void CountryOverlay::setHoveredCountry(CountryMesh::Ptr countryMesh)
   {
-    if (countryMesh != m->hoveredCountryMesh)
+    if (countryMesh == m->hoveredCountryMesh)
+      return;
+
+    if (m->hoveredCountryMesh)
     {
-      if (m->hoveredCountryMesh)
-      {
-        m->hoveredCountryMesh->setDistanceShaderEnabled(false);
+      m->hoveredCountryMesh->setHoverMode(false);
 
-        if (m->highlightedCountries.count(m->hoveredCountryMesh) == 0)
-          setChildValue(m->hoveredCountryMesh, false);
-      }
+      if (m->highlightedCountries.count(m->hoveredCountryMesh) == 0)
+        setChildValue(m->hoveredCountryMesh, false);
+    }
 
-      m->hoveredCountryMesh = countryMesh;
+    m->hoveredCountryMesh = countryMesh;
 
-      if (!m->hoveredCountryMesh.valid())
-        return;
+    if (!m->hoveredCountryMesh.valid())
+      return;
 
-      if (getSelectedCountryId() == m->hoveredCountryMesh->getCountryData()->getId())
-      {
-        m->hoveredCountryMesh->setDistanceShaderEnabled(false);
-        m->hoveredCountryMesh.release();
-        return;
-      }
-
-      m->hoveredCountryMesh->setDistanceShaderEnabled(true);
+    if (m->highlightedCountries.count(m->hoveredCountryMesh) == 0)
+    {
+      m->hoveredCountryMesh->setColorMode(CountryMesh::MODE_HOVER);
       setChildValue(m->hoveredCountryMesh, true);
     }
-    // disable shader after selection
-    else if (m->hoveredCountryMesh && getSelectedCountryId() == m->hoveredCountryMesh->getCountryData()->getId())
-    {
-      m->hoveredCountryMesh->setDistanceShaderEnabled(false);
-      m->hoveredCountryMesh.release();
-    }
+
+    m->hoveredCountryMesh->setHoverMode(true);
   }
 
   void CountryOverlay::setAllCountriesVisibility(bool visibility)
