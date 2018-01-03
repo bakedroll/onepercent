@@ -445,7 +445,8 @@ namespace onep
     headerLayout->addWidget(m->labelClickCountry);
     headerLayout->addWidget(m->labelClickAgain);
 
-    QPushButton* debugButton = new QPushButton("Debug Window");
+    QPushButton* debugButton = new QPushButton(QObject::tr("Debug Window"));
+    debugButton->setObjectName("DebugButton");
     debugButton->setMaximumWidth(180);
 
     QConnectFunctor::connect(debugButton, SIGNAL(clicked()), [this]()
