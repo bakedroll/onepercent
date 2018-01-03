@@ -220,16 +220,21 @@ namespace onep
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle()),
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio())), m->paramCameraMinDistance), getSimulationTime());
 
-        m->countryMenuWidgetFadeInAnimation->beginAnimation(0.0f, 0.8f, getSimulationTime());
-        m->bFadingOutCountryMenu = false;
+        if (m->selectedCountry != id)
+        {
+          m->countryMenuWidgetFadeInAnimation->beginAnimation(0.0f, 0.8f, getSimulationTime());
+          m->bFadingOutCountryMenu = false;
 
-        m->countryMenuWidget->setVisible(true);
-        m->updateCountryMenuWidgetPosition(id);
+          m->countryMenuWidget->setVisible(true);
+          m->updateCountryMenuWidgetPosition(id);
+        }
       }
       else
       {
         m->countryMenuWidget->setVisible(false);
       }
+
+      m->selectedCountry = id;
     }));
 
     setCameraMotionDuration(2.0);
@@ -266,7 +271,7 @@ namespace onep
       CountryMesh::Ptr countryMesh = m->pickCountryMeshAt(m->mousePos);
 
       int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
-
+      int prevSelected = m->selectedCountry;
       getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->setSelectedCountry(selected);
 
       if (!m->bStarted)
@@ -277,7 +282,7 @@ namespace onep
         }
         else
         {
-          if (m->selectedCountry == selected)
+          if (prevSelected == selected)
           {
             startSimulation();
           }
@@ -287,8 +292,6 @@ namespace onep
           }
         }
       }
-
-      m->selectedCountry = selected;
     }
   }
 

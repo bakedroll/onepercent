@@ -207,10 +207,10 @@ namespace onep
   {
     m->oSelectedCountryId->set(countryId);
 
+    clearHighlightedCountries();
+
     if (countryId == 0)
       return;
-
-    clearHighlightedCountries();
 
     m->highlightedBranch = BRANCH_UNDEFINED;
 
