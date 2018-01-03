@@ -33,3 +33,8 @@ QLabel#LabelDays
   margin-bottom: 5px;
 }
 
+QPushButton#DebugButton
+{
+  min-width: 120px;  
+  max-width: 180px;
+}
