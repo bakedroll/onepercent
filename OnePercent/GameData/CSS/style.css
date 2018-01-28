@@ -25,6 +25,11 @@ QLabel#LabelClickAgain
   font-size: 12pt;
 }
 
+QLabel#LabelSkillPoints
+{
+  font-size: 14pt;
+}
+
 QLabel#LabelDays
 {
   color: #fff;

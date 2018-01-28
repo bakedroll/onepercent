@@ -31,8 +31,6 @@ namespace onep
 
     virtual void onResizeEvent(float width, float height) override;
 
-		void startSimulation();
-
 	protected:
 		virtual osg::ref_ptr<osgGaming::Hud> overrideHud(osg::ref_ptr<osgGaming::View> view) override;
     void setupUi();
