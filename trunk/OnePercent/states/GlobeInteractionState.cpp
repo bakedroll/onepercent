@@ -79,11 +79,8 @@ namespace onep
     , paramCameraScrollSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraScrollSpeedName))
     , paramCameraRotationSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraRotationSpeedName))
     , bReady(false)
-    , bStarted(false)
     , selectedCountry(0)
     , labelDays(nullptr)
-    , labelClickCountry(nullptr)
-    , labelClickAgain(nullptr)
     , countryMenuWidget(nullptr)
     , debugWindow(nullptr)
     , countryMenuWidgetFadeInAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
@@ -105,7 +102,6 @@ namespace onep
     float paramCameraRotationSpeed;
 
     bool bReady;
-    bool bStarted;
 
     int selectedCountry;
 
@@ -113,8 +109,6 @@ namespace onep
     osgGaming::Observer<int>::Ptr dayObserver;
 
     QLabel* labelDays;
-    QLabel* labelClickCountry;
-    QLabel* labelClickAgain;
 
     CountryMenuWidget* countryMenuWidget;
 
@@ -220,13 +214,22 @@ namespace onep
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle()),
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio())), m->paramCameraMinDistance), getSimulationTime());
 
-        if (m->selectedCountry != id)
+        if (m->selectedCountry != id || m->bFadingOutCountryMenu)
         {
-          m->countryMenuWidgetFadeInAnimation->beginAnimation(0.0f, 0.8f, getSimulationTime());
           m->bFadingOutCountryMenu = false;
-
           m->countryMenuWidget->setVisible(true);
-          m->updateCountryMenuWidgetPosition(id);
+
+          if (m->selectedCountry != id)
+          {
+            m->countryMenuWidgetFadeInAnimation->beginAnimation(0.0f, 0.8f, getSimulationTime());
+            m->countryMenuWidget->setCountryMesh(countryMesh);
+            m->updateCountryMenuWidgetPosition(id);
+          }
+          else
+          {
+            double time = getSimulationTime();
+            m->countryMenuWidgetFadeInAnimation->beginAnimation(m->countryMenuWidgetFadeOutAnimation->getValue(time), 0.8f, time);
+          }
         }
       }
       else
@@ -271,48 +274,25 @@ namespace onep
       CountryMesh::Ptr countryMesh = m->pickCountryMeshAt(m->mousePos);
 
       int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
-      int prevSelected = m->selectedCountry;
       getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->setSelectedCountry(selected);
-
-      if (!m->bStarted)
-      {
-        if (selected == 0)
-        {
-          m->labelClickAgain->setText(QString());
-        }
-        else
-        {
-          if (prevSelected == selected)
-          {
-            startSimulation();
-          }
-          else
-          {
-            m->labelClickAgain->setText(QObject::tr("Click again to confirm your selection."));
-          }
-        }
-      }
     }
   }
 
   void GlobeInteractionState::onKeyPressedEvent(int key)
   {
-    if (m->bStarted)
-    {
-      Simulation::Ptr simulation = getGlobeOverviewWorld()->getSimulation();
+    Simulation::Ptr simulation = getGlobeOverviewWorld()->getSimulation();
 
-      if (key == osgGA::GUIEventAdapter::KEY_Space)
+    if (key == osgGA::GUIEventAdapter::KEY_Space)
+    {
+      if (simulation->running())
       {
-        if (simulation->running())
-        {
-          simulation->stop();
-          printf("Simulation stopped\n");
-        }
-        else
-        {
-          simulation->start();
-          printf("Simulation started\n");
-        }
+        simulation->stop();
+        printf("Simulation stopped\n");
+      }
+      else
+      {
+        simulation->start();
+        printf("Simulation started\n");
       }
     }
   }
@@ -403,18 +383,6 @@ namespace onep
     m->mainOverlay->setGeometry(0, 0, int(width), int(height));
   }
 
-  void GlobeInteractionState::startSimulation()
-  {
-    m->labelClickCountry->setText(QString());
-    m->labelClickAgain->setText(QString());
-    m->labelDays->setVisible(true);
-
-    getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryMesh()->getCountryData()->setSkillBranchActivated(BRANCH_BANKS, true);
-    getGlobeOverviewWorld()->getSimulation()->start();
-    
-    m->bStarted = true;
-  }
-
   osg::ref_ptr<osgGaming::Hud> GlobeInteractionState::overrideHud(osg::ref_ptr<osgGaming::View> view)
   {
     return new osgGaming::Hud();
@@ -431,19 +399,8 @@ namespace onep
     m->mainOverlay->setContentsMargins(5, 5, 5, 5);
     m->mainOverlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
 
-    m->labelClickCountry = new QLabel(QObject::tr("Please select a country."));
-    m->labelClickCountry->setObjectName("LabelSelectCountry");
-
-    m->labelClickAgain = new QLabel(QString());
-    m->labelClickAgain->setObjectName("LabelClickAgain");
-
     m->labelDays = new QLabel(QString());
     m->labelDays->setObjectName("LabelDays");
-    m->labelDays->setVisible(false);
-
-    QVBoxLayout* headerLayout = new QVBoxLayout();
-    headerLayout->addWidget(m->labelClickCountry);
-    headerLayout->addWidget(m->labelClickAgain);
 
     QPushButton* debugButton = new QPushButton(QObject::tr("Debug Window"));
     debugButton->setObjectName("DebugButton");
@@ -481,13 +438,12 @@ namespace onep
 
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addLayout(headerLayout);
     layout->addLayout(centralLayout, 1);
     layout->addLayout(footerLayout);
 
     m->mainOverlay->setLayout(layout);
 
-    m->countryMenuWidget = new CountryMenuWidget();
+    m->countryMenuWidget = new CountryMenuWidget(getGlobeOverviewWorld()->getSimulation());
     m->countryMenuWidget->setCenterPosition(500, 500);
 
     getOverlayCompositor()->addVirtualOverlay(m->mainOverlay);

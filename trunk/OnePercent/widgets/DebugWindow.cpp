@@ -33,9 +33,11 @@ namespace onep
 
     osgGaming::Observer<int>::Ptr notifySelectedCountry;
     osgGaming::Observer<int>::Ptr notifyDay;
+    osgGaming::Observer<int>::Ptr notifySkillpoints;
 
     QRadioButton* radioNoOverlay;
     QLabel* labelStats;
+    QLabel* labelSkillpoints;
 
     std::vector<osgGaming::Observer<int>::Ptr> selectedCountryIdObservers;
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
@@ -154,6 +156,8 @@ namespace onep
       }
 
       labelStats = new QLabel(QString());
+      labelSkillpoints = new QLabel(QString());
+      labelSkillpoints->setObjectName("LabelSkillPoints");
 
       QVBoxLayout* rightLayout = new QVBoxLayout();
 
@@ -190,6 +194,7 @@ namespace onep
       QVBoxLayout* leftLayout = new QVBoxLayout();
       leftLayout->addWidget(toggleCountryButton);
       leftLayout->addLayout(branchesLayout);
+      leftLayout->addWidget(labelSkillpoints);
       leftLayout->addWidget(labelStats);
       leftLayout->addStretch(1);
 
@@ -220,6 +225,11 @@ namespace onep
     m->notifyDay = m->world->getSimulation()->getDayObs()->connect(osgGaming::Func<int>([this](int day)
     {
       m->updateCountryInfoText();
+    }));
+
+    m->notifySkillpoints = m->world->getSimulation()->getSkillPointsObs()->connectAndNotify(osgGaming::Func<int>([this](int skillPoints)
+    {
+      m->labelSkillpoints->setText(QString("Skill Points: %1").arg(skillPoints));
     }));
 
     m->notifySelectedCountry = m->world->getGlobeModel()->getCountryOverlay()->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([this](int selected)

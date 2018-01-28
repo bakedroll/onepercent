@@ -15,6 +15,7 @@ namespace onep
       , affectNeighborsVisitor(new SimulationVisitor(SimulationVisitor::AFFECT_NEIGHBORS))
       , progressCountriesVisitor(new SimulationVisitor(SimulationVisitor::PROGRESS_COUNTRIES))
       , oDay(new osgGaming::Observable<int>(0))
+      , skillPointsObs(new osgGaming::Observable<int>(0))
     {}
 
     SkillBranch::Map skillBranches;
@@ -28,6 +29,8 @@ namespace onep
     osgGaming::Observable<int>::Ptr oDay;
 
     QTimer timer;
+
+    osgGaming::Observable<int>::Ptr skillPointsObs;
   };
 
   Simulation::Simulation()
@@ -41,6 +44,9 @@ namespace onep
     m->skillBranches[BRANCH_CONCERNS] = new SkillBranch(BRANCH_CONCERNS);
     m->skillBranches[BRANCH_MEDIA] = new SkillBranch(BRANCH_MEDIA);
     m->skillBranches[BRANCH_POLITICS] = new SkillBranch(BRANCH_POLITICS);
+
+    // start with 50 skill points
+    m->skillPointsObs->set(50);
 
     m->timer.setSingleShot(false);
     m->timer.setInterval(1000);
@@ -134,6 +140,21 @@ namespace onep
   osgGaming::Observable<int>::Ptr Simulation::getDayObs()
   {
     return m->oDay;
+  }
+
+  osgGaming::Observable<int>::Ptr Simulation::getSkillPointsObs()
+  {
+    return m->skillPointsObs;
+  }
+
+  bool Simulation::paySkillPoints(int points)
+  {
+    int amount = m->skillPointsObs->get();
+    if (amount < points)
+      return false;
+
+    m->skillPointsObs->set(amount - points);
+    return true;
   }
 
   void Simulation::start()
