@@ -12,8 +12,7 @@ namespace onep
   class QtGameLoadingState : public osgGaming::GameLoadingState
   {
   public:
-    QtGameLoadingState(osg::ref_ptr<osgGaming::GameState> nextState);
-    QtGameLoadingState(AbstractGameStateList nextStates);
+    QtGameLoadingState(osgGaming::Injector& injector);
     ~QtGameLoadingState();
 
     osgGaming::Observable<bool>::Ptr getFullscreenEnabledObs();

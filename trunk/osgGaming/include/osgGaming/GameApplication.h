@@ -1,5 +1,7 @@
 #pragma once
 
+#include <osgGaming/Injector.h>
+#include <osgGaming/InjectionContainer.h>
 #include <osgGaming/SimulationCallback.h>
 #include <osgGaming/GameStateStack.h>
 
@@ -31,13 +33,35 @@ namespace osgGaming
 		void setDefaultHud(osg::ref_ptr<Hud> hud);
     void setDefaultGameSettings(osg::ref_ptr<GameSettings> settings);
 
-		int run(osg::ref_ptr<AbstractGameState> initialState);
-		int run(GameStateStack::AbstractGameStateList initialStates);
+  private:
+    int run(osg::ref_ptr<AbstractGameState> initialState);
+    int run(GameStateStack::AbstractGameStateList initialStates);
+  public:
+
+    template<typename TState>
+    int run()
+    {
+      registerComponents(m_container);
+      Injector injector(m_container);
+      m_injector = &injector;
+
+      osg::ref_ptr<TState> s = injector.inject<TState>();
+      osg::ref_ptr<AbstractGameState> state = osg::ref_ptr<AbstractGameState>(dynamic_cast<AbstractGameState*>(s.get()));
+      if (!state.valid())
+      {
+        assert(false && "TState has to be an AbstractGameState.");
+        return -1;
+      }
+
+      return run(state);
+    }
 
     osgGaming::Signal& onEndGameSignal();
     osg::ref_ptr<osgGaming::Viewer> getViewer();
 
   protected:
+    virtual void registerComponents(InjectionContainer& container);
+
     virtual int mainloop() = 0;
     virtual osg::ref_ptr<InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) = 0;
 
@@ -49,6 +73,9 @@ namespace osgGaming
 	private:
     struct Impl;
     std::unique_ptr<Impl> m;
+
+    InjectionContainer m_container;
+    Injector* m_injector;
 
 	};
 }

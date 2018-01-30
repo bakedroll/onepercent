@@ -25,7 +25,7 @@ struct MainMenuState::Impl
   VirtualOverlay* overlay;
 };
 
-MainMenuState::MainMenuState()
+MainMenuState::MainMenuState(osgGaming::Injector& injector)
 	: GlobeCameraState()
   , m(new Impl())
 {

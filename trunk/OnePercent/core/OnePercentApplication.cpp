@@ -33,10 +33,14 @@ namespace onep
 
   int OnePercentApplication::run()
   {
-    osgGaming::GameState::AbstractGameStateList states;
-    states.push_back(new GlobeOverviewState());
-    states.push_back(new MainMenuState());
+    return QtGameApplication::run<LoadingGlobeOverviewState>();
+  }
 
-    return QtGameApplication::run(new LoadingGlobeOverviewState(states));
+  void OnePercentApplication::registerComponents(osgGaming::InjectionContainer& container)
+  {
+    // States
+    container.registerType<LoadingGlobeOverviewState>();
+    container.registerType<GlobeOverviewState>();
+    container.registerType<MainMenuState>();
   }
 }

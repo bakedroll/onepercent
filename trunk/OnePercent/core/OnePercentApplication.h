@@ -11,5 +11,8 @@ namespace onep
 
     int run();
 
+  protected:
+    virtual void registerComponents(osgGaming::InjectionContainer& container) override;
+
   };
 }

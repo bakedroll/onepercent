@@ -1,6 +1,5 @@
 #include <osgGaming/GameLoadingState.h>
 #include <osgGaming/GameSettings.h>
-#include <osgGaming/GameState.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/View.h>
 #include <osgGaming/World.h>
@@ -8,17 +7,10 @@
 namespace osgGaming
 {
 
-  GameLoadingState::GameLoadingState(osg::ref_ptr<GameState> nextState)
+  GameLoadingState::GameLoadingState(Injector& container)
     : AbstractGameState()
+    , m_bStatesInjected(false)
   {
-    _nextStates.push_back(nextState);
-  }
-
-  GameLoadingState::GameLoadingState(AbstractGameState::AbstractGameStateList nextStates)
-    : AbstractGameState(),
-    _nextStates(nextStates)
-  {
-
   }
 
   void GameLoadingState::loading_thread(osg::ref_ptr<World> world, osg::ref_ptr<Hud> hud, osg::ref_ptr<GameSettings> settings)
@@ -41,9 +33,17 @@ namespace osgGaming
     return new Hud();
   }
 
-  AbstractGameState::AbstractGameStateList GameLoadingState::getNextStates()
+  void GameLoadingState::getNextStates(Injector& injector, AbstractGameStateList& states)
   {
-    return _nextStates;
+    if (m_bStatesInjected)
+    {
+      states = m_nextStates;
+      return;
+    }
+
+    injectNextStates(injector, states);
+    m_nextStates = states;
+    m_bStatesInjected = true;
   }
 
 }

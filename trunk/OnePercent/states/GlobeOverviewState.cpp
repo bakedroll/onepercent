@@ -18,7 +18,7 @@ using namespace osgGaming;
 
 const float GlobeOverviewState::_NORMAL_TIME = 0.008f;
 
-GlobeOverviewState::GlobeOverviewState()
+GlobeOverviewState::GlobeOverviewState(osgGaming::Injector& injector)
 	: QtGameState(),
 	  _timeSpeed(1.0f),
 	  _day(0.0f)

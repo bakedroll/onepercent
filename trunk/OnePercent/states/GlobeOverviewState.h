@@ -1,5 +1,7 @@
 #pragma once
 
+#include <osgGaming/Injector.h>
+
 #include "nodes/GlobeOverviewWorld.h"
 #include "states/QtGameState.h"
 
@@ -8,7 +10,7 @@ namespace onep
 	class GlobeOverviewState : public QtGameState
 	{
 	public:
-		GlobeOverviewState();
+		GlobeOverviewState(osgGaming::Injector& injector);
 
 		virtual void initialize() override;
 
