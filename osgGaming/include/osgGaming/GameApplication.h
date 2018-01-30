@@ -19,25 +19,10 @@ namespace osgGaming
 
   class GameApplication : public SimulationCallback
 	{
-	public:
-    GameApplication();
-    ~GameApplication();
-
-		virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override;
-
-		osg::ref_ptr<World> getDefaultWorld();
-		osg::ref_ptr<Hud> getDefaultHud();
-		osg::ref_ptr<GameSettings> getDefaultGameSettings();
-
-		void setDefaultWorld(osg::ref_ptr<World> world);
-		void setDefaultHud(osg::ref_ptr<Hud> hud);
-    void setDefaultGameSettings(osg::ref_ptr<GameSettings> settings);
-
-  private:
-    int run(osg::ref_ptr<AbstractGameState> initialState);
-    int run(GameStateStack::AbstractGameStateList initialStates);
+  protected:
+    virtual int run(osg::ref_ptr<AbstractGameState> initialState);
+    virtual int run(GameStateStack::AbstractGameStateList initialStates);
   public:
-
     template<typename TState>
     int run()
     {
@@ -55,6 +40,19 @@ namespace osgGaming
 
       return run(state);
     }
+
+    GameApplication();
+    ~GameApplication();
+
+    virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override;
+
+    osg::ref_ptr<World> getDefaultWorld();
+    osg::ref_ptr<Hud> getDefaultHud();
+    osg::ref_ptr<GameSettings> getDefaultGameSettings();
+
+    void setDefaultWorld(osg::ref_ptr<World> world);
+    void setDefaultHud(osg::ref_ptr<Hud> hud);
+    void setDefaultGameSettings(osg::ref_ptr<GameSettings> settings);
 
     osgGaming::Signal& onEndGameSignal();
     osg::ref_ptr<osgGaming::Viewer> getViewer();
