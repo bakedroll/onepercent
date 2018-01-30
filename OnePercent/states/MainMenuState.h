@@ -2,6 +2,8 @@
 
 #include "GlobeCameraState.h"
 
+#include <osgGaming/Injector.h>
+
 #include <osgGaming/UIElement.h>
 
 namespace onep
@@ -9,7 +11,7 @@ namespace onep
 	class MainMenuState : public GlobeCameraState
 	{
 	public:
-		MainMenuState();
+		MainMenuState(osgGaming::Injector& injector);
     ~MainMenuState();
 
 		virtual void initialize() override;

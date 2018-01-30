@@ -13,8 +13,7 @@ namespace onep
 	class LoadingGlobeOverviewState : public QtGameLoadingState
 	{
 	public:
-		LoadingGlobeOverviewState(osg::ref_ptr<osgGaming::GameState> nextState);
-		LoadingGlobeOverviewState(osgGaming::AbstractGameState::AbstractGameStateList nextStates);
+    LoadingGlobeOverviewState(osgGaming::Injector& injector);
 		~LoadingGlobeOverviewState();
 
 		virtual void initialize() override;
@@ -23,6 +22,9 @@ namespace onep
 		virtual void load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings) override;
 
     virtual void onResizeEvent(float width, float height) override;
+
+  protected:
+    virtual void injectNextStates(osgGaming::Injector& injector, AbstractGameStateList& states) override;
 
 	private:
 		struct Impl;

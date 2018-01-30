@@ -21,7 +21,6 @@ using namespace std;
 
 namespace osgGaming
 {
-
   struct GameApplication::Impl
   {
     Impl(GameApplication* app)
@@ -202,7 +201,9 @@ namespace osgGaming
 
             ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
 
-            AbstractGameState::AbstractGameStateList nextStates = loadingState->getNextStates();
+            AbstractGameState::AbstractGameStateList nextStates;
+            loadingState->getNextStates(*m_injector, nextStates);
+
             m->prepareStateWorldAndHud(nextStates);
 
             ref_ptr<AbstractGameState> nextState = *nextStates.begin();
@@ -261,7 +262,9 @@ namespace osgGaming
 
             ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
 
-            m->gameStateStack.replaceState(loadingState->getNextStates());
+            AbstractGameState::AbstractGameStateList nextStates;
+            loadingState->getNextStates(*m_injector, nextStates);
+            m->gameStateStack.replaceState(nextStates);
 
             break;
           }
@@ -390,6 +393,10 @@ namespace osgGaming
   osg::ref_ptr<osgGaming::Viewer> GameApplication::getViewer()
   {
     return m->viewer;
+  }
+
+  void GameApplication::registerComponents(InjectionContainer& container)
+  {
   }
 
   void GameApplication::newStateEvent(osg::ref_ptr<AbstractGameState> state)

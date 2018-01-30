@@ -3,9 +3,12 @@
 #include "nodes/GlobeModel.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/BackgroundModel.h"
+#include "states/GlobeOverviewState.h"
+#include "states/MainMenuState.h"
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 
+#include <osgGaming/Injector.h>
 #include <osgGaming/NativeView.h>
 
 #include <osgGaming/HighDynamicRangeEffect.h>
@@ -31,14 +34,8 @@ namespace onep
     VirtualOverlay* overlay;
   };
 
-  LoadingGlobeOverviewState::LoadingGlobeOverviewState(osg::ref_ptr<osgGaming:: GameState> nextState)
-    : QtGameLoadingState(nextState)
-    , m(new Impl())
-  {
-  }
-
-  LoadingGlobeOverviewState::LoadingGlobeOverviewState(AbstractGameState::AbstractGameStateList nextStates)
-    : QtGameLoadingState(nextStates)
+  LoadingGlobeOverviewState::LoadingGlobeOverviewState(osgGaming::Injector& injector)
+    : QtGameLoadingState(injector)
     , m(new Impl())
   {
   }
@@ -122,5 +119,11 @@ namespace onep
   void LoadingGlobeOverviewState::onResizeEvent(float width, float height)
   {
     m->overlay->setGeometry(0, 0, int(width), int(height));
+  }
+
+  void LoadingGlobeOverviewState::injectNextStates(osgGaming::Injector& injector, AbstractGameStateList& states)
+  {
+    states.push_back(injector.inject<GlobeOverviewState>());
+    states.push_back(injector.inject<MainMenuState>());
   }
 }

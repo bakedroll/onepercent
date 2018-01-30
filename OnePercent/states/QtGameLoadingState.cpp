@@ -10,14 +10,8 @@ namespace onep
     osgGaming::Observable<bool>::Ptr oFullscreenEnabled;
   };
 
-  QtGameLoadingState::QtGameLoadingState(osg::ref_ptr<osgGaming::GameState> nextState)
-    : osgGaming::GameLoadingState(nextState)
-    , m(new Impl())
-  {
-  }
-
-  QtGameLoadingState::QtGameLoadingState(AbstractGameStateList nextStates)
-    : osgGaming::GameLoadingState(nextStates)
+  QtGameLoadingState::QtGameLoadingState(osgGaming::Injector& injector)
+    : osgGaming::GameLoadingState(injector)
     , m(new Impl())
   {
   }
