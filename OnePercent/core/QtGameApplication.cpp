@@ -34,7 +34,7 @@ struct QtGameApplication::Impl
   osgGaming::Observer<bool>::Ptr fullscreenEnabledObserver;
 };
 
-QtGameApplication::QtGameApplication(int argc, char** argv)
+QtGameApplication::QtGameApplication(int& argc, char** argv)
   : GameApplication()
   , m(new Impl())
 {
