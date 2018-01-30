@@ -17,6 +17,11 @@ namespace osgGamingTest
   {
   }
 
+  int MockedGameApplication::run(osgGaming::GameStateStack::AbstractGameStateList initialStates)
+  {
+    return osgGaming::GameApplication::run(initialStates);
+  }
+
   int MockedGameApplication::mainloop()
   {
     double simTime = 0.0;
