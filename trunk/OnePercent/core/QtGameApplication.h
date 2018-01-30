@@ -12,7 +12,7 @@ namespace onep
   class QtGameApplication : public osgGaming::GameApplication
   {
   public:
-    QtGameApplication(int argc, char** argv);
+    QtGameApplication(int& argc, char** argv);
     ~QtGameApplication();
 
   protected:

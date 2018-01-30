@@ -10,7 +10,7 @@
 
 namespace onep
 {
-  OnePercentApplication::OnePercentApplication(int argc, char** argv)
+  OnePercentApplication::OnePercentApplication(int& argc, char** argv)
     : QtGameApplication(argc, argv)
   {
     osgGaming::ResourceManager::getInstance()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
