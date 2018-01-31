@@ -26,7 +26,7 @@ struct MainMenuState::Impl
 };
 
 MainMenuState::MainMenuState(osgGaming::Injector& injector)
-	: GlobeCameraState()
+	: GlobeCameraState(injector)
   , m(new Impl())
 {
 

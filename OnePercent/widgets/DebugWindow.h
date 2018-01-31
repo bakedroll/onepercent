@@ -1,6 +1,8 @@
 #pragma once
 
-#include "nodes/GlobeOverviewWorld.h"
+#include "nodes/BoundariesMesh.h"
+#include "nodes/CountryOverlay.h"
+#include "simulation/Simulation.h"
 
 #include <QDialog>
 #include <memory>
@@ -12,7 +14,11 @@ namespace onep
     Q_OBJECT
 
   public:
-    DebugWindow(osg::ref_ptr<GlobeOverviewWorld> world, QWidget* parent = nullptr);
+    DebugWindow(
+      osg::ref_ptr<CountryOverlay> countryOverlay,
+      osg::ref_ptr<BoundariesMesh> boundariesMesh,
+      osg::ref_ptr<Simulation> simulation, 
+      QWidget* parent = nullptr);
     ~DebugWindow();
 
   private:

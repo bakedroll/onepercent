@@ -133,3 +133,9 @@ void GameStateStack::replaceState(AbstractGameStateList states)
 	popState();
 	pushStates(states);
 }
+
+void GameStateStack::clear()
+{
+  _stateStack.clear();
+  _itTop.release();
+}

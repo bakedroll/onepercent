@@ -379,7 +379,21 @@ namespace osgGaming
       m->gameStateStack.pushStates(initialStates);
       m->view->getRootGroup()->setUpdateCallback(this);
 
-      return mainloop();
+      int ret = mainloop();
+      deinitialize();
+
+      // shutdown/free all pointers
+      m->view->setSceneData(nullptr);
+
+      m->gameStateStack.clear();
+      m->viewer.release();
+      m->view.release();
+      m->defaultHud.release();
+      m->defaultWorld.release();
+
+      m_container.clear();
+
+      return ret;
     }
     catch (GameException& e)
     {
@@ -408,6 +422,10 @@ namespace osgGaming
   }
 
   void GameApplication::initialize(Injector& injector)
+  {
+  }
+
+  void GameApplication::deinitialize()
   {
   }
 

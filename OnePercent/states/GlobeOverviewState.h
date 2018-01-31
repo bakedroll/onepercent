@@ -11,8 +11,7 @@ namespace onep
 	{
 	public:
 		GlobeOverviewState(osgGaming::Injector& injector);
-
-		virtual void initialize() override;
+    ~GlobeOverviewState();
 
 		virtual unsigned char getProperties() override;
 
@@ -20,14 +19,9 @@ namespace onep
 
 		virtual void onKeyPressedEvent(int key) override;
 
-		//virtual void onUIClickedEvent(osg::ref_ptr<UIElement> uiElement) override;
-
 	private:
-		static const float _NORMAL_TIME;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
-		osg::ref_ptr<GlobeOverviewWorld> _globeWorld;
-
-		float _timeSpeed;
-		float _day;
 	};
 }

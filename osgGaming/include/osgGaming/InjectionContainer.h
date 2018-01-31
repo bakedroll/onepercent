@@ -39,6 +39,8 @@ namespace osgGaming
     Classes& classes();
     Singletons& singletons();
 
+    void clear();
+
   private:
     std::set<std::type_index> m_registeredClasses;
     std::map<std::type_index, osg::ref_ptr<osg::Referenced>> m_registeredSingletons;

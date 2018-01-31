@@ -4,6 +4,7 @@
 #include "core/QConnectFunctor.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/GlobeModel.h"
+#include "nodes/CountryOverlay.h"
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 #include "widgets/CountryMenuWidget.h"
@@ -69,14 +70,11 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector, GlobeInteractionState* b)
     : base(b)
-    , paramEarthRadius(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_EarthRadiusName))
-    , paramCameraMinDistance(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraMinDistanceName))
-    , paramCameraMaxDistance(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraMaxDistanceName))
-    , paramCameraMaxLatitude(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraMaxLatitudeName))
-    , paramCameraZoomSpeed(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraZoomSpeedName))
-    , paramCameraZoomSpeedFactor(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraZoomSpeedFactorName))
-    , paramCameraScrollSpeed(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraScrollSpeedName))
-    , paramCameraRotationSpeed(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraRotationSpeedName))
+    , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+    , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
+    , simulation(injector.inject<Simulation>())
+    , countryOverlay(injector.inject<CountryOverlay>())
+    , boundariesMesh(injector.inject<BoundariesMesh>())
     , bReady(false)
     , selectedCountry(0)
     , labelDays(nullptr)
@@ -90,6 +88,12 @@ namespace onep
     }
 
     GlobeInteractionState* base;
+
+    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+    osg::ref_ptr<GlobeOverviewWorld> globeOverviewWorld;
+    osg::ref_ptr<Simulation> simulation;
+    osg::ref_ptr<CountryOverlay> countryOverlay;
+    osg::ref_ptr<BoundariesMesh> boundariesMesh;
 
     float paramEarthRadius;
     float paramCameraMinDistance;
@@ -130,7 +134,7 @@ namespace onep
       if (osgGaming::sphereLineIntersection(osg::Vec3f(0.0f, 0.0f, 0.0f), paramEarthRadius, point, direction, pickResult))
       {
         osg::Vec2f polar = osgGaming::getPolarFromCartesian(pickResult);
-        osg::ref_ptr<CountryMesh> countryMesh = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getCountryMesh(polar);
+        osg::ref_ptr<CountryMesh> countryMesh = countryOverlay->getCountryMesh(polar);
 
         return countryMesh;
       }
@@ -152,14 +156,14 @@ namespace onep
 
     void updateCountryMenuWidgetPosition(int id)
     {
-      osg::ref_ptr<CountryData> data = base->getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getCountryMesh(id)->getCountryData();
+      osg::ref_ptr<CountryData> data = countryOverlay->getCountryMesh(id)->getCountryData();
       osg::Vec2f latLong = data->getCenterLatLong();
 
       osg::Vec3f position = osgGaming::getVec3FromEuler(latLong.x(), 0.0, latLong.y()) * paramEarthRadius;
 
       osg::ref_ptr<osg::Camera> cam = base->getView(0)->getSceneCamera();
       osg::Matrix win = cam->getViewport()->computeWindowMatrix();
-      osg::Matrix view = base->getGlobeOverviewWorld()->getCameraManipulator()->getViewMatrix();
+      osg::Matrix view = globeOverviewWorld->getCameraManipulator()->getViewMatrix();
       osg::Matrix proj = cam->getProjectionMatrix();
 
       osg::Vec3 screen = position * view * proj * win;
@@ -179,7 +183,7 @@ namespace onep
   };
 
   GlobeInteractionState::GlobeInteractionState(osgGaming::Injector& injector)
-    : GlobeCameraState()
+    : GlobeCameraState(injector)
     , m(new Impl(injector, this))
   {
   }
@@ -193,18 +197,27 @@ namespace onep
   {
     GlobeCameraState::initialize();
 
+    m->paramEarthRadius = m->propertiesManager->getValue<float>(Param_EarthRadiusName);
+    m->paramCameraMinDistance = m->propertiesManager->getValue<float>(Param_CameraMinDistanceName);
+    m->paramCameraMaxDistance = m->propertiesManager->getValue<float>(Param_CameraMaxDistanceName);
+    m->paramCameraMaxLatitude = m->propertiesManager->getValue<float>(Param_CameraMaxLatitudeName);
+    m->paramCameraZoomSpeed = m->propertiesManager->getValue<float>(Param_CameraZoomSpeedName);
+    m->paramCameraZoomSpeedFactor = m->propertiesManager->getValue<float>(Param_CameraZoomSpeedFactorName);
+    m->paramCameraScrollSpeed = m->propertiesManager->getValue<float>(Param_CameraScrollSpeedName);
+    m->paramCameraRotationSpeed = m->propertiesManager->getValue<float>(Param_CameraRotationSpeedName);
+
     getHud(getView(0))->setFpsEnabled(true);
 
-    m->dayObserver = getGlobeOverviewWorld()->getSimulation()->getDayObs()->connect(osgGaming::Func<int>([this](int day)
+    m->dayObserver = m->simulation->getDayObs()->connect(osgGaming::Func<int>([this](int day)
     {
       m->labelDays->setText(QObject::tr("Day %1").arg(day));
     }));
 
-    m->selectedCountryObserver = getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getSelectedCountryIdObservable()->connect(osgGaming::Func<int>([this](int id)
+    m->selectedCountryObserver = m->countryOverlay->getSelectedCountryIdObservable()->connect(osgGaming::Func<int>([this](int id)
     {
       if (id > 0)
       {
-        CountryMesh::Ptr countryMesh = getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->getCountryMesh(id);
+        CountryMesh::Ptr countryMesh = m->countryOverlay->getCountryMesh(id);
 
         printf("Selected country (%d): %s\n", countryMesh->getCountryData()->getId(), countryMesh->getCountryData()->getCountryName().c_str());
 
@@ -256,7 +269,7 @@ namespace onep
       m->updateCountryMenuWidgetPosition(m->selectedCountry);
 
     CountryMesh::Ptr hovered = m->pickCountryMeshAt(m->mousePos);
-    getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->setHoveredCountry(hovered);
+    m->countryOverlay->setHoveredCountry(hovered);
 
     return e;
   }
@@ -273,24 +286,22 @@ namespace onep
       CountryMesh::Ptr countryMesh = m->pickCountryMeshAt(m->mousePos);
 
       int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
-      getGlobeOverviewWorld()->getGlobeModel()->getCountryOverlay()->setSelectedCountry(selected);
+      m->countryOverlay->setSelectedCountry(selected);
     }
   }
 
   void GlobeInteractionState::onKeyPressedEvent(int key)
   {
-    Simulation::Ptr simulation = getGlobeOverviewWorld()->getSimulation();
-
     if (key == osgGA::GUIEventAdapter::KEY_Space)
     {
-      if (simulation->running())
+      if (m->simulation->running())
       {
-        simulation->stop();
+        m->simulation->stop();
         printf("Simulation stopped\n");
       }
       else
       {
-        simulation->start();
+        m->simulation->start();
         printf("Simulation started\n");
       }
     }
@@ -391,9 +402,6 @@ namespace onep
   {
     osg::Vec2f resolution = getView(0)->getResolution();
 
-    GlobeModel::Ptr globeModel = getGlobeOverviewWorld()->getGlobeModel();
-    Simulation::Ptr simulation = getGlobeOverviewWorld()->getSimulation();
-
     m->mainOverlay = new VirtualOverlay();
     m->mainOverlay->setContentsMargins(5, 5, 5, 5);
     m->mainOverlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
@@ -408,7 +416,7 @@ namespace onep
     QConnectFunctor::connect(debugButton, SIGNAL(clicked()), [this]()
     {
       if (m->debugWindow == nullptr)
-        m->debugWindow = new DebugWindow(getGlobeOverviewWorld(), m->mainOverlay);
+        m->debugWindow = new DebugWindow(m->countryOverlay, m->boundariesMesh, m->simulation, m->mainOverlay);
        
       if (!m->debugWindow->isVisible())
       {
@@ -442,7 +450,7 @@ namespace onep
 
     m->mainOverlay->setLayout(layout);
 
-    m->countryMenuWidget = new CountryMenuWidget(getGlobeOverviewWorld()->getSimulation());
+    m->countryMenuWidget = new CountryMenuWidget(m->simulation);
     m->countryMenuWidget->setCenterPosition(500, 500);
 
     getOverlayCompositor()->addVirtualOverlay(m->mainOverlay);

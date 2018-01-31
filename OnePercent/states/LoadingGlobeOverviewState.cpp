@@ -3,6 +3,8 @@
 #include "nodes/GlobeModel.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/BackgroundModel.h"
+#include "nodes/BoundariesMesh.h"
+#include "nodes/CountryOverlay.h"
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
 #include "widgets/OverlayCompositor.h"
@@ -27,9 +29,13 @@ namespace onep
       : fxaa(injector.inject<osgGaming::FastApproximateAntiAliasingEffect>())
       , hdr(injector.inject<osgGaming::HighDynamicRangeEffect>())
       , dof(injector.inject<osgGaming::DepthOfFieldEffect>())
+      , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
       , backgroundModel(injector.inject<BackgroundModel>())
       , globeModel(injector.inject<GlobeModel>())
       , countryNameOverlay(injector.inject<CountryNameOverlay>())
+      , boundariesMesh(injector.inject<BoundariesMesh>())
+      , countryOverlay(injector.inject<CountryOverlay>())
+      , simulation(injector.inject<Simulation>())
       , labelLoadingText(nullptr)
       , overlay(nullptr)
     {
@@ -40,9 +46,13 @@ namespace onep
     osg::ref_ptr<osgGaming::HighDynamicRangeEffect> hdr;
     osg::ref_ptr<osgGaming::DepthOfFieldEffect> dof;
 
+    osg::ref_ptr<GlobeOverviewWorld> globeOverviewWorld;
     osg::ref_ptr<BackgroundModel> backgroundModel;
     osg::ref_ptr<GlobeModel> globeModel;
     osg::ref_ptr<CountryNameOverlay> countryNameOverlay;
+    osg::ref_ptr<BoundariesMesh> boundariesMesh;
+    osg::ref_ptr<CountryOverlay> countryOverlay;
+    osg::ref_ptr<Simulation> simulation;
 
     QLabel* labelLoadingText;
     VirtualOverlay* overlay;
@@ -61,6 +71,8 @@ namespace onep
 
   void LoadingGlobeOverviewState::initialize()
   {
+    m->globeOverviewWorld->initialize();
+
     float projNear = float(getWorld(getView(0))->getCameraManipulator()->getProjectionNear());
     float projFar = float(getWorld(getView(0))->getCameraManipulator()->getProjectionFar());
 
@@ -108,29 +120,26 @@ namespace onep
 
   void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
-    m->backgroundModel->loadStars("./GameData/data/stars.bin");
-
     osg::ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
-    m->globeModel->loadFromDisk(world->getCameraManipulator());
-    m->globeModel->getBoundariesMesh()->loadBoundaries("./GameData/data/boundaries.dat");
-    m->globeModel->getBoundariesMesh()->makeOverallBoundaries(0.005f);
+    m->backgroundModel->loadStars("./GameData/data/stars.bin");
 
-    m->globeModel->getCountryOverlay()->loadCountries(
+    m->globeModel->loadFromDisk(world->getCameraManipulator());
+
+    m->boundariesMesh->loadBoundaries("./GameData/data/boundaries.dat");
+    m->boundariesMesh->makeOverallBoundaries(0.005f);
+
+    m->countryOverlay->loadCountries(
       "./GameData/data/countries.dat",
       "./GameData/textures/earth/distance.png",
-      m->globeModel->getBoundariesMesh()->getCountryVertices(),
-      m->globeModel->getBoundariesMesh()->getCountryTexcoords());
+      m->boundariesMesh->getCountryVertices(),
+      m->boundariesMesh->getCountryTexcoords());
 
-    globeWorld->getSimulation()->loadSkillsXml("./GameData/data/skills/passive.xml");
-    globeWorld->getSimulation()->attachCountries(m->globeModel->getCountryOverlay()->getCountryMeshs());
+    m->simulation->loadSkillsXml("./GameData/data/skills/passive.xml");
+    m->simulation->attachCountries(m->countryOverlay->getCountryMeshs());
 
     m->countryNameOverlay->setEnabled(false);
-    m->countryNameOverlay->setCountryMap(m->globeModel->getCountryOverlay()->getCountryMeshs());
-
-    globeWorld->setGlobeModel(m->globeModel);
-    globeWorld->setCountryNameOverlay(m->countryNameOverlay);
-    globeWorld->setBackgroundModel(m->backgroundModel);
+    m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryMeshs());
   }
 
   void LoadingGlobeOverviewState::onResizeEvent(float width, float height)

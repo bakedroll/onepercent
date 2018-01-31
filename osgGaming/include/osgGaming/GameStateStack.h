@@ -29,6 +29,8 @@ namespace osgGaming
 		void pushStates(AbstractGameStateList states);
 		void replaceState(AbstractGameStateList states);
 
+    void clear();
+
 	private:
 		AbstractGameStateList _stateStack;
 
