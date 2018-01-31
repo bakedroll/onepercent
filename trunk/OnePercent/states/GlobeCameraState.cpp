@@ -3,124 +3,135 @@
 #include <osgGaming/Helper.h>
 #include <osgGaming/NativeView.h>
 
-using namespace onep;
-using namespace osg;
-using namespace std;
-using namespace osgGA;
-using namespace osgGaming;
-
-GlobeCameraState::GlobeCameraState()
-	: QtGameState()
-  , _cameraDistance(0.0f)
+namespace onep
 {
-}
+  struct GlobeCameraState::Impl
+  {
+    Impl(osgGaming::Injector& injector)
+      : globeWorld(injector.inject<GlobeOverviewWorld>())
+      , backgroundModel(injector.inject<BackgroundModel>())
+      , cameraDistance(0.0f)
+    {}
 
-GlobeCameraState::~GlobeCameraState()
-{
-}
+    osg::ref_ptr<GlobeOverviewWorld> globeWorld;
+    osg::ref_ptr<BackgroundModel> backgroundModel;
 
-void GlobeCameraState::initialize()
-{
-	_globeWorld = static_cast<GlobeOverviewWorld*>(getWorld(getView(0)).get());
+    osg::Vec2f cameraLatLong;
+    float cameraDistance;
+    osg::Vec2f cameraViewAngle;
 
-	_cameraLatLong = _globeWorld->getCameraLatLong();
-	_cameraDistance = _globeWorld->getCameraDistance();
-	_cameraViewAngle = _globeWorld->getCameraViewAngle();
+    osg::ref_ptr<osgGaming::RepeatedVec2fAnimation> cameraLatLongAnimation;
+    osg::ref_ptr<osgGaming::Animation<float>> cameraDistanceAnimation;
+    osg::ref_ptr<osgGaming::Animation<osg::Vec2f>> cameraViewAngleAnimation;
+  };
 
-	_cameraLatLongAnimation = new RepeatedVec2fAnimation(Vec2f(-C_PI / 2.0f, 0.0f), Vec2f(C_PI / 2.0f, 2.0f * C_PI), _cameraLatLong, 0.5, CIRCLE_OUT);
-	_cameraDistanceAnimation = new Animation<float>(_cameraDistance, 0.5, CIRCLE_OUT);
-	_cameraViewAngleAnimation = new Animation<Vec2f>(_cameraViewAngle, 0.5, CIRCLE_OUT);
+  GlobeCameraState::GlobeCameraState(osgGaming::Injector& injector)
+    : QtGameState()
+    , m(new Impl(injector))
+  {
+  }
 
-  _globeWorld->getBackgroundModel()->updateResolutionHeight(getView(0)->getResolution().y());
-}
+  GlobeCameraState::~GlobeCameraState()
+  {
+  }
 
-GameState::StateEvent* GlobeCameraState::update()
-{
-	_globeWorld->updateCameraPosition(
-		_cameraLatLongAnimation->getValue(getSimulationTime()),
-		_cameraViewAngleAnimation->getValue(getSimulationTime()),
-		_cameraDistanceAnimation->getValue(getSimulationTime()));
+  void GlobeCameraState::initialize()
+  {
+    m->cameraLatLong = m->globeWorld->getCameraLatLong();
+    m->cameraDistance = m->globeWorld->getCameraDistance();
+    m->cameraViewAngle = m->globeWorld->getCameraViewAngle();
 
-	return stateEvent_default();
-}
+    m->cameraLatLongAnimation = new osgGaming::RepeatedVec2fAnimation(osg::Vec2f(-C_PI / 2.0f, 0.0f), osg::Vec2f(C_PI / 2.0f, 2.0f * C_PI), m->cameraLatLong, 0.5, osgGaming::CIRCLE_OUT);
+    m->cameraDistanceAnimation = new osgGaming::Animation<float>(m->cameraDistance, 0.5, osgGaming::CIRCLE_OUT);
+    m->cameraViewAngleAnimation = new osgGaming::Animation<osg::Vec2f>(m->cameraViewAngle, 0.5, osgGaming::CIRCLE_OUT);
 
-ref_ptr<GlobeOverviewWorld> GlobeCameraState::getGlobeOverviewWorld()
-{
-	return _globeWorld;
-}
+    m->backgroundModel->updateResolutionHeight(getView(0)->getResolution().y());
+  }
 
-Vec2f GlobeCameraState::getCameraLatLong()
-{
-	return _cameraLatLong;
-}
+  osgGaming::GameState::StateEvent* GlobeCameraState::update()
+  {
+    m->globeWorld->updateCameraPosition(
+      m->cameraLatLongAnimation->getValue(getSimulationTime()),
+      m->cameraViewAngleAnimation->getValue(getSimulationTime()),
+      m->cameraDistanceAnimation->getValue(getSimulationTime()));
 
-float GlobeCameraState::getCameraDistance()
-{
-	return _cameraDistance;
-}
+    return stateEvent_default();
+  }
 
-Vec2f GlobeCameraState::getCameraViewAngle()
-{
-	return _cameraViewAngle;
-}
+  osg::Vec2f GlobeCameraState::getCameraLatLong()
+  {
+    return m->cameraLatLong;
+  }
 
-void GlobeCameraState::setCameraLatLong(osg::Vec2f latLong, double time)
-{
-	_cameraLatLong = latLong;
+  float GlobeCameraState::getCameraDistance()
+  {
+    return m->cameraDistance;
+  }
 
-	if (time < 0.0)
-	{
-		_cameraLatLongAnimation->setValue(_cameraLatLong);
-	}
-	else
-	{
-		_cameraLatLongAnimation->beginAnimation(_cameraLatLong, time);
-	}
-}
+  osg::Vec2f GlobeCameraState::getCameraViewAngle()
+  {
+    return m->cameraViewAngle;
+  }
 
-void GlobeCameraState::setCameraDistance(float distance, double time)
-{
-	_cameraDistance = distance;
+  void GlobeCameraState::setCameraLatLong(osg::Vec2f latLong, double time)
+  {
+    m->cameraLatLong = latLong;
 
-	if (time < 0.0)
-	{
-		_cameraDistanceAnimation->setValue(_cameraDistance);
-	}
-	else
-	{
-		_cameraDistanceAnimation->beginAnimation(_cameraDistance, time);
-	}
-}
+    if (time < 0.0)
+    {
+      m->cameraLatLongAnimation->setValue(m->cameraLatLong);
+    }
+    else
+    {
+      m->cameraLatLongAnimation->beginAnimation(m->cameraLatLong, time);
+    }
+  }
 
-void GlobeCameraState::setCameraMotionDuration(double time)
-{
-	_cameraDistanceAnimation->setDuration(time);
-	_cameraLatLongAnimation->setDuration(time);
-	_cameraViewAngleAnimation->setDuration(time);
-}
+  void GlobeCameraState::setCameraDistance(float distance, double time)
+  {
+    m->cameraDistance = distance;
 
-void GlobeCameraState::setCameraMotionEase(AnimationEase ease)
-{
-	_cameraDistanceAnimation->setEase(ease);
-	_cameraLatLongAnimation->setEase(ease);
-	_cameraViewAngleAnimation->setEase(ease);
-}
+    if (time < 0.0)
+    {
+      m->cameraDistanceAnimation->setValue(m->cameraDistance);
+    }
+    else
+    {
+      m->cameraDistanceAnimation->beginAnimation(m->cameraDistance, time);
+    }
+  }
 
-void GlobeCameraState::setCameraViewAngle(osg::Vec2f viewAngle, double time)
-{
-	_cameraViewAngle = viewAngle;
+  void GlobeCameraState::setCameraMotionDuration(double time)
+  {
+    m->cameraDistanceAnimation->setDuration(time);
+    m->cameraLatLongAnimation->setDuration(time);
+    m->cameraViewAngleAnimation->setDuration(time);
+  }
 
-	if (time < 0.0)
-	{
-		_cameraViewAngleAnimation->setValue(_cameraViewAngle);
-	}
-	else
-	{
-		_cameraViewAngleAnimation->beginAnimation(_cameraViewAngle, time);
-	}
-}
+  void GlobeCameraState::setCameraMotionEase(osgGaming::AnimationEase ease)
+  {
+    m->cameraDistanceAnimation->setEase(ease);
+    m->cameraLatLongAnimation->setEase(ease);
+    m->cameraViewAngleAnimation->setEase(ease);
+  }
 
-bool GlobeCameraState::isCameraInMotion()
-{
-	return _cameraDistanceAnimation->running();
+  void GlobeCameraState::setCameraViewAngle(osg::Vec2f viewAngle, double time)
+  {
+    m->cameraViewAngle = viewAngle;
+
+    if (time < 0.0)
+    {
+      m->cameraViewAngleAnimation->setValue(m->cameraViewAngle);
+    }
+    else
+    {
+      m->cameraViewAngleAnimation->beginAnimation(m->cameraViewAngle, time);
+    }
+  }
+
+  bool GlobeCameraState::isCameraInMotion()
+  {
+    return m->cameraDistanceAnimation->running();
+  }
+
 }

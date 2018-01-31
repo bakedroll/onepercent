@@ -73,6 +73,14 @@ QtGameApplication::~QtGameApplication()
 {
 }
 
+void QtGameApplication::deinitialize()
+{
+  m->overlayCompositor.reset();
+
+  m->mainWindow->close();
+  delete m->mainWindow;
+}
+
 void QtGameApplication::newStateEvent(osg::ref_ptr<osgGaming::AbstractGameState> state)
 {
   m->overlayCompositor->clear();

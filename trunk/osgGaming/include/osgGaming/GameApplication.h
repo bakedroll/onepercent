@@ -22,6 +22,7 @@ namespace osgGaming
 	{
   protected:
     virtual void initialize(Injector& injector);
+    virtual void deinitialize();
 
     virtual int run(osg::ref_ptr<AbstractGameState> initialState);
     virtual int run(GameStateStack::AbstractGameStateList initialStates);

@@ -16,15 +16,8 @@ namespace onep
 		GlobeOverviewWorld(osgGaming::Injector& injector);
     ~GlobeOverviewWorld();
 
-		osg::ref_ptr<GlobeModel> getGlobeModel();
-		osg::ref_ptr<CountryNameOverlay> getCountryOverlay();
-		osg::ref_ptr<BackgroundModel> getBackgroundModel();
-		osg::ref_ptr<Simulation> getSimulation();
+    void initialize();
 		
-		void setGlobeModel(osg::ref_ptr<GlobeModel> globeModel);
-		void setCountryNameOverlay(osg::ref_ptr<CountryNameOverlay> countryOverlay);
-		void setBackgroundModel(osg::ref_ptr<BackgroundModel> backgroundModel);
-
 		void setDay(float day);
 
 		osg::Vec2f getCameraLatLong();

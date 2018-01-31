@@ -10,6 +10,8 @@
 #include <QLabel>
 
 #include <chrono>
+#include <nodes/CountryOverlay.h>
+#include <nodes/BoundariesMesh.h>
 
 namespace onep
 {
@@ -26,9 +28,11 @@ namespace onep
 
     DebugWindow* base;
 
-    QPushButton* toggleCountryButton;
+    osg::ref_ptr<CountryOverlay> countryOverlay;
+    osg::ref_ptr<BoundariesMesh> boundariesMesh;
+    osg::ref_ptr<Simulation> simulation;
 
-    osg::ref_ptr<GlobeOverviewWorld> world;
+    QPushButton* toggleCountryButton;
     CountryMesh::Map selectedCountries;
 
     osgGaming::Observer<int>::Ptr notifySelectedCountry;
@@ -46,7 +50,7 @@ namespace onep
     {
       auto start_time = std::chrono::high_resolution_clock::now();
 
-      CountryMesh::Ptr mesh = world->getGlobeModel()->getCountryOverlay()->getSelectedCountryMesh();
+      CountryMesh::Ptr mesh = countryOverlay->getSelectedCountryMesh();
       if (!mesh.valid())
         return;
 
@@ -60,7 +64,7 @@ namespace onep
       for (CountryMesh::Map::iterator cit = selectedCountries.begin(); cit != selectedCountries.end(); ++cit)
         meshlist.push_back(cit->second);
 
-      world->getGlobeModel()->getBoundariesMesh()->makeCountryBoundaries(meshlist, osg::Vec3f(1.0f, 0.5, 0.1f), 0.03f);
+      boundariesMesh->makeCountryBoundaries(meshlist, osg::Vec3f(1.0f, 0.5, 0.1f), 0.03f);
 
       auto duration = std::chrono::high_resolution_clock::now() - start_time;
 
@@ -70,13 +74,13 @@ namespace onep
 
     void updateCountryInfoText()
     {
-      if (world->getGlobeModel()->getCountryOverlay()->getSelectedCountryId() == 0)
+      if (countryOverlay->getSelectedCountryId() == 0)
       {
         labelStats->setText("");
         return;
       }
 
-      CountryData::Ptr country = world->getGlobeModel()->getCountryOverlay()->getSelectedCountryMesh()->getCountryData();
+      CountryData::Ptr country = countryOverlay->getSelectedCountryMesh()->getCountryData();
 
       std::string infoText = country->getCountryName() + "\n";
       country->getValues()->getContainer()->debugPrintToString(infoText);
@@ -103,7 +107,7 @@ namespace onep
       QConnectBoolFunctor::connect(radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
       {
         if (checked)
-          world->getGlobeModel()->getCountryOverlay()->clearHighlightedCountries();
+          countryOverlay->clearHighlightedCountries();
       });
 
       branchesLayout->addWidget(radioNoOverlay, 0, 1);
@@ -118,7 +122,7 @@ namespace onep
 
         QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
         {
-          osg::ref_ptr<CountryData> selectedCountry = world->getGlobeModel()->getCountryOverlay()->getSelectedCountryMesh()->getCountryData();
+          osg::ref_ptr<CountryData> selectedCountry = countryOverlay->getSelectedCountryMesh()->getCountryData();
           if (!selectedCountry.valid())
             return;
 
@@ -127,14 +131,14 @@ namespace onep
 
         QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
         {
-          world->getGlobeModel()->getCountryOverlay()->setHighlightedSkillBranch(BranchType(i));
+          countryOverlay->setHighlightedSkillBranch(BranchType(i));
         });
 
-        selectedCountryIdObservers.push_back(world->getGlobeModel()->getCountryOverlay()->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
+        selectedCountryIdObservers.push_back(countryOverlay->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
         {
           if (selected > 0)
           {
-            checkBox->setChecked(world->getGlobeModel()->getCountryOverlay()->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
+            checkBox->setChecked(countryOverlay->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
           }
           else
           {
@@ -144,12 +148,12 @@ namespace onep
           checkBox->setEnabled(selected > 0);
         })));
 
-        CountryMesh::Map& countryMeshs = world->getGlobeModel()->getCountryOverlay()->getCountryMeshs();
+        CountryMesh::Map& countryMeshs = countryOverlay->getCountryMeshs();
         for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
         {
           skillBranchActivatedObservers.push_back(it->second->getCountryData()->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([=](bool activated)
           {
-            if (it->first == world->getGlobeModel()->getCountryOverlay()->getSelectedCountryId())
+            if (it->first == countryOverlay->getSelectedCountryId())
               checkBox->setChecked(activated);
           })));
         }
@@ -165,21 +169,21 @@ namespace onep
       for (int i = 0; i < NUM_SKILLBRANCHES; i++)
       {
         // Skills
-        int nskills = world->getSimulation()->getSkillBranch(BranchType(i))->getNumSkills();
+        int nskills = simulation->getSkillBranch(BranchType(i))->getNumSkills();
 
         QLabel* label = new QLabel(QString::fromStdString(branch_getStringFromType(i)));
         rightLayout->addWidget(label);
 
         for (int j = 0; j < nskills; j++)
         {
-          Skill::Ptr skill = world->getSimulation()->getSkillBranch(BranchType(i))->getSkill(j);
+          Skill::Ptr skill = simulation->getSkillBranch(BranchType(i))->getSkill(j);
 
           QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getName()));
           rightLayout->addWidget(checkBox);
 
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
-            world->getSimulation()->getSkillBranch(BranchType(i))->getSkill(j)->setActivated(checked);
+            simulation->getSkillBranch(BranchType(i))->getSkill(j)->setActivated(checked);
           });
         }
       }
@@ -212,27 +216,33 @@ namespace onep
     }
   };
 
-  DebugWindow::DebugWindow(osg::ref_ptr<GlobeOverviewWorld> world, QWidget* parent)
+  DebugWindow::DebugWindow(
+    osg::ref_ptr<CountryOverlay> countryOverlay,
+    osg::ref_ptr<BoundariesMesh> boundariesMesh,
+    osg::ref_ptr<Simulation> simulation,
+    QWidget* parent)
     : QDialog(parent)
     , m(new Impl(this))
   {
     setGeometry(100, 100, 500, 800);
 
-    m->world = world;
+    m->countryOverlay = countryOverlay;
+    m->boundariesMesh = boundariesMesh;
+    m->simulation = simulation;
 
     m->setupUi();
 
-    m->notifyDay = m->world->getSimulation()->getDayObs()->connect(osgGaming::Func<int>([this](int day)
+    m->notifyDay = m->simulation->getDayObs()->connect(osgGaming::Func<int>([this](int day)
     {
       m->updateCountryInfoText();
     }));
 
-    m->notifySkillpoints = m->world->getSimulation()->getSkillPointsObs()->connectAndNotify(osgGaming::Func<int>([this](int skillPoints)
+    m->notifySkillpoints = m->simulation->getSkillPointsObs()->connectAndNotify(osgGaming::Func<int>([this](int skillPoints)
     {
       m->labelSkillpoints->setText(QString("Skill Points: %1").arg(skillPoints));
     }));
 
-    m->notifySelectedCountry = m->world->getGlobeModel()->getCountryOverlay()->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([this](int selected)
+    m->notifySelectedCountry = m->countryOverlay->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([this](int selected)
     {
       m->updateCountryInfoText();
 

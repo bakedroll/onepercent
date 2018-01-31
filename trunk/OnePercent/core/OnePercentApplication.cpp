@@ -1,5 +1,7 @@
 #include "OnePercentApplication.h"
 
+#include "nodes/CountryOverlay.h"
+#include "nodes/BoundariesMesh.h"
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
 #include "states/LoadingGlobeOverviewState.h"

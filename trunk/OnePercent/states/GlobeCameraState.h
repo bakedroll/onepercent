@@ -10,7 +10,7 @@ namespace onep
 	class GlobeCameraState : public QtGameState
 	{
 	public:
-	  GlobeCameraState();
+	  GlobeCameraState(osgGaming::Injector& injector);
     virtual ~GlobeCameraState();
 
 		virtual void initialize() override;
@@ -18,8 +18,6 @@ namespace onep
 		virtual osgGaming::GameState::StateEvent* update() override;
 
 	protected:
-		osg::ref_ptr<GlobeOverviewWorld> getGlobeOverviewWorld();
-
 		osg::Vec2f getCameraLatLong();
 		float getCameraDistance();
 		osg::Vec2f getCameraViewAngle();
@@ -34,15 +32,8 @@ namespace onep
 		bool isCameraInMotion();
 
 	private:
-		osg::ref_ptr<GlobeOverviewWorld> _globeWorld;
-
-		osg::Vec2f _cameraLatLong;
-		float _cameraDistance;
-		osg::Vec2f _cameraViewAngle;
-
-		osg::ref_ptr<osgGaming::RepeatedVec2fAnimation> _cameraLatLongAnimation;
-		osg::ref_ptr<osgGaming::Animation<float>> _cameraDistanceAnimation;
-		osg::ref_ptr<osgGaming::Animation<osg::Vec2f>> _cameraViewAngleAnimation;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
 	};
 }

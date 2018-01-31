@@ -12,7 +12,9 @@ namespace onep
     Impl(osgGaming::Injector& injector, GlobeOverviewWorld* b)
       : base(b)
       , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
-      , paramEarthRadius(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_EarthRadiusName))
+      , globeModel(injector.inject<GlobeModel>())
+      , countryNameOverlay(injector.inject<CountryNameOverlay>())
+      , backgroundModel(injector.inject<BackgroundModel>())
       , simulation(injector.inject<Simulation>())
       , cameraLatLong(osg::Vec2f(0.0f, 0.0f))
       , cameraViewAngle(osg::Vec2f(0.0f, 0.0f))
@@ -67,63 +69,19 @@ namespace onep
     light->setDiffuse(osg::Vec4(1.0, 1.0, 1.0, 1.0));
     light->setSpecular(osg::Vec4(1.0, 1.0, 1.0, 1.0));
     light->setAmbient(osg::Vec4(0.0, 0.0, 0.0, 1.0));
+
+    getRootNode()->addChild(m->globeModel);
+    getRootNode()->addChild(m->countryNameOverlay);
+    getRootNode()->addChild(m->backgroundModel->getTransform());
   }
 
   GlobeOverviewWorld::~GlobeOverviewWorld()
   {
   }
 
-  osg::ref_ptr<GlobeModel> GlobeOverviewWorld::getGlobeModel()
+  void GlobeOverviewWorld::initialize()
   {
-    return m->globeModel;
-  }
-
-  osg::ref_ptr<CountryNameOverlay> GlobeOverviewWorld::getCountryOverlay()
-  {
-    return m->countryNameOverlay;
-  }
-
-  osg::ref_ptr<BackgroundModel> GlobeOverviewWorld::getBackgroundModel()
-  {
-    return m->backgroundModel;
-  }
-
-  osg::ref_ptr<Simulation> GlobeOverviewWorld::getSimulation()
-  {
-    return m->simulation;
-  }
-
-  void GlobeOverviewWorld::setGlobeModel(osg::ref_ptr<GlobeModel> globeModel)
-  {
-    if (m->globeModel.valid())
-    {
-      getRootNode()->removeChild(m->globeModel);
-    }
-
-    getRootNode()->addChild(globeModel);
-    m->globeModel = globeModel;
-  }
-
-  void GlobeOverviewWorld::setCountryNameOverlay(osg::ref_ptr<CountryNameOverlay> countryNameOverlay)
-  {
-    if (m->countryNameOverlay.valid())
-    {
-      getRootNode()->removeChild(m->countryNameOverlay);
-    }
-
-    getRootNode()->addChild(countryNameOverlay);
-    m->countryNameOverlay = countryNameOverlay;
-  }
-
-  void GlobeOverviewWorld::setBackgroundModel(osg::ref_ptr<BackgroundModel> backgroundModel)
-  {
-    if (m->backgroundModel.valid())
-    {
-      getRootNode()->removeChild(m->backgroundModel->getTransform());
-    }
-
-    getRootNode()->addChild(backgroundModel->getTransform());
-    m->backgroundModel = backgroundModel;
+    m->paramEarthRadius = m->propertiesManager->getValue<float>(Param_EarthRadiusName);
   }
 
   void GlobeOverviewWorld::setDay(float day)

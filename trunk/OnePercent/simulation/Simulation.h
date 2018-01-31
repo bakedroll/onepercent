@@ -1,6 +1,8 @@
 #pragma once
 
 #include "nodes/GlobeModel.h"
+#include "nodes/CountryMesh.h"
+
 #include "SkillBranch.h"
 #include "SimulationVisitor.h"
 #include "SimulationCallback.h"

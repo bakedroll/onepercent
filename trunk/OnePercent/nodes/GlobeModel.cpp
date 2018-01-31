@@ -1,5 +1,8 @@
 #include "GlobeModel.h"
 
+#include "BoundariesMesh.h"
+#include "CountryOverlay.h"
+
 #include <osg/Geode>
 #include <osg/Texture2D>
 
@@ -428,13 +431,4 @@ namespace onep
     m->uniformTime->set(day * m->paramEarthCloudsMorphSpeed);
   }
 
-  BoundariesMesh::Ptr GlobeModel::getBoundariesMesh()
-  {
-    return m->boundariesMesh;
-  }
-
-  CountryOverlay::Ptr GlobeModel::getCountryOverlay()
-  {
-    return m->countryOverlay;
-  }
 }
