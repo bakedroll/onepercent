@@ -10,13 +10,16 @@ namespace onep
 {
   struct Simulation::Impl
   {
-    Impl()
-      : applySkillsVisitor(new SimulationVisitor(SimulationVisitor::APPLY_SKILLS))
+    Impl(osgGaming::Injector& injector)
+      : propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+      , applySkillsVisitor(new SimulationVisitor(SimulationVisitor::APPLY_SKILLS))
       , affectNeighborsVisitor(new SimulationVisitor(SimulationVisitor::AFFECT_NEIGHBORS))
       , progressCountriesVisitor(new SimulationVisitor(SimulationVisitor::PROGRESS_COUNTRIES))
       , oDay(new osgGaming::Observable<int>(0))
       , skillPointsObs(new osgGaming::Observable<int>(0))
     {}
+
+    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
 
     SkillBranch::Map skillBranches;
 
@@ -33,10 +36,10 @@ namespace onep
     osgGaming::Observable<int>::Ptr skillPointsObs;
   };
 
-  Simulation::Simulation()
+  Simulation::Simulation(osgGaming::Injector& injector)
     : Group()
     , SimulationCallback()
-    , m(new Impl())
+    , m(new Impl(injector))
 
   {
     m->skillBranches[BRANCH_CONTROL] = new SkillBranch(BRANCH_CONTROL);
@@ -70,15 +73,15 @@ namespace onep
 
   void Simulation::loadSkillsXml(std::string filename)
   {
-    osgGaming::PropertiesManager::getInstance()->loadPropertiesFromXmlResource(filename);
+    m->propertiesManager->loadPropertiesFromXmlResource(filename);
 
-    int nelements = osgGaming::PropertiesManager::getInstance()->root()->group("skills")->array("passive")->size();
+    int nelements = m->propertiesManager->root()->group("skills")->array("passive")->size();
     for (int i = 0; i < nelements; i++)
     {
-      std::string name = osgGaming::PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<std::string>(i, "name")->get();
-      std::string typeStr = osgGaming::PropertiesManager::getInstance()->root()->group("skills")->array("passive")->property<std::string>(i, "branch")->get();
+      std::string name = m->propertiesManager->root()->group("skills")->array("passive")->property<std::string>(i, "name")->get();
+      std::string typeStr = m->propertiesManager->root()->group("skills")->array("passive")->property<std::string>(i, "branch")->get();
 
-      osg::ref_ptr<osgGaming::PropertyArray> arr = osgGaming::PropertiesManager::getInstance()->root()->group("skills")->array("passive")->array(i, "attributes");
+      osg::ref_ptr<osgGaming::PropertyArray> arr = m->propertiesManager->root()->group("skills")->array("passive")->array(i, "attributes");
       int arrsize = arr->size();
 
       BranchType type = branch_getTypeFromString(typeStr);

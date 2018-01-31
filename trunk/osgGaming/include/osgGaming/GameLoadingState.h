@@ -20,8 +20,8 @@ namespace osgGaming
     void getNextStates(Injector& injector, AbstractGameStateList& states);
 
 	protected:
-		virtual osg::ref_ptr<World> overrideWorld(osg::ref_ptr<View> view) override;
-    virtual osg::ref_ptr<Hud> overrideHud(osg::ref_ptr<View> view) override;
+		virtual osg::ref_ptr<World> injectWorld(osgGaming::Injector& injector, osg::ref_ptr<View> view) override;
+    virtual osg::ref_ptr<Hud> injectHud(osgGaming::Injector& injector, osg::ref_ptr<View> view) override;
 
     virtual void injectNextStates(Injector& injector, AbstractGameStateList& states) = 0;
 

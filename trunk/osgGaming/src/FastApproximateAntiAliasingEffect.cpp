@@ -1,109 +1,141 @@
+#include <osgGaming/Injector.h>
+
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>
 #include <osgGaming/ShaderFactory.h>
 #include <osgGaming/StaticResources.h>
 
-using namespace osgGaming;
-using namespace osg;
-using namespace std;
-
-FastApproximateAntiAliasingEffectCallback::FastApproximateAntiAliasingEffectCallback(ref_ptr<osgPPU::ShaderAttribute> shaderFxaa, Vec2f resolution)
-	: osgGA::GUIEventHandler(),
-	  _shaderFxaa(shaderFxaa),
-	  _resolution(resolution)
+namespace osgGaming
 {
+  class FastApproximateAntiAliasingEffectCallback : public osgGA::GUIEventHandler
+  {
+  public:
+    FastApproximateAntiAliasingEffectCallback(osg::ref_ptr<osgPPU::ShaderAttribute> shaderFxaa, osg::Vec2f resolution)
+      : osgGA::GUIEventHandler(),
+      shaderFxaa(shaderFxaa),
+      resolution(resolution)
+    {
 
-}
+    }
 
-bool FastApproximateAntiAliasingEffectCallback::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa)
-{
-	switch (ea.getEventType())
-	{
-	case osgGA::GUIEventAdapter::RESIZE:
+    virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override
+    {
+      switch (ea.getEventType())
+      {
+      case osgGA::GUIEventAdapter::RESIZE:
 
-		int width = ea.getWindowWidth();
-		int height = ea.getWindowHeight();
+        int width = ea.getWindowWidth();
+        int height = ea.getWindowHeight();
 
-		if (width != (int)_resolution.x() || height != (int)_resolution.y())
-		{
-			_resolution = Vec2f((float)width, (float)height);
+        if (width != int(resolution.x()) || height != int(resolution.y()))
+        {
+          resolution = osg::Vec2f(float(width), float(height));
 
-			_shaderFxaa->set("rt_w", _resolution.x());
-			_shaderFxaa->set("rt_h", _resolution.y());
+          shaderFxaa->set("rt_w", resolution.x());
+          shaderFxaa->set("rt_h", resolution.y());
 
-			return true;
-		}
-	}
+          return true;
+        }
+      }
 
-	return false;
-}
+      return false;
+    }
 
-const string FastApproximateAntiAliasingEffect::NAME = "fxaaEffect";
+  private:
+    osg::ref_ptr<osgPPU::ShaderAttribute> shaderFxaa;
+    osg::Vec2f resolution;
+  };
 
-FastApproximateAntiAliasingEffect::FastApproximateAntiAliasingEffect(Vec2f resolution)
-	: PostProcessingEffect(),
-	  _resolution(resolution)
-{
+  struct FastApproximateAntiAliasingEffect::Impl
+  {
+    Impl(Injector& injector)
+      : shaderFactory(injector.inject<ShaderFactory>())
+      , resolution(osg::Vec2f(512.0f, 512.0f))
+    {
+    }
 
-}
+    osg::ref_ptr<ShaderFactory> shaderFactory;
 
-string FastApproximateAntiAliasingEffect::getName()
-{
-	return NAME;
-}
+    osg::ref_ptr<osgPPU::UnitInOut> unitFxaa;
+    osg::Vec2f resolution;
+    osg::ref_ptr<osgPPU::ShaderAttribute> shaderFxaa;
+  };
 
-FastApproximateAntiAliasingEffect::InitialUnitList FastApproximateAntiAliasingEffect::getInitialUnits()
-{
-	PostProcessingEffect::InitialUnitList list;
+  const std::string FastApproximateAntiAliasingEffect::NAME = "fxaaEffect";
 
-	return list;
-}
+  FastApproximateAntiAliasingEffect::FastApproximateAntiAliasingEffect(Injector& injector)
+    : PostProcessingEffect()
+    , m(new Impl(injector))
+  {
 
-ref_ptr<osgPPU::Unit> FastApproximateAntiAliasingEffect::getResultUnit()
-{
-	return _unitFxaa;
-}
+  }
 
-FastApproximateAntiAliasingEffect::InputToUniformList FastApproximateAntiAliasingEffect::getInputToUniform()
-{
-	PostProcessingEffect::InputToUniformList list;
+  FastApproximateAntiAliasingEffect::~FastApproximateAntiAliasingEffect()
+  {
+  }
 
-	InputToUniform ituBypass;
-	ituBypass.name = "tex0";
-	ituBypass.type = PostProcessingEffect::ONGOING_COLOR;
-	ituBypass.unit = _unitFxaa;
+  std::string FastApproximateAntiAliasingEffect::getName()
+  {
+    return NAME;
+  }
 
-	list.push_back(ituBypass);
+  FastApproximateAntiAliasingEffect::InitialUnitList FastApproximateAntiAliasingEffect::getInitialUnits()
+  {
+    PostProcessingEffect::InitialUnitList list;
 
-	return list;
-}
+    return list;
+  }
 
-void FastApproximateAntiAliasingEffect::setResolution(Vec2f resolution)
-{
-	_resolution = resolution;
+  osg::ref_ptr<osgPPU::Unit> FastApproximateAntiAliasingEffect::getResultUnit()
+  {
+    return m->unitFxaa;
+  }
 
-	_shaderFxaa->set("rt_w", _resolution.x());
-	_shaderFxaa->set("rt_h", _resolution.y());
-}
+  FastApproximateAntiAliasingEffect::InputToUniformList FastApproximateAntiAliasingEffect::getInputToUniform()
+  {
+    PostProcessingEffect::InputToUniformList list;
 
-void FastApproximateAntiAliasingEffect::initializeUnits()
-{
-	ref_ptr<Shader> shaderFxaaFp = ShaderFactory::getInstance()->fromSourceText("ShaderFxaaFp", StaticResources::ShaderFxaaFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderFxaaVp = ShaderFactory::getInstance()->fromSourceText("ShaderFxaaVp", StaticResources::ShaderFxaaVp, Shader::VERTEX);
+    InputToUniform ituBypass;
+    ituBypass.name = "tex0";
+    ituBypass.type = PostProcessingEffect::ONGOING_COLOR;
+    ituBypass.unit = m->unitFxaa;
 
-	_unitFxaa = new osgPPU::UnitInOut();
-	{
-		_shaderFxaa = new osgPPU::ShaderAttribute();
-		_shaderFxaa->addShader(shaderFxaaFp);
-		_shaderFxaa->addShader(shaderFxaaVp);
+    list.push_back(ituBypass);
 
-		_shaderFxaa->add("rt_w", osg::Uniform::FLOAT);
-		_shaderFxaa->add("rt_h", osg::Uniform::FLOAT);
+    return list;
+  }
 
-		_shaderFxaa->set("rt_w", _resolution.x());
-		_shaderFxaa->set("rt_h", _resolution.y());
+  void FastApproximateAntiAliasingEffect::setResolution(osg::Vec2f resolution)
+  {
+    m->resolution = resolution;
 
-		_unitFxaa->getOrCreateStateSet()->setAttributeAndModes(_shaderFxaa);
+    if (m->shaderFxaa.valid())
+    {
+      m->shaderFxaa->set("rt_w", m->resolution.x());
+      m->shaderFxaa->set("rt_h", m->resolution.y());
+    }
+  }
 
-		_unitFxaa->setEventCallback(new FastApproximateAntiAliasingEffectCallback(_shaderFxaa, _resolution));
-	}
+  void FastApproximateAntiAliasingEffect::initializeUnits()
+  {
+    osg::ref_ptr<osg::Shader> shaderFxaaFp = m->shaderFactory->fromSourceText("ShaderFxaaFp", StaticResources::ShaderFxaaFp, osg::Shader::FRAGMENT);
+    osg::ref_ptr<osg::Shader> shaderFxaaVp = m->shaderFactory->fromSourceText("ShaderFxaaVp", StaticResources::ShaderFxaaVp, osg::Shader::VERTEX);
+
+    m->unitFxaa = new osgPPU::UnitInOut();
+    {
+      m->shaderFxaa = new osgPPU::ShaderAttribute();
+      m->shaderFxaa->addShader(shaderFxaaFp);
+      m->shaderFxaa->addShader(shaderFxaaVp);
+
+      m->shaderFxaa->add("rt_w", osg::Uniform::FLOAT);
+      m->shaderFxaa->add("rt_h", osg::Uniform::FLOAT);
+
+      m->shaderFxaa->set("rt_w", m->resolution.x());
+      m->shaderFxaa->set("rt_h", m->resolution.y());
+      
+      m->unitFxaa->getOrCreateStateSet()->setAttributeAndModes(m->shaderFxaa);
+
+      m->unitFxaa->setEventCallback(new FastApproximateAntiAliasingEffectCallback(m->shaderFxaa, m->resolution));
+    }
+  }
+
 }

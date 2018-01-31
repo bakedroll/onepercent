@@ -23,14 +23,14 @@ namespace osgGaming
     return true;
   }
 
-  osg::ref_ptr<World> GameLoadingState::overrideWorld(osg::ref_ptr<View> view)
+  osg::ref_ptr<World> GameLoadingState::injectWorld(osgGaming::Injector& injector, osg::ref_ptr<View> view)
   {
-    return new World();
+    return injector.inject<World>();
   }
 
-  osg::ref_ptr<Hud> GameLoadingState::overrideHud(osg::ref_ptr<View> view)
+  osg::ref_ptr<Hud> GameLoadingState::injectHud(osgGaming::Injector& injector, osg::ref_ptr<View> view)
   {
-    return new Hud();
+    return injector.inject<Hud>();
   }
 
   void GameLoadingState::getNextStates(Injector& injector, AbstractGameStateList& states)

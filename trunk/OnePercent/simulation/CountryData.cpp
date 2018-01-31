@@ -3,7 +3,6 @@
 #include "core/Globals.h"
 #include "SimulationVisitor.h"
 
-#include <osgGaming/Property.h>
 #include <osgGaming/Helper.h>
 
 using namespace osgGaming;
@@ -23,17 +22,24 @@ namespace onep
     _relation = relation;
   }
 
-  CountryData::CountryData(string name, int id, float population, float wealth, Vec2f centerLatLong, Vec2f size)
+  CountryData::CountryData(
+    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
+    string name,
+    int id,
+    float population,
+    float wealth,
+    Vec2f centerLatLong,
+    Vec2f size)
     : Group()
     , SimulationCallback()
     , m_name(name)
-    , m_values(new CountryValues(wealth))
+    , m_values(new CountryValues(propertiesManager, wealth))
     , m_populationInMio(population)
     , m_id(id)
     , m_centerLatLong(centerLatLong)
     , m_size(size)
-    , m_earthRadius(PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName))
-    , m_cameraZoom(PropertiesManager::getInstance()->getValue<float>(Param_CameraCountryZoomName))
+    , m_earthRadius(propertiesManager->getValue<float>(Param_EarthRadiusName))
+    , m_cameraZoom(propertiesManager->getValue<float>(Param_CameraCountryZoomName))
   {
     for (int i = 0; i < NUM_SKILLBRANCHES; i++)
       m_skillBranches.oActivated[i] = new osgGaming::Observable<bool>(false);

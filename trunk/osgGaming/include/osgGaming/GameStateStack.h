@@ -25,6 +25,7 @@ namespace osgGaming
 		osg::ref_ptr<AbstractGameState> get();
 
 		void popState();
+    void pushState(osg::ref_ptr<AbstractGameState> state);
 		void pushStates(AbstractGameStateList states);
 		void replaceState(AbstractGameStateList states);
 

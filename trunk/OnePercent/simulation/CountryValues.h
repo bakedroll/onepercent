@@ -1,5 +1,7 @@
 #pragma once
 
+#include <osgGaming/PropertiesManager.h>
+
 #include <osg/Referenced>
 
 #include "core/Globals.h"
@@ -14,7 +16,7 @@ namespace onep
   public:
     typedef osg::ref_ptr<CountryValues> Ptr;
 
-    CountryValues(float wealth);
+    CountryValues(osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager, float wealth);
 
     template<typename T>
     ProgressingValue<T>* getValue(CountryValueType type);

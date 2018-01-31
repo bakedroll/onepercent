@@ -7,183 +7,180 @@
 #include <osgDB/ReadFile>
 #include <osgDB/FileNameUtils>
 
-using namespace osg;
-using namespace osgDB;
-using namespace std;
-using namespace osgGaming;
-using namespace osgText;
-
-template<>
-ref_ptr<ResourceManager> Singleton<ResourceManager>::_instance;
-
-ResourceManager::ResourceManager()
-	: Singleton<ResourceManager>(),
-	  _defaultFontResourceKey("")
+namespace osgGaming
 {
-	// _utf8Locale = locale(locale(), new codecvt_utf8<char>);
-}
 
-string ResourceManager::loadText(string resourceKey)
-{
-	return static_cast<TextResource*>(loadObject(resourceKey, TEXT).get())->text;
-}
+  ResourceManager::ResourceManager(Injector& injector)
+    : _defaultFontResourceKey("")
+  {
+    // _utf8Locale = locale(locale(), new codecvt_utf8<char>);
+  }
 
-char* ResourceManager::loadBinary(std::string resourceKey)
-{
-	return static_cast<BinaryResource*>(loadObject(resourceKey, BINARY).get())->getBytes();
-}
+  ResourceManager::~ResourceManager()
+  {
+  }
 
-ref_ptr<Image> ResourceManager::loadImage(string resourceKey)
-{
-	return static_cast<Image*>(loadObject(resourceKey).get());
-}
+  std::string ResourceManager::loadText(std::string resourceKey)
+  {
+    return static_cast<TextResource*>(loadObject(resourceKey, TEXT).get())->text;
+  }
 
-ref_ptr<Font> ResourceManager::loadFont(string resourceKey)
-{
-	return static_cast<Font*>(loadObject(resourceKey).get());
-}
+  char* ResourceManager::loadBinary(std::string resourceKey)
+  {
+    return static_cast<BinaryResource*>(loadObject(resourceKey, BINARY).get())->getBytes();
+  }
 
-ref_ptr<Shader> ResourceManager::loadShader(string resourceKey, Shader::Type type)
-{
-	return static_cast<Shader*>(loadObject(resourceKey, SHADER, type).get());
-}
+  osg::ref_ptr<osg::Image> ResourceManager::loadImage(std::string resourceKey)
+  {
+    return static_cast<osg::Image*>(loadObject(resourceKey).get());
+  }
 
-ref_ptr<Font> ResourceManager::loadDefaultFont()
-{
-	if (_defaultFontResourceKey == "")
-	{
-		return NULL;
-	}
+  osg::ref_ptr<osgText::Font> ResourceManager::loadFont(std::string resourceKey)
+  {
+    return static_cast<osgText::Font*>(loadObject(resourceKey).get());
+  }
 
-	return loadFont(_defaultFontResourceKey);
-}
+  osg::ref_ptr<osg::Shader> ResourceManager::loadShader(std::string resourceKey, osg::Shader::Type type)
+  {
+    return static_cast<osg::Shader*>(loadObject(resourceKey, SHADER, type).get());
+  }
 
-void ResourceManager::setDefaultFontResourceKey(string resourceKey)
-{
-	_defaultFontResourceKey = resourceKey;
-}
+  osg::ref_ptr<osgText::Font> ResourceManager::loadDefaultFont()
+  {
+    if (_defaultFontResourceKey == "")
+    {
+      return nullptr;
+    }
 
-void ResourceManager::setResourceLoader(ref_ptr<ResourceLoader> loader)
-{
-	_resourceLoader = loader;
-}
+    return loadFont(_defaultFontResourceKey);
+  }
 
-void ResourceManager::clearCacheResource(string resourceKey)
-{
-	ResourceDictionary::iterator it = _cache.find(lowerString(resourceKey));
-	if (it == _cache.end())
-	{
-		throw GameException("Clear cache resource: resource key '" + resourceKey + "' not found");
-	}
+  void ResourceManager::setDefaultFontResourceKey(std::string resourceKey)
+  {
+    _defaultFontResourceKey = resourceKey;
+  }
 
-	_cache.erase(it);
-}
+  void ResourceManager::setResourceLoader(osg::ref_ptr<ResourceLoader> loader)
+  {
+    _resourceLoader = loader;
+  }
 
-void ResourceManager::clearCache()
-{
-	_cache.clear();
-}
+  void ResourceManager::clearCacheResource(std::string resourceKey)
+  {
+    ResourceDictionary::iterator it = _cache.find(lowerString(resourceKey));
+    if (it == _cache.end())
+    {
+      throw GameException("Clear cache resource: resource key '" + resourceKey + "' not found");
+    }
 
-ref_ptr<ResourceLoader> ResourceManager::resourceLoader()
-{
-	if (!_resourceLoader.valid())
-	{
-		_resourceLoader = new FileResourceLoader();
-	}
+    _cache.erase(it);
+  }
 
-	return _resourceLoader;
-}
+  void ResourceManager::clearCache()
+  {
+    _cache.clear();
+  }
 
-char* ResourceManager::loadBytesFromStream(std::ifstream& stream, long long length)
-{
-	char* buffer = new char[length];
-	stream.read(buffer, length);
+  osg::ref_ptr<ResourceLoader> ResourceManager::resourceLoader()
+  {
+    if (!_resourceLoader.valid())
+    {
+      _resourceLoader = new FileResourceLoader();
+    }
 
-	return buffer;
-}
+    return _resourceLoader;
+  }
 
-string ResourceManager::loadTextFromStream(std::ifstream& stream, long long length)
-{
-	char* buffer = new char[length + 1];
-	stream.read(buffer, length);
-	buffer[length] = '\0';
+  char* ResourceManager::loadBytesFromStream(std::ifstream& stream, long long length)
+  {
+    char* buffer = new char[length];
+    stream.read(buffer, length);
 
-	string text = string(buffer);
+    return buffer;
+  }
 
-	delete[] buffer;
+  std::string ResourceManager::loadTextFromStream(std::ifstream& stream, long long length)
+  {
+    char* buffer = new char[length + 1];
+    stream.read(buffer, length);
+    buffer[length] = '\0';
 
-	return text;
-}
+    std::string text = std::string(buffer);
 
-ref_ptr<Object> ResourceManager::loadObject(string resourceKey, ResourceType type, Shader::Type shaderType)
-{
-	ref_ptr<Object> obj = getCacheItem(resourceKey);
-	if (obj.valid())
-	{
-		return obj;
-	}
+    delete[] buffer;
 
-	std::ifstream stream;
+    return text;
+  }
 
-	long long length;
-	resourceLoader()->getResourceStream(resourceKey, stream, length);
+  osg::ref_ptr<osg::Object> ResourceManager::loadObject(std::string resourceKey, ResourceType type, osg::Shader::Type shaderType)
+  {
+    osg::ref_ptr<osg::Object> obj = getCacheItem(resourceKey);
+    if (obj.valid())
+    {
+      return obj;
+    }
 
-	if (type == DETECT)
-	{
-		ref_ptr<ReaderWriter> rw = Registry::instance()->getReaderWriterForExtension(getLowerCaseFileExtension(resourceKey));
-		ReaderWriter::ReadResult res = rw->readObject(stream);
+    std::ifstream stream;
 
-		obj = res.getObject();
-	}
-	else if (type == TEXT)
-	{
-		// stream.imbue(_utf8Locale);
+    long long length;
+    resourceLoader()->getResourceStream(resourceKey, stream, length);
 
-		ref_ptr<TextResource> textRes = new TextResource();
-		textRes->text = loadTextFromStream(stream, length);
+    if (type == DETECT)
+    {
+      osg::ref_ptr<osgDB::ReaderWriter> rw = osgDB::Registry::instance()->getReaderWriterForExtension(osgDB::getLowerCaseFileExtension(resourceKey));
+      osgDB::ReaderWriter::ReadResult res = rw->readObject(stream);
 
-		obj = textRes;
-	}
-	else if (type == BINARY)
-	{
-		ref_ptr<BinaryResource> binRes = new BinaryResource();
-		binRes->setBytes(loadBytesFromStream(stream, length));
+      obj = res.getObject();
+    }
+    else if (type == TEXT)
+    {
+      // stream.imbue(_utf8Locale);
 
-		obj = binRes;
-	}
-	else if (type == SHADER)
-	{
-		ref_ptr<Shader> shader = new Shader(shaderType);
-		string source = loadTextFromStream(stream, length);
+      osg::ref_ptr<TextResource> textRes = new TextResource();
+      textRes->text = loadTextFromStream(stream, length);
 
-		shader->setShaderSource(source);
+      obj = textRes;
+    }
+    else if (type == BINARY)
+    {
+      osg::ref_ptr<BinaryResource> binRes = new BinaryResource();
+      binRes->setBytes(loadBytesFromStream(stream, length));
 
-		obj = shader;
-	}
+      obj = binRes;
+    }
+    else if (type == SHADER)
+    {
+      osg::ref_ptr<osg::Shader> shader = new osg::Shader(shaderType);
+      std::string source = loadTextFromStream(stream, length);
 
-	stream.close();
+      shader->setShaderSource(source);
 
-	storeCacheItem(resourceKey, obj);
+      obj = shader;
+    }
 
-	return obj;
-}
+    stream.close();
 
-ref_ptr<Object> ResourceManager::getCacheItem(string key)
-{
-	string lower_key = lowerString(key);
+    storeCacheItem(resourceKey, obj);
 
-	ResourceDictionary::iterator it = _cache.find(lower_key);
-	if (it == _cache.end())
-	{
-		return NULL;
-	}
+    return obj;
+  }
 
-	return it->second;
-}
+  osg::ref_ptr<osg::Object> ResourceManager::getCacheItem(std::string key)
+  {
+    std::string lower_key = lowerString(key);
 
-void ResourceManager::storeCacheItem(string key, ref_ptr<Object> obj)
-{
-	string lower_key = lowerString(key);
+    ResourceDictionary::iterator it = _cache.find(lower_key);
+    if (it == _cache.end())
+      return nullptr;
 
-	_cache.insert(ResourceDictionary::value_type(lower_key, obj));
+    return it->second;
+  }
+
+  void ResourceManager::storeCacheItem(std::string key, osg::ref_ptr<osg::Object> obj)
+  {
+    std::string lower_key = lowerString(key);
+
+    _cache.insert(ResourceDictionary::value_type(lower_key, obj));
+  }
+
 }

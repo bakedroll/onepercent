@@ -1,28 +1,31 @@
 #pragma once
 
 #include <map>
+#include <memory>
 
 #include <rapidxml.hpp>
 
-#include <osgGaming/Singleton.h>
 #include <osgGaming/PropertyValue.h>
 #include <osgGaming/PropertyGroup.h>
 
 namespace osgGaming
 {
-	class PropertiesManager : public Singleton<PropertiesManager>
+  class Injector;
+
+  class PropertiesManager : public osg::Referenced
 	{
 	public:
-		PropertiesManager();
+    explicit PropertiesManager(Injector& injector);
+    ~PropertiesManager();
 
 		template <typename T>
 		T* getValuePtr(const std::string& name)
 		{
-			AbstractPropertyValue::ValueMap::iterator it = _values.find(name);
-			if (it == _values.end())
+			AbstractPropertyValue::ValueMap::iterator it = m_values.find(name);
+			if (it == m_values.end())
 			{
 				PropertyValue<T>* value = new PropertyValue<T>();
-				_values.insert(AbstractPropertyValue::ValueMap::value_type(name, value));
+				m_values.insert(AbstractPropertyValue::ValueMap::value_type(name, value));
 
 				return value->getPtr();
 			}
@@ -67,8 +70,9 @@ namespace osgGaming
 		void throwMissingAttribute(const std::string& path, const std::string& tag);
 		void throwMissingAttribute(const std::string& path, const std::string& tag, const std::string& attribute);
 
-		AbstractPropertyValue::ValueMap _values;
+		AbstractPropertyValue::ValueMap m_values;
 
-		osg::ref_ptr<PropertyGroup> _root;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 	};
 }

@@ -3,14 +3,18 @@
 #include <vector>
 
 #include <osgGaming/Timer.h>
-#include <osgGaming/Singleton.h>
+
+#include <osg/ref_ptr>
 
 namespace osgGaming
 {
-	class TimerFactory : public Singleton<TimerFactory>
+  class Injector;
+
+  class TimerFactory : public osg::Referenced
 	{
 	public:
-		TimerFactory();
+    explicit TimerFactory(Injector& injector);
+    ~TimerFactory();
 
 		osg::ref_ptr<Timer> create(void(*callback)(), double duration = 1.0, bool singleShot = true);
 
@@ -19,7 +23,7 @@ namespace osgGaming
 		{
 			osg::ref_ptr<Timer> timer = new Timer(std::bind(callback, context), duration, singleShot);
 
-			_timers.push_back(timer);
+			m_timers.push_back(timer);
 
 			return timer;
 		}
@@ -29,6 +33,6 @@ namespace osgGaming
 	private:
 		typedef std::vector<osg::ref_ptr<Timer>> TimerList;
 
-		TimerList _timers;
+		TimerList m_timers;
 	};
 }

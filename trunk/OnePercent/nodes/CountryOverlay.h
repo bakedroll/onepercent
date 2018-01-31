@@ -1,5 +1,7 @@
 #pragma once
 
+#include <osgGaming/Injector.h>
+
 #include "simulation/SkillBranch.h"
 #include "data/CountriesMap.h"
 #include "nodes/CountryMesh.h"
@@ -15,7 +17,7 @@ namespace onep
   public:
     typedef osg::ref_ptr<CountryOverlay> Ptr;
 
-    CountryOverlay();
+    CountryOverlay(osgGaming::Injector& injector);
     ~CountryOverlay();
 
     void loadCountries(

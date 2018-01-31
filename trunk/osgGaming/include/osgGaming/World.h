@@ -2,6 +2,7 @@
 
 #include <osgGaming/TransformableCameraManipulator.h>
 
+#include <memory>
 #include <map>
 
 #include <osg/Referenced>
@@ -14,7 +15,9 @@
 
 namespace osgGaming
 {
-	typedef std::map<int, osg::ref_ptr<osg::LightSource>> LightSourceDictionary;
+  class Injector;
+
+  typedef std::map<int, osg::ref_ptr<osg::LightSource>> LightSourceDictionary;
 	typedef std::pair<int, osg::ref_ptr<osg::LightSource>> LightSourceDictPair;
 
 	class World : public osg::Referenced
@@ -22,7 +25,8 @@ namespace osgGaming
 	public:
     typedef osg::ref_ptr<World> Ptr;
 
-		World();
+		World(Injector& injector);
+    ~World();
 
 		osg::ref_ptr<osg::Group> getRootNode();
 		osg::ref_ptr<osg::StateSet> getGlobalStateSet();
@@ -33,14 +37,8 @@ namespace osgGaming
 		osg::ref_ptr<osg::Light> getLight(int lightNum);
 
 	private:
-		void initializeStateSet();
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
-		osg::ref_ptr<osg::Group> _rootNode;
-		osg::ref_ptr<osg::StateSet> _globalStateSet;
-		osg::ref_ptr<osg::LightModel> _globalLightModel;
-
-		LightSourceDictionary _lightSources;
-
-		osg::ref_ptr<TransformableCameraManipulator> _cameraManipulator;
 	};
 }

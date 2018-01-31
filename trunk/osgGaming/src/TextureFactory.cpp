@@ -1,88 +1,128 @@
 #include <osgGaming/TextureFactory.h>
 
-using namespace osgGaming;
-using namespace osg;
-using namespace std;
-
-TextureBlueprint::TextureBlueprint()
-	: Referenced(),
-	  _texLayer(0),
-	  _dataVariance(Object::DYNAMIC),
-	  _wrapS(Texture::CLAMP_TO_EDGE),
-	  _wrapT(Texture::CLAMP_TO_EDGE),
-	  _minFilter(Texture::LINEAR_MIPMAP_LINEAR),
-	  _magFilter(Texture::LINEAR),
-	  _maxAnisotropy(8.0f)
+namespace osgGaming
 {
+  struct TextureBlueprint::Impl
+  {
+    Impl() 
+      : texLayer(0)
+      , dataVariance(osg::Object::DYNAMIC)
+      , wrapS(osg::Texture::CLAMP_TO_EDGE)
+      , wrapT(osg::Texture::CLAMP_TO_EDGE)
+      , minFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
+      , magFilter(osg::Texture::LINEAR)
+      , maxAnisotropy(8.0f)
+    {}
 
-}
+    typedef struct _bpUniform
+    {
+      std::string uniformName;
+      osg::ref_ptr<osg::StateSet> stateSet;
+    } BpUniform;
 
-ref_ptr<TextureBlueprint> TextureBlueprint::image(ref_ptr<Image> img)
-{
-	_image = img;
+    typedef std::vector<BpUniform> BpUniformList;
+    typedef std::vector<osg::ref_ptr<osg::StateSet>> StateSetList;
 
-	return this;
-}
+    osg::ref_ptr<osg::Image> image;
 
-ref_ptr<TextureBlueprint> TextureBlueprint::texLayer(int texLayer)
-{
-	_texLayer = texLayer;
+    int texLayer;
 
-	return this;
-}
+    osg::Object::DataVariance dataVariance;
+    osg::Texture::WrapMode wrapS;
+    osg::Texture::WrapMode wrapT;
+    osg::Texture::FilterMode minFilter;
+    osg::Texture::FilterMode magFilter;
 
-ref_ptr<TextureBlueprint> TextureBlueprint::assign(ref_ptr<StateSet> stateSet)
-{
-	_assignToStateSets.push_back(stateSet);
+    float maxAnisotropy;
 
-	return this;
-}
+    BpUniformList bpUniforms;
+    StateSetList assignToStateSets;
+  };
 
-ref_ptr<TextureBlueprint> TextureBlueprint::uniform(ref_ptr<StateSet> stateSet, string uniformName)
-{
-	BpUniform uniform;
-	uniform.stateSet = stateSet;
-	uniform.uniformName = uniformName;
+  TextureBlueprint::TextureBlueprint()
+    : Referenced()
+    , m(new Impl())
+  {
 
-	_bpUniforms.push_back(uniform);
+  }
 
-	return this;
-}
+  TextureBlueprint::~TextureBlueprint()
+  {
+  }
 
-ref_ptr<Texture2D> TextureBlueprint::build()
-{
-	ref_ptr<Texture2D> texture = new Texture2D();
-	texture->setDataVariance(_dataVariance);
-	texture->setWrap(Texture::WRAP_S, _wrapS);
-	texture->setWrap(Texture::WRAP_T, _wrapT);
-	texture->setFilter(Texture::MIN_FILTER, _minFilter);
-	texture->setFilter(Texture::MAG_FILTER, _magFilter);
-	texture->setMaxAnisotropy(_maxAnisotropy);
+  osg::ref_ptr<TextureBlueprint> TextureBlueprint::image(osg::ref_ptr<osg::Image> img)
+  {
+    m->image = img;
 
-	if (_image.valid())
-	{
-		texture->setImage(_image);
-	}
+    return this;
+  }
 
-	for (StateSetList::iterator it = _assignToStateSets.begin(); it != _assignToStateSets.end(); ++it)
-	{
-		it->get()->setTextureAttributeAndModes(_texLayer, texture, StateAttribute::ON);
-	}
+  osg::ref_ptr<TextureBlueprint> TextureBlueprint::texLayer(int texLayer)
+  {
+    m->texLayer = texLayer;
 
-	for (BpUniformList::iterator it = _bpUniforms.begin(); it != _bpUniforms.end(); ++it)
-	{
-		ref_ptr<Uniform> uniform = new Uniform(Uniform::SAMPLER_2D, it->uniformName);
-		uniform->set(_texLayer);
-		it->stateSet->addUniform(uniform);
-	}
+    return this;
+  }
 
-	return texture;
-}
+  osg::ref_ptr<TextureBlueprint> TextureBlueprint::assign(osg::ref_ptr<osg::StateSet> stateSet)
+  {
+    m->assignToStateSets.push_back(stateSet);
 
-template<>
-ref_ptr<TextureFactory> Singleton<TextureFactory>::_instance;
+    return this;
+  }
 
-ref_ptr<TextureBlueprint> TextureFactory::make()
-{
-	return new TextureBlueprint();
+  osg::ref_ptr<TextureBlueprint> TextureBlueprint::uniform(osg::ref_ptr<osg::StateSet> stateSet, std::string uniformName)
+  {
+    Impl::BpUniform uniform;
+    uniform.stateSet = stateSet;
+    uniform.uniformName = uniformName;
+
+    m->bpUniforms.push_back(uniform);
+
+    return this;
+  }
+
+  osg::ref_ptr<osg::Texture2D> TextureBlueprint::build()
+  {
+    osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D();
+    texture->setDataVariance(m->dataVariance);
+    texture->setWrap(osg::Texture::WRAP_S, m->wrapS);
+    texture->setWrap(osg::Texture::WRAP_T, m->wrapT);
+    texture->setFilter(osg::Texture::MIN_FILTER, m->minFilter);
+    texture->setFilter(osg::Texture::MAG_FILTER, m->magFilter);
+    texture->setMaxAnisotropy(m->maxAnisotropy);
+
+    if (m->image.valid())
+    {
+      texture->setImage(m->image);
+    }
+
+    for (Impl::StateSetList::iterator it = m->assignToStateSets.begin(); it != m->assignToStateSets.end(); ++it)
+    {
+      it->get()->setTextureAttributeAndModes(m->texLayer, texture, osg::StateAttribute::ON);
+    }
+
+    for (Impl::BpUniformList::iterator it = m->bpUniforms.begin(); it != m->bpUniforms.end(); ++it)
+    {
+      osg::ref_ptr<osg::Uniform> uniform = new osg::Uniform(osg::Uniform::SAMPLER_2D, it->uniformName);
+      uniform->set(m->texLayer);
+      it->stateSet->addUniform(uniform);
+    }
+
+    return texture;
+  }
+
+  TextureFactory::TextureFactory(Injector& injector)
+  {
+  }
+
+  TextureFactory::~TextureFactory()
+  {
+  }
+
+  osg::ref_ptr<TextureBlueprint> TextureFactory::make()
+  {
+    return new TextureBlueprint();
+  }
+
 }

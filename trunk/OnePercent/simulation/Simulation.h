@@ -12,7 +12,7 @@ namespace onep
 	public:
     typedef osg::ref_ptr<Simulation> Ptr;
 
-		Simulation();
+		Simulation(osgGaming::Injector& injector);
     ~Simulation();
 
 		void loadSkillsXml(std::string filename);

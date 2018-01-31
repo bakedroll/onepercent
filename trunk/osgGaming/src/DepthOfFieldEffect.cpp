@@ -1,248 +1,279 @@
+#include <osgGaming/Injector.h>
 #include <osgGaming/DepthOfFieldEffect.h>
 #include <osgGaming/StaticResources.h>
 #include <osgGaming/ShaderFactory.h>
 
-using namespace osgGaming;
-using namespace osg;
-using namespace std;
-
-const string DepthOfFieldEffect::NAME = "dofEffect";
-
-DepthOfFieldEffect::DepthOfFieldEffect(float zNear, float zFar)
-	: PostProcessingEffect(),
-	  _zNear(zNear),
-	  _zFar(zFar),
-	  _gaussSigma(1.5f),
-	  _gaussRadius(5.0f),
-	  _focalLength(10.0f),
-	  _focalRange(8.0f)
+namespace osgGaming
 {
+  struct DepthOfFieldEffect::Impl
+  {
+    Impl(Injector& injector)
+      : shaderFactory(injector.inject<ShaderFactory>())
+      , gaussSigma(1.5f)
+      , gaussRadius(5.0f)
+      , focalLength(10.0f)
+      , focalRange(8.0f)
+      , zNear(1.0f)
+      , zFar(1000.0f)
+    {
+      
+    }
 
-}
+    osg::ref_ptr<ShaderFactory> shaderFactory;
 
-string DepthOfFieldEffect::getName()
-{
-	return NAME;
-}
+    float gaussSigma;
+    float gaussRadius;
+    float focalLength;
+    float focalRange;
+    float zNear;
+    float zFar;
 
-PostProcessingEffect::InitialUnitList DepthOfFieldEffect::getInitialUnits()
-{
-	PostProcessingEffect::InitialUnitList list;
+    osg::ref_ptr<osgPPU::ShaderAttribute> shaderDof;
+    osg::ref_ptr<osgPPU::ShaderAttribute> shaderGaussX;
+    osg::ref_ptr<osgPPU::ShaderAttribute> shaderGaussY;
+    osg::ref_ptr<osgPPU::UnitInResampleOut> unitResampleLight;
+    osg::ref_ptr<osgPPU::UnitInResampleOut> unitResampleStrong;
+    osg::ref_ptr<osgPPU::UnitInOut> unitDof;
+  };
 
-	PostProcessingEffect::InitialUnit unitResampleLight;
-	unitResampleLight.type = PostProcessingEffect::ONGOING_COLOR;
-	unitResampleLight.unit = _unitResampleLight;
+  const std::string DepthOfFieldEffect::NAME = "dofEffect";
 
-	PostProcessingEffect::InitialUnit unitResampleStrong;
-	unitResampleStrong.type = PostProcessingEffect::ONGOING_COLOR;
-	unitResampleStrong.unit = _unitResampleStrong;
+  DepthOfFieldEffect::DepthOfFieldEffect(Injector& injector)
+    : PostProcessingEffect()
+    , m(new Impl(injector))
+  {
 
-	list.push_back(unitResampleLight);
-	list.push_back(unitResampleStrong);
+  }
 
-	return list;
-}
+  DepthOfFieldEffect::~DepthOfFieldEffect()
+  {
+  }
 
-ref_ptr<osgPPU::Unit> DepthOfFieldEffect::getResultUnit()
-{
-	return _unitDof;
-}
+  std::string DepthOfFieldEffect::getName()
+  {
+    return NAME;
+  }
 
-PostProcessingEffect::InputToUniformList DepthOfFieldEffect::getInputToUniform()
-{
-	PostProcessingEffect::InputToUniformList list;
+  PostProcessingEffect::InitialUnitList DepthOfFieldEffect::getInitialUnits()
+  {
+    PostProcessingEffect::InitialUnitList list;
 
-	InputToUniform ituBypass;
-	ituBypass.name = "texColorMap";
-	ituBypass.type = PostProcessingEffect::ONGOING_COLOR;
-	ituBypass.unit = _unitDof;
+    PostProcessingEffect::InitialUnit unitResampleLight;
+    unitResampleLight.type = PostProcessingEffect::ONGOING_COLOR;
+    unitResampleLight.unit = m->unitResampleLight;
 
-	InputToUniform ituDepthBypass;
-	ituDepthBypass.name = "texDepthMap";
-	ituDepthBypass.type = PostProcessingEffect::BYPASS_DEPTH;
-	ituDepthBypass.unit = _unitDof;
+    PostProcessingEffect::InitialUnit unitResampleStrong;
+    unitResampleStrong.type = PostProcessingEffect::ONGOING_COLOR;
+    unitResampleStrong.unit = m->unitResampleStrong;
 
-	list.push_back(ituBypass);
-	list.push_back(ituDepthBypass);
+    list.push_back(unitResampleLight);
+    list.push_back(unitResampleStrong);
 
-	return list;
-}
+    return list;
+  }
 
-void DepthOfFieldEffect::setGaussSigma(float gaussSigma)
-{
-	_gaussSigma = gaussSigma;
+  osg::ref_ptr<osgPPU::Unit> DepthOfFieldEffect::getResultUnit()
+  {
+    return m->unitDof;
+  }
 
-	if (isInitialized())
-	{
-		_shaderGaussX->set("sigma", _gaussSigma);
-		_shaderGaussY->set("sigma", _gaussSigma);
-	}
-}
+  PostProcessingEffect::InputToUniformList DepthOfFieldEffect::getInputToUniform()
+  {
+    PostProcessingEffect::InputToUniformList list;
 
-void DepthOfFieldEffect::setGaussRadius(float gaussRadius)
-{
-	_gaussRadius = gaussRadius;
+    InputToUniform ituBypass;
+    ituBypass.name = "texColorMap";
+    ituBypass.type = PostProcessingEffect::ONGOING_COLOR;
+    ituBypass.unit = m->unitDof;
 
-	if (isInitialized())
-	{
-		_shaderGaussX->set("radius", _gaussRadius);
-		_shaderGaussY->set("radius", _gaussRadius);
-	}
-}
+    InputToUniform ituDepthBypass;
+    ituDepthBypass.name = "texDepthMap";
+    ituDepthBypass.type = PostProcessingEffect::BYPASS_DEPTH;
+    ituDepthBypass.unit = m->unitDof;
 
-void DepthOfFieldEffect::setFocalLength(float focalLength)
-{
-	_focalLength = focalLength;
+    list.push_back(ituBypass);
+    list.push_back(ituDepthBypass);
 
-	if (isInitialized())
-	{
-		_shaderDof->set("focalLength", _focalLength);
-	}
-}
+    return list;
+  }
 
-void DepthOfFieldEffect::setFocalRange(float focalRange)
-{
-	_focalRange = focalRange;
+  void DepthOfFieldEffect::setGaussSigma(float gaussSigma)
+  {
+    m->gaussSigma = gaussSigma;
 
-	if (isInitialized())
-	{
-		_shaderDof->set("focalRange", _focalRange);
-	}
-}
+    if (isInitialized())
+    {
+      m->shaderGaussX->set("sigma", m->gaussSigma);
+      m->shaderGaussY->set("sigma", m->gaussSigma);
+    }
+  }
 
-void DepthOfFieldEffect::setZNear(float zNear)
-{
-	_zNear = zNear;
+  void DepthOfFieldEffect::setGaussRadius(float gaussRadius)
+  {
+    m->gaussRadius = gaussRadius;
 
-	if (isInitialized())
-	{
-		_shaderDof->set("zNear", _zNear);
-	}
-}
+    if (isInitialized())
+    {
+      m->shaderGaussX->set("radius", m->gaussRadius);
+      m->shaderGaussY->set("radius", m->gaussRadius);
+    }
+  }
 
-void DepthOfFieldEffect::setZFar(float zFar)
-{
-	_zFar = zFar;
+  void DepthOfFieldEffect::setFocalLength(float focalLength)
+  {
+    m->focalLength = focalLength;
 
-	if (isInitialized())
-	{
-		_shaderDof->set("zFar", _zFar);
-	}
-}
+    if (isInitialized())
+    {
+      m->shaderDof->set("focalLength", m->focalLength);
+    }
+  }
 
-float DepthOfFieldEffect::getGaussSigma()
-{
-	return _gaussSigma;
-}
+  void DepthOfFieldEffect::setFocalRange(float focalRange)
+  {
+    m->focalRange = focalRange;
 
-float DepthOfFieldEffect::getGaussRadius()
-{
-	return _gaussRadius;
-}
+    if (isInitialized())
+    {
+      m->shaderDof->set("focalRange", m->focalRange);
+    }
+  }
 
-float DepthOfFieldEffect::getFocalLength()
-{
-	return _focalLength;
-}
+  void DepthOfFieldEffect::setZNear(float zNear)
+  {
+    m->zNear = zNear;
 
-float DepthOfFieldEffect::getFocalRange()
-{
-	return _focalRange;
-}
+    if (isInitialized())
+    {
+      m->shaderDof->set("zNear", m->zNear);
+    }
+  }
 
-float DepthOfFieldEffect::getZNear()
-{
-	return _zNear;
-}
+  void DepthOfFieldEffect::setZFar(float zFar)
+  {
+    m->zFar = zFar;
 
-float DepthOfFieldEffect::getZFar()
-{
-	return _zFar;
-}
+    if (isInitialized())
+    {
+      m->shaderDof->set("zFar", m->zFar);
+    }
+  }
 
-void DepthOfFieldEffect::initializeUnits()
-{
-	ref_ptr<Shader> shaderDepthOfFieldFp		= ShaderFactory::getInstance()->fromSourceText("ShaderDepthOfFieldFp", StaticResources::ShaderDepthOfFieldFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderGaussConvolution1dxFp = ShaderFactory::getInstance()->fromSourceText("ShaderGaussConvolution1dxFp", StaticResources::ShaderGaussConvolution1dxFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderGaussConvolution1dyFp = ShaderFactory::getInstance()->fromSourceText("ShaderGaussConvolution1dyFp", StaticResources::ShaderGaussConvolution1dyFp, Shader::FRAGMENT);
-	ref_ptr<Shader> shaderGaussConvolutionVp	= ShaderFactory::getInstance()->fromSourceText("ShaderGaussConvolutionVp", StaticResources::ShaderGaussConvolutionVp, Shader::VERTEX);
+  float DepthOfFieldEffect::getGaussSigma()
+  {
+    return m->gaussSigma;
+  }
 
-	_unitResampleLight = new osgPPU::UnitInResampleOut();
-	{
-		_unitResampleLight->setFactorX(0.5);
-		_unitResampleLight->setFactorY(0.5);
-	}
+  float DepthOfFieldEffect::getGaussRadius()
+  {
+    return m->gaussRadius;
+  }
 
-	_shaderGaussX = new osgPPU::ShaderAttribute();
-	_shaderGaussY = new osgPPU::ShaderAttribute();
-	{
-		_shaderGaussX->addShader(shaderGaussConvolutionVp);
-		_shaderGaussX->addShader(shaderGaussConvolution1dxFp);
+  float DepthOfFieldEffect::getFocalLength()
+  {
+    return m->focalLength;
+  }
 
-		_shaderGaussX->add("sigma", osg::Uniform::FLOAT);
-		_shaderGaussX->add("radius", osg::Uniform::FLOAT);
-		_shaderGaussX->add("texUnit0", osg::Uniform::SAMPLER_2D);
+  float DepthOfFieldEffect::getFocalRange()
+  {
+    return m->focalRange;
+  }
 
-		_shaderGaussX->set("sigma", _gaussSigma);
-		_shaderGaussX->set("radius", _gaussRadius);
-		_shaderGaussX->set("texUnit0", 0);
+  float DepthOfFieldEffect::getZNear()
+  {
+    return m->zNear;
+  }
 
-		_shaderGaussY->addShader(shaderGaussConvolutionVp);
-		_shaderGaussY->addShader(shaderGaussConvolution1dyFp);
+  float DepthOfFieldEffect::getZFar()
+  {
+    return m->zFar;
+  }
 
-		_shaderGaussY->add("sigma", osg::Uniform::FLOAT);
-		_shaderGaussY->add("radius", osg::Uniform::FLOAT);
-		_shaderGaussY->add("texUnit0", osg::Uniform::SAMPLER_2D);
+  void DepthOfFieldEffect::initializeUnits()
+  {
+    osg::ref_ptr<osg::Shader> shaderDepthOfFieldFp = m->shaderFactory->fromSourceText("ShaderDepthOfFieldFp", StaticResources::ShaderDepthOfFieldFp, osg::Shader::FRAGMENT);
+    osg::ref_ptr<osg::Shader> shaderGaussConvolution1dxFp = m->shaderFactory->fromSourceText("ShaderGaussConvolution1dxFp", StaticResources::ShaderGaussConvolution1dxFp, osg::Shader::FRAGMENT);
+    osg::ref_ptr<osg::Shader> shaderGaussConvolution1dyFp = m->shaderFactory->fromSourceText("ShaderGaussConvolution1dyFp", StaticResources::ShaderGaussConvolution1dyFp, osg::Shader::FRAGMENT);
+    osg::ref_ptr<osg::Shader> shaderGaussConvolutionVp = m->shaderFactory->fromSourceText("ShaderGaussConvolutionVp", StaticResources::ShaderGaussConvolutionVp, osg::Shader::VERTEX);
 
-		_shaderGaussY->set("sigma", _gaussSigma);
-		_shaderGaussY->set("radius", _gaussRadius);
-		_shaderGaussY->set("texUnit0", 0);
-	}
+    m->unitResampleLight = new osgPPU::UnitInResampleOut();
+    {
+      m->unitResampleLight->setFactorX(0.5);
+      m->unitResampleLight->setFactorY(0.5);
+    }
 
-	osgPPU::UnitInOut* blurxlight = new osgPPU::UnitInOut();
-	osgPPU::UnitInOut* blurylight = new osgPPU::UnitInOut();
-	{
-		blurxlight->getOrCreateStateSet()->setAttributeAndModes(_shaderGaussX);
-		blurylight->getOrCreateStateSet()->setAttributeAndModes(_shaderGaussY);
-	}
-	_unitResampleLight->addChild(blurxlight);
-	blurxlight->addChild(blurylight);
+    m->shaderGaussX = new osgPPU::ShaderAttribute();
+    m->shaderGaussY = new osgPPU::ShaderAttribute();
+    {
+      m->shaderGaussX->addShader(shaderGaussConvolutionVp);
+      m->shaderGaussX->addShader(shaderGaussConvolution1dxFp);
+
+      m->shaderGaussX->add("sigma", osg::Uniform::FLOAT);
+      m->shaderGaussX->add("radius", osg::Uniform::FLOAT);
+      m->shaderGaussX->add("texUnit0", osg::Uniform::SAMPLER_2D);
+
+      m->shaderGaussX->set("sigma", m->gaussSigma);
+      m->shaderGaussX->set("radius", m->gaussRadius);
+      m->shaderGaussX->set("texUnit0", 0);
+
+      m->shaderGaussY->addShader(shaderGaussConvolutionVp);
+      m->shaderGaussY->addShader(shaderGaussConvolution1dyFp);
+
+      m->shaderGaussY->add("sigma", osg::Uniform::FLOAT);
+      m->shaderGaussY->add("radius", osg::Uniform::FLOAT);
+      m->shaderGaussY->add("texUnit0", osg::Uniform::SAMPLER_2D);
+
+      m->shaderGaussY->set("sigma", m->gaussSigma);
+      m->shaderGaussY->set("radius", m->gaussRadius);
+      m->shaderGaussY->set("texUnit0", 0);
+    }
+
+    osgPPU::UnitInOut* blurxlight = new osgPPU::UnitInOut();
+    osgPPU::UnitInOut* blurylight = new osgPPU::UnitInOut();
+    {
+      blurxlight->getOrCreateStateSet()->setAttributeAndModes(m->shaderGaussX);
+      blurylight->getOrCreateStateSet()->setAttributeAndModes(m->shaderGaussY);
+    }
+    m->unitResampleLight->addChild(blurxlight);
+    blurxlight->addChild(blurylight);
 
 
-	_unitResampleStrong = new osgPPU::UnitInResampleOut();
-	{
-		_unitResampleStrong->setFactorX(0.25f);
-		_unitResampleStrong->setFactorY(0.25f);
-	}
+    m->unitResampleStrong = new osgPPU::UnitInResampleOut();
+    {
+      m->unitResampleStrong->setFactorX(0.25f);
+      m->unitResampleStrong->setFactorY(0.25f);
+    }
 
-	osgPPU::UnitInOut* blurxstrong = new osgPPU::UnitInOut();
-	osgPPU::UnitInOut* blurystrong = new osgPPU::UnitInOut();
-	{
-		blurxstrong->getOrCreateStateSet()->setAttributeAndModes(_shaderGaussX);
-		blurystrong->getOrCreateStateSet()->setAttributeAndModes(_shaderGaussY);
-	}
-	_unitResampleStrong->addChild(blurxstrong);
-	blurxstrong->addChild(blurystrong);
+    osgPPU::UnitInOut* blurxstrong = new osgPPU::UnitInOut();
+    osgPPU::UnitInOut* blurystrong = new osgPPU::UnitInOut();
+    {
+      blurxstrong->getOrCreateStateSet()->setAttributeAndModes(m->shaderGaussX);
+      blurystrong->getOrCreateStateSet()->setAttributeAndModes(m->shaderGaussY);
+    }
+    m->unitResampleStrong->addChild(blurxstrong);
+    blurxstrong->addChild(blurystrong);
 
-	_unitDof = new osgPPU::UnitInOut();
-	{
-		_shaderDof = new osgPPU::ShaderAttribute();
-		_shaderDof->addShader(shaderDepthOfFieldFp);
+    m->unitDof = new osgPPU::UnitInOut();
+    {
+      m->shaderDof = new osgPPU::ShaderAttribute();
+      m->shaderDof->addShader(shaderDepthOfFieldFp);
 
-		_shaderDof->add("focalLength", osg::Uniform::FLOAT);
-		_shaderDof->add("focalRange", osg::Uniform::FLOAT);
-		_shaderDof->add("zNear", osg::Uniform::FLOAT);
-		_shaderDof->add("zFar", osg::Uniform::FLOAT);
+      m->shaderDof->add("focalLength", osg::Uniform::FLOAT);
+      m->shaderDof->add("focalRange", osg::Uniform::FLOAT);
+      m->shaderDof->add("zNear", osg::Uniform::FLOAT);
+      m->shaderDof->add("zFar", osg::Uniform::FLOAT);
 
-		_shaderDof->set("focalLength", _focalLength);
-		_shaderDof->set("focalRange", _focalRange);
-		_shaderDof->set("zNear", _zNear);
-		_shaderDof->set("zFar", _zFar);
+      m->shaderDof->set("focalLength", m->focalLength);
+      m->shaderDof->set("focalRange", m->focalRange);
+      m->shaderDof->set("zNear", m->zNear);
+      m->shaderDof->set("zFar", m->zFar);
 
-		_unitDof->getOrCreateStateSet()->setAttributeAndModes(_shaderDof);
-		_unitDof->setInputTextureIndexForViewportReference(0);
+      m->unitDof->getOrCreateStateSet()->setAttributeAndModes(m->shaderDof);
+      m->unitDof->setInputTextureIndexForViewportReference(0);
 
-		_unitDof->setInputToUniform(blurylight, "texBlurredColorMap", true);
-		_unitDof->setInputToUniform(blurystrong, "texStrongBlurredColorMap", true);
-	}
+      m->unitDof->setInputToUniform(blurylight, "texBlurredColorMap", true);
+      m->unitDof->setInputToUniform(blurystrong, "texStrongBlurredColorMap", true);
+    }
+  }
+
 }

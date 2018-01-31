@@ -65,13 +65,13 @@ void MainMenuState::onKeyPressedEvent(int key)
 {
   if (key == 's')
   {
-    stateEvent_replace(new GlobeInteractionState());
+    stateEvent_replace<GlobeInteractionState>();
   }
 }
 
-ref_ptr<Hud> MainMenuState::overrideHud(osg::ref_ptr<osgGaming::View> view)
+ref_ptr<Hud> MainMenuState::injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view)
 {
-	return new Hud();
+	return injector.inject<Hud>();
 }
 
 void MainMenuState::setupUi()
@@ -84,7 +84,7 @@ void MainMenuState::setupUi()
 
   QConnectFunctor::connect(buttonStart, SIGNAL(clicked()), [this]()
   {
-    stateEvent_replace(new GlobeInteractionState());
+    stateEvent_replace<GlobeInteractionState>();
   });
 
   QConnectFunctor::connect(buttonEnd, SIGNAL(clicked()), [this]()

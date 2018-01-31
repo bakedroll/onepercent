@@ -13,7 +13,7 @@ namespace onep
 	class GlobeOverviewWorld : public osgGaming::World
 	{
 	public:
-		GlobeOverviewWorld();
+		GlobeOverviewWorld(osgGaming::Injector& injector);
     ~GlobeOverviewWorld();
 
 		osg::ref_ptr<GlobeModel> getGlobeModel();

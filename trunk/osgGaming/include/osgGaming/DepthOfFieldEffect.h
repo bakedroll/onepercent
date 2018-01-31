@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <osgGaming/PostProcessingEffect.h>
 
 #include <osgPPU/ShaderAttribute.h>
@@ -7,12 +9,15 @@
 
 namespace osgGaming
 {
-	class DepthOfFieldEffect : public PostProcessingEffect
+  class Injector;
+
+  class DepthOfFieldEffect : public PostProcessingEffect
 	{
 	public:
 		static const std::string NAME;
 
-		DepthOfFieldEffect(float zNear, float zFar);
+		DepthOfFieldEffect(Injector& injector);
+    ~DepthOfFieldEffect();
 
 		virtual std::string getName() override;
 		virtual InitialUnitList getInitialUnits() override;
@@ -37,18 +42,8 @@ namespace osgGaming
 		virtual void initializeUnits() override;
 
 	private:
-		float _gaussSigma;
-		float _gaussRadius;
-		float _focalLength;
-		float _focalRange;
-		float _zNear;
-		float _zFar;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
-		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderDof;
-		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderGaussX;
-		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderGaussY;
-		osg::ref_ptr<osgPPU::UnitInResampleOut> _unitResampleLight;
-		osg::ref_ptr<osgPPU::UnitInResampleOut> _unitResampleStrong;
-		osg::ref_ptr<osgPPU::UnitInOut> _unitDof;
 	};
 }

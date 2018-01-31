@@ -17,14 +17,13 @@ namespace onep
 {
   struct GlobeModel::Impl
   {
-    Impl(GlobeModel* b)
+    Impl(osgGaming::Injector& injector, GlobeModel* b)
       : base(b)
-      , paramSunDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_SunDistanceName))
-      , paramSunRadiusMp2(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_SunRadiusPm2Name))
-      , paramEarthCloudsSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsSpeedName))
-      , paramEarthCloudsMorphSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsMorphSpeedName))
-      , boundariesMesh(new BoundariesMesh())
-      , countryOverlay(new CountryOverlay())
+      , resourceManager(injector.inject<osgGaming::ResourceManager>())
+      , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+      , textureFactory(injector.inject<osgGaming::TextureFactory>())
+      , boundariesMesh(injector.inject<BoundariesMesh>())
+      , countryOverlay(injector.inject<CountryOverlay>())
     {
       base->addChild(boundariesMesh);
       base->addChild(countryOverlay);
@@ -51,8 +50,8 @@ namespace onep
       // shader
       osg::ref_ptr<osg::Program> pgm = new osg::Program();
 
-      osg::ref_ptr<osg::Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/globe.vert", osg::Shader::VERTEX);
-      osg::ref_ptr<osg::Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/globe.frag", osg::Shader::FRAGMENT);
+      osg::ref_ptr<osg::Shader> vert_shader = resourceManager->loadShader("./GameData/shaders/globe.vert", osg::Shader::VERTEX);
+      osg::ref_ptr<osg::Shader> frag_shader = resourceManager->loadShader("./GameData/shaders/globe.frag", osg::Shader::FRAGMENT);
 
       pgm->addShader(vert_shader);
       pgm->addShader(frag_shader);
@@ -94,8 +93,8 @@ namespace onep
       // shader
       osg::ref_ptr<osg::Program> pgm = new osg::Program();
 
-      osg::ref_ptr<osg::Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/clouds.vert", osg::Shader::VERTEX);
-      osg::ref_ptr<osg::Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/clouds.frag", osg::Shader::FRAGMENT);
+      osg::ref_ptr<osg::Shader> vert_shader = resourceManager->loadShader("./GameData/shaders/clouds.vert", osg::Shader::VERTEX);
+      osg::ref_ptr<osg::Shader> frag_shader = resourceManager->loadShader("./GameData/shaders/clouds.frag", osg::Shader::FRAGMENT);
 
       pgm->addShader(vert_shader);
       pgm->addShader(frag_shader);
@@ -113,11 +112,11 @@ namespace onep
 
     void makeAtmosphericScattering(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
     {
-      float earthRadius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
-      float atmosphereHeight = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthAtmosphereHeightName);
-      float scatteringDepth = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthScatteringDepthName);
-      float scatteringIntensity = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthScatteringIntensityName);
-      osg::Vec4f atmosphereColor = osgGaming::PropertiesManager::getInstance()->getValue<osg::Vec4f>(Param_EarthAtmosphereColorName);
+      float earthRadius = propertiesManager->getValue<float>(Param_EarthRadiusName);
+      float atmosphereHeight = propertiesManager->getValue<float>(Param_EarthAtmosphereHeightName);
+      float scatteringDepth = propertiesManager->getValue<float>(Param_EarthScatteringDepthName);
+      float scatteringIntensity = propertiesManager->getValue<float>(Param_EarthScatteringIntensityName);
+      osg::Vec4f atmosphereColor = propertiesManager->getValue<osg::Vec4f>(Param_EarthAtmosphereColorName);
 
       // atmospheric scattering geometry
       osg::ref_ptr<osgGaming::CameraAlignedQuad> caq = new osgGaming::CameraAlignedQuad();
@@ -128,8 +127,8 @@ namespace onep
 
       osg::ref_ptr<osg::Program> pgm = new osg::Program();
 
-      osg::ref_ptr<osg::Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.vert", osg::Shader::VERTEX);
-      osg::ref_ptr<osg::Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/atmosphere.frag", osg::Shader::FRAGMENT);
+      osg::ref_ptr<osg::Shader> vert_shader = resourceManager->loadShader("./GameData/shaders/atmosphere.vert", osg::Shader::VERTEX);
+      osg::ref_ptr<osg::Shader> frag_shader = resourceManager->loadShader("./GameData/shaders/atmosphere.frag", osg::Shader::FRAGMENT);
 
       pgm->addShader(vert_shader);
       pgm->addShader(frag_shader);
@@ -187,9 +186,9 @@ namespace onep
         break;
       };
 
-      int stacks = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereStacksName);
-      int slices = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereSlicesName);
-      float radius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
+      int stacks = propertiesManager->getValue<int>(Param_EarthSphereStacksName);
+      int slices = propertiesManager->getValue<int>(Param_EarthSphereSlicesName);
+      float radius = propertiesManager->getValue<float>(Param_EarthRadiusName);
 
       int stacksPerSegment = stacks / m;
       int slicesPerSegment = slices / n;
@@ -217,29 +216,29 @@ namespace onep
           sprintf(specreliefcitiesboundariesmap_file, "./GameData/textures/earth/speccitiesclouds/%s/%dx%d.png", resolutionLevel1.c_str(), x, y);
           sprintf(normalmap_file, "./GameData/textures/earth/normal/%s/%dx%d.png", resolutionLevel1.c_str(), x, y);
 
-          osgGaming::TextureFactory::getInstance()->make()
-            ->image(osgGaming::ResourceManager::getInstance()->loadImage(colormap_file))
+          textureFactory->make()
+            ->image(resourceManager->loadImage(colormap_file))
             ->texLayer(0)
             ->uniform(stateSet, "colormap")
             ->assign(stateSet)
             ->build();
 
-          osgGaming::TextureFactory::getInstance()->make()
-            ->image(osgGaming::ResourceManager::getInstance()->loadImage(nightmap_file))
+          textureFactory->make()
+            ->image(resourceManager->loadImage(nightmap_file))
             ->texLayer(1)
             ->uniform(stateSet, "nightmap")
             ->assign(stateSet)
             ->build();
 
-          osgGaming::TextureFactory::getInstance()->make()
-            ->image(osgGaming::ResourceManager::getInstance()->loadImage(specreliefcitiesboundariesmap_file))
+          textureFactory->make()
+            ->image(resourceManager->loadImage(specreliefcitiesboundariesmap_file))
             ->texLayer(2)
             ->uniform(stateSet, "speccitiescloudsmap")
             ->assign(stateSet)
             ->build();
 
-          osgGaming::TextureFactory::getInstance()->make()
-            ->image(osgGaming::ResourceManager::getInstance()->loadImage(normalmap_file))
+          textureFactory->make()
+            ->image(resourceManager->loadImage(normalmap_file))
             ->texLayer(3)
             ->uniform(stateSet, "normalmap")
             ->assign(stateSet)
@@ -259,10 +258,10 @@ namespace onep
       int n = 2;
       int m = 1;
 
-      int stacks = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereStacksName);
-      int slices = osgGaming::PropertiesManager::getInstance()->getValue<int>(Param_EarthSphereSlicesName);
-      float radius = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName);
-      float cloudsHeight = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthCloudsHeightName);
+      int stacks = propertiesManager->getValue<int>(Param_EarthSphereStacksName);
+      int slices = propertiesManager->getValue<int>(Param_EarthSphereSlicesName);
+      float radius = propertiesManager->getValue<float>(Param_EarthRadiusName);
+      float cloudsHeight = propertiesManager->getValue<float>(Param_EarthCloudsHeightName);
 
       int stacksPerSegment = stacks / m;
       int slicesPerSegment = slices / n;
@@ -283,8 +282,8 @@ namespace onep
           char colormap_file[128];
           sprintf(colormap_file, "./GameData/textures/earth/speccitiesclouds/8k/%dx%d.png", x, y);
 
-          osgGaming::TextureFactory::getInstance()->make()
-            ->image(osgGaming::ResourceManager::getInstance()->loadImage(colormap_file))
+          textureFactory->make()
+            ->image(resourceManager->loadImage(colormap_file))
             ->texLayer(0)
             ->uniform(stateSet, "colormap")
             ->assign(stateSet)
@@ -371,6 +370,10 @@ namespace onep
 
     GlobeModel* base;
 
+    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+    osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
+
     float paramSunDistance;
     float paramSunRadiusMp2;
 
@@ -387,17 +390,26 @@ namespace onep
     osg::ref_ptr<CountryOverlay> countryOverlay;
   };
 
-  GlobeModel::GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
+  GlobeModel::GlobeModel(osgGaming::Injector& injector)
     : osg::Group()
-    , m(new Impl(this))
+    , m(new Impl(injector, this))
   {
-    m->makeEarthModel();
-    m->makeCloudsModel();
-    m->makeAtmosphericScattering(tcm);
   }
 
   GlobeModel::~GlobeModel()
   {
+  }
+
+  void GlobeModel::loadFromDisk(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm)
+  {
+    m->paramSunDistance = m->propertiesManager->getValue<float>(Param_SunDistanceName);
+    m->paramSunRadiusMp2 = m->propertiesManager->getValue<float>(Param_SunRadiusPm2Name);
+    m->paramEarthCloudsSpeed = m->propertiesManager->getValue<float>(Param_EarthCloudsSpeedName);
+    m->paramEarthCloudsMorphSpeed = m->propertiesManager->getValue<float>(Param_EarthCloudsMorphSpeedName);
+
+    m->makeEarthModel();
+    m->makeCloudsModel();
+    m->makeAtmosphericScattering(tcm);
   }
 
   void GlobeModel::updateLightDirection(osg::Vec3f direction)

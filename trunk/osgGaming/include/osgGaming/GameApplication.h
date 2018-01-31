@@ -6,6 +6,7 @@
 #include <osgGaming/GameStateStack.h>
 
 #include "Viewer.h"
+#include "TimerFactory.h"
 
 namespace osgGaming
 {
@@ -20,8 +21,11 @@ namespace osgGaming
   class GameApplication : public SimulationCallback
 	{
   protected:
+    virtual void initialize(Injector& injector);
+
     virtual int run(osg::ref_ptr<AbstractGameState> initialState);
     virtual int run(GameStateStack::AbstractGameStateList initialStates);
+
   public:
     template<typename TState>
     int run()
@@ -30,7 +34,11 @@ namespace osgGaming
       Injector injector(m_container);
       m_injector = &injector;
 
-      osg::ref_ptr<TState> s = injector.inject<TState>();
+      m_container.registerSingletonType<TimerFactory>();
+      m_container.registerType<World>();
+      m_container.registerType<Hud>();
+
+      osg::ref_ptr<TState> s = m_injector->inject<TState>();
       osg::ref_ptr<AbstractGameState> state = osg::ref_ptr<AbstractGameState>(dynamic_cast<AbstractGameState*>(s.get()));
       if (!state.valid())
       {
@@ -38,6 +46,9 @@ namespace osgGaming
         return -1;
       }
 
+      initialize(*m_injector);
+
+      state->setInjector(*m_injector);
       return run(state);
     }
 
@@ -59,6 +70,7 @@ namespace osgGaming
 
   protected:
     virtual void registerComponents(InjectionContainer& container);
+    void registerEssentialComponents();
 
     virtual int mainloop() = 0;
     virtual osg::ref_ptr<InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) = 0;

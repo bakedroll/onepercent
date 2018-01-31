@@ -12,7 +12,6 @@
 #include <osgGA/GUIEventAdapter>
 
 #include <osgGaming/Helper.h>
-#include <osgGaming/TimerFactory.h>
 #include <osgGaming/UIButton.h>
 #include <simulation/CountryData.h>
 #include <osgGaming/Hud.h>
@@ -68,16 +67,16 @@ namespace onep
 
   struct GlobeInteractionState::Impl
   {
-    Impl(GlobeInteractionState* b)
+    Impl(osgGaming::Injector& injector, GlobeInteractionState* b)
     : base(b)
-    , paramEarthRadius(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName))
-    , paramCameraMinDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraMinDistanceName))
-    , paramCameraMaxDistance(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraMaxDistanceName))
-    , paramCameraMaxLatitude(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraMaxLatitudeName))
-    , paramCameraZoomSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraZoomSpeedName))
-    , paramCameraZoomSpeedFactor(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraZoomSpeedFactorName))
-    , paramCameraScrollSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraScrollSpeedName))
-    , paramCameraRotationSpeed(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_CameraRotationSpeedName))
+    , paramEarthRadius(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_EarthRadiusName))
+    , paramCameraMinDistance(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraMinDistanceName))
+    , paramCameraMaxDistance(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraMaxDistanceName))
+    , paramCameraMaxLatitude(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraMaxLatitudeName))
+    , paramCameraZoomSpeed(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraZoomSpeedName))
+    , paramCameraZoomSpeedFactor(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraZoomSpeedFactorName))
+    , paramCameraScrollSpeed(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraScrollSpeedName))
+    , paramCameraRotationSpeed(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_CameraRotationSpeedName))
     , bReady(false)
     , selectedCountry(0)
     , labelDays(nullptr)
@@ -179,9 +178,9 @@ namespace onep
     }
   };
 
-  GlobeInteractionState::GlobeInteractionState()
+  GlobeInteractionState::GlobeInteractionState(osgGaming::Injector& injector)
     : GlobeCameraState()
-    , m(new Impl(this))
+    , m(new Impl(injector, this))
   {
   }
 
@@ -383,9 +382,9 @@ namespace onep
     m->mainOverlay->setGeometry(0, 0, int(width), int(height));
   }
 
-  osg::ref_ptr<osgGaming::Hud> GlobeInteractionState::overrideHud(osg::ref_ptr<osgGaming::View> view)
+  osg::ref_ptr<osgGaming::Hud> GlobeInteractionState::injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view)
   {
-    return new osgGaming::Hud();
+    return injector.inject<osgGaming::Hud>();
   }
 
   void GlobeInteractionState::setupUi()

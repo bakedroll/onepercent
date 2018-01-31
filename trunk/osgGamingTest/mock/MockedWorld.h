@@ -7,7 +7,7 @@ namespace osgGamingTest
   class MockedWorld : public osgGaming::World
   {
   public:
-    MockedWorld(int id = -1);
+    MockedWorld(osgGaming::Injector& injector);
 
     int getId();
     void setId(int id);

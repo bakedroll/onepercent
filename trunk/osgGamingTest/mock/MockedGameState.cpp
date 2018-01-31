@@ -54,34 +54,14 @@ namespace osgGamingTest
     return m->properties;
   }
 
-  osg::ref_ptr<osgGaming::World> MockedState::overrideWorld(osg::ref_ptr<osgGaming::View> view)
+  osg::ref_ptr<osgGaming::World> MockedState::injectWorld(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view)
   {
     return m->overrideWorld;
-  }
-  
-  osgGaming::AbstractGameState::StateEvent* MockedState::stateEvent_push(osg::ref_ptr<AbstractGameState> state)
-  {
-    return osgGaming::AbstractGameState::stateEvent_push(state);
-  }
-
-  osgGaming::AbstractGameState::StateEvent* MockedState::stateEvent_push(AbstractGameStateList states)
-  {
-    return osgGaming::AbstractGameState::stateEvent_push(states);
   }
 
   osgGaming::AbstractGameState::StateEvent* MockedState::stateEvent_pop()
   {
     return osgGaming::AbstractGameState::stateEvent_pop();
-  }
-
-  osgGaming::AbstractGameState::StateEvent* MockedState::stateEvent_replace(osg::ref_ptr<AbstractGameState> state)
-  {
-    return osgGaming::AbstractGameState::stateEvent_replace(state);
-  }
-
-  osgGaming::AbstractGameState::StateEvent* MockedState::stateEvent_replace(AbstractGameStateList states)
-  {
-    return osgGaming::AbstractGameState::stateEvent_replace(states);
   }
 
   osgGaming::AbstractGameState::StateEvent* MockedState::stateEvent_endGame()

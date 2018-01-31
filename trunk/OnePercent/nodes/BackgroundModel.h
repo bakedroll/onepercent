@@ -1,7 +1,10 @@
 #pragma once
 
+#include <memory>
+
+#include <osgGaming/Injector.h>
+
 #include <osg/PositionAttitudeTransform>
-#include <osg/Point>
 #include <osgGA/GUIEventHandler>
 
 namespace onep
@@ -9,7 +12,10 @@ namespace onep
 	class BackgroundModel : public osgGA::GUIEventHandler
 	{
 	public:
-		BackgroundModel();
+		BackgroundModel(osgGaming::Injector& injector);
+    ~BackgroundModel();
+
+    void loadStars(std::string filename);
 
 		osg::ref_ptr<osg::PositionAttitudeTransform> getTransform();
 		osg::ref_ptr<osg::PositionAttitudeTransform> getSunTransform();
@@ -20,12 +26,8 @@ namespace onep
 		virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
 
 	private:
-		void makeStars();
-		void makeSun();
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
-		osg::ref_ptr<osg::PositionAttitudeTransform> _transform;
-		osg::ref_ptr<osg::PositionAttitudeTransform> _sunTransform;
-		osg::ref_ptr<osg::PositionAttitudeTransform> _sunGlowTransform;
-		osg::ref_ptr<osg::Point> _point;
 	};
 }

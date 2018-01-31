@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core/Globals.h"
-
 #include <osg/Geometry>
 
 #include <osgGaming/TransformableCameraManipulator.h>
@@ -16,8 +14,10 @@ namespace onep
 	public:
     typedef osg::ref_ptr<GlobeModel> Ptr;
 
-		GlobeModel(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);
+		GlobeModel(osgGaming::Injector& injector);
     ~GlobeModel();
+
+    void loadFromDisk(osg::ref_ptr<osgGaming::TransformableCameraManipulator> tcm);
 
 		void updateLightDirection(osg::Vec3f direction);
 		void updateClouds(float day);

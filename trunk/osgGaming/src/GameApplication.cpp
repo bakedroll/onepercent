@@ -14,7 +14,10 @@
 #include <future>
 #include <iostream>
 
-#include <assert.h>
+#include <osgGaming/ShaderFactory.h>
+#include <osgGaming/PropertiesManager.h>
+#include <osgGaming/TextureFactory.h>
+#include <osgGaming/ResourceManager.h>
 
 using namespace osg;
 using namespace std;
@@ -55,7 +58,7 @@ namespace osgGaming
             continue;
           }
 
-          state->prepareWorldAndHud(view);
+          state->prepareWorldAndHud(*base->m_injector, view);
 
           if (!state->getWorld(view).valid())
             state->setWorld(view, base->getDefaultWorld());
@@ -125,8 +128,10 @@ namespace osgGaming
     GameApplication* base;
     GameStateStack gameStateStack;
 
-    osg::ref_ptr<osgGaming::Viewer> viewer;
-    osg::ref_ptr<osgGaming::View> view;
+    osg::ref_ptr<TimerFactory> timerFactory;
+
+    osg::ref_ptr<Viewer> viewer;
+    osg::ref_ptr<View> view;
 
     osg::ref_ptr<World> defaultWorld;
     osg::ref_ptr<Hud> defaultHud;
@@ -160,7 +165,7 @@ namespace osgGaming
       return;
     }
 
-    TimerFactory::getInstance()->updateRegisteredTimers(simTime);
+    m->timerFactory->updateRegisteredTimers(simTime);
 
     if (!m->gameStateStack.isEmpty())
     {
@@ -203,6 +208,9 @@ namespace osgGaming
 
             AbstractGameState::AbstractGameStateList nextStates;
             loadingState->getNextStates(*m_injector, nextStates);
+
+            for (osgGaming::GameState::AbstractGameStateList::iterator it = nextStates.begin(); it != nextStates.end(); ++it)
+              (*it)->setInjector(*m_injector);
 
             m->prepareStateWorldAndHud(nextStates);
 
@@ -306,7 +314,8 @@ namespace osgGaming
   {
     if (!m->defaultWorld.valid())
     {
-      setDefaultWorld(new World());
+      // TODO: overthink that
+      setDefaultWorld(m_injector->inject<World>());
     }
 
     return m->defaultWorld;
@@ -316,7 +325,8 @@ namespace osgGaming
   {
     if (!m->defaultHud.valid())
     {
-      setDefaultHud(new Hud());
+      // TODO: look at this again
+      setDefaultHud(m_injector->inject<Hud>());
     }
 
     return m->defaultHud;
@@ -351,6 +361,8 @@ namespace osgGaming
 
   int GameApplication::run(ref_ptr<AbstractGameState> initialState)
   {
+    m->timerFactory = m_injector->inject<TimerFactory>();
+
     GameStateStack::AbstractGameStateList states;
     states.push_back(initialState);
 
@@ -395,8 +407,20 @@ namespace osgGaming
     return m->viewer;
   }
 
+  void GameApplication::initialize(Injector& injector)
+  {
+  }
+
   void GameApplication::registerComponents(InjectionContainer& container)
   {
+  }
+
+  void GameApplication::registerEssentialComponents()
+  {
+    m_container.registerSingletonType<ShaderFactory>();
+    m_container.registerSingletonType<PropertiesManager>();
+    m_container.registerSingletonType<ResourceManager>();
+    m_container.registerSingletonType<TextureFactory>();
   }
 
   void GameApplication::newStateEvent(osg::ref_ptr<AbstractGameState> state)
