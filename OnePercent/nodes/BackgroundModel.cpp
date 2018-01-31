@@ -27,8 +27,6 @@ namespace onep
     {
       char* bytes = resourceManager->loadBinary(filename);
 
-      transform = new osg::PositionAttitudeTransform();
-
       osg::ref_ptr<osg::Geode> geode = new osg::Geode();
       osg::ref_ptr<osg::Geometry> geo = new osg::Geometry();
       osg::ref_ptr<osg::StateSet> globStateSet = new osg::StateSet();
@@ -153,6 +151,7 @@ namespace onep
     : GUIEventHandler()
     , m(new Impl(injector, this))
   {
+    m->transform = new osg::PositionAttitudeTransform();
   }
 
   BackgroundModel::~BackgroundModel()
