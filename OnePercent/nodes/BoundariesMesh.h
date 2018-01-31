@@ -1,5 +1,7 @@
 #pragma once
 
+#include <osgGaming/Injector.h>
+
 #include "nodes/CountryMesh.h"
 
 #include <osg/Group>
@@ -12,7 +14,7 @@ namespace onep
   public:
     typedef osg::ref_ptr<BoundariesMesh> Ptr;
 
-    BoundariesMesh();
+    BoundariesMesh(osgGaming::Injector& injector);
     ~BoundariesMesh();
 
     void loadBoundaries(const std::string& filename);

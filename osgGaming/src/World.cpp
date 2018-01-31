@@ -1,85 +1,106 @@
 #include <osgGaming/World.h>
 #include <osgGaming/Helper.h>
 
-using namespace std;
-using namespace osg;
-using namespace osgGaming;
-
-World::World()
+namespace osgGaming
 {
-	_rootNode = new Group();
-	_cameraManipulator = new TransformableCameraManipulator();
+  struct World::Impl
+  {
+    Impl()
+    {
+      rootNode = new osg::Group();
+      cameraManipulator = new TransformableCameraManipulator();
 
-	initializeStateSet();
-}
+      initializeStateSet();
+    }
 
-ref_ptr<Group> World::getRootNode()
-{
-	return _rootNode;
-}
+    void initializeStateSet()
+    {
+      globalStateSet = new osg::StateSet();
 
-ref_ptr<StateSet> World::getGlobalStateSet()
-{
-	return _globalStateSet;
-}
+      globalLightModel = new osg::LightModel();
 
-ref_ptr<LightModel> World::getGlobalLightModel()
-{
-	return _globalLightModel;
-}
+      globalStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+      globalStateSet->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+      globalStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+      globalStateSet->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 
-ref_ptr<TransformableCameraManipulator> World::getCameraManipulator()
-{
-	return _cameraManipulator;
-}
+      for (int i = 0; i < OSGGAMING_MAX_LIGHTS; i++)
+      {
+        globalStateSet->setMode(GL_LIGHT0 + i, osg::StateAttribute::OFF);
+      }
 
-void World::setLightEnabled(int lightNum, bool enabled)
-{
-	_globalStateSet->setMode(GL_LIGHT0 + lightNum, glModeValueFromBool(enabled));
+      globalStateSet->setAttributeAndModes(globalLightModel, osg::StateAttribute::ON);
 
-	getLight(lightNum);
-}
+      rootNode->setStateSet(globalStateSet);
+    }
 
-ref_ptr<Light> World::getLight(int lightNum)
-{
-	LightSourceDictionary::iterator it = _lightSources.find(lightNum);
+    osg::ref_ptr<osg::Group> rootNode;
+    osg::ref_ptr<osg::StateSet> globalStateSet;
+    osg::ref_ptr<osg::LightModel> globalLightModel;
 
-	if (it == _lightSources.end())
-	{
-		ref_ptr<Light> light = new Light();
-		ref_ptr<LightSource> ls = new LightSource();
+    LightSourceDictionary lightSources;
 
-		light->setLightNum(lightNum);
+    osg::ref_ptr<TransformableCameraManipulator> cameraManipulator;
+  };
 
-		ls->setLight(light);
+  World::World(Injector& injector)
+    : osg::Referenced()
+    , m(new Impl())
+  {
+  }
 
-		_rootNode->addChild(ls);
+  World::~World()
+  {
+  }
 
-		_lightSources.insert(LightSourceDictPair(lightNum, ls));
+  osg::ref_ptr<osg::Group> World::getRootNode()
+  {
+    return m->rootNode;
+  }
 
-		return light;
-	}
+  osg::ref_ptr<osg::StateSet> World::getGlobalStateSet()
+  {
+    return m->globalStateSet;
+  }
 
-	return it->second->getLight();
-}
+  osg::ref_ptr<osg::LightModel> World::getGlobalLightModel()
+  {
+    return m->globalLightModel;
+  }
 
-void World::initializeStateSet()
-{
-	_globalStateSet = new StateSet();
+  osg::ref_ptr<TransformableCameraManipulator> World::getCameraManipulator()
+  {
+    return m->cameraManipulator;
+  }
 
-	_globalLightModel = new LightModel();
+  void World::setLightEnabled(int lightNum, bool enabled)
+  {
+    m->globalStateSet->setMode(GL_LIGHT0 + lightNum, glModeValueFromBool(enabled));
 
-	_globalStateSet->setMode(GL_CULL_FACE, StateAttribute::ON);
-	_globalStateSet->setMode(GL_NORMALIZE, StateAttribute::ON);
-	_globalStateSet->setMode(GL_DEPTH_TEST, StateAttribute::ON);
-	_globalStateSet->setMode(GL_LIGHTING, StateAttribute::ON);
+    getLight(lightNum);
+  }
 
-	for (int i = 0; i < OSGGAMING_MAX_LIGHTS; i++)
-	{
-		_globalStateSet->setMode(GL_LIGHT0 + i, StateAttribute::OFF);
-	}
+  osg::ref_ptr<osg::Light> World::getLight(int lightNum)
+  {
+    LightSourceDictionary::iterator it = m->lightSources.find(lightNum);
 
-	_globalStateSet->setAttributeAndModes(_globalLightModel, StateAttribute::ON);
+    if (it == m->lightSources.end())
+    {
+      osg::ref_ptr<osg::Light> light = new osg::Light();
+      osg::ref_ptr<osg::LightSource> ls = new osg::LightSource();
 
-	_rootNode->setStateSet(_globalStateSet);
+      light->setLightNum(lightNum);
+
+      ls->setLight(light);
+
+      m->rootNode->addChild(ls);
+
+      m->lightSources.insert(LightSourceDictPair(lightNum, ls));
+
+      return light;
+    }
+
+    return it->second->getLight();
+  }
+
 }

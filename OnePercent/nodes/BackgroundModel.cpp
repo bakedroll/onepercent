@@ -13,170 +13,194 @@
 #include <osgGaming/Helper.h>
 #include <osgGaming/ByteStream.h>
 
-using namespace onep;
-using namespace osgGaming;
-using namespace osg;
-using namespace std;
-using namespace osgGA;
-
-BackgroundModel::BackgroundModel()
-	: GUIEventHandler()
+namespace onep
 {
-	makeStars();
-	makeSun();
+  struct BackgroundModel::Impl
+  {
+    Impl(osgGaming::Injector& injector, BackgroundModel* b)
+      : base(b)
+      , resourceManager(injector.inject<osgGaming::ResourceManager>())
+      , textureFactory(injector.inject<osgGaming::TextureFactory>())
+    {}
 
-	_transform->addEventCallback(this);
-}
+    void makeStars(std::string filename)
+    {
+      char* bytes = resourceManager->loadBinary(filename);
 
-ref_ptr<PositionAttitudeTransform> BackgroundModel::getTransform()
-{
-	return _transform;
-}
+      transform = new osg::PositionAttitudeTransform();
 
-ref_ptr<PositionAttitudeTransform> BackgroundModel::getSunTransform()
-{
-	return _sunTransform;
-}
+      osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+      osg::ref_ptr<osg::Geometry> geo = new osg::Geometry();
+      osg::ref_ptr<osg::StateSet> globStateSet = new osg::StateSet();
+      osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
 
-ref_ptr<PositionAttitudeTransform> BackgroundModel::getSunGlowTransform()
-{
-	return _sunGlowTransform;
-}
+      osg::ref_ptr<osg::Vec3Array> verts = new osg::Vec3Array();
+      osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
 
-void BackgroundModel::updateResolutionHeight(float height)
-{
-	_point->setSize(height / 100.0f);
-}
+      osgGaming::ByteStream stream(bytes);
 
-bool BackgroundModel::handle(const GUIEventAdapter& ea, GUIActionAdapter& aa)
-{
-	switch (ea.getEventType())
-	{
-	case GUIEventAdapter::RESIZE:
+      int nstars = stream.read<int>();
 
-		updateResolutionHeight(ea.getWindowHeight());
+      for (int i = 0; i < nstars; i++)
+      {
+        float x = stream.read<float>();
+        float y = stream.read<float>();
+        float z = stream.read<float>();
+        float size = stream.read<float>();
 
-		return true;
+        verts->push_back(osg::Vec3f(x, -z, -y) * 10.0f);
+        colors->push_back(osg::Vec4f(size / 8.0f, 0.0f, 0.0f, 1.0f));
+      }
 
-	default:
-		break;
+      point = new osg::Point();
+      osg::ref_ptr<osg::PointSprite> pointSprite = new osg::PointSprite();
+      osg::ref_ptr<osg::BlendEquation> blendEquation = new osg::BlendEquation(osg::BlendEquation::FUNC_ADD);
 
-	}
+      stateSet->setAttribute(point);
+      stateSet->setTextureAttributeAndModes(0, pointSprite, osg::StateAttribute::ON);
 
-	return false;
-}
+      globStateSet->setAttributeAndModes(blendEquation, osg::StateAttribute::ON);
+      globStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+      globStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+      globStateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+      globStateSet->setAttributeAndModes(new osg::BlendFunc(GL_ONE, GL_ONE), osg::StateAttribute::ON);
+      stateSet->setRenderBinDetails(-10, "RenderBin");
 
-void BackgroundModel::makeStars()
-{
-	string starsFilename = "./GameData/data/stars.bin";
+      // shader
+      osg::ref_ptr<osg::Program> pgm = new osg::Program();
 
-	char* bytes = ResourceManager::getInstance()->loadBinary(starsFilename);
+      osg::ref_ptr<osg::Shader> vert_shader = resourceManager->loadShader("./GameData/shaders/star.vert", osg::Shader::VERTEX);
+      osg::ref_ptr<osg::Shader> frag_shader = resourceManager->loadShader("./GameData/shaders/star.frag", osg::Shader::FRAGMENT);
 
-	_transform = new PositionAttitudeTransform();
+      pgm->addShader(vert_shader);
+      pgm->addShader(frag_shader);
 
-	ref_ptr<Geode> geode = new Geode();
-	ref_ptr<Geometry> geo = new Geometry();
-	ref_ptr<StateSet> globStateSet = new StateSet();
-	ref_ptr<StateSet> stateSet = new StateSet();
+      stateSet->setAttribute(pgm, osg::StateAttribute::ON);
+      // ###
 
-	ref_ptr<Vec3Array> verts = new Vec3Array();
-	ref_ptr<Vec4Array> colors = new Vec4Array();
+      transform->setStateSet(globStateSet);
+      geode->setStateSet(stateSet);
 
-	ByteStream stream(bytes);
+      geo->setVertexArray(verts);
+      geo->setColorArray(colors);
+      geo->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+      geo->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, verts->size()));
 
-	int nstars = stream.read<int>();
+      geode->addDrawable(geo);
+      transform->addChild(geode);
 
-	for (int i = 0; i < nstars; i++)
-	{
-		float x = stream.read<float>();
-		float y = stream.read<float>();
-		float z = stream.read<float>();
-		float size = stream.read<float>();
+      transform->addEventCallback(base);
 
-		verts->push_back(Vec3f(x, -z, -y) * 10.0f);
-		colors->push_back(Vec4f(size / 8.0f, 0.0f, 0.0f, 1.0f));
-	}
+      resourceManager->clearCacheResource(filename);
+    }
 
-	_point = new Point();
-	ref_ptr<PointSprite> pointSprite = new PointSprite();
-	ref_ptr<BlendEquation> blendEquation = new BlendEquation(BlendEquation::FUNC_ADD);
+    void makeSun()
+    {
+      osg::ref_ptr<osg::Billboard> sunBillboard = new osg::Billboard();
+      sunTransform = new osg::PositionAttitudeTransform();
+      sunGlowTransform = new osg::PositionAttitudeTransform();
+      osg::ref_ptr<osg::PositionAttitudeTransform> sunPosTransform = new osg::PositionAttitudeTransform();
+      osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
 
-	stateSet->setAttribute(_point);
-	stateSet->setTextureAttributeAndModes(0, pointSprite, StateAttribute::ON);
+      sunBillboard->setMode(osg::Billboard::Mode::POINT_ROT_EYE);
+      sunBillboard->setNormal(osg::Vec3(0.0f, -1.0f, 0.0f));
 
-	globStateSet->setAttributeAndModes(blendEquation, StateAttribute::ON);
-	globStateSet->setMode(GL_DEPTH_TEST, StateAttribute::OFF);
-	globStateSet->setMode(GL_LIGHTING, StateAttribute::OFF);
-	globStateSet->setMode(GL_BLEND, StateAttribute::ON);
-	globStateSet->setAttributeAndModes(new BlendFunc(GL_ONE, GL_ONE), StateAttribute::ON);
-	stateSet->setRenderBinDetails(-10, "RenderBin");
+      osg::ref_ptr<osg::Geometry> geo = osgGaming::createQuadGeometry(-1.0f, 1.0f, -1.0f, 1.0f);
 
-	// shader
-	ref_ptr<Program> pgm = new Program();
+      osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+      colors->push_back(osg::Vec4f(1.0, 1.0, 1.0, 1.0));
+      geo->setColorArray(colors);
+      geo->setColorBinding(osg::Geometry::BIND_OVERALL);
 
-	ref_ptr<Shader> vert_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/star.vert", Shader::VERTEX);
-	ref_ptr<Shader> frag_shader = ResourceManager::getInstance()->loadShader("./GameData/shaders/star.frag", Shader::FRAGMENT);
+      sunPosTransform->setPosition(osg::Vec3f(0.0f, 9.0f, 0.0f));
+      sunPosTransform->setScale(osg::Vec3f(0.3f, 0.3f, 0.3f));
 
-	pgm->addShader(vert_shader);
-	pgm->addShader(frag_shader);
+      textureFactory->make()
+        ->image(resourceManager->loadImage("./GameData/textures/sun/sprite.png"))
+        ->assign(stateSet)
+        ->build();
 
-	stateSet->setAttribute(pgm, StateAttribute::ON);
-	// ###
+      textureFactory->make()
+        ->image(resourceManager->loadImage("./GameData/textures/sun/blend.png"))
+        ->assign(sunGlowTransform->getOrCreateStateSet())
+        ->build();
 
-	_transform->setStateSet(globStateSet);
-	geode->setStateSet(stateSet);
+      sunBillboard->getOrCreateStateSet()->setRenderBinDetails(-10, "RenderBin");
+      sunGlowTransform->getOrCreateStateSet()->setRenderBinDetails(10, "RenderBin");
 
-	geo->setVertexArray(verts);
-	geo->setColorArray(colors);
-	geo->setColorBinding(Geometry::BIND_PER_VERTEX);
-	geo->addPrimitiveSet(new DrawArrays(PrimitiveSet::POINTS, 0, verts->size()));
+      sunPosTransform->setStateSet(stateSet);
 
-	geode->addDrawable(geo);
-	_transform->addChild(geode);
+      transform->addChild(sunTransform);
+      sunTransform->addChild(sunPosTransform);
+      sunPosTransform->addChild(sunBillboard);
+      sunPosTransform->addChild(sunGlowTransform);
+      sunGlowTransform->addChild(sunBillboard);
+      sunBillboard->addDrawable(geo);
+    }
 
-	ResourceManager::getInstance()->clearCacheResource(starsFilename);
-}
+    BackgroundModel* base;
 
-void BackgroundModel::makeSun()
-{
-	ref_ptr<Billboard> sunBillboard = new Billboard();
-	_sunTransform = new PositionAttitudeTransform();
-	_sunGlowTransform = new PositionAttitudeTransform();
-	ref_ptr<PositionAttitudeTransform> sunPosTransform = new PositionAttitudeTransform();
-	ref_ptr<StateSet> stateSet = new StateSet();
+    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+    osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
 
-	sunBillboard->setMode(Billboard::Mode::POINT_ROT_EYE);
-	sunBillboard->setNormal(Vec3(0.0f, -1.0f, 0.0f));
+    osg::ref_ptr<osg::PositionAttitudeTransform> transform;
+    osg::ref_ptr<osg::PositionAttitudeTransform> sunTransform;
+    osg::ref_ptr<osg::PositionAttitudeTransform> sunGlowTransform;
+    osg::ref_ptr<osg::Point> point;
+  };
 
-	ref_ptr<Geometry> geo = createQuadGeometry(-1.0f, 1.0f, -1.0f, 1.0f);
+  BackgroundModel::BackgroundModel(osgGaming::Injector& injector)
+    : GUIEventHandler()
+    , m(new Impl(injector, this))
+  {
+  }
 
-	ref_ptr<Vec4Array> colors = new Vec4Array();
-	colors->push_back(Vec4f(1.0, 1.0, 1.0, 1.0));
-	geo->setColorArray(colors);
-	geo->setColorBinding(Geometry::BIND_OVERALL);
+  BackgroundModel::~BackgroundModel()
+  {
+  }
 
-	sunPosTransform->setPosition(Vec3f(0.0f, 9.0f, 0.0f));
-	sunPosTransform->setScale(Vec3f(0.3f, 0.3f, 0.3f));
+  void BackgroundModel::loadStars(std::string filename)
+  {
+    m->makeStars(filename);
+    m->makeSun();
+  }
 
-	TextureFactory::getInstance()->make()
-		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/sun/sprite.png"))
-		->assign(stateSet)
-		->build();
+  osg::ref_ptr<osg::PositionAttitudeTransform> BackgroundModel::getTransform()
+  {
+    return m->transform;
+  }
 
-	TextureFactory::getInstance()->make()
-		->image(ResourceManager::getInstance()->loadImage("./GameData/textures/sun/blend.png"))
-		->assign(_sunGlowTransform->getOrCreateStateSet())
-		->build();
+  osg::ref_ptr<osg::PositionAttitudeTransform> BackgroundModel::getSunTransform()
+  {
+    return m->sunTransform;
+  }
 
-	sunBillboard->getOrCreateStateSet()->setRenderBinDetails(-10, "RenderBin");
-	_sunGlowTransform->getOrCreateStateSet()->setRenderBinDetails(10, "RenderBin");
+  osg::ref_ptr<osg::PositionAttitudeTransform> BackgroundModel::getSunGlowTransform()
+  {
+    return m->sunGlowTransform;
+  }
 
-	sunPosTransform->setStateSet(stateSet);
+  void BackgroundModel::updateResolutionHeight(float height)
+  {
+    m->point->setSize(height / 100.0f);
+  }
 
-	_transform->addChild(_sunTransform);
-	_sunTransform->addChild(sunPosTransform);
-	sunPosTransform->addChild(sunBillboard);
-	sunPosTransform->addChild(_sunGlowTransform);
-	_sunGlowTransform->addChild(sunBillboard);
-	sunBillboard->addDrawable(geo);
+  bool BackgroundModel::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa)
+  {
+    switch (ea.getEventType())
+    {
+    case osgGA::GUIEventAdapter::RESIZE:
+
+      updateResolutionHeight(ea.getWindowHeight());
+
+      return true;
+
+    default:
+      break;
+
+    }
+
+    return false;
+  }
+
 }

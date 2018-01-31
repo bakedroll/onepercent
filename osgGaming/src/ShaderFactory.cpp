@@ -1,25 +1,31 @@
 #include <osgGaming/ShaderFactory.h>
 
-using namespace std;
-using namespace osg;
-using namespace osgGaming;
-
-template<>
-ref_ptr<ShaderFactory> Singleton<ShaderFactory>::_instance;
-
-ref_ptr<Shader> ShaderFactory::fromSourceText(string key, string source, Shader::Type type)
+namespace osgGaming
 {
-	ShaderDictionary::iterator it = _shaderCache.find(key);
-	
-	if (it != _shaderCache.end())
-	{
-		return it->second;
-	}
 
-	ref_ptr<Shader> shader = new Shader(type);
-	shader->setShaderSource(source);
+  ShaderFactory::ShaderFactory(Injector& injector)
+  {
+  }
 
-	_shaderCache.insert(ShaderDictionary::value_type(key, shader));
+  ShaderFactory::~ShaderFactory()
+  {
+  }
 
-	return shader;
+  osg::ref_ptr<osg::Shader> ShaderFactory::fromSourceText(std::string key, std::string source, osg::Shader::Type type)
+  {
+    ShaderDictionary::iterator it = m_shaderCache.find(key);
+
+    if (it != m_shaderCache.end())
+    {
+      return it->second;
+    }
+
+    osg::ref_ptr<osg::Shader> shader = new osg::Shader(type);
+    shader->setShaderSource(source);
+
+    m_shaderCache.insert(ShaderDictionary::value_type(key, shader));
+
+    return shader;
+  }
+
 }

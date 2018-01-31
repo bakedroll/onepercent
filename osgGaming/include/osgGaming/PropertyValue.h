@@ -2,6 +2,8 @@
 
 #include <osgGaming/PropertyNode.h>
 
+#include <osg/ref_ptr>
+
 namespace osgGaming
 {
 	class AbstractPropertyValue : public PropertyNode

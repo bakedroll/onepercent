@@ -1,5 +1,4 @@
 #include <osgGaming/UIButton.h>
-#include <osgGaming/ResourceManager.h>
 #include <osgGaming/Helper.h>
 
 #include <osg/Geode>
@@ -35,7 +34,7 @@ namespace osgGaming
 
     osg::ref_ptr<osg::Geode> textGeode = new osg::Geode();
 
-    m_textNode = createTextNode(m_text, m_fontSize, ResourceManager::getInstance()->loadDefaultFont());
+    m_textNode = createTextNode(m_text, m_fontSize);
     m_textNode->setAlignment(osgText::TextBase::CENTER_CENTER);
 
     MatrixTransform::addChild(textGeode);

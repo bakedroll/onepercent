@@ -13,8 +13,11 @@ namespace onep
 {
   struct CountryOverlay::Impl
   {
-    Impl(CountryOverlay* b)
+    Impl(osgGaming::Injector& injector, CountryOverlay* b)
       : base(b)
+      , resourceManager(injector.inject<osgGaming::ResourceManager>())
+      , textureFactory(injector.inject<osgGaming::TextureFactory>())
+      , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
       , oSelectedCountryId(new osgGaming::Observable<int>(0))
       , highlightedBranch(BRANCH_UNDEFINED)
     {}
@@ -59,6 +62,10 @@ namespace onep
 
     CountryOverlay* base;
 
+    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+    osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
+    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+
     CountryMesh::Map countryMeshs;
     CountriesMap::Ptr countriesMap;
 
@@ -72,24 +79,10 @@ namespace onep
     CountryMesh::Ptr hoveredCountryMesh;
   };
 
-  CountryOverlay::CountryOverlay()
+  CountryOverlay::CountryOverlay(osgGaming::Injector& injector)
     : osg::Switch()
-    , m(new Impl(this))
+    , m(new Impl(injector, this))
   {
-    osg::ref_ptr<osg::Program> program = new osg::Program();
-    osg::ref_ptr<osg::Shader> frag_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/country.frag", osg::Shader::FRAGMENT);
-    osg::ref_ptr<osg::Shader> vert_shader = osgGaming::ResourceManager::getInstance()->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
-    program->addShader(frag_shader);
-    program->addShader(vert_shader);
-
-    osg::ref_ptr<osg::StateSet> stateSet = getOrCreateStateSet();
-
-    stateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
-    stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-    stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-    stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    stateSet->setRenderBinDetails(1, "RenderBin");
   }
 
   CountryOverlay::~CountryOverlay()
@@ -101,14 +94,30 @@ namespace onep
     typedef std::vector<int> NeighborList;
     typedef std::map<int, NeighborList> NeighborMap;
 
-    char* bytes = osgGaming::ResourceManager::getInstance()->loadBinary(countriesFilename);
+    osg::ref_ptr<osg::Program> program = new osg::Program();
+    osg::ref_ptr<osg::Shader> frag_shader = m->resourceManager->loadShader("./GameData/shaders/country.frag", osg::Shader::FRAGMENT);
+    osg::ref_ptr<osg::Shader> vert_shader = m->resourceManager->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
+    program->addShader(frag_shader);
+    program->addShader(vert_shader);
+
+    osg::ref_ptr<osg::StateSet> stateSet = getOrCreateStateSet();
+
+    stateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
+    stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+    stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+    stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+    stateSet->setRenderBinDetails(1, "RenderBin");
+
+
+    char* bytes = m->resourceManager->loadBinary(countriesFilename);
 
     osgGaming::ByteStream stream(bytes);
 
     NeighborMap neighborMap;
 
-    osg::ref_ptr<osg::Texture2D> distanceTexture = osgGaming::TextureFactory::getInstance()->make()
-      ->image(osgGaming::ResourceManager::getInstance()->loadImage(distanceMapFilename))
+    osg::ref_ptr<osg::Texture2D> distanceTexture = m->textureFactory->make()
+      ->image(m->resourceManager->loadImage(distanceMapFilename))
       ->build();
 
     getOrCreateStateSet()->setTextureAttributeAndModes(0, distanceTexture, osg::StateAttribute::ON);
@@ -130,6 +139,7 @@ namespace onep
       float height = stream.read<float>();
 
       osg::ref_ptr<CountryData> country = new CountryData(
+        m->propertiesManager,
         name,
         id,
         population,
@@ -192,7 +202,7 @@ namespace onep
 
     m->countriesMap = new CountriesMap(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
 
-    osgGaming::ResourceManager::getInstance()->clearCacheResource(countriesFilename);
+    m->resourceManager->clearCacheResource(countriesFilename);
   }
 
   void CountryOverlay::clearHighlightedCountries()

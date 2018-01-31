@@ -48,7 +48,9 @@ namespace onep
 
   struct BoundariesMesh::Impl
   {
-    Impl() {}
+    Impl(osgGaming::Injector& injector)
+      : resourceManager(injector.inject<osgGaming::ResourceManager>())
+    {}
 
     void addQuads(
       Quad::List& quads,
@@ -99,6 +101,8 @@ namespace onep
       }
     }
 
+    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+
     Point::Map pointsMap;
     IdQuadListMap boundariesMap;
 
@@ -113,9 +117,9 @@ namespace onep
     osg::ref_ptr<osg::Geode> countriesBoundsGeode;
   };
 
-  BoundariesMesh::BoundariesMesh()
+  BoundariesMesh::BoundariesMesh(osgGaming::Injector& injector)
     : osg::Group()
-    , m(new Impl())
+    , m(new Impl(injector))
   {
     osg::ref_ptr<osg::StateSet> stateSet = getOrCreateStateSet();
 
@@ -139,7 +143,7 @@ namespace onep
     m->nodalsFull.clear();
     m->vertices.release();
 
-    char* bytes = osgGaming::ResourceManager::getInstance()->loadBinary(filename);
+    char* bytes = m->resourceManager->loadBinary(filename);
     osgGaming::ByteStream stream(bytes);
 
     int nverts = stream.read<int>();
@@ -229,7 +233,7 @@ namespace onep
       m->nodals[fromTo] = quads;
     }
 
-    osgGaming::ResourceManager::getInstance()->clearCacheResource(filename);
+    m->resourceManager->clearCacheResource(filename);
   }
 
   osg::ref_ptr<osg::Vec3Array> BoundariesMesh::getCountryVertices()

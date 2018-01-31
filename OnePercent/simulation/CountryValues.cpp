@@ -1,14 +1,12 @@
 #include "CountryValues.h"
 
-#include <osgGaming/Property.h>
-
 namespace onep
 {
-  CountryValues::CountryValues(float wealth)
+  CountryValues::CountryValues(osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager, float wealth)
     : osg::Referenced()
     , m_container(new ProgressingValueContainer())
   {
-    float startBuyingPower = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_MechanicsStartBuyingPowerName);
+    float startBuyingPower = propertiesManager->getValue<float>(Param_MechanicsStartBuyingPowerName);
 
     createValue<float>(VALUE_ANGER, 0.0f, 1.0f, 0.0f);
     createValue<float>(VALUE_DEPT, 0.0f, wealth, 0.0f);

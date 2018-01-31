@@ -1,21 +1,20 @@
 #pragma once
 
 #include <map>
-#include <fstream>
 //#include <locale>
 //#include <codecvt>
 
 #include <osgGaming/FileResourceLoader.h>
-#include <osgGaming/Singleton.h>
 
 #include <osg/Image>
 #include <osgText/Font>
-#include <osgDB/ReadFile>
 #include <osg/Shader>
 
 namespace osgGaming
 {
-	class ResourceManager : public Singleton<ResourceManager>
+  class Injector;
+
+  class ResourceManager : public osg::Referenced
 	{
 	public:
 		typedef enum _resourceType
@@ -26,7 +25,8 @@ namespace osgGaming
 			SHADER
 		} ResourceType;
 
-		ResourceManager();
+    explicit ResourceManager(Injector& injector);
+    ~ResourceManager();
 
 		std::string loadText(std::string resourceKey);
 		char* loadBinary(std::string resourceKey);

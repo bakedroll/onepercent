@@ -1,10 +1,11 @@
+#include <osgGaming/Injector.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/FpsTextCallback.h>
 #include <osgGaming/UIUpdateVisitor.h>
 #include <osgGaming/UIMCollectorVisitor.h>
 #include <osgGaming/UIFindElementVisitor.h>
-#include <osgGaming/UIMarkupLoader.h>
 #include <osgGaming/UIElement.h>
+#include <osgGaming/UIGrid.h>
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/Helper.h>
 
@@ -17,9 +18,12 @@ namespace osgGaming
 
   struct Hud::Impl
   {
-    Impl()
-      : fpsEnabled(false)
+    Impl(Injector& injector)
+      : resourceManager(injector.inject<ResourceManager>())
+      , fpsEnabled(false)
     {}
+
+    osg::ref_ptr<ResourceManager> resourceManager;
 
     osg::ref_ptr<osg::Projection> projection;
     osg::ref_ptr<osg::MatrixTransform> textTransform;
@@ -43,9 +47,9 @@ namespace osgGaming
     }
   };
 
-  Hud::Hud()
+  Hud::Hud(Injector& injector)
     : Referenced()
-    , m(new Impl())
+    , m(new Impl(injector))
   {
     osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
     stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
@@ -75,13 +79,6 @@ namespace osgGaming
   osg::ref_ptr<osg::MatrixTransform> Hud::getModelViewTransform()
   {
     return m->modelViewTransform;
-  }
-
-  void Hud::loadMarkupFromXmlResource(std::string resourceKey)
-  {
-    osg::ref_ptr<UIElement> element = UIMarkupLoader::getInstance()->loadMarkupFromXmlResource(resourceKey);
-
-    setRootUIElement(element);
   }
 
   osg::ref_ptr<UIElement> Hud::getRootUIElement()
@@ -142,7 +139,7 @@ namespace osgGaming
       mat.makeScale(1.0f, -1.0f, 1.0f);
       mat.setTrans(10.0f, 10.0f, 0.0f);
 
-      osg::ref_ptr<osgText::Text> fpsText = createTextNode("", 25.0f, ResourceManager::getInstance()->loadDefaultFont());
+      osg::ref_ptr<osgText::Text> fpsText = createTextNode("", 25.0f, m->resourceManager->loadDefaultFont());
       fpsText->setAlignment(osgText::TextBase::LEFT_TOP);
       fpsText->setAxisAlignment(osgText::Text::AxisAlignment::XY_PLANE);
       fpsText->setPosition(osg::Vec3f(0.0f, 0.0f, 0.0f));

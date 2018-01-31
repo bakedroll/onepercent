@@ -1,31 +1,21 @@
 #pragma once
 
+#include <memory>
+
 #include <osgGaming/SimulationCallback.h>
 #include <osgGaming/PostProcessingEffect.h>
 
-#include <osgPPU/UnitInResampleOut.h>
-#include <osgPPU/ShaderAttribute.h>
-
 namespace osgGaming
 {
-	class HighDynamicRangeEffectCallback : public SimulationCallback
-	{
-	public:
-		HighDynamicRangeEffectCallback(osg::ref_ptr<osgPPU::UnitInOut> unitAdaptedLuminance);
+  class Injector;
 
-		virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override;
-
-	private:
-		osg::ref_ptr<osgPPU::UnitInOut> _unitAdaptedLuminance;
-
-	};
-
-	class HighDynamicRangeEffect : public PostProcessingEffect
+  class HighDynamicRangeEffect : public PostProcessingEffect
 	{
 	public:
 		static const std::string NAME;
 
-		HighDynamicRangeEffect();
+		HighDynamicRangeEffect(Injector& injector);
+    ~HighDynamicRangeEffect();
 
 		virtual std::string getName() override;
 		virtual InitialUnitList getInitialUnits() override;
@@ -52,21 +42,8 @@ namespace osgGaming
 		virtual void initializeUnits() override;
 
 	private:
-		float _midGrey;
-		float _hdrBlurSigma;
-		float _hdrBlurRadius;
-		float _glareFactor;
-		float _adaptFactor;
-		float _minLuminance;
-		float _maxLuminance;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
-		osg::ref_ptr<osgPPU::UnitInResampleOut> _unitResample;
-		osg::ref_ptr<osgPPU::UnitInOut> _unitHdr;
-
-		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderBrightpass;
-		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderHdr;
-		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderGaussX;
-		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderGaussY;
-		osg::ref_ptr<osgPPU::ShaderAttribute> _shaderAdapted;
 	};
 }

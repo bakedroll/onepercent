@@ -21,14 +21,22 @@ namespace osgGamingTest
     virtual StateEvent* update() override;
     virtual unsigned char getProperties() override;
 
-    virtual osg::ref_ptr<osgGaming::World> overrideWorld(osg::ref_ptr<osgGaming::View> view) override;
+    virtual osg::ref_ptr<osgGaming::World> injectWorld(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view) override;
 
-    StateEvent* stateEvent_push(osg::ref_ptr<AbstractGameState> state);
-    StateEvent* stateEvent_push(AbstractGameStateList states);
-    StateEvent* stateEvent_pop();
-    StateEvent* stateEvent_replace(osg::ref_ptr<AbstractGameState> state);
-    StateEvent* stateEvent_replace(AbstractGameStateList states);
-    StateEvent* stateEvent_endGame();
+    template<typename TState>
+    StateEvent* stateEvent_push()
+    {
+      return osgGaming::AbstractGameState::stateEvent_push<TState>();
+    }
+
+    template<typename TState>
+    StateEvent* stateEvent_replace()
+    {
+      return osgGaming::AbstractGameState::stateEvent_replace<TState>();
+    }
+
+    virtual StateEvent* stateEvent_pop() override;
+    virtual StateEvent* stateEvent_endGame() override;
 
   private:
     struct Impl;

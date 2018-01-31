@@ -6,6 +6,7 @@
 #include <osg/Group>
 
 #include <osgGaming/Observable.h>
+#include <osgGaming/PropertiesManager.h>
 
 #include "CountryValues.h"
 #include "SimulationCallback.h"
@@ -37,7 +38,14 @@ namespace onep
       osg::ref_ptr<NeighborCountryInfo> info;
     } Neighbor;
 
-		CountryData(std::string name, int id, float population, float wealth, osg::Vec2f center, osg::Vec2f size);
+		CountryData(
+      osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
+      std::string name,
+      int id,
+      float population,
+      float wealth,
+      osg::Vec2f center,
+      osg::Vec2f size);
 
     void addNeighbor(Neighbor neighbor);
 

@@ -5,6 +5,8 @@
 #include <vector>
 #include <memory>
 
+#include <osgGaming/Injector.h>
+
 #include <osg/Referenced>
 #include <osg/ref_ptr>
 
@@ -90,7 +92,7 @@ namespace osgGaming
 
 		virtual void onResizeEvent(float width, float height);
 
-    void prepareWorldAndHud(osg::ref_ptr<View> view);
+    void prepareWorldAndHud(osgGaming::Injector& injector, osg::ref_ptr<View> view);
 
 		double getSimulationTime();
 		double getFrameTime();
@@ -109,20 +111,54 @@ namespace osgGaming
 
 		StateEvent* stateEvent_default();
 
-	protected:
-		virtual osg::ref_ptr<World> overrideWorld(osg::ref_ptr<View> view);
-    virtual osg::ref_ptr<Hud> overrideHud(osg::ref_ptr<View> view);
+    void setInjector(Injector& injector);
 
-		StateEvent* stateEvent_push(osg::ref_ptr<AbstractGameState> state);
-		StateEvent* stateEvent_push(AbstractGameStateList states);
-		StateEvent* stateEvent_pop();
-		StateEvent* stateEvent_replace(osg::ref_ptr<AbstractGameState> state);
-		StateEvent* stateEvent_replace(AbstractGameStateList states);
-		StateEvent* stateEvent_endGame();
+  private:
+    template<typename TState>
+    osg::ref_ptr<AbstractGameState> injectState()
+    {
+      osg::ref_ptr<TState> s = m_injector->inject<TState>();
+      osg::ref_ptr<AbstractGameState> state = osg::ref_ptr<AbstractGameState>(dynamic_cast<AbstractGameState*>(s.get()));
+      if (!state.valid())
+      {
+        assert(false && "State could not be injected.");
+        return osg::ref_ptr<AbstractGameState>();
+      }
+
+      state->setInjector(*m_injector);
+      return state;
+    }
+
+    virtual StateEvent* stateEvent_push(osg::ref_ptr<AbstractGameState> state);
+    virtual StateEvent* stateEvent_replace(osg::ref_ptr<AbstractGameState> state);
+
+	protected:
+		virtual osg::ref_ptr<World> injectWorld(osgGaming::Injector& injector, osg::ref_ptr<View> view);
+    virtual osg::ref_ptr<Hud> injectHud(osgGaming::Injector& injector, osg::ref_ptr<View> view);
+
+    template<typename TState>
+    StateEvent* stateEvent_push()
+    {
+      return stateEvent_push(injectState<TState>());
+    }
+
+    template<typename TState>
+    StateEvent* stateEvent_replace()
+    {
+      return stateEvent_replace(injectState<TState>());
+    }
+
+
+		//StateEvent* stateEvent_push(AbstractGameStateList states);
+	  virtual StateEvent* stateEvent_pop();
+		//StateEvent* stateEvent_replace(AbstractGameStateList states);
+	  virtual StateEvent* stateEvent_endGame();
 
 	private:
     struct Impl;
     std::unique_ptr<Impl> m;
+
+    Injector* m_injector;
 
 	};
 }

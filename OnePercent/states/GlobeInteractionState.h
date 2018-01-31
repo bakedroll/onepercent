@@ -13,7 +13,7 @@ namespace onep
 	class GlobeInteractionState : public GlobeCameraState
 	{
 	public:
-		GlobeInteractionState();
+		GlobeInteractionState(osgGaming::Injector& injector);
 		~GlobeInteractionState();
 
 		virtual void initialize() override;
@@ -32,7 +32,7 @@ namespace onep
     virtual void onResizeEvent(float width, float height) override;
 
 	protected:
-		virtual osg::ref_ptr<osgGaming::Hud> overrideHud(osg::ref_ptr<osgGaming::View> view) override;
+    virtual osg::ref_ptr<osgGaming::Hud> injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view) override;
     void setupUi();
 
 	private:

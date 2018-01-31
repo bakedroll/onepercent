@@ -168,7 +168,7 @@ namespace osgGaming
 
   }
 
-  void AbstractGameState::prepareWorldAndHud(osg::ref_ptr<View> view)
+  void AbstractGameState::prepareWorldAndHud(osgGaming::Injector& injector, osg::ref_ptr<View> view)
   {
     Impl::ViewWorldMap::iterator wit = m->overriddenWorlds.find(view);
     World::Ptr world;
@@ -178,7 +178,7 @@ namespace osgGaming
     }
     else
     {
-      world = overrideWorld(view);
+      world = injectWorld(injector, view);
       m->overriddenWorlds[view] = world;
     }
 
@@ -192,7 +192,7 @@ namespace osgGaming
     }
     else
     {
-      hud = overrideHud(view);
+      hud = injectHud(injector, view);
       m->overriddenHuds[view] = hud;
     }
 
@@ -277,19 +277,24 @@ namespace osgGaming
     return m->stateEvent;
   }
 
-  osg::ref_ptr<World> AbstractGameState::overrideWorld(osg::ref_ptr<View> view)
+  void AbstractGameState::setInjector(Injector& injector)
+  {
+    m_injector = &injector;
+  }
+
+  osg::ref_ptr<World> AbstractGameState::injectWorld(osgGaming::Injector& injector, osg::ref_ptr<View> view)
   {
     return nullptr;
   }
 
-  osg::ref_ptr<Hud> AbstractGameState::overrideHud(osg::ref_ptr<View> view)
+  osg::ref_ptr<Hud> AbstractGameState::injectHud(osgGaming::Injector& injector, osg::ref_ptr<View> view)
   {
     return nullptr;
   }
 
   AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(osg::ref_ptr<AbstractGameState> state)
   {
-    if (m->stateEvent != NULL)
+    if (m->stateEvent != nullptr)
     {
       return m->stateEvent;
     }
@@ -301,9 +306,9 @@ namespace osgGaming
     return m->stateEvent;
   }
 
-  AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(AbstractGameStateList states)
+  /*AbstractGameState::StateEvent* AbstractGameState::stateEvent_push(AbstractGameStateList states)
   {
-    if (m->stateEvent != NULL)
+    if (m->stateEvent != nullptr)
     {
       return m->stateEvent;
     }
@@ -313,11 +318,11 @@ namespace osgGaming
     m->stateEvent->referencedStates = states;
 
     return m->stateEvent;
-  }
+  }*/
 
   AbstractGameState::StateEvent* AbstractGameState::stateEvent_pop()
   {
-    if (m->stateEvent != NULL)
+    if (m->stateEvent != nullptr)
     {
       return m->stateEvent;
     }
@@ -330,7 +335,7 @@ namespace osgGaming
 
   AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(osg::ref_ptr<AbstractGameState> state)
   {
-    if (m->stateEvent != NULL)
+    if (m->stateEvent != nullptr)
     {
       return m->stateEvent;
     }
@@ -342,9 +347,9 @@ namespace osgGaming
     return m->stateEvent;
   }
 
-  AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(AbstractGameStateList states)
+  /*AbstractGameState::StateEvent* AbstractGameState::stateEvent_replace(AbstractGameStateList states)
   {
-    if (m->stateEvent != NULL)
+    if (m->stateEvent != nullptr)
     {
       return m->stateEvent;
     }
@@ -354,11 +359,11 @@ namespace osgGaming
     m->stateEvent->referencedStates = states;
 
     return m->stateEvent;
-  }
+  }*/
 
   AbstractGameState::StateEvent* AbstractGameState::stateEvent_endGame()
   {
-    if (m->stateEvent != NULL)
+    if (m->stateEvent != nullptr)
     {
       return m->stateEvent;
     }

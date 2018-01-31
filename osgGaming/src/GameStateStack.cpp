@@ -112,6 +112,12 @@ void GameStateStack::popState()
 	_stateStack.pop_back();
 }
 
+void GameStateStack::pushState(osg::ref_ptr<AbstractGameState> state)
+{
+  _attachRequired = true;
+  _stateStack.push_back(state);
+}
+
 void GameStateStack::pushStates(AbstractGameStateList states)
 {
 	_attachRequired = true;

@@ -29,7 +29,6 @@ int main(int argc, char** argv)
 #ifdef INITIALIZE_QT
 
   ref_ptr<OnePercentApplication> app = new OnePercentApplication(argc, argv);
-
   return app->run();
 
 #else

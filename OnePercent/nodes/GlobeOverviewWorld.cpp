@@ -9,10 +9,11 @@ namespace onep
 {
   struct GlobeOverviewWorld::Impl
   {
-    Impl(GlobeOverviewWorld* b) 
+    Impl(osgGaming::Injector& injector, GlobeOverviewWorld* b)
       : base(b)
-      , paramEarthRadius(osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_EarthRadiusName))
-      , simulation(new Simulation())
+      , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+      , paramEarthRadius(injector.inject<osgGaming::PropertiesManager>()->getValue<float>(Param_EarthRadiusName))
+      , simulation(injector.inject<Simulation>())
       , cameraLatLong(osg::Vec2f(0.0f, 0.0f))
       , cameraViewAngle(osg::Vec2f(0.0f, 0.0f))
       , cameraDistance(28.0f)
@@ -38,6 +39,8 @@ namespace onep
 
     GlobeOverviewWorld* base;
 
+    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+
     float paramEarthRadius;
 
     osg::ref_ptr<GlobeModel> globeModel;
@@ -51,9 +54,9 @@ namespace onep
     float cameraDistance;
   };
 
-  GlobeOverviewWorld::GlobeOverviewWorld()
-    : World()
-    , m(new Impl(this))
+  GlobeOverviewWorld::GlobeOverviewWorld(osgGaming::Injector& injector)
+    : World(injector)
+    , m(new Impl(injector, this))
   {
     getGlobalLightModel()->setAmbientIntensity(osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
@@ -125,7 +128,7 @@ namespace onep
 
   void GlobeOverviewWorld::setDay(float day)
   {
-    float daysInYear = osgGaming::PropertiesManager::getInstance()->getValue<float>(Param_MechanicsDaysInYearName);
+    float daysInYear = m->propertiesManager->getValue<float>(Param_MechanicsDaysInYearName);
     float year = day / daysInYear;
 
     osg::Matrix yearMat = osgGaming::getMatrixFromEuler(0.0f, 0.0f, -year * 2.0f * C_PI) *

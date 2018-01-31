@@ -1,5 +1,4 @@
 #include <osgGaming/UIText.h>
-#include <osgGaming/ResourceManager.h>
 #include <osgGaming/Helper.h>
 
 #include <osg/Geode>
@@ -16,7 +15,7 @@ UIText::UIText()
 {
 	ref_ptr<Geode> geode = new Geode();
 
-	_textNode = createTextNode(_text, _fontSize, ResourceManager::getInstance()->loadDefaultFont());
+	_textNode = createTextNode(_text, _fontSize);
 
 	getChildGroup()->addChild(geode);
 	// MatrixTransform::addChild(geode);

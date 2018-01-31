@@ -1,6 +1,7 @@
 #pragma once
 
-#include "simulation/CountryData.h"
+#include <osgGaming/Injector.h>
+
 #include "nodes/CountryMesh.h"
 
 #include <osg/PositionAttitudeTransform>
@@ -11,7 +12,8 @@ namespace onep
 	class CountryNameOverlay : public osg::PositionAttitudeTransform
 	{
 	public:
-		CountryNameOverlay();
+		CountryNameOverlay(osgGaming::Injector& injector);
+    ~CountryNameOverlay();
 
 		bool getEnabled();
 
@@ -19,9 +21,8 @@ namespace onep
 		void setEnabled(bool enabled);
 
 	private:
-		osg::ref_ptr<osg::Switch> _switch;
-    const CountryMesh::Map* _countryMap;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
-		bool _enabled;
 	};
 }

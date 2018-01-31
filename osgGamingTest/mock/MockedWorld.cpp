@@ -2,9 +2,9 @@
 
 namespace osgGamingTest
 {
-  MockedWorld::MockedWorld(int id)
-    : osgGaming::World()
-    , m_id(id)
+  MockedWorld::MockedWorld(osgGaming::Injector& injector)
+    : osgGaming::World(injector)
+    , m_id(-1)
   {
   }
 

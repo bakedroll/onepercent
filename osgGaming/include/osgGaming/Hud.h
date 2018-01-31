@@ -10,6 +10,7 @@
 
 namespace osgGaming
 {
+  class Injector;
   class UIElement;
 
 	class Hud : public osg::Referenced
@@ -17,13 +18,11 @@ namespace osgGaming
 	public:
     typedef osg::ref_ptr<Hud> Ptr;
 
-		Hud();
+		Hud(Injector& injector);
 		~Hud();
 
 		osg::ref_ptr<osg::Projection> getProjection();
 		osg::ref_ptr<osg::MatrixTransform> getModelViewTransform();
-
-		void loadMarkupFromXmlResource(std::string resourceKey);
 
 		osg::ref_ptr<UIElement> getRootUIElement();
 		UserInteractionModel::List& getUserInteractionModels();
