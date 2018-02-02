@@ -41,17 +41,19 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${CMAKE_SOURCE_DIR}/osgGaming/include
   ${OSG_INCLUDE_DIR}
   ${RAPIDXML_INCLUDE_DIR}
-  ${OSGPPU_INCLUDE_DIR})
+  ${OSGPPU_INCLUDE_DIR}
+  ${LUA_INCLUDE_DIR}
+  ${LUABRIDGE_INCLUDE_DIR})
 
 # set debug and release libs
 target_link_libraries(${PROJECT_NAME}
   osgGaming)
 
 target_link_libraries(${PROJECT_NAME}
-  optimized ${OSGPPU_LIBRARY_RELEASE})
+  optimized ${OSGPPU_LIBRARY_RELEASE} ${LUA_LIB_RELEASE})
   
 target_link_libraries(${PROJECT_NAME}
-  debug ${OSGPPU_LIBRARY_DEBUG})
+  debug ${OSGPPU_LIBRARY_DEBUG} ${LUA_LIB_DEBUG})
 
 if (MSVC)
   foreach(lib ${OSG_LIBRARIES})

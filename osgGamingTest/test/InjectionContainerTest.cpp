@@ -38,5 +38,5 @@ TEST(InjectionContainerTest, DependencyTree)
   osg::ref_ptr<B> b1 = injector.inject<B>();
   osg::ref_ptr<B> b2 = injector.inject<B>();
 
-  GTEST_ASSERT_NE(b1, b2);
+  ASSERT_NE(b1, b2);
 }

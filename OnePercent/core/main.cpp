@@ -1,15 +1,13 @@
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/PropertiesManager.h>
-#include <osgGaming/NativeGameApplication.h>
-#include <osgGaming/NativeView.h>
 
 #include "core/OnePercentApplication.h"
 
-#include "states/LoadingGlobeOverviewState.h"
-#include "states/GlobeOverviewState.h"
-#include "states/MainMenuState.h"
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+}
 
-#include "nodes/GlobeOverviewWorld.h"
+#include <LuaBridge.h>
 
 using namespace osgGaming;
 using namespace onep;
