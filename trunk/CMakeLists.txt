@@ -86,6 +86,7 @@ else()
 endif()
 
 # Check for existence of required directories
+# OSG
 if ("${Qt5Core_LIBRARIES}" STREQUAL "")
   set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify QT5_ROOT_DIRECTORY\n")
 endif()
@@ -102,11 +103,45 @@ else()
   adjust_cached_path(OSG_LIBRARY "Path to a library." ${OSG_LIBRARY})
 endif()
 
+# rapidxml
 set(RAPIDXML_INCLUDE_DIR "NOTFOUND" CACHE STRING "rapidxml include dir")
 if (NOT EXISTS ${RAPIDXML_INCLUDE_DIR})
   set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify RAPIDXML_INCLUDE_DIR\n")
 else()
   adjust_cached_path(RAPIDXML_INCLUDE_DIR "rapidxml include dir" ${RAPIDXML_INCLUDE_DIR})
+endif()
+
+# Lua
+set(LUA_INCLUDE_DIR "NOTFOUND" CACHE STRING "Lua include dir")
+if (NOT EXISTS ${LUA_INCLUDE_DIR})
+  set(ERROR_MESSAGES ${LUA_INCLUDE_DIR} "Please specify LUA_INCLUDE_DIR\n")
+else()
+  adjust_cached_path(LUA_INCLUDE_DIR "Lua include dir" ${LUA_INCLUDE_DIR})
+endif()
+
+set(LUA_LIB_RELEASE "NOTFOUND" CACHE STRING "Lua lib dir")
+if (NOT EXISTS ${LUA_LIB_RELEASE})
+  set(ERROR_MESSAGES ${LUA_LIB_RELEASE} "Please specify LUA_LIB_RELEASE\n")
+else()
+  adjust_cached_path(LUA_LIB_RELEASE "Lua lib dir" ${LUA_LIB_RELEASE})
+endif()
+
+set(LUA_LIB_DEBUG "NOTFOUND" CACHE STRING "Lua debug lib dir")
+if (NOT EXISTS ${LUA_LIB_DEBUG})
+  set(LUA_LIB_DEBUG ${LUA_LIB_RELEASE})
+endif()
+if (NOT EXISTS ${LUA_LIB_DEBUG})
+  set(ERROR_MESSAGES ${LUA_LIB_DEBUG} "Please specify LUA_LIB_DEBUG\n")
+else()
+  adjust_cached_path(LUA_LIB_DEBUG "Lua debug lib dir" ${LUA_LIB_DEBUG})
+endif()
+
+# LuaBridge
+set(LUABRIDGE_INCLUDE_DIR "NOTFOUND" CACHE STRING "LuaBridge include dir")
+if (NOT EXISTS ${LUABRIDGE_INCLUDE_DIR})
+  set(ERROR_MESSAGES ${LUABRIDGE_INCLUDE_DIR} "Please specify LUABRIDGE_INCLUDE_DIR\n")
+else()
+  adjust_cached_path(LUABRIDGE_INCLUDE_DIR "LuaBridge include dir" ${LUABRIDGE_INCLUDE_DIR})
 endif()
 
 # check for debug libraries
