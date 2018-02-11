@@ -282,6 +282,12 @@ namespace osgGaming
     m_injector = &injector;
   }
 
+  void AbstractGameState::toAbstractGameStateRefList(AbstractGameStateList& list, AbstractGameStateRefList& refList)
+  {
+    for (AbstractGameStateList::iterator it = list.begin(); it != list.end(); ++it)
+      refList.push_back(std::reference_wrapper<osg::ref_ptr<AbstractGameState>>(*it));
+  }
+
   osg::ref_ptr<World> AbstractGameState::injectWorld(osgGaming::Injector& injector, osg::ref_ptr<View> view)
   {
     return nullptr;

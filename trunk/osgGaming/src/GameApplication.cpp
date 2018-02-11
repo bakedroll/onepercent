@@ -205,6 +205,7 @@ namespace osgGaming
             }
 
             ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
+            state.release();
 
             AbstractGameState::AbstractGameStateList nextStates;
             loadingState->getNextStates(*m_injector, nextStates);
@@ -223,7 +224,7 @@ namespace osgGaming
            
             m->loadingThreadFuture = async(launch::async,
               &GameLoadingState::loading_thread,
-              loadingState,
+              loadingState.get(),
               nextState->getWorld(view),
               nextState->getHud(view),
               getDefaultGameSettings());
@@ -272,23 +273,30 @@ namespace osgGaming
 
             AbstractGameState::AbstractGameStateList nextStates;
             loadingState->getNextStates(*m_injector, nextStates);
-            m->gameStateStack.replaceState(nextStates);
+
+            AbstractGameState::AbstractGameStateRefList nextStatesRef;
+            AbstractGameState::toAbstractGameStateRefList(nextStates, nextStatesRef);
+
+            m->gameStateStack.replaceState(nextStatesRef);
 
             break;
           }
         }
         else if (se != nullptr)
         {
+          AbstractGameState::AbstractGameStateRefList nextStatesRef;
+          AbstractGameState::toAbstractGameStateRefList(se->referencedStates, nextStatesRef);
+
           switch (se->type)
           {
           case GameState::POP:
             m->gameStateStack.popState();
             break;
           case GameState::PUSH:
-            m->gameStateStack.pushStates(se->referencedStates);
+            m->gameStateStack.pushStates(nextStatesRef);
             break;
           case GameState::REPLACE:
-            m->gameStateStack.replaceState(se->referencedStates);
+            m->gameStateStack.replaceState(nextStatesRef);
             break;
           case GameState::END_GAME:
             m->gameEnded = true;
@@ -359,17 +367,17 @@ namespace osgGaming
     m->defaultGameSettings = settings;
   }
 
-  int GameApplication::run(ref_ptr<AbstractGameState> initialState)
+  int GameApplication::run(ref_ptr<AbstractGameState>& initialState)
   {
     m->timerFactory = m_injector->inject<TimerFactory>();
 
-    GameStateStack::AbstractGameStateList states;
+    AbstractGameState::AbstractGameStateRefList states;
     states.push_back(initialState);
 
     return run(states);
   }
 
-  int GameApplication::run(GameStateStack::AbstractGameStateList initialStates)
+  int GameApplication::run(AbstractGameState::AbstractGameStateRefList initialStates)
   {
     try
     {
@@ -377,6 +385,11 @@ namespace osgGaming
       assert(m->view.valid());
 
       m->gameStateStack.pushStates(initialStates);
+
+      for (AbstractGameState::AbstractGameStateRefList::iterator it = initialStates.begin(); it != initialStates.end(); ++it)
+        it->get().release();
+      initialStates.clear();
+
       m->view->getRootGroup()->setUpdateCallback(this);
 
       int ret = mainloop();

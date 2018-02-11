@@ -57,14 +57,14 @@ bool GameStateStack::next()
 
 bool GameStateStack::isTop()
 {
-	return _itCurrent->get() == _itTop.get();
+	return _itCurrent->get() == _itTop;
 }
 
 bool GameStateStack::hasBehavior(osg::ref_ptr<AbstractGameState> state, AbstractGameState::StateBehavior behavior)
 {
 	char props = state->getProperties();
 
-	bool isTop = state == _itTop.get();
+	bool isTop = state == _itTop;
 
 	if (behavior == AbstractGameState::UPDATE)
 	{
@@ -112,23 +112,23 @@ void GameStateStack::popState()
 	_stateStack.pop_back();
 }
 
-void GameStateStack::pushState(osg::ref_ptr<AbstractGameState> state)
+void GameStateStack::pushState(osg::ref_ptr<AbstractGameState>& state)
 {
   _attachRequired = true;
   _stateStack.push_back(state);
 }
 
-void GameStateStack::pushStates(AbstractGameStateList states)
+void GameStateStack::pushStates(AbstractGameState::AbstractGameStateRefList states)
 {
 	_attachRequired = true;
 
-	for (AbstractGameStateList::iterator it = states.begin(); it != states.end(); ++it)
+  for (AbstractGameState::AbstractGameStateRefList::iterator it = states.begin(); it != states.end(); ++it)
 	{
 		_stateStack.push_back(*it);
 	}
 }
 
-void GameStateStack::replaceState(AbstractGameStateList states)
+void GameStateStack::replaceState(AbstractGameState::AbstractGameStateRefList states)
 {
 	popState();
 	pushStates(states);
@@ -137,5 +137,4 @@ void GameStateStack::replaceState(AbstractGameStateList states)
 void GameStateStack::clear()
 {
   _stateStack.clear();
-  _itTop.release();
 }

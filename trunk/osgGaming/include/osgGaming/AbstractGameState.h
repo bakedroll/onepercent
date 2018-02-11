@@ -49,6 +49,7 @@ namespace osgGaming
 		} StateBehavior;
 
 		typedef std::vector<osg::ref_ptr<AbstractGameState>> AbstractGameStateList;
+    typedef std::vector<std::reference_wrapper<osg::ref_ptr<AbstractGameState>>> AbstractGameStateRefList;
 
 		typedef struct _stateEvent
 		{
@@ -112,6 +113,8 @@ namespace osgGaming
 		StateEvent* stateEvent_default();
 
     void setInjector(Injector& injector);
+
+    static void toAbstractGameStateRefList(AbstractGameStateList& list, AbstractGameStateRefList& refList);
 
   private:
     template<typename TState>

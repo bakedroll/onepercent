@@ -20,6 +20,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <chrono>
+#include <core/LuaStateManager.h>
 
 namespace onep
 {
@@ -36,6 +37,7 @@ namespace onep
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , countryOverlay(injector.inject<CountryOverlay>())
       , simulation(injector.inject<Simulation>())
+      , lua(injector.inject<LuaStateManager>())
       , labelLoadingText(nullptr)
       , overlay(nullptr)
     {
@@ -53,6 +55,7 @@ namespace onep
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<Simulation> simulation;
+    osg::ref_ptr<LuaStateManager> lua;
 
     QLabel* labelLoadingText;
     VirtualOverlay* overlay;
@@ -66,7 +69,6 @@ namespace onep
 
   LoadingGlobeOverviewState::~LoadingGlobeOverviewState()
   {
-
   }
 
   void LoadingGlobeOverviewState::initialize()
