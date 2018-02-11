@@ -2,13 +2,6 @@
 
 #include "core/OnePercentApplication.h"
 
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-}
-
-#include <LuaBridge.h>
-
 using namespace osgGaming;
 using namespace onep;
 using namespace osg;

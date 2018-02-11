@@ -17,7 +17,7 @@ namespace osgGamingTest
   {
   }
 
-  int MockedGameApplication::run(osgGaming::GameStateStack::AbstractGameStateList initialStates)
+  int MockedGameApplication::run(osgGaming::AbstractGameState::AbstractGameStateRefList initialStates)
   {
     return osgGaming::GameApplication::run(initialStates);
   }

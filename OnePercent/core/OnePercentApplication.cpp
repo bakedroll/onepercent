@@ -1,5 +1,7 @@
 #include "OnePercentApplication.h"
 
+#include "LuaStateManager.h"
+
 #include "nodes/CountryOverlay.h"
 #include "nodes/BoundariesMesh.h"
 #include "states/GlobeOverviewState.h"
@@ -52,6 +54,9 @@ namespace onep
     container.registerType<osgGaming::FastApproximateAntiAliasingEffect>();
     container.registerType<osgGaming::HighDynamicRangeEffect>();
     container.registerType<osgGaming::DepthOfFieldEffect>();
+
+    // wrapper
+    container.registerSingletonType<LuaStateManager>();
   }
 
   void OnePercentApplication::initialize(osgGaming::Injector& injector)

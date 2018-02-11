@@ -9,8 +9,6 @@ namespace osgGaming
 	class GameStateStack
 	{
 	public:
-		typedef std::vector<osg::ref_ptr<AbstractGameState>> AbstractGameStateList;
-
 		GameStateStack();
 
 		bool attachRequired();
@@ -25,22 +23,22 @@ namespace osgGaming
 		osg::ref_ptr<AbstractGameState> get();
 
 		void popState();
-    void pushState(osg::ref_ptr<AbstractGameState> state);
-		void pushStates(AbstractGameStateList states);
-		void replaceState(AbstractGameStateList states);
+    void pushState(osg::ref_ptr<AbstractGameState>& state);
+		void pushStates(AbstractGameState::AbstractGameStateRefList states);
+    void replaceState(AbstractGameState::AbstractGameStateRefList states);
 
     void clear();
 
 	private:
-		AbstractGameStateList _stateStack;
+    AbstractGameState::AbstractGameStateList _stateStack;
 
 		bool _attachRequired;
 
 		bool _itOnlyInitialized;
 		AbstractGameState::StateBehavior _itBehavior;
-		AbstractGameStateList::iterator _itCurrent;
-		AbstractGameStateList::iterator _itNext;
-		osg::ref_ptr<AbstractGameState> _itTop;
+    AbstractGameState::AbstractGameStateList::iterator _itCurrent;
+    AbstractGameState::AbstractGameStateList::iterator _itNext;
+		AbstractGameState* _itTop;
 
 	};
 }

@@ -24,8 +24,8 @@ namespace osgGaming
     virtual void initialize(Injector& injector);
     virtual void deinitialize();
 
-    virtual int run(osg::ref_ptr<AbstractGameState> initialState);
-    virtual int run(GameStateStack::AbstractGameStateList initialStates);
+    virtual int run(osg::ref_ptr<AbstractGameState>& initialState);
+    virtual int run(AbstractGameState::AbstractGameStateRefList initialStates);
 
   public:
     template<typename TState>
@@ -41,6 +41,8 @@ namespace osgGaming
 
       osg::ref_ptr<TState> s = m_injector->inject<TState>();
       osg::ref_ptr<AbstractGameState> state = osg::ref_ptr<AbstractGameState>(dynamic_cast<AbstractGameState*>(s.get()));
+      s.release();
+
       if (!state.valid())
       {
         assert(false && "TState has to be an AbstractGameState.");

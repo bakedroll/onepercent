@@ -10,7 +10,7 @@ namespace osgGamingTest
     MockedGameApplication();
     ~MockedGameApplication();
 
-    virtual int run(osgGaming::GameStateStack::AbstractGameStateList initialStates) override;
+    virtual int run(osgGaming::AbstractGameState::AbstractGameStateRefList initialStates) override;
 
   protected:
     virtual int mainloop() override;
