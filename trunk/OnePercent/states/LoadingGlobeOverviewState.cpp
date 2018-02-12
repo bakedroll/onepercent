@@ -122,6 +122,8 @@ namespace onep
 
   void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
+    m->lua->registerClassInstance<Simulation>(m->simulation);
+
     osg::ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
     m->backgroundModel->loadStars("./GameData/data/stars.bin");
@@ -136,6 +138,8 @@ namespace onep
       "./GameData/textures/earth/distance.png",
       m->boundariesMesh->getCountryVertices(),
       m->boundariesMesh->getCountryTexcoords());
+
+    m->lua->loadScript("./GameData/scripts/branches.lua");
 
     m->simulation->loadSkillsXml("./GameData/data/skills/passive.xml");
     m->simulation->attachCountries(m->countryOverlay->getCountryMeshs());
