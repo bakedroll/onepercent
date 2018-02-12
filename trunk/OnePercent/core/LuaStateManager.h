@@ -11,7 +11,7 @@ extern "C"
 #include <lualib.h>
 }
 
-#include "LuaBridge.h"
+#include <LuaBridge.h>
 
 namespace onep
 {

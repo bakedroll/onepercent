@@ -205,7 +205,6 @@ namespace osgGaming
             }
 
             ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
-            state.release();
 
             AbstractGameState::AbstractGameStateList nextStates;
             loadingState->getNextStates(*m_injector, nextStates);
@@ -308,6 +307,7 @@ namespace osgGaming
           break;
         }
 
+        state.release();
       }
     }
     else
