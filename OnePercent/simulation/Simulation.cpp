@@ -6,12 +6,22 @@
 
 #include <QTimer>
 
+extern "C"
+{
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
+
+#include "LuaBridge.h"
+
 namespace onep
 {
   struct Simulation::Impl
   {
     Impl(osgGaming::Injector& injector)
       : propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+      , lua(injector.inject<LuaStateManager>())
       , applySkillsVisitor(new SimulationVisitor(SimulationVisitor::APPLY_SKILLS))
       , affectNeighborsVisitor(new SimulationVisitor(SimulationVisitor::AFFECT_NEIGHBORS))
       , progressCountriesVisitor(new SimulationVisitor(SimulationVisitor::PROGRESS_COUNTRIES))
@@ -20,6 +30,7 @@ namespace onep
     {}
 
     osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+    osg::ref_ptr<LuaStateManager> lua;
 
     SkillBranch::Map skillBranches;
 
@@ -180,4 +191,34 @@ namespace onep
     return true;
   }
 
+  void Simulation::registerClass(lua_State* state)
+  {
+    luabridge::getGlobalNamespace(state)
+      .beginClass<Simulation>("Simulation")
+      .addFunction("add_branches", &Simulation::lua_add_branches)
+    .endClass();
+  }
+
+  std::string Simulation::instanceVariableName()
+  {
+    return "simulation";
+  }
+
+  void Simulation::lua_add_branches(lua_State* state)
+  {
+    luaL_checktype(state, -1, LUA_TTABLE);
+
+    lua_pushnil(state);
+
+    while (lua_next(state, -2) != 0)
+    {
+      luaL_checktype(state, -1, LUA_TTABLE);
+      lua_getfield(state, -1, "name");
+
+      const char* name = luaL_checkstring(state, -1);
+      printf("Branch: %s\n", name);
+
+      lua_pop(state, 2);
+    }
+  }
 }
