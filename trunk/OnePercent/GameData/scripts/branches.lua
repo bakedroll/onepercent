@@ -16,4 +16,4 @@ local branches = {
   }
 }
 
-simulation.add_branches(branches)
+simulation:add_branches(branches)

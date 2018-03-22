@@ -1,5 +1,6 @@
 #include "DebugWindow.h"
 
+#include "core/Observables.h"
 #include "core/QConnectFunctor.h"
 
 #include <QVBoxLayout>
@@ -12,18 +13,23 @@
 #include <chrono>
 #include <nodes/CountryOverlay.h>
 #include <nodes/BoundariesMesh.h>
+#include "simulation/Simulation.h"
 
 namespace onep
 {
   struct DebugWindow::Impl
   {
-    Impl(DebugWindow* b)
+    Impl(osgGaming::Injector& injector, DebugWindow* b)
       : base(b)
+      , countryOverlay(injector.inject<CountryOverlay>())
+      , boundariesMesh(injector.inject<BoundariesMesh>())
+      , simulation(injector.inject<Simulation>())
+      , oDay(injector.inject<ODay>())
+      , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , toggleCountryButton(nullptr)
       , radioNoOverlay(nullptr)
       , labelStats(nullptr)
     {
-      
     }
 
     DebugWindow* base;
@@ -31,6 +37,9 @@ namespace onep
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<Simulation> simulation;
+
+    ODay::Ptr oDay;
+    ONumSkillPoints::Ptr oNumSkillPoints;
 
     QPushButton* toggleCountryButton;
     CountryMesh::Map selectedCountries;
@@ -217,27 +226,21 @@ namespace onep
   };
 
   DebugWindow::DebugWindow(
-    osg::ref_ptr<CountryOverlay> countryOverlay,
-    osg::ref_ptr<BoundariesMesh> boundariesMesh,
-    osg::ref_ptr<Simulation> simulation,
+    osgGaming::Injector& injector,
     QWidget* parent)
     : QDialog(parent)
-    , m(new Impl(this))
+    , m(new Impl(injector, this))
   {
     setGeometry(100, 100, 500, 800);
 
-    m->countryOverlay = countryOverlay;
-    m->boundariesMesh = boundariesMesh;
-    m->simulation = simulation;
-
     m->setupUi();
 
-    m->notifyDay = m->simulation->getDayObs()->connect(osgGaming::Func<int>([this](int day)
+    m->notifyDay = m->oDay->connect(osgGaming::Func<int>([this](int day)
     {
       m->updateCountryInfoText();
     }));
 
-    m->notifySkillpoints = m->simulation->getSkillPointsObs()->connectAndNotify(osgGaming::Func<int>([this](int skillPoints)
+    m->notifySkillpoints = m->oNumSkillPoints->connectAndNotify(osgGaming::Func<int>([this](int skillPoints)
     {
       m->labelSkillpoints->setText(QString("Skill Points: %1").arg(skillPoints));
     }));

@@ -22,11 +22,7 @@ namespace onep
 
     void attachCountries(CountryMesh::Map& countries);
 
-		int getNumSkills();
     SkillBranch::Ptr getSkillBranch(BranchType type);
-
-		osgGaming::Observable<int>::Ptr getDayObs();
-    osgGaming::Observable<int>::Ptr getSkillPointsObs();
 
     bool paySkillPoints(int points);
 

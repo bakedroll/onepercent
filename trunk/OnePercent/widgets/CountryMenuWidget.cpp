@@ -1,7 +1,10 @@
 #include "CountryMenuWidget.h"
 
+#include "core/Observables.h"
 #include "core/Globals.h"
 #include "core/QConnectFunctor.h"
+
+#include "simulation/Simulation.h"
 
 #include <osgGaming/Helper.h>
 
@@ -11,13 +14,16 @@ namespace onep
 {
 	struct CountryMenuWidget::Impl
 	{
-    Impl(Simulation::Ptr s)
-      : simulation(s)
+    Impl(osgGaming::Injector& injector)
+      : simulation(injector.inject<Simulation>())
+      , oNumSkillPoints(injector.inject<ONumSkillPoints>())
     {}
 
     CountryMesh::Ptr countryMesh;
     Simulation::Ptr simulation;
     std::vector<QPushButton*> buttons;
+
+    ONumSkillPoints::Ptr oNumSkillPoints;
 
     osgGaming::Observer<int>::Ptr notifySkillPoints;
 
@@ -54,15 +60,15 @@ namespace onep
           int costs = getBranchCosts(i);
 
           buttons[i]->setText(QString("%1\n(%2 SP to unlock)").arg(QString::fromStdString(branch_getStringFromType(i))).arg(costs));
-          buttons[i]->setEnabled(simulation->getSkillPointsObs()->get() >= costs);
+          buttons[i]->setEnabled(oNumSkillPoints->get() >= costs);
         }
       }
     }
 	};
 
-  CountryMenuWidget::CountryMenuWidget(Simulation::Ptr simulation)
+  CountryMenuWidget::CountryMenuWidget(osgGaming::Injector& injector)
 		: VirtualOverlay()
-		, m(new Impl(simulation))
+		, m(new Impl(injector))
 	{
     QSize size(400, 400);
     QSize buttonSize(100, 100);
@@ -98,7 +104,7 @@ namespace onep
       });
     }
 
-    m->notifySkillPoints = m->simulation->getSkillPointsObs()->connect(osgGaming::Func<int>([this](int skillPoints)
+    m->notifySkillPoints = m->oNumSkillPoints->connect(osgGaming::Func<int>([this](int skillPoints)
     {
       m->updateUi();
     }));

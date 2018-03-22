@@ -1,7 +1,9 @@
 #include "GlobeInteractionState.h"
 
+#include "core/Observables.h"
 #include "core/Globals.h"
 #include "core/QConnectFunctor.h"
+#include "nodes/BoundariesMesh.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/GlobeModel.h"
 #include "nodes/CountryOverlay.h"
@@ -70,6 +72,7 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector, GlobeInteractionState* b)
     : base(b)
+    , pInjector(&injector)
     , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
     , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
     , simulation(injector.inject<Simulation>())
@@ -78,16 +81,20 @@ namespace onep
     , bReady(false)
     , selectedCountry(0)
     , labelDays(nullptr)
-    , countryMenuWidget(nullptr)
+    , countryMenuWidget(new CountryMenuWidget(injector))
     , debugWindow(nullptr)
     , countryMenuWidgetFadeInAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
     , countryMenuWidgetFadeOutAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_OUT))
     , bFadingOutCountryMenu(false)
+    , oDay(injector.inject<ODay>())
     {
 
     }
 
     GlobeInteractionState* base;
+
+    // only for debug window
+    osgGaming::Injector* pInjector;
 
     osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
     osg::ref_ptr<GlobeOverviewWorld> globeOverviewWorld;
@@ -125,6 +132,8 @@ namespace onep
     osg::Vec2i mousePos;
 
     bool bFadingOutCountryMenu;
+
+    ODay::Ptr oDay;
 
     CountryMesh::Ptr pickCountryMeshAt(const osg::Vec2i& pos)
     {
@@ -208,7 +217,7 @@ namespace onep
 
     getHud(getView(0))->setFpsEnabled(true);
 
-    m->dayObserver = m->simulation->getDayObs()->connect(osgGaming::Func<int>([this](int day)
+    m->dayObserver = m->oDay->connect(osgGaming::Func<int>([this](int day)
     {
       m->labelDays->setText(QObject::tr("Day %1").arg(day));
     }));
@@ -416,7 +425,7 @@ namespace onep
     QConnectFunctor::connect(debugButton, SIGNAL(clicked()), [this]()
     {
       if (m->debugWindow == nullptr)
-        m->debugWindow = new DebugWindow(m->countryOverlay, m->boundariesMesh, m->simulation, m->mainOverlay);
+        m->debugWindow = new DebugWindow(*m->pInjector);
        
       if (!m->debugWindow->isVisible())
       {
@@ -450,7 +459,6 @@ namespace onep
 
     m->mainOverlay->setLayout(layout);
 
-    m->countryMenuWidget = new CountryMenuWidget(m->simulation);
     m->countryMenuWidget->setCenterPosition(500, 500);
 
     getOverlayCompositor()->addVirtualOverlay(m->mainOverlay);

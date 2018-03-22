@@ -1,8 +1,6 @@
 #pragma once
 
-#include "nodes/BoundariesMesh.h"
-#include "nodes/CountryOverlay.h"
-#include "simulation/Simulation.h"
+#include <osgGaming/Injector.h>
 
 #include <QDialog>
 #include <memory>
@@ -15,9 +13,7 @@ namespace onep
 
   public:
     DebugWindow(
-      osg::ref_ptr<CountryOverlay> countryOverlay,
-      osg::ref_ptr<BoundariesMesh> boundariesMesh,
-      osg::ref_ptr<Simulation> simulation, 
+      osgGaming::Injector& injector, 
       QWidget* parent = nullptr);
     ~DebugWindow();
 

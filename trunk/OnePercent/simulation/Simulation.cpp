@@ -1,5 +1,7 @@
 #include "Simulation.h"
+
 #include "core/QConnectFunctor.h"
+#include "core/Observables.h"
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/PropertiesManager.h>
@@ -25,8 +27,8 @@ namespace onep
       , applySkillsVisitor(new SimulationVisitor(SimulationVisitor::APPLY_SKILLS))
       , affectNeighborsVisitor(new SimulationVisitor(SimulationVisitor::AFFECT_NEIGHBORS))
       , progressCountriesVisitor(new SimulationVisitor(SimulationVisitor::PROGRESS_COUNTRIES))
-      , oDay(new osgGaming::Observable<int>(0))
-      , skillPointsObs(new osgGaming::Observable<int>(0))
+      , oDay(injector.inject<ODay>())
+      , oNumSkillPoints(injector.inject<ONumSkillPoints>())
     {}
 
     osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
@@ -40,11 +42,10 @@ namespace onep
     SimulationVisitor::Ptr affectNeighborsVisitor;
     SimulationVisitor::Ptr progressCountriesVisitor;
 
-    osgGaming::Observable<int>::Ptr oDay;
-
     QTimer timer;
 
-    osgGaming::Observable<int>::Ptr skillPointsObs;
+    ODay::Ptr oDay;
+    ONumSkillPoints::Ptr oNumSkillPoints;
   };
 
   Simulation::Simulation(osgGaming::Injector& injector)
@@ -60,7 +61,7 @@ namespace onep
     m->skillBranches[BRANCH_POLITICS] = new SkillBranch(BRANCH_POLITICS);
 
     // start with 50 skill points
-    m->skillPointsObs->set(50);
+    m->oNumSkillPoints->set(50);
 
     m->timer.setSingleShot(false);
     m->timer.setInterval(1000);
@@ -137,37 +138,18 @@ namespace onep
     }
   }
 
-  int Simulation::getNumSkills()
-  {
-    int nSkills = 0;
-    for (SkillBranch::Map::iterator it = m->skillBranches.begin(); it != m->skillBranches.end(); ++it)
-      nSkills += it->second->getNumSkills();
-
-    return nSkills;
-  }
-
   SkillBranch::Ptr Simulation::getSkillBranch(BranchType type)
   {
     return m->skillBranches[type];
   }
 
-  osgGaming::Observable<int>::Ptr Simulation::getDayObs()
-  {
-    return m->oDay;
-  }
-
-  osgGaming::Observable<int>::Ptr Simulation::getSkillPointsObs()
-  {
-    return m->skillPointsObs;
-  }
-
   bool Simulation::paySkillPoints(int points)
   {
-    int amount = m->skillPointsObs->get();
+    int amount = m->oNumSkillPoints->get();
     if (amount < points)
       return false;
 
-    m->skillPointsObs->set(amount - points);
+    m->oNumSkillPoints->set(amount - points);
     return true;
   }
 

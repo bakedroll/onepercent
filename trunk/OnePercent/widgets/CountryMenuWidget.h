@@ -1,6 +1,5 @@
 #pragma once
 
-#include "simulation/Simulation.h"
 #include "nodes/CountryMesh.h"
 #include "widgets/VirtualOverlay.h"
 
@@ -11,7 +10,7 @@ namespace onep
 	class CountryMenuWidget : public VirtualOverlay
 	{
 	public:
-		CountryMenuWidget(Simulation::Ptr simulation);
+		CountryMenuWidget(osgGaming::Injector& injector);
 		~CountryMenuWidget();
 
 		void setCenterPosition(int x, int y);
