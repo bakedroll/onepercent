@@ -2,6 +2,7 @@
 
 #include "LuaStateManager.h"
 
+#include "core/Observables.h"
 #include "nodes/CountryOverlay.h"
 #include "nodes/BoundariesMesh.h"
 #include "states/GlobeOverviewState.h"
@@ -57,6 +58,10 @@ namespace onep
 
     // wrapper
     container.registerSingletonType<LuaStateManager>();
+
+    // Observables
+    container.registerSingletonType<ONumSkillPoints>();
+    container.registerSingletonType<ODay>();
   }
 
   void OnePercentApplication::initialize(osgGaming::Injector& injector)
