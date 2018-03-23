@@ -4,44 +4,6 @@
 
 namespace onep
 {
-  /*std::string branch_getStringFromType(int type)
-  {
-    switch (type)
-    {
-    case BRANCH_CONTROL:
-      return "control";
-    case BRANCH_BANKS:
-      return "banks";
-    case BRANCH_CONCERNS:
-      return "concerns";
-    case BRANCH_MEDIA:
-      return "media";
-    case BRANCH_POLITICS:
-      return "politics";
-    case BRANCH_UNDEFINED:
-    default:
-      assert(false);
-      return "undefined";
-    }
-  }
-
-  BranchType branch_getTypeFromString(std::string str)
-  {
-    if (str == "control")
-      return BRANCH_CONTROL;
-    if (str == "banks")
-      return BRANCH_BANKS;
-    if (str == "concerns")
-      return BRANCH_CONCERNS;
-    if (str == "media")
-      return BRANCH_MEDIA;
-    if (str == "politics")
-      return BRANCH_POLITICS;
-
-    assert(false);
-    return BRANCH_UNDEFINED;
-  }*/
-
   std::string countryValue_getStringFromType(int type)
   {
     switch (type)
