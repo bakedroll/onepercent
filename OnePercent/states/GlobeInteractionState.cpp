@@ -15,7 +15,6 @@
 #include <osgGA/GUIEventAdapter>
 
 #include <osgGaming/Helper.h>
-#include <osgGaming/UIButton.h>
 #include <simulation/CountryData.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/View.h>
