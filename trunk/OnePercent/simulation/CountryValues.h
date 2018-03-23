@@ -11,28 +11,35 @@
 
 namespace onep
 {
+  class SkillBranchContainer;
+
   class CountryValues : public osg::Referenced
   {
   public:
     typedef osg::ref_ptr<CountryValues> Ptr;
 
-    CountryValues(osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager, float wealth);
+    CountryValues(osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager, osg::ref_ptr<SkillBranchContainer> skillBranchContainer, float wealth);
 
     template<typename T>
     ProgressingValue<T>* getValue(CountryValueType type);
 
     template<typename T>
-    ProgressingValue<T>* getBranchValue(CountryValueType type, BranchType branch);
+    ProgressingValue<T>* getBranchValue(CountryValueType type, int branchId);
 
     osg::ref_ptr<ProgressingValueContainer> getContainer();
 
   private:
     typedef std::map<int, ProgressingValueBase::Map> ProgressingValueBranchMap;
 
+    int numBranches();
+    std::string idToName(int id);
+
     ProgressingValueBase::Map m_values;
     ProgressingValueBranchMap m_branchValues;
 
     osg::ref_ptr<ProgressingValueContainer> m_container;
+
+    osg::ref_ptr<SkillBranchContainer> m_skillBranchContainer;
 
     template<typename T>
     void createValue(CountryValueType type, T min, T max, T init);
@@ -49,9 +56,9 @@ namespace onep
   }
 
   template <typename T>
-  ProgressingValue<T>* CountryValues::getBranchValue(CountryValueType type, BranchType branch)
+  ProgressingValue<T>* CountryValues::getBranchValue(CountryValueType type, int branchId)
   {
-    return dynamic_cast<ProgressingValue<T>*>(m_branchValues.find(int(branch))->second.find(int(type))->second.get());
+    return dynamic_cast<ProgressingValue<T>*>(m_branchValues.find(branchId)->second.find(int(type))->second.get());
   }
 
   template <typename T>
@@ -66,7 +73,8 @@ namespace onep
   template <typename T>
   void CountryValues::createBranchValues(CountryValueType type, T min, T max, T init)
   {
-    for (int i = 0; i < NUM_SKILLBRANCHES; i++)
+    int n = numBranches();
+    for (int i = 0; i < n; i++)
     {
       osg::ref_ptr<ProgressingValue<T>> value = new ProgressingValue<T>(min, max, init);
 
@@ -82,7 +90,8 @@ namespace onep
         it->second.insert(ProgressingValueBase::Map::value_type(int(type), value));
       }
 
-      m_container->registerValue(value, countryValue_getStringFromType(int(type)) + " [" + branch_getStringFromType(i) + "]");
+      std::string name = idToName(i);
+      m_container->registerValue(value, countryValue_getStringFromType(int(type)) + " [" + name + "]");
     }
   }
 }

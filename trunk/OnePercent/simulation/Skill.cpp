@@ -21,10 +21,10 @@ namespace onep
     m_attributes.push_back(attribute);
   }
 
-  void Skill::addBranchAttribute(BranchType branch, CountryValueType valueType, ProgressingValueMethod method, float value)
+  void Skill::addBranchAttribute(int branchId, CountryValueType valueType, ProgressingValueMethod method, float value)
   {
     BranchAttribute branchAttribute;
-    branchAttribute.branchType = branch;
+    branchAttribute.branchId = branchId;
     branchAttribute.attribute.method = method;
     branchAttribute.attribute.value = value;
     branchAttribute.attribute.valueType = valueType;
@@ -56,7 +56,7 @@ namespace onep
       visitor->getCountryValues()->getValue<float>(it->valueType)->prepare(it->value, it->method);
 
     for (BranchAttribute::List::iterator it = m_branchAttributes.begin(); it != m_branchAttributes.end(); ++it)
-      visitor->getCountryValues()->getBranchValue<float>(it->attribute.valueType, it->branchType)->prepare(it->attribute.value, it->attribute.method);
+      visitor->getCountryValues()->getBranchValue<float>(it->attribute.valueType, it->branchId)->prepare(it->attribute.value, it->attribute.method);
 
     return false;
   }

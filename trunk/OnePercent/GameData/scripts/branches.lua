@@ -1,19 +1,24 @@
 local branches = {
   {
-    name = "banks"
+    name = "banks",
+    costs = 120
   },
   {
-    name = "concerns"
+    name = "concerns",
+    costs = 120
   },
   {
-    name = "control"
+    name = "control",
+    costs = 50
   },
   {
-    name = "media"
+    name = "media",
+    costs = 50
   },
   {
-    name = "politics"
+    name = "politics",
+    costs = 50
   }
 }
 
-simulation:add_branches(branches)
+skillBranchContainer:add_branches(branches)

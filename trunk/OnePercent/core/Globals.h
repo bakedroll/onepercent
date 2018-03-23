@@ -33,18 +33,6 @@ namespace onep
   static const std::string Param_MechanicsDaysInYearName = "mechanics/days_in_year";
   static const std::string Param_MechanicsStartBuyingPowerName = "mechanics/start_buying_power";
 
-  static const int NUM_SKILLBRANCHES = 5;
-
-  typedef enum _branchType
-  {
-    BRANCH_BANKS = 0,
-    BRANCH_CONTROL = 1,
-    BRANCH_MEDIA = 2,
-    BRANCH_CONCERNS = 3,
-    BRANCH_POLITICS = 4,
-    BRANCH_UNDEFINED = -1
-  } BranchType;
-
   typedef enum _countryValueType
   {
     VALUE_ANGER,
@@ -64,9 +52,6 @@ namespace onep
     METHOD_ADD_CHANGE,
     METHOD_UNDEFINED = -1
   } ProgressingValueMethod;
-
-  std::string branch_getStringFromType(int type);
-  BranchType branch_getTypeFromString(std::string str);
 
   std::string countryValue_getStringFromType(int type);
   CountryValueType countryValue_getTypeFromString(std::string str);

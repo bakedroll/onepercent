@@ -53,7 +53,7 @@ namespace onep
 
       luabridge::push<T*>(m_state, tinst);
       lua_setglobal(m_state, varName.c_str());
-      lua_pop(m_state, 1);
+      //lua_pop(m_state, 1);
     }
 
   private:

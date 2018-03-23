@@ -19,7 +19,7 @@ namespace onep
 		Skill(std::string name);
 
     void addAttribute(CountryValueType valueType, ProgressingValueMethod method, float value);
-    void addBranchAttribute(BranchType branch, CountryValueType valueType, ProgressingValueMethod method, float value);
+    void addBranchAttribute(int branchId, CountryValueType valueType, ProgressingValueMethod method, float value);
 
 		void setActivated(bool activated);
 
@@ -42,7 +42,7 @@ namespace onep
     {
       typedef std::vector<_branchAttribute> List;
 
-      BranchType branchType;
+      int branchId;
       Attribute attribute;
     } BranchAttribute;
 

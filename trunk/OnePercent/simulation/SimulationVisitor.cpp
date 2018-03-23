@@ -9,9 +9,9 @@ namespace onep
     
   }
 
-  bool SimulationVisitor::getBranchActivated(BranchType type)
+  bool SimulationVisitor::getBranchActivated(int id)
   {
-    return m_skillBranches->oActivated[type]->get();
+    return m_skillBranches->oActivated[id]->get();
   }
 
   CountryValues::Ptr SimulationVisitor::getCountryValues()

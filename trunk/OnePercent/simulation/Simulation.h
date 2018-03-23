@@ -22,8 +22,6 @@ namespace onep
 
     void attachCountries(CountryMesh::Map& countries);
 
-    SkillBranch::Ptr getSkillBranch(BranchType type);
-
     bool paySkillPoints(int points);
 
     void start();
@@ -35,7 +33,8 @@ namespace onep
     virtual std::string instanceVariableName() override;
 
     // Lua functions
-    void lua_add_branches(lua_State* state);
+    void lua_start(lua_State* state);
+    void lua_stop(lua_State* state);
 
 	private:
     struct Impl;

@@ -18,20 +18,22 @@ namespace onep
     typedef osg::ref_ptr<SkillBranch> Ptr;
     typedef std::map<int, Ptr> Map;
 
-    SkillBranch(BranchType type);
+    SkillBranch(int id, const std::string& name, int costs);
 
-    int getNumSkills();
-    Skill::Ptr getSkill(int i);
-    BranchType getType();
+    int getBranchId() const;
+    std::string getBranchName() const;
+    int getNumSkills() const;
+    Skill::Ptr getSkill(int i) const;
+
+    int getCosts() const;
 
     void addSkill(Skill::Ptr skill);
 
     virtual bool callback(SimulationVisitor* visitor) override;
 
   private:
-    BranchType m_type;
-
-    Skill::List m_skills;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
   };
 }

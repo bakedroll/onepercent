@@ -3,6 +3,8 @@
 #include "core/QConnectFunctor.h"
 #include "core/Observables.h"
 
+#include "SkillBranchContainer.h"
+
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/PropertiesManager.h>
 
@@ -24,6 +26,7 @@ namespace onep
     Impl(osgGaming::Injector& injector)
       : propertiesManager(injector.inject<osgGaming::PropertiesManager>())
       , lua(injector.inject<LuaStateManager>())
+      , skillBranchContainer(injector.inject<SkillBranchContainer>())
       , applySkillsVisitor(new SimulationVisitor(SimulationVisitor::APPLY_SKILLS))
       , affectNeighborsVisitor(new SimulationVisitor(SimulationVisitor::AFFECT_NEIGHBORS))
       , progressCountriesVisitor(new SimulationVisitor(SimulationVisitor::PROGRESS_COUNTRIES))
@@ -34,7 +37,7 @@ namespace onep
     osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
     osg::ref_ptr<LuaStateManager> lua;
 
-    SkillBranch::Map skillBranches;
+    SkillBranchContainer::Ptr skillBranchContainer;
 
     GlobeModel::Ptr globeModel;
 
@@ -54,12 +57,6 @@ namespace onep
     , m(new Impl(injector))
 
   {
-    m->skillBranches[BRANCH_CONTROL] = new SkillBranch(BRANCH_CONTROL);
-    m->skillBranches[BRANCH_BANKS] = new SkillBranch(BRANCH_BANKS);
-    m->skillBranches[BRANCH_CONCERNS] = new SkillBranch(BRANCH_CONCERNS);
-    m->skillBranches[BRANCH_MEDIA] = new SkillBranch(BRANCH_MEDIA);
-    m->skillBranches[BRANCH_POLITICS] = new SkillBranch(BRANCH_POLITICS);
-
     // start with 50 skill points
     m->oNumSkillPoints->set(50);
 
@@ -92,11 +89,11 @@ namespace onep
     {
       std::string name = m->propertiesManager->root()->group("skills")->array("passive")->property<std::string>(i, "name")->get();
       std::string typeStr = m->propertiesManager->root()->group("skills")->array("passive")->property<std::string>(i, "branch")->get();
+      int id = m->skillBranchContainer->getBranchByName(name)->getBranchId();
 
       osg::ref_ptr<osgGaming::PropertyArray> arr = m->propertiesManager->root()->group("skills")->array("passive")->array(i, "attributes");
       int arrsize = arr->size();
 
-      BranchType type = branch_getTypeFromString(typeStr);
       osg::ref_ptr<Skill> skill = new Skill(name);
 
       for (int j = 0; j < arrsize; j++)
@@ -109,7 +106,7 @@ namespace onep
         if (branchAttr)
         {
           skill->addBranchAttribute(
-            type,
+            id,
             countryValue_getTypeFromString(valuetypeStr),
             valueMethod_getTypeFromString(methodStr),
             value);
@@ -123,24 +120,24 @@ namespace onep
         }
       }
 
-      m->skillBranches[type]->addSkill(skill);
+      SkillBranch::Ptr branch = m->skillBranchContainer->getBranchByName(name);
+      assert(branch.valid());
+
+      branch->addSkill(skill);
     }
   }
 
   void Simulation::attachCountries(CountryMesh::Map& countries)
   {
+    int n = m->skillBranchContainer->getNumBranches();
+
     for (CountryMesh::Map::iterator it = countries.begin(); it != countries.end(); ++it)
     {
-      for (int j = 0; j < NUM_SKILLBRANCHES; j++)
-        it->second->getCountryData()->addChild(m->skillBranches[j]);
+      for (int j = 0; j < n; j++)
+        it->second->getCountryData()->addChild(m->skillBranchContainer->getBranchByIndex(j));
 
       addChild(it->second->getCountryData());
     }
-  }
-
-  SkillBranch::Ptr Simulation::getSkillBranch(BranchType type)
-  {
-    return m->skillBranches[type];
   }
 
   bool Simulation::paySkillPoints(int points)
@@ -177,7 +174,8 @@ namespace onep
   {
     luabridge::getGlobalNamespace(state)
       .beginClass<Simulation>("Simulation")
-      .addFunction("add_branches", &Simulation::lua_add_branches)
+      .addFunction("start", &Simulation::lua_start)
+      .addFunction("stop", &Simulation::lua_stop)
     .endClass();
   }
 
@@ -186,21 +184,13 @@ namespace onep
     return "simulation";
   }
 
-  void Simulation::lua_add_branches(lua_State* state)
+  void Simulation::lua_start(lua_State* state)
   {
-    luaL_checktype(state, -1, LUA_TTABLE);
+    start();
+  }
 
-    lua_pushnil(state);
-
-    while (lua_next(state, -2) != 0)
-    {
-      luaL_checktype(state, -1, LUA_TTABLE);
-      lua_getfield(state, -1, "name");
-
-      const char* name = luaL_checkstring(state, -1);
-      printf("Branch: %s\n", name);
-
-      lua_pop(state, 2);
-    }
+  void Simulation::lua_stop(lua_State* state)
+  {
+    stop();
   }
 }

@@ -28,7 +28,7 @@ namespace onep
 
     void clearHighlightedCountries();
     void setSelectedCountry(int countryId);
-    void setHighlightedSkillBranch(BranchType type);
+    void setHighlightedSkillBranch(int id);
 
     void setHoveredCountry(CountryMesh::Ptr countryMesh);
     void setAllCountriesVisibility(bool visibility);

@@ -18,8 +18,9 @@ namespace onep
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
       , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+      , skillBranchContainer(injector.inject<SkillBranchContainer>())
       , oSelectedCountryId(new osgGaming::Observable<int>(0))
-      , highlightedBranch(BRANCH_UNDEFINED)
+      , highlightedBranchId(-1)
     {}
 
     void addCountry(
@@ -38,14 +39,15 @@ namespace onep
       countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
       base->addChild(mesh, false);
 
-      for (int i = 0; i < NUM_SKILLBRANCHES; i++)
+      int n = skillBranchContainer->getNumBranches();
+      for (int i = 0; i < n; i++)
       {
         skillBranchActivatedObservers.push_back(countryData->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([this, mesh, i](bool activated)
         {
           if (!activated)
             return;
 
-          if (oSelectedCountryId->get() == 0 && highlightedBranch == i)
+          if (oSelectedCountryId->get() == 0 && highlightedBranchId == i)
             setCountryColorMode(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
         })));
       }
@@ -65,13 +67,14 @@ namespace onep
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
     osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+    osg::ref_ptr<SkillBranchContainer> skillBranchContainer;
 
     CountryMesh::Map countryMeshs;
     CountriesMap::Ptr countriesMap;
 
     osgGaming::Observable<int>::Ptr oSelectedCountryId;
 
-    BranchType highlightedBranch;
+    int highlightedBranchId;
 
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
 
@@ -140,6 +143,7 @@ namespace onep
 
       osg::ref_ptr<CountryData> country = new CountryData(
         m->propertiesManager,
+        m->skillBranchContainer,
         name,
         id,
         population,
@@ -208,7 +212,7 @@ namespace onep
   void CountryOverlay::clearHighlightedCountries()
   {
     setAllCountriesVisibility(false);
-    m->highlightedBranch = BRANCH_UNDEFINED;
+    m->highlightedBranchId = -1;
 
     m->highlightedCountries.clear();
   }
@@ -222,7 +226,7 @@ namespace onep
     if (countryId == 0)
       return;
 
-    m->highlightedBranch = BRANCH_UNDEFINED;
+    m->highlightedBranchId = -1;
 
     CountryMesh::Ptr mesh = m->countryMeshs.find(countryId)->second;
     m->setCountryColorMode(mesh, CountryMesh::MODE_SELECTED);
@@ -232,17 +236,17 @@ namespace onep
       m->setCountryColorMode(*it, CountryMesh::MODE_NEIGHBOR);
   }
 
-  void CountryOverlay::setHighlightedSkillBranch(BranchType type)
+  void CountryOverlay::setHighlightedSkillBranch(int id)
   {
     m->oSelectedCountryId->set(0);
     clearHighlightedCountries();
 
-    m->highlightedBranch = type;
+    m->highlightedBranchId = id;
 
     for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
     {
-      if (it->second->getCountryData()->getSkillBranchActivated(type))
-        m->setCountryColorMode(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + int(type)));
+      if (it->second->getCountryData()->getSkillBranchActivated(id))
+        m->setCountryColorMode(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + id));
     }
   }
 
