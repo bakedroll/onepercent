@@ -1,6 +1,7 @@
 #pragma once
 
 #include "osgGaming/InjectionContainer.h"
+#include "osgGaming/LogManager.h"
 
 #ifdef _DEBUG
 #include <vector>
@@ -23,10 +24,13 @@ namespace osgGaming
       for (std::vector<std::type_index>::iterator it = m_creationOrder.begin(); it != m_creationOrder.end(); ++it)
       {
         if (*it == ti)
-          printf("Circular dependency detected!");
+          OSGG_LOG_WARN("Circular dependency detected!");
       }
 
-      printf("%*s%s%s\n", (m_depth) * 2, "", "Injecting ", ti.name());
+      char buffer[256];
+      sprintf_s(buffer, "%*s%s%s", (m_depth)* 2, "", "Injecting ", ti.name());
+
+      OSGG_LOG_INFO(std::string(buffer));
     }
 
     template<typename T>

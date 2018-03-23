@@ -1,6 +1,5 @@
 #include "QtGameApplication.h"
 
-#include "nodes/GlobeOverviewWorld.h"
 #include "states/QtGameState.h"
 #include "states/QtGameLoadingState.h"
 #include "widgets/MainWindow.h"
@@ -8,11 +7,50 @@
 
 #include <osgGaming/InputManager.h>
 #include <osgGaming/Observable.h>
+#include <osgGaming/LogManager.h>
+
+#include <QDir>
+#include <QDateTime>
+#include <QTextStream>
 
 #include <assert.h>
 
 namespace onep
 {
+
+class FileLogger : public osgGaming::Logger
+{
+public:
+  FileLogger(const QString& directory)
+  {
+    QDir dir(directory);
+    if (!dir.exists())
+      dir.mkpath(".");
+
+    QString filename = dir.filePath(QString("%1.txt").arg(QDateTime::currentDateTime().toString("yy-MM-dd HH.mm.ss")));
+
+    m_file.setFileName(filename);
+    m_file.open(QIODevice::WriteOnly);
+
+    m_textStream.setDevice(&m_file);
+  }
+
+  ~FileLogger()
+  {
+    if (m_file.isOpen())
+      m_file.close();
+  }
+
+  virtual void log(const std::string& text) override
+  {
+    if (m_file.isOpen())
+      m_textStream << QString::fromStdString(text) << "\n";
+  }
+
+private:
+  QFile m_file;
+  QTextStream m_textStream;
+};
 
 struct QtGameApplication::Impl
 {
@@ -38,6 +76,11 @@ QtGameApplication::QtGameApplication(int& argc, char** argv)
   : GameApplication()
   , m(new Impl())
 {
+  osgGaming::LogManager::getInstance()->addLogger(new osgGaming::StdOutLogger());
+  osgGaming::LogManager::getInstance()->addLogger(new FileLogger("./logs"));
+
+  OSGG_LOG_INFO("Application starting up");
+
   m->qapplication.reset(new QApplication(argc, argv));
 
   setlocale(LC_NUMERIC, "en_US");
@@ -75,6 +118,8 @@ QtGameApplication::~QtGameApplication()
 
 void QtGameApplication::deinitialize()
 {
+  OSGG_LOG_INFO("Application shutting down");
+
   m->overlayCompositor.reset();
 
   m->mainWindow->close();

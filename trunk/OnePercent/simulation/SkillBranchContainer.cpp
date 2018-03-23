@@ -69,7 +69,8 @@ namespace onep
 
       const char* name = luaL_checkstring(state, -2);
       int costs = luaL_checkinteger(state, -1);
-      printf("Branch: %s\n", name);
+
+      OSGG_LOG_INFO("Branch: " + std::string(name));
 
       addSkillBranch(new SkillBranch(int(m->branches.size()), std::string(name), costs));
 

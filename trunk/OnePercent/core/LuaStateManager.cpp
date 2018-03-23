@@ -36,7 +36,7 @@ namespace onep
       std::string msg = lua_tostring(m_state, -1);
 
       std::replace(msg.begin(), msg.end(), '\r', '\n');
-      printf("Lua Error in file %s: %s\n", filename.c_str(), msg.c_str());
+      OSGG_LOG_FATAL("Lua Error in file " + filename + ": " + msg);
 
       lua_pop(m_state, 1);
     }

@@ -80,7 +80,9 @@ namespace onep
       auto duration = std::chrono::high_resolution_clock::now() - start_time;
 
       long d = std::chrono::duration_cast<std::chrono::milliseconds> (duration).count();
-      printf("Took %d ms\n", d);
+
+      QString logmsg = QString("Took %1 ms").arg(d);
+      OSGG_LOG_DEBUG(logmsg.toStdString());
     }
 
     void updateCountryInfoText()
