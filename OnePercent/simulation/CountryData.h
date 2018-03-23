@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SkillBranchContainer.h"
+
 #include <osg/Referenced>
 #include <osg/Vec2f>
 #include <osg/ref_ptr>
@@ -13,6 +15,8 @@
 
 namespace onep
 {
+  class SkillBranchContainer;
+
 	class NeighborCountryInfo : public osg::Referenced
 	{
 	public:
@@ -22,7 +26,7 @@ namespace onep
 		void setRelation(float relation);
 
 	private:
-		float _relation;
+		float m_relation;
 	};
 
 	class CountryData : public osg::Group, public SimulationCallback
@@ -40,12 +44,15 @@ namespace onep
 
 		CountryData(
       osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
+      osg::ref_ptr<SkillBranchContainer> skillBranchContainer,
       std::string name,
       int id,
       float population,
       float wealth,
       osg::Vec2f center,
       osg::Vec2f size);
+
+    ~CountryData();
 
     void addNeighbor(Neighbor neighbor);
 
@@ -60,7 +67,7 @@ namespace onep
 
     CountryValues::Ptr getValues();
 
-    bool getSkillBranchActivated(int type);
+    bool getSkillBranchActivated(int id);
     osgGaming::Observable<bool>::Ptr getSkillBranchActivatedObservable(int type);
 
 		bool anySkillBranchActivated();
@@ -68,23 +75,8 @@ namespace onep
     virtual bool callback(SimulationVisitor* visitor) override;
 
 	private:
-		std::string m_name;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
-    CountryValues::Ptr m_values;
-    Neighbor::List m_neighbors;
-
-		float m_populationInMio;
-
-    SkillBranchesActivated m_skillBranches;
-
-    int m_id;
-		osg::Vec2f m_centerLatLong;
-		osg::Vec2f m_size;
-
-		float m_earthRadius;
-		float m_cameraZoom;
-
-    void step();
-    void affectNeighbors();
 	};
 }

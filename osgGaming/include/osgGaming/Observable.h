@@ -179,4 +179,15 @@ namespace osgGaming
     }
 
   };
+
+  template <typename T, T init = T()>
+  class InitializedObservable : public Observable<T>
+  {
+  public:
+    InitializedObservable()
+      : Observable<T>(init)
+    {
+
+    }
+  };
 }

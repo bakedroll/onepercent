@@ -4,7 +4,7 @@
 
 namespace onep
 {
-  std::string branch_getStringFromType(int type)
+  /*std::string branch_getStringFromType(int type)
   {
     switch (type)
     {
@@ -40,7 +40,7 @@ namespace onep
 
     assert(false);
     return BRANCH_UNDEFINED;
-  }
+  }*/
 
   std::string countryValue_getStringFromType(int type)
   {

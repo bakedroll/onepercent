@@ -27,47 +27,6 @@
 
 namespace onep
 {
-  class DebugButton : public osgGaming::UIButton
-  {
-  public:
-    typedef enum _type
-    {
-      BRANCH,
-      SKILL,
-      OVERLAY
-    } Type;
-
-    DebugButton(Type type, int id, BranchType branch = BRANCH_UNDEFINED)
-      : UIButton()
-      , m_branch(branch)
-      , m_id(id)
-      , m_type(type)
-    {
-
-    }
-
-    int getId()
-    {
-      return m_id;
-    }
-
-    Type getType()
-    {
-      return m_type;
-    }
-
-    BranchType getBranchType()
-    {
-      return m_branch;
-    }
-
-  private:
-    BranchType m_branch;
-    int m_id;
-    Type m_type;
-
-  };
-
   struct GlobeInteractionState::Impl
   {
     Impl(osgGaming::Injector& injector, GlobeInteractionState* b)

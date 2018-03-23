@@ -24,6 +24,7 @@ namespace onep
       , countryOverlay(injector.inject<CountryOverlay>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , simulation(injector.inject<Simulation>())
+      , skillBranchContainer(injector.inject<SkillBranchContainer>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , toggleCountryButton(nullptr)
@@ -37,6 +38,7 @@ namespace onep
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<Simulation> simulation;
+    osg::ref_ptr<SkillBranchContainer> skillBranchContainer;
 
     ODay::Ptr oDay;
     ONumSkillPoints::Ptr oNumSkillPoints;
@@ -120,9 +122,13 @@ namespace onep
       });
 
       branchesLayout->addWidget(radioNoOverlay, 0, 1);
-      for (int i = 0; i < NUM_SKILLBRANCHES; i++)
+
+      int n = skillBranchContainer->getNumBranches();
+      for (int i = 0; i < n; i++)
       {
-        QCheckBox* checkBox = new QCheckBox(QString::fromStdString(branch_getStringFromType(i)));
+        std::string name = skillBranchContainer->getBranchByIndex(i)->getBranchName();
+
+        QCheckBox* checkBox = new QCheckBox(QString::fromStdString(name));
         QRadioButton* radioButton = new QRadioButton(QObject::tr("Overlay"));
         radioGroup->addButton(radioButton);
 
@@ -140,7 +146,7 @@ namespace onep
 
         QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
         {
-          countryOverlay->setHighlightedSkillBranch(BranchType(i));
+          countryOverlay->setHighlightedSkillBranch(i);
         });
 
         selectedCountryIdObservers.push_back(countryOverlay->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
@@ -175,24 +181,27 @@ namespace onep
       QVBoxLayout* rightLayout = new QVBoxLayout();
 
       // Skills
-      for (int i = 0; i < NUM_SKILLBRANCHES; i++)
+      for (int i = 0; i < n; i++)
       {
-        // Skills
-        int nskills = simulation->getSkillBranch(BranchType(i))->getNumSkills();
+        SkillBranch::Ptr skillBranch = skillBranchContainer->getBranchByIndex(i);
+        std::string name = skillBranch->getBranchName();
 
-        QLabel* label = new QLabel(QString::fromStdString(branch_getStringFromType(i)));
+        // Skills
+        int nskills = skillBranch->getNumSkills();
+
+        QLabel* label = new QLabel(QString::fromStdString(name));
         rightLayout->addWidget(label);
 
         for (int j = 0; j < nskills; j++)
         {
-          Skill::Ptr skill = simulation->getSkillBranch(BranchType(i))->getSkill(j);
+          Skill::Ptr skill = skillBranch->getSkill(j);
 
           QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getName()));
           rightLayout->addWidget(checkBox);
 
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
-            simulation->getSkillBranch(BranchType(i))->getSkill(j)->setActivated(checked);
+            skillBranch->getSkill(j)->setActivated(checked);
           });
         }
       }

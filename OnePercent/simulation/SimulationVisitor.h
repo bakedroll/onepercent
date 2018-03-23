@@ -8,7 +8,7 @@ namespace onep
 {
   typedef struct _skillBranchesActivated
   {
-    osg::ref_ptr<osgGaming::Observable<bool>> oActivated[NUM_SKILLBRANCHES];
+    std::map<int, osg::ref_ptr<osgGaming::InitializedObservable<bool, false>>> oActivated;
   } SkillBranchesActivated;
 
   class SimulationVisitor : public osgUtil::UpdateVisitor
@@ -25,7 +25,7 @@ namespace onep
 
     SimulationVisitor(Type type);
 
-    bool getBranchActivated(BranchType type);
+    bool getBranchActivated(int id);
     CountryValues::Ptr getCountryValues();
     Type getType();
 

@@ -9,6 +9,7 @@
 #include "states/MainMenuState.h"
 #include "states/LoadingGlobeOverviewState.h"
 #include "states/GlobeInteractionState.h"
+#include "simulation/SkillBranchContainer.h"
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/PropertiesManager.h>
@@ -50,6 +51,7 @@ namespace onep
 
     // simulation
     container.registerSingletonType<Simulation>();
+    container.registerSingletonType<SkillBranchContainer>();
 
     // effects
     container.registerType<osgGaming::FastApproximateAntiAliasingEffect>();

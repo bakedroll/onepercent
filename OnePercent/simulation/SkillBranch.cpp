@@ -3,39 +3,64 @@
 
 namespace onep
 {
-  SkillBranch::SkillBranch(BranchType type)
+  struct SkillBranch::Impl
+  {
+    Impl() : id(-1) {}
+
+    int id;
+    std::string name;
+    int costs;
+
+    Skill::List skills;
+  };
+
+  SkillBranch::SkillBranch(int id, const std::string& name, int costs)
     : Group()
     , SimulationCallback()
-    , m_type(type)
+    , m(new Impl())
   {
+    m->id = id;
+    m->name = name;
+    m->costs = costs;
+
     setUpdateCallback(new Callback());
   }
 
-  int SkillBranch::getNumSkills()
+  int SkillBranch::getBranchId() const
   {
-    return int(m_skills.size());
+    return m->id;
   }
 
-  Skill::Ptr SkillBranch::getSkill(int i)
+  std::string SkillBranch::getBranchName() const
   {
-    return m_skills[i];
+    return m->name;
   }
 
-  BranchType SkillBranch::getType()
+  int SkillBranch::getNumSkills() const
   {
-    return m_type;
+    return int(m->skills.size());
+  }
+
+  Skill::Ptr SkillBranch::getSkill(int i) const
+  {
+    return m->skills[i];
+  }
+
+  int SkillBranch::getCosts() const
+  {
+    return m->costs;
   }
 
   void SkillBranch::addSkill(Skill::Ptr skill)
   {
-    m_skills.push_back(skill);
+    m->skills.push_back(skill);
     addChild(skill);
   }
 
   bool SkillBranch::callback(SimulationVisitor* visitor)
   {
     // traverse if branch activated
-    if (visitor->getBranchActivated(m_type))
+    if (visitor->getBranchActivated(m->id))
       return true;
 
     return false;
