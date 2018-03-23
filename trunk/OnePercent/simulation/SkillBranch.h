@@ -1,14 +1,12 @@
 #pragma once
 
-#include "core/Globals.h"
 #include "SimulationCallback.h"
+#include "Skill.h"
 
 #include <osg/Group>
 #include <osg/ref_ptr>
 
 #include <map>
-#include "Skill.h"
-
 
 namespace onep
 {

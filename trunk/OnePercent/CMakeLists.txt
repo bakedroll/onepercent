@@ -14,6 +14,7 @@ add_source_directory(ONE_PERCENT_SOURCE widgets)
 
 add_other_directory(ONE_PERCENT_SOURCE GameData/CSS)
 add_other_directory(ONE_PERCENT_SOURCE GameData/shaders)
+add_other_directory(ONE_PERCENT_SOURCE GameData/scripts)
 
 # add executable OnePercent
 add_executable(${PROJECT_NAME} ${ONE_PERCENT_SOURCE})
@@ -75,6 +76,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/GameData DESTINATION ${CMAKE_CURRENT_BINAR
 # post-build refresh stylesheets and shaders
 file(GLOB FILES_STYLESHEETS "${CMAKE_CURRENT_SOURCE_DIR}/GameData/CSS/*.css")
 file(GLOB FILES_SHADERS "${CMAKE_CURRENT_SOURCE_DIR}/GameData/shaders/*.*")
+file(GLOB FILES_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/GameData/scripts/*.*")
 
 foreach(file ${FILES_STYLESHEETS})
   add_custom_command(
@@ -87,6 +89,13 @@ foreach(file ${FILES_SHADERS})
   add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${file} ${CMAKE_CURRENT_BINARY_DIR}/GameData/shaders
+  )
+endforeach()
+
+foreach(file ${FILES_SCRIPTS})
+  add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${file} ${CMAKE_CURRENT_BINARY_DIR}/GameData/scripts
   )
 endforeach()
 
