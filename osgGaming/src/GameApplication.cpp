@@ -18,6 +18,7 @@
 #include <osgGaming/PropertiesManager.h>
 #include <osgGaming/TextureFactory.h>
 #include <osgGaming/ResourceManager.h>
+#include <osgGaming/LogManager.h>
 
 using namespace osg;
 using namespace std;
@@ -393,6 +394,7 @@ namespace osgGaming
       m->view->getRootGroup()->setUpdateCallback(this);
 
       int ret = mainloop();
+
       deinitialize();
 
       // shutdown/free all pointers
@@ -406,17 +408,19 @@ namespace osgGaming
 
       m_container.clear();
 
+      osgGaming::LogManager::clearInstance();
+
       return ret;
     }
     catch (GameException& e)
     {
-      printf("Exception: %s\n", e.getMessage().c_str());
+      OSGG_LOG_FATAL(std::string("Exception: ") + e.getMessage());
 
       std::cin.ignore();
     }
     catch (exception& e)
     {
-      printf("Exception: %s\n", e.what());
+      OSGG_LOG_FATAL(std::string("Exception: ") + std::string(e.what()));
 
       std::cin.ignore();
     }

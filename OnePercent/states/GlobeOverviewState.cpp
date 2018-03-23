@@ -10,6 +10,8 @@
 #include <osgGaming/DepthOfFieldEffect.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>
 
+#include <QString>
+
 namespace onep
 {
   struct GlobeOverviewState::Impl
@@ -101,12 +103,16 @@ namespace onep
     else if (key == osgGA::GUIEventAdapter::KEY_Minus)
     {
       m->timeSpeed *= 0.75f;
-      printf("Speed: x%f\n", m->timeSpeed);
+
+      QString logmsg = QString("Speed: x%1").arg(m->timeSpeed);
+      OSGG_LOG_DEBUG(logmsg.toStdString());
     }
     else if (key == osgGA::GUIEventAdapter::KEY_Plus)
     {
       m->timeSpeed *= 1.25f;
-      printf("Speed: x%f\n", m->timeSpeed);
+
+      QString logmsg = QString("Speed: x%1").arg(m->timeSpeed);
+      OSGG_LOG_DEBUG(logmsg.toStdString());
     }
     else if (key == osgGA::GUIEventAdapter::KEY_O)
     {

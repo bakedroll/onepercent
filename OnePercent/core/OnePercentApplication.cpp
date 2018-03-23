@@ -77,6 +77,7 @@ namespace onep
     QFile file("./GameData/CSS/style.css");
     if (!file.open(QIODevice::ReadOnly))
     {
+      OSGG_LOG_FATAL("Could not load style sheets");
       assert(false);
     }
     else

@@ -1,4 +1,5 @@
 #include "osgGaming/InjectionContainer.h"
+#include "osgGaming/LogManager.h"
 
 namespace osgGaming
 {
@@ -23,7 +24,12 @@ namespace osgGaming
     {
       int refcount = it->second->referenceCount();
       if (refcount > 1)
-        printf("Warning: %s has %d references left\n", it->first.name(), refcount - 1);
+      {
+        char buffer[256];
+        sprintf_s(buffer, "%s has %d references left", it->first.name(), refcount - 1);
+
+        OSGG_LOG_WARN(std::string(buffer));
+      }
     }
 #endif
 

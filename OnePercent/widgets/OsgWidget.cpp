@@ -4,6 +4,7 @@
 
 #include <assert.h>
 
+#include <osgGaming/LogManager.h>
 #include <osgGaming/NativeView.h>
 #include <QTimer>
 #include <QResizeEvent>
@@ -229,6 +230,8 @@ namespace onep
 
     if (!m->camera || !m->view)
     {
+      OSGG_LOG_FATAL("Camera not set");
+
       assert(false && "Please set camera");
       return;
     }

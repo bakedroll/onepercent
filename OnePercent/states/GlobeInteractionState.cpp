@@ -186,7 +186,8 @@ namespace onep
       {
         CountryMesh::Ptr countryMesh = m->countryOverlay->getCountryMesh(id);
 
-        printf("Selected country (%d): %s\n", countryMesh->getCountryData()->getId(), countryMesh->getCountryData()->getCountryName().c_str());
+        QString logmsg = QString("Selected country (%1): %2").arg(countryMesh->getCountryData()->getId()).arg(countryMesh->getCountryData()->getCountryName().c_str());
+        OSGG_LOG_INFO(logmsg.toStdString());
 
         setCameraLatLong(countryMesh->getCountryData()->getCenterLatLong(), getSimulationTime());
         setCameraDistance(std::max<float>(countryMesh->getCountryData()->getOptimalCameraDistance(
@@ -264,12 +265,14 @@ namespace onep
       if (m->simulation->running())
       {
         m->simulation->stop();
-        printf("Simulation stopped\n");
+
+        OSGG_LOG_INFO("Simulation stopped");
       }
       else
       {
         m->simulation->start();
-        printf("Simulation started\n");
+
+        OSGG_LOG_INFO("Simulation started");
       }
     }
   }

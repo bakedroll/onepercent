@@ -1,6 +1,7 @@
 #pragma once
 
 #include <osgGaming/Injector.h>
+#include <osgGaming/LogManager.h>
 
 #include <memory>
 
@@ -40,7 +41,9 @@ namespace onep
       T* tinst = dynamic_cast<T*>(inst);
       if (tinst == nullptr)
       {
-        assert(false && "T should derive from LuaClassInstance");
+        OSGG_LOG_WARN("T should derive from LuaClassInstance");
+
+        assert(false);
         return;
       }
 
