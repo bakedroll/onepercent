@@ -326,3 +326,15 @@ set(TEMPLATE_PATH_GAMEDATA_DST "${CMAKE_BINARY_DIR}/OnePercent/GameData")
 configure_file("CMake/templates/generate_boundaries_and_countries.py.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/generate_boundaries_and_countries.py")
 configure_file("CMake/templates/generate_colormap.py.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/generate_colormap.py")
 configure_file("CMake/templates/generate_merged_textures.py.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/generate_merged_textures.py")
+
+set(COPY_DIR_SOURCE "${TEMPLATE_PATH_GAMEDATA_SRC}/scripts")
+set(COPY_DIR_TARGET "${TEMPLATE_PATH_GAMEDATA_DST}/scripts")
+configure_file("CMake/templates/copydir.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/updateScripts.py)
+
+set(COPY_DIR_SOURCE "${TEMPLATE_PATH_GAMEDATA_SRC}/CSS")
+set(COPY_DIR_TARGET "${TEMPLATE_PATH_GAMEDATA_DST}/CSS")
+configure_file("CMake/templates/copydir.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/updateCSS.py)
+
+set(COPY_DIR_SOURCE "${TEMPLATE_PATH_GAMEDATA_SRC}/shaders")
+set(COPY_DIR_TARGET "${TEMPLATE_PATH_GAMEDATA_DST}/shaders")
+configure_file("CMake/templates/copydir.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/updateShaders.py)

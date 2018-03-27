@@ -137,7 +137,7 @@ namespace onep
     m->boundariesMesh->loadBoundaries("./GameData/data/boundaries.dat");
     m->boundariesMesh->makeOverallBoundaries(0.005f);
 
-    m->lua->loadScript("./GameData/scripts/branches.lua");
+    m->lua->loadScript("./GameData/scripts/data/branches.lua");
 
     m->countryOverlay->loadCountries(
       "./GameData/data/countries.dat",

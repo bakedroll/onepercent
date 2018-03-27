@@ -1,0 +1,24 @@
+import os
+import shutil
+
+sourcepath = r"${COPY_DIR_SOURCE}"
+targetpath = r"${COPY_DIR_TARGET}"
+
+sourcepath = os.path.abspath(sourcepath)
+targetpath = os.path.abspath(targetpath)
+
+for root, dirnames, filenames in os.walk(sourcepath):
+    for dirname in dirnames:
+        dirsourcepath = os.path.join(root, dirname)
+        cutpath = dirsourcepath[len(sourcepath)+1:len(dirsourcepath)]
+
+        dirtargetpath = os.path.join(targetpath, cutpath)
+        if not os.path.exists(dirtargetpath):
+            os.makedirs(dirtargetpath)
+
+    for filename in filenames:
+        filesourcepath = os.path.join(root, filename)
+        cutpath = filesourcepath[len(sourcepath)+1:len(filesourcepath)]
+
+        filetargetpath = os.path.join(targetpath, cutpath)
+        shutil.copyfile(filesourcepath, filetargetpath)
