@@ -1,5 +1,6 @@
 #include "GlobeOverviewState.h"
 
+#include "core/Macros.h"
 #include "nodes/GlobeModel.h"
 
 #include <osgViewer/ViewerEventHandlers>
@@ -103,16 +104,12 @@ namespace onep
     else if (key == osgGA::GUIEventAdapter::KEY_Minus)
     {
       m->timeSpeed *= 0.75f;
-
-      QString logmsg = QString("Speed: x%1").arg(m->timeSpeed);
-      OSGG_LOG_DEBUG(logmsg.toStdString());
+      OSGG_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
     }
     else if (key == osgGA::GUIEventAdapter::KEY_Plus)
     {
       m->timeSpeed *= 1.25f;
-
-      QString logmsg = QString("Speed: x%1").arg(m->timeSpeed);
-      OSGG_LOG_DEBUG(logmsg.toStdString());
+      OSGG_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
     }
     else if (key == osgGA::GUIEventAdapter::KEY_O)
     {

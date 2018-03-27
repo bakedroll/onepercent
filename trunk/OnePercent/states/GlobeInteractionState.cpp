@@ -1,5 +1,6 @@
 #include "GlobeInteractionState.h"
 
+#include "core/Macros.h"
 #include "core/Observables.h"
 #include "core/Globals.h"
 #include "core/QConnectFunctor.h"
@@ -186,8 +187,7 @@ namespace onep
       {
         CountryMesh::Ptr countryMesh = m->countryOverlay->getCountryMesh(id);
 
-        QString logmsg = QString("Selected country (%1): %2").arg(countryMesh->getCountryData()->getId()).arg(countryMesh->getCountryData()->getCountryName().c_str());
-        OSGG_LOG_INFO(logmsg.toStdString());
+        OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(countryMesh->getCountryData()->getId()).arg(countryMesh->getCountryData()->getCountryName().c_str()));
 
         setCameraLatLong(countryMesh->getCountryData()->getCenterLatLong(), getSimulationTime());
         setCameraDistance(std::max<float>(countryMesh->getCountryData()->getOptimalCameraDistance(

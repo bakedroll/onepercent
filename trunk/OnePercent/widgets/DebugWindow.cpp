@@ -1,5 +1,6 @@
 #include "DebugWindow.h"
 
+#include "core/Macros.h"
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
 
@@ -81,8 +82,7 @@ namespace onep
 
       long d = std::chrono::duration_cast<std::chrono::milliseconds> (duration).count();
 
-      QString logmsg = QString("Took %1 ms").arg(d);
-      OSGG_LOG_DEBUG(logmsg.toStdString());
+      OSGG_QLOG_DEBUG(QString("Took %1 ms").arg(d));
     }
 
     void updateCountryInfoText()

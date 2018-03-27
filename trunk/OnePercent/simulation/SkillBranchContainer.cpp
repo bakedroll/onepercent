@@ -65,7 +65,7 @@ namespace onep
     {
       luaL_checktype(state, -1, LUA_TTABLE);
       lua_getfield(state, -1, "name");
-      lua_getfield(state, -2, "costs");
+      lua_getfield(state, -2, "cost");
 
       const char* name = luaL_checkstring(state, -2);
       int costs = luaL_checkinteger(state, -1);
