@@ -3,7 +3,6 @@
 #include <vector>
 #include <iostream>
 #include <chrono>
-#include <filesystem>
 #include <assert.h>
 
 namespace osgGaming
