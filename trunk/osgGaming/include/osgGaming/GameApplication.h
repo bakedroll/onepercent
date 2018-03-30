@@ -4,6 +4,7 @@
 #include <osgGaming/InjectionContainer.h>
 #include <osgGaming/SimulationCallback.h>
 #include <osgGaming/GameStateStack.h>
+#include <osgGaming/Hud.h>
 
 #include "Viewer.h"
 #include "TimerFactory.h"
