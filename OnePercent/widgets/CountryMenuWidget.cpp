@@ -5,6 +5,7 @@
 
 #include "simulation/Simulation.h"
 #include "simulation/SimulatedValuesContainer.h"
+#include "simulation/SkillBranch.h"
 
 #include <osgGaming/Helper.h>
 

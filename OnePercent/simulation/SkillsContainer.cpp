@@ -58,8 +58,6 @@ namespace onep
       .beginClass<SkillsContainer>("SkillsContainer")
       .addFunction("add_branches", &SkillsContainer::lua_add_branches)
       .addFunction("add_skills", &SkillsContainer::lua_add_skills)
-      .addFunction("on_step", &SkillsContainer::lua_on_step)
-      .addFunction("on_country_step", &SkillsContainer::lua_on_country_step)
       .endClass();
   }
 
@@ -127,17 +125,4 @@ namespace onep
     }
   }
 
-  void SkillsContainer::lua_on_step(lua_State* state)
-  {
-    const char* name = luaL_checkstring(state, -2);
-    luaL_checktype(state, -1, LUA_TFUNCTION);
-
-    luabridge::LuaRef funcRef = luabridge::LuaRef::fromStack(state, -1);
-
-    printf("adding function to %s\n", name);
-  }
-
-  void SkillsContainer::lua_on_country_step(lua_State* state)
-  {
-  }
 }

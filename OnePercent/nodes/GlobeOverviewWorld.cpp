@@ -2,6 +2,8 @@
 #include "GlobeModel.h"
 #include "BackgroundModel.h"
 
+#include "core/Globals.h"
+
 #include <osgGaming/Helper.h>
 #include <osgGaming/PropertiesManager.h>
 

@@ -7,11 +7,7 @@
 #include <osg/ref_ptr>
 #include <osg/Group>
 
-#include <osgGaming/Observable.h>
 #include <osgGaming/PropertiesManager.h>
-
-#include "CountryValues.h"
-#include "SimulationCallback.h"
 
 namespace onep
 {
@@ -29,7 +25,7 @@ namespace onep
 		float m_relation;
 	};
 
-	class CountryData : public osg::Group, public SimulationCallback
+	class CountryData : public osg::Referenced
 	{
 	public:
 		typedef osg::ref_ptr<CountryData> Ptr;
@@ -62,10 +58,6 @@ namespace onep
 		osg::Vec2f getSize();
 		osg::Vec2f getSurfaceSize();
 		float getOptimalCameraDistance(float angle, float ratio);
-
-    CountryValues::Ptr getValues();
-
-    virtual bool callback(SimulationVisitor* visitor) override;
 
 	private:
     struct Impl;

@@ -1,5 +1,4 @@
 #include "SkillBranch.h"
-#include "SimulationVisitor.h"
 
 namespace onep
 {
@@ -15,15 +14,12 @@ namespace onep
   };
 
   SkillBranch::SkillBranch(int id, const std::string& name, int costs)
-    : Group()
-    , SimulationCallback()
+    : osg::Referenced()
     , m(new Impl())
   {
     m->id = id;
     m->name = name;
     m->cost = costs;
-
-    setUpdateCallback(new Callback());
   }
 
   int SkillBranch::getBranchId() const
@@ -54,15 +50,6 @@ namespace onep
   void SkillBranch::addSkill(Skill::Ptr skill)
   {
     m->skills.push_back(skill);
-    addChild(skill);
   }
 
-  bool SkillBranch::callback(SimulationVisitor* visitor)
-  {
-    // traverse if branch activated
-    if (visitor->getBranchActivated(m->id))
-      return true;
-
-    return false;
-  }
 }

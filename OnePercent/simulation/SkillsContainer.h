@@ -32,9 +32,6 @@ namespace onep
     void lua_add_branches(lua_State* state);
     void lua_add_skills(lua_State* state);
     
-    void lua_on_step(lua_State* state);
-    void lua_on_country_step(lua_State* state);
-
   private:
     struct Impl;
     std::unique_ptr<Impl> m;
