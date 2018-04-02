@@ -4,6 +4,7 @@
 #include <iostream>
 #include <chrono>
 #include <assert.h>
+#include <mutex>
 
 namespace osgGaming
 {
@@ -33,6 +34,8 @@ namespace osgGaming
 
     std::vector<osg::ref_ptr<Logger>> loggerList;
     Severety minSeverity;
+
+    std::mutex mutex;
   };
 
   LogManager::Ptr LogManager::getInstance()
@@ -51,11 +54,15 @@ namespace osgGaming
 
   void LogManager::setMinSeverity(Severety severity)
   {
+    std::lock_guard<std::mutex> lock(m->mutex);
+
     m->minSeverity = severity;
   }
 
   void LogManager::log(Severety severety, const std::string& message)
   {
+    std::lock_guard<std::mutex> lock(m->mutex);
+
     if (severety < m->minSeverity)
       return;
 
@@ -81,6 +88,7 @@ namespace osgGaming
 
   void LogManager::addLogger(osg::ref_ptr<Logger> logger)
   {
+    std::lock_guard<std::mutex> lock(m->mutex);
     m->loggerList.push_back(logger);
   }
 

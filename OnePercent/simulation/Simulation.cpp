@@ -8,9 +8,9 @@
 #include "simulation/CountryState.h"
 #include "simulation/NeighbourshipsContainer.h"
 #include "simulation/SkillBranch.h"
+#include "simulation/UpdateThread.h"
 
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/PropertiesManager.h>
 
 #include <QTimer>
 
@@ -22,8 +22,6 @@ extern "C"
 }
 
 #include <LuaBridge.h>
-
-#include <QElapsedTimer>
 
 namespace onep
 {
@@ -61,6 +59,8 @@ namespace onep
     NeighbourshipsContainer::Ptr neighbourshipsContainer;
 
     std::vector<osgGaming::Observer<bool>::Ptr> notifyActivatedList;
+
+    UpdateThread thread;
   };
 
   Simulation::Simulation(osgGaming::Injector& injector)
@@ -77,41 +77,12 @@ namespace onep
 
     QConnectFunctor::connect(&m->timer, SIGNAL(timeout()), [this]()
     {
-      SimulationState::Ptr state = m->valuesContainer->getState();
+      m->thread.doNextStep();
+    });
 
-      QElapsedTimer timerSkillsUpdate;
-      QElapsedTimer timerBranchesUpdate;
-      QElapsedTimer timerOverall;
-
-      try
-      {
-        timerOverall.start();
-
-        m->stateCopy->overwrite(state);
-
-        timerSkillsUpdate.start();
-        (*m->refUpdate_skills_func)(state.get(), m->stateCopy.get());
-        long skillsElapsed = timerSkillsUpdate.elapsed();
-
-        state->overwrite(m->stateCopy);
-
-        timerBranchesUpdate.start();
-        (*m->refUpdate_branches_func)(state.get(), m->stateCopy.get());
-        long branchesElapsed = timerBranchesUpdate.elapsed();
-
-        m->valuesContainer->setState(m->stateCopy);
-        m->stateCopy = state;
-
-        long overallElapsed = timerOverall.elapsed();
-
-        OSGG_QLOG_DEBUG(QString("SkillsUpdate: %1ms BranchesUpdate: %2ms Overall: %3ms").arg(skillsElapsed).arg(branchesElapsed).arg(overallElapsed));
-
-      }
-      catch (luabridge::LuaException& e)
-      {
-        OSGG_QLOG_FATAL(QString("Lua Exception: %1").arg(e.what()));
-        assert(false);
-      }
+    QConnectFunctor::connect(&m->thread, SIGNAL(onStateUpdated()), [this]()
+    {
+      m->valuesContainer->getState()->overwrite(m->thread.getState());
 
       // increment day
       m->oDay->set(m->oDay->get() + 1);
@@ -120,6 +91,9 @@ namespace onep
 
   Simulation::~Simulation()
   {
+    m->thread.shutdown();
+    m->thread.doNextStep();
+    m->thread.wait();
   }
 
   void Simulation::prepare()
@@ -164,8 +138,9 @@ namespace onep
       {
         std::string branchName = m->skillsContainer->getBranchByIndex(i)->getBranchName();
 
-        m->notifyActivatedList.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([this, cid, branchName, cstate](bool activated)
+        m->notifyActivatedList.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
         {
+          QMutexLocker lock(&m->thread.getStateMutex());
           (*m->refSet_branch_activated)(cid, branchName, activated);
         })));
       }
@@ -180,14 +155,20 @@ namespace onep
       for (int j = 0; j < nskills; j++)
       {
         Skill::Ptr skill = branch->getSkill(j);
-        m->notifyActivatedList.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([skill, this](bool activated)
+        m->notifyActivatedList.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([=](bool activated)
         {
+          QMutexLocker lock(&m->thread.getStateMutex());
           (*m->refSet_skill_activated)(skill->getName(), activated);
         })));
       }
     }
 
     m->stateCopy = m->valuesContainer->getState()->copy();
+
+    m->thread.initializeState(m->valuesContainer->getState());
+    m->thread.setUpdateFunctions(m->refUpdate_skills_func, m->refUpdate_branches_func);
+
+    m->thread.start();
   }
 
   const std::map<int, std::string>& Simulation::getIdCountryMap()

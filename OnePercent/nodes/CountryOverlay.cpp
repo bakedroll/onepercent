@@ -269,7 +269,7 @@ namespace onep
       int cid = it->second->getCountryData()->getId();
       CountryState::Ptr cstate = m->valuesContainer->getState()->getCountryStates()[cid];
 
-      if (cstate->getOActivatedBranch(branchName.c_str())->get())
+      if (cstate->getBranchActivated(branchName.c_str()))
         m->setCountryColorMode(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + id));
     }
   }

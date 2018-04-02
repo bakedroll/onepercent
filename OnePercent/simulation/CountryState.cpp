@@ -1,5 +1,6 @@
 #include "simulation/CountryState.h"
 #include "simulation/SkillBranch.h"
+#include <core/Multithreading.h>
 
 namespace onep
 {
@@ -15,6 +16,8 @@ namespace onep
     std::string currentBranchName;
 
     BranchActivatedMap oActivatedBranches;
+
+    QMutex mutexActivated;
   };
 
   CountryState::CountryState()
@@ -78,6 +81,18 @@ namespace onep
     return m->branchValues;
   }
 
+  bool CountryState::getBranchActivated(const char* branchName) const
+  {
+    QMutexLocker lock(&m->mutexActivated);
+    return getOActivatedBranch(branchName)->get();
+  }
+
+  void CountryState::setBranchActivated(const char* branchName, bool activated)
+  {
+    QMutexLocker lock(&m->mutexActivated);
+    getOActivatedBranch(branchName)->set(activated);
+  }
+
   osgGaming::Observable<bool>::Ptr CountryState::getOActivatedBranch(const char* branchName) const
   {
     if (m->oActivatedBranches.count(QString(branchName)) == 0)
@@ -115,11 +130,16 @@ namespace onep
 
   bool CountryState::lua_get_branch_activated() const
   {
-    return getOActivatedBranch(m->currentBranchName.c_str())->get();
+    return getBranchActivated(m->currentBranchName.c_str());
   }
 
   void CountryState::lua_set_branch_activated(bool activated)
   {
-    getOActivatedBranch(m->currentBranchName.c_str())->set(activated);
+    std::string name = m->currentBranchName;
+
+    Multithreading::uiExecuteOrAsync([=]()
+    {
+      setBranchActivated(name.c_str(), activated);
+    });
   }
 }

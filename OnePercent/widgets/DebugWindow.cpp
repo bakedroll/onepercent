@@ -166,7 +166,7 @@ namespace onep
           int cid = selectedCountry->getId();
           CountryState::Ptr cstate = simulatedValuesContainer->getState()->getCountryStates()[cid];
 
-          cstate->getOActivatedBranch(name.c_str())->set(checked);
+          cstate->setBranchActivated(name.c_str(), checked);
         });
 
         QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
@@ -180,7 +180,7 @@ namespace onep
           {
             CountryState::Ptr cstate = simulatedValuesContainer->getState()->getCountryStates()[selected];
 
-            checkBox->setChecked(cstate->getOActivatedBranch(name.c_str())->get());
+            checkBox->setChecked(cstate->getBranchActivated(name.c_str()));
           }
           else
           {
