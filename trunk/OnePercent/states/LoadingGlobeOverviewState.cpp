@@ -149,9 +149,6 @@ namespace onep
 
     m->simulation->prepare();
 
-    //m->simulation->loadSkillsXml("./GameData/data/skills/passive.xml");
-    //m->simulation->attachCountries(m->countryOverlay->getCountryMeshs());
-
     m->countryNameOverlay->setEnabled(false);
     m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryMeshs());
   }

@@ -3,13 +3,13 @@
 namespace onep
 {
   SimulatedLuaValue::SimulatedLuaValue()
-    : SimulatedValue<float>(0.0f)
+    : SimulatedValue<float>(0.0f, 0.0f, 100.0f)
     , LuaClass()
   {
   }
 
   SimulatedLuaValue::SimulatedLuaValue(const float& initial)
-    : SimulatedValue<float>(initial)
+    : SimulatedValue<float>(initial, 0.0f, 100.0f)
     , LuaClass()
   {
 
@@ -25,7 +25,6 @@ namespace onep
       .beginClass<SimulatedLuaValue>("SimulatedLuaValue")
       .addFunction("set", &SimulatedLuaValue::lua_set)
       .addFunction("get", &SimulatedLuaValue::lua_get)
-      .addFunction("test", &SimulatedLuaValue::test)
       .endClass();
   }
 
@@ -39,8 +38,4 @@ namespace onep
     SimulatedValue<float>::set(value);
   }
 
-  void SimulatedLuaValue::test()
-  {
-    printf("TEST\n");
-  }
 }

@@ -1,16 +1,14 @@
 #pragma once
 
-#include "SimulationCallback.h"
 #include "Skill.h"
 
-#include <osg/Group>
 #include <osg/ref_ptr>
 
-#include <map>
+#include <memory>
 
 namespace onep
 {
-  class SkillBranch : public osg::Group, public SimulationCallback
+  class SkillBranch : public osg::Referenced
   {
   public:
     typedef osg::ref_ptr<SkillBranch> Ptr;
@@ -26,8 +24,6 @@ namespace onep
     int getCost() const;
 
     void addSkill(Skill::Ptr skill);
-
-    virtual bool callback(SimulationVisitor* visitor) override;
 
   private:
     struct Impl;

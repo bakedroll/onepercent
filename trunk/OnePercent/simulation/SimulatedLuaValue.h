@@ -1,6 +1,7 @@
 #pragma once
 
 #include "simulation/SimulatedValue.h"
+#include "core/LuaStateManager.h"
 
 namespace onep
 {
@@ -18,6 +19,5 @@ namespace onep
     const float& lua_get() const;
     void lua_set(const float& value);
 
-    void test();
   };
 }

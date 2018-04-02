@@ -1,7 +1,6 @@
 #include "CountryData.h"
 
 #include "core/Globals.h"
-#include "SimulationVisitor.h"
 
 #include <osgGaming/Helper.h>
 
@@ -34,7 +33,6 @@ namespace onep
       Vec2f size)
       : name(name)
       , skillsContainer(skillsContainer)
-      , values(new CountryValues(propertiesManager, skillsContainer, wealth))
       , populationInMio(population)
       , id(id)
       , centerLatLong(centerLatLong)
@@ -46,8 +44,6 @@ namespace onep
     std::string name;
 
     SkillsContainer::Ptr skillsContainer;
-
-    CountryValues::Ptr values;
     Neighbor::List m_neighbors;
 
     float populationInMio;
@@ -59,55 +55,6 @@ namespace onep
     float earthRadius;
     float cameraZoom;
 
-    void step()
-    {/*
-      ProgressingValue<float>* dept = values->getValue<float>(VALUE_DEPT);
-      ProgressingValue<float>* anger = values->getValue<float>(VALUE_ANGER);
-      ProgressingValue<float>* interest = values->getValue<float>(VALUE_INTEREST);
-      ProgressingValue<float>* buyingPower = values->getValue<float>(VALUE_BUYING_POWER);
-
-      SkillBranch::Ptr branch = skillsContainer->getBranchByName("banks");
-      if (!branch.valid())
-      {
-        assert(false);
-        return;
-      }
-
-      if (m_skillBranches.oActivated[branch->getBranchId()]->get())
-      {
-        dept->prepare(dept->getValue() * interest->getValue() + buyingPower->getValue(), METHOD_SET_BALANCE);
-      }
-
-      // rel dept * 0.1
-      anger->prepare(dept->getValue() / dept->getMax() * 0.1f, METHOD_SET_BALANCE);
-
-      values->getContainer()->step();
-
-      int n = skillsContainer->getNumBranches();
-      for (int i = 0; i < n; i++)
-      {
-        if (!m_skillBranches.oActivated[i]->get() && values->getBranchValue<float>(VALUE_PROPAGATED, i)->full())
-          m_skillBranches.oActivated[i]->set(true);
-      }*/
-    }
-
-    /*void affectNeighbors()
-    {
-      int n = skillsContainer->getNumBranches();
-      for (int i = 0; i < n; i++)
-      {
-        if (m_skillBranches.oActivated[i]->get())
-        {
-          float propagation = values->getBranchValue<float>(VALUE_PROPAGATION, i)->getValue();
-
-          for (Neighbor::List::iterator it = m_neighbors.begin(); it != m_neighbors.end(); ++it)
-          {
-            if (!it->country->getSkillBranchActivated(i))
-              it->country->getValues()->getBranchValue<float>(VALUE_PROPAGATED, i)->prepare(propagation, METHOD_ADD_INFLUENCE);
-          }
-        }
-      }
-    }*/
   };
 
   CountryData::CountryData(
@@ -119,8 +66,7 @@ namespace onep
     float wealth,
     Vec2f centerLatLong,
     Vec2f size)
-    : Group()
-    , SimulationCallback()
+    : osg::Referenced()
     , m(new Impl(
       propertiesManager,
       skillsContainer,
@@ -131,11 +77,6 @@ namespace onep
       centerLatLong,
       size))
   {
-    /*int n = m->skillsContainer->getNumBranches();
-    for (int i = 0; i < n; i++)
-      m->m_skillBranches.oActivated[i] = new osgGaming::InitializedObservable<bool, false>();*/
-
-    setUpdateCallback(new Callback());
   }
 
   CountryData::~CountryData()
@@ -182,33 +123,6 @@ namespace onep
     float vdistance = surfaceSize.y() * m->cameraZoom / (2.0f * tan(angle * C_PI / 360.0f)) + m->earthRadius;
 
     return max(hdistance, vdistance);
-  }
-
-  CountryValues::Ptr CountryData::getValues()
-  {
-    return m->values;
-  }
-
-  bool CountryData::callback(SimulationVisitor* visitor)
-  {/*
-    if (visitor->getType() == SimulationVisitor::PROGRESS_COUNTRIES)
-    {
-      m->step();
-      return false; // don't traverse
-    }
-
-    if (visitor->getType() == SimulationVisitor::AFFECT_NEIGHBORS)
-    {
-      //m->affectNeighbors();
-      return false; // don't traverse
-    }
-
-    visitor->setActivatedBranches(&m->m_skillBranches);
-    visitor->setCountryValues(m->values);
-
-    return true;*/
-
-    return true;
   }
 
 }

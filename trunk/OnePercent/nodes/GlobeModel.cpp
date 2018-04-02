@@ -3,6 +3,8 @@
 #include "BoundariesMesh.h"
 #include "CountryOverlay.h"
 
+#include "core/Globals.h"
+
 #include <osg/Geode>
 #include <osg/Texture2D>
 

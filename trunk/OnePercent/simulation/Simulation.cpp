@@ -7,6 +7,7 @@
 #include "simulation/SimulatedValuesContainer.h"
 #include "simulation/CountryState.h"
 #include "simulation/NeighbourshipsContainer.h"
+#include "simulation/SkillBranch.h"
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/PropertiesManager.h>
@@ -29,29 +30,18 @@ namespace onep
   struct Simulation::Impl
   {
     Impl(osgGaming::Injector& injector)
-      : propertiesManager(injector.inject<osgGaming::PropertiesManager>())
-      , lua(injector.inject<LuaStateManager>())
+      : lua(injector.inject<LuaStateManager>())
       , skillsContainer(injector.inject<SkillsContainer>())
       , valuesContainer(injector.inject<SimulatedValuesContainer>())
-      , applySkillsVisitor(new SimulationVisitor(SimulationVisitor::APPLY_SKILLS))
-      , affectNeighborsVisitor(new SimulationVisitor(SimulationVisitor::AFFECT_NEIGHBORS))
-      , progressCountriesVisitor(new SimulationVisitor(SimulationVisitor::PROGRESS_COUNTRIES))
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , neighbourshipsContainer(injector.inject<NeighbourshipsContainer>())
     {}
 
-    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
     osg::ref_ptr<LuaStateManager> lua;
 
     SkillsContainer::Ptr skillsContainer;
     SimulatedValuesContainer::Ptr valuesContainer;
-
-    GlobeModel::Ptr globeModel;
-
-    SimulationVisitor::Ptr applySkillsVisitor;
-    SimulationVisitor::Ptr affectNeighborsVisitor;
-    SimulationVisitor::Ptr progressCountriesVisitor;
 
     QTimer timer;
 
@@ -74,8 +64,8 @@ namespace onep
   };
 
   Simulation::Simulation(osgGaming::Injector& injector)
-    : Group()
-    , SimulationCallback()
+    : osg::Referenced()
+    , LuaClassInstance()
     , m(new Impl(injector))
 
   {
@@ -84,8 +74,6 @@ namespace onep
 
     m->timer.setSingleShot(false);
     m->timer.setInterval(1000);
-
-    setUpdateCallback(new Callback());
 
     QConnectFunctor::connect(&m->timer, SIGNAL(timeout()), [this]()
     {
@@ -207,66 +195,6 @@ namespace onep
     return m->idCountryMap;
   }
 
-  void Simulation::loadSkillsXml(std::string filename)
-  {
-    m->propertiesManager->loadPropertiesFromXmlResource(filename);
-
-    int nelements = m->propertiesManager->root()->group("skills")->array("passive")->size();
-    for (int i = 0; i < nelements; i++)
-    {
-      std::string name = m->propertiesManager->root()->group("skills")->array("passive")->property<std::string>(i, "name")->get();
-      std::string typeStr = m->propertiesManager->root()->group("skills")->array("passive")->property<std::string>(i, "branch")->get();
-      int id = m->skillsContainer->getBranchByName(name)->getBranchId();
-
-      osg::ref_ptr<osgGaming::PropertyArray> arr = m->propertiesManager->root()->group("skills")->array("passive")->array(i, "attributes");
-      int arrsize = arr->size();
-
-      osg::ref_ptr<Skill> skill = new Skill(name);
-
-      for (int j = 0; j < arrsize; j++)
-      {
-        std::string valuetypeStr = arr->property<std::string>(j, "valuetype")->get();
-        std::string methodStr = arr->property<std::string>(j, "method")->get();
-        float value = arr->property<float>(j, "value")->get();
-        bool branchAttr = arr->property<bool>(j, "branch_attr")->get();
-
-        if (branchAttr)
-        {
-          skill->addBranchAttribute(
-            id,
-            countryValue_getTypeFromString(valuetypeStr),
-            valueMethod_getTypeFromString(methodStr),
-            value);
-        }
-        else
-        {
-          skill->addAttribute(
-            countryValue_getTypeFromString(valuetypeStr),
-            valueMethod_getTypeFromString(methodStr),
-            value);
-        }
-      }
-
-      SkillBranch::Ptr branch = m->skillsContainer->getBranchByName(name);
-      assert(branch.valid());
-
-      branch->addSkill(skill);
-    }
-  }
-
-  void Simulation::attachCountries(CountryMesh::Map& countries)
-  {
-    int n = m->skillsContainer->getNumBranches();
-
-    for (CountryMesh::Map::iterator it = countries.begin(); it != countries.end(); ++it)
-    {
-      for (int j = 0; j < n; j++)
-        it->second->getCountryData()->addChild(m->skillsContainer->getBranchByIndex(j));
-
-      addChild(it->second->getCountryData());
-    }
-  }
-
   bool Simulation::paySkillPoints(int points)
   {
     int amount = m->oNumSkillPoints->get();
@@ -290,11 +218,6 @@ namespace onep
   bool Simulation::running() const
   {
     return m->timer.isActive();
-  }
-
-  bool Simulation::callback(SimulationVisitor* visitor)
-  {
-    return true;
   }
 
   void Simulation::registerClass(lua_State* state)
