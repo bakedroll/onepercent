@@ -24,7 +24,7 @@ namespace onep
   void SkillBranchContainer::addSkillBranch(SkillBranch::Ptr branch)
   {
     m->branches.push_back(branch);
-    m->nameIndexMap[branch->getBranchName()] = int(m->branches.size()) - 1;
+    m->nameIndexMap[branch->getName()] = int(m->branches.size()) - 1;
   }
 
   int SkillBranchContainer::getNumBranches()

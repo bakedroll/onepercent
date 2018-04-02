@@ -9,7 +9,7 @@ namespace onep
 
     int id;
     std::string name;
-    int costs;
+    int cost;
 
     Skill::List skills;
   };
@@ -21,7 +21,7 @@ namespace onep
   {
     m->id = id;
     m->name = name;
-    m->costs = costs;
+    m->cost = costs;
 
     setUpdateCallback(new Callback());
   }
@@ -31,7 +31,7 @@ namespace onep
     return m->id;
   }
 
-  std::string SkillBranch::getBranchName() const
+  const std::string& SkillBranch::getBranchName() const
   {
     return m->name;
   }
@@ -46,9 +46,9 @@ namespace onep
     return m->skills[i];
   }
 
-  int SkillBranch::getCosts() const
+  int SkillBranch::getCost() const
   {
-    return m->costs;
+    return m->cost;
   }
 
   void SkillBranch::addSkill(Skill::Ptr skill)

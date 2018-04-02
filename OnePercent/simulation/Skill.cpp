@@ -2,12 +2,42 @@
 
 namespace onep
 {
+  struct Skill::Impl
+  {
+    Impl()
+      : obActivated(new osgGaming::Observable<bool>(false))
+    {}
+
+    std::string name;
+    std::string displayName;
+    std::string type;
+    int cost;
+
+    osgGaming::Observable<bool>::Ptr obActivated;
+
+    std::vector<std::unique_ptr<luabridge::LuaRef>> actions;
+  };
 
   Skill::Skill(std::string name)
     : Node()
-    , m_name(name)
-    , m_activated(false)
+    , SimulationCallback()
+    , m(new Impl())
   {
+    m->name = name;
+
+    setUpdateCallback(new Callback());
+  }
+
+  Skill::Skill(std::string name, std::string displayName, std::string type, int cost)
+    : Node()
+    , SimulationCallback()
+    , m(new Impl())
+  {
+    m->name = name;
+    m->displayName = displayName;
+    m->type = type;
+    m->cost = cost;
+
     setUpdateCallback(new Callback());
   }
 
@@ -32,24 +62,19 @@ namespace onep
     m_branchAttributes.push_back(branchAttribute);
   }
 
-  void Skill::setActivated(bool activated)
-  {
-    m_activated = activated;
-  }
-
   std::string Skill::getName()
   {
-    return m_name;
+    return m->name;
   }
 
-  bool Skill::getActivated()
+  osgGaming::Observable<bool>::Ptr Skill::getObActivated() const
   {
-    return m_activated;
+    return m->obActivated;
   }
 
   bool Skill::callback(SimulationVisitor* visitor)
   {
-    if (!m_activated)
+    if (!m->obActivated->get())
       return false;
 
     for (Attribute::List::iterator it = m_attributes.begin(); it != m_attributes.end(); ++it)
@@ -61,4 +86,16 @@ namespace onep
     return false;
   }
 
+  void Skill::onAction()
+  {
+    for (std::vector<std::unique_ptr<luabridge::LuaRef>>::iterator it = m->actions.begin(); it != m->actions.end(); ++it)
+    {
+      (*it->get())(1);
+    }
+  }
+
+  void Skill::addOnAction(luabridge::LuaRef& luaRef)
+  {
+    m->actions.push_back(std::make_unique<luabridge::LuaRef>(luaRef));
+  }
 }

@@ -468,8 +468,6 @@ namespace helper
     {
       BoundingBox<float> bb = it->second.boundingbox;
       bb.shift(sx, 0.0f);
-
-      writeFileString(file, it->second.data.name);
       writeFile<float>(file, it->second.data.population);
       writeFile<int>(file, int(it->second.data.gdp));
       writeFile<int>(file, it->second.data.id);

@@ -2,7 +2,6 @@
 
 #include "core/Globals.h"
 #include "SimulationVisitor.h"
-#include "SkillBranch.h"
 
 #include <osgGaming/Helper.h>
 
@@ -26,50 +25,48 @@ namespace onep
   struct CountryData::Impl
   {
     Impl(osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
-      osg::ref_ptr<SkillBranchContainer> skillBranchContainer,
+      osg::ref_ptr<SkillsContainer> skillsContainer,
       string name,
       int id,
       float population,
       float wealth,
       Vec2f centerLatLong,
       Vec2f size)
-      : m_name(name)
-      , skillBranchContainer(skillBranchContainer)
-      , m_values(new CountryValues(propertiesManager, skillBranchContainer, wealth))
-      , m_populationInMio(population)
-      , m_id(id)
-      , m_centerLatLong(centerLatLong)
-      , m_size(size)
-      , m_earthRadius(propertiesManager->getValue<float>(Param_EarthRadiusName))
-      , m_cameraZoom(propertiesManager->getValue<float>(Param_CameraCountryZoomName))
+      : name(name)
+      , skillsContainer(skillsContainer)
+      , values(new CountryValues(propertiesManager, skillsContainer, wealth))
+      , populationInMio(population)
+      , id(id)
+      , centerLatLong(centerLatLong)
+      , size(size)
+      , earthRadius(propertiesManager->getValue<float>(Param_EarthRadiusName))
+      , cameraZoom(propertiesManager->getValue<float>(Param_CameraCountryZoomName))
     {}
 
-    std::string m_name;
+    std::string name;
 
-    SkillBranchContainer::Ptr skillBranchContainer;
+    SkillsContainer::Ptr skillsContainer;
 
-    CountryValues::Ptr m_values;
+    CountryValues::Ptr values;
     Neighbor::List m_neighbors;
 
-    float m_populationInMio;
+    float populationInMio;
 
-    SkillBranchesActivated m_skillBranches;
+    int id;
+    osg::Vec2f centerLatLong;
+    osg::Vec2f size;
 
-    int m_id;
-    osg::Vec2f m_centerLatLong;
-    osg::Vec2f m_size;
-
-    float m_earthRadius;
-    float m_cameraZoom;
+    float earthRadius;
+    float cameraZoom;
 
     void step()
-    {
-      ProgressingValue<float>* dept = m_values->getValue<float>(VALUE_DEPT);
-      ProgressingValue<float>* anger = m_values->getValue<float>(VALUE_ANGER);
-      ProgressingValue<float>* interest = m_values->getValue<float>(VALUE_INTEREST);
-      ProgressingValue<float>* buyingPower = m_values->getValue<float>(VALUE_BUYING_POWER);
+    {/*
+      ProgressingValue<float>* dept = values->getValue<float>(VALUE_DEPT);
+      ProgressingValue<float>* anger = values->getValue<float>(VALUE_ANGER);
+      ProgressingValue<float>* interest = values->getValue<float>(VALUE_INTEREST);
+      ProgressingValue<float>* buyingPower = values->getValue<float>(VALUE_BUYING_POWER);
 
-      SkillBranch::Ptr branch = skillBranchContainer->getBranchByName("banks");
+      SkillBranch::Ptr branch = skillsContainer->getBranchByName("banks");
       if (!branch.valid())
       {
         assert(false);
@@ -84,24 +81,24 @@ namespace onep
       // rel dept * 0.1
       anger->prepare(dept->getValue() / dept->getMax() * 0.1f, METHOD_SET_BALANCE);
 
-      m_values->getContainer()->step();
+      values->getContainer()->step();
 
-      int n = skillBranchContainer->getNumBranches();
+      int n = skillsContainer->getNumBranches();
       for (int i = 0; i < n; i++)
       {
-        if (!m_skillBranches.oActivated[i]->get() && m_values->getBranchValue<float>(VALUE_PROPAGATED, i)->full())
+        if (!m_skillBranches.oActivated[i]->get() && values->getBranchValue<float>(VALUE_PROPAGATED, i)->full())
           m_skillBranches.oActivated[i]->set(true);
-      }
+      }*/
     }
 
-    void affectNeighbors()
+    /*void affectNeighbors()
     {
-      int n = skillBranchContainer->getNumBranches();
+      int n = skillsContainer->getNumBranches();
       for (int i = 0; i < n; i++)
       {
         if (m_skillBranches.oActivated[i]->get())
         {
-          float propagation = m_values->getBranchValue<float>(VALUE_PROPAGATION, i)->getValue();
+          float propagation = values->getBranchValue<float>(VALUE_PROPAGATION, i)->getValue();
 
           for (Neighbor::List::iterator it = m_neighbors.begin(); it != m_neighbors.end(); ++it)
           {
@@ -110,12 +107,12 @@ namespace onep
           }
         }
       }
-    }
+    }*/
   };
 
   CountryData::CountryData(
     osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
-    osg::ref_ptr<SkillBranchContainer> skillBranchContainer,
+    osg::ref_ptr<SkillsContainer> skillsContainer,
     string name,
     int id,
     float population,
@@ -126,7 +123,7 @@ namespace onep
     , SimulationCallback()
     , m(new Impl(
       propertiesManager,
-      skillBranchContainer,
+      skillsContainer,
       name,
       id,
       population,
@@ -134,9 +131,9 @@ namespace onep
       centerLatLong,
       size))
   {
-    int n = m->skillBranchContainer->getNumBranches();
+    /*int n = m->skillsContainer->getNumBranches();
     for (int i = 0; i < n; i++)
-      m->m_skillBranches.oActivated[i] = new osgGaming::InitializedObservable<bool, false>();
+      m->m_skillBranches.oActivated[i] = new osgGaming::InitializedObservable<bool, false>();*/
 
     setUpdateCallback(new Callback());
   }
@@ -150,77 +147,50 @@ namespace onep
     m->m_neighbors.push_back(neighbor);
   }
 
-  void CountryData::setSkillBranchActivated(int type, bool activated)
-  {
-    m->m_skillBranches.oActivated[type]->set(activated);
-  }
-
   string CountryData::getCountryName()
   {
-    return m->m_name;
+    return m->name;
   }
 
   int CountryData::getId()
   {
-    return m->m_id;
+    return m->id;
   }
 
   Vec2f CountryData::getCenterLatLong()
   {
-    return m->m_centerLatLong;
+    return m->centerLatLong;
   }
 
   Vec2f CountryData::getSize()
   {
-    return m->m_size;
+    return m->size;
   }
 
   Vec2f CountryData::getSurfaceSize()
   {
     return Vec2f(
-      2.0f * C_PI * sin(C_PI / 2.0f - abs(m->m_centerLatLong.x())) * m->m_earthRadius * m->m_size.x(),
-      C_PI * m->m_earthRadius * m->m_size.y());
+      2.0f * C_PI * sin(C_PI / 2.0f - abs(m->centerLatLong.x())) * m->earthRadius * m->size.x(),
+      C_PI * m->earthRadius * m->size.y());
   }
 
   float CountryData::getOptimalCameraDistance(float angle, float ratio)
   {
     Vec2f surfaceSize = getSurfaceSize();
 
-    float hdistance = surfaceSize.x() * m->m_cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + m->m_earthRadius;
-    float vdistance = surfaceSize.y() * m->m_cameraZoom / (2.0f * tan(angle * C_PI / 360.0f)) + m->m_earthRadius;
+    float hdistance = surfaceSize.x() * m->cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + m->earthRadius;
+    float vdistance = surfaceSize.y() * m->cameraZoom / (2.0f * tan(angle * C_PI / 360.0f)) + m->earthRadius;
 
     return max(hdistance, vdistance);
   }
 
   CountryValues::Ptr CountryData::getValues()
   {
-    return m->m_values;
-  }
-
-  bool CountryData::getSkillBranchActivated(int id)
-  {
-    return m->m_skillBranches.oActivated[id]->get();
-  }
-
-  osgGaming::Observable<bool>::Ptr CountryData::getSkillBranchActivatedObservable(int type)
-  {
-    return m->m_skillBranches.oActivated[type];
-  }
-
-  bool CountryData::anySkillBranchActivated()
-  {
-    int n = m->skillBranchContainer->getNumBranches();
-    for (int i = 0; i < n; i++)
-    {
-      if (m->m_skillBranches.oActivated[i]->get())
-        return true;
-    }
-
-    return false;
+    return m->values;
   }
 
   bool CountryData::callback(SimulationVisitor* visitor)
-  {
+  {/*
     if (visitor->getType() == SimulationVisitor::PROGRESS_COUNTRIES)
     {
       m->step();
@@ -229,12 +199,14 @@ namespace onep
 
     if (visitor->getType() == SimulationVisitor::AFFECT_NEIGHBORS)
     {
-      m->affectNeighbors();
+      //m->affectNeighbors();
       return false; // don't traverse
     }
 
     visitor->setActivatedBranches(&m->m_skillBranches);
-    visitor->setCountryValues(m->m_values);
+    visitor->setCountryValues(m->values);
+
+    return true;*/
 
     return true;
   }

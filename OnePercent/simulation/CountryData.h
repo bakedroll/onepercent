@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SkillBranchContainer.h"
+#include "SkillsContainer.h"
 
 #include <osg/Referenced>
 #include <osg/Vec2f>
@@ -15,7 +15,7 @@
 
 namespace onep
 {
-  class SkillBranchContainer;
+  class SkillsContainer;
 
 	class NeighborCountryInfo : public osg::Referenced
 	{
@@ -44,7 +44,7 @@ namespace onep
 
 		CountryData(
       osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
-      osg::ref_ptr<SkillBranchContainer> skillBranchContainer,
+      osg::ref_ptr<SkillsContainer> skillsContainer,
       std::string name,
       int id,
       float population,
@@ -56,8 +56,6 @@ namespace onep
 
     void addNeighbor(Neighbor neighbor);
 
-		void setSkillBranchActivated(int type, bool activated);
-
 		std::string getCountryName();
     int getId();
 		osg::Vec2f getCenterLatLong();
@@ -66,11 +64,6 @@ namespace onep
 		float getOptimalCameraDistance(float angle, float ratio);
 
     CountryValues::Ptr getValues();
-
-    bool getSkillBranchActivated(int id);
-    osgGaming::Observable<bool>::Ptr getSkillBranchActivatedObservable(int type);
-
-		bool anySkillBranchActivated();
 
     virtual bool callback(SimulationVisitor* visitor) override;
 

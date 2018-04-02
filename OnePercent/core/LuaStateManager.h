@@ -14,14 +14,24 @@ extern "C"
 
 #include <LuaBridge.h>
 
+#define MAKE_LUAREF_PTR(luaRef) std::make_shared<luabridge::LuaRef>(luaRef)
+
 namespace onep
 {
-  class LuaClassInstance
+  typedef std::shared_ptr<luabridge::LuaRef> LuaRefPtr;
+
+  class LuaClass
+  {
+  public:
+    virtual ~LuaClass() {}
+    virtual void registerClass(lua_State* state) = 0;
+  };
+
+  class LuaClassInstance : public LuaClass
   {
   public:
     virtual ~LuaClassInstance() {}
-    virtual void registerClass(lua_State* state) = 0;
-    virtual std::string instanceVariableName() { return ""; };
+    virtual std::string instanceVariableName() = 0;
 
   };
 
@@ -30,6 +40,8 @@ namespace onep
   public:
     explicit LuaStateManager(osgGaming::Injector& injector);
     ~LuaStateManager();
+
+    luabridge::LuaRef getGlobal(const char* name) const;
 
     void loadScript(std::string filename);
     void printStack();
@@ -51,12 +63,23 @@ namespace onep
 
       inst->registerClass(m_state);
 
-      if (varName.empty())
-        return;
-
       luabridge::push<T*>(m_state, tinst);
       lua_setglobal(m_state, varName.c_str());
-      //lua_pop(m_state, 1);
+    }
+
+    template<typename T>
+    void registerClass()
+    {
+      T inst;
+      if (dynamic_cast<LuaClass*>(&inst) == nullptr)
+      {
+        OSGG_LOG_WARN("T should derive from LuaClass");
+
+        assert(false);
+        return;
+      }
+
+      inst.registerClass(m_state);
     }
 
   private:

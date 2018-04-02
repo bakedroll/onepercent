@@ -1,5 +1,8 @@
 #include "CountryOverlay.h"
 
+#include "core/Macros.h"
+#include "simulation/SimulatedValuesContainer.h"
+
 #include <osgGaming/Observable.h>
 #include <osgGaming/ByteStream.h>
 
@@ -18,7 +21,8 @@ namespace onep
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
       , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
-      , skillBranchContainer(injector.inject<SkillBranchContainer>())
+      , skillsContainer(injector.inject<SkillsContainer>())
+      , valuesContainer(injector.inject<SimulatedValuesContainer>())
       , oSelectedCountryId(new osgGaming::Observable<int>(0))
       , highlightedBranchId(-1)
     {}
@@ -39,10 +43,15 @@ namespace onep
       countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
       base->addChild(mesh, false);
 
-      int n = skillBranchContainer->getNumBranches();
+      assert(valuesContainer->getState()->getCountryStates().count(id) > 0);
+      CountryState::Ptr cstate = valuesContainer->getState()->getCountryStates()[id];
+
+      int n = skillsContainer->getNumBranches();
       for (int i = 0; i < n; i++)
       {
-        skillBranchActivatedObservers.push_back(countryData->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([this, mesh, i](bool activated)
+        std::string branchName = skillsContainer->getBranchByIndex(i)->getBranchName();
+
+        skillBranchActivatedObservers.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([this, mesh, i](bool activated)
         {
           if (!activated)
             return;
@@ -67,7 +76,8 @@ namespace onep
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
     osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
-    osg::ref_ptr<SkillBranchContainer> skillBranchContainer;
+    osg::ref_ptr<SkillsContainer> skillsContainer;
+    SimulatedValuesContainer::Ptr valuesContainer;
 
     CountryMesh::Map countryMeshs;
     CountriesMap::Ptr countriesMap;
@@ -80,6 +90,8 @@ namespace onep
 
     std::set<CountryMesh::Ptr> highlightedCountries;
     CountryMesh::Ptr hoveredCountryMesh;
+
+    NeighbourMap neighbourMap;
   };
 
   CountryOverlay::CountryOverlay(osgGaming::Injector& injector)
@@ -92,11 +104,13 @@ namespace onep
   {
   }
 
-  void CountryOverlay::loadCountries(std::string countriesFilename, std::string distanceMapFilename, osg::ref_ptr<osg::Vec3Array> vertices, osg::ref_ptr<osg::Vec2Array> texcoords)
+  void CountryOverlay::loadCountries(
+    const std::map<int, std::string> idCountriesMap,
+    std::string countriesFilename,
+    std::string distanceMapFilename,
+    osg::ref_ptr<osg::Vec3Array> vertices,
+    osg::ref_ptr<osg::Vec2Array> texcoords)
   {
-    typedef std::vector<int> NeighborList;
-    typedef std::map<int, NeighborList> NeighborMap;
-
     osg::ref_ptr<osg::Program> program = new osg::Program();
     osg::ref_ptr<osg::Shader> frag_shader = m->resourceManager->loadShader("./GameData/shaders/country.frag", osg::Shader::FRAGMENT);
     osg::ref_ptr<osg::Shader> vert_shader = m->resourceManager->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
@@ -112,12 +126,11 @@ namespace onep
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     stateSet->setRenderBinDetails(1, "RenderBin");
 
+    m->neighbourMap.clear();
 
     char* bytes = m->resourceManager->loadBinary(countriesFilename);
 
     osgGaming::ByteStream stream(bytes);
-
-    NeighborMap neighborMap;
 
     osg::ref_ptr<osg::Texture2D> distanceTexture = m->textureFactory->make()
       ->image(m->resourceManager->loadImage(distanceMapFilename))
@@ -129,10 +142,6 @@ namespace onep
     int ncountries = stream.read<int>();
     for (int i = 0; i < ncountries; i++)
     {
-      int name_length = stream.read<int>();
-      char* name_p = stream.readString(name_length);
-      std::string name = name_p;
-
       float population = stream.read<float>();
       float wealth = float(stream.read<int>());
       int id = stream.read<int>();
@@ -141,9 +150,21 @@ namespace onep
       float width = stream.read<float>();
       float height = stream.read<float>();
 
+      std::string name;
+      if (!idCountriesMap.count(id))
+      {
+        OSGG_QLOG_WARN(QString("No country name for id %1 defined").arg(id));
+        name = "unknown";
+        assert(false);
+      }
+      else
+      {
+        name = idCountriesMap.find(id)->second;
+      }
+
       osg::ref_ptr<CountryData> country = new CountryData(
         m->propertiesManager,
-        m->skillBranchContainer,
+        m->skillsContainer,
         name,
         id,
         population,
@@ -157,7 +178,7 @@ namespace onep
       for (int j = 0; j < neighbors_count; j++)
         neighborList.push_back(stream.read<int>());
 
-      neighborMap.insert(NeighborMap::value_type(id, neighborList));
+      m->neighbourMap.insert(NeighbourMap::value_type(id, neighborList));
 
       CountryMesh::BorderIdMap neighborBorderMap;
       int neighborBorderCount = stream.read<int>();
@@ -187,13 +208,11 @@ namespace onep
       }
 
       m->addCountry(int(id), country, triangles, neighborBorderMap, vertices, texcoords);
-
-      delete[] name_p;
     }
 
     for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
     {
-      NeighborList neighborList = neighborMap.find(it->second->getCountryData()->getId())->second;
+      NeighborList neighborList = m->neighbourMap.find(it->second->getCountryData()->getId())->second;
 
       for (NeighborList::iterator nit = neighborList.begin(); nit != neighborList.end(); ++nit)
       {
@@ -243,9 +262,14 @@ namespace onep
 
     m->highlightedBranchId = id;
 
+    std::string branchName = m->skillsContainer->getBranchByIndex(id)->getBranchName();
+
     for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
     {
-      if (it->second->getCountryData()->getSkillBranchActivated(id))
+      int cid = it->second->getCountryData()->getId();
+      CountryState::Ptr cstate = m->valuesContainer->getState()->getCountryStates()[cid];
+
+      if (cstate->getOActivatedBranch(branchName.c_str())->get())
         m->setCountryColorMode(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + id));
     }
   }
@@ -293,6 +317,11 @@ namespace onep
   CountriesMap::Ptr CountryOverlay::getCountriesMap()
   {
     return m->countriesMap;
+  }
+
+  CountryOverlay::NeighbourMap& CountryOverlay::getNeighbourships()
+  {
+    return m->neighbourMap;
   }
 
   CountryMesh::Ptr CountryOverlay::getSelectedCountryMesh()

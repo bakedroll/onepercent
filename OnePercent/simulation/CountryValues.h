@@ -11,14 +11,14 @@
 
 namespace onep
 {
-  class SkillBranchContainer;
+  class SkillsContainer;
 
   class CountryValues : public osg::Referenced
   {
   public:
     typedef osg::ref_ptr<CountryValues> Ptr;
 
-    CountryValues(osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager, osg::ref_ptr<SkillBranchContainer> skillBranchContainer, float wealth);
+    CountryValues(osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager, osg::ref_ptr<SkillsContainer> skillsContainer, float wealth);
 
     template<typename T>
     ProgressingValue<T>* getValue(CountryValueType type);
@@ -39,7 +39,7 @@ namespace onep
 
     osg::ref_ptr<ProgressingValueContainer> m_container;
 
-    osg::ref_ptr<SkillBranchContainer> m_skillBranchContainer;
+    osg::ref_ptr<SkillsContainer> m_skillsContainer;
 
     template<typename T>
     void createValue(CountryValueType type, T min, T max, T init);
