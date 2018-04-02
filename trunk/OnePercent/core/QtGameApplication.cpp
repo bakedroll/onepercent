@@ -61,7 +61,7 @@ struct QtGameApplication::Impl
   {
   }
 
-  std::shared_ptr<QApplication> qapplication;
+  std::shared_ptr<Multithreading> qapplication;
 
   MainWindow* mainWindow;
   std::shared_ptr<OverlayCompositor> overlayCompositor;
@@ -81,7 +81,7 @@ QtGameApplication::QtGameApplication(int& argc, char** argv)
 
   OSGG_LOG_INFO("Application starting up");
 
-  m->qapplication.reset(new QApplication(argc, argv));
+  m->qapplication.reset(new Multithreading(argc, argv));
 
   setlocale(LC_NUMERIC, "en_US");
 
@@ -171,7 +171,7 @@ osg::ref_ptr<osgGaming::InputManager> QtGameApplication::createInputManager(osg:
   return m->mainWindow->getViewWidget();
 }
 
-std::shared_ptr<QApplication> QtGameApplication::qApplication()
+std::shared_ptr<Multithreading> QtGameApplication::qApplication()
 {
   return m->qapplication;
 }

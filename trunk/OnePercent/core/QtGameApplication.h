@@ -1,9 +1,9 @@
 #pragma once
 
+#include "core/Multithreading.h"
+
 #include <osgGaming/GameApplication.h>
 #include <osgGaming/AbstractGameState.h>
-
-#include <QtWidgets/QApplication>
 
 #include <memory>
 
@@ -24,7 +24,7 @@ namespace onep
     virtual int mainloop() override;
     virtual osg::ref_ptr<osgGaming::InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) override;
 
-    std::shared_ptr<QApplication> qApplication();
+    std::shared_ptr<Multithreading> qApplication();
 
   private:
     struct Impl;

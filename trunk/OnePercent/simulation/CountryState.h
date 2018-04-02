@@ -30,6 +30,8 @@ namespace onep
     ValuesMap& getValuesMap() const;
     BranchValuesMap& getBranchValuesMap() const;
 
+    bool getBranchActivated(const char* branchName) const;
+    void setBranchActivated(const char* branchName, bool activated);
     osgGaming::Observable<bool>::Ptr getOActivatedBranch(const char* branchName) const;
 
     virtual void registerClass(lua_State* state) override;

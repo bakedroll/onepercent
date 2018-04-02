@@ -51,7 +51,7 @@ namespace onep
         SkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
         std::string name = branch->getBranchName();
 
-        if (cstate->getOActivatedBranch(name.c_str())->get())
+        if (cstate->getBranchActivated(name.c_str()))
         {
           buttons[i]->setText(QString("%1\n%2").arg(QString::fromStdString(name)).arg(tr("(Unlocked)")));
           buttons[i]->setEnabled(false);
@@ -105,7 +105,7 @@ namespace onep
         int cid = m->countryMesh->getCountryData()->getId();
         CountryState::Ptr cstate = m->valuesContainer->getState()->getCountryStates()[cid];
 
-        cstate->getOActivatedBranch(name.c_str())->set(true);
+        cstate->setBranchActivated(name.c_str(), true);
 
         if (!m->simulation->running())
           m->simulation->start();
