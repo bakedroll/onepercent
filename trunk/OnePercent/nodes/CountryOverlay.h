@@ -17,10 +17,14 @@ namespace onep
   public:
     typedef osg::ref_ptr<CountryOverlay> Ptr;
 
+    typedef std::vector<int> NeighborList;
+    typedef std::map<int, NeighborList> NeighbourMap;
+
     CountryOverlay(osgGaming::Injector& injector);
     ~CountryOverlay();
 
     void loadCountries(
+      const std::map<int, std::string> idCountriesMap,
       std::string countriesFilename,
       std::string distanceMapFilename,
       osg::ref_ptr<osg::Vec3Array> vertices,
@@ -35,6 +39,7 @@ namespace onep
 
     CountryMesh::Map& getCountryMeshs();
     CountriesMap::Ptr getCountriesMap();
+    NeighbourMap& getNeighbourships();
 
     CountryMesh::Ptr getSelectedCountryMesh();
     CountryMesh::Ptr getCountryMesh(int id);

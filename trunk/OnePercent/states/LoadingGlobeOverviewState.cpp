@@ -5,7 +5,6 @@
 #include "nodes/BackgroundModel.h"
 #include "nodes/BoundariesMesh.h"
 #include "nodes/CountryOverlay.h"
-#include "simulation/SkillBranchContainer.h"
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
 #include "widgets/OverlayCompositor.h"
@@ -38,7 +37,6 @@ namespace onep
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , countryOverlay(injector.inject<CountryOverlay>())
       , simulation(injector.inject<Simulation>())
-      , skillBranchContainer(injector.inject<SkillBranchContainer>())
       , lua(injector.inject<LuaStateManager>())
       , labelLoadingText(nullptr)
       , overlay(nullptr)
@@ -57,7 +55,6 @@ namespace onep
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<Simulation> simulation;
-    osg::ref_ptr<SkillBranchContainer> skillBranchContainer;
     osg::ref_ptr<LuaStateManager> lua;
 
     QLabel* labelLoadingText;
@@ -125,10 +122,16 @@ namespace onep
 
   void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
-    m->lua->registerClassInstance<SkillBranchContainer>(m->skillBranchContainer);
-    m->lua->registerClassInstance<Simulation>(m->simulation);
-
     osg::ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
+
+    m->lua->loadScript("./GameData/scripts/core.lua");
+
+    m->lua->loadScript("./GameData/scripts/data/branches.lua");
+    m->lua->loadScript("./GameData/scripts/data/skills.lua");
+    m->lua->loadScript("./GameData/scripts/data/countries.lua");
+    m->lua->loadScript("./GameData/scripts/data/values.lua");
+
+    m->lua->loadScript("./GameData/scripts/control/skills.lua");
 
     m->backgroundModel->loadStars("./GameData/data/stars.bin");
 
@@ -137,16 +140,17 @@ namespace onep
     m->boundariesMesh->loadBoundaries("./GameData/data/boundaries.dat");
     m->boundariesMesh->makeOverallBoundaries(0.005f);
 
-    m->lua->loadScript("./GameData/scripts/data/branches.lua");
-
     m->countryOverlay->loadCountries(
+      m->simulation->getIdCountryMap(),
       "./GameData/data/countries.dat",
       "./GameData/textures/earth/distance.png",
       m->boundariesMesh->getCountryVertices(),
       m->boundariesMesh->getCountryTexcoords());
 
-    m->simulation->loadSkillsXml("./GameData/data/skills/passive.xml");
-    m->simulation->attachCountries(m->countryOverlay->getCountryMeshs());
+    m->simulation->prepare();
+
+    //m->simulation->loadSkillsXml("./GameData/data/skills/passive.xml");
+    //m->simulation->attachCountries(m->countryOverlay->getCountryMeshs());
 
     m->countryNameOverlay->setEnabled(false);
     m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryMeshs());

@@ -7,6 +7,15 @@
 
 #include <vector>
 
+extern "C"
+{
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
+
+#include <LuaBridge.h>
+
 namespace onep
 {
 	class Skill : public osg::Node, public SimulationCallback
@@ -17,16 +26,19 @@ namespace onep
     typedef std::map<int, Ptr> Map;
 
 		Skill(std::string name);
+    Skill(std::string name, std::string displayName, std::string type, int cost);
 
     void addAttribute(CountryValueType valueType, ProgressingValueMethod method, float value);
     void addBranchAttribute(int branchId, CountryValueType valueType, ProgressingValueMethod method, float value);
 
-		void setActivated(bool activated);
-
 		std::string getName();
-		bool getActivated();
+
+    osgGaming::Observable<bool>::Ptr getObActivated() const;
 
     virtual bool callback(SimulationVisitor* visitor) override;
+
+    void onAction();
+    void addOnAction(luabridge::LuaRef& luaRef);
 	  
   private:
     typedef struct _attribute
@@ -49,7 +61,7 @@ namespace onep
     Attribute::List m_attributes;
     BranchAttribute::List m_branchAttributes;
 
-	  std::string m_name;
-		bool m_activated;
+    struct Impl;
+    std::unique_ptr<Impl> m;
 	};
 }

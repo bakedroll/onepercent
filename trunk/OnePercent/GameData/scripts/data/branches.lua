@@ -21,4 +21,4 @@ local branches = {
   }
 }
 
-skillBranchContainer:add_branches(branches)
+core.control.create_branches(branches)

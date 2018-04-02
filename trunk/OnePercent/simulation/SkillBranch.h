@@ -14,16 +14,16 @@ namespace onep
   {
   public:
     typedef osg::ref_ptr<SkillBranch> Ptr;
-    typedef std::map<int, Ptr> Map;
+    typedef std::vector<Ptr> List;
 
     SkillBranch(int id, const std::string& name, int costs);
 
     int getBranchId() const;
-    std::string getBranchName() const;
+    const std::string& getBranchName() const;
     int getNumSkills() const;
     Skill::Ptr getSkill(int i) const;
 
-    int getCosts() const;
+    int getCost() const;
 
     void addSkill(Skill::Ptr skill);
 

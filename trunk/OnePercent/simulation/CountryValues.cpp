@@ -1,14 +1,14 @@
 #include "CountryValues.h"
 
-#include "simulation/SkillBranchContainer.h"
+#include "simulation/SkillsContainer.h"
 #include "simulation/SkillBranch.h"
 
 namespace onep
 {
-  CountryValues::CountryValues(osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager, SkillBranchContainer::Ptr skillBranchContainer, float wealth)
+  CountryValues::CountryValues(osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager, SkillsContainer::Ptr skillsContainer, float wealth)
     : osg::Referenced()
     , m_container(new ProgressingValueContainer())
-    , m_skillBranchContainer(skillBranchContainer)
+    , m_skillsContainer(skillsContainer)
   {
     float startBuyingPower = propertiesManager->getValue<float>(Param_MechanicsStartBuyingPowerName);
 
@@ -31,11 +31,11 @@ namespace onep
 
   int CountryValues::numBranches()
   {
-    return m_skillBranchContainer->getNumBranches();
+    return m_skillsContainer->getNumBranches();
   }
 
   std::string CountryValues::idToName(int id)
   {
-    return m_skillBranchContainer->getBranchByIndex(id)->getBranchName();
+    return m_skillsContainer->getBranchByIndex(id)->getName();
   }
 }

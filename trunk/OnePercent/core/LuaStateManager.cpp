@@ -3,6 +3,8 @@
 #include <osgGaming/ResourceManager.h>
 #include <algorithm>
 
+#include <QMutex>
+
 namespace onep
 {
   struct LuaStateManager::Impl
@@ -12,11 +14,14 @@ namespace onep
     {}
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+    QMutex luaLock;
   };
 
   LuaStateManager::LuaStateManager(osgGaming::Injector& injector)
     : m(new Impl(injector))
   {
+    QMutexLocker lock(&m->luaLock);
+
     m_state = luaL_newstate();
 
     luaL_openlibs(m_state);
@@ -24,11 +29,20 @@ namespace onep
 
   LuaStateManager::~LuaStateManager()
   {
+    QMutexLocker lock(&m->luaLock);
     lua_close(m_state);
+  }
+
+  luabridge::LuaRef LuaStateManager::getGlobal(const char* name) const
+  {
+    QMutexLocker lock(&m->luaLock);
+    return luabridge::getGlobal(m_state, name);
   }
 
   void LuaStateManager::loadScript(std::string filename)
   {
+    QMutexLocker lock(&m->luaLock);
+
     std::string script = m->resourceManager->loadText(filename);
 
     if (luaL_dostring(m_state, script.c_str()))
@@ -46,6 +60,8 @@ namespace onep
 
   void LuaStateManager::printStack()
   {
+    QMutexLocker lock(&m->luaLock);
+
     int i;
     int top = lua_gettop(m_state);
     std::string str;
@@ -79,6 +95,8 @@ namespace onep
 
   void LuaStateManager::printTable()
   {
+    QMutexLocker lock(&m->luaLock);
+
     lua_pushnil(m_state);
 
     while (lua_next(m_state, -2) != 0)

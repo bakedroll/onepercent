@@ -3,6 +3,8 @@
 #include "core/Macros.h"
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
+#include "simulation/Simulation.h"
+#include "simulation/SimulatedValuesContainer.h"
 
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -14,7 +16,6 @@
 #include <chrono>
 #include <nodes/CountryOverlay.h>
 #include <nodes/BoundariesMesh.h>
-#include "simulation/Simulation.h"
 
 namespace onep
 {
@@ -25,7 +26,8 @@ namespace onep
       , countryOverlay(injector.inject<CountryOverlay>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , simulation(injector.inject<Simulation>())
-      , skillBranchContainer(injector.inject<SkillBranchContainer>())
+      , skillsContainer(injector.inject<SkillsContainer>())
+      , simulatedValuesContainer(injector.inject<SimulatedValuesContainer>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , toggleCountryButton(nullptr)
@@ -39,7 +41,8 @@ namespace onep
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<Simulation> simulation;
-    osg::ref_ptr<SkillBranchContainer> skillBranchContainer;
+    osg::ref_ptr<SkillsContainer> skillsContainer;
+    osg::ref_ptr<SimulatedValuesContainer> simulatedValuesContainer;
 
     ODay::Ptr oDay;
     ONumSkillPoints::Ptr oNumSkillPoints;
@@ -87,17 +90,34 @@ namespace onep
 
     void updateCountryInfoText()
     {
-      if (countryOverlay->getSelectedCountryId() == 0)
+      int selectedId = countryOverlay->getSelectedCountryId();
+
+      if (selectedId == 0)
       {
         labelStats->setText("");
         return;
       }
 
-      CountryData::Ptr country = countryOverlay->getSelectedCountryMesh()->getCountryData();
+      CountryState::Map& countryStates = simulatedValuesContainer->getState()->getCountryStates();
+      if (countryStates.count(selectedId) == 0)
+        return;
 
-      std::string infoText = country->getCountryName() + "\n";
-      country->getValues()->getContainer()->debugPrintToString(infoText);
-      labelStats->setText(QString::fromStdString(infoText));
+      CountryData::Ptr country = countryOverlay->getSelectedCountryMesh()->getCountryData();
+      CountryState::Ptr countryState = countryStates[selectedId];
+
+      CountryState::ValuesMap& values = countryState->getValuesMap();
+      CountryState::BranchValuesMap& branchValues = countryState->getBranchValuesMap();
+
+      QString infoText = QString("%1 (%2)\n").arg(QString::fromLocal8Bit(country->getCountryName().c_str())).arg(country->getId());
+
+      for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
+        infoText += QString("%1: %2\n").arg(it->first).arg(it->second->get());
+
+      for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
+        for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+          infoText += QString("%1 %2: %3\n").arg(it->first).arg(vit->first).arg(vit->second->get());
+
+      labelStats->setText(infoText);
     }
 
     void setupUi()
@@ -125,10 +145,10 @@ namespace onep
 
       branchesLayout->addWidget(radioNoOverlay, 0, 1);
 
-      int n = skillBranchContainer->getNumBranches();
+      int n = skillsContainer->getNumBranches();
       for (int i = 0; i < n; i++)
       {
-        std::string name = skillBranchContainer->getBranchByIndex(i)->getBranchName();
+        std::string name = skillsContainer->getBranchByIndex(i)->getBranchName();
 
         QCheckBox* checkBox = new QCheckBox(QString::fromStdString(name));
         QRadioButton* radioButton = new QRadioButton(QObject::tr("Overlay"));
@@ -143,7 +163,10 @@ namespace onep
           if (!selectedCountry.valid())
             return;
 
-          selectedCountry->setSkillBranchActivated(i, checked);
+          int cid = selectedCountry->getId();
+          CountryState::Ptr cstate = simulatedValuesContainer->getState()->getCountryStates()[cid];
+
+          cstate->getOActivatedBranch(name.c_str())->set(checked);
         });
 
         QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
@@ -155,7 +178,9 @@ namespace onep
         {
           if (selected > 0)
           {
-            checkBox->setChecked(countryOverlay->getCountryMesh(selected)->getCountryData()->getSkillBranchActivated(i));
+            CountryState::Ptr cstate = simulatedValuesContainer->getState()->getCountryStates()[selected];
+
+            checkBox->setChecked(cstate->getOActivatedBranch(name.c_str())->get());
           }
           else
           {
@@ -165,10 +190,9 @@ namespace onep
           checkBox->setEnabled(selected > 0);
         })));
 
-        CountryMesh::Map& countryMeshs = countryOverlay->getCountryMeshs();
-        for (CountryMesh::Map::iterator it = countryMeshs.begin(); it != countryMeshs.end(); ++it)
+        ONEP_FOREACH(CountryState::Map, it, simulatedValuesContainer->getState()->getCountryStates())
         {
-          skillBranchActivatedObservers.push_back(it->second->getCountryData()->getSkillBranchActivatedObservable(i)->connect(osgGaming::Func<bool>([=](bool activated)
+          skillBranchActivatedObservers.push_back(it->second->getOActivatedBranch(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
           {
             if (it->first == countryOverlay->getSelectedCountryId())
               checkBox->setChecked(activated);
@@ -185,7 +209,7 @@ namespace onep
       // Skills
       for (int i = 0; i < n; i++)
       {
-        SkillBranch::Ptr skillBranch = skillBranchContainer->getBranchByIndex(i);
+        SkillBranch::Ptr skillBranch = skillsContainer->getBranchByIndex(i);
         std::string name = skillBranch->getBranchName();
 
         // Skills
@@ -203,7 +227,7 @@ namespace onep
 
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
-            skillBranch->getSkill(j)->setActivated(checked);
+            skillBranch->getSkill(j)->getObActivated()->set(checked);
           });
         }
       }

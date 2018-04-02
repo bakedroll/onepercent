@@ -186,8 +186,8 @@ namespace onep
       if (id > 0)
       {
         CountryMesh::Ptr countryMesh = m->countryOverlay->getCountryMesh(id);
-
-        OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(countryMesh->getCountryData()->getId()).arg(countryMesh->getCountryData()->getCountryName().c_str()));
+        
+        OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(countryMesh->getCountryData()->getId()).arg(QString::fromLocal8Bit(countryMesh->getCountryData()->getCountryName().c_str())));
 
         setCameraLatLong(countryMesh->getCountryData()->getCenterLatLong(), getSimulationTime());
         setCameraDistance(std::max<float>(countryMesh->getCountryData()->getOptimalCameraDistance(

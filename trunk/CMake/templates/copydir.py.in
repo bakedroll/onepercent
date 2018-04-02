@@ -22,3 +22,5 @@ for root, dirnames, filenames in os.walk(sourcepath):
 
         filetargetpath = os.path.join(targetpath, cutpath)
         shutil.copyfile(filesourcepath, filetargetpath)
+
+        print("Copied " + cutpath)

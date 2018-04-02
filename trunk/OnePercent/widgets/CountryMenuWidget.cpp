@@ -4,6 +4,7 @@
 #include "core/QConnectFunctor.h"
 
 #include "simulation/Simulation.h"
+#include "simulation/SimulatedValuesContainer.h"
 
 #include <osgGaming/Helper.h>
 
@@ -15,14 +16,16 @@ namespace onep
 	{
     Impl(osgGaming::Injector& injector)
       : simulation(injector.inject<Simulation>())
-      , skillBranchContainer(injector.inject<SkillBranchContainer>())
+      , skillsContainer(injector.inject<SkillsContainer>())
+      , valuesContainer(injector.inject<SimulatedValuesContainer>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
     {}
 
     CountryMesh::Ptr countryMesh;
 
     Simulation::Ptr simulation;
-    SkillBranchContainer::Ptr skillBranchContainer;
+    SkillsContainer::Ptr skillsContainer;
+    SimulatedValuesContainer::Ptr valuesContainer;
 
     std::vector<QPushButton*> buttons;
 
@@ -35,20 +38,26 @@ namespace onep
       if (!countryMesh.valid())
         return;
 
-      int n = skillBranchContainer->getNumBranches();
+      int cid = countryMesh->getCountryData()->getId();
+      if (valuesContainer->getState()->getCountryStates().count(cid) == 0)
+        return;
+
+      CountryState::Ptr cstate = valuesContainer->getState()->getCountryStates()[cid];
+
+      int n = skillsContainer->getNumBranches();
       for (int i = 0; i < n; i++)
       {
-        SkillBranch::Ptr branch = skillBranchContainer->getBranchByIndex(i);
+        SkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
         std::string name = branch->getBranchName();
 
-        if (countryMesh->getCountryData()->getSkillBranchActivated(i))
+        if (cstate->getOActivatedBranch(name.c_str())->get())
         {
           buttons[i]->setText(QString("%1\n%2").arg(QString::fromStdString(name)).arg(tr("(Unlocked)")));
           buttons[i]->setEnabled(false);
         }
         else
         {
-          int costs = branch->getCosts();
+          int costs = branch->getCost();
 
           buttons[i]->setText(QString("%1\n(%2 SP to unlock)").arg(QString::fromStdString(name)).arg(costs));
           buttons[i]->setEnabled(oNumSkillPoints->get() >= costs);
@@ -66,10 +75,10 @@ namespace onep
 
     setFixedSize(size);
 
-    int n = m->skillBranchContainer->getNumBranches();
+    int n = m->skillsContainer->getNumBranches();
     for (int i = 0; i<n; i++)
     {
-      SkillBranch::Ptr branch = m->skillBranchContainer->getBranchByIndex(i);
+      SkillBranch::Ptr branch = m->skillsContainer->getBranchByIndex(i);
       std::string name = branch->getBranchName();
 
       QPushButton* button = new QPushButton(QString::fromStdString(name));
@@ -83,16 +92,19 @@ namespace onep
 
       m->buttons.push_back(button);
 
-      QConnectFunctor::connect(button, SIGNAL(clicked()), [this, i, branch]()
+      QConnectFunctor::connect(button, SIGNAL(clicked()), [this, i, branch, name]()
       {
         if (!m->countryMesh.valid())
           return;
 
-        int costs = branch->getCosts();
+        int costs = branch->getCost();
         if (!m->simulation->paySkillPoints(costs))
           return;
 
-        m->countryMesh->getCountryData()->setSkillBranchActivated(i, true);
+        int cid = m->countryMesh->getCountryData()->getId();
+        CountryState::Ptr cstate = m->valuesContainer->getState()->getCountryStates()[cid];
+
+        cstate->getOActivatedBranch(name.c_str())->set(true);
 
         if (!m->simulation->running())
           m->simulation->start();
