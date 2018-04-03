@@ -11,7 +11,7 @@ namespace onep
     Q_OBJECT
 
   public:
-    Multithreading(int argc, char **argv);
+    Multithreading(int& argc, char **argv);
     virtual ~Multithreading();
 
     static void ignoreAnyFurtherUiEvents();

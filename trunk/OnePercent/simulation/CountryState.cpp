@@ -1,6 +1,8 @@
 #include "simulation/CountryState.h"
 #include "simulation/SkillBranch.h"
-#include <core/Multithreading.h>
+#include "core/Multithreading.h"
+
+#include "QMutex"
 
 namespace onep
 {

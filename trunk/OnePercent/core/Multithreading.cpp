@@ -56,7 +56,7 @@ namespace onep
   bool Multithreading::m_ignoreFurtherEvents = false;
   std::mutex Multithreading::m_ignoreFurtherEventsMutex;
 
-  Multithreading::Multithreading(int argc, char** argv)
+  Multithreading::Multithreading(int& argc, char** argv)
     : QApplication(argc, argv)
   {
     std::lock_guard<std::mutex> guard(m_ignoreFurtherEventsMutex);

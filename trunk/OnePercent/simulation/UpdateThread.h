@@ -3,6 +3,7 @@
 #include "simulation/SimulationState.h"
 
 #include <QThread>
+#include <QMutex>
 #include <memory>
 
 namespace onep
