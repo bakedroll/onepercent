@@ -338,3 +338,5 @@ configure_file("CMake/templates/copydir.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN
 set(COPY_DIR_SOURCE "${TEMPLATE_PATH_GAMEDATA_SRC}/shaders")
 set(COPY_DIR_TARGET "${TEMPLATE_PATH_GAMEDATA_DST}/shaders")
 configure_file("CMake/templates/copydir.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/updateShaders.py)
+
+configure_file("CMake/templates/loc.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/loc.py)
