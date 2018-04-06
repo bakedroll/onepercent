@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/LuaStateManager.h"
+#include "scripting/LuaStateManager.h"
 
 #include <osgGaming/Injector.h>
 

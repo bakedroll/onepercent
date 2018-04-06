@@ -1,7 +1,7 @@
 #pragma once
 
 #include "simulation/SimulatedValue.h"
-#include "core/LuaStateManager.h"
+#include "scripting/LuaStateManager.h"
 
 namespace onep
 {

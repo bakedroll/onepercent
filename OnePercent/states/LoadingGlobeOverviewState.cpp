@@ -20,7 +20,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <chrono>
-#include <core/LuaStateManager.h>
+#include <scripting/LuaStateManager.h>
 
 namespace onep
 {
