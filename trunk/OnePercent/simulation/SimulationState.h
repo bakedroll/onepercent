@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/LuaStateManager.h"
+#include "scripting/LuaStateManager.h"
 #include "simulation/SimulatedLuaValue.h"
 #include "simulation/CountryState.h"
 

@@ -1,6 +1,6 @@
 #include "OnePercentApplication.h"
 
-#include "LuaStateManager.h"
+#include "scripting/LuaStateManager.h"
 
 #include "core/Observables.h"
 #include "nodes/CountryOverlay.h"

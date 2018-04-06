@@ -1,7 +1,7 @@
 #pragma once
 
 #include "simulation/SkillsContainer.h"
-#include "core/LuaStateManager.h"
+#include "scripting/LuaStateManager.h"
 #include "simulation/SimulatedLuaValue.h"
 
 #include <QString>
