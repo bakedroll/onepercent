@@ -32,7 +32,9 @@ namespace onep
       for (luabridge::Iterator it(object); !it.isNil(); ++it)
       {
         assert_continue((*it).isNumber());
-        values[it.key().tostring()] = float(*it);
+        assert_continue(it.key().isString());
+
+        values[it.key()] = float(*it);
       }
     }
 
@@ -67,12 +69,16 @@ namespace onep
       for (luabridge::Iterator it(object); !it.isNil(); ++it)
       {
         assert_continue((*it).isTable());
+        assert_continue(it.key().isString());
+
         std::string branchName = it.key().tostring();
 
         for (luabridge::Iterator vit(*it); !vit.isNil(); ++vit)
         {
           assert_continue((*vit).isNumber());
-          branchValues[branchName][vit.key().tostring()] = float(*vit);
+          assert_continue(vit.key().isString());
+
+          branchValues[branchName][vit.key()] = float(*vit);
         }
       }
     }
@@ -88,6 +94,8 @@ namespace onep
       for (luabridge::Iterator it(object); !it.isNil(); ++it)
       {
         assert_continue((*it).type() == LUA_TBOOLEAN);
+        assert_continue(it.key().isString());
+
         oActivatedBranches[it.key()] = new osgGaming::Observable<bool>(bool(*it));
       }
     }
@@ -107,6 +115,7 @@ namespace onep
     {
       for (luabridge::Iterator it(object); !it.isNil(); ++it)
       {
+        assert_continue(it.key().isString());
         osgGaming::Observable<bool>::Ptr oActivated = oActivatedBranches[it.key()];
 
         assert_continue((*it).type() == LUA_TBOOLEAN);

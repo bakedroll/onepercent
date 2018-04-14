@@ -75,10 +75,8 @@ namespace onep
 
     QConnectFunctor::connect(&m->thread, SIGNAL(onStateUpdated()), [this]()
     {
-      // not really necessary
-      // QMutexLocker lock(&m->thread.getStateMutex());
-
       // synchronize with lua state
+      // Caution: lua state mutex is locked here
       m->bSyncing = true;
       m->stateContainer->getState()->read();
       m->bSyncing = false;

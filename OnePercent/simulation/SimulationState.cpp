@@ -23,6 +23,7 @@ namespace onep
     {
       luabridge::LuaRef ref = *it;
       assert_continue(ref.isTable());
+      assert_continue(it.key().isNumber());
 
       m->countryStates[int(it.key())] = new CountryState(ref);
     }

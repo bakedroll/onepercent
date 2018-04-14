@@ -158,7 +158,6 @@ namespace onep
     catch (luabridge::LuaException& e)
     {
       OSGG_QLOG_FATAL(QString("Lua Exception: %1").arg(e.what()));
-      assert(false);
     }
   }
 

@@ -78,6 +78,7 @@ namespace onep
 
       long skillsElapsed = 0;
       long long branchesElapsed = 0;
+      long syncElapsed = 0;
 
       timerOverall.start();
 
@@ -94,12 +95,12 @@ namespace onep
         timerBranchesUpdate.start();
         (*m->refUpdate_branches_func)();
         branchesElapsed = timerBranchesUpdate.elapsed();
+
+        timerSync.start();
+        emit onStateUpdated();
+        syncElapsed = timerSync.elapsed();
       });
 
-      timerSync.start();
-      emit onStateUpdated();
-
-      long syncElapsed = timerSync.elapsed();
       long overallElapsed = timerOverall.elapsed();
 
       OSGG_QLOG_DEBUG(QString("SkillsUpdate: %1ms BranchesUpdate: %2ms Sync: %3ms Overall: %4ms")
