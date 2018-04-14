@@ -9,3 +9,15 @@
 
 
 #define ONEP_FOREACH(type, it, container) for (type::iterator it = container.begin(); it != container.end(); ++it)
+
+#ifdef _DEBUG
+
+#define assert_return(cond, ...) if (!(cond)) { assert(false); return __VA_ARGS__; }
+#define assert_continue(cond, ...) if (!(cond)) { assert(false); continue; }
+
+#else
+
+#define assert_return(cond, ...)
+#define assert_continue(cond, ...)
+
+#endif

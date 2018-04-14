@@ -4,6 +4,8 @@
 
 namespace onep
 {
+  class SimulationState;
+
 	class Simulation : public osg::Referenced, public LuaClassInstance
 	{
 	public:
@@ -13,8 +15,6 @@ namespace onep
     ~Simulation();
 
     void prepare();
-
-    const std::map<int, std::string>& getIdCountryMap();
 
     bool paySkillPoints(int points);
 
@@ -28,8 +28,6 @@ namespace onep
     // Lua functions
     void lua_start(lua_State* state);
     void lua_stop(lua_State* state);
-
-    void lua_add_countries(lua_State* state);
 
 	private:
     struct Impl;

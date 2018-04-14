@@ -1,10 +1,12 @@
 #include "SkillBranch.h"
 
+#include "core/Macros.h"
+
 namespace onep
 {
   struct SkillBranch::Impl
   {
-    Impl() : id(-1) {}
+    Impl() {}
 
     int id;
     std::string name;
@@ -13,13 +15,34 @@ namespace onep
     Skill::List skills;
   };
 
-  SkillBranch::SkillBranch(int id, const std::string& name, int costs)
+  SkillBranch::SkillBranch(const luabridge::LuaRef& object, int id)
     : osg::Referenced()
+    , LuaObjectMapper(object)
     , m(new Impl())
   {
+    luabridge::LuaRef nameRef = object["name"];
+    luabridge::LuaRef costRef = object["cost"];
+    luabridge::LuaRef skillsRef = object["skills"];
+
+    assert_return(nameRef.isString());
+    assert_return(costRef.isNumber());
+    assert_return(skillsRef.isTable());
+
     m->id = id;
-    m->name = name;
-    m->cost = costs;
+    m->name = nameRef.tostring();
+    m->cost = costRef;
+
+    for (luabridge::Iterator it(skillsRef); !it.isNil(); ++it)
+    {
+      luabridge::LuaRef skillRef = *it;
+      assert_continue(skillRef.isTable());
+
+      m->skills.push_back(new Skill(skillRef));
+    }
+  }
+
+  SkillBranch::~SkillBranch()
+  {
   }
 
   int SkillBranch::getBranchId() const
@@ -47,9 +70,11 @@ namespace onep
     return m->cost;
   }
 
-  void SkillBranch::addSkill(Skill::Ptr skill)
+  void SkillBranch::writeObject(luabridge::LuaRef& object) const
   {
-    m->skills.push_back(skill);
   }
 
+  void SkillBranch::readObject(const luabridge::LuaRef& object)
+  {
+  }
 }

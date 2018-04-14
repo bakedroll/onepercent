@@ -4,6 +4,7 @@
 #include <osgGaming/LogManager.h>
 
 #include <memory>
+#include <functional>
 
 extern "C"
 {
@@ -42,10 +43,13 @@ namespace onep
     ~LuaStateManager();
 
     luabridge::LuaRef getGlobal(const char* name) const;
+    luabridge::LuaRef getObject(const char* name) const;
 
     void loadScript(std::string filename);
     void printStack();
     void printTable();
+
+    static void safeExecute(std::function<void()> func);
 
     template<typename T>
     void registerClassInstance(LuaClassInstance* inst)

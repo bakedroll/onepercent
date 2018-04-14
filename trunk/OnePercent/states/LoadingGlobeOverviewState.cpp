@@ -7,6 +7,9 @@
 #include "nodes/CountryOverlay.h"
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
+#include "scripting/LuaStateManager.h"
+#include "simulation/CountriesContainer.h"
+#include "simulation/SimulationStateContainer.h"
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 
@@ -20,7 +23,6 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <chrono>
-#include <scripting/LuaStateManager.h>
 
 namespace onep
 {
@@ -36,6 +38,9 @@ namespace onep
       , countryNameOverlay(injector.inject<CountryNameOverlay>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , countryOverlay(injector.inject<CountryOverlay>())
+      , skillsContainer(injector.inject<SkillsContainer>())
+      , countriesContainer(injector.inject<CountriesContainer>())
+      , stateContainer(injector.inject<SimulationStateContainer>())
       , simulation(injector.inject<Simulation>())
       , lua(injector.inject<LuaStateManager>())
       , labelLoadingText(nullptr)
@@ -54,6 +59,11 @@ namespace onep
     osg::ref_ptr<CountryNameOverlay> countryNameOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<CountryOverlay> countryOverlay;
+
+    osg::ref_ptr<SkillsContainer> skillsContainer;
+    osg::ref_ptr<CountriesContainer> countriesContainer;
+    osg::ref_ptr<SimulationStateContainer> stateContainer;
+
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<LuaStateManager> lua;
 
@@ -124,6 +134,7 @@ namespace onep
   {
     osg::ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
+    // Loading lua scripts
     m->lua->loadScript("./GameData/scripts/core.lua");
 
     m->lua->loadScript("./GameData/scripts/data/branches.lua");
@@ -133,6 +144,16 @@ namespace onep
 
     m->lua->loadScript("./GameData/scripts/control/skills.lua");
 
+    // initialize simulation state in lua
+    luabridge::LuaRef func_initialize_state = m->lua->getObject("core.control.initialize_state");
+    LuaStateManager::safeExecute([&](){ func_initialize_state(); });
+
+    // load data from lua state
+    m->skillsContainer    ->loadFromLua(m->lua->getObject("core.model.branches"));
+    m->countriesContainer ->loadFromLua(m->lua->getObject("core.model.countries"));
+    m->stateContainer     ->loadFromLua(m->lua->getObject("core.model.state"));
+
+    // loading globe
     m->backgroundModel->loadStars("./GameData/data/stars.bin");
 
     m->globeModel->loadFromDisk(world->getCameraManipulator());
@@ -141,16 +162,22 @@ namespace onep
     m->boundariesMesh->makeOverallBoundaries(0.005f);
 
     m->countryOverlay->loadCountries(
-      m->simulation->getIdCountryMap(),
       "./GameData/data/countries.dat",
       "./GameData/textures/earth/distance.png",
       m->boundariesMesh->getCountryVertices(),
       m->boundariesMesh->getCountryTexcoords());
 
-    m->simulation->prepare();
-
     m->countryNameOverlay->setEnabled(false);
     m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryMeshs());
+
+    // update neighbours data
+    m->countriesContainer->writeToLua();
+
+    luabridge::LuaRef func_initialize_neighbour_states = m->lua->getObject("core.control.initialize_neighbour_states");
+    LuaStateManager::safeExecute([&](){ func_initialize_neighbour_states(); });
+
+    // loading simulation
+    m->simulation->prepare();
   }
 
   void LoadingGlobeOverviewState::onResizeEvent(float width, float height)

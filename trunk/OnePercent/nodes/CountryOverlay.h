@@ -24,7 +24,6 @@ namespace onep
     ~CountryOverlay();
 
     void loadCountries(
-      const std::map<int, std::string> idCountriesMap,
       std::string countriesFilename,
       std::string distanceMapFilename,
       osg::ref_ptr<osg::Vec3Array> vertices,

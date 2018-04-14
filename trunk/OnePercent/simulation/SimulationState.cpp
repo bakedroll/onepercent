@@ -1,5 +1,6 @@
 #include "SimulationState.h"
 
+#include "core/Macros.h"
 #include "simulation/CountryState.h"
 
 namespace onep
@@ -11,32 +12,24 @@ namespace onep
     CountryState::Map countryStates;
   };
 
-  SimulationState::SimulationState()
+  SimulationState::SimulationState(const luabridge::LuaRef& object)
     : osg::Referenced()
-    , LuaClass()
+    , LuaObjectMapper(object)
     , m(new Impl())
   {
+    assert_return(object.isTable());
 
+    for (luabridge::Iterator it(object); !it.isNil(); ++it)
+    {
+      luabridge::LuaRef ref = *it;
+      assert_continue(ref.isTable());
+
+      m->countryStates[int(it.key())] = new CountryState(ref);
+    }
   }
 
   SimulationState::~SimulationState()
   {
-  }
-
-  SimulationState::Ptr SimulationState::copy() const
-  {
-    Ptr c = new SimulationState();
-    
-    for (CountryState::Map::iterator it = m->countryStates.begin(); it != m->countryStates.end(); ++it)
-      c->m->countryStates[it->first] = it->second->copy();
-
-    return c;
-  }
-
-  void SimulationState::overwrite(Ptr other)
-  {
-    for (CountryState::Map::iterator it = other->m->countryStates.begin(); it != other->m->countryStates.end(); ++it)
-      m->countryStates[it->first]->overwrite(it->second);
   }
 
   void SimulationState::addCountryState(int id, CountryState::Ptr countryState)
@@ -49,16 +42,15 @@ namespace onep
     return m->countryStates;
   }
 
-  void SimulationState::registerClass(lua_State* state)
+  void SimulationState::writeObject(luabridge::LuaRef& object) const
   {
-    luabridge::getGlobalNamespace(state)
-      .beginClass<SimulationState>("SimulationState")
-      .addFunction("get_country_state", &SimulationState::lua_get_country_state)
-      .endClass();
+    for (CountryState::Map::const_iterator it = m->countryStates.cbegin(); it != m->countryStates.cend(); ++it)
+      it->second->write();
   }
 
-  CountryState* SimulationState::lua_get_country_state(int id)
+  void SimulationState::readObject(const luabridge::LuaRef& object)
   {
-    return m->countryStates[id].get();
+    for (CountryState::Map::const_iterator it = m->countryStates.cbegin(); it != m->countryStates.cend(); ++it)
+      it->second->read();
   }
 }

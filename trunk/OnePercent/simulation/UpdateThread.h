@@ -3,7 +3,6 @@
 #include "simulation/SimulationState.h"
 
 #include <QThread>
-#include <QMutex>
 #include <memory>
 
 namespace onep
@@ -16,7 +15,6 @@ namespace onep
     UpdateThread();
     ~UpdateThread();
 
-    void initializeState(SimulationState::Ptr state);
     void setUpdateFunctions(LuaRefPtr refUpdate_skills_func, LuaRefPtr refUpdate_branches_func);
 
     virtual void run() override;
@@ -24,8 +22,7 @@ namespace onep
     void doNextStep();
     void shutdown();
 
-    SimulationState::Ptr getState() const;
-    QMutex& getStateMutex();
+    QMutex& getStateMutex() const;
 
   private:
     struct Impl;
