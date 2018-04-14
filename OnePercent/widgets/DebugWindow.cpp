@@ -14,7 +14,7 @@
 #include <QCheckBox>
 #include <QButtonGroup>
 #include <QLabel>
-#include <QLineEdit>
+#include <QKeyEvent>
 
 #include <chrono>
 #include <nodes/CountryOverlay.h>
@@ -22,6 +22,53 @@
 
 namespace onep
 {
+  ConsoleEdit::ConsoleEdit(QWidget* parent)
+    : QLineEdit(parent)
+    , m_pos(-1)
+  {
+    setFont(QFont("Lucida Console", 12));
+
+    QConnectFunctor::connect(this, SIGNAL(returnPressed()), [&]()
+    {
+      QString command = text();
+      m_latestCommands.push_back(command);
+      emit commandEntered(command);
+      setText(QString());
+      m_pos = -1;
+    });
+  }
+
+  void ConsoleEdit::keyPressEvent(QKeyEvent* event)
+  {
+    if (event->key() == Qt::Key_Up && m_latestCommands.size() > 0)
+    {
+      if (m_pos == -1)
+      {
+        m_pos = m_latestCommands.size() - 1;
+        setText(m_latestCommands[m_pos]);
+      }
+      else if (m_pos > 0)
+      {
+        m_pos--;
+        setText(m_latestCommands[m_pos]);
+      }
+    }
+    else if (event->key() == Qt::Key_Down && m_latestCommands.size() > 0)
+    {
+      if (m_pos < int(m_latestCommands.size()-1))
+      {
+        m_pos++;
+        setText(m_latestCommands[m_pos]);
+      }
+    }
+    else if (event->key() == Qt::Key_Escape)
+    {
+      setText(QString());
+    }
+
+    QLineEdit::keyPressEvent(event);
+  }
+
   struct DebugWindow::Impl
   {
     Impl(osgGaming::Injector& injector, DebugWindow* b)
@@ -35,8 +82,10 @@ namespace onep
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , toggleCountryButton(nullptr)
+      , widgetStats(nullptr)
+      , layoutStats(nullptr)
       , radioNoOverlay(nullptr)
-      , labelStats(nullptr)
+      , buttonStartStop(nullptr)
     {
     }
 
@@ -58,14 +107,30 @@ namespace onep
     osgGaming::Observer<int>::Ptr notifySelectedCountry;
     osgGaming::Observer<int>::Ptr notifyDay;
     osgGaming::Observer<int>::Ptr notifySkillpoints;
+    osgGaming::Observer<bool>::Ptr notifyRunningValues;
+    osgGaming::Observer<bool>::Ptr notifyRunningButton;
 
+    QWidget* widgetStats;
+    QVBoxLayout* layoutStats;
     QRadioButton* radioNoOverlay;
-    QLabel* labelStats;
     QLabel* labelSkillpoints;
-    QLineEdit* luaConsoleEdit;
+    ConsoleEdit* luaConsoleEdit;
+    QPushButton* buttonStartStop;
 
     std::vector<osgGaming::Observer<int>::Ptr> selectedCountryIdObservers;
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
+
+    struct ValueWidget
+    {
+      QLineEdit* edit;
+      QPushButton* buttonSet;
+    };
+
+    typedef std::map<std::string, ValueWidget> ValueWidgets;
+    typedef std::map<std::string, ValueWidgets> BranchValueWidgets;
+
+    ValueWidgets valueWidgets;
+    BranchValueWidgets branchValueWidgets;
 
     void toggleCountry()
     {
@@ -94,15 +159,50 @@ namespace onep
       OSGG_QLOG_DEBUG(QString("Took %1 ms").arg(d));
     }
 
+    ValueWidget createValueWidgets(const QString& labelText)
+    {
+      ValueWidget widget;
+
+      QLabel* label = new QLabel(labelText);
+      label->setMinimumWidth(150);
+
+      widget.edit = new QLineEdit();
+      widget.edit->setMaximumWidth(40);
+
+      widget.buttonSet = new QPushButton("Set");
+      widget.buttonSet->setMaximumWidth(50);
+      widget.buttonSet->setEnabled(false);
+      widget.buttonSet->setFocusPolicy(Qt::NoFocus);
+
+      QPushButton* button = widget.buttonSet;
+      QConnectFunctor::connect(widget.edit, SIGNAL(textEdited(QString)), [button]()
+      {
+        button->setEnabled(true);
+      });
+
+      QHBoxLayout* layout = new QHBoxLayout();
+      layout->setContentsMargins(0, 0, 0, 0);
+      layout->addWidget(label);
+      layout->addStretch(1);
+      layout->addWidget(widget.edit);
+      layout->addWidget(widget.buttonSet);
+
+      layoutStats->addLayout(layout);
+
+      return widget;
+    }
+
     void updateCountryInfoText()
     {
       int selectedId = countryOverlay->getSelectedCountryId();
 
       if (selectedId == 0)
       {
-        labelStats->setText("");
+        widgetStats->setVisible(false);
         return;
       }
+
+      widgetStats->setVisible(true);
 
       CountryState::Map& countryStates = stateContainer->getState()->getCountryStates();
       if (countryStates.count(selectedId) == 0)
@@ -114,16 +214,77 @@ namespace onep
       CountryState::ValuesMap& values = countryState->getValuesMap();
       CountryState::BranchValuesMap& branchValues = countryState->getBranchValuesMap();
 
-      QString infoText = QString("%1 (%2)\n").arg(QString::fromLocal8Bit(country->getCountryName().c_str())).arg(country->getId());
+      if (layoutStats == nullptr)
+      {
+        layoutStats = new QVBoxLayout();
+        layoutStats->setContentsMargins(0, 0, 0, 0);
+        layoutStats->setSpacing(0);
+        widgetStats->setLayout(layoutStats);
+
+        QLabel* labelCountry = new QLabel();
+        labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getCountryName().c_str())).arg(country->getId()));
+
+        layoutStats->addWidget(labelCountry);
+
+        for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
+        {
+          ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()));
+          valueWidgets[it->first] = widget;
+
+          QPushButton* button = widget.buttonSet;
+          QLineEdit* edit = widget.edit;
+          std::string name = it->first;
+          QConnectFunctor::connect(widget.buttonSet, SIGNAL(clicked()), [=]()
+          {
+            bool ok;
+            float value = edit->text().toInt(&ok);
+            countryState->getValuesMap()[name] = value;
+            simulation->getUpdateThread()->executeLuaTask([countryState](){ countryState->writeValues(); });
+            edit->setText(QString::number(value));
+            button->setEnabled(false);
+          });
+        }
+
+        for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
+        {
+          for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+          {
+            ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()));
+            branchValueWidgets[it->first][vit->first] = widget;
+
+            QPushButton* button = widget.buttonSet;
+            QLineEdit* edit = widget.edit;
+            std::string branchName = it->first;
+            std::string name = vit->first;
+            QConnectFunctor::connect(widget.buttonSet, SIGNAL(clicked()), [=]()
+            {
+              bool ok;
+              float value = edit->text().toInt(&ok);
+              countryState->getBranchValuesMap()[branchName][name] = value;
+              simulation->getUpdateThread()->executeLuaTask([countryState](){ countryState->writeBranchValues(); });
+              edit->setText(QString::number(value));
+              button->setEnabled(false);
+            });
+          }
+        }
+
+        notifyRunningValues = simulation->getORunning()->connectAndNotify(osgGaming::Func<bool>([&](bool running)
+        {
+          for (ValueWidgets::iterator it = valueWidgets.begin(); it != valueWidgets.end(); ++it)
+            it->second.edit->setEnabled(!running);
+
+          for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
+            for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+              vit->second.edit->setEnabled(!running);
+        }));
+      }
 
       for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
-        infoText += QString("%1: %2\n").arg(it->first.c_str()).arg(it->second);
+        valueWidgets[it->first].edit->setText(QString::number(it->second));
 
       for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
         for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-          infoText += QString("%1 %2: %3\n").arg(vit->first.c_str()).arg(it->first.c_str()).arg(vit->second);
-
-      labelStats->setText(infoText);
+          branchValueWidgets[it->first][vit->first].edit->setText(QString::number(vit->second));
     }
 
     void setupUi()
@@ -207,16 +368,30 @@ namespace onep
         }
       }
 
-      luaConsoleEdit = new QLineEdit();
+      luaConsoleEdit = new ConsoleEdit();
+      buttonStartStop = new QPushButton();
+      buttonStartStop->setFixedWidth(100);
+      buttonStartStop->setFocusPolicy(Qt::NoFocus);
 
-      QConnectFunctor::connect(luaConsoleEdit, SIGNAL(returnPressed()), [&]()
+      connect(luaConsoleEdit, SIGNAL(commandEntered(QString)), base, SLOT(onCommandEntered(QString)));
+
+      QConnectFunctor::connect(buttonStartStop, SIGNAL(clicked()), [&]()
       {
-        std::string command = luaConsoleEdit->text().toStdString();
-        simulation->getUpdateThread()->executeLuaTask([this, command]() { lua->executeCode(command); });
-        luaConsoleEdit->setText(QString());
+        if (simulation->running())
+          simulation->stop();
+        else
+          simulation->start();
       });
 
-      labelStats = new QLabel(QString());
+      notifyRunningButton = simulation->getORunning()->connectAndNotify(osgGaming::Func<bool>([&](bool running)
+      {
+        if (running)
+          buttonStartStop->setText("Stop simulation");
+        else
+          buttonStartStop->setText("Start simulation");
+      }));
+
+      widgetStats = new QWidget();
       labelSkillpoints = new QLabel(QString());
       labelSkillpoints->setObjectName("LabelSkillPoints");
 
@@ -259,7 +434,7 @@ namespace onep
       leftLayout->addWidget(toggleCountryButton);
       leftLayout->addLayout(branchesLayout);
       leftLayout->addWidget(labelSkillpoints);
-      leftLayout->addWidget(labelStats);
+      leftLayout->addWidget(widgetStats);
       leftLayout->addStretch(1);
 
       QWidget* leftWidget = new QWidget();
@@ -272,8 +447,13 @@ namespace onep
       centralLayout->addStretch(1);
       centralLayout->addWidget(rightWidget);
 
+      QHBoxLayout* consoleLayout = new QHBoxLayout();
+      consoleLayout->setContentsMargins(0, 0, 0, 0);
+      consoleLayout->addWidget(luaConsoleEdit);
+      consoleLayout->addWidget(buttonStartStop);
+
       QVBoxLayout* centralVLayout = new QVBoxLayout();
-      centralVLayout->addWidget(luaConsoleEdit);
+      centralVLayout->addLayout(consoleLayout);
       centralVLayout->addLayout(centralLayout);
 
       base->setLayout(centralVLayout);
@@ -311,5 +491,17 @@ namespace onep
 
   DebugWindow::~DebugWindow()
   {
+  }
+
+  void DebugWindow::keyPressEvent(QKeyEvent* event)
+  {
+    if (event->key() != Qt::Key_Escape || !m->luaConsoleEdit->hasFocus())
+      QDialog::keyPressEvent(event);
+  }
+
+  void DebugWindow::onCommandEntered(const QString& command)
+  {
+    std::string c = command.toStdString();
+    m->simulation->getUpdateThread()->executeLuaTask([this, c]() { m->lua->executeCode(c); });
   }
 }

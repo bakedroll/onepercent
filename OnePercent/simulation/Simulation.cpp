@@ -1,6 +1,7 @@
 #include "Simulation.h"
 
 #include "core/QConnectFunctor.h"
+#include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "core/Macros.h"
 #include "simulation/SkillsContainer.h"
@@ -8,8 +9,6 @@
 #include "simulation/CountryState.h"
 #include "simulation/SkillBranch.h"
 #include "simulation/UpdateThread.h"
-
-#include <osgGaming/ResourceManager.h>
 
 #include <QTimer>
 
@@ -30,6 +29,7 @@ namespace onep
       , stateContainer(injector.inject<SimulationStateContainer>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
+      , oRunning(new osgGaming::Observable<bool>(false))
       , bSyncing(false)
     {}
 
@@ -46,6 +46,8 @@ namespace onep
     LuaRefPtr refUpdate_skills_func;
     LuaRefPtr refUpdate_branches_func;
     LuaRefPtr refDump_object;
+
+    osgGaming::Observable<bool>::Ptr oRunning;
 
     std::vector<osgGaming::Observer<bool>::Ptr> notifyActivatedList;
 
@@ -169,6 +171,7 @@ namespace onep
 
   void Simulation::start()
   {
+    m->oRunning->set(true);
     m->timer.start();
     OSGG_LOG_DEBUG("Simulation started");
   }
@@ -176,12 +179,18 @@ namespace onep
   void Simulation::stop()
   {
     m->timer.stop();
+    m->oRunning->set(false);
     OSGG_LOG_DEBUG("Simulation stopped");
   }
 
   bool Simulation::running() const
   {
     return m->timer.isActive();
+  }
+
+  osgGaming::Observable<bool>::Ptr Simulation::getORunning() const
+  {
+    return m->oRunning;
   }
 
   void Simulation::registerClass(lua_State* state)
@@ -203,26 +212,26 @@ namespace onep
 
   void Simulation::lua_start(lua_State* state)
   {
-    start();
+    Multithreading::uiExecuteOrAsync([this](){ start(); });
   }
 
   void Simulation::lua_stop(lua_State* state)
   {
-    stop();
+    Multithreading::uiExecuteOrAsync([this](){ stop(); });
   }
 
   void Simulation::lua_set_skill_points(int points)
   {
-    m->oNumSkillPoints->set(points);
+    Multithreading::uiExecuteOrAsync([=](){ m->oNumSkillPoints->set(points); });
   }
 
   void Simulation::lua_set_day(int day)
   {
-    m->oDay->set(day);
+    Multithreading::uiExecuteOrAsync([=](){ m->oDay->set(day); });
   }
 
   void Simulation::lua_set_interval(int interval)
   {
-    m->timer.setInterval(interval);
+    Multithreading::uiExecuteOrAsync([=](){ m->timer.setInterval(interval); });
   }
 }
