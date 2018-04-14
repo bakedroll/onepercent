@@ -5,6 +5,7 @@
 namespace onep
 {
   class SimulationState;
+  class UpdateThread;
 
 	class Simulation : public osg::Referenced, public LuaClassInstance
 	{
@@ -16,6 +17,8 @@ namespace onep
 
     void prepare();
     void shutdownUpdateThread();
+
+    UpdateThread* getUpdateThread();
 
     bool paySkillPoints(int points);
 
@@ -29,6 +32,9 @@ namespace onep
     // Lua functions
     void lua_start(lua_State* state);
     void lua_stop(lua_State* state);
+    void lua_set_skill_points(int points);
+    void lua_set_day(int day);
+    void lua_set_interval(int interval);
 
 	private:
     struct Impl;

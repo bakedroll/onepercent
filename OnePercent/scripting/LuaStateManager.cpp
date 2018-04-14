@@ -68,23 +68,31 @@ namespace onep
     return current;
   }
 
-  void LuaStateManager::loadScript(std::string filename)
+  bool LuaStateManager::executeCode(std::string code)
   {
     QMutexLocker lock(&m->luaLock);
 
-    std::string script = m->resourceManager->loadText(filename);
-
-    if (luaL_dostring(m_state, script.c_str()))
+    if (luaL_dostring(m_state, code.c_str()))
     {
       std::string msg = lua_tostring(m_state, -1);
 
       std::replace(msg.begin(), msg.end(), '\r', '\n');
-      OSGG_LOG_FATAL("Lua Error in file " + filename + ": " + msg);
+      OSGG_LOG_FATAL("Lua Error: " + msg);
 
       lua_pop(m_state, 1);
+      return true;
     }
 
+    return false;
+  }
+
+  bool LuaStateManager::loadScript(std::string filename)
+  {
+    std::string script = m->resourceManager->loadText(filename);
+    bool success = executeCode(script);
     m->resourceManager->clearCacheResource(filename);
+
+    return success;
   }
 
   void LuaStateManager::printStack()

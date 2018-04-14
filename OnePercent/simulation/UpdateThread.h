@@ -20,9 +20,9 @@ namespace onep
     virtual void run() override;
 
     void doNextStep();
+    void scheduleLuaTask(const std::function<void()>& task);
+    void executeLuaTask(const std::function<void()>& task);
     void shutdown();
-
-    QMutex& getStateMutex() const;
 
   private:
     struct Impl;

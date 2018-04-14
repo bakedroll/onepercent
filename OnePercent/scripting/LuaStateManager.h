@@ -45,7 +45,9 @@ namespace onep
     luabridge::LuaRef getGlobal(const char* name) const;
     luabridge::LuaRef getObject(const char* name) const;
 
-    void loadScript(std::string filename);
+    bool executeCode(std::string code);
+    bool loadScript(std::string filename);
+
     void printStack();
     void printTable();
 

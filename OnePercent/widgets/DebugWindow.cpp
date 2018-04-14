@@ -6,6 +6,7 @@
 #include "simulation/Simulation.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
+#include "Simulation/UpdateThread.h"
 
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -13,6 +14,7 @@
 #include <QCheckBox>
 #include <QButtonGroup>
 #include <QLabel>
+#include <QLineEdit>
 
 #include <chrono>
 #include <nodes/CountryOverlay.h>
@@ -24,6 +26,7 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector, DebugWindow* b)
       : base(b)
+      , lua(injector.inject<LuaStateManager>())
       , countryOverlay(injector.inject<CountryOverlay>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , simulation(injector.inject<Simulation>())
@@ -39,6 +42,7 @@ namespace onep
 
     DebugWindow* base;
 
+    osg::ref_ptr<LuaStateManager> lua;
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<Simulation> simulation;
@@ -58,6 +62,7 @@ namespace onep
     QRadioButton* radioNoOverlay;
     QLabel* labelStats;
     QLabel* labelSkillpoints;
+    QLineEdit* luaConsoleEdit;
 
     std::vector<osgGaming::Observer<int>::Ptr> selectedCountryIdObservers;
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
@@ -124,6 +129,7 @@ namespace onep
     void setupUi()
     {
       toggleCountryButton = new QPushButton("Toggle selected country");
+      toggleCountryButton->setFocusPolicy(Qt::NoFocus);
 
       QConnectFunctor::connect(toggleCountryButton, SIGNAL(clicked()), [this]()
       {
@@ -201,6 +207,15 @@ namespace onep
         }
       }
 
+      luaConsoleEdit = new QLineEdit();
+
+      QConnectFunctor::connect(luaConsoleEdit, SIGNAL(returnPressed()), [&]()
+      {
+        std::string command = luaConsoleEdit->text().toStdString();
+        simulation->getUpdateThread()->executeLuaTask([this, command]() { lua->executeCode(command); });
+        luaConsoleEdit->setText(QString());
+      });
+
       labelStats = new QLabel(QString());
       labelSkillpoints = new QLabel(QString());
       labelSkillpoints->setObjectName("LabelSkillPoints");
@@ -257,7 +272,11 @@ namespace onep
       centralLayout->addStretch(1);
       centralLayout->addWidget(rightWidget);
 
-      base->setLayout(centralLayout);
+      QVBoxLayout* centralVLayout = new QVBoxLayout();
+      centralVLayout->addWidget(luaConsoleEdit);
+      centralVLayout->addLayout(centralLayout);
+
+      base->setLayout(centralVLayout);
     }
   };
 
