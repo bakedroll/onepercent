@@ -2,6 +2,8 @@
 
 #include "scripting/LuaStateManager.h"
 
+#include <osgGaming/Observable.h>
+
 namespace onep
 {
   class SimulationState;
@@ -25,6 +27,7 @@ namespace onep
     void start();
     void stop();
     bool running() const;
+    osgGaming::Observable<bool>::Ptr getORunning() const;
 
     virtual void registerClass(lua_State* state) override;
     virtual std::string instanceVariableName() override;
