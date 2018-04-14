@@ -73,7 +73,8 @@ namespace onep
 
     QConnectFunctor::connect(&m->thread, SIGNAL(onStateUpdated()), [this]()
     {
-      QMutexLocker lock(&m->thread.getStateMutex());
+      // not really necessary
+      // QMutexLocker lock(&m->thread.getStateMutex());
 
       // synchronize with lua state
       m->bSyncing = true;
@@ -114,13 +115,12 @@ namespace onep
       {
         std::string branchName = m->skillsContainer->getBranchByIndex(i)->getBranchName();
 
-        m->notifyActivatedList.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
+        m->notifyActivatedList.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([this, cstate](bool activated)
         {
           if (m->bSyncing)
             return;
 
-          QMutexLocker lock(&m->thread.getStateMutex());
-          cstate->writeBranchesActivated();
+          m->thread.scheduleLuaTask([cstate](){ cstate->writeBranchesActivated(); });
         })));
       }
       
@@ -134,10 +134,9 @@ namespace onep
       for (int j = 0; j < nskills; j++)
       {
         Skill::Ptr skill = branch->getSkill(j);
-        m->notifyActivatedList.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([=](bool activated)
+        m->notifyActivatedList.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([this, skill](bool activated)
         {
-          QMutexLocker lock(&m->thread.getStateMutex());
-          skill->write();
+          m->thread.scheduleLuaTask([skill](){ skill->write(); });
         })));
       }
     }
@@ -153,6 +152,11 @@ namespace onep
     m->thread.wait();
   }
 
+  UpdateThread* Simulation::getUpdateThread()
+  {
+    return &m->thread;
+  }
+
   bool Simulation::paySkillPoints(int points)
   {
     int amount = m->oNumSkillPoints->get();
@@ -166,11 +170,13 @@ namespace onep
   void Simulation::start()
   {
     m->timer.start();
+    OSGG_LOG_DEBUG("Simulation started");
   }
 
   void Simulation::stop()
   {
     m->timer.stop();
+    OSGG_LOG_DEBUG("Simulation stopped");
   }
 
   bool Simulation::running() const
@@ -184,6 +190,9 @@ namespace onep
       .beginClass<Simulation>("Simulation")
       .addFunction("start", &Simulation::lua_start)
       .addFunction("stop", &Simulation::lua_stop)
+      .addFunction("set_day", &Simulation::lua_set_day)
+      .addFunction("set_interval", &Simulation::lua_set_interval)
+      .addFunction("set_skill_points", &Simulation::lua_set_skill_points)
     .endClass();
   }
 
@@ -202,4 +211,18 @@ namespace onep
     stop();
   }
 
+  void Simulation::lua_set_skill_points(int points)
+  {
+    m->oNumSkillPoints->set(points);
+  }
+
+  void Simulation::lua_set_day(int day)
+  {
+    m->oDay->set(day);
+  }
+
+  void Simulation::lua_set_interval(int interval)
+  {
+    m->timer.setInterval(interval);
+  }
 }

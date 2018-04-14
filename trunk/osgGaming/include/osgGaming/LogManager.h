@@ -7,7 +7,13 @@
 #include <string>
 
 #define OSGG_LOG(sev, msg) osgGaming::LogManager::getInstance()->log(sev, msg)
+
+#ifdef _DEBUG
 #define OSGG_LOG_DEBUG(msg) OSGG_LOG(osgGaming::LogManager::DEBUG, msg)
+#else
+#define OSGG_LOG_DEBUG(msg)
+#endif
+
 #define OSGG_LOG_INFO(msg) OSGG_LOG(osgGaming::LogManager::INFO, msg)
 #define OSGG_LOG_WARN(msg) OSGG_LOG(osgGaming::LogManager::WARNING, msg)
 #define OSGG_LOG_FATAL(msg) OSGG_LOG(osgGaming::LogManager::FATAL, msg)
