@@ -17,7 +17,7 @@
 
 #else
 
-#define assert_return(cond, ...)
-#define assert_continue(cond, ...)
+#define assert_return(cond, ...) if (!(cond)) return __VA_ARGS__;
+#define assert_continue(cond, ...) if (!(cond)) continue;
 
 #endif
