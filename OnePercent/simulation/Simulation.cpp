@@ -87,9 +87,6 @@ namespace onep
 
   Simulation::~Simulation()
   {
-    m->thread.shutdown();
-    m->thread.doNextStep();
-    m->thread.wait();
   }
 
   void Simulation::prepare()
@@ -147,6 +144,13 @@ namespace onep
 
     m->thread.setUpdateFunctions(m->refUpdate_skills_func, m->refUpdate_branches_func);
     m->thread.start();
+  }
+
+  void Simulation::shutdownUpdateThread()
+  {
+    m->thread.shutdown();
+    m->thread.doNextStep();
+    m->thread.wait();
   }
 
   bool Simulation::paySkillPoints(int points)
