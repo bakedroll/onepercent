@@ -9,10 +9,10 @@
 #include "states/MainMenuState.h"
 #include "states/LoadingGlobeOverviewState.h"
 #include "states/GlobeInteractionState.h"
+#include "scripting/LuaLogger.h"
 #include "simulation/SkillsContainer.h"
-#include "simulation/SimulatedValuesContainer.h"
-#include "simulation/NeighbourshipsContainer.h"
-#include "simulation/Neighbourship.h"
+#include "simulation/CountriesContainer.h"
+#include "simulation/SimulationStateContainer.h"
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/PropertiesManager.h>
@@ -55,8 +55,8 @@ namespace onep
     // simulation
     container.registerSingletonType<Simulation>();
     container.registerSingletonType<SkillsContainer>();
-    container.registerSingletonType<SimulatedValuesContainer>();
-    container.registerSingletonType<NeighbourshipsContainer>();
+    container.registerSingletonType<CountriesContainer>();
+    container.registerSingletonType<SimulationStateContainer>();
 
     // effects
     container.registerType<osgGaming::FastApproximateAntiAliasingEffect>();
@@ -65,6 +65,7 @@ namespace onep
 
     // wrapper
     container.registerSingletonType<LuaStateManager>();
+    container.registerSingletonType<LuaLogger>();
 
     // Observables
     container.registerSingletonType<ONumSkillPoints>();
@@ -78,15 +79,8 @@ namespace onep
 
     // initialize Lua classes
     osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
-    lua->registerClassInstance<SkillsContainer>(injector.inject<SkillsContainer>());
-    lua->registerClassInstance<SimulatedValuesContainer>(injector.inject<SimulatedValuesContainer>());
-    lua->registerClassInstance<NeighbourshipsContainer>(injector.inject<NeighbourshipsContainer>());
     lua->registerClassInstance<Simulation>(injector.inject<Simulation>());
-
-    lua->registerClass<SimulationState>();
-    lua->registerClass<CountryState>();
-    lua->registerClass<SimulatedLuaValue>();
-    lua->registerClass<Neighbourship>();
+    lua->registerClassInstance<LuaLogger>(injector.inject<LuaLogger>());
 
     setDefaultWorld(injector.inject<GlobeOverviewWorld>());
 

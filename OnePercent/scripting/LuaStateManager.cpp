@@ -1,9 +1,13 @@
 #include "LuaStateManager.h"
 
+#include "core/Macros.h"
+
 #include <osgGaming/ResourceManager.h>
 #include <algorithm>
 
 #include <QMutex>
+#include <QString>
+#include <QStringList>
 
 namespace onep
 {
@@ -37,6 +41,31 @@ namespace onep
   {
     QMutexLocker lock(&m->luaLock);
     return luabridge::getGlobal(m_state, name);
+  }
+
+  luabridge::LuaRef LuaStateManager::getObject(const char* name) const
+  {
+    QMutexLocker lock(&m->luaLock);
+    QString namestr(name);
+
+    QStringList names = namestr.split('.');
+
+    assert_return(names.size() > 0, luabridge::LuaRef(m_state));
+
+    std::string currentName = names[0].toStdString();
+    luabridge::LuaRef first = luabridge::getGlobal(m_state, currentName.c_str());
+    luabridge::LuaRef current = first;
+
+    for (int i = 1; i < names.size(); i++)
+    {
+      assert_return(current.isTable(), luabridge::LuaRef(m_state));
+
+      currentName = names[i].toStdString();
+      luabridge::LuaRef next = current[currentName.c_str()];
+      current = next;
+    }
+
+    return current;
   }
 
   void LuaStateManager::loadScript(std::string filename)
@@ -111,4 +140,18 @@ namespace onep
       lua_pop(m_state, 1);
     }
   }
+
+  void LuaStateManager::safeExecute(std::function<void()> func)
+  {
+    try
+    {
+      func();
+    }
+    catch (luabridge::LuaException& e)
+    {
+      OSGG_QLOG_FATAL(QString("Lua Exception: %1").arg(e.what()));
+      assert(false);
+    }
+  }
+
 }

@@ -4,7 +4,8 @@
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
 #include "simulation/Simulation.h"
-#include "simulation/SimulatedValuesContainer.h"
+#include "simulation/SimulationStateContainer.h"
+#include "simulation/SimulationState.h"
 
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -27,7 +28,7 @@ namespace onep
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , simulation(injector.inject<Simulation>())
       , skillsContainer(injector.inject<SkillsContainer>())
-      , simulatedValuesContainer(injector.inject<SimulatedValuesContainer>())
+      , stateContainer(injector.inject<SimulationStateContainer>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , toggleCountryButton(nullptr)
@@ -42,7 +43,7 @@ namespace onep
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<SkillsContainer> skillsContainer;
-    osg::ref_ptr<SimulatedValuesContainer> simulatedValuesContainer;
+    osg::ref_ptr<SimulationStateContainer> stateContainer;
 
     ODay::Ptr oDay;
     ONumSkillPoints::Ptr oNumSkillPoints;
@@ -98,7 +99,7 @@ namespace onep
         return;
       }
 
-      CountryState::Map& countryStates = simulatedValuesContainer->getState()->getCountryStates();
+      CountryState::Map& countryStates = stateContainer->getState()->getCountryStates();
       if (countryStates.count(selectedId) == 0)
         return;
 
@@ -111,11 +112,11 @@ namespace onep
       QString infoText = QString("%1 (%2)\n").arg(QString::fromLocal8Bit(country->getCountryName().c_str())).arg(country->getId());
 
       for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
-        infoText += QString("%1: %2\n").arg(it->first).arg(it->second->get());
+        infoText += QString("%1: %2\n").arg(it->first.c_str()).arg(it->second);
 
       for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
         for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-          infoText += QString("%1 %2: %3\n").arg(it->first).arg(vit->first).arg(vit->second->get());
+          infoText += QString("%1 %2: %3\n").arg(vit->first.c_str()).arg(it->first.c_str()).arg(vit->second);
 
       labelStats->setText(infoText);
     }
@@ -164,7 +165,7 @@ namespace onep
             return;
 
           int cid = selectedCountry->getId();
-          CountryState::Ptr cstate = simulatedValuesContainer->getState()->getCountryStates()[cid];
+          CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[cid];
 
           cstate->setBranchActivated(name.c_str(), checked);
         });
@@ -178,7 +179,7 @@ namespace onep
         {
           if (selected > 0)
           {
-            CountryState::Ptr cstate = simulatedValuesContainer->getState()->getCountryStates()[selected];
+            CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[selected];
 
             checkBox->setChecked(cstate->getBranchActivated(name.c_str()));
           }
@@ -190,7 +191,7 @@ namespace onep
           checkBox->setEnabled(selected > 0);
         })));
 
-        ONEP_FOREACH(CountryState::Map, it, simulatedValuesContainer->getState()->getCountryStates())
+        ONEP_FOREACH(CountryState::Map, it, stateContainer->getState()->getCountryStates())
         {
           skillBranchActivatedObservers.push_back(it->second->getOActivatedBranch(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
           {

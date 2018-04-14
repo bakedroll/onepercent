@@ -4,11 +4,11 @@ core = {
   model = 
   {
     branches = {},
-    skills = {},
     values = {},
     countries = {},
-    
-    skills_name_map = {}
+    state = {},
+
+    branches_name_map = {}
   },
 
   -- core function definitions
@@ -35,25 +35,32 @@ core = {
     create_branches = (function(branches)
 
       local global_branches = core.model.branches
-      for k,v in pairs(branches) do global_branches[k] = v end
-
-      skillsContainer:add_branches(branches)
+      local map = core.model.branches_name_map
+      for _ , v in ipairs(branches) do
+        v.skills = {}
+        table.insert(global_branches, v)
+        map[v.name] = #global_branches
+      end
 
     end),
 
     -- same here with the skills
     create_skills = (function(skills)
 
-      local global_skills = core.model.skills
-      local map = core.model.skills_name_map
-      for k,v in pairs(skills) do
-        global_skills[k] = v
-        map[v.name] = k
+      local branches = core.model.branches
+      local branches_name_map = core.model.branches_name_map
+      local branch
 
-        v.activated = false
+      for _, v in ipairs(skills) do
+        branch = branches[branches_name_map[v.branch]]
+
+        if branch ~= nil then
+          v.activated = false
+          table.insert(branch.skills, v)
+        else
+          log:warn("Could not add skill '" .. v.name .. "'. Branch '" .. v.branch .. "' not found")
+        end
       end
-
-      skillsContainer:add_skills(skills)
 
     end),
 
@@ -62,16 +69,10 @@ core = {
 
       local global_countries = core.model.countries
       local branches = core.model.branches
-      for k,v in pairs(countries) do
+      for k, v in pairs(countries) do
+        v.neighbours = {}
         global_countries[v.id] = v
-        v.branch_activated = {}
-
-        for _, branch in pairs(branches) do
-          v.branch_activated[branch.name] = false
-        end
       end
-
-      simulation:add_countries(countries)
 
     end),
 
@@ -79,81 +80,104 @@ core = {
     create_values = (function(values)
 
       local global_values = core.model.values
-      for k,v in pairs(values) do global_values[k] = v end
-
-      valuesContainer:add_values(values)
+      for _, v in ipairs(values) do table.insert(global_values, v) end
 
     end),
 
-    set_skill_activated = (function(skill_name, activated)
+    -- initializes the state for all countries with its values and branch_activated
+    initialize_state = (function()
 
-      core.model.skills[core.model.skills_name_map[skill_name]].activated = activated
+      local branches = core.model.branches
+      local countries = core.model.countries
+      local values = core.model.values
+      local state = core.model.state
+
+      for cid, country in pairs(countries) do
+        state[cid] = { values = {}, branch_values = {}, branches_activated = {} }
+
+        -- branch_values and branch_activated
+        for _, branch in pairs(branches) do
+          state[cid].branch_values[branch.name] = {}
+          state[cid].branches_activated[branch.name] = false
+        end
+
+        -- values
+        for _, value in pairs(values) do
+          if value.type == "default" then
+            state[cid].values[value.name] = value.init
+          elseif value.type == "branch" then
+            for _, branch in pairs(branches) do
+              state[cid].branch_values[branch.name][value.name] = value.init
+            end
+          else
+            log:warn("Unknown value type '" .. value.type .. "'")
+          end
+        end
+
+      end
 
     end),
 
-    set_branch_activated = (function(country_id, branch_name, activated)
+    -- update neighbours data
+    initialize_neighbour_states = (function()
 
-      core.model.countries[country_id].branch_activated[branch_name] = activated
+      local countries = core.model.countries
+      local state = core.model.state
+
+      for cid, country_state in pairs(state) do 
+        country_state.neighbour_states = {}
+        for _, neighbour_id in ipairs(countries[cid].neighbours) do
+          country_state.neighbour_states[neighbour_id] = state[neighbour_id]
+        end
+      end
 
     end),
 
     -- calls the skill_actions functions for each country
     -- and skill that is activated in an active branch
-    update_skills_func = (function(state, new_state)
+    update_skills_func = (function()
 
+      local branches = core.model.branches
       local countries = core.model.countries
-      local skills = core.model.skills
+      local state = core.model.state
       local skill_actions = core.control.skill_actions
-      local country_state, new_country_state, neighbourship, actions
+      local country_state
 
-      for id, country in pairs(countries) do
+      for cid, country in pairs(countries) do
 
-        country_state = state:get_country_state(id)
-        new_country_state = new_state:get_country_state(id)
-        neighbourship = neighbourshipsContainer:get_neighbourship(id)
+        for _, branch in ipairs(branches) do
+          for _, skill in ipairs(branch.skills) do
+            country_state = state[cid]
 
-        for _, skill in ipairs(skills) do
-          if (skill.activated == true and country.branch_activated[skill.branch] == true) then
-            actions = skill_actions[skill.name]
+            if (skill.activated == true and country_state.branches_activated[skill.branch] == true) then
+              actions = skill_actions[skill.name]
 
-            if (actions ~= nil) then
-              country_state:set_current_branch(skill.branch)
-              new_country_state:set_current_branch(skill.branch)
-              neighbourship:set_current_branch(skill.branch)
-
-              for _, func in ipairs(actions) do
-                func(country_state, neighbourship, new_country_state)
+              if (actions ~= nil) then
+                for _, func in ipairs(actions) do
+                  func(branch.name, country_state)
+                end
               end
             end
           end
         end
+
       end
 
     end),
 
     -- calls the branch_actions functions for each country
     -- and each branch
-    update_branches_func = (function(state, new_state)
+    update_branches_func = (function()
 
-      local countries = core.model.countries
       local branches = core.model.branches
-      local actions = core.control.branch_actions
-      local country_state, new_country_state, neighbourship
+      local countries = core.model.countries
+      local state = core.model.state
+      local branch_actions = core.control.branch_actions
 
-      for id, country in pairs(countries) do
-
-        country_state = state:get_country_state(id)
-        new_country_state = new_state:get_country_state(id)
-        neighbourship = neighbourshipsContainer:get_neighbourship(id)
-
+      for cid, country in pairs(countries) do
         for _, branch in ipairs(branches) do
-
-          country_state:set_current_branch(branch.name)
-          new_country_state:set_current_branch(branch.name)
-          neighbourship:set_current_branch(branch.name)
-
-          for _, func in ipairs(actions) do
-            func(country_state, neighbourship, new_country_state)
+          for _, func in ipairs(branch_actions) do
+            func(branch.name, state[cid])
           end
         end
       end

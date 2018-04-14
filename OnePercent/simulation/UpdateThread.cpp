@@ -22,9 +22,6 @@ namespace onep
     QMutex mutexShutdown;
     QMutex mutexState;
 
-    SimulationState::Ptr state;
-    SimulationState::Ptr nextState;
-
     LuaRefPtr refUpdate_skills_func;
     LuaRefPtr refUpdate_branches_func;
 
@@ -40,12 +37,6 @@ namespace onep
 
   UpdateThread::~UpdateThread()
   {
-  }
-
-  void UpdateThread::initializeState(SimulationState::Ptr state)
-  {
-    m->state = state->copy();
-    m->nextState = state->copy();
   }
 
   void UpdateThread::setUpdateFunctions(LuaRefPtr refUpdate_skills_func, LuaRefPtr refUpdate_branches_func)
@@ -69,39 +60,38 @@ namespace onep
 
       QElapsedTimer timerSkillsUpdate;
       QElapsedTimer timerBranchesUpdate;
+      QElapsedTimer timerSync;
       QElapsedTimer timerOverall;
 
-      try
+      long skillsElapsed = 0;
+      long long branchesElapsed = 0;
+
+      timerOverall.start();
+
+      LuaStateManager::safeExecute([&]()
       {
         QMutexLocker lock(&m->mutexState);
 
-        timerOverall.start();
-
-        m->nextState->overwrite(m->state);
-
         timerSkillsUpdate.start();
-        (*m->refUpdate_skills_func)(m->state.get(), m->nextState.get());
-        long skillsElapsed = timerSkillsUpdate.elapsed();
-
-        m->state->overwrite(m->nextState);
+        (*m->refUpdate_skills_func)();
+        skillsElapsed = timerSkillsUpdate.elapsed();
 
         timerBranchesUpdate.start();
-        (*m->refUpdate_branches_func)(m->state.get(), m->nextState.get());
-        long branchesElapsed = timerBranchesUpdate.elapsed();
+        (*m->refUpdate_branches_func)();
+        branchesElapsed = timerBranchesUpdate.elapsed();
+      });
 
-        m->state.swap(m->nextState);
-        long overallElapsed = timerOverall.elapsed();
-
-        OSGG_QLOG_DEBUG(QString("SkillsUpdate: %1ms BranchesUpdate: %2ms Overall: %3ms").arg(skillsElapsed).arg(branchesElapsed).arg(overallElapsed));
-
-      }
-      catch (luabridge::LuaException& e)
-      {
-        OSGG_QLOG_FATAL(QString("Lua Exception: %1").arg(e.what()));
-        assert(false);
-      }
-
+      timerSync.start();
       emit onStateUpdated();
+
+      long syncElapsed = timerSync.elapsed();
+      long overallElapsed = timerOverall.elapsed();
+
+      OSGG_QLOG_DEBUG(QString("SkillsUpdate: %1ms BranchesUpdate: %2ms Sync: %3ms Overall: %4ms")
+        .arg(skillsElapsed)
+        .arg(branchesElapsed)
+        .arg(syncElapsed)
+        .arg(overallElapsed));
     }
 
     OSGG_LOG_DEBUG("Shutdown update thread");
@@ -118,13 +108,7 @@ namespace onep
     m->bShutdown = true;
   }
 
-  SimulationState::Ptr UpdateThread::getState() const
-  {
-    QMutexLocker lock(&m->mutexState);
-    return m->state;
-  }
-
-  QMutex& UpdateThread::getStateMutex()
+  QMutex& UpdateThread::getStateMutex() const
   {
     return m->mutexState;
   }

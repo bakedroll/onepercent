@@ -4,7 +4,8 @@
 #include "core/QConnectFunctor.h"
 
 #include "simulation/Simulation.h"
-#include "simulation/SimulatedValuesContainer.h"
+#include "simulation/SimulationStateContainer.h"
+#include "simulation/SimulationState.h"
 #include "simulation/SkillBranch.h"
 
 #include <osgGaming/Helper.h>
@@ -18,7 +19,7 @@ namespace onep
     Impl(osgGaming::Injector& injector)
       : simulation(injector.inject<Simulation>())
       , skillsContainer(injector.inject<SkillsContainer>())
-      , valuesContainer(injector.inject<SimulatedValuesContainer>())
+      , stateContainer(injector.inject<SimulationStateContainer>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
     {}
 
@@ -26,7 +27,7 @@ namespace onep
 
     Simulation::Ptr simulation;
     SkillsContainer::Ptr skillsContainer;
-    SimulatedValuesContainer::Ptr valuesContainer;
+    SimulationStateContainer::Ptr stateContainer;
 
     std::vector<QPushButton*> buttons;
 
@@ -40,10 +41,10 @@ namespace onep
         return;
 
       int cid = countryMesh->getCountryData()->getId();
-      if (valuesContainer->getState()->getCountryStates().count(cid) == 0)
+      if (stateContainer->getState()->getCountryStates().count(cid) == 0)
         return;
 
-      CountryState::Ptr cstate = valuesContainer->getState()->getCountryStates()[cid];
+      CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[cid];
 
       int n = skillsContainer->getNumBranches();
       for (int i = 0; i < n; i++)
@@ -103,7 +104,7 @@ namespace onep
           return;
 
         int cid = m->countryMesh->getCountryData()->getId();
-        CountryState::Ptr cstate = m->valuesContainer->getState()->getCountryStates()[cid];
+        CountryState::Ptr cstate = m->stateContainer->getState()->getCountryStates()[cid];
 
         cstate->setBranchActivated(name.c_str(), true);
 

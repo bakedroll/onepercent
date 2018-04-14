@@ -4,9 +4,8 @@
 #include "core/Observables.h"
 #include "core/Macros.h"
 #include "simulation/SkillsContainer.h"
-#include "simulation/SimulatedValuesContainer.h"
+#include "simulation/SimulationStateContainer.h"
 #include "simulation/CountryState.h"
-#include "simulation/NeighbourshipsContainer.h"
 #include "simulation/SkillBranch.h"
 #include "simulation/UpdateThread.h"
 
@@ -17,8 +16,6 @@
 extern "C"
 {
 #include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
 }
 
 #include <LuaBridge.h>
@@ -30,37 +27,31 @@ namespace onep
     Impl(osgGaming::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
       , skillsContainer(injector.inject<SkillsContainer>())
-      , valuesContainer(injector.inject<SimulatedValuesContainer>())
+      , stateContainer(injector.inject<SimulationStateContainer>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
-      , neighbourshipsContainer(injector.inject<NeighbourshipsContainer>())
+      , bSyncing(false)
     {}
 
     osg::ref_ptr<LuaStateManager> lua;
 
     SkillsContainer::Ptr skillsContainer;
-    SimulatedValuesContainer::Ptr valuesContainer;
+    SimulationStateContainer::Ptr stateContainer;
 
     QTimer timer;
 
     ODay::Ptr oDay;
     ONumSkillPoints::Ptr oNumSkillPoints;
 
-    std::map<int, std::string> idCountryMap;
-
     LuaRefPtr refUpdate_skills_func;
     LuaRefPtr refUpdate_branches_func;
-    LuaRefPtr refSet_skill_activated;
-    LuaRefPtr refSet_branch_activated;
-
     LuaRefPtr refDump_object;
-
-    SimulationState::Ptr stateCopy;
-    NeighbourshipsContainer::Ptr neighbourshipsContainer;
 
     std::vector<osgGaming::Observer<bool>::Ptr> notifyActivatedList;
 
     UpdateThread thread;
+
+    bool bSyncing;
   };
 
   Simulation::Simulation(osgGaming::Injector& injector)
@@ -82,7 +73,12 @@ namespace onep
 
     QConnectFunctor::connect(&m->thread, SIGNAL(onStateUpdated()), [this]()
     {
-      m->valuesContainer->getState()->overwrite(m->thread.getState());
+      QMutexLocker lock(&m->thread.getStateMutex());
+
+      // synchronize with lua state
+      m->bSyncing = true;
+      m->stateContainer->getState()->read();
+      m->bSyncing = false;
 
       // increment day
       m->oDay->set(m->oDay->get() + 1);
@@ -98,17 +94,9 @@ namespace onep
 
   void Simulation::prepare()
   {
-    luabridge::LuaRef core = m->lua->getGlobal("core");
-    luabridge::LuaRef control = core["control"];
-    luabridge::LuaRef helper = core["helper"];
-
-
-    m->refUpdate_skills_func = MAKE_LUAREF_PTR(control["update_skills_func"]);
-    m->refUpdate_branches_func = MAKE_LUAREF_PTR(control["update_branches_func"]);
-    m->refSet_skill_activated = MAKE_LUAREF_PTR(control["set_skill_activated"]);
-    m->refSet_branch_activated = MAKE_LUAREF_PTR(control["set_branch_activated"]);
-
-    m->refDump_object = MAKE_LUAREF_PTR(helper["dump_object"]);
+    m->refUpdate_skills_func    = MAKE_LUAREF_PTR(m->lua->getObject("core.control.update_skills_func"));
+    m->refUpdate_branches_func  = MAKE_LUAREF_PTR(m->lua->getObject("core.control.update_branches_func"));
+    m->refDump_object           = MAKE_LUAREF_PTR(m->lua->getObject("core.helper.dump_object"));
 
     if (!m->refUpdate_skills_func->isFunction())
       OSGG_QLOG_FATAL(QString("Could not load lua function ''").arg("update_skills_func"));
@@ -116,23 +104,14 @@ namespace onep
     if (!m->refUpdate_branches_func->isFunction())
       OSGG_QLOG_FATAL(QString("Could not load lua function ''").arg("update_branches_func"));
 
-    if (!m->refSet_skill_activated->isFunction())
-      OSGG_QLOG_FATAL(QString("Could not load lua function ''").arg("set_skill_activated"));
-
-    if (!m->refSet_branch_activated->isFunction())
-      OSGG_QLOG_FATAL(QString("Could not load lua function ''").arg("set_branch_activated"));
-
     if (!m->refDump_object->isFunction())
       OSGG_QLOG_FATAL(QString("Could not load lua function ''").arg("dump_object"));
 
-    m->neighbourshipsContainer->prepare();
-
     int nBranches = m->skillsContainer->getNumBranches();
 
-    ONEP_FOREACH(CountryState::Map, it, m->valuesContainer->getState()->getCountryStates())
+    ONEP_FOREACH(CountryState::Map, it, m->stateContainer->getState()->getCountryStates())
     {
       CountryState::Ptr cstate = it->second;
-      int cid = it->first;
 
       for (int i = 0; i < nBranches; i++)
       {
@@ -140,8 +119,11 @@ namespace onep
 
         m->notifyActivatedList.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
         {
+          if (m->bSyncing)
+            return;
+
           QMutexLocker lock(&m->thread.getStateMutex());
-          (*m->refSet_branch_activated)(cid, branchName, activated);
+          cstate->writeBranchesActivated();
         })));
       }
       
@@ -158,22 +140,13 @@ namespace onep
         m->notifyActivatedList.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([=](bool activated)
         {
           QMutexLocker lock(&m->thread.getStateMutex());
-          (*m->refSet_skill_activated)(skill->getName(), activated);
+          skill->write();
         })));
       }
     }
 
-    m->stateCopy = m->valuesContainer->getState()->copy();
-
-    m->thread.initializeState(m->valuesContainer->getState());
     m->thread.setUpdateFunctions(m->refUpdate_skills_func, m->refUpdate_branches_func);
-
     m->thread.start();
-  }
-
-  const std::map<int, std::string>& Simulation::getIdCountryMap()
-  {
-    return m->idCountryMap;
   }
 
   bool Simulation::paySkillPoints(int points)
@@ -207,7 +180,6 @@ namespace onep
       .beginClass<Simulation>("Simulation")
       .addFunction("start", &Simulation::lua_start)
       .addFunction("stop", &Simulation::lua_stop)
-      .addFunction("add_countries", &Simulation::lua_add_countries)
     .endClass();
   }
 
@@ -226,30 +198,4 @@ namespace onep
     stop();
   }
 
-  void Simulation::lua_add_countries(lua_State* state)
-  {
-    luaL_checktype(state, -1, LUA_TTABLE);
-
-    lua_pushnil(state);
-
-    while (lua_next(state, -2) != 0)
-    {
-      luaL_checktype(state, -1, LUA_TTABLE);
-      lua_getfield(state, -1, "id");
-      lua_getfield(state, -2, "name");
-
-      int id = luaL_checkinteger(state, -2);
-      const char* name = luaL_checkstring(state, -1);
-
-      if (m->idCountryMap.count(id))
-        OSGG_QLOG_WARN(QString("Country with id %1 (%2) already exists. Overwriting with %3").arg(id).arg(m->idCountryMap[id].c_str()).arg(QString::fromLocal8Bit(name)));
-
-      m->idCountryMap[id] = std::string(name);
-      m->valuesContainer->getState()->addCountryState(id, new CountryState());
-
-      OSGG_QLOG_INFO(QString("Country added: %1").arg(name));
-
-      lua_pop(state, 3);
-    }
-  }
 }

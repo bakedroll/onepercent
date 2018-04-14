@@ -1,86 +1,165 @@
 #include "simulation/CountryState.h"
 #include "simulation/SkillBranch.h"
+#include "core/Macros.h"
 #include "core/Multithreading.h"
-
-#include "QMutex"
 
 namespace onep
 {
-  typedef std::map<QString, osgGaming::Observable<bool>::Ptr> BranchActivatedMap;
+  typedef std::map<std::string, osgGaming::Observable<bool>::Ptr> BranchActivatedMap;
+
+  class ValuesTable : public LuaObjectMapper
+  {
+  public:
+    ValuesTable(const luabridge::LuaRef& object)
+      : LuaObjectMapper(object)
+    {
+      readObject(object);
+    }
+
+    ~ValuesTable() {}
+
+    CountryState::ValuesMap values;
+
+  protected:
+    virtual void writeObject(luabridge::LuaRef& object) const override
+    {
+      for (CountryState::ValuesMap::const_iterator it = values.cbegin(); it != values.cend(); ++it)
+        object[it->first.c_str()] = it->second;
+    }
+
+    virtual void readObject(const luabridge::LuaRef& object) override
+    {
+      for (luabridge::Iterator it(object); !it.isNil(); ++it)
+      {
+        assert_continue((*it).isNumber());
+        values[it.key().tostring()] = float(*it);
+      }
+    }
+
+  };
+
+  class BranchValuesTable : public LuaObjectMapper
+  {
+  public:
+    BranchValuesTable(const luabridge::LuaRef& object)
+      : LuaObjectMapper(object)
+    {
+      readObject(object);
+    }
+
+    ~BranchValuesTable() {}
+
+    CountryState::BranchValuesMap branchValues;
+
+  protected:
+    virtual void writeObject(luabridge::LuaRef& object) const override
+    {
+      for (CountryState::BranchValuesMap::const_iterator it = branchValues.cbegin(); it != branchValues.cend(); ++it)
+      {
+        luabridge::LuaRef refValues = object[it->first];
+        for (CountryState::ValuesMap::const_iterator vit = it->second.cbegin(); vit != it->second.cend(); ++vit)
+          refValues[vit->first] = vit->second;
+      }
+    }
+
+    virtual void readObject(const luabridge::LuaRef& object) override
+    {
+      for (luabridge::Iterator it(object); !it.isNil(); ++it)
+      {
+        assert_continue((*it).isTable());
+        std::string branchName = it.key().tostring();
+
+        for (luabridge::Iterator vit(*it); !vit.isNil(); ++vit)
+        {
+          assert_continue((*vit).isNumber());
+          branchValues[branchName][vit.key().tostring()] = float(*vit);
+        }
+      }
+    }
+
+  };
+
+  class BranchesActivatedTable : public LuaObjectMapper
+  {
+  public:
+    BranchesActivatedTable(const luabridge::LuaRef& object)
+      : LuaObjectMapper(object)
+    {
+      for (luabridge::Iterator it(object); !it.isNil(); ++it)
+      {
+        assert_continue((*it).type() == LUA_TBOOLEAN);
+        oActivatedBranches[it.key()] = new osgGaming::Observable<bool>(bool(*it));
+      }
+    }
+
+    ~BranchesActivatedTable() {}
+
+    BranchActivatedMap oActivatedBranches;
+
+  protected:
+    virtual void writeObject(luabridge::LuaRef& object) const override
+    {
+      for (BranchActivatedMap::const_iterator it = oActivatedBranches.cbegin(); it != oActivatedBranches.cend(); ++it)
+        object[it->first] = it->second->get();
+    }
+
+    virtual void readObject(const luabridge::LuaRef& object) override
+    {
+      for (luabridge::Iterator it(object); !it.isNil(); ++it)
+      {
+        osgGaming::Observable<bool>::Ptr oActivated = oActivatedBranches[it.key()];
+
+        assert_continue((*it).type() == LUA_TBOOLEAN);
+        assert_continue(oActivated.valid());
+
+        if (oActivated->get() != bool(*it))
+          oActivated->set(bool(*it));
+      }
+    }
+
+  };
 
   struct CountryState::Impl
   {
     Impl() {}
 
-    ValuesMap values;
-    BranchValuesMap branchValues;
-
-    std::string currentBranchName;
-
-    BranchActivatedMap oActivatedBranches;
+    std::shared_ptr<ValuesTable> tValues;
+    std::shared_ptr<BranchValuesTable> tBranchValues;
+    std::shared_ptr<BranchesActivatedTable> tBranchesActivated;
 
     QMutex mutexActivated;
   };
 
-  CountryState::CountryState()
-    : m(new Impl())
+  CountryState::CountryState(const luabridge::LuaRef& object)
+    : osg::Referenced()
+    , LuaObjectMapper(object)
+    , m(new Impl())
   {
+    luabridge::LuaRef refValues = object["values"];
+    luabridge::LuaRef refBranchValues = object["branch_values"];
+    luabridge::LuaRef refBranchesActivated = object["branches_activated"];
+
+    assert_return(refValues.isTable());
+    assert_return(refBranchValues.isTable());
+    assert_return(refBranchesActivated.isTable());
+
+    m->tValues.reset(new ValuesTable(refValues));
+    m->tBranchValues.reset(new BranchValuesTable(refBranchValues));
+    m->tBranchesActivated.reset(new BranchesActivatedTable(refBranchesActivated));
   }
 
   CountryState::~CountryState()
   {
   }
 
-  CountryState::Ptr CountryState::copy() const
-  {
-    Ptr c = new CountryState();
-
-    for (ValuesMap::iterator it = m->values.begin(); it != m->values.end(); ++it)
-      c->m->values[it->first] = new SimulatedLuaValue(it->second->get());
-
-    for (BranchValuesMap::iterator it = m->branchValues.begin(); it != m->branchValues.end(); ++it)
-      for (ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-        c->m->branchValues[it->first][vit->first] = new SimulatedLuaValue(vit->second->get());
-
-    for (BranchActivatedMap::iterator it = m->oActivatedBranches.begin(); it != m->oActivatedBranches.end(); ++it)
-      c->m->oActivatedBranches[it->first] = it->second;
-
-    return c;
-  }
-
-  void CountryState::overwrite(Ptr other)
-  {
-    for (ValuesMap::iterator it = other->m->values.begin(); it != other->m->values.end(); ++it)
-      m->values[it->first]->set(it->second->get());
-
-    for (BranchValuesMap::iterator it = other->m->branchValues.begin(); it != other->m->branchValues.end(); ++it)
-      for (ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-        m->branchValues[it->first][vit->first]->set(vit->second->get());
-  }
-
-  void CountryState::addValue(const char* name, float init)
-  {
-    m->values[name] = new SimulatedLuaValue(init);
-  }
-
-  void CountryState::addBranchValue(const char* name, SkillsContainer::Ptr skillsContainer, float init)
-  {
-    int n = skillsContainer->getNumBranches();
-    for (int i = 0; i < n; i++)
-    {
-      std::string branchName = skillsContainer->getBranchByIndex(i)->getBranchName();
-      m->branchValues[name][QString::fromStdString(branchName)] = new SimulatedLuaValue(init);
-    }
-  }
-
   CountryState::ValuesMap& CountryState::getValuesMap() const
   {
-    return m->values;
+    return m->tValues->values;
   }
 
   CountryState::BranchValuesMap& CountryState::getBranchValuesMap() const
   {
-    return m->branchValues;
+    return m->tBranchValues->branchValues;
   }
 
   bool CountryState::getBranchActivated(const char* branchName) const
@@ -97,51 +176,40 @@ namespace onep
 
   osgGaming::Observable<bool>::Ptr CountryState::getOActivatedBranch(const char* branchName) const
   {
-    if (m->oActivatedBranches.count(QString(branchName)) == 0)
-      m->oActivatedBranches.insert(BranchActivatedMap::value_type(QString(branchName), new osgGaming::Observable<bool>(false)));
+    std::string branchNameStr(branchName);
 
-    return m->oActivatedBranches[QString(branchName)];
+    if (m->tBranchesActivated->oActivatedBranches.count(branchNameStr) == 0)
+      m->tBranchesActivated->oActivatedBranches.insert(BranchActivatedMap::value_type(branchNameStr, new osgGaming::Observable<bool>(false)));
+
+    return m->tBranchesActivated->oActivatedBranches[branchNameStr];
   }
 
-  void CountryState::registerClass(lua_State* state)
+  void CountryState::writeValues()
   {
-    luabridge::getGlobalNamespace(state)
-      .beginClass<CountryState>("CountryState")
-      .addFunction("get_branch_value", &CountryState::lua_get_branch_value)
-      .addFunction("get_value", &CountryState::lua_get_value)
-      .addFunction("set_current_branch", &CountryState::lua_set_current_branch)
-      .addFunction("get_branch_activated", &CountryState::lua_get_branch_activated)
-      .addFunction("set_branch_activated", &CountryState::lua_set_branch_activated)
-      .endClass();
+    m->tValues->write();
   }
 
-  SimulatedLuaValue* CountryState::lua_get_value(const char* name)
+  void CountryState::writeBranchValues()
   {
-    return m->values[name].get();
+    m->tBranchValues->write();
   }
 
-  SimulatedLuaValue* CountryState::lua_get_branch_value(const char* name)
+  void CountryState::writeBranchesActivated()
   {
-    return m->branchValues[name][m->currentBranchName.c_str()].get();
+    m->tBranchesActivated->write();
   }
 
-  void CountryState::lua_set_current_branch(std::string branchName)
+  void CountryState::writeObject(luabridge::LuaRef& object) const
   {
-    m->currentBranchName = branchName;
+    m->tValues->write();
+    m->tBranchValues->write();
+    m->tBranchesActivated->write();
   }
 
-  bool CountryState::lua_get_branch_activated() const
+  void CountryState::readObject(const luabridge::LuaRef& object)
   {
-    return getBranchActivated(m->currentBranchName.c_str());
-  }
-
-  void CountryState::lua_set_branch_activated(bool activated)
-  {
-    std::string name = m->currentBranchName;
-
-    Multithreading::uiExecuteOrAsync([=]()
-    {
-      setBranchActivated(name.c_str(), activated);
-    });
+    m->tValues->read();
+    m->tBranchValues->read();
+    m->tBranchesActivated->read();
   }
 }

@@ -1,59 +1,52 @@
-core.control.on_skill_action("interest_1", function(state, neighbourship, new_state)
+core.control.on_skill_action("interest_1", function(branch_name, country_state)
 
-  local interest = state:get_value("interest")
-  local new_interest = interest:get() + 0.1
-
-  new_state:get_value("interest"):set(new_interest)
+  country_state.values["interest"] = country_state.values["interest"] + 0.1
 
 end)
 
-core.control.on_skill_action("propagation_banks", function(state, neighbourship, new_state)
+core.control.on_skill_action("propagation_banks", function(branch_name, country_state)
 
-  new_state:get_branch_value("propagation"):set(1.0)
-
-end)
-
-core.control.on_skill_action("propagation_control", function(state, neighbourship, new_state)
-
-  new_state:get_branch_value("propagation"):set(1.0)
+  country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-core.control.on_skill_action("propagation_media", function(state, neighbourship, new_state)
+core.control.on_skill_action("propagation_control", function(branch_name, country_state)
 
-  new_state:get_branch_value("propagation"):set(1.0)
-
-end)
-
-core.control.on_skill_action("propagation_concerns", function(state, neighbourship, new_state)
-
-  new_state:get_branch_value("propagation"):set(1.0)
+  country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-core.control.on_skill_action("propagation_politics", function(state, neighbourship, new_state)
+core.control.on_skill_action("propagation_media", function(branch_name, country_state)
 
-  new_state:get_branch_value("propagation"):set(1.0)
+  country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-core.control.on_branch_action(function(state, neighbourship, new_state)
+core.control.on_skill_action("propagation_concerns", function(branch_name, country_state)
 
-  if (state:get_branch_activated()) then return end
+  country_state.branch_values[branch_name]["propagation"] = 1.0
 
-  local nneighbours = neighbourship:get_num_neighbours()
-  local propagated = state:get_branch_value("propagated"):get()
-  local neighbourstate
+end)
 
-  for i=0,nneighbours-1 do
-    neighbourstate = neighbourship:get_neighbour_state(i)
-    propagated = propagated + neighbourstate:get_branch_value("propagation"):get()
+core.control.on_skill_action("propagation_politics", function(branch_name, country_state)
+
+  country_state.branch_values[branch_name]["propagation"] = 1.0
+
+end)
+
+core.control.on_branch_action(function(branch_name, country_state)
+
+  if (country_state.branches_activated[branch_name] == true) then return end
+
+  local propagated = country_state.branch_values[branch_name]["propagated"]
+  for _, neighbour_state in pairs(country_state.neighbour_states) do
+    propagated = propagated + neighbour_state.branch_values[branch_name]["propagation"]
   end
 
-  new_state:get_branch_value("propagated"):set(propagated)
+  country_state.branch_values[branch_name]["propagated"] = propagated
 
   if (propagated >= 20) then
-    new_state:set_branch_activated(true)
+    country_state.branches_activated[branch_name] = true
   end
 
 end)

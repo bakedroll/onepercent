@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Skill.h"
+#include "scripting/LuaObjectMapper.h"
 
 #include <osg/ref_ptr>
 
@@ -8,13 +9,14 @@
 
 namespace onep
 {
-  class SkillBranch : public osg::Referenced
+  class SkillBranch : public osg::Referenced, public LuaObjectMapper
   {
   public:
     typedef osg::ref_ptr<SkillBranch> Ptr;
     typedef std::vector<Ptr> List;
 
-    SkillBranch(int id, const std::string& name, int costs);
+    SkillBranch(const luabridge::LuaRef& object, int id);
+    ~SkillBranch();
 
     int getBranchId() const;
     const std::string& getBranchName() const;
@@ -23,7 +25,10 @@ namespace onep
 
     int getCost() const;
 
-    void addSkill(Skill::Ptr skill);
+  protected:
+
+    virtual void writeObject(luabridge::LuaRef& object) const override;
+    virtual void readObject(const luabridge::LuaRef& object) override;
 
   private:
     struct Impl;

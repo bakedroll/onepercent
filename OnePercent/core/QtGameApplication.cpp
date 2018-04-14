@@ -44,7 +44,10 @@ public:
   virtual void log(const std::string& text) override
   {
     if (m_file.isOpen())
+    {
       m_textStream << QString::fromStdString(text) << "\n";
+      m_textStream.flush();
+    }
   }
 
 private:
