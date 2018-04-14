@@ -15,6 +15,7 @@ namespace onep
     ~Simulation();
 
     void prepare();
+    void shutdownUpdateThread();
 
     bool paySkillPoints(int points);
 

@@ -24,8 +24,16 @@
 
 namespace onep
 {
+  struct OnePercentApplication::Impl
+  {
+    Impl() {}
+
+    Simulation::Ptr simulation;
+  };
+
   OnePercentApplication::OnePercentApplication(int& argc, char** argv)
     : QtGameApplication(argc, argv)
+    , m(new Impl())
   {
   }
 
@@ -82,6 +90,8 @@ namespace onep
     lua->registerClassInstance<Simulation>(injector.inject<Simulation>());
     lua->registerClassInstance<LuaLogger>(injector.inject<LuaLogger>());
 
+    m->simulation = injector.inject<Simulation>();
+
     setDefaultWorld(injector.inject<GlobeOverviewWorld>());
 
     // load CSS
@@ -96,5 +106,13 @@ namespace onep
       qApplication()->setStyleSheet(QString(file.readAll()));
       file.close();
     }
+  }
+
+  void OnePercentApplication::deinitialize()
+  {
+    m->simulation->shutdownUpdateThread();
+    m->simulation.release();
+
+    QtGameApplication::deinitialize();
   }
 }

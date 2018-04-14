@@ -14,6 +14,11 @@ namespace onep
   protected:
     virtual void registerComponents(osgGaming::InjectionContainer& container) override;
     virtual void initialize(osgGaming::Injector& injector) override;
+    virtual void deinitialize() override;
+
+  private:
+    struct Impl;
+    std::unique_ptr<Impl> m;
 
   };
 }
