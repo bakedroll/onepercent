@@ -85,6 +85,8 @@ namespace onep
       , widgetStats(nullptr)
       , layoutStats(nullptr)
       , radioNoOverlay(nullptr)
+      , labelSkillpoints(nullptr)
+      , labelCountry(nullptr)
       , buttonStartStop(nullptr)
     {
     }
@@ -114,6 +116,7 @@ namespace onep
     QVBoxLayout* layoutStats;
     QRadioButton* radioNoOverlay;
     QLabel* labelSkillpoints;
+    QLabel* labelCountry;
     ConsoleEdit* luaConsoleEdit;
     QPushButton* buttonStartStop;
 
@@ -159,7 +162,7 @@ namespace onep
       OSGG_QLOG_DEBUG(QString("Took %1 ms").arg(d));
     }
 
-    ValueWidget createValueWidgets(const QString& labelText)
+    ValueWidget createValueWidgets(const QString& labelText, std::function<void(float, CountryState::Ptr)> setFunc)
     {
       ValueWidget widget;
 
@@ -178,6 +181,21 @@ namespace onep
       QConnectFunctor::connect(widget.edit, SIGNAL(textEdited(QString)), [button]()
       {
         button->setEnabled(true);
+      });
+
+      QLineEdit* edit = widget.edit;
+      QConnectFunctor::connect(widget.buttonSet, SIGNAL(clicked()), [=]()
+      {
+        int id = countryOverlay->getSelectedCountryId();
+        if (id == 0) return;
+
+        CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[id];
+
+        bool ok;
+        float value = edit->text().toInt(&ok);
+        setFunc(value, cstate);
+        edit->setText(QString::number(value));
+        button->setEnabled(false);
       });
 
       QHBoxLayout* layout = new QHBoxLayout();
@@ -221,50 +239,33 @@ namespace onep
         layoutStats->setSpacing(0);
         widgetStats->setLayout(layoutStats);
 
-        QLabel* labelCountry = new QLabel();
-        labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getCountryName().c_str())).arg(country->getId()));
+        labelCountry = new QLabel();
 
         layoutStats->addWidget(labelCountry);
 
         for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
         {
-          ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()));
-          valueWidgets[it->first] = widget;
-
-          QPushButton* button = widget.buttonSet;
-          QLineEdit* edit = widget.edit;
           std::string name = it->first;
-          QConnectFunctor::connect(widget.buttonSet, SIGNAL(clicked()), [=]()
+          ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
           {
-            bool ok;
-            float value = edit->text().toInt(&ok);
-            countryState->getValuesMap()[name] = value;
-            simulation->getUpdateThread()->executeLuaTask([countryState](){ countryState->writeValues(); });
-            edit->setText(QString::number(value));
-            button->setEnabled(false);
+            cstate->getValuesMap()[name] = value;
+            simulation->getUpdateThread()->executeLuaTask([cstate](){ cstate->writeValues(); });
           });
+          valueWidgets[it->first] = widget;
         }
 
         for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
         {
           for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
           {
-            ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()));
-            branchValueWidgets[it->first][vit->first] = widget;
-
-            QPushButton* button = widget.buttonSet;
-            QLineEdit* edit = widget.edit;
             std::string branchName = it->first;
             std::string name = vit->first;
-            QConnectFunctor::connect(widget.buttonSet, SIGNAL(clicked()), [=]()
+            ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
             {
-              bool ok;
-              float value = edit->text().toInt(&ok);
-              countryState->getBranchValuesMap()[branchName][name] = value;
-              simulation->getUpdateThread()->executeLuaTask([countryState](){ countryState->writeBranchValues(); });
-              edit->setText(QString::number(value));
-              button->setEnabled(false);
+              cstate->getBranchValuesMap()[branchName][name] = value;
+              simulation->getUpdateThread()->executeLuaTask([cstate](){ cstate->writeBranchValues(); });
             });
+            branchValueWidgets[it->first][vit->first] = widget;
           }
         }
 
@@ -278,6 +279,8 @@ namespace onep
               vit->second.edit->setEnabled(!running);
         }));
       }
+
+      labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getCountryName().c_str())).arg(country->getId()));
 
       for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
         valueWidgets[it->first].edit->setText(QString::number(it->second));
