@@ -189,18 +189,34 @@ core = {
   helper = 
   {
     -- dumping table to a string
-    dump_object = (function(o)
-
-      if type(o) == 'table' then
-        local s = '{ '
-        for k,v in pairs(o) do
-          if type(k) ~= 'number' then k = '"'..k..'"' end
-          s = s .. '['..k..'] = ' .. core.helper.dump_object(v) .. ','
-        end
-        return s .. '} '
-      else
-        return tostring(o)
+    dump_object = (function(o, d)
+      if d == nil then
+        d = 0
+        core.helper.visited_objects = {}
       end
+
+      local s = ''
+      if type(o) == 'table' then
+        if core.helper.visited_objects[o] then
+          s = s .. '#REF#'
+        else
+          core.helper.visited_objects[o] = true
+
+          s = s .. '{ '
+          for k,v in pairs(o) do
+            if type(k) ~= 'number' then k = '"'..k..'"' end
+            s = s .. '\n'
+            for i=0,d do s = s .. '  ' end
+            s = s .. '['..k..'] = ' .. core.helper.dump_object(v, d + 1) .. ','
+          end
+          s = s .. ' }'
+        end
+      else
+        s = s .. tostring(o)
+      end
+
+      if d == 0 then core.helper.visited_objects = nil end
+      return s
 
     end),
 
