@@ -1,9 +1,12 @@
 #include "CountryMesh.h"
+#include "core/Globals.h"
 
 #include <osg/Geometry>
-#include <osgGaming/ResourceManager.h>
 #include <osgGaming/SimulationCallback.h>
 #include <osgGaming/Animation.h>
+#include <osgGaming/Helper.h>
+
+#include <algorithm>
 
 namespace onep
 {
@@ -55,7 +58,11 @@ namespace onep
   {
     Impl() {}
 
-    CountryData::Ptr countryData;
+    osg::Vec2f centerLatLong;
+    osg::Vec2f size;
+
+    float earthRadius;
+    float cameraZoom;
 
     List neighbors;
     BorderIdMap neighbourBorders;
@@ -73,7 +80,9 @@ namespace onep
   };
 
   CountryMesh::CountryMesh(
-    CountryData::Ptr data,
+    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
+    osg::Vec2f centerLatLong,
+    osg::Vec2f size,
     osg::ref_ptr<osg::Vec3Array> vertices,
     osg::ref_ptr<osg::Vec2Array> texcoords,
     osg::ref_ptr<osg::DrawElementsUInt> triangles,
@@ -81,8 +90,13 @@ namespace onep
     : osg::Geode()
     , m(new Impl())
   {
+    m->earthRadius = propertiesManager->getValue<float>(Param_EarthRadiusName);
+    m->cameraZoom = propertiesManager->getValue<float>(Param_CameraCountryZoomName);
+
+    m->centerLatLong = centerLatLong;
+    m->size = size;
+
     m->neighbourBorders = neighbourBorders;
-    m->countryData = data;
 
     osg::ref_ptr<osg::Geometry> geo = new osg::Geometry();
     geo->setVertexArray(vertices);
@@ -112,19 +126,9 @@ namespace onep
   {
   }
 
-  void CountryMesh::addNeighbor(osg::ref_ptr<CountryMesh> mesh, NeighborCountryInfo::Ptr info)
+  void CountryMesh::addNeighbor(osg::ref_ptr<CountryMesh> mesh)
   {
-    CountryData::Neighbor nb;
-    nb.country = mesh->getCountryData();
-    nb.info = info;
-
     m->neighbors.push_back(mesh);
-    m->countryData->addNeighbor(nb);
-  }
-
-  CountryData::Ptr CountryMesh::getCountryData()
-  {
-    return m->countryData;
   }
 
   CountryMesh::List& CountryMesh::getNeighborCountryMeshs()
@@ -204,5 +208,32 @@ namespace onep
 
     m->uniformHoverEnabled->set(bHoverEnabled ? 1 : 0);
     m->callback->setEnabled(bHoverEnabled);
+  }
+
+  osg::Vec2f CountryMesh::getCenterLatLong()
+  {
+    return m->centerLatLong;
+  }
+
+  osg::Vec2f CountryMesh::getSize()
+  {
+    return m->size;
+  }
+
+  osg::Vec2f CountryMesh::getSurfaceSize()
+  {
+    return osg::Vec2f(
+      2.0f * C_PI * sin(C_PI / 2.0f - abs(m->centerLatLong.x())) * m->earthRadius * m->size.x(),
+      C_PI * m->earthRadius * m->size.y());
+  }
+
+  float CountryMesh::getOptimalCameraDistance(float angle, float ratio)
+  {
+    osg::Vec2f surfaceSize = getSurfaceSize();
+
+    float hdistance = surfaceSize.x() * m->cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + m->earthRadius;
+    float vdistance = surfaceSize.y() * m->cameraZoom / (2.0f * tan(angle * C_PI / 360.0f)) + m->earthRadius;
+
+    return std::max(hdistance, vdistance);
   }
 }

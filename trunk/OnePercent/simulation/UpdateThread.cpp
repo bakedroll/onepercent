@@ -74,13 +74,13 @@ namespace onep
       QElapsedTimer timerSkillsUpdate;
       QElapsedTimer timerBranchesUpdate;
       QElapsedTimer timerSync;
-      QElapsedTimer timerOverall;
+      QElapsedTimer timerTotal;
 
       long skillsElapsed = 0;
       long long branchesElapsed = 0;
       long syncElapsed = 0;
 
-      timerOverall.start();
+      timerTotal.start();
 
       LuaStateManager::safeExecute([&]()
       {
@@ -101,13 +101,13 @@ namespace onep
         syncElapsed = timerSync.elapsed();
       });
 
-      long overallElapsed = timerOverall.elapsed();
+      long totalElapsed = timerTotal.elapsed();
 
-      OSGG_QLOG_DEBUG(QString("SkillsUpdate: %1ms BranchesUpdate: %2ms Sync: %3ms Overall: %4ms")
+      OSGG_QLOG_DEBUG(QString("SkillsUpdate: %1ms BranchesUpdate: %2ms Sync: %3ms Total: %4ms")
         .arg(skillsElapsed)
         .arg(branchesElapsed)
         .arg(syncElapsed)
-        .arg(overallElapsed));
+        .arg(totalElapsed));
     }
 
     OSGG_LOG_DEBUG("Shutdown update thread");

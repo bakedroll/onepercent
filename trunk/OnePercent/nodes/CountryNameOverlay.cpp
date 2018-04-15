@@ -1,6 +1,8 @@
 #include "CountryNameOverlay.h"
 
 #include "core/Globals.h"
+#include "simulation/CountriesContainer.h"
+#include "simulation/Country.h"
 
 #include <osgGaming/Helper.h>
 #include <osg/Billboard>
@@ -14,6 +16,7 @@ namespace onep
     Impl(osgGaming::Injector& injector)
       : resourceManager(injector.inject<osgGaming::ResourceManager>())
       , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+      , countriesContainer(injector.inject<CountriesContainer>())
       , enabled(true)
     {
       switchNode = new osg::Switch();
@@ -24,6 +27,7 @@ namespace onep
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+    osg::ref_ptr<CountriesContainer> countriesContainer;
 
     osg::ref_ptr<osg::Switch> switchNode;
     const CountryMesh::Map* countryMap;
@@ -62,13 +66,13 @@ namespace onep
     int i = 0;
     for (CountryMesh::Map::const_iterator it = m->countryMap->cbegin(); it != m->countryMap->cend(); ++it)
     {
-      osg::Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCountryData()->getCenterLatLong());
+      osg::Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCenterLatLong());
       if (!pos.valid())
       {
         continue;
       }
 
-      std::string name = osgGaming::utf8ToLatin1(it->second->getCountryData()->getCountryName().c_str());
+      std::string name = osgGaming::utf8ToLatin1(m->countriesContainer->getCountry(it->first)->getName().c_str());
       /*std::string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str()) + "\n";
       CountryData::Neighbors neighbors = it->second->getNeighborCountries();
 

@@ -1,9 +1,11 @@
 #pragma once
 
-#include "nodes/CountryMesh.h"
+#include "simulation/Country.h"
 #include "widgets/VirtualOverlay.h"
 
 #include <memory>
+
+#include <osgGaming/Injector.h>
 
 namespace onep
 {
@@ -14,7 +16,7 @@ namespace onep
 		~CountryMenuWidget();
 
 		void setCenterPosition(int x, int y);
-    void setCountryMesh(CountryMesh::Ptr countryMesh);
+    void setCountry(Country::Ptr country);
 
 	private:
 		struct Impl;

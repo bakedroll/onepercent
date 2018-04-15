@@ -8,6 +8,7 @@
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
 #include "scripting/LuaStateManager.h"
+#include "simulation/SkillsContainer.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/SimulationStateContainer.h"
 #include "widgets/OverlayCompositor.h"

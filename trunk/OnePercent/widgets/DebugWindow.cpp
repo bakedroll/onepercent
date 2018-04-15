@@ -3,6 +3,8 @@
 #include "core/Macros.h"
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
+#include "simulation/CountriesContainer.h"
+#include "simulation/Country.h"
 #include "simulation/Simulation.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
@@ -78,6 +80,7 @@ namespace onep
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , simulation(injector.inject<Simulation>())
       , skillsContainer(injector.inject<SkillsContainer>())
+      , countriesContainer(injector.inject<CountriesContainer>())
       , stateContainer(injector.inject<SimulationStateContainer>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
@@ -98,6 +101,7 @@ namespace onep
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<SkillsContainer> skillsContainer;
+    osg::ref_ptr<CountriesContainer> countriesContainer;
     osg::ref_ptr<SimulationStateContainer> stateContainer;
 
     ODay::Ptr oDay;
@@ -137,23 +141,23 @@ namespace onep
 
     void toggleCountry()
     {
+      int id = countryOverlay->getSelectedCountryId();
+
+      if (id == 0)
+        return;
+
       auto start_time = std::chrono::high_resolution_clock::now();
 
       CountryMesh::Ptr mesh = countryOverlay->getSelectedCountryMesh();
-      if (!mesh.valid())
-        return;
+      assert_return(mesh.valid());
 
-      CountryMesh::Map::iterator it = selectedCountries.find(mesh->getCountryData()->getId());
+      CountryMesh::Map::iterator it = selectedCountries.find(id);
       if (it == selectedCountries.end())
-        selectedCountries[mesh->getCountryData()->getId()] = mesh;
+        selectedCountries[id] = mesh;
       else
         selectedCountries.erase(it);
 
-      CountryMesh::List meshlist;
-      for (CountryMesh::Map::iterator cit = selectedCountries.begin(); cit != selectedCountries.end(); ++cit)
-        meshlist.push_back(cit->second);
-
-      boundariesMesh->makeCountryBoundaries(meshlist, osg::Vec3f(1.0f, 0.5, 0.1f), 0.03f);
+      boundariesMesh->makeCountryBoundaries(selectedCountries, osg::Vec3f(1.0f, 0.5, 0.1f), 0.03f);
 
       auto duration = std::chrono::high_resolution_clock::now() - start_time;
 
@@ -226,7 +230,7 @@ namespace onep
       if (countryStates.count(selectedId) == 0)
         return;
 
-      CountryData::Ptr country = countryOverlay->getSelectedCountryMesh()->getCountryData();
+      Country::Ptr country = countriesContainer->getCountry(selectedId);
       CountryState::Ptr countryState = countryStates[selectedId];
 
       CountryState::ValuesMap& values = countryState->getValuesMap();
@@ -280,7 +284,7 @@ namespace onep
         }));
       }
 
-      labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getCountryName().c_str())).arg(country->getId()));
+      labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getName().c_str())).arg(country->getId()));
 
       for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
         valueWidgets[it->first].edit->setText(QString::number(it->second));
@@ -330,11 +334,10 @@ namespace onep
 
         QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
         {
-          osg::ref_ptr<CountryData> selectedCountry = countryOverlay->getSelectedCountryMesh()->getCountryData();
-          if (!selectedCountry.valid())
+          int cid = countryOverlay->getSelectedCountryId();
+          if (cid == 0)
             return;
 
-          int cid = selectedCountry->getId();
           CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[cid];
 
           cstate->setBranchActivated(name.c_str(), checked);

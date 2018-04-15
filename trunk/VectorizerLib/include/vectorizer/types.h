@@ -284,8 +284,6 @@ namespace helper
   {
     int id;
     std::string name;
-    float population;
-    float gdp;
   };
 
   struct CountryRow
