@@ -415,8 +415,6 @@ namespace helper
       CountryRow row;
       row.data.id = atoi(elems[0].c_str());
       row.data.name = elems[1];
-      row.data.population = float(atof(elems[2].c_str()));
-      row.data.gdp = float(atof(elems[3].c_str()));
 
       if (elems.size() >= 5)
       {
@@ -468,8 +466,6 @@ namespace helper
     {
       BoundingBox<float> bb = it->second.boundingbox;
       bb.shift(sx, 0.0f);
-      writeFile<float>(file, it->second.data.population);
-      writeFile<int>(file, int(it->second.data.gdp));
       writeFile<int>(file, it->second.data.id);
       writeFile<float>(file, bb.center().x);
       writeFile<float>(file, bb.center().y);

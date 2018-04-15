@@ -1,6 +1,5 @@
 #include "CountryOverlay.h"
 
-#include "core/Macros.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
@@ -14,8 +13,6 @@
 #include <osgGaming/Helper.h>
 
 #include <osg/Texture2D>
-
-#include <QString>
 
 namespace onep
 {
@@ -35,7 +32,8 @@ namespace onep
 
     void addCountry(
       int id,
-      CountryData::Ptr countryData,
+      osg::Vec2f centerLatLong,
+      osg::Vec2f size,
       osg::ref_ptr<osg::DrawElementsUInt> triangles,
       CountryMesh::BorderIdMap& neighborBorders,
       osg::ref_ptr<osg::Vec3Array> vertices,
@@ -44,7 +42,7 @@ namespace onep
       if (countryMeshs.find(id) != countryMeshs.end())
         return;
 
-      CountryMesh::Ptr mesh = new CountryMesh(countryData, vertices, texcoords, triangles, neighborBorders);
+      CountryMesh::Ptr mesh = new CountryMesh(propertiesManager, centerLatLong, size, vertices, texcoords, triangles, neighborBorders);
 
       countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
       base->addChild(mesh, false);
@@ -148,36 +146,16 @@ namespace onep
     int ncountries = stream.read<int>();
     for (int i = 0; i < ncountries; i++)
     {
-      float population = stream.read<float>();
-      float wealth = float(stream.read<int>());
       int id = stream.read<int>();
       float centerX = stream.read<float>();
       float centerY = stream.read<float>();
       float width = stream.read<float>();
       float height = stream.read<float>();
 
-      std::string name;
-      Country::Ptr country = m->countriesContainer->getCountry(id);
-      if (country.valid())
-      {
-        name = country->getName();
-      }
-      else
-      {
-        OSGG_QLOG_WARN(QString("No country name for id %1 defined").arg(id));
-        name = "unknown";
-        assert(false);
-      }
+      osg::Vec2f centerLatLong((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI);
+      osg::Vec2f size(width, height);
 
-      osg::ref_ptr<CountryData> countryData = new CountryData(
-        m->propertiesManager,
-        m->skillsContainer,
-        name,
-        id,
-        population,
-        wealth,
-        osg::Vec2f((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI),
-        osg::Vec2f(width, height));
+      Country::Ptr country = m->countriesContainer->getCountry(id);
 
       NeighborList neighborList;
 
@@ -220,16 +198,16 @@ namespace onep
         triangles->push_back(v1);
       }
 
-      m->addCountry(int(id), countryData, triangles, neighborBorderMap, vertices, texcoords);
+      m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords);
     }
 
     for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
     {
-      NeighborList neighborList = m->neighbourMap.find(it->second->getCountryData()->getId())->second;
+      NeighborList neighborList = m->neighbourMap.find(it->first)->second;
 
       for (NeighborList::iterator nit = neighborList.begin(); nit != neighborList.end(); ++nit)
       {
-        it->second->addNeighbor(getCountryMesh(*nit), new NeighborCountryInfo());
+        it->second->addNeighbor(getCountryMesh(*nit));
       }
     }
 
@@ -279,7 +257,7 @@ namespace onep
 
     for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
     {
-      int cid = it->second->getCountryData()->getId();
+      int cid = it->first;
       CountryState::Ptr cstate = m->stateContainer->getState()->getCountryStates()[cid];
 
       if (cstate->getBranchActivated(branchName.c_str()))
@@ -287,8 +265,10 @@ namespace onep
     }
   }
 
-  void CountryOverlay::setHoveredCountry(CountryMesh::Ptr countryMesh)
+  void CountryOverlay::setHoveredCountryId(int id)
   {
+    CountryMesh::Ptr countryMesh = m->countryMeshs.count(id) > 0 ? m->countryMeshs[id] : nullptr;
+
     if (countryMesh == m->hoveredCountryMesh)
       return;
 
@@ -370,17 +350,6 @@ namespace onep
     int iy = int(coord.y() * float(mapSize.y()));
 
     return m->countriesMap->getDataAt(ix, iy);
-  }
-
-  std::string CountryOverlay::getCountryName(osg::Vec2f coord)
-  {
-    CountryMesh::Map::iterator it = m->countryMeshs.find(getCountryId(coord));
-    if (it == m->countryMeshs.end())
-    {
-      return "No country selected";
-    }
-
-    return it->second->getCountryData()->getCountryName();
   }
 
   int CountryOverlay::getSelectedCountryId()

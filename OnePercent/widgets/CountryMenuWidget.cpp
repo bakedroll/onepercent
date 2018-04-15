@@ -23,7 +23,7 @@ namespace onep
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
     {}
 
-    CountryMesh::Ptr countryMesh;
+    Country::Ptr country;
 
     Simulation::Ptr simulation;
     SkillsContainer::Ptr skillsContainer;
@@ -40,10 +40,10 @@ namespace onep
     {
       notifiesActivated.clear();
 
-      if (!countryMesh.valid())
+      if (!country.valid())
         return;
 
-      int cid = countryMesh->getCountryData()->getId();
+      int cid = country->getId();
       if (stateContainer->getState()->getCountryStates().count(cid) == 0)
         return;
 
@@ -103,14 +103,14 @@ namespace onep
 
       QConnectFunctor::connect(button, SIGNAL(clicked()), [this, i, branch, name]()
       {
-        if (!m->countryMesh.valid())
+        if (!m->country.valid())
           return;
 
         int costs = branch->getCost();
         if (!m->simulation->paySkillPoints(costs))
           return;
 
-        int cid = m->countryMesh->getCountryData()->getId();
+        int cid = m->country->getId();
         CountryState::Ptr cstate = m->stateContainer->getState()->getCountryStates()[cid];
 
         cstate->setBranchActivated(name.c_str(), true);
@@ -136,9 +136,9 @@ namespace onep
     setGeometry(x - geo.width() / 2, y - geo.height() / 2, geo.width(), geo.height());
 	}
 
-  void CountryMenuWidget::setCountryMesh(CountryMesh::Ptr countryMesh)
+  void CountryMenuWidget::setCountry(Country::Ptr country)
   {
-    m->countryMesh = countryMesh;
+    m->country = country;
     m->updateUi();
   }
 }

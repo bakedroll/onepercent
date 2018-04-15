@@ -24,7 +24,7 @@ namespace onep
 
     void makeOverallBoundaries(float thickness = 0.005f);
     void makeCountryBoundaries(
-      const CountryMesh::List& countries,
+      const CountryMesh::Map& countries,
       const osg::Vec3f& color = osg::Vec3f(1.0f, 1.0f, 1.0f),
       float thickness = 0.005f);
 

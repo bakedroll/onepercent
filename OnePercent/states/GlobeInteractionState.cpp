@@ -8,6 +8,8 @@
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/GlobeModel.h"
 #include "nodes/CountryOverlay.h"
+#include "simulation/CountriesContainer.h"
+#include "simulation/Country.h"
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 #include "widgets/CountryMenuWidget.h"
@@ -16,7 +18,6 @@
 #include <osgGA/GUIEventAdapter>
 
 #include <osgGaming/Helper.h>
-#include <simulation/CountryData.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/View.h>
 #include <osgGaming/PropertiesManager.h>
@@ -37,6 +38,7 @@ namespace onep
     , simulation(injector.inject<Simulation>())
     , countryOverlay(injector.inject<CountryOverlay>())
     , boundariesMesh(injector.inject<BoundariesMesh>())
+    , countriesContainer(injector.inject<CountriesContainer>())
     , bReady(false)
     , selectedCountry(0)
     , labelDays(nullptr)
@@ -60,6 +62,8 @@ namespace onep
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
+
+    osg::ref_ptr<CountriesContainer> countriesContainer;
 
     float paramEarthRadius;
     float paramCameraMinDistance;
@@ -94,7 +98,7 @@ namespace onep
 
     ODay::Ptr oDay;
 
-    CountryMesh::Ptr pickCountryMeshAt(const osg::Vec2i& pos)
+    int pickCountryIdAt(const osg::Vec2i& pos)
     {
       osg::Vec3f point, direction, pickResult;
       base->getWorld(base->getView(0))->getCameraManipulator()->getPickRay(float(pos.x()), float(pos.y()), point, direction);
@@ -102,12 +106,10 @@ namespace onep
       if (osgGaming::sphereLineIntersection(osg::Vec3f(0.0f, 0.0f, 0.0f), paramEarthRadius, point, direction, pickResult))
       {
         osg::Vec2f polar = osgGaming::getPolarFromCartesian(pickResult);
-        osg::ref_ptr<CountryMesh> countryMesh = countryOverlay->getCountryMesh(polar);
-
-        return countryMesh;
+        return countryOverlay->getCountryId(polar);
       }
 
-      return nullptr;
+      return 0;
     }
 
     bool ready()
@@ -124,8 +126,7 @@ namespace onep
 
     void updateCountryMenuWidgetPosition(int id)
     {
-      osg::ref_ptr<CountryData> data = countryOverlay->getCountryMesh(id)->getCountryData();
-      osg::Vec2f latLong = data->getCenterLatLong();
+      osg::Vec2f latLong = countryOverlay->getCountryMesh(id)->getCenterLatLong();
 
       osg::Vec3f position = osgGaming::getVec3FromEuler(latLong.x(), 0.0, latLong.y()) * paramEarthRadius;
 
@@ -186,11 +187,12 @@ namespace onep
       if (id > 0)
       {
         CountryMesh::Ptr countryMesh = m->countryOverlay->getCountryMesh(id);
+        Country::Ptr country = m->countriesContainer->getCountry(id);
         
-        OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(countryMesh->getCountryData()->getId()).arg(QString::fromLocal8Bit(countryMesh->getCountryData()->getCountryName().c_str())));
+        OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
 
-        setCameraLatLong(countryMesh->getCountryData()->getCenterLatLong(), getSimulationTime());
-        setCameraDistance(std::max<float>(countryMesh->getCountryData()->getOptimalCameraDistance(
+        setCameraLatLong(countryMesh->getCenterLatLong(), getSimulationTime());
+        setCameraDistance(std::max<float>(countryMesh->getOptimalCameraDistance(
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle()),
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio())), m->paramCameraMinDistance), getSimulationTime());
 
@@ -202,7 +204,7 @@ namespace onep
           if (m->selectedCountry != id)
           {
             m->countryMenuWidgetFadeInAnimation->beginAnimation(0.0f, 0.8f, getSimulationTime());
-            m->countryMenuWidget->setCountryMesh(countryMesh);
+            m->countryMenuWidget->setCountry(country);
             m->updateCountryMenuWidgetPosition(id);
           }
           else
@@ -236,8 +238,8 @@ namespace onep
     if (m->selectedCountry > 0 && m->countryMenuWidget->isVisible())
       m->updateCountryMenuWidgetPosition(m->selectedCountry);
 
-    CountryMesh::Ptr hovered = m->pickCountryMeshAt(m->mousePos);
-    m->countryOverlay->setHoveredCountry(hovered);
+    int id = m->pickCountryIdAt(m->mousePos);
+    m->countryOverlay->setHoveredCountryId(id);
 
     return e;
   }
@@ -251,9 +253,7 @@ namespace onep
 
     if (button == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
     {
-      CountryMesh::Ptr countryMesh = m->pickCountryMeshAt(m->mousePos);
-
-      int selected = countryMesh == nullptr ? 0 : int(countryMesh->getCountryData()->getId());
+      int selected = m->pickCountryIdAt(m->mousePos);
       m->countryOverlay->setSelectedCountry(selected);
     }
   }

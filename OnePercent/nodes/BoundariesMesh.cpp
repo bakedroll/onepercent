@@ -305,7 +305,7 @@ namespace onep
     addChild(m->overallBoundsGeode);
   }
 
-  void BoundariesMesh::makeCountryBoundaries(const CountryMesh::List& countries, const osg::Vec3f& color, float thickness)
+  void BoundariesMesh::makeCountryBoundaries(const CountryMesh::Map& countries, const osg::Vec3f& color, float thickness)
   {
     if (m->countriesBoundsGeode.valid())
     {
@@ -326,15 +326,11 @@ namespace onep
     int idCounter = 0;
     IdMap idMap;
 
-    std::map<int, CountryMesh::Ptr> cmap;
-    for (CountryMesh::List::const_iterator it = countries.begin(); it != countries.end(); ++it)
-      cmap[(*it)->getCountryData()->getId()] = *it;
-
     std::set<int> visited;
 
-    for (CountryMesh::List::const_iterator it = countries.begin(); it != countries.end(); ++it)
+    for (CountryMesh::Map::const_iterator it = countries.begin(); it != countries.end(); ++it)
     {
-      CountryMesh::Ptr cmesh = *it;
+      CountryMesh::Ptr cmesh = it->second;
 
       std::vector<int> startIds;
 
@@ -353,7 +349,7 @@ namespace onep
         for (CountryMesh::BorderIdMap::const_iterator nit = nborders.begin(); nit != nborders.end(); ++nit)
         {
           // neighbor not included, start at this border
-          if (cmap.count(nit->first) == 0)
+          if (countries.count(nit->first) == 0)
           {
             bool found = false;
             for (std::vector<int>::const_iterator nnit = nit->second.begin(); nnit != nit->second.end(); ++nnit)
@@ -392,7 +388,7 @@ namespace onep
           for (IdList::iterator bit = border.nextBorderIds.begin(); bit != border.nextBorderIds.end(); ++bit)
           {
             Border& nextBorder = m->borders[*bit];
-            if (border.countryId == nextBorder.countryId || cmap.count(nextBorder.countryId) > 0)
+            if (border.countryId == nextBorder.countryId || countries.count(nextBorder.countryId) > 0)
             {
               m->addQuads(m->nodals[std::pair<int, int>(currentBorderId, *bit)], thickness, color, idCounter, idMap, verts, colors, quads);
               currentBorderId = *bit;

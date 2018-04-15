@@ -2,9 +2,9 @@
 
 #include <osg/Geode>
 
-#include "simulation/CountryData.h"
-
 #include <memory>
+
+#include <osgGaming/PropertiesManager.h>
 
 namespace onep
 {
@@ -30,7 +30,9 @@ namespace onep
     } ColorMode;
 
     CountryMesh(
-      CountryData::Ptr data,
+      osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
+      osg::Vec2f centerLatLong,
+      osg::Vec2f size,
       osg::ref_ptr<osg::Vec3Array> vertices,
       osg::ref_ptr<osg::Vec2Array> texcoords,
       osg::ref_ptr<osg::DrawElementsUInt> triangles,
@@ -38,9 +40,7 @@ namespace onep
 
     ~CountryMesh();
 
-    void addNeighbor(osg::ref_ptr<CountryMesh> mesh, NeighborCountryInfo::Ptr info);
-
-    CountryData::Ptr getCountryData();
+    void addNeighbor(osg::ref_ptr<CountryMesh> mesh);
     List& getNeighborCountryMeshs();
 
     const BorderIdMap& getNeighborBorders() const;
@@ -50,6 +50,11 @@ namespace onep
 
     void setColorMode(ColorMode mode);
     void setHoverMode(bool bHoverEnabled);
+
+    osg::Vec2f getCenterLatLong();
+    osg::Vec2f getSize();
+    osg::Vec2f getSurfaceSize();
+    float getOptimalCameraDistance(float angle, float ratio);
 
   private:
     struct Impl;

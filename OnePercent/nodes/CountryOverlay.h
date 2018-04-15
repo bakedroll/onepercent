@@ -33,7 +33,7 @@ namespace onep
     void setSelectedCountry(int countryId);
     void setHighlightedSkillBranch(int id);
 
-    void setHoveredCountry(CountryMesh::Ptr countryMesh);
+    void setHoveredCountryId(int id);
     void setAllCountriesVisibility(bool visibility);
 
     CountryMesh::Map& getCountryMeshs();
@@ -44,7 +44,6 @@ namespace onep
     CountryMesh::Ptr getCountryMesh(int id);
     CountryMesh::Ptr getCountryMesh(osg::Vec2f coord);
     int getCountryId(osg::Vec2f coord);
-    std::string getCountryName(osg::Vec2f coord);
 
     int getSelectedCountryId();
     osgGaming::Observable<int>::Ptr getSelectedCountryIdObservable();
