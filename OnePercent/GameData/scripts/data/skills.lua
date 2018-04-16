@@ -1,24 +1,10 @@
 local skills = {
   {
-    name = "interest_1",
-    displayName = "INTEREST I",
+    name = "found_party",
+    displayName = "Found party",
     type = "passive",
-    branch = "banks",
+    branch = "politics",
     cost = 2
-  },
-  {
-    name = "interest_2",
-    displayName = "INTEREST II",
-    type = "passive",
-    branch = "banks",
-    cost = 5
-  },
-  {
-    name = "anger_test",
-    displayName = "ANGER TEST",
-    type = "passive",
-    branch = "banks",
-    cost = 5
   },
   {
     name = "propagation_banks",

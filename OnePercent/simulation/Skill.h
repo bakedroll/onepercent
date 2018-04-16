@@ -18,7 +18,7 @@ namespace onep
 	public:
     typedef osg::ref_ptr<Skill> Ptr;
     typedef std::vector<Ptr> List;
-    typedef std::map<int, Ptr> Map;
+    typedef std::map<std::string, Ptr> Map;
 
 	  explicit Skill(const luabridge::LuaRef& object);
 

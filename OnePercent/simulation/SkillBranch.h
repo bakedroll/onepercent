@@ -21,7 +21,8 @@ namespace onep
     int getBranchId() const;
     const std::string& getBranchName() const;
     int getNumSkills() const;
-    Skill::Ptr getSkill(int i) const;
+    Skill::Ptr getSkillByIndex(int i) const;
+    Skill::Ptr getSkillByName(std::string name) const;
 
     int getCost() const;
 

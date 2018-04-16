@@ -17,6 +17,7 @@
 #include <QButtonGroup>
 #include <QLabel>
 #include <QKeyEvent>
+#include <QFileDialog>
 
 #include <chrono>
 #include <nodes/CountryOverlay.h>
@@ -126,6 +127,7 @@ namespace onep
 
     std::vector<osgGaming::Observer<int>::Ptr> selectedCountryIdObservers;
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
+    std::vector<osgGaming::Observer<bool>::Ptr> skillActivatedObservers;
 
     struct ValueWidget
     {
@@ -417,15 +419,20 @@ namespace onep
 
         for (int j = 0; j < nskills; j++)
         {
-          Skill::Ptr skill = skillBranch->getSkill(j);
+          Skill::Ptr skill = skillBranch->getSkillByIndex(j);
 
           QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getName()));
           rightLayout->addWidget(checkBox);
 
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
-            skillBranch->getSkill(j)->getObActivated()->set(checked);
+            skillBranch->getSkillByIndex(j)->getObActivated()->set(checked);
           });
+
+          skillActivatedObservers.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([=](bool activated)
+          {
+            checkBox->setChecked(activated);
+          })));
         }
       }
 
@@ -436,9 +443,38 @@ namespace onep
       rightWidget->setObjectName("WidgetRightPanel");
       rightWidget->setLayout(rightLayout);
 
+      QPushButton* loadStateButton = new QPushButton("Load state");
+      loadStateButton->setFocusPolicy(Qt::NoFocus);
+
+      QPushButton* saveStateButton = new QPushButton("Save state");
+      saveStateButton->setFocusPolicy(Qt::NoFocus);
+
+      QConnectFunctor::connect(loadStateButton, SIGNAL(clicked()), [this]()
+      {
+        QString filename = QFileDialog::getOpenFileName(base, "Load state", QDir::currentPath(), "State files (*.ste)");
+        if (!filename.isEmpty())
+        {
+          simulation->loadState(filename.toStdString());
+          updateCountryInfoText();
+        }
+      });
+
+      QConnectFunctor::connect(saveStateButton, SIGNAL(clicked()), [this]()
+      {
+        QString filename = QFileDialog::getSaveFileName(base, "Save state", QDir::currentPath(), "State files (*.ste)");
+        if (!filename.isEmpty())
+          simulation->saveState(filename.toStdString());
+      });
+
+      QHBoxLayout* saveLoadStateLayout = new QHBoxLayout();
+      saveLoadStateLayout->setContentsMargins(0, 0, 0, 0);
+      saveLoadStateLayout->addWidget(loadStateButton);
+      saveLoadStateLayout->addWidget(saveStateButton);
+
       QVBoxLayout* leftLayout = new QVBoxLayout();
       leftLayout->addWidget(toggleCountryButton);
       leftLayout->addLayout(branchesLayout);
+      leftLayout->addLayout(saveLoadStateLayout);
       leftLayout->addWidget(labelSkillpoints);
       leftLayout->addWidget(widgetStats);
       leftLayout->addStretch(1);

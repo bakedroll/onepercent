@@ -29,6 +29,9 @@ namespace onep
     bool running() const;
     osgGaming::Observable<bool>::Ptr getORunning() const;
 
+    void saveState(std::string filename);
+    void loadState(std::string filename);
+
     virtual void registerClass(lua_State* state) override;
     virtual std::string instanceVariableName() override;
 
@@ -36,6 +39,7 @@ namespace onep
     void lua_start(lua_State* state);
     void lua_stop(lua_State* state);
     void lua_set_skill_points(int points);
+    void lua_add_skill_points(int points);
     void lua_set_day(int day);
     void lua_set_interval(int interval);
 
