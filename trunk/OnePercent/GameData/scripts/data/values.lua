@@ -5,17 +5,12 @@ local values = {
     init = 0.0
   },
   {
-    name = "buyingpower",
+    name = "political_influence",
     type = "default",
     init = 0.0
   },
   {
-    name = "dept",
-    type = "default",
-    init = 0.0
-  },
-  {
-    name = "interest",
+    name = "ideology",
     type = "default",
     init = 0.0
   },

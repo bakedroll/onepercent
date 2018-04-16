@@ -13,6 +13,7 @@ namespace onep
     int cost;
 
     Skill::List skills;
+    std::map<std::string, int> nameIndexMap;
   };
 
   SkillBranch::SkillBranch(const luabridge::LuaRef& object, int id)
@@ -37,7 +38,9 @@ namespace onep
       luabridge::LuaRef skillRef = *it;
       assert_continue(skillRef.isTable());
 
-      m->skills.push_back(new Skill(skillRef));
+      Skill::Ptr skill = new Skill(skillRef);
+      m->skills.push_back(skill);
+      m->nameIndexMap[skill->getName()] = int(m->skills.size()) - 1;
     }
   }
 
@@ -60,9 +63,15 @@ namespace onep
     return int(m->skills.size());
   }
 
-  Skill::Ptr SkillBranch::getSkill(int i) const
+  Skill::Ptr SkillBranch::getSkillByIndex(int i) const
   {
     return m->skills[i];
+  }
+
+  Skill::Ptr SkillBranch::getSkillByName(std::string name) const
+  {
+    assert_return(m->nameIndexMap.count(name) > 0, nullptr);
+    return m->skills[m->nameIndexMap[name]];
   }
 
   int SkillBranch::getCost() const
