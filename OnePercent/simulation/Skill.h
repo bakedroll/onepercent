@@ -22,7 +22,8 @@ namespace onep
 
 	  explicit Skill(const luabridge::LuaRef& object);
 
-		std::string getName();
+		std::string getSkillName() const;
+    std::string getDisplayName() const;
 
     osgGaming::Observable<bool>::Ptr getObActivated() const;
 

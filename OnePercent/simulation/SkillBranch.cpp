@@ -40,7 +40,7 @@ namespace onep
 
       Skill::Ptr skill = new Skill(skillRef);
       m->skills.push_back(skill);
-      m->nameIndexMap[skill->getName()] = int(m->skills.size()) - 1;
+      m->nameIndexMap[skill->getSkillName()] = int(m->skills.size()) - 1;
     }
   }
 

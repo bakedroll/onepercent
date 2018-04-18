@@ -137,12 +137,14 @@ namespace onep
 
     // Loading lua scripts
     m->lua->loadScript("./GameData/scripts/core.lua");
+    m->lua->loadScript("./GameData/scripts/helper.lua");
 
     m->lua->loadScript("./GameData/scripts/data/branches.lua");
     m->lua->loadScript("./GameData/scripts/data/skills.lua");
     m->lua->loadScript("./GameData/scripts/data/countries.lua");
     m->lua->loadScript("./GameData/scripts/data/values.lua");
 
+    m->lua->loadScript("./GameData/scripts/control/misc.lua");
     m->lua->loadScript("./GameData/scripts/control/skills.lua");
 
     // initialize simulation state in lua
@@ -174,8 +176,14 @@ namespace onep
     // update neighbours data
     m->countriesContainer->writeToLua();
 
+    // initialize neighbour states and call on_initialize actions
     luabridge::LuaRef func_initialize_neighbour_states = m->lua->getObject("core.control.initialize_neighbour_states");
-    LuaStateManager::safeExecute([&](){ func_initialize_neighbour_states(); });
+    luabridge::LuaRef func_perform_on_initialize_actions = m->lua->getObject("core.control.perform_on_initialize_actions");
+    LuaStateManager::safeExecute([&]()
+    {
+      func_initialize_neighbour_states();
+      func_perform_on_initialize_actions();
+    });
 
     // loading simulation
     m->simulation->prepare();

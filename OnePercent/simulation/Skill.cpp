@@ -24,7 +24,7 @@ namespace onep
     , m(new Impl())
   {
     luabridge::LuaRef nameRef         = object["name"];
-    luabridge::LuaRef displayNameRef  = object["displayName"];
+    luabridge::LuaRef displayNameRef  = object["display_name"];
     luabridge::LuaRef typeRef         = object["type"];
     luabridge::LuaRef costRef         = object["cost"];
     luabridge::LuaRef activatedRef    = object["activated"];
@@ -42,9 +42,14 @@ namespace onep
     m->obActivated->set(bool(activatedRef));
   }
 
-  std::string Skill::getName()
+  std::string Skill::getSkillName() const
   {
     return m->name;
+  }
+
+  std::string Skill::getDisplayName() const
+  {
+    return m->displayName;
   }
 
   osgGaming::Observable<bool>::Ptr Skill::getObActivated() const

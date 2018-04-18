@@ -421,7 +421,7 @@ namespace onep
         {
           Skill::Ptr skill = skillBranch->getSkillByIndex(j);
 
-          QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getName()));
+          QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getDisplayName()));
           rightLayout->addWidget(checkBox);
 
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
