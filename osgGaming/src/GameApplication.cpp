@@ -393,6 +393,7 @@ namespace osgGaming
 
       m->view->getRootGroup()->setUpdateCallback(this);
 
+      OSGG_LOG_INFO("Starting mainloop");
       int ret = mainloop();
 
       deinitialize();
@@ -415,13 +416,11 @@ namespace osgGaming
     catch (GameException& e)
     {
       OSGG_LOG_FATAL(std::string("Exception: ") + e.getMessage());
-
       std::cin.ignore();
     }
     catch (exception& e)
     {
       OSGG_LOG_FATAL(std::string("Exception: ") + std::string(e.what()));
-
       std::cin.ignore();
     }
 

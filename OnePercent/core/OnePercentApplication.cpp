@@ -82,7 +82,10 @@ namespace onep
 
   void OnePercentApplication::initialize(osgGaming::Injector& injector)
   {
+    OSGG_LOG_INFO("Loading fonts");
     injector.inject<osgGaming::ResourceManager>()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
+
+    OSGG_LOG_INFO("Loading game parameters");
     injector.inject<osgGaming::PropertiesManager>()->loadPropertiesFromXmlResource("./GameData/data/game_parameters.xml");
 
     // initialize Lua classes
@@ -93,6 +96,8 @@ namespace onep
     m->simulation = injector.inject<Simulation>();
 
     setDefaultWorld(injector.inject<GlobeOverviewWorld>());
+
+    OSGG_LOG_INFO("Loading stylesheets");
 
     // load CSS
     QFile file("./GameData/CSS/style.css");

@@ -6,6 +6,12 @@ using namespace osgGaming;
 using namespace onep;
 using namespace osg;
 
+#ifdef WIN32
+#include "core/CrashDumpWriter.h"
+#endif
+
+#include <QDir>
+
 #define INITIALIZE_QT
 
 int main(int argc, char** argv)
@@ -18,6 +24,10 @@ int main(int argc, char** argv)
 
 
 #ifdef INITIALIZE_QT
+
+#ifdef WIN32
+  SetUnhandledExceptionFilter(unhandled_handler);
+#endif
 
   ref_ptr<OnePercentApplication> app = new OnePercentApplication(argc, argv);
   return app->run();

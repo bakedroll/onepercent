@@ -27,7 +27,7 @@ public:
     if (!dir.exists())
       dir.mkpath(".");
 
-    QString filename = dir.filePath(QString("%1.txt").arg(QDateTime::currentDateTime().toString("yy-MM-dd HH.mm.ss")));
+    QString filename = dir.filePath(QString("%1.txt").arg(QDateTime::currentDateTime().toString("yy-MM-dd_HH.mm.ss")));
 
     m_file.setFileName(filename);
     m_file.open(QIODevice::WriteOnly);
@@ -82,8 +82,6 @@ QtGameApplication::QtGameApplication(int& argc, char** argv)
   osgGaming::LogManager::getInstance()->addLogger(new osgGaming::StdOutLogger());
   osgGaming::LogManager::getInstance()->addLogger(new FileLogger("./logs"));
 
-  OSGG_LOG_INFO("Application starting up");
-
   m->qapplication.reset(new Multithreading(argc, argv));
 
   setlocale(LC_NUMERIC, "en_US");
@@ -91,7 +89,6 @@ QtGameApplication::QtGameApplication(int& argc, char** argv)
   getViewer()->addView(new osgGaming::View());
 
   m->mainWindow = new MainWindow(getViewer());
-
   m->mainWindow->show();
 
   m->overlayCompositor.reset(new OverlayCompositor());
