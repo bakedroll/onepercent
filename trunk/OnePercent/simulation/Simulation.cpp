@@ -262,7 +262,7 @@ namespace onep
       for (int j = 0; j < numSkills; j++)
       {
         Skill::Ptr skill = branch->getSkillByIndex(j);
-        std::string skillName = skill->getName();
+        std::string skillName = skill->getSkillName();
 
         stream << int(skillName.length());
         stream.writeRawData(skillName.c_str(), skillName.length());

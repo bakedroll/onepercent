@@ -1,42 +1,42 @@
 local skills = {
   {
     name = "found_party",
-    displayName = "Found party",
+    display_name = "Found party",
     type = "passive",
     branch = "politics",
     cost = 2
   },
   {
     name = "propagation_banks",
-    displayName = "propagation banks",
+    display_name = "propagation banks",
     type = "passive",
     branch = "banks",
     cost = 10
   },
   {
     name = "propagation_control",
-    displayName = "propagation control",
+    display_name = "propagation control",
     type = "passive",
     branch = "control",
     cost = 10
   },
   {
     name = "propagation_media",
-    displayName = "propagation media",
+    display_name = "propagation media",
     type = "passive",
     branch = "media",
     cost = 10
   },
   {
     name = "propagation_concerns",
-    displayName = "propagation concerns",
+    display_name = "propagation concerns",
     type = "passive",
     branch = "concerns",
     cost = 10
   },
   {
     name = "propagation_politics",
-    displayName = "propagation politics",
+    display_name = "propagation politics",
     type = "passive",
     branch = "politics",
     cost = 10
