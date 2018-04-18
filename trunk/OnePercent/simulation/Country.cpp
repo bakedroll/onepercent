@@ -10,9 +10,6 @@ namespace onep
 
     int id;
     std::string name;
-    float population;
-    float wealth;
-
     std::vector<int> neighbourIds;
   };
 
@@ -23,18 +20,12 @@ namespace onep
   {
     luabridge::LuaRef idRef         = object["id"];
     luabridge::LuaRef nameRef       = object["name"];
-    luabridge::LuaRef populationRef = object["population"];
-    luabridge::LuaRef wealthRef     = object["wealth"];
 
     assert_return(idRef.isNumber());
     assert_return(nameRef.isString());
-    assert_return(populationRef.isNumber());
-    assert_return(wealthRef.isNumber());
 
     m->id = idRef;
     m->name = nameRef.tostring();
-    m->population = populationRef;
-    m->wealth = wealthRef;
   }
 
   Country::~Country()

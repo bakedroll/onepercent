@@ -187,6 +187,41 @@ namespace onep
 
     // loading simulation
     m->simulation->prepare();
+
+
+    /** 
+     * CODE TO GENERATE countries.lua
+     *
+    QFile file("./GameData/countries.lua.gen");
+    assert_return(file.open(QIODevice::WriteOnly));
+
+    QTextStream stream(&file);
+
+    stream << "local countries = {\n";
+
+    Country::Map& countries = m->countriesContainer->getCountryMap();
+    for (Country::Map::iterator it = countries.begin(); it != countries.end(); ++it)
+    {
+      stream << "  {\n";
+      stream << QString("    id = %1,\n").arg(it->second->getId());
+      stream << QString("    name = \"%1\",\n").arg(QString::fromLocal8Bit(it->second->getName().c_str()));
+      stream << QString("    init_values = {\n");
+      stream << QString("      [\"population\"] =  %1,\n").arg(it->second->getPopulation());
+      stream << QString("      [\"wealth\"] =  %1\n").arg(int(it->second->getWealth()));
+      stream << QString("    }\n");
+      stream << "  }";
+
+      if (it->first != countries.rbegin()->first)
+        stream << ",";
+
+      stream << "\n";
+    }
+
+    stream << "}\n\n";
+    stream << "core.control.create_countries(countries)\n";
+
+    file.close();
+    */
   }
 
   void LoadingGlobeOverviewState::onResizeEvent(float width, float height)

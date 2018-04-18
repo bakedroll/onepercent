@@ -1,5 +1,15 @@
 local values = {
   {
+    name = "population",
+    type = "default",
+    init = 0.0
+  },
+  {
+    name = "wealth",
+    type = "default",
+    init = 0.0
+  },
+  {
     name = "anger",
     type = "default",
     init = 0.0
