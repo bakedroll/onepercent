@@ -65,6 +65,11 @@ namespace onep
   {
   }
 
+  std::map<int, osg::ref_ptr<Country>>& CountriesContainer::getCountryMap() const
+  {
+    return m->countriesTable->countries;
+  }
+
   osg::ref_ptr<Country> CountriesContainer::getCountry(int id)
   {
     assert_return(m->countriesTable->countries.count(id) > 0, nullptr);
