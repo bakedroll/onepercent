@@ -67,12 +67,12 @@ namespace onep
     for (CountryMesh::Map::const_iterator it = m->countryMap->cbegin(); it != m->countryMap->cend(); ++it)
     {
       osg::Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCenterLatLong());
-      if (!pos.valid())
-      {
-        continue;
-      }
+      Country::Ptr country = m->countriesContainer->getCountry(it->first);
 
-      std::string name = osgGaming::utf8ToLatin1(m->countriesContainer->getCountry(it->first)->getName().c_str());
+      if (!pos.valid() || !country.valid())
+        continue;
+
+      std::string name = osgGaming::utf8ToLatin1(country->getName().c_str());
       /*std::string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str()) + "\n";
       CountryData::Neighbors neighbors = it->second->getNeighborCountries();
 
