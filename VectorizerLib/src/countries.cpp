@@ -48,7 +48,28 @@ namespace helper
         {
           // ignore adjacent cycles of same country
           if (it->cycleIds.find(eit->first) != it->cycleIds.end())
+          {
+            // HACK: remove common edges from graph
+            printf("Remove common edge\n");
+
+            for (EdgeList::iterator eeit = eit->second.begin(); eeit != eit->second.end(); ++eeit)
+            {
+              EdgeValueList::iterator evit = graph.edges.begin();
+              while (evit != graph.edges.end())
+              {
+                if (evit->first.first == eeit->first && evit->first.second == eeit->second ||
+                  evit->first.first == eeit->second && evit->first.second == eeit->first)
+                {
+                  evit = graph.edges.erase(evit);
+                  continue;
+                }
+
+                ++evit;
+              }
+            }
+
             continue;
+          }
 
           for (EdgeList::iterator nit = eit->second.begin(); nit != eit->second.end(); ++nit)
           {
