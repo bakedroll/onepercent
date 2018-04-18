@@ -8,7 +8,7 @@
 #include "simulation/Simulation.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
-#include "Simulation/UpdateThread.h"
+#include "simulation/UpdateThread.h"
 
 #include <QVBoxLayout>
 #include <QPushButton>

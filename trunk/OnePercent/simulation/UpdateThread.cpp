@@ -2,6 +2,7 @@
 
 #include "core/Macros.h"
 
+#include <QMutex>
 #include <QEventLoop>
 #include <QElapsedTimer>
 
