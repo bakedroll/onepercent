@@ -95,6 +95,7 @@ function core.control.initialize_state()
   local countries = core.model.countries
   local values = core.model.values
   local state = core.model.state
+  local init
 
   for cid, country in pairs(countries) do
     state[cid] = { values = {}, branch_values = {}, branches_activated = {} }
@@ -108,11 +109,13 @@ function core.control.initialize_state()
 
     -- values
     for _, value in pairs(values) do
+      init = country.init_values[value.name] or value.init
+
       if value.type == "default" then
-        state[cid].values[value.name] = country.init_values[value.name] or value.init
+        state[cid].values[value.name] = init
       elseif value.type == "branch" then
         for _, branch in pairs(branches) do
-          state[cid].branch_values[branch.name][value.name] = country.init_values[value.name] or value.init
+          state[cid].branch_values[branch.name][value.name] = init
         end
       else
         log:warn("Unknown value type '" .. value.type .. "'")

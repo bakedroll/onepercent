@@ -91,11 +91,12 @@ else()
 endif()
 
 # Check for existence of required directories
-# OSG
+# Qt
 if ("${Qt5Core_LIBRARIES}" STREQUAL "")
   set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify QT5_ROOT_DIRECTORY\n")
 endif()
 
+# OSG
 if (NOT EXISTS ${OSG_INCLUDE_DIR})
   set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify OSG_INCLUDE_DIR\n")
 else()
@@ -173,7 +174,9 @@ endif()
 if (WIN32)
   set(OSG_BINARY "NOTFOUND" CACHE STRING "OSG binary directory")
   set(OSG_BINARY_DEBUG "NOTFOUND" CACHE STRING "OSG debug binary directory")
-
+  set(OSGPPU_BINARY "NOTFOUND" CACHE STRING "OSGPPU binary directory")
+  set(OSGPPU_BINARY_DEBUG "NOTFOUND" CACHE STRING "OSGPPU debug binary directory")
+  
   if (NOT EXISTS ${OSG_BINARY})
     if (EXISTS ${OSG_LIBRARY}/../bin)
       set(OSG_BINARY_TMP ${OSG_LIBRARY}/../bin)
@@ -183,10 +186,26 @@ if (WIN32)
       message(WARNING "OSG binary directory not found")
     endif()
   endif()
+  
+  if (NOT EXISTS ${OSGPPU_BINARY})
+	  get_filename_component(OSGPPU_LIBRARY_DIRECTORY ${OSGPPU_LIBRARY_RELEASE} DIRECTORY)
+    if (EXISTS ${OSGPPU_LIBRARY_DIRECTORY}/Release)
+      set(OSGPPU_BINARY_TMP ${OSGPPU_LIBRARY_DIRECTORY}/Release)
+      
+      adjust_cached_path(OSGPPU_BINARY "OSGPPU binary directory" ${OSGPPU_BINARY_TMP})
+    else()
+      message(WARNING "OSGPPU binary directory not found")
+    endif()
+  endif()
 
   adjust_cached_path(OSG_BINARY "OSG binary directory" ${OSG_BINARY})
   if (NOT EXISTS ${OSG_BINARY_DEBUG} AND EXISTS ${OSG_BINARY})
     adjust_cached_path(OSG_BINARY_DEBUG "OSG debug binary directory" ${OSG_BINARY})
+  endif()
+  
+  adjust_cached_path(OSGPPU_BINARY "OSGPPU binary directory" ${OSGPPU_BINARY})
+  if (NOT EXISTS ${OSGPPU_BINARY_DEBUG} AND EXISTS ${OSGPPU_BINARY})
+    adjust_cached_path(OSGPPU_BINARY_DEBUG "OSGPPU debug binary directory" ${OSGPPU_BINARY}/../Debug)
   endif()
 
   # find osg plugins directory
@@ -256,31 +275,37 @@ else()
 endif()
 
 # copy shared dlls
-if (WIN32 AND EXISTS ${OSG_BINARY})
-  copy_dlls(${OSG_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osg100-" ""
-    "osg osgDB osgGA osgText osgUtil osgViewer")
-  copy_dlls(${OSG_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "" ""
-    "osgPPU")
-  copy_dlls(${OSG_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "ot20-" ""
-    "OpenThreads")
-  
-  if (EXISTS ${OSG_PLUGINS})
-    copy_dlls(${OSG_PLUGINS} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osgdb_" ""
-      "freetype glsl jpeg png")
-  endif()
-  
-  if (OSG_LIBRARIES_DEBUG_SUFFIX AND EXISTS ${OSG_BINARY_DEBUG})
-    copy_dlls(${OSG_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osg100-" ${OSG_LIBRARY_SUFFIX}
+if (WIN32)
+  if (EXISTS ${OSG_BINARY})
+    copy_dlls(${OSG_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osg100-" ""
       "osg osgDB osgGA osgText osgUtil osgViewer")
-    copy_dlls(${OSG_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "" ${OSG_LIBRARY_SUFFIX}
-      "osgPPU")
-    copy_dlls(${OSG_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "ot20-" ${OSG_LIBRARY_SUFFIX}
+    copy_dlls(${OSG_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "ot20-" ""
       "OpenThreads")
     
-    if (EXISTS ${OSG_PLUGINS_DEBUG})
-      copy_dlls(${OSG_PLUGINS_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osgdb_" ${OSG_LIBRARY_SUFFIX}
-        "freetype glsl jpeg png")
+    if (EXISTS ${OSG_PLUGINS})
+      copy_dlls(${OSG_PLUGINS} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osgdb_" ""
+        "freetype png")
     endif()
+    
+    if (OSG_LIBRARIES_DEBUG_SUFFIX AND EXISTS ${OSG_BINARY_DEBUG})
+      copy_dlls(${OSG_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osg100-" ${OSG_LIBRARY_SUFFIX}
+        "osg osgDB osgGA osgText osgUtil osgViewer")
+      copy_dlls(${OSG_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "ot20-" ${OSG_LIBRARY_SUFFIX}
+        "OpenThreads")
+      
+      if (EXISTS ${OSG_PLUGINS_DEBUG})
+        copy_dlls(${OSG_PLUGINS_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osgdb_" ${OSG_LIBRARY_SUFFIX}
+          "freetype png")
+      endif()
+    endif()
+  endif()
+  
+  if (EXISTS ${OSGPPU_BINARY})
+    copy_dlls(${OSGPPU_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "" "" "osgPPU")
+  endif()
+  
+  if (EXISTS ${OSGPPU_BINARY_DEBUG})
+    copy_dlls(${OSGPPU_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "" "d" "osgPPU")
   endif()
   
   if (GTEST_FOUND)

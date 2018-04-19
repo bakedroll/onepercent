@@ -44,20 +44,10 @@ core.control.on_branch_action(function(branch_name, country_state)
   if (country_state.branches_activated[branch_name] == true) then
 
     if branch_name == "politics" then
-
-      if core.model.data == nil then
-        core.model.data = {}
-        core.model.data.first_skill_points = false
+      if country_state.values["first_skill_points_politics"] == 0 and country_state.values["political_influence"] >= 5 then
+        simulation:add_skill_points(30)
+        country_state.values["first_skill_points_politics"] = 1
       end
-      local data = core.model.data
-
-      if data.first_skill_points == false then
-        if country_state.values["political_influence"] >= 5 then
-          simulation:add_skill_points(30)
-          data.first_skill_points = true
-        end
-      end
-
     end
 
   else

@@ -89,7 +89,7 @@ function(copy_dlls COPY_DLLS_SRC COPY_DLLS_DST COPY_DLLS_PREFIX COPY_DLLS_SUFFIX
     if (EXISTS ${FILE_FROM})
       configure_file(${FILE_FROM} ${COPY_DLLS_DST}/${FILE_NAME} COPYONLY)
     else()
-      message(WARNING "Could not copy file ${FILE_FROM}")
+      message(STATUS "Could not copy file ${FILE_FROM}")
     endif()
   endforeach()
 
