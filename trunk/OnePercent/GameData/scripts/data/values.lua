@@ -20,6 +20,11 @@ local values = {
     init = 0.0
   },
   {
+    name = "first_skill_points_politics",
+    type = "default",
+    init = 0.0
+  },
+  {
     name = "ideology",
     type = "default",
     init = 0.0
