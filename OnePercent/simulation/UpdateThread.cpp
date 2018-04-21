@@ -104,7 +104,7 @@ namespace onep
 
       long totalElapsed = timerTotal.elapsed();
 
-      OSGG_QLOG_DEBUG(QString("SkillsUpdate: %1ms BranchesUpdate: %2ms Sync: %3ms Total: %4ms")
+      OSGG_QLOG_INFO(QString("SkillsUpdate: %1ms BranchesUpdate: %2ms Sync: %3ms Total: %4ms")
         .arg(skillsElapsed)
         .arg(branchesElapsed)
         .arg(syncElapsed)

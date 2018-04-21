@@ -33,11 +33,6 @@ namespace onep
   {
   }
 
-  void SimulationState::addCountryState(int id, CountryState::Ptr countryState)
-  {
-    m->countryStates[id] = countryState;
-  }
-
   CountryState::Map& SimulationState::getCountryStates()
   {
     return m->countryStates;

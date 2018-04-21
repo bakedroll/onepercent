@@ -20,13 +20,16 @@ namespace onep
         luabridge::LuaRef ref = *it;
         assert_continue(ref.isTable());
         
-        branches.push_back(new SkillBranch(ref, int(branches.size())));
+        SkillBranch::Ptr branch = new SkillBranch(ref, int(branches.size()));
+        branches.push_back(branch);
+        nameIndexMap[branch->getBranchName()] = int(branches.size()) - 1;
       }
     }
 
     ~LuaBranchesTable() {}
 
     SkillBranch::List branches;
+    std::map<std::string, int> nameIndexMap;
 
   protected:
     virtual void writeObject(luabridge::LuaRef& object) const override {}
@@ -40,7 +43,6 @@ namespace onep
     Impl() {}
 
     std::shared_ptr<LuaBranchesTable> branchesTable;
-    std::map<std::string, int> nameIndexMap;
   };
 
 
@@ -66,7 +68,7 @@ namespace onep
 
   SkillBranch::Ptr SkillsContainer::getBranchByName(std::string name)
   {
-    return m->branchesTable->branches[m->nameIndexMap[name]];
+    return m->branchesTable->branches[m->branchesTable->nameIndexMap[name]];
   }
 
   void SkillsContainer::loadFromLua(const luabridge::LuaRef branches)

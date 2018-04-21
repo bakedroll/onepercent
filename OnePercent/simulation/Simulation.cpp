@@ -85,7 +85,7 @@ namespace onep
 
       // increment day
       m->oDay->set(m->oDay->get() + 1);
-    });
+    }, nullptr, Qt::BlockingQueuedConnection);
   }
 
   Simulation::~Simulation()
@@ -205,14 +205,14 @@ namespace onep
     QDataStream stream(&file);
 
     CountryState::Map& state = m->stateContainer->getState()->getCountryStates();
-    
+
     int numBranches = m->skillsContainer->getNumBranches();
 
     stream << int(state.size());
     for (CountryState::Map::iterator it = state.begin(); it != state.end(); ++it)
     {
       stream << it->first;
-      
+
       CountryState::ValuesMap& values = it->second->getValuesMap();
       CountryState::BranchValuesMap& branchValues = it->second->getBranchValuesMap();
 
@@ -245,6 +245,10 @@ namespace onep
       for (int i = 0; i < numBranches; i++)
       {
         std::string branchName = m->skillsContainer->getBranchByIndex(i)->getBranchName();
+
+        stream << int(branchName.length());
+        stream.writeRawData(branchName.c_str(), branchName.length());
+
         bool activated = it->second->getBranchActivated(branchName.c_str());
 
         stream << activated;
@@ -255,7 +259,11 @@ namespace onep
     for (int i = 0; i < numBranches; i++)
     {
       SkillBranch::Ptr branch = m->skillsContainer->getBranchByIndex(i);
-      
+      std::string branchName = branch->getBranchName();
+
+      stream << int(branchName.length());
+      stream.writeRawData(branchName.c_str(), branchName.length());
+
       int numSkills = branch->getNumSkills();
       stream << numSkills;
 
@@ -363,15 +371,16 @@ namespace onep
         stream >> numBranches;
         for (int j = 0; j < numBranches; j++)
         {
+          stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+          std::string branchName(buffer);
+
           stream >> activated;
 
-          if (m->skillsContainer->getBranchByIndex(j) == nullptr)
+          if (m->skillsContainer->getBranchByName(branchName) == nullptr)
           {
             OSGG_QLOG_WARN(QString("Branch not found"));
             continue;
           }
-
-          std::string branchName = m->skillsContainer->getBranchByIndex(j)->getBranchName();
 
           osgGaming::Observable<bool>::Ptr obs = cstate->getOActivatedBranch(branchName.c_str());
           if (obs->get() != activated) obs->set(activated);
@@ -381,7 +390,10 @@ namespace onep
       stream >> numBranches;
       for (int i = 0; i < numBranches; i++)
       {
-        SkillBranch::Ptr branch = m->skillsContainer->getBranchByIndex(i);
+        stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+        std::string branchName(buffer);
+
+        SkillBranch::Ptr branch = m->skillsContainer->getBranchByName(branchName);
 
         stream >> numSkills;
         for (int j = 0; j < numSkills; j++)
