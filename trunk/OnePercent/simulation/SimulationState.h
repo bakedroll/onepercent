@@ -13,7 +13,6 @@ namespace onep
     SimulationState(const luabridge::LuaRef& object);
     ~SimulationState();
 
-    void addCountryState(int id, CountryState::Ptr countryState);
     CountryState::Map& getCountryStates();
 
   protected:
