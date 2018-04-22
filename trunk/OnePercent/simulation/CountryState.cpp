@@ -118,13 +118,21 @@ namespace onep
       for (luabridge::Iterator it(object); !it.isNil(); ++it)
       {
         assert_continue(it.key().isString());
-        osgGaming::Observable<bool>::Ptr oActivated = oActivatedBranches[it.key()];
-
         assert_continue((*it).type() == LUA_TBOOLEAN);
-        assert_continue(oActivated.valid());
 
-        if (oActivated->get() != bool(*it))
-          oActivated->set(bool(*it));
+        luabridge::LuaRef refKey = it.key();
+        std::string key = refKey;
+
+        bool activated = bool(*it);
+
+        Multithreading::uiExecuteOrAsync([this, key, activated]()
+        {
+          osgGaming::Observable<bool>::Ptr oActivated = oActivatedBranches[key];
+          assert_return(oActivated.valid());
+
+          if (oActivated->get() != activated)
+            oActivated->set(activated);
+        });
       }
     }
 

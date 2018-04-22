@@ -1,6 +1,7 @@
 #include "UpdateThread.h"
 
 #include "core/Macros.h"
+#include "core/Multithreading.h"
 
 #include <QMutex>
 #include <QEventLoop>
@@ -35,8 +36,11 @@ namespace onep
     {
       QMutexLocker lock(&mutexTasks);
 
-      for (std::vector<std::function<void()>>::iterator it = scheduledTasks.begin(); it != scheduledTasks.end(); ++it)
-        (*it)();
+      Multithreading::uiExecute([this]()
+      {
+        for (std::vector<std::function<void()>>::iterator it = scheduledTasks.begin(); it != scheduledTasks.end(); ++it)
+          (*it)();
+      });
 
       scheduledTasks.clear();
     }

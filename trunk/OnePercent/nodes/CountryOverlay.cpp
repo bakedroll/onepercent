@@ -47,23 +47,27 @@ namespace onep
       countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
       base->addChild(mesh, false);
 
-      assert(stateContainer->getState()->getCountryStates().count(id) > 0);
-      CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[id];
-
-      int n = skillsContainer->getNumBranches();
-      for (int i = 0; i < n; i++)
+      stateContainer->accessState([=](SimulationState::Ptr state)
       {
-        std::string branchName = skillsContainer->getBranchByIndex(i)->getBranchName();
+        CountryState::Ptr cstate = state->getCountryState(id);
 
-        skillBranchActivatedObservers.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([this, mesh, i](bool activated)
+        int n = skillsContainer->getNumBranches();
+        for (int i = 0; i < n; i++)
         {
-          if (!activated)
-            return;
+          std::string branchName = skillsContainer->getBranchByIndex(i)->getBranchName();
 
-          if (oSelectedCountryId->get() == 0 && highlightedBranchId == i)
-            setCountryColorMode(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
-        })));
-      }
+          skillBranchActivatedObservers.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
+          {
+            if (!activated)
+              return;
+
+            if (oSelectedCountryId->get() == 0 && highlightedBranchId == i)
+              setCountryColorMode(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
+          })));
+        }
+      });
+
+
     }
 
     void setCountryColorMode(CountryMesh::Ptr mesh, CountryMesh::ColorMode mode)
@@ -258,10 +262,13 @@ namespace onep
     for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
     {
       int cid = it->first;
-      CountryState::Ptr cstate = m->stateContainer->getState()->getCountryStates()[cid];
+      m->stateContainer->accessState([=](SimulationState::Ptr state)
+      {
+        CountryState::Ptr cstate = state->getCountryState(cid);
 
-      if (cstate->getBranchActivated(branchName.c_str()))
-        m->setCountryColorMode(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + id));
+        if (cstate->getBranchActivated(branchName.c_str()))
+          m->setCountryColorMode(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + id));
+      });
     }
   }
 

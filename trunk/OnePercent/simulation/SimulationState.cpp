@@ -33,9 +33,15 @@ namespace onep
   {
   }
 
-  CountryState::Map& SimulationState::getCountryStates()
+  CountryState::Map& SimulationState::getCountryStates() const
   {
     return m->countryStates;
+  }
+
+  CountryState::Ptr SimulationState::getCountryState(int cid) const
+  {
+    assert_return(m->countryStates.count(cid) > 0, nullptr);
+    return m->countryStates[cid];
   }
 
   void SimulationState::writeObject(luabridge::LuaRef& object) const

@@ -13,7 +13,8 @@ namespace onep
     SimulationState(const luabridge::LuaRef& object);
     ~SimulationState();
 
-    CountryState::Map& getCountryStates();
+    CountryState::Map& getCountryStates() const;
+    CountryState::Ptr getCountryState(int cid) const;
 
   protected:
     virtual void writeObject(luabridge::LuaRef& object) const override;

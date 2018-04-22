@@ -7,6 +7,7 @@
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
 #include "simulation/SkillBranch.h"
+#include "simulation/UpdateThread.h"
 
 #include <osgGaming/Helper.h>
 
@@ -44,34 +45,39 @@ namespace onep
         return;
 
       int cid = country->getId();
-      if (stateContainer->getState()->getCountryStates().count(cid) == 0)
-        return;
 
-      CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[cid];
-
-      int n = skillsContainer->getNumBranches();
-      for (int i = 0; i < n; i++)
+      stateContainer->accessState([=](SimulationState::Ptr state)
       {
-        SkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
-        std::string name = branch->getBranchName();
+        if (state->getCountryStates().count(cid) == 0)
+          return;
 
-        notifiesActivated.push_back(cstate->getOActivatedBranch(name.c_str())->connectAndNotify(osgGaming::Func<bool>([=](bool activated)
+        CountryState::Ptr cstate = state->getCountryStates()[cid];
+
+        int n = skillsContainer->getNumBranches();
+        for (int i = 0; i < n; i++)
         {
-          if (activated)
-          {
-            buttons[i]->setText(QString("%1\n%2").arg(QString::fromStdString(name)).arg(tr("(Unlocked)")));
-            buttons[i]->setEnabled(false);
-          }
-          else
-          {
-            int costs = branch->getCost();
+          SkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
+          std::string name = branch->getBranchName();
 
-            buttons[i]->setText(QString("%1\n(%2 SP to unlock)").arg(QString::fromStdString(name)).arg(costs));
-            buttons[i]->setEnabled(oNumSkillPoints->get() >= costs);
-          }
-        })));
+          notifiesActivated.push_back(cstate->getOActivatedBranch(name.c_str())->connectAndNotify(osgGaming::Func<bool>([=](bool activated)
+          {
+            if (activated)
+            {
+              buttons[i]->setText(QString("%1\n%2").arg(QString::fromStdString(name)).arg(tr("(Unlocked)")));
+              buttons[i]->setEnabled(false);
+            }
+            else
+            {
+              int costs = branch->getCost();
 
-      }
+              buttons[i]->setText(QString("%1\n(%2 SP to unlock)").arg(QString::fromStdString(name)).arg(costs));
+              buttons[i]->setEnabled(oNumSkillPoints->get() >= costs);
+            }
+          })));
+
+        }
+      });
+
     }
 	};
 
@@ -101,7 +107,7 @@ namespace onep
 
       m->buttons.push_back(button);
 
-      QConnectFunctor::connect(button, SIGNAL(clicked()), [this, i, branch, name]()
+      QConnectFunctor::connect(button, SIGNAL(clicked()), [=]()
       {
         if (!m->country.valid())
           return;
@@ -111,9 +117,15 @@ namespace onep
           return;
 
         int cid = m->country->getId();
-        CountryState::Ptr cstate = m->stateContainer->getState()->getCountryStates()[cid];
 
-        cstate->setBranchActivated(name.c_str(), true);
+        // schedule task
+        m->simulation->getUpdateThread()->executeLuaTask([=]()
+        {
+          m->stateContainer->accessState([=](SimulationState::Ptr state)
+          {
+            state->getCountryState(cid)->setBranchActivated(name.c_str(), true);
+          });
+        });
 
         if (!m->simulation->running())
           m->simulation->start();
