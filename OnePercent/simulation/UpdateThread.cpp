@@ -23,27 +23,12 @@ namespace onep
 
     QMutex mutexShutdown;
     QMutex mutexState;
-    QMutex mutexTasks;
 
     LuaRefPtr refUpdate_skills_func;
     LuaRefPtr refUpdate_branches_func;
 
-    std::vector<std::function<void()>> scheduledTasks;
-
     bool bShutdown;
 
-    void processScheduledTasks()
-    {
-      QMutexLocker lock(&mutexTasks);
-
-      Multithreading::uiExecute([this]()
-      {
-        for (std::vector<std::function<void()>>::iterator it = scheduledTasks.begin(); it != scheduledTasks.end(); ++it)
-          (*it)();
-      });
-
-      scheduledTasks.clear();
-    }
   };
 
   UpdateThread::UpdateThread()
@@ -91,8 +76,6 @@ namespace onep
       {
         QMutexLocker lock(&m->mutexState);
 
-        m->processScheduledTasks();
-
         timerSkillsUpdate.start();
         (*m->refUpdate_skills_func)();
         skillsElapsed = timerSkillsUpdate.elapsed();
@@ -121,12 +104,6 @@ namespace onep
   void UpdateThread::doNextStep()
   {
     emit nextStep();
-  }
-
-  void UpdateThread::scheduleLuaTask(const std::function<void()>& task)
-  {
-    QMutexLocker lock(&m->mutexTasks);
-    m->scheduledTasks.push_back(task);
   }
 
   void UpdateThread::executeLuaTask(const std::function<void()>& task)

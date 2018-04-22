@@ -26,16 +26,14 @@ namespace onep
         t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
     }
 
-    QDir dir("./crashdumps");
+    QDir dir("./Crashdumps");
     if (!dir.exists())
       dir.mkpath(".");
 
     QFileInfo fileinfo(name);
     QString filename = fileinfo.fileName();
 
-    std::string path = std::string(".\\crashdumps\\") + filename.toStdString();
-
-    printf("Path: %s\n", path.c_str());
+    std::string path = std::string(".\\Crashdumps\\") + filename.toStdString();
 
     auto hFile = CreateFileA(path.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile == INVALID_HANDLE_VALUE)

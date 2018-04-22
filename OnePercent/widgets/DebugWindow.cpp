@@ -355,7 +355,7 @@ namespace onep
             return;
 
           // schedule task
-          simulation->getUpdateThread()->scheduleLuaTask([=]()
+          simulation->getUpdateThread()->executeLuaTask([=]()
           {
             stateContainer->accessState([=](SimulationState::Ptr state)
             {

@@ -80,7 +80,7 @@ QtGameApplication::QtGameApplication(int& argc, char** argv)
   , m(new Impl())
 {
   osgGaming::LogManager::getInstance()->addLogger(new osgGaming::StdOutLogger());
-  osgGaming::LogManager::getInstance()->addLogger(new FileLogger("./logs"));
+  osgGaming::LogManager::getInstance()->addLogger(new FileLogger("./Logs"));
 
   m->qapplication.reset(new Multithreading(argc, argv));
 
