@@ -143,7 +143,7 @@ namespace onep
         Skill::Ptr skill = branch->getSkillByIndex(j);
         m->notifyActivatedList.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([this, skill](bool activated)
         {
-          m->thread.scheduleLuaTask([skill](){ skill->write(); });
+          m->thread.executeLuaTask([skill](){ skill->write(); });
         })));
       }
     }
