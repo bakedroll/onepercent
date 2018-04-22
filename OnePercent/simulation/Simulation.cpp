@@ -75,17 +75,18 @@ namespace onep
       m->thread.doNextStep();
     });
 
+    // DirectConnection: Code is executed in UpdateThread
     QConnectFunctor::connect(&m->thread, SIGNAL(onStateUpdated()), [this]()
     {
       // synchronize with lua state
       // Caution: lua state mutex is locked here
       m->bSyncing = true;
-      m->stateContainer->getState()->read();
+      m->stateContainer->accessState([](SimulationState::Ptr state){ state->read(); });
       m->bSyncing = false;
 
       // increment day
-      m->oDay->set(m->oDay->get() + 1);
-    }, nullptr, Qt::BlockingQueuedConnection);
+      Multithreading::uiExecuteOrAsync([this](){ m->oDay->set(m->oDay->get() + 1); });
+    }, nullptr, Qt::DirectConnection);
   }
 
   Simulation::~Simulation()
@@ -109,24 +110,29 @@ namespace onep
 
     int nBranches = m->skillsContainer->getNumBranches();
 
-    ONEP_FOREACH(CountryState::Map, it, m->stateContainer->getState()->getCountryStates())
+    m->stateContainer->accessState([this, nBranches](SimulationState::Ptr state)
     {
-      CountryState::Ptr cstate = it->second;
-
-      for (int i = 0; i < nBranches; i++)
+      ONEP_FOREACH(CountryState::Map, it, state->getCountryStates())
       {
-        std::string branchName = m->skillsContainer->getBranchByIndex(i)->getBranchName();
+        CountryState::Ptr cstate = it->second;
 
-        m->notifyActivatedList.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([this, cstate](bool activated)
+        for (int i = 0; i < nBranches; i++)
         {
-          if (m->bSyncing)
-            return;
+          std::string branchName = m->skillsContainer->getBranchByIndex(i)->getBranchName();
 
-          m->thread.scheduleLuaTask([cstate](){ cstate->writeBranchesActivated(); });
-        })));
+          m->notifyActivatedList.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([this, cstate](bool activated)
+          {
+            // cancel when already written
+            if (m->bSyncing)
+              return;
+
+            // We are in a scheduled Lua task already
+            cstate->writeBranchesActivated();
+          })));
+        }
       }
-      
-    }
+    });
+
 
     for (int i = 0; i < nBranches; i++)
     {
@@ -204,83 +210,86 @@ namespace onep
 
     QDataStream stream(&file);
 
-    CountryState::Map& state = m->stateContainer->getState()->getCountryStates();
-
-    int numBranches = m->skillsContainer->getNumBranches();
-
-    stream << int(state.size());
-    for (CountryState::Map::iterator it = state.begin(); it != state.end(); ++it)
+    m->stateContainer->accessState([&](SimulationState::Ptr state)
     {
-      stream << it->first;
+      CountryState::Map& cstates = state->getCountryStates();
 
-      CountryState::ValuesMap& values = it->second->getValuesMap();
-      CountryState::BranchValuesMap& branchValues = it->second->getBranchValuesMap();
+      int numBranches = m->skillsContainer->getNumBranches();
 
-      stream << int(values.size());
-      for (CountryState::ValuesMap::iterator vit = values.begin(); vit != values.end(); ++vit)
+      stream << int(cstates.size());
+      for (CountryState::Map::iterator it = cstates.begin(); it != cstates.end(); ++it)
       {
-        stream << int(vit->first.length());
-        stream.writeRawData(vit->first.c_str(), vit->first.length());
+        stream << it->first;
 
-        stream << float(vit->second);
-      }
+        CountryState::ValuesMap& values = it->second->getValuesMap();
+        CountryState::BranchValuesMap& branchValues = it->second->getBranchValuesMap();
 
-      stream << int(branchValues.size());
-      for (CountryState::BranchValuesMap::iterator bit = branchValues.begin(); bit != branchValues.end(); ++bit)
-      {
-        stream << int(bit->first.length());
-        stream.writeRawData(bit->first.c_str(), bit->first.length());
-
-        stream << int(bit->second.size());
-        for (CountryState::ValuesMap::iterator vit = bit->second.begin(); vit != bit->second.end(); ++vit)
+        stream << int(values.size());
+        for (CountryState::ValuesMap::iterator vit = values.begin(); vit != values.end(); ++vit)
         {
           stream << int(vit->first.length());
           stream.writeRawData(vit->first.c_str(), vit->first.length());
 
           stream << float(vit->second);
         }
+
+        stream << int(branchValues.size());
+        for (CountryState::BranchValuesMap::iterator bit = branchValues.begin(); bit != branchValues.end(); ++bit)
+        {
+          stream << int(bit->first.length());
+          stream.writeRawData(bit->first.c_str(), bit->first.length());
+
+          stream << int(bit->second.size());
+          for (CountryState::ValuesMap::iterator vit = bit->second.begin(); vit != bit->second.end(); ++vit)
+          {
+            stream << int(vit->first.length());
+            stream.writeRawData(vit->first.c_str(), vit->first.length());
+
+            stream << float(vit->second);
+          }
+        }
+
+        stream << numBranches;
+        for (int i = 0; i < numBranches; i++)
+        {
+          std::string branchName = m->skillsContainer->getBranchByIndex(i)->getBranchName();
+
+          stream << int(branchName.length());
+          stream.writeRawData(branchName.c_str(), branchName.length());
+
+          bool activated = it->second->getBranchActivated(branchName.c_str());
+
+          stream << activated;
+        }
       }
 
       stream << numBranches;
       for (int i = 0; i < numBranches; i++)
       {
-        std::string branchName = m->skillsContainer->getBranchByIndex(i)->getBranchName();
+        SkillBranch::Ptr branch = m->skillsContainer->getBranchByIndex(i);
+        std::string branchName = branch->getBranchName();
 
         stream << int(branchName.length());
         stream.writeRawData(branchName.c_str(), branchName.length());
 
-        bool activated = it->second->getBranchActivated(branchName.c_str());
+        int numSkills = branch->getNumSkills();
+        stream << numSkills;
 
-        stream << activated;
+        for (int j = 0; j < numSkills; j++)
+        {
+          Skill::Ptr skill = branch->getSkillByIndex(j);
+          std::string skillName = skill->getSkillName();
+
+          stream << int(skillName.length());
+          stream.writeRawData(skillName.c_str(), skillName.length());
+
+          stream << skill->getObActivated()->get();
+        }
       }
-    }
 
-    stream << numBranches;
-    for (int i = 0; i < numBranches; i++)
-    {
-      SkillBranch::Ptr branch = m->skillsContainer->getBranchByIndex(i);
-      std::string branchName = branch->getBranchName();
-
-      stream << int(branchName.length());
-      stream.writeRawData(branchName.c_str(), branchName.length());
-
-      int numSkills = branch->getNumSkills();
-      stream << numSkills;
-
-      for (int j = 0; j < numSkills; j++)
-      {
-        Skill::Ptr skill = branch->getSkillByIndex(j);
-        std::string skillName = skill->getSkillName();
-
-        stream << int(skillName.length());
-        stream.writeRawData(skillName.c_str(), skillName.length());
-
-        stream << skill->getObActivated()->get();
-      }
-    }
-
-    stream << m->oNumSkillPoints->get();
-    stream << m->oDay->get();
+      stream << m->oNumSkillPoints->get();
+      stream << m->oDay->get();
+    });
 
     file.close();
   }
@@ -297,130 +306,134 @@ namespace onep
     QDataStream stream(&file);
     m->bSyncing = true;
 
-    m->thread.executeLuaTask([this, &stream]()
+    m->thread.executeLuaTask([&]()
     {
-      CountryState::Map& state = m->stateContainer->getState()->getCountryStates();
-      int numCountries, cid, numValues, numBranches, numSkills, len, number;
-      char buffer[256];
-      float value;
-      bool activated;
-
-      stream >> numCountries;
-      for (int i = 0; i < numCountries; i++)
+      m->stateContainer->accessState([&](SimulationState::Ptr state)
       {
-        stream >> cid;
+        CountryState::Map& cstates = state->getCountryStates();
+        int numCountries, cid, numValues, numBranches, numSkills, len;
+        char buffer[256];
+        float value;
+        bool activated;
 
-        if (state.count(cid) == 0)
+        stream >> numCountries;
+        for (int i = 0; i < numCountries; i++)
         {
-          OSGG_QLOG_WARN(QString("No country with id %1").arg(cid));
-          return;
-        }
+          stream >> cid;
 
-        CountryState::Ptr cstate = state[cid];
-
-        CountryState::ValuesMap& values = cstate->getValuesMap();
-        CountryState::BranchValuesMap& branchValues = cstate->getBranchValuesMap();
-
-        stream >> numValues;
-        for (int j = 0; j < numValues; j++)
-        {
-          stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
-          std::string valueName(buffer);
-
-          stream >> value;
-
-          if (values.count(valueName) == 0)
+          if (cstates.count(cid) == 0)
           {
-            OSGG_QLOG_WARN(QString("Value %1 not found").arg(valueName.c_str()));
-            continue;
+            OSGG_QLOG_WARN(QString("No country with id %1").arg(cid));
+            return;
           }
 
-          values[valueName] = value;
-        }
+          CountryState::Ptr cstate = cstates[cid];
 
-        stream >> numBranches;
-        for (int j = 0; j < numBranches; j++)
-        {
-          stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
-          std::string branchName(buffer);
+          CountryState::ValuesMap& values = cstate->getValuesMap();
+          CountryState::BranchValuesMap& branchValues = cstate->getBranchValuesMap();
 
           stream >> numValues;
-          for (int k = 0; k < numValues; k++)
+          for (int j = 0; j < numValues; j++)
           {
             stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
             std::string valueName(buffer);
 
             stream >> value;
 
-            if (branchValues.count(branchName) == 0)
-            {
-              OSGG_QLOG_WARN(QString("Branch %1 not found").arg(branchName.c_str()));
-              continue;
-            }
-
-            if (branchValues[branchName].count(valueName) == 0)
+            if (values.count(valueName) == 0)
             {
               OSGG_QLOG_WARN(QString("Value %1 not found").arg(valueName.c_str()));
               continue;
             }
 
-            branchValues[branchName][valueName] = value;
+            values[valueName] = value;
+          }
+
+          stream >> numBranches;
+          for (int j = 0; j < numBranches; j++)
+          {
+            stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+            std::string branchName(buffer);
+
+            stream >> numValues;
+            for (int k = 0; k < numValues; k++)
+            {
+              stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+              std::string valueName(buffer);
+
+              stream >> value;
+
+              if (branchValues.count(branchName) == 0)
+              {
+                OSGG_QLOG_WARN(QString("Branch %1 not found").arg(branchName.c_str()));
+                continue;
+              }
+
+              if (branchValues[branchName].count(valueName) == 0)
+              {
+                OSGG_QLOG_WARN(QString("Value %1 not found").arg(valueName.c_str()));
+                continue;
+              }
+
+              branchValues[branchName][valueName] = value;
+            }
+          }
+
+          stream >> numBranches;
+          for (int j = 0; j < numBranches; j++)
+          {
+            stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+            std::string branchName(buffer);
+
+            stream >> activated;
+
+            if (m->skillsContainer->getBranchByName(branchName) == nullptr)
+            {
+              OSGG_QLOG_WARN(QString("Branch not found"));
+              continue;
+            }
+
+            osgGaming::Observable<bool>::Ptr obs = cstate->getOActivatedBranch(branchName.c_str());
+            if (obs->get() != activated) obs->set(activated);
           }
         }
 
         stream >> numBranches;
-        for (int j = 0; j < numBranches; j++)
+        for (int i = 0; i < numBranches; i++)
         {
           stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
           std::string branchName(buffer);
 
-          stream >> activated;
+          SkillBranch::Ptr branch = m->skillsContainer->getBranchByName(branchName);
 
-          if (m->skillsContainer->getBranchByName(branchName) == nullptr)
+          stream >> numSkills;
+          for (int j = 0; j < numSkills; j++)
           {
-            OSGG_QLOG_WARN(QString("Branch not found"));
-            continue;
+            stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+            std::string skillName(buffer);
+
+            stream >> activated;
+
+            if (!branch.valid() || !branch->getSkillByName(skillName))
+            {
+              OSGG_QLOG_WARN(QString("Skill %1 not found").arg(skillName.c_str()));
+              continue;
+            }
+
+            Skill::Ptr skill = branch->getSkillByName(skillName);
+            if (activated != skill->getObActivated()->get()) skill->getObActivated()->set(activated);
           }
-
-          osgGaming::Observable<bool>::Ptr obs = cstate->getOActivatedBranch(branchName.c_str());
-          if (obs->get() != activated) obs->set(activated);
         }
-      }
 
-      stream >> numBranches;
-      for (int i = 0; i < numBranches; i++)
-      {
-        stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
-        std::string branchName(buffer);
-
-        SkillBranch::Ptr branch = m->skillsContainer->getBranchByName(branchName);
-
-        stream >> numSkills;
-        for (int j = 0; j < numSkills; j++)
-        {
-          stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
-          std::string skillName(buffer);
-
-          stream >> activated;
-
-          if (!branch.valid() || !branch->getSkillByName(skillName))
-          {
-            OSGG_QLOG_WARN(QString("Skill %1 not found").arg(skillName.c_str()));
-            continue;
-          }
-
-          Skill::Ptr skill = branch->getSkillByName(skillName);
-          if (activated != skill->getObActivated()->get()) skill->getObActivated()->set(activated);
-        }
-      }
-
-      stream >> number;
-      m->oNumSkillPoints->set(number);
-      stream >> number;
-      m->oDay->set(number);
-
-      m->stateContainer->getState()->write();
+        state->write();
+      });
     });
+
+    int number;
+    stream >> number;
+    m->oNumSkillPoints->set(number);
+    stream >> number;
+    m->oDay->set(number);
 
     file.close();
     m->bSyncing = false;

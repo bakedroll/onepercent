@@ -2,6 +2,8 @@
 
 #include <osgGaming/Injector.h>
 
+#include <functional>
+
 extern "C"
 {
 #include <lua.h>
@@ -23,7 +25,7 @@ namespace onep
     SimulationStateContainer(osgGaming::Injector& injector);
     ~SimulationStateContainer();
 
-    osg::ref_ptr<SimulationState> getState();
+    void accessState(std::function<void(osg::ref_ptr<SimulationState>)> func);
 
     void loadFromLua(const luabridge::LuaRef object);
 

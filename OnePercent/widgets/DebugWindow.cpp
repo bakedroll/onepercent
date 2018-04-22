@@ -1,6 +1,7 @@
 #include "DebugWindow.h"
 
 #include "core/Macros.h"
+#include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
 #include "simulation/CountriesContainer.h"
@@ -195,13 +196,16 @@ namespace onep
         int id = countryOverlay->getSelectedCountryId();
         if (id == 0) return;
 
-        CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[id];
+        stateContainer->accessState([=](SimulationState::Ptr state)
+        {
+          CountryState::Ptr cstate = state->getCountryState(id);
 
-        bool ok;
-        float value = edit->text().toInt(&ok);
-        setFunc(value, cstate);
-        edit->setText(QString::number(value));
-        button->setEnabled(false);
+          bool ok;
+          float value = edit->text().toInt(&ok);
+          setFunc(value, cstate);
+          edit->setText(QString::number(value));
+          button->setEnabled(false);
+        });
       });
 
       QHBoxLayout* layout = new QHBoxLayout();
@@ -228,72 +232,82 @@ namespace onep
 
       widgetStats->setVisible(true);
 
-      CountryState::Map& countryStates = stateContainer->getState()->getCountryStates();
-      if (countryStates.count(selectedId) == 0)
-        return;
-
-      Country::Ptr country = countriesContainer->getCountry(selectedId);
-      CountryState::Ptr countryState = countryStates[selectedId];
-
-      CountryState::ValuesMap& values = countryState->getValuesMap();
-      CountryState::BranchValuesMap& branchValues = countryState->getBranchValuesMap();
-
-      if (layoutStats == nullptr)
+      stateContainer->accessState([=](SimulationState::Ptr state)
       {
-        layoutStats = new QVBoxLayout();
-        layoutStats->setContentsMargins(0, 0, 0, 0);
-        layoutStats->setSpacing(0);
-        widgetStats->setLayout(layoutStats);
+        CountryState::Map& countryStates = state->getCountryStates();
+        if (countryStates.count(selectedId) == 0)
+          return;
 
-        labelCountry = new QLabel();
+        Country::Ptr country = countriesContainer->getCountry(selectedId);
+        CountryState::Ptr countryState = countryStates[selectedId];
 
-        layoutStats->addWidget(labelCountry);
+        CountryState::ValuesMap& values = countryState->getValuesMap();
+        CountryState::BranchValuesMap& branchValues = countryState->getBranchValuesMap();
+
+        if (layoutStats == nullptr)
+        {
+          layoutStats = new QVBoxLayout();
+          layoutStats->setContentsMargins(0, 0, 0, 0);
+          layoutStats->setSpacing(0);
+          widgetStats->setLayout(layoutStats);
+
+          labelCountry = new QLabel();
+
+          layoutStats->addWidget(labelCountry);
+
+          for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
+          {
+            std::string name = it->first;
+            ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
+            {
+              simulation->getUpdateThread()->executeLuaTask([cstate, name, value]()
+              {
+                cstate->getValuesMap()[name] = value;
+                cstate->writeValues();
+              });
+            });
+            valueWidgets[it->first] = widget;
+          }
+
+          for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
+          {
+            for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+            {
+              std::string branchName = it->first;
+              std::string name = vit->first;
+              ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
+              {
+                simulation->getUpdateThread()->executeLuaTask([cstate, branchName, name, value]()
+                {
+                  cstate->getBranchValuesMap()[branchName][name] = value;
+                  cstate->writeBranchValues();
+                });
+              });
+              branchValueWidgets[it->first][vit->first] = widget;
+            }
+          }
+
+          notifyRunningValues = simulation->getORunning()->connectAndNotify(osgGaming::Func<bool>([this](bool running)
+          {
+            for (ValueWidgets::iterator it = valueWidgets.begin(); it != valueWidgets.end(); ++it)
+              it->second.edit->setEnabled(!running);
+
+            for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
+              for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+                vit->second.edit->setEnabled(!running);
+          }));
+        }
+
+        labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getName().c_str())).arg(country->getId()));
 
         for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
-        {
-          std::string name = it->first;
-          ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
-          {
-            cstate->getValuesMap()[name] = value;
-            simulation->getUpdateThread()->executeLuaTask([cstate](){ cstate->writeValues(); });
-          });
-          valueWidgets[it->first] = widget;
-        }
+          valueWidgets[it->first].edit->setText(QString::number(it->second));
 
         for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
-        {
           for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-          {
-            std::string branchName = it->first;
-            std::string name = vit->first;
-            ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
-            {
-              cstate->getBranchValuesMap()[branchName][name] = value;
-              simulation->getUpdateThread()->executeLuaTask([cstate](){ cstate->writeBranchValues(); });
-            });
-            branchValueWidgets[it->first][vit->first] = widget;
-          }
-        }
+            branchValueWidgets[it->first][vit->first].edit->setText(QString::number(vit->second));
 
-        notifyRunningValues = simulation->getORunning()->connectAndNotify(osgGaming::Func<bool>([&](bool running)
-        {
-          for (ValueWidgets::iterator it = valueWidgets.begin(); it != valueWidgets.end(); ++it)
-            it->second.edit->setEnabled(!running);
-
-          for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
-            for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-              vit->second.edit->setEnabled(!running);
-        }));
-      }
-
-      labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getName().c_str())).arg(country->getId()));
-
-      for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
-        valueWidgets[it->first].edit->setText(QString::number(it->second));
-
-      for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
-        for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-          branchValueWidgets[it->first][vit->first].edit->setText(QString::number(vit->second));
+      });
     }
 
     void setupUi()
@@ -340,9 +354,14 @@ namespace onep
           if (cid == 0)
             return;
 
-          CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[cid];
-
-          cstate->setBranchActivated(name.c_str(), checked);
+          // schedule task
+          simulation->getUpdateThread()->scheduleLuaTask([=]()
+          {
+            stateContainer->accessState([=](SimulationState::Ptr state)
+            {
+              state->getCountryState(cid)->setBranchActivated(name.c_str(), checked);
+            });
+          });
         });
 
         QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
@@ -354,9 +373,10 @@ namespace onep
         {
           if (selected > 0)
           {
-            CountryState::Ptr cstate = stateContainer->getState()->getCountryStates()[selected];
-
-            checkBox->setChecked(cstate->getBranchActivated(name.c_str()));
+            stateContainer->accessState([=](SimulationState::Ptr state)
+            {
+              checkBox->setChecked(state->getCountryState(selected)->getBranchActivated(name.c_str()));
+            });
           }
           else
           {
@@ -366,14 +386,20 @@ namespace onep
           checkBox->setEnabled(selected > 0);
         })));
 
-        ONEP_FOREACH(CountryState::Map, it, stateContainer->getState()->getCountryStates())
+        stateContainer->accessState([this, name, checkBox](SimulationState::Ptr state)
         {
-          skillBranchActivatedObservers.push_back(it->second->getOActivatedBranch(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
+          ONEP_FOREACH(CountryState::Map, it, state->getCountryStates())
           {
-            if (it->first == countryOverlay->getSelectedCountryId())
-              checkBox->setChecked(activated);
-          })));
-        }
+            int cid = it->first;
+
+            skillBranchActivatedObservers.push_back(it->second->getOActivatedBranch(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
+            {
+              if (cid == countryOverlay->getSelectedCountryId())
+                checkBox->setChecked(activated);
+            })));
+          }
+        });
+
       }
 
       luaConsoleEdit = new ConsoleEdit();
@@ -426,6 +452,7 @@ namespace onep
 
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
+            // No need to schedule thread task here. Skill branch will never be modified from Lua code.
             skillBranch->getSkillByIndex(j)->getObActivated()->set(checked);
           });
 
