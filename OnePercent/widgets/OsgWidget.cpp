@@ -294,6 +294,9 @@ namespace onep
     osg::ref_ptr<osg::Geode> geode = m->view->getCanvasGeode();
     geode->removeDrawable(geode->getDrawable(0));
     geode->addDrawable(osg::createTexturedQuadGeometry(osg::Vec3f(-factor, -1.0f, 0.0f), osg::Vec3f(2.0f * factor, 0.0f, 0.0f), osg::Vec3f(0.0f, 2.0f, 0.0f)));
+
+    m->camera->setViewport(0, 0, width, height);
+    m->view->getHudCamera()->setViewport(0, 0, width, height);
   }
 
   void OsgWidget::keyPressEvent(QKeyEvent* event)
