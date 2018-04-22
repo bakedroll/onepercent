@@ -29,8 +29,8 @@ namespace onep
     bool running() const;
     osgGaming::Observable<bool>::Ptr getORunning() const;
 
-    void saveState(std::string filename);
-    void loadState(std::string filename);
+    void saveState(const std::string& filename);
+    void loadState(const std::string& filename);
 
     virtual void registerClass(lua_State* state) override;
     virtual std::string instanceVariableName() override;
