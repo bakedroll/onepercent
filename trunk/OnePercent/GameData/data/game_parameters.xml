@@ -2,12 +2,12 @@
 <root>
 
 	<group name="camera">
-		<property name="min_distance" type="float" value="9.0" />
-		<property name="max_distance" type="float" value="100.0" />
+		<property name="min_distance" type="float" value="7.5" />
+		<property name="max_distance" type="float" value="25.0" />
 		<property name="max_latitude" type="float" value="1.414" /> <!-- PI / 2.0 * 0.9 -->
 		<property name="zoom_speed" type="float" value="0.85" />
 		<property name="zoom_speed_factor" type="float" value="3.0" />
-		<property name="scroll_speed" type="float" value="0.003" />
+		<property name="scroll_speed" type="float" value="0.001" />
 		<property name="rotation_speed" type="float" value="0.003" />
 		
 		<property name="country_zoom" type="float" value="1.5" />
