@@ -47,6 +47,8 @@ namespace onep
     , countryMenuWidgetFadeInAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
     , countryMenuWidgetFadeOutAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_OUT))
     , bFadingOutCountryMenu(false)
+    , bDraggingMidMouse(false)
+    , bCountrySelectedView(false)
     , oDay(injector.inject<ODay>())
     {
 
@@ -95,8 +97,27 @@ namespace onep
     osg::Vec2i mousePos;
 
     bool bFadingOutCountryMenu;
+    bool bDraggingMidMouse;
+    bool bCountrySelectedView;
 
     ODay::Ptr oDay;
+
+    float getViewAngleForDistance(float distance) const
+    {
+      float x = 1.0f - ((distance - paramCameraMinDistance) / (paramCameraMaxDistance - paramCameraMinDistance));
+      return std::pow(x, 6.0f) * C_PI * 0.3f;
+    }
+
+    void setCameraDistanceAndAngle(float distance, float time = -1.0)
+    {
+      if (!bDraggingMidMouse)
+      {
+        base->setCameraViewAngle(osg::Vec2f(0.0f, getViewAngleForDistance(distance)), time);
+        bCountrySelectedView = false;
+      }
+
+      base->setCameraDistance(distance, time);
+    }
 
     int pickCountryIdAt(const osg::Vec2i& pos)
     {
@@ -186,15 +207,19 @@ namespace onep
     {
       if (id > 0)
       {
+        double time = getSimulationTime();
+        m->bCountrySelectedView = true;
+
         CountryMesh::Ptr countryMesh = m->countryOverlay->getCountryMesh(id);
         Country::Ptr country = m->countriesContainer->getCountry(id);
         
         OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
 
-        setCameraLatLong(countryMesh->getCenterLatLong(), getSimulationTime());
+        setCameraLatLong(countryMesh->getCenterLatLong(), time);
         setCameraDistance(std::max<float>(countryMesh->getOptimalCameraDistance(
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle()),
-          float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio())), m->paramCameraMinDistance), getSimulationTime());
+          float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio())), m->paramCameraMinDistance), time);
+        setCameraViewAngle(osg::Vec2f(0.0f, 0.0f), time);
 
         if (m->selectedCountry != id || m->bFadingOutCountryMenu)
         {
@@ -203,13 +228,12 @@ namespace onep
 
           if (m->selectedCountry != id)
           {
-            m->countryMenuWidgetFadeInAnimation->beginAnimation(0.0f, 0.8f, getSimulationTime());
+            m->countryMenuWidgetFadeInAnimation->beginAnimation(0.0f, 0.8f, time);
             m->countryMenuWidget->setCountry(country);
             m->updateCountryMenuWidgetPosition(id);
           }
           else
           {
-            double time = getSimulationTime();
             m->countryMenuWidgetFadeInAnimation->beginAnimation(m->countryMenuWidgetFadeOutAnimation->getValue(time), 0.8f, time);
           }
         }
@@ -225,8 +249,7 @@ namespace onep
     setCameraMotionDuration(2.0);
     setCameraMotionEase(osgGaming::AnimationEase::SMOOTHER);
 
-    setCameraDistance(28.0f, getSimulationTime());
-    setCameraViewAngle(osg::Vec2f(0.0f, 0.0f), getSimulationTime());
+    m->setCameraDistanceAndAngle(m->paramCameraMaxDistance, getSimulationTime());
 
     setupUi();
   }
@@ -306,7 +329,7 @@ namespace onep
 
     distance = osg::clampBetween<float>(distance, m->paramCameraMinDistance, m->paramCameraMaxDistance);
 
-    setCameraDistance(distance, getSimulationTime());
+    m->setCameraDistanceAndAngle(distance, getSimulationTime());
   }
 
   void GlobeInteractionState::onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change)
@@ -330,6 +353,11 @@ namespace onep
 
     if (button == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON)
     {
+      /*if (m->bCountrySelectedView)
+      {
+        setCameraViewAngle(osg::Vec2f(0.0f, m->getViewAngleForDistance(distance)), getSimulationTime());
+        m->bCountrySelectedView = false;
+      }*/
       change *= ((distance - m->paramEarthRadius) / (m->paramCameraMaxDistance - m->paramEarthRadius)) * m->paramCameraZoomSpeedFactor;
 
       latLong.set(
@@ -340,7 +368,8 @@ namespace onep
     }
     else if (button == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
     {
-      float clamp_to = atan(m->paramEarthRadius * 1.3 / distance);
+      m->bDraggingMidMouse = true;
+      float clamp_to = std::max<float>(m->getViewAngleForDistance(distance) * 1.3f, atan(m->paramEarthRadius * 1.3 / distance));
 
       viewAngle.set(
         viewAngle.x() + change.x() * m->paramCameraRotationSpeed,
@@ -354,7 +383,12 @@ namespace onep
   {
     if (button == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
     {
-      setCameraViewAngle(osg::Vec2f(0.0f, 0.0f), getSimulationTime());
+      m->bDraggingMidMouse = false;
+      setCameraViewAngle(
+        osg::Vec2f(
+          0.0f,
+          m->bCountrySelectedView ? 0.0f : m->getViewAngleForDistance(getCameraDistance())),
+        getSimulationTime());
     }
   }
 
