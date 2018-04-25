@@ -29,6 +29,8 @@ namespace onep
 		void setCameraMotionDuration(double time);
 		void setCameraMotionEase(osgGaming::AnimationEase ease);
 
+    void stopMotion(double time);
+
 		bool isCameraInMotion();
 
 	private:

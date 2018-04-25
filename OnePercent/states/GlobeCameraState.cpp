@@ -115,6 +115,13 @@ namespace onep
     m->cameraViewAngleAnimation->setEase(ease);
   }
 
+  void GlobeCameraState::stopMotion(double time)
+  {
+    m->cameraDistanceAnimation->setValue(m->cameraDistanceAnimation->getValue(time));
+    m->cameraLatLongAnimation->setValue(m->cameraLatLongAnimation->getValue(time));
+    m->cameraViewAngleAnimation->setValue(m->cameraViewAngleAnimation->getValue(time));
+  }
+
   void GlobeCameraState::setCameraViewAngle(osg::Vec2f viewAngle, double time)
   {
     m->cameraViewAngle = viewAngle;

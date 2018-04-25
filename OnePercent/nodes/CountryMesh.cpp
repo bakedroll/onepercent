@@ -231,8 +231,8 @@ namespace onep
   {
     osg::Vec2f surfaceSize = getSurfaceSize();
 
-    float hdistance = surfaceSize.x() * m->cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f)) + m->earthRadius;
-    float vdistance = surfaceSize.y() * m->cameraZoom / (2.0f * tan(angle * C_PI / 360.0f)) + m->earthRadius;
+    float hdistance = surfaceSize.x() * m->cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f));
+    float vdistance = surfaceSize.y() * m->cameraZoom / (2.0f * tan(angle * C_PI / 360.0f));
 
     return std::max(hdistance, vdistance);
   }
