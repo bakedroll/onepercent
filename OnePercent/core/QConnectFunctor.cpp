@@ -59,4 +59,24 @@ namespace onep
   {
     // empty
   }
+
+  bool QConnectDoubleFunctor::connect(QObject* sender, const char* signal, const std::function<void(double)>& receiver, QObject* parent, Qt::ConnectionType connectionType)
+  {
+    if (!parent)
+      parent = sender;
+
+    return QObject::connect(sender, signal, new QConnectDoubleFunctor(parent, receiver), SLOT(run(double)), connectionType);
+  }
+
+  void QConnectDoubleFunctor::run(double d)
+  {
+    m_func(d);
+  }
+
+  QConnectDoubleFunctor::QConnectDoubleFunctor(QObject* parent, const std::function<void(double)>& func)
+    : QObject(parent)
+    , m_func(func)
+  {
+    // empty
+  }
 }
