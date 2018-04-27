@@ -7,6 +7,12 @@
 
 namespace onep
 {
+  struct Edge
+  {
+    int p1;
+    int p2;
+  };
+
   struct Quad
   {
     typedef std::vector<Quad> List;
@@ -42,6 +48,14 @@ namespace onep
     IdList nextBorderIds;
   };
 
+  struct QuadSegment
+  {
+    typedef std::vector<QuadSegment> List;
+
+    Edge e1;
+    Edge e2;
+  };
+
   typedef std::map<int, int> IdMap;
   typedef std::map<std::pair<int, int>, Quad::List> NodalsMap;
   typedef std::map<int, Border> BordersMap;
@@ -60,8 +74,11 @@ namespace onep
       IdMap& idMap,
       osg::ref_ptr<osg::Vec3Array> verts,
       osg::ref_ptr<osg::Vec4Array> colors,
-      osg::ref_ptr<osg::DrawElementsUInt> unit)
+      osg::ref_ptr<osg::DrawElementsUInt> unit,
+      bool bWireframe = false)
     {
+      int lastId = -1, currentId = -1, firstId = -1;
+
       for (Quad::List::iterator it = quads.begin(); it != quads.end(); ++it)
       {
         for (int i = 0; i < 4; i++)
@@ -81,7 +98,7 @@ namespace onep
             if (pit->second.originId > -1)
             {
               verts->push_back(pointsMap[pit->second.originId].coords + pit->second.coords * thickness);
-              colors->push_back(osg::Vec4f(color, 0.0f));
+              colors->push_back(osg::Vec4f(color, 0.5f)); // 0.0f
             }
             else
             {
@@ -91,11 +108,39 @@ namespace onep
 
             int id = idCounter++;
             idMap[index] = id;
-            unit->push_back(id);
+            if (bWireframe)
+              currentId = id;
+            else
+              unit->push_back(id);
+
+            if (bWireframe && i == 0)
+              firstId = id;
           }
           else
           {
-            unit->push_back(iit->second);
+            if (bWireframe)
+              currentId = iit->second;
+            else
+              unit->push_back(iit->second);
+
+            if (bWireframe && i == 0)
+              firstId = iit->second;
+          }
+
+          if (bWireframe)
+          {
+            if (i > 0 && i < 3)
+            {
+              unit->push_back(lastId);
+              unit->push_back(currentId);
+            }
+            else if (i == 3)
+            {
+              unit->push_back(currentId);
+              unit->push_back(firstId);
+            }
+
+            lastId = currentId;
           }
         }
       }
@@ -305,7 +350,7 @@ namespace onep
     addChild(m->overallBoundsGeode);
   }
 
-  void BoundariesMesh::makeCountryBoundaries(const CountryMesh::Map& countries, const osg::Vec3f& color, float thickness)
+  void BoundariesMesh::makeCountryBoundaries(const CountryMesh::Map& countries, const osg::Vec3f& color, float thickness, bool bWireframe)
   {
     if (m->countriesBoundsGeode.valid())
     {
@@ -321,7 +366,7 @@ namespace onep
     osg::ref_ptr<osg::Vec3Array> verts = new osg::Vec3Array();
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
 
-    osg::ref_ptr<osg::DrawElementsUInt> quads = new osg::DrawElementsUInt(GL_QUADS, 0);
+    osg::ref_ptr<osg::DrawElementsUInt> unit = new osg::DrawElementsUInt(bWireframe ? GL_LINES : GL_QUADS, 0);
 
     int idCounter = 0;
     IdMap idMap;
@@ -379,7 +424,7 @@ namespace onep
         {
           Border& border = m->borders[currentBorderId];
 
-          m->addQuads(m->boundariesMap[border.boundarySegmentId], thickness, color, idCounter, idMap, verts, colors, quads);
+          m->addQuads(m->boundariesMap[border.boundarySegmentId], thickness, color, idCounter, idMap, verts, colors, unit, bWireframe);
           visited.insert(currentBorderId);
 
           if (border.bIsCycle)
@@ -390,7 +435,7 @@ namespace onep
             Border& nextBorder = m->borders[*bit];
             if (border.countryId == nextBorder.countryId || countries.count(nextBorder.countryId) > 0)
             {
-              m->addQuads(m->nodals[std::pair<int, int>(currentBorderId, *bit)], thickness, color, idCounter, idMap, verts, colors, quads);
+              m->addQuads(m->nodals[std::pair<int, int>(currentBorderId, *bit)], thickness, color, idCounter, idMap, verts, colors, unit, bWireframe);
               currentBorderId = *bit;
               break;
             }
@@ -403,7 +448,7 @@ namespace onep
     osg::ref_ptr<osg::Geometry> geo_quads = new osg::Geometry();
     geo_quads->setVertexArray(verts);
     geo_quads->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
-    geo_quads->addPrimitiveSet(quads);
+    geo_quads->addPrimitiveSet(unit);
 
     m->countriesBoundsGeode->addDrawable(geo_quads);
 

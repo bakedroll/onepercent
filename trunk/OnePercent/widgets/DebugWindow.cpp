@@ -19,6 +19,7 @@
 #include <QLabel>
 #include <QKeyEvent>
 #include <QFileDialog>
+#include <QDoubleSpinBox>
 
 #include <chrono>
 #include <nodes/CountryOverlay.h>
@@ -93,6 +94,8 @@ namespace onep
       , labelSkillpoints(nullptr)
       , labelCountry(nullptr)
       , buttonStartStop(nullptr)
+      , bWireframe(false)
+      , borderThickness(0.1f)
     {
     }
 
@@ -142,14 +145,25 @@ namespace onep
     ValueWidgets valueWidgets;
     BranchValueWidgets branchValueWidgets;
 
+    bool bWireframe;
+    float borderThickness;
+
+    void updateBoundaries()
+    {
+      auto start_time = std::chrono::high_resolution_clock::now();
+      boundariesMesh->makeCountryBoundaries(selectedCountries, osg::Vec3f(1.0f, 0.5, 0.1f), borderThickness, bWireframe);
+      auto duration = std::chrono::high_resolution_clock::now() - start_time;
+      long d = std::chrono::duration_cast<std::chrono::milliseconds> (duration).count();
+
+      OSGG_QLOG_DEBUG(QString("Took %1 ms").arg(d));
+    }
+
     void toggleCountry()
     {
       int id = countryOverlay->getSelectedCountryId();
 
       if (id == 0)
         return;
-
-      auto start_time = std::chrono::high_resolution_clock::now();
 
       CountryMesh::Ptr mesh = countryOverlay->getSelectedCountryMesh();
       assert_return(mesh.valid());
@@ -160,13 +174,7 @@ namespace onep
       else
         selectedCountries.erase(it);
 
-      boundariesMesh->makeCountryBoundaries(selectedCountries, osg::Vec3f(1.0f, 0.5, 0.1f), 0.03f);
-
-      auto duration = std::chrono::high_resolution_clock::now() - start_time;
-
-      long d = std::chrono::duration_cast<std::chrono::milliseconds> (duration).count();
-
-      OSGG_QLOG_DEBUG(QString("Took %1 ms").arg(d));
+      updateBoundaries();
     }
 
     ValueWidget createValueWidgets(const QString& labelText, std::function<void(float, CountryState::Ptr)> setFunc)
@@ -315,9 +323,30 @@ namespace onep
       toggleCountryButton = new QPushButton("Toggle selected country");
       toggleCountryButton->setFocusPolicy(Qt::NoFocus);
 
+      QCheckBox* checkBoxWireframe = new QCheckBox("Wireframe Borders");
+      checkBoxWireframe->setChecked(bWireframe);
+      checkBoxWireframe->setFocusPolicy(Qt::NoFocus);
+
+      QDoubleSpinBox* spinboxThickness = new QDoubleSpinBox();
+      spinboxThickness->setValue(borderThickness);
+      spinboxThickness->setRange(0.01, 999.0);
+      spinboxThickness->setSingleStep(0.01);
+
       QConnectFunctor::connect(toggleCountryButton, SIGNAL(clicked()), [this]()
       {
         toggleCountry();
+      });
+
+      QConnectBoolFunctor::connect(checkBoxWireframe, SIGNAL(toggled(bool)), [this](bool checked)
+      {
+        bWireframe = checked;
+        updateBoundaries();
+      });
+
+      QConnectDoubleFunctor::connect(spinboxThickness, SIGNAL(valueChanged(double)), [this](double value)
+      {
+        borderThickness = float(value);
+        updateBoundaries();
       });
 
       QGridLayout* branchesLayout = new QGridLayout();
@@ -500,6 +529,8 @@ namespace onep
 
       QVBoxLayout* leftLayout = new QVBoxLayout();
       leftLayout->addWidget(toggleCountryButton);
+      leftLayout->addWidget(checkBoxWireframe);
+      leftLayout->addWidget(spinboxThickness);
       leftLayout->addLayout(branchesLayout);
       leftLayout->addLayout(saveLoadStateLayout);
       leftLayout->addWidget(labelSkillpoints);

@@ -26,7 +26,8 @@ namespace onep
     void makeCountryBoundaries(
       const CountryMesh::Map& countries,
       const osg::Vec3f& color = osg::Vec3f(1.0f, 1.0f, 1.0f),
-      float thickness = 0.005f);
+      float thickness = 0.005f,
+      bool bWireframe = false);
 
   private:
     struct Impl;

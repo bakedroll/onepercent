@@ -50,4 +50,25 @@ namespace onep
 
     std::function<void(bool)> m_func;
   };
+
+  class QConnectDoubleFunctor : public QObject
+  {
+    Q_OBJECT
+
+  public:
+    static bool connect(
+      QObject* sender,
+      const char* signal,
+      const std::function<void(double)>& receiver,
+      QObject* parent = nullptr,
+      Qt::ConnectionType connectionType = Qt::AutoConnection);
+
+  protected slots:
+    void run(double);
+
+  private:
+    QConnectDoubleFunctor(QObject* parent, const std::function<void(double)>& func);
+
+    std::function<void(double)> m_func;
+  };
 }
