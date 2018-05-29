@@ -176,15 +176,15 @@ namespace onep
       break;
     case MODE_HIGHLIGHT_CONTROL:
       m->uniformAlpha->set(0.3f);
-      m->uniformColor->set(osg::Vec3f(0.635f, 0.439f, 0.031f));
+      m->uniformColor->set(osg::Vec3f(0.635f, 0.439f, 0.031f)); // #A27008
       break;
     case MODE_HIGHLIGHT_CONCERNS:
       m->uniformAlpha->set(0.3f);
-      m->uniformColor->set(osg::Vec3f(0.118f, 0.753f, 0.208f));
+      m->uniformColor->set(osg::Vec3f(0.118f, 0.753f, 0.208f)); // #1EC035
       break;
     case MODE_HIGHLIGHT_MEDIA:
       m->uniformAlpha->set(0.3f);
-      m->uniformColor->set(osg::Vec3f(0.902f, 1.0f, 0.357f));
+      m->uniformColor->set(osg::Vec3f(0.902f, 1.0f, 0.357f)); // #E6FF5B
       break;
     case MODE_HIGHLIGHT_POLITICS:
       m->uniformAlpha->set(0.3f);

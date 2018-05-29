@@ -60,6 +60,16 @@ namespace onep
   typedef std::map<std::pair<int, int>, Quad::List> NodalsMap;
   typedef std::map<int, Border> BordersMap;
 
+  struct QuadSegments
+  {
+    QuadSegments() : verts(new osg::Vec3Array()) {}
+
+    QuadSegment::List segments;
+    IdMap ids;
+    
+    osg::ref_ptr<osg::Vec3Array> verts;
+  };
+
   struct BoundariesMesh::Impl
   {
     Impl(osgGaming::Injector& injector)
@@ -69,6 +79,7 @@ namespace onep
     void addQuads(
       Quad::List& quads,
       float thickness,
+      QuadSegments& segments,
       const osg::Vec3f& color,
       int& idCounter,
       IdMap& idMap,
@@ -324,6 +335,8 @@ namespace onep
 
     osg::Vec3f color(1.0f, 1.0f, 1.0f);
 
+    QuadSegments segments;
+
     m->overallBoundsGeode = new osg::Geode();
 
     osg::ref_ptr<osg::Vec3Array> verts = new osg::Vec3Array();
@@ -335,9 +348,9 @@ namespace onep
     int idCounter = 0;
     IdMap idMap;
     for (IdQuadListMap::iterator it = m->boundariesMap.begin(); it != m->boundariesMap.end(); ++it)
-      m->addQuads(it->second, thickness, color, idCounter, idMap, verts, colors, quads);
+      m->addQuads(it->second, thickness, segments, color, idCounter, idMap, verts, colors, quads);
 
-    m->addQuads(m->nodalsFull, thickness, color, idCounter, idMap, verts, colors, quads);
+    m->addQuads(m->nodalsFull, thickness, segments, color, idCounter, idMap, verts, colors, quads);
 
 
     osg::ref_ptr<osg::Geometry> geo_quads = new osg::Geometry();
@@ -370,6 +383,8 @@ namespace onep
 
     int idCounter = 0;
     IdMap idMap;
+
+    QuadSegments segments;
 
     std::set<int> visited;
 
@@ -424,7 +439,7 @@ namespace onep
         {
           Border& border = m->borders[currentBorderId];
 
-          m->addQuads(m->boundariesMap[border.boundarySegmentId], thickness, color, idCounter, idMap, verts, colors, unit, bWireframe);
+          m->addQuads(m->boundariesMap[border.boundarySegmentId], thickness, segments, color, idCounter, idMap, verts, colors, unit, bWireframe);
           visited.insert(currentBorderId);
 
           if (border.bIsCycle)
@@ -435,7 +450,7 @@ namespace onep
             Border& nextBorder = m->borders[*bit];
             if (border.countryId == nextBorder.countryId || countries.count(nextBorder.countryId) > 0)
             {
-              m->addQuads(m->nodals[std::pair<int, int>(currentBorderId, *bit)], thickness, color, idCounter, idMap, verts, colors, unit, bWireframe);
+              m->addQuads(m->nodals[std::pair<int, int>(currentBorderId, *bit)], thickness, segments, color, idCounter, idMap, verts, colors, unit, bWireframe);
               currentBorderId = *bit;
               break;
             }
