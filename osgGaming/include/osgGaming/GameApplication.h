@@ -40,6 +40,8 @@ namespace osgGaming
       m_container.registerType<World>();
       m_container.registerType<Hud>();
 
+      initialize(*m_injector);
+
       osg::ref_ptr<TState> s = m_injector->inject<TState>();
       osg::ref_ptr<AbstractGameState> state = osg::ref_ptr<AbstractGameState>(dynamic_cast<AbstractGameState*>(s.get()));
       s.release();
@@ -49,8 +51,6 @@ namespace osgGaming
         assert(false && "TState has to be an AbstractGameState.");
         return -1;
       }
-
-      initialize(*m_injector);
 
       state->setInjector(*m_injector);
       return run(state);

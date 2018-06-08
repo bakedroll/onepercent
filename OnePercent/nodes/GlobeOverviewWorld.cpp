@@ -3,6 +3,8 @@
 #include "BackgroundModel.h"
 
 #include "core/Globals.h"
+#include "nodes/CountryNameOverlay.h"
+#include "simulation/Simulation.h"
 
 #include <osgGaming/Helper.h>
 #include <osgGaming/PropertiesManager.h>
@@ -100,7 +102,7 @@ namespace onep
     osg::Vec3f direction = yearDayMat * osg::Vec3f(0.0f, 1.0f, 0.0f);
 
     getLight(0)->setPosition(osg::Vec4f(direction, 0.0f));
-    m->globeModel->updateLightDirection(direction);
+    m->globeModel->updateLightDir(direction);
 
     m->backgroundModel->getTransform()->setAttitude(osg::Matrix::inverse(dayMat).getRotate());
     m->backgroundModel->getSunTransform()->setAttitude(osg::Matrix::inverse(yearMat).getRotate());
