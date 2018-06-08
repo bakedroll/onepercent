@@ -8,6 +8,8 @@ namespace osgGaming
 	class CameraAlignedQuad : public osg::Geode
 	{
 	public:
+    typedef osg::ref_ptr<CameraAlignedQuad> Ptr;
+
 		CameraAlignedQuad(int renderBin = 10);
 
 		osg::ref_ptr<osg::Geometry> getGeometry();

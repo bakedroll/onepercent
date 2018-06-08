@@ -4,10 +4,12 @@
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/BackgroundModel.h"
 #include "nodes/BoundariesMesh.h"
+#include "nodes/CountryNameOverlay.h"
 #include "nodes/CountryOverlay.h"
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
 #include "scripting/LuaStateManager.h"
+#include "simulation/Simulation.h"
 #include "simulation/SkillsContainer.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/SimulationStateContainer.h"
@@ -159,7 +161,8 @@ namespace onep
     // loading globe
     m->backgroundModel->loadStars("./GameData/data/stars.bin");
 
-    m->globeModel->loadFromDisk(world->getCameraManipulator());
+    m->globeModel->makeGlobeModel();
+    world->getCameraManipulator()->addCameraAlignedQuad(m->globeModel->getScatteringQuad());
 
     m->boundariesMesh->loadBoundaries("./GameData/data/boundaries.dat");
     m->boundariesMesh->makeOverallBoundaries(0.005f);

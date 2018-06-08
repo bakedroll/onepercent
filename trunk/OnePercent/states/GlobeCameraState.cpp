@@ -1,5 +1,7 @@
 #include "GlobeCameraState.h"
 
+#include "nodes/BackgroundModel.h"
+
 #include <osgGaming/Helper.h>
 #include <osgGaming/NativeView.h>
 

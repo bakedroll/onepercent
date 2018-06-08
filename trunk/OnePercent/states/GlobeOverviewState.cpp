@@ -1,6 +1,7 @@
 #include "GlobeOverviewState.h"
 
 #include "core/Macros.h"
+#include "nodes/CountryNameOverlay.h"
 #include "nodes/GlobeModel.h"
 
 #include <osgViewer/ViewerEventHandlers>

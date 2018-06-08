@@ -1,10 +1,6 @@
 #pragma once
 
 #include "GlobeModel.h"
-#include "BackgroundModel.h"
-#include "CountryNameOverlay.h"
-
-#include "simulation/Simulation.h"
 
 #include <osgGaming/World.h>
 

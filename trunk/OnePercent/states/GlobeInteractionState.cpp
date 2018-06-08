@@ -10,6 +10,7 @@
 #include "nodes/CountryOverlay.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/Country.h"
+#include "simulation/Simulation.h"
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 #include "widgets/CountryMenuWidget.h"
@@ -316,8 +317,15 @@ namespace onep
     if (m->selectedCountry > 0 && m->countryMenuWidget->isVisible())
       m->updateCountryMenuWidgetPosition(m->selectedCountry);
 
-    int id = m->pickCountryIdAt(m->mousePos);
-    m->countryOverlay->setHoveredCountryId(id);
+    if (!m->bDraggingMidMouse)
+    {
+      int id = m->pickCountryIdAt(m->mousePos);
+      m->countryOverlay->setHoveredCountryId(id);
+    }
+    else
+    {
+      m->countryOverlay->setHoveredCountryId(0);
+    }
 
     return e;
   }
