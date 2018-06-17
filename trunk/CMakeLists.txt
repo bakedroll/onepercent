@@ -30,24 +30,26 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/${PROJECT_LIB_DIR})
 endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 
+#compiler flag for Qt that was built with -reduce-relocations
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 option(BUILD_ENABLE_CONSOLE "Builds a console application (Windows only)" ON)
 
 # find Qt5
 set(QT5_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "Qt5 root directory")
 if (EXISTS ${QT5_ROOT_DIRECTORY})
   adjust_cached_path(QT5_ROOT_DIRECTORY "Qt5 root directory" ${QT5_ROOT_DIRECTORY})
+  set(CMAKE_PREFIX_PATH ${QT5_ROOT_DIRECTORY})
 endif()
-
-set(CMAKE_PREFIX_PATH ${QT5_ROOT_DIRECTORY})
 
 set(QT5_MODULES
   Core
   Gui
   Widgets
   OpenGL)
-  
+
 foreach(module ${QT5_MODULES})
-  find_package(Qt5${module})
+  find_package(Qt5${module} REQUIRED)
 endforeach()
 
 #find OpenSceneGraph
@@ -59,6 +61,9 @@ find_package(Threads)
 
 # optional for Vectorizer
 find_package(OpenCV)
+
+# Lua
+find_package(Lua)
 
 # optional for Tests
 set(GTEST_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "gtest root directory")
@@ -120,20 +125,6 @@ else()
 endif()
 
 # Lua
-set(LUA_INCLUDE_DIR "NOTFOUND" CACHE STRING "Lua include dir")
-if (NOT EXISTS ${LUA_INCLUDE_DIR})
-  set(ERROR_MESSAGES ${LUA_INCLUDE_DIR} "Please specify LUA_INCLUDE_DIR\n")
-else()
-  adjust_cached_path(LUA_INCLUDE_DIR "Lua include dir" ${LUA_INCLUDE_DIR})
-endif()
-
-set(LUA_LIB_RELEASE "NOTFOUND" CACHE STRING "Lua lib dir")
-if (NOT EXISTS ${LUA_LIB_RELEASE})
-  set(ERROR_MESSAGES ${LUA_LIB_RELEASE} "Please specify LUA_LIB_RELEASE\n")
-else()
-  adjust_cached_path(LUA_LIB_RELEASE "Lua lib dir" ${LUA_LIB_RELEASE})
-endif()
-
 set(LUA_LIB_DEBUG "NOTFOUND" CACHE STRING "Lua debug lib dir")
 if (NOT EXISTS ${LUA_LIB_DEBUG})
   set(LUA_LIB_DEBUG ${LUA_LIB_RELEASE})
