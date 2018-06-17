@@ -28,7 +28,6 @@ if (WIN32)
   endif()
 endif()
 
-qt5_use_modules(${PROJECT_NAME} ${QT5_MODULES})
 source_group(GeneratedFiles FILES ${CMAKE_CURRENT_BINARY_DIR}/OnePercent_automoc.cpp)
 
 # specify needed osg libraries
@@ -44,15 +43,20 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${OSG_INCLUDE_DIR}
   ${RAPIDXML_INCLUDE_DIR}
   ${OSGPPU_INCLUDE_DIR}
-  ${LUA_INCLUDE_DIR}
+  ${LUA_INCLUDE_PREFIX}/include
   ${LUABRIDGE_INCLUDE_DIR})
+
+foreach(module ${QT5_MODULES})
+  target_include_directories(${PROJECT_NAME} PUBLIC ${Qt5${module}_INCLUDE_DIRS})
+  target_link_libraries(${PROJECT_NAME} Qt5::${module})
+endforeach()
 
 # set debug and release libs
 target_link_libraries(${PROJECT_NAME}
   osgGaming)
 
 target_link_libraries(${PROJECT_NAME}
-  optimized ${OSGPPU_LIBRARY_RELEASE} ${LUA_LIB_RELEASE})
+  optimized ${OSGPPU_LIBRARY_RELEASE} ${LUA_LIBRARY})
   
 target_link_libraries(${PROJECT_NAME}
   debug ${OSGPPU_LIBRARY_DEBUG} ${LUA_LIB_DEBUG})
