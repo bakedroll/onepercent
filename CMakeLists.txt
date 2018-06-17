@@ -125,6 +125,13 @@ else()
 endif()
 
 # Lua
+set(LUA_INCLUDE_PREFIX "NOTFOUND" CACHE STRING "Lua include prefix (without /include)")
+if (NOT EXISTS ${LUA_INCLUDE_PREFIX})
+  set(ERROR_MESSAGES ${LUA_INCLUDE_PREFIX} "Please specify LUA_INCLUDE_PREFIX\n")
+else()
+  adjust_cached_path(LUA_INCLUDE_PREFIX "Lua include prefix (without /include)" ${LUA_INCLUDE_PREFIX})
+endif()
+
 set(LUA_LIB_DEBUG "NOTFOUND" CACHE STRING "Lua debug lib dir")
 if (NOT EXISTS ${LUA_LIB_DEBUG})
   set(LUA_LIB_DEBUG ${LUA_LIB_RELEASE})
