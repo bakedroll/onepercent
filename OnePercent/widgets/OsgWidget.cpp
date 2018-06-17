@@ -5,7 +5,6 @@
 #include <assert.h>
 
 #include <osgGaming/LogManager.h>
-#include <osgGaming/NativeView.h>
 #include <QTimer>
 #include <QResizeEvent>
 

@@ -4,8 +4,6 @@
 
 #include <osgGaming/Injector.h>
 
-#include <osgGaming/UIElement.h>
-
 namespace onep
 {
 	class MainMenuState : public GlobeCameraState

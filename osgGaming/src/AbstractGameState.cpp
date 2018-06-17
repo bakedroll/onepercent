@@ -3,8 +3,7 @@
 #include <osgGaming/World.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/GameSettings.h>
-#include <osgGaming/NativeView.h>
-#include <osgGaming/UIElement.h>
+#include <osgGaming/View.h>
 
 namespace osgGaming
 {
@@ -110,7 +109,7 @@ namespace osgGaming
 
   unsigned char AbstractGameState::getProperties()
   {
-    return AbstractGameState::PROP_GUIEVENTS_TOP | AbstractGameState::PROP_UIMEVENTS_TOP | AbstractGameState::PROP_UPDATE_TOP;
+    return AbstractGameState::PROP_GUIEVENTS_TOP | AbstractGameState::PROP_UPDATE_TOP;
   }
 
   void AbstractGameState::onKeyPressedEvent(int key)
@@ -154,11 +153,6 @@ namespace osgGaming
   }
 
   void AbstractGameState::onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position)
-  {
-
-  }
-
-  void AbstractGameState::onUIClickedEvent(osg::ref_ptr<UIElement> uiElement)
   {
 
   }

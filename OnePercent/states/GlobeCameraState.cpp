@@ -3,7 +3,7 @@
 #include "nodes/BackgroundModel.h"
 
 #include <osgGaming/Helper.h>
-#include <osgGaming/NativeView.h>
+#include <osgGaming/View.h>
 
 namespace onep
 {

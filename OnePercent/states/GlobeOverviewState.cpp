@@ -6,7 +6,7 @@
 
 #include <osgViewer/ViewerEventHandlers>
 
-#include <osgGaming/NativeView.h>
+#include <osgGaming/View.h>
 
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
@@ -46,7 +46,7 @@ namespace onep
 
   unsigned char GlobeOverviewState::getProperties()
   {
-    return GameState::PROP_UPDATE_ALWAYS | PROP_UIMEVENTS_ALWAYS | PROP_GUIEVENTS_ALWAYS;
+    return GameState::PROP_UPDATE_ALWAYS | PROP_GUIEVENTS_ALWAYS;
   }
 
   osgGaming::GameState::StateEvent* GlobeOverviewState::update()

@@ -17,7 +17,7 @@
 #include "widgets/VirtualOverlay.h"
 
 #include <osgGaming/Injector.h>
-#include <osgGaming/NativeView.h>
+#include <osgGaming/View.h>
 
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>

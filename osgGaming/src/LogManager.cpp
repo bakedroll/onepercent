@@ -15,7 +15,7 @@ namespace osgGaming
     struct tm* now;
     time_t tim;
     time(&tim);
-#pragma warning(disable: 4996)
+#pragma warning(suppress: 4996)
     now = localtime(&tim);
 
     char buffer[128];

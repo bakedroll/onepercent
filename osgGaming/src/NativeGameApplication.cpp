@@ -2,7 +2,7 @@
 
 #include <osgGaming/GameSettings.h>
 #include <osgGaming/NativeInputManager.h>
-#include <osgGaming/NativeView.h>
+#include <osgGaming/View.h>
 
 #include <assert.h>
 
@@ -12,7 +12,7 @@ namespace osgGaming
     : GameApplication()
   {
     if (!view)
-      view = new osgGaming::NativeView();
+      view = new osgGaming::View();
 
     getViewer()->addView(view);
   }

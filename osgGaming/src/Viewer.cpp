@@ -1,5 +1,5 @@
 #include "osgGaming/Viewer.h"
-#include <osgGaming/NativeView.h>
+#include <osgGaming/View.h>
 
 #include <assert.h>
 
@@ -17,7 +17,7 @@ namespace osgGaming
     getWindows(windows);
 
     osgViewer::View* view = getView(viewId);
-    NativeView* gview = dynamic_cast<NativeView*>(view);
+    View* gview = dynamic_cast<View*>(view);
 
     if (!gview)
     {
@@ -34,7 +34,7 @@ namespace osgGaming
     getWindows(windows);
 
     osgViewer::View* view = getView(viewId);
-    NativeView* gview = dynamic_cast<NativeView*>(view);
+    View* gview = dynamic_cast<View*>(view);
 
     if (!gview)
     {

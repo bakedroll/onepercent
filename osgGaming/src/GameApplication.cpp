@@ -119,8 +119,6 @@ namespace osgGaming
         view->setCameraManipulator(state->getWorld(view)->getCameraManipulator());
 
         inputManager->updateNewRunningStates();
-        //inputManager->setCurrentState(state);
-
       }
     }
 
