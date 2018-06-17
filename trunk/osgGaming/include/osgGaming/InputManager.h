@@ -22,7 +22,7 @@ namespace osgGaming
     void setView(osg::ref_ptr<osgGaming::View> viewer);
 		void setGameStateStack(GameStateStack* stack);
 
-		void updateNewRunningStates();
+    void updateNewRunningStates();
 
     void setIsInizialized(bool initialized);
     bool isInitialized();

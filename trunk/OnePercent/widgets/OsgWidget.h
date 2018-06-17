@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QtOpenGL/QGLWidget>
-#include <osgGaming/NativeView.h>
 #include <memory>
 
 #include <osgViewer/CompositeViewer>

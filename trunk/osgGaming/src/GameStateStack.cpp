@@ -80,18 +80,10 @@ bool GameStateStack::hasBehavior(osg::ref_ptr<AbstractGameState> state, Abstract
 			return true;
 		}
 	}
-	else if (behavior == AbstractGameState::UIMEVENT)
-	{
-		if ((props & AbstractGameState::PROP_UIMEVENTS_ALWAYS) || (isTop && (props & AbstractGameState::PROP_UIMEVENTS_TOP)))
-		{
-			return true;
-		}
-	}
 	else if (behavior == AbstractGameState::ALL)
 	{
 		if (((props & AbstractGameState::PROP_UPDATE_ALWAYS) || (isTop && (props & AbstractGameState::PROP_UPDATE_TOP))) ||
-			((props & AbstractGameState::PROP_GUIEVENTS_ALWAYS) || (isTop && (props & AbstractGameState::PROP_GUIEVENTS_TOP))) ||
-			((props & AbstractGameState::PROP_UIMEVENTS_ALWAYS) || (isTop && (props & AbstractGameState::PROP_UIMEVENTS_TOP))))
+			((props & AbstractGameState::PROP_GUIEVENTS_ALWAYS) || (isTop && (props & AbstractGameState::PROP_GUIEVENTS_TOP))))
 		{
 			return true;
 		}

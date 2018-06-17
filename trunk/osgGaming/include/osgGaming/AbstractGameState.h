@@ -15,7 +15,6 @@ namespace osgGaming
   class GameSettings;
   class Hud;
   class NativeView;
-  class UIElement;
   class View;
   class World;
 
@@ -35,16 +34,13 @@ namespace osgGaming
 			PROP_UPDATE_TOP = 1,
 			PROP_UPDATE_ALWAYS = 2,
 			PROP_GUIEVENTS_TOP = 4,
-			PROP_GUIEVENTS_ALWAYS = 8,
-			PROP_UIMEVENTS_TOP = 16,
-			PROP_UIMEVENTS_ALWAYS = 32
+			PROP_GUIEVENTS_ALWAYS = 8
 		} StateProperties;
 
 		typedef enum _stateBahavior
 		{
 			UPDATE,
 			GUIEVENT,
-			UIMEVENT,
 			ALL
 		} StateBehavior;
 
@@ -88,8 +84,6 @@ namespace osgGaming
 		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change);
 		virtual void onDragBeginEvent(int button, osg::Vec2f origin);
 		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position);
-
-		virtual void onUIClickedEvent(osg::ref_ptr<UIElement> uiElement);
 
 		virtual void onResizeEvent(float width, float height);
 
