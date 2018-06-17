@@ -71,8 +71,20 @@ endfunction()
 
 function(adjust_cached_path_if_exists ADJUST_CACHED_PATH_VAR ADJUST_CACHED_PATH_DOC ADJUST_CACHED_PATH_VALUE)
 
+  cmake_parse_arguments(adjust_cached_path_if_exists "CACHE" "MESSAGES DEFAULT" "" ${ARGN})
+  
+  if (adjust_cached_path_if_exists_CACHE)
+    set(${ADJUST_CACHED_PATH_VAR} "${ADJUST_CACHED_PATH_VAR}-NOTFOUND" CACHE STRING ${ADJUST_CACHED_PATH_DOC})
+  endif()
+  
   if (EXISTS ${ADJUST_CACHED_PATH_VALUE})
-    adjust_cached_path(${ADJUST_CACHED_PATH_VAR} ${ADJUST_CACHED_PATH_DOC} ${ADJUST_CACHED_PATH_VALUE})
+      adjust_cached_path(${ADJUST_CACHED_PATH_VAR} ${ADJUST_CACHED_PATH_DOC} ${ADJUST_CACHED_PATH_VALUE})
+  else()
+    if (DEFINED adjust_cached_path_if_exists_DEFAULT)
+      set(${ADJUST_CACHED_PATH_VAR} ${adjust_cached_path_if_exists_DEFAULT})
+    elseif (DEFINED adjust_cached_path_if_exists_MESSAGES)
+      set(${adjust_cached_path_if_exists_MESSAGES} ${${adjust_cached_path_if_exists_MESSAGES}} "Please specify ${adjust_cached_path_if_exists_MESSAGES}\n" PARENT_SCOPE)
+    endif()
   endif()
 
 endfunction()

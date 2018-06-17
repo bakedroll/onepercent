@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8.11)
 
 include("CMake/scripts.cmake")
 
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMake )
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CMake)
 set(ERROR_MESSAGES "")
 
 set(PROJECT_BIN_DIR "bin")
@@ -30,10 +30,11 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/${PROJECT_LIB_DIR})
 endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 
-#compiler flag for Qt that was built with -reduce-relocations
+# Compiler flag for Qt that was built with -reduce-relocations
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 option(BUILD_ENABLE_CONSOLE "Builds a console application (Windows only)" ON)
+option(OSG_LIBRARIES_DEBUG_SUFFIX "osg debug libraries suffix" ON)
 
 # find Qt5
 set(QT5_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "Qt5 root directory")
@@ -76,19 +77,9 @@ set(GTEST_ROOT ${QT5_ROOT_DIRECTORY})
 find_package(GTest)
 
 # osgPPU
-set(OSGPPU_INCLUDE_DIR "NOTFOUND" CACHE STRING "osgPPU include directory")
-if (EXISTS ${OSGPPU_INCLUDE_DIR})
-  adjust_cached_path(OSGPPU_INCLUDE_DIR "osgPPU include directory" ${OSGPPU_INCLUDE_DIR})
-else()
-  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify OSGPPU_INCLUDE_DIR\n")
-endif()
-
-set(OSGPPU_LIBRARY_RELEASE "NOTFOUND" CACHE STRING "osgPPU library")
-if (EXISTS ${OSGPPU_LIBRARY_RELEASE})
-  adjust_cached_path(OSGPPU_LIBRARY_RELEASE "osgPPU library" ${OSGPPU_LIBRARY_RELEASE})
-else()
-  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify OSGPPU_LIBRARY_RELEASE\n")
-endif()
+adjust_cached_path_if_exists(OSGPPU_INCLUDE_DIR "osgPPU include directory" "${OSGPPU_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES CACHE)
+adjust_cached_path_if_exists(OSGPPU_LIBRARY_RELEASE "osgPPU release library" "${OSGPPU_LIBRARY_RELEASE}" MESSAGES ERROR_MESSAGES CACHE)
+adjust_cached_path_if_exists(OSGPPU_LIBRARY_DEBUG "osgPPU debug library" "${OSGPPU_LIBRARY_DEBUG}" MESSAGES ERROR_MESSAGES DEFAULT ${OSGPPU_LIBRARY_RELEASE} CACHE)
 
 set(OSGPPU_LIBRARY_DEBUG "NOTFOUND" CACHE STRING "osgPPU debug library")
 if (EXISTS ${OSGPPU_LIBRARY_DEBUG})
@@ -104,70 +95,62 @@ if ("${Qt5Core_LIBRARIES}" STREQUAL "")
 endif()
 
 # OSG
-if (NOT EXISTS ${OSG_INCLUDE_DIR})
-  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify OSG_INCLUDE_DIR\n")
-else()
-  adjust_cached_path(OSG_INCLUDE_DIR "Path to a file." ${OSG_INCLUDE_DIR})
-endif()
+adjust_cached_path_if_exists(OSG_INCLUDE_DIR "Path to a file." "${OSG_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES)
+adjust_cached_path_if_exists(OSG_LIBRARY "Path to a library." "${OSG_LIBRARY}" MESSAGES ERROR_MESSAGES)
 
-if (NOT EXISTS ${OSG_LIBRARY})
-  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify OSG_LIBRARY\n")
-else()
-  adjust_cached_path(OSG_LIBRARY "Path to a library." ${OSG_LIBRARY})
-endif()
-
-# rapidxml
-set(RAPIDXML_INCLUDE_DIR "NOTFOUND" CACHE STRING "rapidxml include dir")
-if (NOT EXISTS ${RAPIDXML_INCLUDE_DIR})
-  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify RAPIDXML_INCLUDE_DIR\n")
-else()
-  adjust_cached_path(RAPIDXML_INCLUDE_DIR "rapidxml include dir" ${RAPIDXML_INCLUDE_DIR})
-endif()
-
-# Lua
-set(LUA_INCLUDE_PREFIX "NOTFOUND" CACHE STRING "Lua include prefix (without /include)")
-if (NOT EXISTS ${LUA_INCLUDE_PREFIX})
-  set(ERROR_MESSAGES ${LUA_INCLUDE_PREFIX} "Please specify LUA_INCLUDE_PREFIX\n")
-else()
-  adjust_cached_path(LUA_INCLUDE_PREFIX "Lua include prefix (without /include)" ${LUA_INCLUDE_PREFIX})
-endif()
-
-set(LUA_LIB_DEBUG "NOTFOUND" CACHE STRING "Lua debug lib dir")
-if (NOT EXISTS ${LUA_LIB_DEBUG})
-  set(LUA_LIB_DEBUG ${LUA_LIB_RELEASE})
-endif()
-if (NOT EXISTS ${LUA_LIB_DEBUG})
-  set(ERROR_MESSAGES ${LUA_LIB_DEBUG} "Please specify LUA_LIB_DEBUG\n")
-else()
-  adjust_cached_path(LUA_LIB_DEBUG "Lua debug lib dir" ${LUA_LIB_DEBUG})
-endif()
-
-# LuaBridge
-set(LUABRIDGE_INCLUDE_DIR "NOTFOUND" CACHE STRING "LuaBridge include dir")
-if (NOT EXISTS ${LUABRIDGE_INCLUDE_DIR})
-  set(ERROR_MESSAGES ${LUABRIDGE_INCLUDE_DIR} "Please specify LUABRIDGE_INCLUDE_DIR\n")
-else()
-  adjust_cached_path(LUABRIDGE_INCLUDE_DIR "LuaBridge include dir" ${LUABRIDGE_INCLUDE_DIR})
-endif()
-
-# check for debug libraries
 if (NOT EXISTS ${OSG_LIBRARY_DEBUG})
   set(OSG_LIBRARY_DEBUG ${OSG_LIBRARY})
 endif()
 
-# print errors
-if (NOT "${ERROR_MESSAGES}" STREQUAL "")
-  message(FATAL_ERROR ${ERROR_MESSAGES})
-endif()
-
 adjust_cached_path(OSG_LIBRARY_DEBUG "Path to a library." ${OSG_LIBRARY_DEBUG})
-
-option(OSG_LIBRARIES_DEBUG_SUFFIX "osg debug libraries suffix" ON)
 
 if (OSG_LIBRARIES_DEBUG_SUFFIX)
   set(OSG_LIBRARY_SUFFIX "d")
 else()
   set(OSG_LIBRARY_SUFFIX "\"\"")
+endif()
+
+# rapidxml
+adjust_cached_path_if_exists(RAPIDXML_INCLUDE_DIR "rapidxml include dir" "${RAPIDXML_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES CACHE)
+
+# Lua
+adjust_cached_path_if_exists(LUA_INCLUDE_PREFIX "Lua include dir" "${LUA_INCLUDE_PREFIX}" MESSAGES ERROR_MESSAGES CACHE)
+adjust_cached_path_if_exists(LUA_LIB_RELEASE "Lua release library" "${LUA_LIB_RELEASE}" MESSAGES ERROR_MESSAGES)
+adjust_cached_path_if_exists(LUA_LIB_DEBUG "Lua debug library" "${LUA_LIB_DEBUG}" MESSAGES ERROR_MESSAGES CACHE)
+
+# LuaBridge
+adjust_cached_path_if_exists(LUABRIDGE_INCLUDE_DIR "LuaBridge include dir" "${LUABRIDGE_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES CACHE)
+
+# find OpenCV directories
+adjust_cached_path_if_exists(OPENCV_INCLUDE_DIR "OpenCV include directory" ${OPENCV_INCLUDE_DIR})
+adjust_cached_path_if_exists(OPENCV_LIB_DIR_OPT "OpenCV release lib directory" ${OPENCV_LIB_DIR_OPT})
+adjust_cached_path_if_exists(OPENCV_LIB_DIR_DBG "OpenCV debug lib directory" ${OPENCV_LIB_DIR_DBG})
+adjust_cached_path_if_exists(OPENCV_BIN_DIR_OPT "OpenCV release bin directory" ${OPENCV_BIN_DIR_OPT})
+adjust_cached_path_if_exists(OPENCV_BIN_DIR_DBG "OpenCV debug bin directory" ${OPENCV_BIN_DIR_DBG})
+
+if (EXISTS ${OPENCV_LIB_DIR_OPT} AND NOT EXISTS ${OPENCV_LIB_DIR_DBG})
+  adjust_cached_path(OPENCV_LIB_DIR_DBG "OpenCV debug lib directory" ${OPENCV_LIB_DIR_OPT})
+endif()
+
+if (EXISTS ${OPENCV_BIN_DIR_OPT} AND NOT EXISTS ${OPENCV_BIN_DIR_DBG})
+  adjust_cached_path(OPENCV_BIN_DIR_DBG "OpenCV debug bin directory" ${OPENCV_BIN_DIR_OPT})
+endif()
+
+if (EXISTS ${OPENCV_LIB_DIR_OPT} AND EXISTS ${OPENCV_INCLUDE_DIR})
+  set(OPENCV_FOUND true)
+  
+  option(OPENCV_LIBRARIES_DEBUG_SUFFIX "OpenCV debug libraries suffix" ON)
+
+  if (OPENCV_LIBRARIES_DEBUG_SUFFIX)
+    set(OPENCV_LIBRARY_SUFFIX "d")
+  else()
+    set(OPENCV_LIBRARY_SUFFIX "\"\"")
+  endif()
+endif()
+
+# print errors
+if (NOT "${ERROR_MESSAGES}" STREQUAL "")
+  message(FATAL_ERROR ${ERROR_MESSAGES})
 endif()
 
 # find osg binary directory
@@ -223,33 +206,6 @@ if (WIN32)
   adjust_cached_path(OSG_PLUGINS "OSG plugins directory" ${OSG_PLUGINS})
   if (NOT EXISTS ${OSG_PLUGINS_DEBUG} AND EXISTS ${OSG_PLUGINS})
     adjust_cached_path(OSG_PLUGINS_DEBUG "OSG debug binary directory" ${OSG_PLUGINS})
-  endif()
-endif()
-
-# find OpenCV directories
-adjust_cached_path_if_exists(OPENCV_INCLUDE_DIR "OpenCV include directory" ${OPENCV_INCLUDE_DIR})
-adjust_cached_path_if_exists(OPENCV_LIB_DIR_OPT "OpenCV release lib directory" ${OPENCV_LIB_DIR_OPT})
-adjust_cached_path_if_exists(OPENCV_LIB_DIR_DBG "OpenCV debug lib directory" ${OPENCV_LIB_DIR_DBG})
-adjust_cached_path_if_exists(OPENCV_BIN_DIR_OPT "OpenCV release bin directory" ${OPENCV_BIN_DIR_OPT})
-adjust_cached_path_if_exists(OPENCV_BIN_DIR_DBG "OpenCV debug bin directory" ${OPENCV_BIN_DIR_DBG})
-
-if (EXISTS ${OPENCV_LIB_DIR_OPT} AND NOT EXISTS ${OPENCV_LIB_DIR_DBG})
-  adjust_cached_path(OPENCV_LIB_DIR_DBG "OpenCV debug lib directory" ${OPENCV_LIB_DIR_OPT})
-endif()
-
-if (EXISTS ${OPENCV_BIN_DIR_OPT} AND NOT EXISTS ${OPENCV_BIN_DIR_DBG})
-  adjust_cached_path(OPENCV_BIN_DIR_DBG "OpenCV debug bin directory" ${OPENCV_BIN_DIR_OPT})
-endif()
-
-if (EXISTS ${OPENCV_LIB_DIR_OPT} AND EXISTS ${OPENCV_INCLUDE_DIR})
-  set(OPENCV_FOUND true)
-  
-  option(OPENCV_LIBRARIES_DEBUG_SUFFIX "OpenCV debug libraries suffix" ON)
-
-  if (OPENCV_LIBRARIES_DEBUG_SUFFIX)
-    set(OPENCV_LIBRARY_SUFFIX "d")
-  else()
-    set(OPENCV_LIBRARY_SUFFIX "\"\"")
   endif()
 endif()
 
@@ -346,7 +302,6 @@ if (WIN32)
     configure_file(${MODULE_LOCATION_DBG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/${MODULE_FILENAME_DBG} COPYONLY)
   endforeach()
 endif()
-
 
 # configure scripts
 set(TEMPLATE_PATH_RESOURCES "${CMAKE_SOURCE_DIR}/Resources")
