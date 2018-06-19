@@ -1,5 +1,4 @@
 #include "CountryMesh.h"
-#include "core/Globals.h"
 
 #include <osg/Geometry>
 #include <osgGaming/SimulationCallback.h>
@@ -7,6 +6,7 @@
 #include <osgGaming/Helper.h>
 
 #include <algorithm>
+#include <assert.h>
 
 namespace onep
 {
@@ -80,7 +80,7 @@ namespace onep
   };
 
   CountryMesh::CountryMesh(
-    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
+    osg::ref_ptr<ConfigManager> configManager,
     osg::Vec2f centerLatLong,
     osg::Vec2f size,
     osg::ref_ptr<osg::Vec3Array> vertices,
@@ -90,8 +90,8 @@ namespace onep
     : osg::Geode()
     , m(new Impl())
   {
-    m->earthRadius = propertiesManager->getValue<float>(Param_EarthRadiusName);
-    m->cameraZoom = propertiesManager->getValue<float>(Param_CameraCountryZoomName);
+    m->earthRadius = configManager->getNumber<float>("earth.radius");
+    m->cameraZoom = configManager->getNumber<float>("camera.country_zoom");
 
     m->centerLatLong = centerLatLong;
     m->size = size;

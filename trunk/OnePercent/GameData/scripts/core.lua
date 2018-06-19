@@ -15,8 +15,16 @@ core = {
     skill_actions = {},
     branch_actions = {},
     on_initialize_actions = {}
-  }
+  },
+
+  config = {}
 }
+
+function core.config.extend(table)
+
+  core.helper.merge(core.config, table)
+
+end
 
 function core.control.on_initialize_action(func)
 

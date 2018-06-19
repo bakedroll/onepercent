@@ -1,5 +1,6 @@
 #include "CountryOverlay.h"
 
+#include "scripting/ConfigManager.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
@@ -22,7 +23,7 @@ namespace onep
       : base(b)
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
-      , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+      , configManager(injector.inject<ConfigManager>())
       , stateContainer(injector.inject<SimulationStateContainer>())
       , skillsContainer(injector.inject<SkillsContainer>())
       , countriesContainer(injector.inject<CountriesContainer>())
@@ -42,7 +43,7 @@ namespace onep
       if (countryMeshs.find(id) != countryMeshs.end())
         return;
 
-      CountryMesh::Ptr mesh = new CountryMesh(propertiesManager, centerLatLong, size, vertices, texcoords, triangles, neighborBorders);
+      CountryMesh::Ptr mesh = new CountryMesh(configManager, centerLatLong, size, vertices, texcoords, triangles, neighborBorders);
 
       countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
       base->addChild(mesh, false);
@@ -83,7 +84,7 @@ namespace onep
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
-    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+    osg::ref_ptr<ConfigManager> configManager;
     osg::ref_ptr<SimulationStateContainer> stateContainer;
     osg::ref_ptr<SkillsContainer> skillsContainer;
     CountriesContainer::Ptr countriesContainer;

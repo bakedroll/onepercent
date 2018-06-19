@@ -137,10 +137,7 @@ namespace onep
   {
     osg::ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
 
-    // Loading lua scripts
-    m->lua->loadScript("./GameData/scripts/core.lua");
-    m->lua->loadScript("./GameData/scripts/helper.lua");
-
+    // Loading scripts
     m->lua->loadScript("./GameData/scripts/data/branches.lua");
     m->lua->loadScript("./GameData/scripts/data/skills.lua");
     m->lua->loadScript("./GameData/scripts/data/countries.lua");

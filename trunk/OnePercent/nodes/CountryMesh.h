@@ -1,10 +1,10 @@
 #pragma once
 
+#include "scripting/ConfigManager.h"
+
 #include <osg/Geode>
 
 #include <memory>
-
-#include <osgGaming/PropertiesManager.h>
 
 namespace onep
 {
@@ -30,7 +30,7 @@ namespace onep
     } ColorMode;
 
     CountryMesh(
-      osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager,
+      osg::ref_ptr<ConfigManager> configManager,
       osg::Vec2f centerLatLong,
       osg::Vec2f size,
       osg::ref_ptr<osg::Vec3Array> vertices,

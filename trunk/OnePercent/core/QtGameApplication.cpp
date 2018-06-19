@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QTextStream>
+#include <QMessageBox>
 
 #include <assert.h>
 
@@ -64,8 +65,6 @@ struct QtGameApplication::Impl
   {
   }
 
-  std::shared_ptr<Multithreading> qapplication;
-
   MainWindow* mainWindow;
   std::shared_ptr<OverlayCompositor> overlayCompositor;
 
@@ -76,13 +75,12 @@ struct QtGameApplication::Impl
 };
 
 QtGameApplication::QtGameApplication(int& argc, char** argv)
-  : GameApplication()
+  : Multithreading(argc, argv)
+  , GameApplication()
   , m(new Impl())
 {
   osgGaming::LogManager::getInstance()->addLogger(new osgGaming::StdOutLogger());
   osgGaming::LogManager::getInstance()->addLogger(new FileLogger("./Logs"));
-
-  m->qapplication.reset(new Multithreading(argc, argv));
 
   setlocale(LC_NUMERIC, "en_US");
 
@@ -114,6 +112,14 @@ QtGameApplication::QtGameApplication(int& argc, char** argv)
 
 QtGameApplication::~QtGameApplication()
 {
+}
+
+bool QtGameApplication::notify(QObject* receiver, QEvent* event)
+{
+  if (safeExecute([&](){ Multithreading::notify(receiver, event); return 0; }))
+    return true;
+
+  return false;
 }
 
 void QtGameApplication::deinitialize()
@@ -162,7 +168,7 @@ int QtGameApplication::mainloop()
 {
   getViewer()->realize();
 
-  return m->qapplication->exec();
+  return exec();
 }
 
 osg::ref_ptr<osgGaming::InputManager> QtGameApplication::createInputManager(osg::ref_ptr<osgGaming::View> view)
@@ -171,9 +177,10 @@ osg::ref_ptr<osgGaming::InputManager> QtGameApplication::createInputManager(osg:
   return m->mainWindow->getViewWidget();
 }
 
-std::shared_ptr<Multithreading> QtGameApplication::qApplication()
+void QtGameApplication::onException(const std::string& message)
 {
-  return m->qapplication;
+  QMessageBox::critical(nullptr, tr("Fatal error"), tr("A critical exception occured: %1").arg(QString::fromLocal8Bit(message.c_str())));
+  quit();
 }
 
 }

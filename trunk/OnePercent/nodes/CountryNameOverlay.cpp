@@ -1,13 +1,11 @@
 #include "CountryNameOverlay.h"
 
-#include "core/Globals.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/Country.h"
 
 #include <osgGaming/Helper.h>
 #include <osg/Billboard>
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/PropertiesManager.h>
 
 namespace onep
 {
@@ -15,7 +13,7 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector)
       : resourceManager(injector.inject<osgGaming::ResourceManager>())
-      , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+      , configManager(injector.inject<ConfigManager>())
       , countriesContainer(injector.inject<CountriesContainer>())
       , enabled(true)
     {
@@ -26,7 +24,7 @@ namespace onep
     }
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
-    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+    osg::ref_ptr<ConfigManager> configManager;
     osg::ref_ptr<CountriesContainer> countriesContainer;
 
     osg::ref_ptr<osg::Switch> switchNode;
@@ -56,7 +54,7 @@ namespace onep
   {
     osg::ref_ptr<osgText::Font> font = m->resourceManager->loadFont("./GameData/fonts/coolvetica rg.ttf");
 
-    float earthRadius = m->propertiesManager->getValue<float>(Param_EarthRadiusName);
+    float earthRadius = m->configManager->getNumber<float>("earth.radius");
 
     m->countryMap = &countryMap;
 

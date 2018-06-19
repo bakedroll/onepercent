@@ -2,7 +2,6 @@
 
 #include "core/Macros.h"
 #include "core/Observables.h"
-#include "core/Globals.h"
 #include "core/QConnectFunctor.h"
 #include "nodes/BoundariesMesh.h"
 #include "nodes/GlobeOverviewWorld.h"
@@ -21,7 +20,6 @@
 #include <osgGaming/Helper.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/View.h>
-#include <osgGaming/PropertiesManager.h>
 
 #include <QLabel>
 #include <QPushButton>
@@ -34,7 +32,7 @@ namespace onep
     Impl(osgGaming::Injector& injector, GlobeInteractionState* b)
     : base(b)
     , pInjector(&injector)
-    , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+    , configManager(injector.inject<ConfigManager>())
     , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
     , simulation(injector.inject<Simulation>())
     , countryOverlay(injector.inject<CountryOverlay>())
@@ -60,7 +58,7 @@ namespace onep
     // only for debug window
     osgGaming::Injector* pInjector;
 
-    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+    osg::ref_ptr<ConfigManager> configManager;
     osg::ref_ptr<GlobeOverviewWorld> globeOverviewWorld;
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<CountryOverlay> countryOverlay;
@@ -200,14 +198,14 @@ namespace onep
   {
     GlobeCameraState::initialize();
 
-    m->paramEarthRadius = m->propertiesManager->getValue<float>(Param_EarthRadiusName);
-    m->paramCameraMinDistance = m->propertiesManager->getValue<float>(Param_CameraMinDistanceName);
-    m->paramCameraMaxDistance = m->propertiesManager->getValue<float>(Param_CameraMaxDistanceName);
-    m->paramCameraMaxLatitude = m->propertiesManager->getValue<float>(Param_CameraMaxLatitudeName);
-    m->paramCameraZoomSpeed = m->propertiesManager->getValue<float>(Param_CameraZoomSpeedName);
-    m->paramCameraZoomSpeedFactor = m->propertiesManager->getValue<float>(Param_CameraZoomSpeedFactorName);
-    m->paramCameraScrollSpeed = m->propertiesManager->getValue<float>(Param_CameraScrollSpeedName);
-    m->paramCameraRotationSpeed = m->propertiesManager->getValue<float>(Param_CameraRotationSpeedName);
+    m->paramEarthRadius = m->configManager->getNumber<float>("earth.radius");
+    m->paramCameraMinDistance = m->configManager->getNumber<float>("camera.min_distance");
+    m->paramCameraMaxDistance = m->configManager->getNumber<float>("camera.max_distance");
+    m->paramCameraMaxLatitude = m->configManager->getNumber<float>("camera.max_latitude");
+    m->paramCameraZoomSpeed = m->configManager->getNumber<float>("camera.zoom_speed");
+    m->paramCameraZoomSpeedFactor = m->configManager->getNumber<float>("camera.zoom_speed_factor");
+    m->paramCameraScrollSpeed = m->configManager->getNumber<float>("camera.scroll_speed");
+    m->paramCameraRotationSpeed = m->configManager->getNumber<float>("camera.rotation_speed");
 
     getHud(getView(0))->setFpsEnabled(true);
 

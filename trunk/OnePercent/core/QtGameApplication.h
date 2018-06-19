@@ -9,11 +9,13 @@
 
 namespace onep
 {
-  class QtGameApplication : public osgGaming::GameApplication
+  class QtGameApplication : public Multithreading, public osgGaming::GameApplication
   {
   public:
     QtGameApplication(int& argc, char** argv);
     ~QtGameApplication();
+
+    virtual bool notify(QObject *receiver, QEvent *event) override;
 
   protected:
     virtual void deinitialize() override;
@@ -24,7 +26,7 @@ namespace onep
     virtual int mainloop() override;
     virtual osg::ref_ptr<osgGaming::InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) override;
 
-    std::shared_ptr<Multithreading> qApplication();
+    virtual void onException(const std::string& message) override;
 
   private:
     struct Impl;

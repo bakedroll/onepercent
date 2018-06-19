@@ -2,6 +2,7 @@
 
 #include "BoundariesMesh.h"
 #include "CountryOverlay.h"
+#include "scripting/ConfigManager.h"
 
 #include <osg/BlendFunc>
 #include <osg/Geode>
@@ -11,7 +12,6 @@
 #include <osgDB/ReadFile>
 
 #include <osgGaming/Helper.h>
-#include <osgGaming/PropertiesManager.h>
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/TextureFactory.h>
 
@@ -23,16 +23,16 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector, GlobeModel* b)
       : base(b)
+      , configManager(injector.inject<ConfigManager>())
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
-      , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , countryOverlay(injector.inject<CountryOverlay>())
     {
-      propSunDistance = propertiesManager->getValue<float>("sun/distance");
-      propSunRadiusMp2 = propertiesManager->getValue<float>("sun/radius_pm2");
-      propEarthCloudsSpeed = propertiesManager->getValue<float>("earth/clouds_speed");
-      propEarthCloudsMorphSpeed = propertiesManager->getValue<float>("earth/clouds_morph_speed");
+      propSunDistance = configManager->getNumber<float>("sun.distance");
+      propSunRadiusMp2 = configManager->getNumber<float>("sun.radius_pm2");
+      propEarthCloudsSpeed = configManager->getNumber<float>("earth.clouds_speed");
+      propEarthCloudsMorphSpeed = configManager->getNumber<float>("earth.clouds_morph_speed");
 
       base->addChild(boundariesMesh);
       base->addChild(countryOverlay);
@@ -118,11 +118,11 @@ namespace onep
 
     void makeAtmosphericScattering()
     {
-      float earthRadius = propertiesManager->getValue<float>("earth/radius");
-      float atmosphereHeight = propertiesManager->getValue<float>("earth/atmosphere_height");
-      float scatteringDepth = propertiesManager->getValue<float>("earth/scattering_depth");
-      float scatteringIntensity = propertiesManager->getValue<float>("earth/scattering_intensity");
-      osg::Vec4f atmosphereColor = propertiesManager->getValue<osg::Vec4f>("earth/atmosphere_color");
+      float earthRadius = configManager->getNumber<float>("earth.radius");
+      float atmosphereHeight = configManager->getNumber<float>("earth.atmosphere_height");
+      float scatteringDepth = configManager->getNumber<float>("earth.scattering_depth");
+      float scatteringIntensity = configManager->getNumber<float>("earth.scattering_intensity");
+      osg::Vec4f atmosphereColor = configManager->getVector<osg::Vec4f>("earth.atmosphere_color");
 
       // atmospheric scattering geometry
       scatteringQuad = new osgGaming::CameraAlignedQuad();
@@ -188,9 +188,9 @@ namespace onep
         break;
       };
 
-      int numStacks = propertiesManager->getValue<int>("earth/sphere_stacks");
-      int numSlices = propertiesManager->getValue<int>("earth/sphere_slices");
-      float radius = propertiesManager->getValue<float>("earth/radius");
+      int numStacks = configManager->getNumber<int>("earth.sphere_stacks");
+      int numSlices = configManager->getNumber<int>("earth.sphere_slices");
+      float radius = configManager->getNumber<float>("earth.radius");
 
       int stacksPerSurface = numStacks / m;
       int slicesPerSurface = numSlices / n;
@@ -259,10 +259,10 @@ namespace onep
       int n = 2;
       int m = 1;
 
-      int stacks = propertiesManager->getValue<int>("earth/sphere_stacks");
-      int slices = propertiesManager->getValue<int>("earth/sphere_slices");
-      float radius = propertiesManager->getValue<float>("earth/radius");
-      float cloudsHeight = propertiesManager->getValue<float>("earth/clouds_height");
+      int stacks = configManager->getNumber<int>("earth.sphere_stacks");
+      int slices = configManager->getNumber<int>("earth.sphere_slices");
+      float radius = configManager->getNumber<float>("earth.radius");
+      float cloudsHeight = configManager->getNumber<float>("earth.clouds_height");
 
       int stacksPerSurface = stacks / m;
       int slicesPerSurface = slices / n;
@@ -374,8 +374,8 @@ namespace onep
 
     GlobeModel* base;
 
+    osg::ref_ptr<ConfigManager> configManager;
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
-    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
 
     float propSunDistance;

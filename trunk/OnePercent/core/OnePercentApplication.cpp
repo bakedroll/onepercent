@@ -11,6 +11,7 @@
 #include "states/MainMenuState.h"
 #include "states/LoadingGlobeOverviewState.h"
 #include "states/GlobeInteractionState.h"
+#include "scripting/ConfigManager.h"
 #include "scripting/LuaLogger.h"
 #include "simulation/Simulation.h"
 #include "simulation/SkillsContainer.h"
@@ -18,7 +19,6 @@
 #include "simulation/SimulationStateContainer.h"
 
 #include <osgGaming/ResourceManager.h>
-#include <osgGaming/PropertiesManager.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
 #include <osgGaming/HighDynamicRangeEffect.h>
@@ -77,6 +77,7 @@ namespace onep
     // wrapper
     container.registerSingletonType<LuaStateManager>();
     container.registerSingletonType<LuaLogger>();
+    container.registerSingletonType<ConfigManager>();
 
     // Observables
     container.registerSingletonType<ONumSkillPoints>();
@@ -88,13 +89,15 @@ namespace onep
     OSGG_LOG_INFO("Loading fonts");
     injector.inject<osgGaming::ResourceManager>()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 
-    OSGG_LOG_INFO("Loading game parameters");
-    injector.inject<osgGaming::PropertiesManager>()->loadPropertiesFromXmlResource("./GameData/data/game_parameters.xml");
-
     // initialize Lua classes
     osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
     lua->registerClassInstance<Simulation>(injector.inject<Simulation>());
     lua->registerClassInstance<LuaLogger>(injector.inject<LuaLogger>());
+
+    OSGG_LOG_INFO("Loading scripts");
+    lua->loadScript("./GameData/scripts/core.lua");
+    lua->loadScript("./GameData/scripts/helper.lua");
+    lua->loadScript("./GameData/scripts/data/config.lua");
 
     m->simulation = injector.inject<Simulation>();
 
@@ -111,7 +114,7 @@ namespace onep
     }
     else
     {
-      qApplication()->setStyleSheet(QString(file.readAll()));
+      setStyleSheet(QString(file.readAll()));
       file.close();
     }
   }
