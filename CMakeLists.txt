@@ -53,48 +53,14 @@ foreach(module ${QT5_MODULES})
   find_package(Qt5${module} REQUIRED)
 endforeach()
 
-#find OpenSceneGraph
-find_package(OpenSceneGraph COMPONENTS
-  osg osgViewer osgUtil osgGA osgDB osgText OpenThreads)
-
-# pthread
-find_package(Threads)
-
-# optional for Vectorizer
-find_package(OpenCV)
-
-# Lua
-find_package(Lua)
-
-# optional for Tests
-set(GTEST_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "gtest root directory")
-if (EXISTS ${GTEST_ROOT_DIRECTORY})
-  adjust_cached_path(GTEST_ROOT_DIRECTORY "gtest root directory" ${GTEST_ROOT_DIRECTORY})
-endif()
-
-set(GTEST_ROOT ${QT5_ROOT_DIRECTORY})
-
-find_package(GTest)
-
-# osgPPU
-adjust_cached_path_if_exists(OSGPPU_INCLUDE_DIR "osgPPU include directory" "${OSGPPU_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES CACHE)
-adjust_cached_path_if_exists(OSGPPU_LIBRARY_RELEASE "osgPPU release library" "${OSGPPU_LIBRARY_RELEASE}" MESSAGES ERROR_MESSAGES CACHE)
-adjust_cached_path_if_exists(OSGPPU_LIBRARY_DEBUG "osgPPU debug library" "${OSGPPU_LIBRARY_DEBUG}" MESSAGES ERROR_MESSAGES DEFAULT ${OSGPPU_LIBRARY_RELEASE} CACHE)
-
-set(OSGPPU_LIBRARY_DEBUG "NOTFOUND" CACHE STRING "osgPPU debug library")
-if (EXISTS ${OSGPPU_LIBRARY_DEBUG})
-  adjust_cached_path(OSGPPU_LIBRARY_DEBUG "osgPPU debug library" ${OSGPPU_LIBRARY_DEBUG})
-else()
-  set(OSGPPU_LIBRARY_DEBUG ${OSGPPU_LIBRARY_RELEASE})
-endif()
-
-# Check for existence of required directories
-# Qt
 if ("${Qt5Core_LIBRARIES}" STREQUAL "")
   set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify QT5_ROOT_DIRECTORY\n")
 endif()
 
-# OSG
+#find OpenSceneGraph
+find_package(OpenSceneGraph COMPONENTS
+  osg osgViewer osgUtil osgGA osgDB osgText OpenThreads)
+
 adjust_cached_path_if_exists(OSG_INCLUDE_DIR "Path to a file." "${OSG_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES)
 adjust_cached_path_if_exists(OSG_LIBRARY "Path to a library." "${OSG_LIBRARY}" MESSAGES ERROR_MESSAGES)
 
@@ -110,16 +76,17 @@ else()
   set(OSG_LIBRARY_SUFFIX "\"\"")
 endif()
 
-# rapidxml
-adjust_cached_path_if_exists(RAPIDXML_INCLUDE_DIR "rapidxml include dir" "${RAPIDXML_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES CACHE)
+# osgPPU
+adjust_cached_path_if_exists(OSGPPU_INCLUDE_DIR "osgPPU include directory" "${OSGPPU_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES CACHE)
+adjust_cached_path_if_exists(OSGPPU_LIBRARY_RELEASE "osgPPU release library" "${OSGPPU_LIBRARY_RELEASE}" MESSAGES ERROR_MESSAGES CACHE)
+adjust_cached_path_if_exists(OSGPPU_LIBRARY_DEBUG "osgPPU debug library" "${OSGPPU_LIBRARY_DEBUG}" MESSAGES ERROR_MESSAGES DEFAULT ${OSGPPU_LIBRARY_RELEASE} CACHE)
 
-# Lua
-adjust_cached_path_if_exists(LUA_INCLUDE_PREFIX "Lua include dir" "${LUA_INCLUDE_PREFIX}" MESSAGES ERROR_MESSAGES CACHE)
-adjust_cached_path_if_exists(LUA_LIB_RELEASE "Lua release library" "${LUA_LIB_RELEASE}" MESSAGES ERROR_MESSAGES)
-adjust_cached_path_if_exists(LUA_LIB_DEBUG "Lua debug library" "${LUA_LIB_DEBUG}" MESSAGES ERROR_MESSAGES CACHE)
-
-# LuaBridge
-adjust_cached_path_if_exists(LUABRIDGE_INCLUDE_DIR "LuaBridge include dir" "${LUABRIDGE_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES CACHE)
+set(OSGPPU_LIBRARY_DEBUG "NOTFOUND" CACHE STRING "osgPPU debug library")
+if (EXISTS ${OSGPPU_LIBRARY_DEBUG})
+  adjust_cached_path(OSGPPU_LIBRARY_DEBUG "osgPPU debug library" ${OSGPPU_LIBRARY_DEBUG})
+else()
+  set(OSGPPU_LIBRARY_DEBUG ${OSGPPU_LIBRARY_RELEASE})
+endif()
 
 # find OpenCV directories
 adjust_cached_path_if_exists(OPENCV_INCLUDE_DIR "OpenCV include directory" ${OPENCV_INCLUDE_DIR})
@@ -147,6 +114,32 @@ if (EXISTS ${OPENCV_LIB_DIR_OPT} AND EXISTS ${OPENCV_INCLUDE_DIR})
     set(OPENCV_LIBRARY_SUFFIX "\"\"")
   endif()
 endif()
+  
+# pthread
+find_package(Threads)
+
+# optional for Vectorizer
+find_package(OpenCV)
+
+# Lua
+find_package(Lua)
+
+adjust_cached_path_if_exists(LUA_INCLUDE_PREFIX "Lua include dir" "${LUA_INCLUDE_PREFIX}" MESSAGES ERROR_MESSAGES CACHE)
+adjust_cached_path_if_exists(LUA_LIB_RELEASE "Lua release library" "${LUA_LIB_RELEASE}" MESSAGES ERROR_MESSAGES)
+adjust_cached_path_if_exists(LUA_LIB_DEBUG "Lua debug library" "${LUA_LIB_DEBUG}" MESSAGES ERROR_MESSAGES CACHE)
+
+# LuaBridge
+adjust_cached_path_if_exists(LUABRIDGE_INCLUDE_DIR "LuaBridge include dir" "${LUABRIDGE_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES CACHE)
+
+# optional for Tests
+set(GTEST_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "gtest root directory")
+if (EXISTS ${GTEST_ROOT_DIRECTORY})
+  adjust_cached_path(GTEST_ROOT_DIRECTORY "gtest root directory" ${GTEST_ROOT_DIRECTORY})
+endif()
+
+set(GTEST_ROOT ${QT5_ROOT_DIRECTORY})
+
+find_package(GTest)
 
 # print errors
 if (NOT "${ERROR_MESSAGES}" STREQUAL "")

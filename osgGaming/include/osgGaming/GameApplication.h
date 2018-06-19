@@ -28,6 +28,9 @@ namespace osgGaming
     virtual int run(osg::ref_ptr<AbstractGameState>& initialState);
     virtual int run(AbstractGameState::AbstractGameStateRefList initialStates);
 
+    virtual void onException(const std::string& message);
+    int safeExecute(std::function<int()> func);
+
   public:
     template<typename TState>
     int run()

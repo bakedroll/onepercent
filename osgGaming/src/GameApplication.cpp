@@ -12,10 +12,8 @@
 
 #include <chrono>
 #include <future>
-#include <iostream>
 
 #include <osgGaming/ShaderFactory.h>
-#include <osgGaming/PropertiesManager.h>
 #include <osgGaming/TextureFactory.h>
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/LogManager.h>
@@ -378,7 +376,7 @@ namespace osgGaming
 
   int GameApplication::run(AbstractGameState::AbstractGameStateRefList initialStates)
   {
-    try
+    return safeExecute([&]()
     {
       m->view = m->viewer->getView(0);
       assert(m->view.valid());
@@ -410,16 +408,28 @@ namespace osgGaming
       osgGaming::LogManager::clearInstance();
 
       return ret;
+    });
+  }
+
+  void GameApplication::onException(const std::string& message)
+  {
+  }
+
+  int GameApplication::safeExecute(std::function<int()> func)
+  {
+    try
+    {
+      return func();
     }
     catch (GameException& e)
     {
       OSGG_LOG_FATAL(std::string("Exception: ") + e.getMessage());
-      std::cin.ignore();
+      onException(e.getMessage());
     }
     catch (exception& e)
     {
       OSGG_LOG_FATAL(std::string("Exception: ") + std::string(e.what()));
-      std::cin.ignore();
+      onException(e.what());
     }
 
     return -1;
@@ -450,7 +460,6 @@ namespace osgGaming
   void GameApplication::registerEssentialComponents()
   {
     m_container.registerSingletonType<ShaderFactory>();
-    m_container.registerSingletonType<PropertiesManager>();
     m_container.registerSingletonType<ResourceManager>();
     m_container.registerSingletonType<TextureFactory>();
   }

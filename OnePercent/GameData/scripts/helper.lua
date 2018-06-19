@@ -2,6 +2,18 @@
 
 core.helper = {}
 
+function core.helper.merge(t1, t2)
+
+  for k, v in pairs(t2) do
+    if (type(v) == "table") and (type(t1[k] or false) == "table") then
+      core.helper.merge(t1[k], t2[k])
+    else
+      t1[k] = v
+    end
+  end
+
+end
+
 -- dumping table to a string
 function core.helper.dump_object(o, d)
   if d == nil then

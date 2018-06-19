@@ -2,12 +2,10 @@
 #include "GlobeModel.h"
 #include "BackgroundModel.h"
 
-#include "core/Globals.h"
 #include "nodes/CountryNameOverlay.h"
 #include "simulation/Simulation.h"
 
 #include <osgGaming/Helper.h>
-#include <osgGaming/PropertiesManager.h>
 
 namespace onep
 {
@@ -15,7 +13,7 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector, GlobeOverviewWorld* b)
       : base(b)
-      , propertiesManager(injector.inject<osgGaming::PropertiesManager>())
+      , configManager(injector.inject<ConfigManager>())
       , globeModel(injector.inject<GlobeModel>())
       , countryNameOverlay(injector.inject<CountryNameOverlay>())
       , backgroundModel(injector.inject<BackgroundModel>())
@@ -45,7 +43,7 @@ namespace onep
 
     GlobeOverviewWorld* base;
 
-    osg::ref_ptr<osgGaming::PropertiesManager> propertiesManager;
+    osg::ref_ptr<ConfigManager> configManager;
 
     float paramEarthRadius;
 
@@ -85,12 +83,12 @@ namespace onep
 
   void GlobeOverviewWorld::initialize()
   {
-    m->paramEarthRadius = m->propertiesManager->getValue<float>(Param_EarthRadiusName);
+    m->paramEarthRadius = m->configManager->getNumber<float>("earth.radius");
   }
 
   void GlobeOverviewWorld::setDay(float day)
   {
-    float daysInYear = m->propertiesManager->getValue<float>(Param_MechanicsDaysInYearName);
+    float daysInYear = m->configManager->getNumber<float>("mechanics.days_in_year");
     float year = day / daysInYear;
 
     osg::Matrix yearMat = osgGaming::getMatrixFromEuler(0.0f, 0.0f, -year * 2.0f * C_PI) *

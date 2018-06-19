@@ -13,8 +13,7 @@ target_compile_options(osgGaming PRIVATE "-fpermissive")
 target_include_directories(osgGaming PUBLIC
   ${OSGGAMING_INCLUDE_DIR}
   ${OSG_INCLUDE_DIR}
-  ${OSGPPU_INCLUDE_DIR}
-  ${RAPIDXML_INCLUDE_DIR})
+  ${OSGPPU_INCLUDE_DIR})
   
 # make variable globally accessable
 set(OSGGAMING_INCLUDE_DIR ${OSGGAMING_INCLUDE_DIR} PARENT_SCOPE)
