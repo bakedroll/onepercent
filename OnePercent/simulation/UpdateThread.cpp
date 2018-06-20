@@ -3,8 +3,6 @@
 #include "core/Macros.h"
 #include "core/Multithreading.h"
 
-#include <QMutex>
-#include <QEventLoop>
 #include <QElapsedTimer>
 
 namespace onep
