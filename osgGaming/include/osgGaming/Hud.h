@@ -22,7 +22,6 @@ namespace osgGaming
 		osg::ref_ptr<osg::MatrixTransform> getModelViewTransform();
 
 		void updateResolution(osg::Vec2f resolution);
-		void setFpsEnabled(bool enabled);
 
 	private:
 		struct Impl;

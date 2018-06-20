@@ -28,13 +28,21 @@ namespace onep
     template<typename T>
     T getNumber(const std::string& name)
     {
-      return (T)std::dynamic_pointer_cast<ValueType<float>>(getValuePtr(name, [this](luabridge::LuaRef& ref) { return nullptr; }))->value;
+      return (T)std::dynamic_pointer_cast<ValueType<float>>(
+        getValuePtr(name, [this](luabridge::LuaRef& ref)
+      {
+        return std::make_shared<ValueType<float>>((float)ref);
+      }))->value;
     }
 
     template<typename T>
     T& getVector(const std::string& name)
     {
-      return std::dynamic_pointer_cast<ValueType<T>>(getValuePtr(name, [this](luabridge::LuaRef& ref) { return std::make_shared<ValueType<T>>(refToVec<T>(ref)); }))->value;
+      return std::dynamic_pointer_cast<ValueType<T>>(
+        getValuePtr(name, [this](luabridge::LuaRef& ref)
+      {
+        return std::make_shared<ValueType<T>>(refToVec<T>(ref));
+      }))->value;
     }
 
     void clearCache();
@@ -58,7 +66,7 @@ namespace onep
 
     std::shared_ptr<ValueTypeBase> getValuePtr(
       const std::string& name,
-      std::function<std::shared_ptr<ValueTypeBase>(luabridge::LuaRef& ref)> vecFunc);
+      std::function<std::shared_ptr<ValueTypeBase>(luabridge::LuaRef& ref)> getFunc);
 
     template<typename T>
     T refToVec(luabridge::LuaRef& ref)

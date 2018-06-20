@@ -38,7 +38,7 @@ namespace onep
 
   std::shared_ptr<ConfigManager::ValueTypeBase> ConfigManager::getValuePtr(
     const std::string& name,
-    std::function<std::shared_ptr<ValueTypeBase>(luabridge::LuaRef& ref)> vecFunc)
+    std::function<std::shared_ptr<ValueTypeBase>(luabridge::LuaRef& ref)> getFunc)
   {
     Impl::Cache::iterator it = m->cache.find(name);
     if (it != m->cache.end())
@@ -50,18 +50,10 @@ namespace onep
       std::string path = CONFIG_PATH + std::string(".") + name;
 
       luabridge::LuaRef ref = m->lua->getObject(path.c_str());
-      if (ref.isNumber())
-      {
-        result = std::make_shared<ValueType<float>>((float)ref);
-        m->cache[name] = result;
-      }
-      else if (ref.isTable())
-      {
-        result = vecFunc(ref);
-        m->cache[name] = result;
-      }
+      result = getFunc(ref);
     });
 
+    m->cache[name] = result;
     return result;
   }
 }

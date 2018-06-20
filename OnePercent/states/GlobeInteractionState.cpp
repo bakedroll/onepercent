@@ -1,7 +1,6 @@
 #include "GlobeInteractionState.h"
 
 #include "core/Macros.h"
-#include "core/Observables.h"
 #include "core/QConnectFunctor.h"
 #include "nodes/BoundariesMesh.h"
 #include "nodes/GlobeOverviewWorld.h"
@@ -13,6 +12,7 @@
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 #include "widgets/CountryMenuWidget.h"
+#include "widgets/MainFrameWidget.h"
 #include "widgets/DebugWindow.h"
 
 #include <osgGA/GUIEventAdapter>
@@ -20,10 +20,6 @@
 #include <osgGaming/Helper.h>
 #include <osgGaming/Hud.h>
 #include <osgGaming/View.h>
-
-#include <QLabel>
-#include <QPushButton>
-#include <QVBoxLayout>
 
 namespace onep
 {
@@ -40,15 +36,14 @@ namespace onep
     , countriesContainer(injector.inject<CountriesContainer>())
     , bReady(false)
     , selectedCountry(0)
-    , labelDays(nullptr)
     , countryMenuWidget(new CountryMenuWidget(injector))
+    , mainFrameWidget(nullptr)
     , debugWindow(nullptr)
     , countryMenuWidgetFadeInAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
     , countryMenuWidgetFadeOutAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_OUT))
     , bFadingOutCountryMenu(false)
     , bDraggingMidMouse(false)
     , bFastAnimation(false)
-    , oDay(injector.inject<ODay>())
     {
 
     }
@@ -80,14 +75,9 @@ namespace onep
     int selectedCountry;
 
     osgGaming::Observer<int>::Ptr selectedCountryObserver;
-    osgGaming::Observer<int>::Ptr dayObserver;
-
-    QLabel* labelDays;
 
     CountryMenuWidget* countryMenuWidget;
-
-    VirtualOverlay* mainOverlay;
-
+    MainFrameWidget* mainFrameWidget;
     DebugWindow* debugWindow;
 
     osg::ref_ptr<osgGaming::Animation<float>> countryMenuWidgetFadeInAnimation;
@@ -98,8 +88,6 @@ namespace onep
     bool bFadingOutCountryMenu;
     bool bDraggingMidMouse;
     bool bFastAnimation;
-
-    ODay::Ptr oDay;
 
     float getViewAngleForDistance(float distance) const
     {
@@ -207,8 +195,6 @@ namespace onep
     m->paramCameraScrollSpeed = m->configManager->getNumber<float>("camera.scroll_speed");
     m->paramCameraRotationSpeed = m->configManager->getNumber<float>("camera.rotation_speed");
 
-    getHud(getView(0))->setFpsEnabled(true);
-
     CountryMesh::Map& meshs = m->countryOverlay->getCountryMeshs();
     float projAngle = getWorld(getView(0))->getCameraManipulator()->getProjectionAngle();
     float projRatio = getWorld(getView(0))->getCameraManipulator()->getProjectionRatio();
@@ -220,11 +206,6 @@ namespace onep
       minDistance = std::min<float>(dist, minDistance);
       maxDistance = std::max<float>(dist, maxDistance);
     }
-
-    m->dayObserver = m->oDay->connect(osgGaming::Func<int>([this](int day)
-    {
-      m->labelDays->setText(QObject::tr("Day %1").arg(day));
-    }));
 
     m->selectedCountryObserver = m->countryOverlay->getSelectedCountryIdObservable()->connect(osgGaming::Func<int>([this, minDistance, maxDistance](int id)
     {
@@ -452,7 +433,7 @@ namespace onep
 
   void GlobeInteractionState::onResizeEvent(float width, float height)
   {
-    m->mainOverlay->setGeometry(0, 0, int(width), int(height));
+    m->mainFrameWidget->setGeometry(0, 0, int(width), int(height));
   }
 
   osg::ref_ptr<osgGaming::Hud> GlobeInteractionState::injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view)
@@ -464,18 +445,14 @@ namespace onep
   {
     osg::Vec2f resolution = getView(0)->getResolution();
 
-    m->mainOverlay = new VirtualOverlay();
-    m->mainOverlay->setContentsMargins(5, 5, 5, 5);
-    m->mainOverlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
+    m->mainFrameWidget = new MainFrameWidget(*m->pInjector);
+    m->mainFrameWidget->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
 
-    m->labelDays = new QLabel(QString());
+    /*m->labelDays = new QLabel(QString());
     m->labelDays->setObjectName("LabelDays");
 
-    QPushButton* debugButton = new QPushButton(QObject::tr("Debug Window"));
-    debugButton->setObjectName("DebugButton");
-    debugButton->setMaximumWidth(180);
-
-    QConnectFunctor::connect(debugButton, SIGNAL(clicked()), [this]()
+    */
+    QConnectFunctor::connect(m->mainFrameWidget, SIGNAL(clickedButtonDebug()), [this]()
     {
       if (m->debugWindow == nullptr)
         m->debugWindow = new DebugWindow(*m->pInjector);
@@ -488,33 +465,9 @@ namespace onep
       }
     });
 
-    QVBoxLayout* leftLayout = new QVBoxLayout();
-    leftLayout->addStretch(1);
-    leftLayout->addWidget(debugButton);
-
-    QWidget* leftWidget = new QWidget();
-    leftWidget->setContentsMargins(0, 0, 0, 0);
-    leftWidget->setObjectName("WidgetLeftPanel");
-    leftWidget->setLayout(leftLayout);
-
-    QHBoxLayout* centralLayout = new QHBoxLayout();
-    centralLayout->addWidget(leftWidget);
-    centralLayout->addStretch(1);
-
-    QHBoxLayout* footerLayout = new QHBoxLayout();
-    footerLayout->addWidget(m->labelDays);
-    footerLayout->addStretch(1);
-
-    QVBoxLayout* layout = new QVBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addLayout(centralLayout, 1);
-    layout->addLayout(footerLayout);
-
-    m->mainOverlay->setLayout(layout);
-
     m->countryMenuWidget->setCenterPosition(500, 500);
 
-    getOverlayCompositor()->addVirtualOverlay(m->mainOverlay);
+    getOverlayCompositor()->addVirtualOverlay(m->mainFrameWidget);
     getOverlayCompositor()->addVirtualOverlay(m->countryMenuWidget);
 
     m->countryMenuWidget->setVisible(false);

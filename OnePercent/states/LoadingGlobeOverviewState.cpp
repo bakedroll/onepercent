@@ -86,8 +86,6 @@ namespace onep
 
   void LoadingGlobeOverviewState::initialize()
   {
-    m->globeOverviewWorld->initialize();
-
     float projNear = float(getWorld(getView(0))->getCameraManipulator()->getProjectionNear());
     float projFar = float(getWorld(getView(0))->getCameraManipulator()->getProjectionFar());
 
@@ -135,9 +133,11 @@ namespace onep
 
   void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
-    osg::ref_ptr<GlobeOverviewWorld> globeWorld = static_cast<GlobeOverviewWorld*>(world.get());
-
     // Loading scripts
+    m->lua->loadScript("./GameData/scripts/core.lua");
+    m->lua->loadScript("./GameData/scripts/helper.lua");
+    m->lua->loadScript("./GameData/scripts/data/config.lua");
+
     m->lua->loadScript("./GameData/scripts/data/branches.lua");
     m->lua->loadScript("./GameData/scripts/data/skills.lua");
     m->lua->loadScript("./GameData/scripts/data/countries.lua");
@@ -156,6 +156,7 @@ namespace onep
     m->stateContainer     ->loadFromLua(m->lua->getObject("core.model.state"));
 
     // loading globe
+    m->globeOverviewWorld->initialize();
     m->backgroundModel->loadStars("./GameData/data/stars.bin");
 
     m->globeModel->makeGlobeModel();

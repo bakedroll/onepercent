@@ -12,34 +12,3 @@ QPushButton#ButtonMainMenu
   max-width: 400px;
   max-height: 45px;
 }
-
-QLabel#LabelSelectCountry
-{
-  color: #fff;
-  font-size: 18pt;
-}
-
-QLabel#LabelClickAgain
-{
-  color: #fff;
-  font-size: 12pt;
-}
-
-QLabel#LabelSkillPoints
-{
-  font-size: 14pt;
-}
-
-QLabel#LabelDays
-{
-  color: #fff;
-  font-size: 18pt;
-  margin-left: 5px;
-  margin-bottom: 5px;
-}
-
-QPushButton#DebugButton
-{
-  min-width: 120px;  
-  max-width: 180px;
-}
