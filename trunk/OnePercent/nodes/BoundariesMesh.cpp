@@ -109,7 +109,7 @@ namespace onep
             if (pit->second.originId > -1)
             {
               verts->push_back(pointsMap[pit->second.originId].coords + pit->second.coords * thickness);
-              colors->push_back(osg::Vec4f(color, 0.5f)); // 0.0f
+              colors->push_back(osg::Vec4f(color, 0.2f)); // 0.0f
             }
             else
             {

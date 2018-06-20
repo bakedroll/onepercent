@@ -44,8 +44,6 @@ void MainMenuState::initialize()
 	setCameraViewAngle(Vec2f(-0.9f, 0.6f));
 	setCameraLatLong(Vec2f(0.5f, 1.2f));
 
-  getHud(getView(0))->setFpsEnabled(true);
-
   setupUi();
 }
 

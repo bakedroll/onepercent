@@ -1,0 +1,37 @@
+onep--MainFrameWidget QFrame#FrameTopBar
+{
+  margin: 0px;
+  background-color: rgba(20, 20, 20, 50%);
+}
+
+onep--MainFrameWidget QFrame#FrameBottomBar
+{
+  margin: 0px;
+  background-color: rgba(20, 20, 20, 50%);
+}
+
+onep--MainFrameWidget QPushButton#ButtonSkills
+{
+  min-width: 120px;
+}
+
+onep--MainFrameWidget QPushButton#ButtonDebug
+{
+  min-width: 120px;
+}
+
+onep--MainFrameWidget QLabel#LabelDays
+{
+  color: #fff;
+  font-size: 18pt;
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+
+onep--MainFrameWidget QLabel#LabelFps
+{
+  color: #fff;
+  min-width: 35px;
+  /*margin-right: 4px;*/
+  text-align: right;
+}

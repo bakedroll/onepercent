@@ -29,11 +29,6 @@ namespace onep
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , countryOverlay(injector.inject<CountryOverlay>())
     {
-      propSunDistance = configManager->getNumber<float>("sun.distance");
-      propSunRadiusMp2 = configManager->getNumber<float>("sun.radius_pm2");
-      propEarthCloudsSpeed = configManager->getNumber<float>("earth.clouds_speed");
-      propEarthCloudsMorphSpeed = configManager->getNumber<float>("earth.clouds_morph_speed");
-
       base->addChild(boundariesMesh);
       base->addChild(countryOverlay);
     }
@@ -407,6 +402,11 @@ namespace onep
 
   void GlobeModel::makeGlobeModel()
   {
+    m->propSunDistance = m->configManager->getNumber<float>("sun.distance");
+    m->propSunRadiusMp2 = m->configManager->getNumber<float>("sun.radius_pm2");
+    m->propEarthCloudsSpeed = m->configManager->getNumber<float>("earth.clouds_speed");
+    m->propEarthCloudsMorphSpeed = m->configManager->getNumber<float>("earth.clouds_morph_speed");
+
     m->makeEarthModel();
     m->makeCloudsModel();
     m->makeAtmosphericScattering();

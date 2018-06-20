@@ -24,19 +24,49 @@
 #include <osgGaming/HighDynamicRangeEffect.h>
 
 #include <QFile>
+#include <QDir>
 
 namespace onep
 {
   struct OnePercentApplication::Impl
   {
-    Impl() {}
+    Impl(OnePercentApplication* b) : base(b) {}
 
+    OnePercentApplication* base;
     Simulation::Ptr simulation;
+
+    void loadStylesheets(const QString& path)
+    {
+      QDir dir(path);
+      if (!dir.exists())
+      {
+        OSGG_QLOG_WARN(QString("Could not find stylesheet directory: %1").arg(path));
+        return;
+      }
+
+      QStringList cssFiles = dir.entryList(QDir::Files | QDir::NoSymLinks);
+
+      QString stylesheetStr;
+      for (QStringList::iterator it = cssFiles.begin(); it != cssFiles.end(); ++it)
+      {
+        QFile file(dir.filePath(*it));
+        if (!file.open(QIODevice::ReadOnly))
+        {
+          OSGG_QLOG_WARN(QString("Could not read stylesheet file: %1").arg(file.fileName()));
+          continue;
+        }
+
+        stylesheetStr.append(QString(file.readAll()) + "\n");
+        file.close();
+      }
+
+      base->setStyleSheet(stylesheetStr);
+    }
   };
 
   OnePercentApplication::OnePercentApplication(int& argc, char** argv)
     : QtGameApplication(argc, argv)
-    , m(new Impl())
+    , m(new Impl(this))
   {
   }
 
@@ -94,29 +124,12 @@ namespace onep
     lua->registerClassInstance<Simulation>(injector.inject<Simulation>());
     lua->registerClassInstance<LuaLogger>(injector.inject<LuaLogger>());
 
-    OSGG_LOG_INFO("Loading scripts");
-    lua->loadScript("./GameData/scripts/core.lua");
-    lua->loadScript("./GameData/scripts/helper.lua");
-    lua->loadScript("./GameData/scripts/data/config.lua");
-
     m->simulation = injector.inject<Simulation>();
 
     setDefaultWorld(injector.inject<GlobeOverviewWorld>());
 
     OSGG_LOG_INFO("Loading stylesheets");
-
-    // load CSS
-    QFile file("./GameData/CSS/style.css");
-    if (!file.open(QIODevice::ReadOnly))
-    {
-      OSGG_LOG_FATAL("Could not load style sheets");
-      assert(false);
-    }
-    else
-    {
-      setStyleSheet(QString(file.readAll()));
-      file.close();
-    }
+    m->loadStylesheets("./GameData/CSS/");
   }
 
   void OnePercentApplication::deinitialize()
