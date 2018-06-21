@@ -423,8 +423,11 @@ namespace onep
 
             skillBranchActivatedObservers.push_back(it->second->getOActivatedBranch(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
             {
-              if (cid == countryOverlay->getSelectedCountryId())
-                checkBox->setChecked(activated);
+              Multithreading::uiExecuteOrAsync([=]()
+              {
+                if (cid == countryOverlay->getSelectedCountryId())
+                  checkBox->setChecked(activated);
+              });
             })));
           }
         });
