@@ -3,8 +3,6 @@
 #include "core/Macros.h"
 #include "core/Multithreading.h"
 
-#include <QMutex>
-
 namespace onep
 {
   typedef std::map<std::string, osgGaming::Observable<bool>::Ptr> BranchActivatedMap;
@@ -125,14 +123,11 @@ namespace onep
 
         bool activated = bool(*it);
 
-        Multithreading::uiExecuteOrAsync([this, key, activated]()
-        {
-          osgGaming::Observable<bool>::Ptr oActivated = oActivatedBranches[key];
-          assert_return(oActivated.valid());
+        osgGaming::Observable<bool>::Ptr oActivated = oActivatedBranches[key];
+        assert_return(oActivated.valid());
 
-          if (oActivated->get() != activated)
-            oActivated->set(activated);
-        });
+        if (oActivated->get() != activated)
+          oActivated->set(activated);
       }
     }
 

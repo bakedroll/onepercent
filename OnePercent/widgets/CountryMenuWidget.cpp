@@ -1,5 +1,6 @@
 #include "CountryMenuWidget.h"
 
+#include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
 
@@ -61,18 +62,21 @@ namespace onep
 
           notifiesActivated.push_back(cstate->getOActivatedBranch(name.c_str())->connectAndNotify(osgGaming::Func<bool>([=](bool activated)
           {
-            if (activated)
+            Multithreading::uiExecuteOrAsync([=]()
             {
-              buttons[i]->setText(QString("%1\n%2").arg(QString::fromStdString(name)).arg(tr("(Unlocked)")));
-              buttons[i]->setEnabled(false);
-            }
-            else
-            {
-              int costs = branch->getCost();
+              if (activated)
+              {
+                buttons[i]->setText(QString("%1\n%2").arg(QString::fromStdString(name)).arg(tr("(Unlocked)")));
+                buttons[i]->setEnabled(false);
+              }
+              else
+              {
+                int costs = branch->getCost();
 
-              buttons[i]->setText(QString("%1\n(%2 SP to unlock)").arg(QString::fromStdString(name)).arg(costs));
-              buttons[i]->setEnabled(oNumSkillPoints->get() >= costs);
-            }
+                buttons[i]->setText(QString("%1\n(%2 SP to unlock)").arg(QString::fromStdString(name)).arg(costs));
+                buttons[i]->setEnabled(oNumSkillPoints->get() >= costs);
+              }
+            });
           })));
 
         }

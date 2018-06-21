@@ -1,5 +1,6 @@
 #include "CountryOverlay.h"
 
+#include "core/Multithreading.h"
 #include "scripting/ConfigManager.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/SimulationStateContainer.h"
@@ -59,11 +60,14 @@ namespace onep
 
           skillBranchActivatedObservers.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
           {
-            if (!activated)
-              return;
+            Multithreading::uiExecuteOrAsync([=]()
+            {
+              if (!activated)
+                return;
 
-            if (oSelectedCountryId->get() == 0 && highlightedBranchId == i)
-              setCountryColorMode(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
+              if (oSelectedCountryId->get() == 0 && highlightedBranchId == i)
+                setCountryColorMode(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
+            });
           })));
         }
       });

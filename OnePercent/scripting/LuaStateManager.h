@@ -48,9 +48,6 @@ namespace onep
     bool executeCode(std::string code);
     bool loadScript(std::string filename);
 
-    void printStack();
-    void printTable();
-
     static void safeExecute(std::function<void()> func);
 
     template<typename T>
