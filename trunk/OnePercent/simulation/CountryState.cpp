@@ -3,6 +3,8 @@
 #include "core/Macros.h"
 #include "core/Multithreading.h"
 
+#include <QMutex>
+
 namespace onep
 {
   typedef std::map<std::string, osgGaming::Observable<bool>::Ptr> BranchActivatedMap;
