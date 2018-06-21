@@ -4,6 +4,7 @@
 #include "core/Multithreading.h"
 
 #include <QElapsedTimer>
+#include <QMutex>
 
 namespace onep
 {
