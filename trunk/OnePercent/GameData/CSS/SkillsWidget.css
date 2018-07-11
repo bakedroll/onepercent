@@ -1,0 +1,6 @@
+onep--SkillsWidget QFrame#FrameContent
+{
+  margin: 100px 100px 100px 100px;
+  padding: 0px;
+  background-color: rgba(20, 0, 0, 90%);
+}

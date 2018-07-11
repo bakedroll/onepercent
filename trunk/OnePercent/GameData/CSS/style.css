@@ -1,3 +1,24 @@
+QPushButton
+{
+  border-width: 10px;
+  border-image: url(./GameData/ui/button_normal.png) 10px 10px 10px 10px stretch stretch;
+}
+
+QPushButton:hover
+{
+  border-image: url(./GameData/ui/button_hover.png) 10px 10px 10px 10px stretch stretch;
+}
+
+QPushButton:pressed
+{
+  border-image: url(./GameData/ui/button_pressed.png) 10px 10px 10px 10px stretch stretch;
+}
+
+QPushButton:disabled
+{
+  border-image: url(./GameData/ui/button_disabled.png) 10px 10px 10px 10px stretch stretch;
+}
+
 QLabel#LabelLoadingText
 {
   color: #fff;
