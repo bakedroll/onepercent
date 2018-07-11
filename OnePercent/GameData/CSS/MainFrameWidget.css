@@ -33,7 +33,6 @@ onep--MainFrameWidget QLabel#LabelFps
 {
   color: #fff;
   min-width: 35px;
-  /*margin-right: 4px;*/
   text-align: right;
 }
 
@@ -41,12 +40,4 @@ onep--MainFrameWidget QPushButton
 {
   min-height: 26px;
   min-width: 100px;
-  color: #fff;
-  background-color: rgba(20, 20, 20, 80%);
-  border: 1px solid #4417B5;
-}
-
-onep--MainFrameWidget QPushButton:hover
-{
-  background-color: rgba(60, 60, 60, 80%);
 }

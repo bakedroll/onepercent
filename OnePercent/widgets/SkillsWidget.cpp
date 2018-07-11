@@ -2,7 +2,8 @@
 
 #include <QFrame>
 #include <QGridLayout>
-#include <QtWidgets/QLabel>
+#include <QLabel>
+#include <QPushButton>
 
 namespace onep
 {
@@ -18,9 +19,15 @@ namespace onep
     void setupUi()
     {
       QLabel* label = new QLabel("test");
+      QPushButton* test1 = new QPushButton("bla");
+      QPushButton* test2 = new QPushButton("bla");
+      QPushButton* test3 = new QPushButton("bla");
 
       QVBoxLayout* layoutContent = new QVBoxLayout();
       layoutContent->addWidget(label);
+      layoutContent->addWidget(test1);
+      layoutContent->addWidget(test2);
+      layoutContent->addWidget(test3);
 
       frameContent = new QFrame();
       frameContent->setObjectName("FrameContent");

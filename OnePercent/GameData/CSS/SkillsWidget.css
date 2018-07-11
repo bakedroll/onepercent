@@ -2,5 +2,6 @@ onep--SkillsWidget QFrame#FrameContent
 {
   margin: 100px 100px 100px 100px;
   padding: 0px;
-  background-color: rgba(20, 0, 0, 90%);
+  border: 4px solid transparent;
+  border-image: url(./GameData/ui/window_frame_1.png) 4px stretch;
 }

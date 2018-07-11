@@ -1,22 +1,24 @@
 QPushButton
 {
-  border-width: 10px;
-  border-image: url(./GameData/ui/button_normal.png) 10px 10px 10px 10px stretch stretch;
+  margin: 0px;
+  padding: 0px;
+  border: 10px solid transparent;
+  border-image: url(./GameData/ui/button_normal.png) 10 10 10 10 stretch;
 }
 
 QPushButton:hover
 {
-  border-image: url(./GameData/ui/button_hover.png) 10px 10px 10px 10px stretch stretch;
+  border-image: url(./GameData/ui/button_hover.png) 10px stretch;
 }
 
 QPushButton:pressed
 {
-  border-image: url(./GameData/ui/button_pressed.png) 10px 10px 10px 10px stretch stretch;
+  border-image: url(./GameData/ui/button_pressed.png) 10px stretch;
 }
 
 QPushButton:disabled
 {
-  border-image: url(./GameData/ui/button_disabled.png) 10px 10px 10px 10px stretch stretch;
+  border-image: url(./GameData/ui/button_disabled.png) 10px stretch;
 }
 
 QLabel#LabelLoadingText
