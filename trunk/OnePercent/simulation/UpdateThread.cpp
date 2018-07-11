@@ -22,6 +22,7 @@ namespace onep
 
     QMutex mutexShutdown;
     QMutex mutexState;
+    QMutex mutexTick;
 
     LuaRefPtr refUpdate_skills_func;
     LuaRefPtr refUpdate_branches_func;
@@ -60,6 +61,8 @@ namespace onep
       if (m->shallShutdown())
         break;
 
+      QMutexLocker tickLock(&m->mutexTick);
+
       QElapsedTimer timerSkillsUpdate;
       QElapsedTimer timerBranchesUpdate;
       QElapsedTimer timerSync;
@@ -73,7 +76,7 @@ namespace onep
 
       LuaStateManager::safeExecute([&]()
       {
-        QMutexLocker lock(&m->mutexState);
+        QMutexLocker StateLock(&m->mutexState);
 
         timerSkillsUpdate.start();
         (*m->refUpdate_skills_func)();
@@ -105,7 +108,7 @@ namespace onep
     emit nextStep();
   }
 
-  void UpdateThread::executeLuaTask(const std::function<void()>& task)
+  void UpdateThread::executeLockedLuaState(const std::function<void()>& task)
   {
     QMutexLocker lock(&m->mutexState);
 
@@ -113,6 +116,12 @@ namespace onep
     {
       task();
     });
+  }
+
+  void UpdateThread::executeLockedTick(const std::function<void()>& task)
+  {
+    QMutexLocker lock(&m->mutexTick);
+    task();
   }
 
   void UpdateThread::shutdown()

@@ -209,7 +209,7 @@ namespace onep
           CountryState::Ptr cstate = state->getCountryState(id);
 
           bool ok;
-          float value = edit->text().toInt(&ok);
+          float value = edit->text().toFloat(&ok);
           setFunc(value, cstate);
           edit->setText(QString::number(value));
           button->setEnabled(false);
@@ -268,7 +268,7 @@ namespace onep
             std::string name = it->first;
             ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
             {
-              simulation->getUpdateThread()->executeLuaTask([cstate, name, value]()
+              simulation->getUpdateThread()->executeLockedLuaState([cstate, name, value]()
               {
                 cstate->getValuesMap()[name] = value;
                 cstate->writeValues();
@@ -285,7 +285,7 @@ namespace onep
               std::string name = vit->first;
               ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
               {
-                simulation->getUpdateThread()->executeLuaTask([cstate, branchName, name, value]()
+                simulation->getUpdateThread()->executeLockedLuaState([cstate, branchName, name, value]()
                 {
                   cstate->getBranchValuesMap()[branchName][name] = value;
                   cstate->writeBranchValues();
@@ -384,7 +384,7 @@ namespace onep
             return;
 
           // schedule task
-          simulation->getUpdateThread()->executeLuaTask([=]()
+          simulation->getUpdateThread()->executeLockedTick([=]()
           {
             stateContainer->accessState([=](SimulationState::Ptr state)
             {
@@ -605,6 +605,6 @@ namespace onep
   void DebugWindow::onCommandEntered(const QString& command)
   {
     std::string c = command.toStdString();
-    m->simulation->getUpdateThread()->executeLuaTask([this, c]() { m->lua->executeCode(c); });
+    m->simulation->getUpdateThread()->executeLockedLuaState([this, c]() { m->lua->executeCode(c); });
   }
 }
