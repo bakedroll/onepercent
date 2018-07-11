@@ -2,12 +2,15 @@
 
 #include "core/Observables.h"
 #include "nodes/GlobeOverviewWorld.h"
+#include "widgets/SkillsWidget.h"
 
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QFrame>
 #include <QLabel>
+
 #include <osgGaming/FpsUpdateCallback.h>
+#include <core/QConnectFunctor.h>
 
 namespace onep
 {
@@ -15,16 +18,37 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector, MainFrameWidget* b)
       : base(b)
+      , layoutMain(nullptr)
+      , skillsWidget(new SkillsWidget(injector))
+      , widgetEnabled(nullptr)
       , oDay(injector.inject<ODay>())
       , globeModel(injector.inject<GlobeModel>())
     {}
 
     MainFrameWidget* base;
 
+    QVBoxLayout* layoutMain;
+
+    SkillsWidget* skillsWidget;
+    QWidget* widgetEnabled;
+
     ODay::Ptr oDay;
     GlobeModel::Ptr globeModel;
 
     osgGaming::Observer<int>::Ptr observerDay;
+
+    void setCenterWidgetEnabled(QWidget* widget)
+    {
+      if (widgetEnabled)
+        widgetEnabled->setVisible(false);
+
+      if (widget)
+        widget->setVisible(true);
+
+      widgetEnabled = widget;
+
+      layoutMain->setStretch(1, widgetEnabled ? 0 : 1);
+    }
 
     void setupUi()
     {
@@ -63,17 +87,27 @@ namespace onep
       frameBottomBar->setLayout(layoutBottomBar);
 
       // Main Layout
-      QVBoxLayout* layoutMain = new QVBoxLayout();
+      layoutMain = new QVBoxLayout();
       layoutMain->setContentsMargins(0, 0, 0, 0);
       layoutMain->addWidget(frameTopBar);
       layoutMain->addStretch(1);
+      layoutMain->addWidget(skillsWidget, 1);
       layoutMain->addWidget(frameBottomBar);
+
+      skillsWidget->setVisible(false);
 
       base->setObjectName("MainFrameWidget");
       base->setLayout(layoutMain);
 
-      connect(buttonSkills, SIGNAL(clicked()), base, SIGNAL(clickedButtonSkills()));
       connect(buttonDebug, SIGNAL(clicked()), base, SIGNAL(clickedButtonDebug()));
+
+      QConnectFunctor::connect(buttonSkills, SIGNAL(clicked()), [this]()
+      {
+        if (widgetEnabled)
+          setCenterWidgetEnabled(nullptr);
+        else
+          setCenterWidgetEnabled(skillsWidget);
+      });
 
       observerDay = oDay->connectAndNotify(osgGaming::Func<int>([labelDays](int day)
       {

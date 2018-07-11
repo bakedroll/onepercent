@@ -8,6 +8,8 @@ namespace onep
 {
   class SkillsWidget : public VirtualOverlay
   {
+    Q_OBJECT
+
   public:
     SkillsWidget(osgGaming::Injector& injector);
     ~SkillsWidget();

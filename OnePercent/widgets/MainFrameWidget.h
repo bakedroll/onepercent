@@ -19,7 +19,6 @@ namespace onep
     std::unique_ptr<Impl> m;
 
   signals:
-    void clickedButtonSkills();
     void clickedButtonDebug();
 
   };
