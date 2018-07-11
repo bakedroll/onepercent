@@ -20,6 +20,9 @@
 #include <QKeyEvent>
 #include <QFileDialog>
 #include <QDoubleSpinBox>
+#include <QProgressBar>
+#include <QScrollArea>
+#include <QPainter>
 
 #include <chrono>
 #include <nodes/CountryOverlay.h>
@@ -88,12 +91,14 @@ namespace onep
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , toggleCountryButton(nullptr)
+      , scrollAreaStats(nullptr)
       , widgetStats(nullptr)
       , layoutStats(nullptr)
       , radioNoOverlay(nullptr)
       , labelSkillpoints(nullptr)
       , labelCountry(nullptr)
       , buttonStartStop(nullptr)
+      , checkBoxEnableGraph(nullptr)
       , bWireframe(false)
       , borderThickness(0.1f)
     {
@@ -121,6 +126,7 @@ namespace onep
     osgGaming::Observer<bool>::Ptr notifyRunningValues;
     osgGaming::Observer<bool>::Ptr notifyRunningButton;
 
+    QScrollArea* scrollAreaStats;
     QWidget* widgetStats;
     QVBoxLayout* layoutStats;
     QRadioButton* radioNoOverlay;
@@ -128,6 +134,7 @@ namespace onep
     QLabel* labelCountry;
     ConsoleEdit* luaConsoleEdit;
     QPushButton* buttonStartStop;
+    QCheckBox* checkBoxEnableGraph;
 
     std::vector<osgGaming::Observer<int>::Ptr> selectedCountryIdObservers;
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
@@ -135,8 +142,14 @@ namespace onep
 
     struct ValueWidget
     {
+      ValueWidget() : pixGraph(100, 36) {}
+
       QLineEdit* edit;
       QPushButton* buttonSet;
+      QProgressBar* progressBar;
+      QLabel* labelGraph;
+      QPixmap pixGraph;
+      std::list<float> latestValues;
     };
 
     typedef std::map<std::string, ValueWidget> ValueWidgets;
@@ -185,12 +198,20 @@ namespace onep
       label->setMinimumWidth(150);
 
       widget.edit = new QLineEdit();
-      widget.edit->setMaximumWidth(40);
+      widget.edit->setMaximumWidth(90);
 
       widget.buttonSet = new QPushButton("Set");
       widget.buttonSet->setMaximumWidth(50);
       widget.buttonSet->setEnabled(false);
       widget.buttonSet->setFocusPolicy(Qt::NoFocus);
+
+      widget.progressBar = new QProgressBar();
+      widget.progressBar->setOrientation(Qt::Vertical);
+      widget.progressBar->setRange(0, 100);
+      widget.progressBar->setFixedSize(20, 36);
+
+      widget.labelGraph = new QLabel();
+      widget.labelGraph->setPixmap(widget.pixGraph);
 
       QPushButton* button = widget.buttonSet;
       QConnectFunctor::connect(widget.edit, SIGNAL(textEdited(QString)), [button]()
@@ -218,14 +239,46 @@ namespace onep
 
       QHBoxLayout* layout = new QHBoxLayout();
       layout->setContentsMargins(0, 0, 0, 0);
+      layout->setSpacing(2);
       layout->addWidget(label);
       layout->addStretch(1);
       layout->addWidget(widget.edit);
       layout->addWidget(widget.buttonSet);
+      layout->addWidget(widget.progressBar);
+      layout->addWidget(widget.labelGraph);
 
       layoutStats->addLayout(layout);
 
       return widget;
+    }
+
+    void updateValueGraph(ValueWidget& widget, float value)
+    {
+      int w = widget.pixGraph.width();
+      int h = widget.pixGraph.height();
+
+      widget.latestValues.push_front(osg::clampBetween<float>(value, 0.0f, 1.0f));
+      if (widget.latestValues.size() > w)
+        widget.latestValues.pop_back();
+
+      QPainter painter(&widget.pixGraph);
+      painter.setPen(QColor(255, 0, 0));
+
+      widget.pixGraph.fill(QColor(255, 255, 255));
+      float lastValue = 0.0f;
+      int pos = 0;
+      for (std::list<float>::iterator it = widget.latestValues.begin(); it != widget.latestValues.end(); ++it)
+      {
+        float val = *it;
+        pos++;
+
+        if (it != widget.latestValues.begin())
+          painter.drawLine(w - pos, (h - 1) - lastValue * (h - 1), w - pos + 1, (h - 1) - val * (h - 1));
+
+        lastValue = val;
+      }
+
+      widget.labelGraph->setPixmap(widget.pixGraph);
     }
 
     void updateCountryInfoText()
@@ -255,9 +308,11 @@ namespace onep
         if (layoutStats == nullptr)
         {
           layoutStats = new QVBoxLayout();
-          layoutStats->setContentsMargins(0, 0, 0, 0);
+          layoutStats->setContentsMargins(10, 10, 10, 10);
           layoutStats->setSpacing(0);
           widgetStats->setLayout(layoutStats);
+
+          scrollAreaStats->setWidget(widgetStats);
 
           labelCountry = new QLabel();
 
@@ -309,11 +364,25 @@ namespace onep
         labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getName().c_str())).arg(country->getId()));
 
         for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
+        {
           valueWidgets[it->first].edit->setText(QString::number(it->second));
+          valueWidgets[it->first].progressBar->setValue(osg::clampBetween<int>(int(it->second * 100.0f), 0, 100));
+
+          if (checkBoxEnableGraph->isChecked())
+            updateValueGraph(valueWidgets[it->first], it->second);
+        }
 
         for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
+        {
           for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+          {
             branchValueWidgets[it->first][vit->first].edit->setText(QString::number(vit->second));
+            branchValueWidgets[it->first][vit->first].progressBar->setValue(osg::clampBetween<int>(int(vit->second * 100.0f), 0, 100));
+
+            if (checkBoxEnableGraph->isChecked())
+              updateValueGraph(branchValueWidgets[it->first][vit->first], vit->second);
+          }
+        }
 
       });
     }
@@ -461,6 +530,12 @@ namespace onep
       labelSkillpoints = new QLabel(QString());
       labelSkillpoints->setObjectName("LabelSkillPoints");
 
+      scrollAreaStats = new QScrollArea();
+      scrollAreaStats->setWidgetResizable(true);
+      scrollAreaStats->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+      scrollAreaStats->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+      scrollAreaStats->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
       QVBoxLayout* rightLayout = new QVBoxLayout();
 
       // Skills
@@ -508,6 +583,33 @@ namespace onep
       QPushButton* saveStateButton = new QPushButton("Save state");
       saveStateButton->setFocusPolicy(Qt::NoFocus);
 
+      checkBoxEnableGraph = new QCheckBox(tr("Enable graph"));
+      checkBoxEnableGraph->setChecked(true);
+
+      QConnectBoolFunctor::connect(checkBoxEnableGraph, SIGNAL(toggled(bool)), [this](bool checked)
+      {
+        if (!checked)
+        {
+          for (ValueWidgets::iterator it = valueWidgets.begin(); it != valueWidgets.end(); ++it)
+          {
+            it->second.latestValues.clear();
+            it->second.pixGraph.fill(QColor(255, 255, 255));
+            it->second.labelGraph->setPixmap(it->second.pixGraph);
+          }
+
+          for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
+          {
+            for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+            {
+              vit->second.latestValues.clear();
+              vit->second.pixGraph.fill(QColor(255, 255, 255));
+              vit->second.labelGraph->setPixmap(vit->second.pixGraph);
+            }
+          }
+              
+        }
+      });
+
       QConnectFunctor::connect(loadStateButton, SIGNAL(clicked()), [this]()
       {
         QString filename = QFileDialog::getOpenFileName(base, "Load state", QDir::currentPath(), "State files (*.ste)");
@@ -534,20 +636,21 @@ namespace onep
       leftLayout->addWidget(toggleCountryButton);
       leftLayout->addWidget(checkBoxWireframe);
       leftLayout->addWidget(spinboxThickness);
+      leftLayout->addWidget(checkBoxEnableGraph);
       leftLayout->addLayout(branchesLayout);
       leftLayout->addLayout(saveLoadStateLayout);
       leftLayout->addWidget(labelSkillpoints);
-      leftLayout->addWidget(widgetStats);
-      leftLayout->addStretch(1);
+      leftLayout->addWidget(scrollAreaStats, 1);
 
       QWidget* leftWidget = new QWidget();
+      leftWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
       leftWidget->setContentsMargins(0, 0, 0, 0);
       leftWidget->setObjectName("WidgetLeftPanel");
       leftWidget->setLayout(leftLayout);
 
       QHBoxLayout* centralLayout = new QHBoxLayout();
-      centralLayout->addWidget(leftWidget);
-      centralLayout->addStretch(1);
+      centralLayout->addWidget(leftWidget, 1);
+      //centralLayout->addWidget(leftWidget, 1, Qt::AlignLeft);
       centralLayout->addWidget(rightWidget);
 
       QHBoxLayout* consoleLayout = new QHBoxLayout();
@@ -557,7 +660,7 @@ namespace onep
 
       QVBoxLayout* centralVLayout = new QVBoxLayout();
       centralVLayout->addLayout(consoleLayout);
-      centralVLayout->addLayout(centralLayout);
+      centralVLayout->addLayout(centralLayout, 1);
 
       base->setLayout(centralVLayout);
     }

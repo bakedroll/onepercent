@@ -3,7 +3,7 @@ QPushButton
   margin: 0px;
   padding: 0px;
   border: 10px solid transparent;
-  border-image: url(./GameData/ui/button_normal.png) 10 10 10 10 stretch;
+  border-image: url(./GameData/ui/button_normal.png) 10px stretch;
 }
 
 QPushButton:hover
