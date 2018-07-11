@@ -1,11 +1,30 @@
+max = 0.4
+binc = 0.02
+einc = 0.0001
+-- einc = 0.0000001
+decay = 5
+
 core.control.on_skill_action("found_party", function(branch_name, country_state)
 
   local influence = country_state.values["political_influence"]
+  local max, binc, einc, decay = max, binc, einc, decay
 
-  influence = influence + 0.1
-  if influence > 20 then influence = 20 end
+  if influence < max then
+    local raise = einc + ((binc - einc) * (1.0 - (influence / max)) ^ decay)
+    influence = influence + raise
+  else
+    influence = influence + einc
+  end
 
   country_state.values["political_influence"] = influence
+
+end)
+
+core.control.on_skill_action("canvassing", function(branch_name, country_state)
+
+end)
+
+core.control.on_skill_action("campaign_pledges", function(branch_name, country_state)
 
 end)
 
