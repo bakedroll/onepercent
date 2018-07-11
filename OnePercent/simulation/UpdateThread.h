@@ -20,7 +20,8 @@ namespace onep
     virtual void run() override;
 
     void doNextStep();
-    void executeLuaTask(const std::function<void()>& task);
+    void executeLockedLuaState(const std::function<void()>& task);
+    void executeLockedTick(const std::function<void()>& task);
     void shutdown();
 
   private:

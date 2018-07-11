@@ -137,7 +137,7 @@ namespace onep
 
     QDataStream stream(&file);
 
-    thread->executeLuaTask([&]()
+    thread->executeLockedTick([&]()
     {
       stateContainer->accessState([&](SimulationState::Ptr state)
       {
@@ -256,7 +256,7 @@ namespace onep
           }
         }
 
-        state->write();
+        thread->executeLockedLuaState([&state](){ state->write(); });
       });
     });
 

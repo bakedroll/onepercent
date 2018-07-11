@@ -126,7 +126,7 @@ namespace onep
               return;
 
             // We are in a scheduled Lua task already
-            cstate->writeBranchesActivated();
+            m->thread.executeLockedLuaState([&cstate](){ cstate->writeBranchesActivated(); });
           })));
         }
       }
@@ -143,7 +143,7 @@ namespace onep
         Skill::Ptr skill = branch->getSkillByIndex(j);
         m->notifyActivatedList.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([this, skill](bool activated)
         {
-          m->thread.executeLuaTask([skill](){ skill->write(); });
+          m->thread.executeLockedLuaState([&skill](){ skill->write(); });
         })));
       }
     }

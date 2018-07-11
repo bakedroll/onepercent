@@ -123,7 +123,7 @@ namespace onep
         int cid = m->country->getId();
 
         // schedule task
-        m->simulation->getUpdateThread()->executeLuaTask([=]()
+        m->simulation->getUpdateThread()->executeLockedTick([=]()
         {
           m->stateContainer->accessState([=](SimulationState::Ptr state)
           {
