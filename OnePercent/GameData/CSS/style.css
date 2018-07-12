@@ -1,4 +1,4 @@
-QPushButton
+onep--OsgWidget QPushButton
 {
   margin: 0px;
   padding: 0px;
@@ -6,17 +6,17 @@ QPushButton
   border-image: url(./GameData/ui/button_normal.png) 10px stretch;
 }
 
-QPushButton:hover
+onep--OsgWidget QPushButton:hover
 {
   border-image: url(./GameData/ui/button_hover.png) 10px stretch;
 }
 
-QPushButton:pressed
+onep--OsgWidget QPushButton:pressed
 {
   border-image: url(./GameData/ui/button_pressed.png) 10px stretch;
 }
 
-QPushButton:disabled
+onep--OsgWidget QPushButton:disabled
 {
   border-image: url(./GameData/ui/button_disabled.png) 10px stretch;
 }
