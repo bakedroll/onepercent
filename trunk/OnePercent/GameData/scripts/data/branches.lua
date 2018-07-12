@@ -21,4 +21,4 @@ local branches = {
   }
 }
 
-core.control.create_branches(branches)
+control.create_branches(branches)

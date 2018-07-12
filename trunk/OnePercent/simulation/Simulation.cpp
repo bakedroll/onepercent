@@ -94,9 +94,9 @@ namespace onep
 
   void Simulation::prepare()
   {
-    m->refUpdate_skills_func    = MAKE_LUAREF_PTR(m->lua->getObject("core.control.update_skills_func"));
-    m->refUpdate_branches_func  = MAKE_LUAREF_PTR(m->lua->getObject("core.control.update_branches_func"));
-    m->refDump_object           = MAKE_LUAREF_PTR(m->lua->getObject("core.helper.dump_object"));
+    m->refUpdate_skills_func    = MAKE_LUAREF_PTR(m->lua->getObject("control.update_skills_func"));
+    m->refUpdate_branches_func  = MAKE_LUAREF_PTR(m->lua->getObject("control.update_branches_func"));
+    m->refDump_object           = MAKE_LUAREF_PTR(m->lua->getObject("helper.dump_object"));
 
     if (!m->refUpdate_skills_func->isFunction())
       OSGG_QLOG_FATAL(QString("Could not load lua function ''").arg("update_skills_func"));

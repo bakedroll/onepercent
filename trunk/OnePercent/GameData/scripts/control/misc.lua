@@ -1,4 +1,4 @@
-core.control.on_initialize_action(function()
+control.on_initialize_action(function()
 
   log:debug("on_initialize_action")
 

@@ -33,14 +33,20 @@ namespace onep
     m->name = nameRef.tostring();
     m->cost = costRef;
 
+    std::map<std::string, Skill::Ptr> sortedMap;
     for (luabridge::Iterator it(skillsRef); !it.isNil(); ++it)
     {
       luabridge::LuaRef skillRef = *it;
       assert_continue(skillRef.isTable());
 
       Skill::Ptr skill = new Skill(skillRef);
-      m->skills.push_back(skill);
-      m->nameIndexMap[skill->getSkillName()] = int(m->skills.size()) - 1;
+      sortedMap[skill->getSkillName()] = skill;
+    }
+
+    for (auto& it : sortedMap)
+    {
+      m->skills.push_back(it.second);
+      m->nameIndexMap[it.first] = int(m->skills.size()) - 1;
     }
   }
 
