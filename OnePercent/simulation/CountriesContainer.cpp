@@ -15,8 +15,6 @@ namespace onep
     {
       assert_return(object.isTable());
 
-      std::vector<Country::Ptr> clist;
-
       for (luabridge::Iterator it(object); !it.isNil(); ++it)
       {
         luabridge::LuaRef ref = *it;
@@ -24,16 +22,7 @@ namespace onep
 
         Country::Ptr country = new Country(ref);
         countries[country->getId()] = country;
-
-        clist.push_back(new Country(ref));
       }
-
-      /*// insert into map with id
-      for (std::vector<Country::Ptr>::iterator it = clist.begin(); it != clist.end(); ++it)
-      {
-        int id = (*it)->getId();
-        countries[id] = *it;
-      }*/
     }
 
     ~LuaCountriesTable() {}
