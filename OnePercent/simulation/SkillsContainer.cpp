@@ -15,15 +15,23 @@ namespace onep
     {
       assert_return(object.isTable());
 
+      std::map<std::string, SkillBranch::Ptr> sortedMap;
       for (luabridge::Iterator it(object); !it.isNil(); ++it)
       {
         luabridge::LuaRef ref = *it;
         assert_continue(ref.isTable());
         
         SkillBranch::Ptr branch = new SkillBranch(ref, int(branches.size()));
-        branches.push_back(branch);
-        nameIndexMap[branch->getBranchName()] = int(branches.size()) - 1;
+        sortedMap[branch->getBranchName()] = branch;
       }
+
+      for (auto& it : sortedMap)
+      {
+        branches.push_back(it.second);
+        nameIndexMap[it.first] = int(branches.size()) - 1;
+      }
+
+      return;
     }
 
     ~LuaBranchesTable() {}

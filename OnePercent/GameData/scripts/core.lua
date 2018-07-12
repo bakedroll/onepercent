@@ -1,56 +1,54 @@
-core = {
-
-  -- the underlying model
-  model = 
-  {
-    branches = {},
-    values = {},
-    countries = {},
-    state = {}
-  },
-
-  -- core function definitions
-  control =
-  {
-    skill_actions = {},
-    branch_actions = {},
-    on_initialize_actions = {}
-  },
-
-  config = {}
+-- the underlying model
+model = 
+{
+  branches = {},
+  values = {},
+  countries = {},
+  state = {}
 }
 
-function core.config.extend(table)
+-- core function definitions
+control =
+{
+  skill_actions = {},
+  branch_actions = {},
+  on_initialize_actions = {}
+}
 
-  core.helper.merge(core.config, table)
+config = {}
+
+
+function config.extend(table)
+
+  helper.merge(config, table)
 
 end
 
-function core.control.on_initialize_action(func)
+function control.on_initialize_action(func)
 
-  table.insert(core.control.on_initialize_actions, func)
+  table.insert(control.on_initialize_actions, func)
 
 end
 
-function core.control.on_skill_action(skill_name, func)
+function control.on_skill_action(skill_name, func)
 
-  local actions = core.control.skill_actions
+  local actions = control.skill_actions
   if (actions[skill_name] == nil) then actions[skill_name] = {} end
   table.insert(actions[skill_name], func)
 
 end
 
-function core.control.on_branch_action(func)
+function control.on_branch_action(func)
 
-  table.insert(core.control.branch_actions, func)
+  table.insert(control.branch_actions, func)
 
 end
 
 -- adds branches to the model and passes them to the c++ code
-function core.control.create_branches(branches)
+function control.create_branches(branches)
 
-  local b = core.model.branches
-  for _ , v in ipairs(branches) do
+  local b = model.branches
+  for _, v in ipairs(branches) do
     v.skills = {}
     b[v.name] = v
   end
@@ -58,9 +56,9 @@ function core.control.create_branches(branches)
 end
 
 -- same here with the skills
-function core.control.create_skills(skills)
+function control.create_skills(skills)
 
-  local branches = core.model.branches
+  local branches = model.branches
   local branch
 
   for _, v in ipairs(skills) do
@@ -77,10 +75,10 @@ function core.control.create_skills(skills)
 end
 
 -- ..and the countries
-function core.control.create_countries(countries)
+function control.create_countries(countries)
 
-  local c = core.model.countries
-  local branches = core.model.branches
+  local c = model.countries
+  local branches = model.branches
   for _, v in ipairs(countries) do
     v.neighbours = {}
     c[v.id] = v
@@ -89,20 +87,20 @@ function core.control.create_countries(countries)
 end
 
 -- ..and last but not least the values
-function core.control.create_values(values)
+function control.create_values(values)
 
-  local val = core.model.values
+  local val = model.values
   for _, v in ipairs(values) do val[v.name] = v end
 
 end
 
 -- initializes the state for all countries with its values and branch_activated
-function core.control.initialize_state()
+function control.initialize_state()
 
-  local branches = core.model.branches
-  local countries = core.model.countries
-  local values = core.model.values
-  local state = core.model.state
+  local branches = model.branches
+  local countries = model.countries
+  local values = model.values
+  local state = model.state
   local init
 
   for cid, country in pairs(countries) do
@@ -138,10 +136,10 @@ function core.control.initialize_state()
 end
 
 -- update neighbours data
-function core.control.initialize_neighbour_states()
+function control.initialize_neighbour_states()
 
-  local countries = core.model.countries
-  local state = core.model.state
+  local countries = model.countries
+  local state = model.state
 
   for cid, country_state in pairs(state) do 
     country_state.neighbour_states = {}
@@ -152,20 +150,20 @@ function core.control.initialize_neighbour_states()
 
 end
 
-function core.control.perform_on_initialize_actions()
+function control.perform_on_initialize_actions()
 
-  for _, func in ipairs(core.control.on_initialize_actions) do func() end
+  for _, func in ipairs(control.on_initialize_actions) do func() end
 
 end
 
 -- calls the skill_actions functions for each country
 -- and skill that is activated in an active branch
-function core.control.update_skills_func()
+function control.update_skills_func()
 
-  local branches = core.model.branches
-  local countries = core.model.countries
-  local state = core.model.state
-  local skill_actions = core.control.skill_actions
+  local branches = model.branches
+  local countries = model.countries
+  local state = model.state
+  local skill_actions = control.skill_actions
   local country_state
 
   for cid, country in pairs(countries) do
@@ -192,12 +190,12 @@ end
 
 -- calls the branch_actions functions for each country
 -- and each branch
-function core.control.update_branches_func()
+function control.update_branches_func()
 
-  local branches = core.model.branches
-  local countries = core.model.countries
-  local state = core.model.state
-  local branch_actions = core.control.branch_actions
+  local branches = model.branches
+  local countries = model.countries
+  local state = model.state
+  local branch_actions = control.branch_actions
 
   for cid, country in pairs(countries) do
     for _, branch in pairs(branches) do

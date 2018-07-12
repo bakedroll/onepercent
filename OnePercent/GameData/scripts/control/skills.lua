@@ -4,7 +4,7 @@ einc = 0.0001
 -- einc = 0.0000001
 decay = 5
 
-core.control.on_skill_action("found_party", function(branch_name, country_state)
+control.on_skill_action("found_party", function(branch_name, country_state)
 
   local influence = country_state.values["political_influence"]
   local max, binc, einc, decay = max, binc, einc, decay
@@ -20,45 +20,45 @@ core.control.on_skill_action("found_party", function(branch_name, country_state)
 
 end)
 
-core.control.on_skill_action("canvassing", function(branch_name, country_state)
+control.on_skill_action("canvassing", function(branch_name, country_state)
 
 end)
 
-core.control.on_skill_action("campaign_pledges", function(branch_name, country_state)
+control.on_skill_action("campaign_pledges", function(branch_name, country_state)
 
 end)
 
-core.control.on_skill_action("propagation_banks", function(branch_name, country_state)
+control.on_skill_action("propagation_banks", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-core.control.on_skill_action("propagation_control", function(branch_name, country_state)
+control.on_skill_action("propagation_control", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-core.control.on_skill_action("propagation_media", function(branch_name, country_state)
+control.on_skill_action("propagation_media", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-core.control.on_skill_action("propagation_concerns", function(branch_name, country_state)
+control.on_skill_action("propagation_concerns", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-core.control.on_skill_action("propagation_politics", function(branch_name, country_state)
+control.on_skill_action("propagation_politics", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-core.control.on_branch_action(function(branch_name, country_state)
+control.on_branch_action(function(branch_name, country_state)
 
   if (country_state.branches_activated[branch_name] == true) then
 

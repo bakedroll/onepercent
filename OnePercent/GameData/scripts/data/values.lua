@@ -63,4 +63,4 @@ local values = {
   }
 }
 
-core.control.create_values(values)
+control.create_values(values)

@@ -4,7 +4,7 @@
 
 #include <unordered_map>
 
-#define CONFIG_PATH "core.config"
+#define CONFIG_PATH "config"
 
 namespace onep
 {

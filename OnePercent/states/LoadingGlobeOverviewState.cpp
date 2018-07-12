@@ -147,13 +147,13 @@ namespace onep
     m->lua->loadScript("./GameData/scripts/control/skills.lua");
 
     // initialize simulation state in lua
-    luabridge::LuaRef func_initialize_state = m->lua->getObject("core.control.initialize_state");
+    luabridge::LuaRef func_initialize_state = m->lua->getObject("control.initialize_state");
     LuaStateManager::safeExecute([&](){ func_initialize_state(); });
 
     // load data from lua state
-    m->skillsContainer    ->loadFromLua(m->lua->getObject("core.model.branches"));
-    m->countriesContainer ->loadFromLua(m->lua->getObject("core.model.countries"));
-    m->stateContainer     ->loadFromLua(m->lua->getObject("core.model.state"));
+    m->skillsContainer    ->loadFromLua(m->lua->getObject("model.branches"));
+    m->countriesContainer ->loadFromLua(m->lua->getObject("model.countries"));
+    m->stateContainer     ->loadFromLua(m->lua->getObject("model.state"));
 
     // loading globe
     m->globeOverviewWorld->initialize();
@@ -178,8 +178,8 @@ namespace onep
     m->countriesContainer->writeToLua();
 
     // initialize neighbour states and call on_initialize actions
-    luabridge::LuaRef func_initialize_neighbour_states = m->lua->getObject("core.control.initialize_neighbour_states");
-    luabridge::LuaRef func_perform_on_initialize_actions = m->lua->getObject("core.control.perform_on_initialize_actions");
+    luabridge::LuaRef func_initialize_neighbour_states = m->lua->getObject("control.initialize_neighbour_states");
+    luabridge::LuaRef func_perform_on_initialize_actions = m->lua->getObject("control.perform_on_initialize_actions");
     LuaStateManager::safeExecute([&]()
     {
       func_initialize_neighbour_states();
@@ -219,7 +219,7 @@ namespace onep
     }
 
     stream << "}\n\n";
-    stream << "core.control.create_countries(countries)\n";
+    stream << "control.create_countries(countries)\n";
 
     file.close();
     */
