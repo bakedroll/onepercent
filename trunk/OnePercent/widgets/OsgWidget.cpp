@@ -214,6 +214,7 @@ namespace onep
     , InputManager()
     , m(new Impl(this, viewer))
   {
+    setObjectName("OsgWidget");
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
 
