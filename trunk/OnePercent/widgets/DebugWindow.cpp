@@ -252,6 +252,26 @@ namespace onep
       return widget;
     }
 
+    void clearValueGraphs()
+    {
+      for (ValueWidgets::iterator it = valueWidgets.begin(); it != valueWidgets.end(); ++it)
+      {
+        it->second.latestValues.clear();
+        it->second.pixGraph.fill(QColor(255, 255, 255));
+        it->second.labelGraph->setPixmap(it->second.pixGraph);
+      }
+
+      for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
+      {
+        for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+        {
+          vit->second.latestValues.clear();
+          vit->second.pixGraph.fill(QColor(255, 255, 255));
+          vit->second.labelGraph->setPixmap(vit->second.pixGraph);
+        }
+      }
+    }
+
     void updateValueGraph(ValueWidget& widget, float value)
     {
       int w = widget.pixGraph.width();
@@ -281,17 +301,17 @@ namespace onep
       widget.labelGraph->setPixmap(widget.pixGraph);
     }
 
-    void updateCountryInfoText()
+    void updateCountryInfo()
     {
+      // cancel update if DebugWindow is not shown
+      if (!base->isVisible())
+        return;
+
       int selectedId = countryOverlay->getSelectedCountryId();
 
+      widgetStats->setVisible(selectedId > 0);
       if (selectedId == 0)
-      {
-        widgetStats->setVisible(false);
         return;
-      }
-
-      widgetStats->setVisible(true);
 
       stateContainer->accessState([=](SimulationState::Ptr state)
       {
@@ -589,25 +609,7 @@ namespace onep
       QConnectBoolFunctor::connect(checkBoxEnableGraph, SIGNAL(toggled(bool)), [this](bool checked)
       {
         if (!checked)
-        {
-          for (ValueWidgets::iterator it = valueWidgets.begin(); it != valueWidgets.end(); ++it)
-          {
-            it->second.latestValues.clear();
-            it->second.pixGraph.fill(QColor(255, 255, 255));
-            it->second.labelGraph->setPixmap(it->second.pixGraph);
-          }
-
-          for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
-          {
-            for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-            {
-              vit->second.latestValues.clear();
-              vit->second.pixGraph.fill(QColor(255, 255, 255));
-              vit->second.labelGraph->setPixmap(vit->second.pixGraph);
-            }
-          }
-              
-        }
+          clearValueGraphs();
       });
 
       QConnectFunctor::connect(loadStateButton, SIGNAL(clicked()), [this]()
@@ -616,7 +618,7 @@ namespace onep
         if (!filename.isEmpty())
         {
           simulation->loadState(filename.toStdString());
-          updateCountryInfoText();
+          updateCountryInfo();
         }
       });
 
@@ -632,13 +634,21 @@ namespace onep
       saveLoadStateLayout->addWidget(loadStateButton);
       saveLoadStateLayout->addWidget(saveStateButton);
 
+      QVBoxLayout* miscControlsLayout = new QVBoxLayout();
+      miscControlsLayout->addWidget(toggleCountryButton);
+      miscControlsLayout->addWidget(checkBoxWireframe);
+      miscControlsLayout->addWidget(spinboxThickness);
+      miscControlsLayout->addWidget(checkBoxEnableGraph);
+      miscControlsLayout->addLayout(branchesLayout);
+      miscControlsLayout->addLayout(saveLoadStateLayout);
+
+      QWidget* miscControlsWidget = new QWidget();
+      miscControlsWidget->setContentsMargins(0, 0, 0, 0);
+      miscControlsWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+      miscControlsWidget->setLayout(miscControlsLayout);
+
       QVBoxLayout* leftLayout = new QVBoxLayout();
-      leftLayout->addWidget(toggleCountryButton);
-      leftLayout->addWidget(checkBoxWireframe);
-      leftLayout->addWidget(spinboxThickness);
-      leftLayout->addWidget(checkBoxEnableGraph);
-      leftLayout->addLayout(branchesLayout);
-      leftLayout->addLayout(saveLoadStateLayout);
+      leftLayout->addWidget(miscControlsWidget, 0, Qt::AlignLeft);
       leftLayout->addWidget(labelSkillpoints);
       leftLayout->addWidget(scrollAreaStats, 1);
 
@@ -678,7 +688,7 @@ namespace onep
 
     m->notifyDay = m->oDay->connect(osgGaming::Func<int>([this](int day)
     {
-      m->updateCountryInfoText();
+      m->updateCountryInfo();
     }));
 
     m->notifySkillpoints = m->oNumSkillPoints->connectAndNotify(osgGaming::Func<int>([this](int skillPoints)
@@ -688,7 +698,7 @@ namespace onep
 
     m->notifySelectedCountry = m->countryOverlay->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([this](int selected)
     {
-      m->updateCountryInfoText();
+      m->updateCountryInfo();
 
       m->toggleCountryButton->setEnabled(selected > 0);
       m->radioNoOverlay->setChecked(selected > 0);
@@ -703,6 +713,16 @@ namespace onep
   {
     if (event->key() != Qt::Key_Escape || !m->luaConsoleEdit->hasFocus())
       QDialog::keyPressEvent(event);
+  }
+
+  void DebugWindow::showEvent(QShowEvent* event)
+  {
+    m->updateCountryInfo();
+  }
+
+  void DebugWindow::closeEvent(QCloseEvent* event)
+  {
+    m->clearValueGraphs();
   }
 
   void DebugWindow::onCommandEntered(const QString& command)
