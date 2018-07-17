@@ -24,6 +24,7 @@ namespace onep
     QMutex mutexState;
     QMutex mutexTick;
 
+    LuaRefPtr refUpdate_tick_func;
     LuaRefPtr refUpdate_skills_func;
     LuaRefPtr refUpdate_branches_func;
 
@@ -42,8 +43,9 @@ namespace onep
   {
   }
 
-  void UpdateThread::setUpdateFunctions(LuaRefPtr refUpdate_skills_func, LuaRefPtr refUpdate_branches_func)
+  void UpdateThread::setUpdateFunctions(LuaRefPtr refUpdate_tick_func, LuaRefPtr refUpdate_skills_func, LuaRefPtr refUpdate_branches_func)
   {
+    m->refUpdate_tick_func = refUpdate_tick_func;
     m->refUpdate_skills_func = refUpdate_skills_func;
     m->refUpdate_branches_func = refUpdate_branches_func;
   }
@@ -63,20 +65,26 @@ namespace onep
 
       QMutexLocker tickLock(&m->mutexTick);
 
+      QElapsedTimer timerTickUpdate;
       QElapsedTimer timerSkillsUpdate;
       QElapsedTimer timerBranchesUpdate;
       QElapsedTimer timerSync;
       QElapsedTimer timerTotal;
 
-      long skillsElapsed = 0;
-      long long branchesElapsed = 0;
-      long syncElapsed = 0;
+      qint64 tickElapsed;
+      qint64 skillsElapsed = 0;
+      qint64 branchesElapsed = 0;
+      qint64 syncElapsed = 0;
 
       timerTotal.start();
 
       LuaStateManager::safeExecute([&]()
       {
         QMutexLocker StateLock(&m->mutexState);
+
+        timerTickUpdate.start();
+        (*m->refUpdate_tick_func)();
+        tickElapsed = timerTickUpdate.elapsed();
 
         timerSkillsUpdate.start();
         (*m->refUpdate_skills_func)();
@@ -93,7 +101,8 @@ namespace onep
 
       long totalElapsed = timerTotal.elapsed();
 
-      OSGG_QLOG_INFO(QString("SkillsUpdate: %1ms BranchesUpdate: %2ms Sync: %3ms Total: %4ms")
+      OSGG_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Total: %5ms")
+        .arg(tickElapsed)
         .arg(skillsElapsed)
         .arg(branchesElapsed)
         .arg(syncElapsed)

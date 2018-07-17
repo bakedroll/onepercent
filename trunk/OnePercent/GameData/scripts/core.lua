@@ -12,6 +12,7 @@ control =
 {
   skill_actions = {},
   branch_actions = {},
+  tick_actions = {},
   on_initialize_actions = {}
 }
 
@@ -41,6 +42,12 @@ end
 function control.on_branch_action(func)
 
   table.insert(control.branch_actions, func)
+
+end
+
+function control.on_tick_action(func)
+
+  table.insert(control.tick_actions, func)
 
 end
 
@@ -153,6 +160,12 @@ end
 function control.perform_on_initialize_actions()
 
   for _, func in ipairs(control.on_initialize_actions) do func() end
+
+end
+
+function control.update_tick_func()
+
+  for _, func in ipairs(control.tick_actions) do func() end
 
 end
 

@@ -1,30 +1,32 @@
-max = 0.4
-binc = 0.02
-einc = 0.0001
--- einc = 0.0000001
-decay = 5
-
 control.on_skill_action("found_party", function(branch_name, country_state)
 
   local influence = country_state.values["political_influence"]
-  local max, binc, einc, decay = max, binc, einc, decay
-
-  if influence < max then
-    local raise = einc + ((binc - einc) * (1.0 - (influence / max)) ^ decay)
-    influence = influence + raise
-  else
-    influence = influence + einc
-  end
-
+  influence = gameplay.raise_value(influence, 0.4, 0.02, 0.0001, 5)
   country_state.values["political_influence"] = influence
 
 end)
 
 control.on_skill_action("canvassing", function(branch_name, country_state)
 
+  local ideology = country_state.values["ideology"]
+  local influence = country_state.values["political_influence"]
+
+  ideology = gameplay.raise_value(ideology, influence * 0.1, 0.002, 0.0, 3)
+  country_state.values["ideology"] = ideology
+
 end)
 
 control.on_skill_action("campaign_pledges", function(branch_name, country_state)
+
+  local ideology = country_state.values["ideology"]
+  local divisiveness = country_state.values["divisiveness"]
+  local influence = country_state.values["political_influence"]
+
+  ideology = gameplay.raise_value(ideology, influence * 0.1, 0.003, 0.0, 1)
+  country_state.values["ideology"] = ideology
+
+  divisiveness = gameplay.raise_value(divisiveness, 0.5, 0.01, 0.002, 12)
+  country_state.values["divisiveness"] = divisiveness
 
 end)
 
