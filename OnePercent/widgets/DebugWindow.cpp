@@ -660,7 +660,6 @@ namespace onep
 
       QHBoxLayout* centralLayout = new QHBoxLayout();
       centralLayout->addWidget(leftWidget, 1);
-      //centralLayout->addWidget(leftWidget, 1, Qt::AlignLeft);
       centralLayout->addWidget(rightWidget);
 
       QHBoxLayout* consoleLayout = new QHBoxLayout();
