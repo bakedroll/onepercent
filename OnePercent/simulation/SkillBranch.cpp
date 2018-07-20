@@ -1,6 +1,6 @@
 #include "SkillBranch.h"
 
-#include "core/Macros.h"
+#include <osgGaming/Macros.h>
 
 namespace onep
 {

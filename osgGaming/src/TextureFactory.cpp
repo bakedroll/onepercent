@@ -111,18 +111,4 @@ namespace osgGaming
 
     return texture;
   }
-
-  TextureFactory::TextureFactory(Injector& injector)
-  {
-  }
-
-  TextureFactory::~TextureFactory()
-  {
-  }
-
-  osg::ref_ptr<TextureBlueprint> TextureFactory::make()
-  {
-    return new TextureBlueprint();
-  }
-
 }

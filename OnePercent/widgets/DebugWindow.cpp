@@ -11,6 +11,8 @@
 #include "simulation/SimulationState.h"
 #include "simulation/UpdateThread.h"
 
+#include <osgGaming/Macros.h>
+
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QRadioButton>
@@ -506,11 +508,11 @@ namespace onep
 
         stateContainer->accessState([this, name, checkBox](SimulationState::Ptr state)
         {
-          ONEP_FOREACH(CountryState::Map, it, state->getCountryStates())
+          for(auto& it : state->getCountryStates())
           {
-            int cid = it->first;
+            int cid = it.first;
 
-            skillBranchActivatedObservers.push_back(it->second->getOActivatedBranch(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
+            skillBranchActivatedObservers.push_back(it.second->getOActivatedBranch(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
             {
               Multithreading::uiExecuteOrAsync([=]()
               {
