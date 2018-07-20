@@ -1,7 +1,8 @@
 #include "SkillsContainer.h"
 
-#include "core/Macros.h"
 #include "scripting/LuaObjectMapper.h"
+
+#include <osgGaming/Macros.h>
 
 #include <LuaBridge.h>
 

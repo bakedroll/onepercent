@@ -2,6 +2,7 @@
 
 #include "scripting/LuaStateManager.h"
 
+#include "core/Macros.h"
 #include "core/Observables.h"
 #include "nodes/CountryNameOverlay.h"
 #include "nodes/CountryOverlay.h"

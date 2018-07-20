@@ -1,7 +1,8 @@
 #include "SimulationState.h"
 
-#include "core/Macros.h"
 #include "simulation/CountryState.h"
+
+#include <osgGaming/Macros.h>
 
 namespace onep
 {

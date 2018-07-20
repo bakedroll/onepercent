@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/Macros.h"
+#include <osgGaming/Macros.h>
 
 #include <osg/Referenced>
 

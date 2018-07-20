@@ -1,9 +1,10 @@
 #include "CountriesContainer.h"
 
-#include "core/Macros.h"
 #include "scripting/LuaObjectMapper.h"
 #include "simulation/Country.h"
 #include "simulation/SkillsContainer.h"
+
+#include <osgGaming/Macros.h>
 
 namespace onep
 {

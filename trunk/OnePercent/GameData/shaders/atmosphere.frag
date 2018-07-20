@@ -1,5 +1,6 @@
 #extension GL_ARB_gpu_shader_fp64 : enable
 #extension GL_ARB_shader_precision : enable
+// TODO: https://stackoverflow.com/questions/18038224/glsl-check-if-an-extension-is-supported
 
 double abs(double x)
 {

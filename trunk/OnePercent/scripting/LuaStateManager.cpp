@@ -3,6 +3,8 @@
 #include "core/Macros.h"
 
 #include <osgGaming/ResourceManager.h>
+#include <osgGaming/Macros.h>
+
 #include <algorithm>
 
 #include <QMutex>

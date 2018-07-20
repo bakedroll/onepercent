@@ -112,9 +112,9 @@ namespace onep
 
     m->stateContainer->accessState([this, nBranches](SimulationState::Ptr state)
     {
-      ONEP_FOREACH(CountryState::Map, it, state->getCountryStates())
+      for(auto& it : state->getCountryStates())
       {
-        CountryState::Ptr cstate = it->second;
+        CountryState::Ptr cstate = it.second;
 
         for (int i = 0; i < nBranches; i++)
         {

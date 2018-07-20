@@ -1,5 +1,7 @@
 #pragma once
 
+#include "osgGaming/AbstractFactory.h"
+
 #include <string>
 #include <memory>
 
@@ -17,8 +19,8 @@ namespace osgGaming
 	public:
 		TextureBlueprint();
     ~TextureBlueprint();
-
 		osg::ref_ptr<TextureBlueprint> image(osg::ref_ptr<osg::Image> img);
+
 		osg::ref_ptr<TextureBlueprint> texLayer(int texLayer);
 		osg::ref_ptr<TextureBlueprint> assign(osg::ref_ptr<osg::StateSet> stateSet);
 		osg::ref_ptr<TextureBlueprint> uniform(osg::ref_ptr<osg::StateSet> stateSet, std::string uniformName);
@@ -31,12 +33,12 @@ namespace osgGaming
 
 	};
 
-	class TextureFactory : public osg::Referenced
-	{
-	public:
-	  explicit TextureFactory(Injector& injector);
-    ~TextureFactory();
-
-		osg::ref_ptr<TextureBlueprint> make();
+	class TextureFactory : public AbstractFactory<TextureBlueprint>
+  {
+  public:
+	  explicit TextureFactory(Injector& injector)
+	    : AbstractFactory<TextureBlueprint>(injector)
+	  {
+	  }
 	};
 }

@@ -1,9 +1,10 @@
 #include "simulation/CountryState.h"
 #include "simulation/SkillBranch.h"
-#include "core/Macros.h"
 #include "core/Multithreading.h"
 
 #include <QMutex>
+
+#include <osgGaming/Macros.h>
 
 namespace onep
 {
