@@ -100,7 +100,7 @@ namespace onep
 
     osg::ref_ptr<osg::Geometry> geo = new osg::Geometry();
     geo->setVertexArray(vertices);
-    geo->setTexCoordArray(0, texcoords, osg::Array::BIND_OVERALL);
+    geo->setTexCoordArray(0, texcoords, osg::Array::BIND_PER_VERTEX);
     geo->addPrimitiveSet(triangles);
 
     addDrawable(geo);

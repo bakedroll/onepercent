@@ -207,6 +207,11 @@ namespace onep
         triangles->push_back(v1);
       }
 
+      // Calculate bounding box of all countries
+      osg::BoundingBox bb;
+      for (osg::Vec3Array::iterator it = vertices->begin(); it != vertices->end(); ++it)
+        bb.expandBy(*it);
+
       m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords);
     }
 
