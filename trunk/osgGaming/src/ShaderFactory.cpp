@@ -17,6 +17,7 @@ namespace osgGaming
     osg::Shader::Type type;
     std::vector<std::string> extensions;
     std::vector<std::string> modules;
+
   };
 
   ShaderBlueprint::ShaderBlueprint()
@@ -47,9 +48,9 @@ namespace osgGaming
     return this;
   }
 
-  osg::ref_ptr<ShaderBlueprint> ShaderBlueprint::module(const std::string& modulePath)
+  osg::ref_ptr<ShaderBlueprint> ShaderBlueprint::module(const std::string& module)
   {
-    m->modules.push_back(modulePath);
+    m->modules.push_back(module);
     return this;
   }
 

@@ -19,7 +19,7 @@ namespace osgGaming
     osg::ref_ptr<ShaderBlueprint> version(int shaderVersion);
     osg::ref_ptr<ShaderBlueprint> type(osg::Shader::Type shaderType);
     osg::ref_ptr<ShaderBlueprint> extension(const std::string& extName);
-    osg::ref_ptr<ShaderBlueprint> module(const std::string& modulePath);
+    osg::ref_ptr<ShaderBlueprint> module(const std::string& module);
 
     osg::ref_ptr<osg::Shader> build();
 

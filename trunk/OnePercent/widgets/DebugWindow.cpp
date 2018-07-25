@@ -280,7 +280,7 @@ namespace onep
       int h = widget.pixGraph.height();
 
       widget.latestValues.push_front(osg::clampBetween<float>(value, 0.0f, 1.0f));
-      if (widget.latestValues.size() > w)
+      if (int(widget.latestValues.size()) > w)
         widget.latestValues.pop_back();
 
       QPainter painter(&widget.pixGraph);

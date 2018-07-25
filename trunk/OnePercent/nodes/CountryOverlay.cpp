@@ -9,9 +9,9 @@
 
 #include <osgGaming/Observable.h>
 #include <osgGaming/ByteStream.h>
-
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/TextureFactory.h>
+#include <osgGaming/ShaderFactory.h>
 #include <osgGaming/Helper.h>
 
 #include <osg/Texture2D>
@@ -24,6 +24,7 @@ namespace onep
       : base(b)
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
+      , shaderFactory(injector.inject<osgGaming::ShaderFactory>())
       , configManager(injector.inject<ConfigManager>())
       , stateContainer(injector.inject<SimulationStateContainer>())
       , skillsContainer(injector.inject<SkillsContainer>())
@@ -39,12 +40,13 @@ namespace onep
       osg::ref_ptr<osg::DrawElementsUInt> triangles,
       CountryMesh::BorderIdMap& neighborBorders,
       osg::ref_ptr<osg::Vec3Array> vertices,
-      osg::ref_ptr<osg::Vec2Array> texcoords)
+      osg::ref_ptr<osg::Vec2Array> texcoords1,
+      osg::ref_ptr<osg::Vec3Array> texcoords2)
     {
       if (countryMeshs.find(id) != countryMeshs.end())
         return;
 
-      CountryMesh::Ptr mesh = new CountryMesh(configManager, centerLatLong, size, vertices, texcoords, triangles, neighborBorders);
+      CountryMesh::Ptr mesh = new CountryMesh(configManager, centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
 
       countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
       base->addChild(mesh, false);
@@ -88,6 +90,7 @@ namespace onep
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
+    osg::ref_ptr<osgGaming::ShaderFactory> shaderFactory;
     osg::ref_ptr<ConfigManager> configManager;
     osg::ref_ptr<SimulationStateContainer> stateContainer;
     osg::ref_ptr<SkillsContainer> skillsContainer;
@@ -125,7 +128,14 @@ namespace onep
     osg::ref_ptr<osg::Vec2Array> texcoords)
   {
     osg::ref_ptr<osg::Program> program = new osg::Program();
-    osg::ref_ptr<osg::Shader> frag_shader = m->resourceManager->loadShader("./GameData/shaders/country.frag", osg::Shader::FRAGMENT);
+
+    osg::ref_ptr<osg::Shader> frag_shader = m->shaderFactory->make()
+      ->type(osg::Shader::FRAGMENT)
+      ->module(m->resourceManager->loadText("./GameData/shaders/modules/noise3D.glsl"))
+      ->module(m->resourceManager->loadText("./GameData/shaders/country.frag"))
+      ->build();
+
+    // osg::ref_ptr<osg::Shader> frag_shader = m->resourceManager->loadShader("./GameData/shaders/country.frag", osg::Shader::FRAGMENT);
     osg::ref_ptr<osg::Shader> vert_shader = m->resourceManager->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
     program->addShader(frag_shader);
     program->addShader(vert_shader);
@@ -140,6 +150,12 @@ namespace onep
     stateSet->setRenderBinDetails(1, "RenderBin");
 
     m->neighbourMap.clear();
+
+    // Calculate 2nd texcoord layer
+    float radius = m->configManager->getNumber<float>("earth.radius");
+    osg::ref_ptr<osg::Vec3Array> texcoords2 = new osg::Vec3Array();
+    for (osg::Vec3Array::iterator it = vertices->begin(); it != vertices->end(); ++it)
+      texcoords2->push_back((*it / radius + osg::Vec3f(1.0f, 1.0f, 1.0f)) / 2.0f);
 
     char* bytes = m->resourceManager->loadBinary(countriesFilename);
 
@@ -207,12 +223,7 @@ namespace onep
         triangles->push_back(v1);
       }
 
-      // Calculate bounding box of all countries
-      osg::BoundingBox bb;
-      for (osg::Vec3Array::iterator it = vertices->begin(); it != vertices->end(); ++it)
-        bb.expandBy(*it);
-
-      m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords);
+      m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords, texcoords2);
     }
 
     for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
@@ -230,6 +241,9 @@ namespace onep
 
     m->countriesMap = new CountriesMap(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
 
+    m->resourceManager->clearCacheResource("./GameData/shaders/country.vert");
+    m->resourceManager->clearCacheResource("./GameData/shaders/modules/noise3D.glsl");
+    m->resourceManager->clearCacheResource("./GameData/shaders/country.frag");
     m->resourceManager->clearCacheResource(countriesFilename);
   }
 

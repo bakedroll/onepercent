@@ -24,4 +24,9 @@ void main (void)
     
     gl_FragColor = vec4(color * intensity, alpha);
   }
+
+
+  float val = clamp(snoise(gl_TexCoord[1].str * 30.0), 0.0, 1.0);
+  //float val = cellular(gl_TexCoord[1].str * 30.0).x;
+  gl_FragColor = vec4(vec3(val), 1.0);
 }
