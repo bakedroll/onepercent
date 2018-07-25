@@ -84,7 +84,8 @@ namespace onep
     osg::Vec2f centerLatLong,
     osg::Vec2f size,
     osg::ref_ptr<osg::Vec3Array> vertices,
-    osg::ref_ptr<osg::Vec2Array> texcoords,
+    osg::ref_ptr<osg::Vec2Array> texcoords1,
+    osg::ref_ptr<osg::Vec3Array> texcoords2,
     osg::ref_ptr<osg::DrawElementsUInt> triangles,
     BorderIdMap& neighbourBorders)
     : osg::Geode()
@@ -100,7 +101,8 @@ namespace onep
 
     osg::ref_ptr<osg::Geometry> geo = new osg::Geometry();
     geo->setVertexArray(vertices);
-    geo->setTexCoordArray(0, texcoords, osg::Array::BIND_PER_VERTEX);
+    geo->setTexCoordArray(0, texcoords1, osg::Array::BIND_PER_VERTEX);
+    geo->setTexCoordArray(1, texcoords2, osg::Array::BIND_PER_VERTEX);
     geo->addPrimitiveSet(triangles);
 
     addDrawable(geo);

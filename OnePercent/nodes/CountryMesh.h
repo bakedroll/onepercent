@@ -34,7 +34,8 @@ namespace onep
       osg::Vec2f centerLatLong,
       osg::Vec2f size,
       osg::ref_ptr<osg::Vec3Array> vertices,
-      osg::ref_ptr<osg::Vec2Array> texcoords,
+      osg::ref_ptr<osg::Vec2Array> texcoords1,
+      osg::ref_ptr<osg::Vec3Array> texcoords2,
       osg::ref_ptr<osg::DrawElementsUInt> triangles,
       BorderIdMap& neighbourBorders);
 
