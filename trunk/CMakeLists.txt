@@ -88,6 +88,9 @@ else()
   set(OSGPPU_LIBRARY_DEBUG ${OSGPPU_LIBRARY_RELEASE})
 endif()
 
+# optional for Vectorizer
+find_package(OpenCV)
+
 # find OpenCV directories
 adjust_cached_path_if_exists(OPENCV_INCLUDE_DIR "OpenCV include directory" ${OPENCV_INCLUDE_DIR})
 adjust_cached_path_if_exists(OPENCV_LIB_DIR_OPT "OpenCV release lib directory" ${OPENCV_LIB_DIR_OPT})
@@ -118,11 +121,12 @@ endif()
 # pthread
 find_package(Threads)
 
-# optional for Vectorizer
-find_package(OpenCV)
-
 # Lua
 find_package(Lua)
+
+if (NOT EXISTS ${LUA_LIB_DEBUG})
+  set(LUA_LIB_DEBUG ${LUA_LIB_RELEASE} CACHE STRING "Lua debug library")
+endif()
 
 adjust_cached_path_if_exists(LUA_INCLUDE_PREFIX "Lua include dir" "${LUA_INCLUDE_PREFIX}" MESSAGES ERROR_MESSAGES CACHE)
 adjust_cached_path_if_exists(LUA_LIB_RELEASE "Lua release library" "${LUA_LIB_RELEASE}" MESSAGES ERROR_MESSAGES)
