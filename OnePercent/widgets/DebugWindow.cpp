@@ -103,6 +103,7 @@ namespace onep
       , checkBoxEnableGraph(nullptr)
       , bWireframe(false)
       , borderThickness(0.1f)
+      , bSettingHighlightedBranch(false)
     {
     }
 
@@ -162,6 +163,7 @@ namespace onep
 
     bool bWireframe;
     float borderThickness;
+    bool bSettingHighlightedBranch;
 
     void updateBoundaries()
     {
@@ -486,7 +488,9 @@ namespace onep
 
         QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
         {
+          bSettingHighlightedBranch = true;
           countryOverlay->setHighlightedSkillBranch(i);
+          bSettingHighlightedBranch = false;
         });
 
         selectedCountryIdObservers.push_back(countryOverlay->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
@@ -700,10 +704,13 @@ namespace onep
 
     m->notifySelectedCountry = m->countryOverlay->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([this](int selected)
     {
+      if (m->bSettingHighlightedBranch)
+        return;
+
       m->updateCountryInfo();
 
       m->toggleCountryButton->setEnabled(selected > 0);
-      m->radioNoOverlay->setChecked(selected > 0);
+      m->radioNoOverlay->setChecked(true);
     }));
   }
 
