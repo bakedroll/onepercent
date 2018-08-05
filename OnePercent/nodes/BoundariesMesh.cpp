@@ -288,8 +288,6 @@ namespace onep
 
       m->nodals[fromTo] = quads;
     }
-
-    m->resourceManager->clearCacheResource(filename);
   }
 
   osg::ref_ptr<osg::Vec3Array> BoundariesMesh::getCountryVertices()

@@ -92,8 +92,6 @@ namespace onep
   {
     std::string script = m->resourceManager->loadText(filename);
     bool success = executeCode(script);
-    m->resourceManager->clearCacheResource(filename);
-
     return success;
   }
 
