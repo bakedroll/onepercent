@@ -683,6 +683,7 @@ namespace onep
     : QDialog(parent)
     , m(new Impl(injector, this))
   {
+    setWindowTitle("Debug Window");
     setGeometry(100, 100, 500, 800);
 
     m->setupUi();
