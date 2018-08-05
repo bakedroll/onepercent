@@ -1,4 +1,4 @@
-#include "CountryMesh.h"
+#include "CountryNode.h"
 
 #include <osg/Geometry>
 #include <osgGaming/SimulationCallback.h>
@@ -54,7 +54,7 @@ namespace onep
     bool bStarted;
   };
 
-  struct CountryMesh::Impl
+  struct CountryNode::Impl
   {
     Impl() {}
 
@@ -79,7 +79,7 @@ namespace onep
     osg::ref_ptr<UpdateHoverIntensityCallback> callback;
   };
 
-  CountryMesh::CountryMesh(
+  CountryNode::CountryNode(
     osg::ref_ptr<ConfigManager> configManager,
     osg::Vec2f centerLatLong,
     osg::Vec2f size,
@@ -124,26 +124,26 @@ namespace onep
     addUpdateCallback(m->callback);
   }
 
-  CountryMesh::~CountryMesh()
+  CountryNode::~CountryNode()
   {
   }
 
-  void CountryMesh::addNeighbor(osg::ref_ptr<CountryMesh> mesh)
+  void CountryNode::addNeighbor(osg::ref_ptr<CountryNode> mesh)
   {
     m->neighbors.push_back(mesh);
   }
 
-  CountryMesh::List& CountryMesh::getNeighborCountryMeshs()
+  CountryNode::List& CountryNode::getNeighborCountryNodes()
   {
     return m->neighbors;
   }
 
-  const CountryMesh::BorderIdMap& CountryMesh::getNeighborBorders() const
+  const CountryNode::BorderIdMap& CountryNode::getNeighborBorders() const
   {
     return m->neighbourBorders;
   }
 
-  const std::vector<int>& CountryMesh::getNeighborBorderIds(int neighborId)
+  const std::vector<int>& CountryNode::getNeighborBorderIds(int neighborId)
   {
     BorderIdMap::iterator it = m->neighbourBorders.find(neighborId);
     if (it == m->neighbourBorders.end())
@@ -155,12 +155,12 @@ namespace onep
     return it->second;
   }
 
-  bool CountryMesh::getIsOnOcean() const
+  bool CountryNode::getIsOnOcean() const
   {
     return m->neighbourBorders.find(-1) != m->neighbourBorders.end();
   }
 
-  void CountryMesh::setColorMode(ColorMode mode)
+  void CountryNode::setColorMode(ColorMode mode)
   {
     switch (mode)
     {
@@ -200,7 +200,7 @@ namespace onep
     }
   }
 
-  void CountryMesh::setHoverMode(bool bHoverEnabled)
+  void CountryNode::setHoverMode(bool bHoverEnabled)
   {
     int enabled;
     m->uniformHoverEnabled->get(enabled);
@@ -212,24 +212,24 @@ namespace onep
     m->callback->setEnabled(bHoverEnabled);
   }
 
-  osg::Vec2f CountryMesh::getCenterLatLong()
+  osg::Vec2f CountryNode::getCenterLatLong()
   {
     return m->centerLatLong;
   }
 
-  osg::Vec2f CountryMesh::getSize()
+  osg::Vec2f CountryNode::getSize()
   {
     return m->size;
   }
 
-  osg::Vec2f CountryMesh::getSurfaceSize()
+  osg::Vec2f CountryNode::getSurfaceSize()
   {
     return osg::Vec2f(
       2.0f * C_PI * sin(C_PI / 2.0f - abs(m->centerLatLong.x())) * m->earthRadius * m->size.x(),
       C_PI * m->earthRadius * m->size.y());
   }
 
-  float CountryMesh::getOptimalCameraDistance(float angle, float ratio)
+  float CountryNode::getOptimalCameraDistance(float angle, float ratio)
   {
     osg::Vec2f surfaceSize = getSurfaceSize();
 

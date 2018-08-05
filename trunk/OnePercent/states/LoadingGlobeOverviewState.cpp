@@ -173,7 +173,7 @@ namespace onep
       m->boundariesMesh->getCountryTexcoords());
 
     m->countryNameOverlay->setEnabled(false);
-    m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryMeshs());
+    m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryNodes());
 
     // update neighbours data
     m->countriesContainer->writeToLua();
