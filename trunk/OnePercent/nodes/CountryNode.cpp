@@ -1,8 +1,8 @@
 #include "CountryNode.h"
 
+#include "nodes/CountryGeometry.h"
+
 #include <osg/Geometry>
-#include <osgGaming/SimulationCallback.h>
-#include <osgGaming/Animation.h>
 #include <osgGaming/Helper.h>
 
 #include <algorithm>
@@ -10,50 +10,6 @@
 
 namespace onep
 {
-  class UpdateHoverIntensityCallback : public osgGaming::SimulationCallback
-  {
-  public:
-    UpdateHoverIntensityCallback(osg::ref_ptr<osg::Uniform> u)
-      : osgGaming::SimulationCallback()
-      , uniform(u)
-      , animationHover(new osgGaming::Animation<float>(0.0f, 0.2f, osgGaming::AnimationEase::CIRCLE_OUT))
-      , bEnabled(false)
-      , bStarted(false)
-    {}
-
-    void setEnabled(bool e)
-    {
-      if (bEnabled == e)
-        return;
-
-      bEnabled = e;
-      if (bEnabled)
-        bStarted = true;
-
-    }
-
-  protected:
-    virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override
-    {
-      if (!bEnabled)
-        return;
-
-      if (bStarted)
-      {
-        bStarted = false;
-        animationHover->beginAnimation(0.0f, 1.0f, simTime);
-      }
-
-      uniform->set(animationHover->getValue(simTime));
-    }
-
-  private:
-    osg::ref_ptr<osg::Uniform> uniform;
-    osg::ref_ptr<osgGaming::Animation<float>> animationHover;
-    bool bEnabled;
-    bool bStarted;
-  };
-
   struct CountryNode::Impl
   {
     Impl() {}
@@ -69,14 +25,8 @@ namespace onep
 
     osg::ref_ptr<osg::StateSet> stateSet;
 
-    bool bShaderEnabled;
-
     osg::ref_ptr<osg::Uniform> uniformColor;
     osg::ref_ptr<osg::Uniform> uniformAlpha;
-    osg::ref_ptr<osg::Uniform> uniformHoverEnabled;
-    osg::ref_ptr<osg::Uniform> uniformHoverIntensity;
-
-    osg::ref_ptr<UpdateHoverIntensityCallback> callback;
   };
 
   CountryNode::CountryNode(
@@ -99,29 +49,15 @@ namespace onep
 
     m->neighbourBorders = neighbourBorders;
 
-    osg::ref_ptr<osg::Geometry> geo = new osg::Geometry();
-    geo->setVertexArray(vertices);
-    geo->setTexCoordArray(0, texcoords1, osg::Array::BIND_PER_VERTEX);
-    geo->setTexCoordArray(1, texcoords2, osg::Array::BIND_PER_VERTEX);
-    geo->addPrimitiveSet(triangles);
-
+    osg::ref_ptr<CountryGeometry> geo = new CountryGeometry(vertices, texcoords1, texcoords2, triangles);
     addDrawable(geo);
 
-    m->uniformHoverEnabled = new osg::Uniform("bHoverEnabled", 0);
     m->uniformAlpha = new osg::Uniform("alpha", 0.0f);
     m->uniformColor = new osg::Uniform("color", osg::Vec3f(0.0f, 0.0f, 0.0f));
-    m->uniformHoverIntensity = new osg::Uniform("hoverIntensity", 0.0f);
     
     m->stateSet = getOrCreateStateSet();
-    m->stateSet->addUniform(m->uniformHoverEnabled);
     m->stateSet->addUniform(m->uniformAlpha);
     m->stateSet->addUniform(m->uniformColor);
-    m->stateSet->addUniform(m->uniformHoverIntensity);
-
-    m->bShaderEnabled = false;
-
-    m->callback = new UpdateHoverIntensityCallback(m->uniformHoverIntensity);
-    addUpdateCallback(m->callback);
   }
 
   CountryNode::~CountryNode()
@@ -192,24 +128,10 @@ namespace onep
       m->uniformAlpha->set(0.3f);
       m->uniformColor->set(osg::Vec3f(0.69f, 0.247f, 0.624f));
       break;
-    case MODE_HOVER:
-      m->uniformAlpha->set(0.0f);
-      m->uniformColor->set(osg::Vec3f(0.5f, 0.5f, 0.5f));
     default:
+      assert(false);
       break;
     }
-  }
-
-  void CountryNode::setHoverMode(bool bHoverEnabled)
-  {
-    int enabled;
-    m->uniformHoverEnabled->get(enabled);
-
-    if (int(bHoverEnabled) == enabled)
-      return;
-
-    m->uniformHoverEnabled->set(bHoverEnabled ? 1 : 0);
-    m->callback->setEnabled(bHoverEnabled);
   }
 
   osg::Vec2f CountryNode::getCenterLatLong()

@@ -6,13 +6,11 @@
 #include "data/CountriesMap.h"
 #include "nodes/CountryNode.h"
 
-#include <osg/Switch>
-
 #include <memory>
 
 namespace onep
 {
-  class CountryOverlay : public osg::Switch
+  class CountryOverlay : public osg::Group
   {
   public:
     typedef osg::ref_ptr<CountryOverlay> Ptr;

@@ -36,6 +36,7 @@ namespace onep
     , countriesContainer(injector.inject<CountriesContainer>())
     , bReady(false)
     , selectedCountry(0)
+    , hoveredCountry(0)
     , countryMenuWidget(new CountryMenuWidget(injector))
     , mainFrameWidget(nullptr)
     , debugWindow(nullptr)
@@ -73,6 +74,7 @@ namespace onep
     bool bReady;
 
     int selectedCountry;
+    int hoveredCountry;
 
     osgGaming::Observer<int>::Ptr selectedCountryObserver;
 
@@ -296,14 +298,13 @@ namespace onep
     if (m->selectedCountry > 0 && m->countryMenuWidget->isVisible())
       m->updateCountryMenuWidgetPosition(m->selectedCountry);
 
-    if (!m->bDraggingMidMouse)
+    int id = m->pickCountryIdAt(m->mousePos);
+    if (id != m->hoveredCountry)
     {
-      int id = m->pickCountryIdAt(m->mousePos);
-      m->countryOverlay->setHoveredCountryId(id);
-    }
-    else
-    {
-      m->countryOverlay->setHoveredCountryId(0);
+      m->hoveredCountry = id;
+
+      if (!m->bDraggingMidMouse)
+        m->countryOverlay->setHoveredCountryId(id);
     }
 
     return e;
@@ -375,6 +376,16 @@ namespace onep
     m->setCameraDistanceAndAngle(distance, getSimulationTime());
   }
 
+  void GlobeInteractionState::onDragBeginEvent(int button, osg::Vec2f position)
+  {
+    if (button == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
+    {
+      m->bDraggingMidMouse = true;
+      if (m->hoveredCountry != 0)
+        m->countryOverlay->setHoveredCountryId(0);
+    }
+  }
+
   void GlobeInteractionState::onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change)
   {
     if (!m->ready())
@@ -407,7 +418,6 @@ namespace onep
     }
     else if (button == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
     {
-      m->bDraggingMidMouse = true;
       float clamp_to = std::max<float>(m->getViewAngleForDistance(distance) * 1.3f, atan(m->paramEarthRadius * 1.3 / distance));
 
       viewAngle.set(
@@ -428,6 +438,9 @@ namespace onep
           0.0f,
           m->getViewAngleForDistance(getCameraDistance())),
         getSimulationTime());
+
+      if (m->hoveredCountry != 0)
+        m->countryOverlay->setHoveredCountryId(m->hoveredCountry);
     }
   }
 

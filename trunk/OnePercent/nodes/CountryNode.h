@@ -25,8 +25,7 @@ namespace onep
       MODE_HIGHLIGHT_CONTROL = 4,
       MODE_HIGHLIGHT_MEDIA = 5,
       MODE_HIGHLIGHT_CONCERNS = 6,
-      MODE_HIGHLIGHT_POLITICS = 7,
-      MODE_HOVER = 8
+      MODE_HIGHLIGHT_POLITICS = 7
     } ColorMode;
 
     CountryNode(
@@ -50,7 +49,6 @@ namespace onep
     bool getIsOnOcean() const;
 
     void setColorMode(ColorMode mode);
-    void setHoverMode(bool bHoverEnabled);
 
     osg::Vec2f getCenterLatLong();
     osg::Vec2f getSize();

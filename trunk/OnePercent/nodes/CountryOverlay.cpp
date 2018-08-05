@@ -1,6 +1,7 @@
 #include "CountryOverlay.h"
 
 #include "core/Multithreading.h"
+#include "nodes/CountryHoverNode.h"
 #include "scripting/ConfigManager.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/SimulationStateContainer.h"
@@ -14,6 +15,7 @@
 #include <osgGaming/ShaderFactory.h>
 #include <osgGaming/Helper.h>
 
+#include <osg/Switch>
 #include <osg/Texture2D>
 
 namespace onep
@@ -21,14 +23,15 @@ namespace onep
   struct CountryOverlay::Impl
   {
     Impl(osgGaming::Injector& injector, CountryOverlay* b)
-      : base(b)
-      , resourceManager(injector.inject<osgGaming::ResourceManager>())
+      : resourceManager(injector.inject<osgGaming::ResourceManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
       , shaderFactory(injector.inject<osgGaming::ShaderFactory>())
       , configManager(injector.inject<ConfigManager>())
       , stateContainer(injector.inject<SimulationStateContainer>())
       , skillsContainer(injector.inject<SkillsContainer>())
       , countriesContainer(injector.inject<CountriesContainer>())
+      , countrySwitch(new osg::Switch())
+      , countryHoverSwitch(new osg::Switch())
       , oSelectedCountryId(new osgGaming::Observable<int>(0))
       , highlightedBranchId(-1)
     {}
@@ -46,10 +49,14 @@ namespace onep
       if (countryNodes.find(id) != countryNodes.end())
         return;
 
-      CountryNode::Ptr mesh = new CountryNode(configManager, centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
+      CountryNode::Ptr node = new CountryNode(configManager, centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
+      CountryHoverNode::Ptr hoverNode = new CountryHoverNode(vertices, texcoords1, triangles);
 
-      countryNodes.insert(CountryNode::Map::value_type(id, mesh));
-      base->addChild(mesh, false);
+      countryNodes.insert(CountryNode::Map::value_type(id, node));
+      countrySwitch->addChild(node, false);
+
+      countryHoverNodes.insert(CountryHoverNode::Map::value_type(id, hoverNode));
+      countryHoverSwitch->addChild(hoverNode, false);
 
       stateContainer->accessState([=](SimulationState::Ptr state)
       {
@@ -68,7 +75,7 @@ namespace onep
                 return;
 
               if (oSelectedCountryId->get() == 0 && highlightedBranchId == i)
-                setCountryColorMode(mesh, CountryNode::ColorMode(CountryNode::MODE_HIGHLIGHT_BANKS + i));
+                setCountryColorMode(node, CountryNode::ColorMode(CountryNode::MODE_HIGHLIGHT_BANKS + i));
             });
           })));
         }
@@ -80,13 +87,11 @@ namespace onep
     void setCountryColorMode(CountryNode::Ptr mesh, CountryNode::ColorMode mode)
     {
       mesh->setColorMode(mode);
-      base->setChildValue(mesh, true);
+      countrySwitch->setChildValue(mesh, true);
 
       if (highlightedCountries.count(mesh) == 0)
         highlightedCountries.insert(mesh);
     }
-
-    CountryOverlay* base;
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
@@ -96,7 +101,11 @@ namespace onep
     osg::ref_ptr<SkillsContainer> skillsContainer;
     CountriesContainer::Ptr countriesContainer;
 
+    osg::ref_ptr<osg::Switch> countrySwitch;
+    osg::ref_ptr<osg::Switch> countryHoverSwitch;
+
     CountryNode::Map countryNodes;
+    CountryHoverNode::Map countryHoverNodes;
     CountriesMap::Ptr countriesMap;
 
     osgGaming::Observable<int>::Ptr oSelectedCountryId;
@@ -106,15 +115,17 @@ namespace onep
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
 
     std::set<CountryNode::Ptr> highlightedCountries;
-    CountryNode::Ptr hoveredCountryNode;
+    CountryHoverNode::Ptr hoveredCountryNode;
 
     NeighbourMap neighbourMap;
   };
 
   CountryOverlay::CountryOverlay(osgGaming::Injector& injector)
-    : osg::Switch()
+    : osg::Group()
     , m(new Impl(injector, this))
   {
+    addChild(m->countrySwitch);
+    addChild(m->countryHoverSwitch);
   }
 
   CountryOverlay::~CountryOverlay()
@@ -129,7 +140,9 @@ namespace onep
   {
     std::string noiseModule = QString("./GameData/shaders/modules/%1.glsl").arg("cellular3D").toStdString();
 
-    osg::ref_ptr<osg::Program> program = new osg::Program();
+    // Load shaders
+    osg::ref_ptr<osg::Program> cnProgram = new osg::Program();
+    osg::ref_ptr<osg::Program> chnProgram = new osg::Program();
 
     osg::ref_ptr<osg::Shader> frag_shader = m->shaderFactory->make()
       ->type(osg::Shader::FRAGMENT)
@@ -137,19 +150,42 @@ namespace onep
       ->module(m->resourceManager->loadText("./GameData/shaders/country.frag"))
       ->build();
 
-    // osg::ref_ptr<osg::Shader> frag_shader = m->resourceManager->loadShader("./GameData/shaders/country.frag", osg::Shader::FRAGMENT);
-    osg::ref_ptr<osg::Shader> vert_shader = m->resourceManager->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
-    program->addShader(frag_shader);
-    program->addShader(vert_shader);
+    osg::ref_ptr<osg::Shader> frag_shader_hover = m->shaderFactory->make()
+      ->type(osg::Shader::FRAGMENT)
+      ->module(m->resourceManager->loadText("./GameData/shaders/countryHover.frag"))
+      ->build();
 
+    osg::ref_ptr<osg::Shader> vert_shader = m->resourceManager->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
+
+    cnProgram->addShader(frag_shader);
+    cnProgram->addShader(vert_shader);
+
+    chnProgram->addShader(frag_shader_hover);
+    chnProgram->addShader(vert_shader);
+
+    // Load distance texture
+    osg::ref_ptr<osg::Texture2D> distanceTexture = m->textureFactory->make()
+      ->image(m->resourceManager->loadImage(distanceMapFilename))
+      ->build();
+
+    // Create statesets
     osg::ref_ptr<osg::StateSet> stateSet = getOrCreateStateSet();
 
-    stateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
     stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
     stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
     stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     stateSet->setRenderBinDetails(1, "RenderBin");
+    stateSet->addUniform(new osg::Uniform("distancemap", 0));
+    stateSet->setTextureAttributeAndModes(0, distanceTexture, osg::StateAttribute::ON);
+
+    osg::ref_ptr<osg::StateSet> csStateSet = m->countrySwitch->getOrCreateStateSet();
+    csStateSet->setAttributeAndModes(cnProgram, osg::StateAttribute::ON);
+    csStateSet->setRenderBinDetails(0, "RenderBin");
+
+    osg::ref_ptr<osg::StateSet> chsStateSet = m->countryHoverSwitch->getOrCreateStateSet();
+    chsStateSet->setAttributeAndModes(chnProgram, osg::StateAttribute::ON);
+    chsStateSet->setRenderBinDetails(1, "RenderBin");
 
     m->neighbourMap.clear();
 
@@ -162,13 +198,6 @@ namespace onep
     char* bytes = m->resourceManager->loadBinary(countriesFilename);
 
     osgGaming::ByteStream stream(bytes);
-
-    osg::ref_ptr<osg::Texture2D> distanceTexture = m->textureFactory->make()
-      ->image(m->resourceManager->loadImage(distanceMapFilename))
-      ->build();
-
-    getOrCreateStateSet()->setTextureAttributeAndModes(0, distanceTexture, osg::StateAttribute::ON);
-    getOrCreateStateSet()->addUniform(new osg::Uniform("distancemap", 0));
 
     int ncountries = stream.read<int>();
     for (int i = 0; i < ncountries; i++)
@@ -246,6 +275,7 @@ namespace onep
     m->resourceManager->clearCacheResource("./GameData/shaders/country.vert");
     m->resourceManager->clearCacheResource(noiseModule);
     m->resourceManager->clearCacheResource("./GameData/shaders/country.frag");
+    m->resourceManager->clearCacheResource("./GameData/shaders/countryHover.frag");
     m->resourceManager->clearCacheResource(countriesFilename);
   }
 
@@ -300,39 +330,32 @@ namespace onep
 
   void CountryOverlay::setHoveredCountryId(int id)
   {
-    CountryNode::Ptr countryNode = m->countryNodes.count(id) > 0 ? m->countryNodes[id] : nullptr;
+    CountryHoverNode::Ptr countryHoverNode = m->countryHoverNodes.count(id) > 0 ? m->countryHoverNodes[id] : nullptr;
 
-    if (countryNode == m->hoveredCountryNode)
+    if (countryHoverNode == m->hoveredCountryNode)
       return;
 
     if (m->hoveredCountryNode)
     {
-      m->hoveredCountryNode->setHoverMode(false);
-
-      if (m->highlightedCountries.count(m->hoveredCountryNode) == 0)
-        setChildValue(m->hoveredCountryNode, false);
+      m->countryHoverSwitch->setChildValue(m->hoveredCountryNode, false);
+      m->hoveredCountryNode->setHoverEnabled(false);
     }
 
-    m->hoveredCountryNode = countryNode;
-
-    if (!m->hoveredCountryNode.valid())
-      return;
-
-    if (m->highlightedCountries.count(m->hoveredCountryNode) == 0)
+    if (countryHoverNode)
     {
-      m->hoveredCountryNode->setColorMode(CountryNode::MODE_HOVER);
-      setChildValue(m->hoveredCountryNode, true);
+      m->countryHoverSwitch->setChildValue(countryHoverNode, true);
+      countryHoverNode->setHoverEnabled(true);
     }
 
-    m->hoveredCountryNode->setHoverMode(true);
+    m->hoveredCountryNode = countryHoverNode;
   }
 
   void CountryOverlay::setAllCountriesVisibility(bool visibility)
   {
     if (visibility)
-      setAllChildrenOn();
+      m->countrySwitch->setAllChildrenOn();
     else
-      setAllChildrenOff();
+      m->countrySwitch->setAllChildrenOff();
   }
 
   CountryNode::Map& CountryOverlay::getCountryNodes()

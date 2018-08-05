@@ -26,6 +26,7 @@ namespace onep
 
 		virtual void onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion) override;
 
+    virtual void onDragBeginEvent(int button, osg::Vec2f position) override;
 		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change) override;
 		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position) override;
 
