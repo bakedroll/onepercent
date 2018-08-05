@@ -127,11 +127,13 @@ namespace onep
     osg::ref_ptr<osg::Vec3Array> vertices,
     osg::ref_ptr<osg::Vec2Array> texcoords)
   {
+    std::string noiseModule = QString("./GameData/shaders/modules/%1.glsl").arg("cellular3D").toStdString();
+
     osg::ref_ptr<osg::Program> program = new osg::Program();
 
     osg::ref_ptr<osg::Shader> frag_shader = m->shaderFactory->make()
       ->type(osg::Shader::FRAGMENT)
-      ->module(m->resourceManager->loadText("./GameData/shaders/modules/noise3D.glsl"))
+      ->module(m->resourceManager->loadText(noiseModule))
       ->module(m->resourceManager->loadText("./GameData/shaders/country.frag"))
       ->build();
 
@@ -242,7 +244,7 @@ namespace onep
     m->countriesMap = new CountriesMap(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
 
     m->resourceManager->clearCacheResource("./GameData/shaders/country.vert");
-    m->resourceManager->clearCacheResource("./GameData/shaders/modules/noise3D.glsl");
+    m->resourceManager->clearCacheResource(noiseModule);
     m->resourceManager->clearCacheResource("./GameData/shaders/country.frag");
     m->resourceManager->clearCacheResource(countriesFilename);
   }
