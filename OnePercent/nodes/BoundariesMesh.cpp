@@ -363,7 +363,7 @@ namespace onep
     addChild(m->overallBoundsGeode);
   }
 
-  void BoundariesMesh::makeCountryBoundaries(const CountryMesh::Map& countries, const osg::Vec3f& color, float thickness, bool bWireframe)
+  void BoundariesMesh::makeCountryBoundaries(const CountryNode::Map& countries, const osg::Vec3f& color, float thickness, bool bWireframe)
   {
     if (m->countriesBoundsGeode.valid())
     {
@@ -388,9 +388,9 @@ namespace onep
 
     std::set<int> visited;
 
-    for (CountryMesh::Map::const_iterator it = countries.begin(); it != countries.end(); ++it)
+    for (CountryNode::Map::const_iterator it = countries.begin(); it != countries.end(); ++it)
     {
-      CountryMesh::Ptr cmesh = it->second;
+      CountryNode::Ptr cmesh = it->second;
 
       std::vector<int> startIds;
 
@@ -405,8 +405,8 @@ namespace onep
       }
       else
       {
-        const CountryMesh::BorderIdMap& nborders = cmesh->getNeighborBorders();
-        for (CountryMesh::BorderIdMap::const_iterator nit = nborders.begin(); nit != nborders.end(); ++nit)
+        const CountryNode::BorderIdMap& nborders = cmesh->getNeighborBorders();
+        for (CountryNode::BorderIdMap::const_iterator nit = nborders.begin(); nit != nborders.end(); ++nit)
         {
           // neighbor not included, start at this border
           if (countries.count(nit->first) == 0)

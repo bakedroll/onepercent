@@ -8,12 +8,12 @@
 
 namespace onep
 {
-  class CountryMesh : public osg::Geode
+  class CountryNode : public osg::Geode
   {
   public:
     typedef std::map<int, std::vector<int>> BorderIdMap;
 
-    typedef osg::ref_ptr<CountryMesh> Ptr;
+    typedef osg::ref_ptr<CountryNode> Ptr;
     typedef std::map<int, Ptr> Map;
     typedef std::vector<Ptr> List;
 
@@ -29,7 +29,7 @@ namespace onep
       MODE_HOVER = 8
     } ColorMode;
 
-    CountryMesh(
+    CountryNode(
       osg::ref_ptr<ConfigManager> configManager,
       osg::Vec2f centerLatLong,
       osg::Vec2f size,
@@ -39,10 +39,10 @@ namespace onep
       osg::ref_ptr<osg::DrawElementsUInt> triangles,
       BorderIdMap& neighbourBorders);
 
-    ~CountryMesh();
+    ~CountryNode();
 
-    void addNeighbor(osg::ref_ptr<CountryMesh> mesh);
-    List& getNeighborCountryMeshs();
+    void addNeighbor(osg::ref_ptr<CountryNode> mesh);
+    List& getNeighborCountryNodes();
 
     const BorderIdMap& getNeighborBorders() const;
     const std::vector<int>& getNeighborBorderIds(int neighborId);

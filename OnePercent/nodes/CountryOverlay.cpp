@@ -38,17 +38,17 @@ namespace onep
       osg::Vec2f centerLatLong,
       osg::Vec2f size,
       osg::ref_ptr<osg::DrawElementsUInt> triangles,
-      CountryMesh::BorderIdMap& neighborBorders,
+      CountryNode::BorderIdMap& neighborBorders,
       osg::ref_ptr<osg::Vec3Array> vertices,
       osg::ref_ptr<osg::Vec2Array> texcoords1,
       osg::ref_ptr<osg::Vec3Array> texcoords2)
     {
-      if (countryMeshs.find(id) != countryMeshs.end())
+      if (countryNodes.find(id) != countryNodes.end())
         return;
 
-      CountryMesh::Ptr mesh = new CountryMesh(configManager, centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
+      CountryNode::Ptr mesh = new CountryNode(configManager, centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
 
-      countryMeshs.insert(CountryMesh::Map::value_type(id, mesh));
+      countryNodes.insert(CountryNode::Map::value_type(id, mesh));
       base->addChild(mesh, false);
 
       stateContainer->accessState([=](SimulationState::Ptr state)
@@ -68,7 +68,7 @@ namespace onep
                 return;
 
               if (oSelectedCountryId->get() == 0 && highlightedBranchId == i)
-                setCountryColorMode(mesh, CountryMesh::ColorMode(CountryMesh::MODE_HIGHLIGHT_BANKS + i));
+                setCountryColorMode(mesh, CountryNode::ColorMode(CountryNode::MODE_HIGHLIGHT_BANKS + i));
             });
           })));
         }
@@ -77,7 +77,7 @@ namespace onep
 
     }
 
-    void setCountryColorMode(CountryMesh::Ptr mesh, CountryMesh::ColorMode mode)
+    void setCountryColorMode(CountryNode::Ptr mesh, CountryNode::ColorMode mode)
     {
       mesh->setColorMode(mode);
       base->setChildValue(mesh, true);
@@ -96,7 +96,7 @@ namespace onep
     osg::ref_ptr<SkillsContainer> skillsContainer;
     CountriesContainer::Ptr countriesContainer;
 
-    CountryMesh::Map countryMeshs;
+    CountryNode::Map countryNodes;
     CountriesMap::Ptr countriesMap;
 
     osgGaming::Observable<int>::Ptr oSelectedCountryId;
@@ -105,8 +105,8 @@ namespace onep
 
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
 
-    std::set<CountryMesh::Ptr> highlightedCountries;
-    CountryMesh::Ptr hoveredCountryMesh;
+    std::set<CountryNode::Ptr> highlightedCountries;
+    CountryNode::Ptr hoveredCountryNode;
 
     NeighbourMap neighbourMap;
   };
@@ -198,7 +198,7 @@ namespace onep
 
       m->neighbourMap.insert(NeighbourMap::value_type(id, neighborList));
 
-      CountryMesh::BorderIdMap neighborBorderMap;
+      CountryNode::BorderIdMap neighborBorderMap;
       int neighborBorderCount = stream.read<int>();
       for (int j = 0; j < neighborBorderCount; j++)
       {
@@ -228,13 +228,13 @@ namespace onep
       m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords, texcoords2);
     }
 
-    for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
+    for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
     {
       NeighborList neighborList = m->neighbourMap.find(it->first)->second;
 
       for (NeighborList::iterator nit = neighborList.begin(); nit != neighborList.end(); ++nit)
       {
-        it->second->addNeighbor(getCountryMesh(*nit));
+        it->second->addNeighbor(getCountryNode(*nit));
       }
     }
 
@@ -268,12 +268,12 @@ namespace onep
 
     m->highlightedBranchId = -1;
 
-    CountryMesh::Ptr mesh = m->countryMeshs.find(countryId)->second;
-    m->setCountryColorMode(mesh, CountryMesh::MODE_SELECTED);
+    CountryNode::Ptr node = m->countryNodes.find(countryId)->second;
+    m->setCountryColorMode(node, CountryNode::MODE_SELECTED);
 
-    CountryMesh::List& neighbors = mesh->getNeighborCountryMeshs();
-    for (CountryMesh::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
-      m->setCountryColorMode(*it, CountryMesh::MODE_NEIGHBOR);
+    CountryNode::List& neighbors = node->getNeighborCountryNodes();
+    for (CountryNode::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+      m->setCountryColorMode(*it, CountryNode::MODE_NEIGHBOR);
   }
 
   void CountryOverlay::setHighlightedSkillBranch(int id)
@@ -285,7 +285,7 @@ namespace onep
 
     std::string branchName = m->skillsContainer->getBranchByIndex(id)->getBranchName();
 
-    for (CountryMesh::Map::iterator it = m->countryMeshs.begin(); it != m->countryMeshs.end(); ++it)
+    for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
     {
       int cid = it->first;
       m->stateContainer->accessState([=](SimulationState::Ptr state)
@@ -293,38 +293,38 @@ namespace onep
         CountryState::Ptr cstate = state->getCountryState(cid);
 
         if (cstate->getBranchActivated(branchName.c_str()))
-          m->setCountryColorMode(it->second, CountryMesh::ColorMode(int(CountryMesh::MODE_HIGHLIGHT_BANKS) + id));
+          m->setCountryColorMode(it->second, CountryNode::ColorMode(int(CountryNode::MODE_HIGHLIGHT_BANKS) + id));
       });
     }
   }
 
   void CountryOverlay::setHoveredCountryId(int id)
   {
-    CountryMesh::Ptr countryMesh = m->countryMeshs.count(id) > 0 ? m->countryMeshs[id] : nullptr;
+    CountryNode::Ptr countryNode = m->countryNodes.count(id) > 0 ? m->countryNodes[id] : nullptr;
 
-    if (countryMesh == m->hoveredCountryMesh)
+    if (countryNode == m->hoveredCountryNode)
       return;
 
-    if (m->hoveredCountryMesh)
+    if (m->hoveredCountryNode)
     {
-      m->hoveredCountryMesh->setHoverMode(false);
+      m->hoveredCountryNode->setHoverMode(false);
 
-      if (m->highlightedCountries.count(m->hoveredCountryMesh) == 0)
-        setChildValue(m->hoveredCountryMesh, false);
+      if (m->highlightedCountries.count(m->hoveredCountryNode) == 0)
+        setChildValue(m->hoveredCountryNode, false);
     }
 
-    m->hoveredCountryMesh = countryMesh;
+    m->hoveredCountryNode = countryNode;
 
-    if (!m->hoveredCountryMesh.valid())
+    if (!m->hoveredCountryNode.valid())
       return;
 
-    if (m->highlightedCountries.count(m->hoveredCountryMesh) == 0)
+    if (m->highlightedCountries.count(m->hoveredCountryNode) == 0)
     {
-      m->hoveredCountryMesh->setColorMode(CountryMesh::MODE_HOVER);
-      setChildValue(m->hoveredCountryMesh, true);
+      m->hoveredCountryNode->setColorMode(CountryNode::MODE_HOVER);
+      setChildValue(m->hoveredCountryNode, true);
     }
 
-    m->hoveredCountryMesh->setHoverMode(true);
+    m->hoveredCountryNode->setHoverMode(true);
   }
 
   void CountryOverlay::setAllCountriesVisibility(bool visibility)
@@ -335,9 +335,9 @@ namespace onep
       setAllChildrenOff();
   }
 
-  CountryMesh::Map& CountryOverlay::getCountryMeshs()
+  CountryNode::Map& CountryOverlay::getCountryNodes()
   {
-    return m->countryMeshs;
+    return m->countryNodes;
   }
 
   CountriesMap::Ptr CountryOverlay::getCountriesMap()
@@ -350,29 +350,29 @@ namespace onep
     return m->neighbourMap;
   }
 
-  CountryMesh::Ptr CountryOverlay::getSelectedCountryMesh()
+  CountryNode::Ptr CountryOverlay::getSelectedCountryNode()
   {
-    return m->countryMeshs.find(m->oSelectedCountryId->get())->second;
+    return m->countryNodes.find(m->oSelectedCountryId->get())->second;
   }
 
-  CountryMesh::Ptr CountryOverlay::getCountryMesh(int id)
+  CountryNode::Ptr CountryOverlay::getCountryNode(int id)
   {
-    CountryMesh::Map::iterator countryMesh = m->countryMeshs.find(id);
+    CountryNode::Map::iterator countryNode = m->countryNodes.find(id);
 
-    if (countryMesh == m->countryMeshs.end())
+    if (countryNode == m->countryNodes.end())
       return nullptr;
 
-    return m->countryMeshs.find(id)->second;
+    return m->countryNodes.find(id)->second;
   }
 
-  CountryMesh::Ptr CountryOverlay::getCountryMesh(osg::Vec2f coord)
+  CountryNode::Ptr CountryOverlay::getCountryNode(osg::Vec2f coord)
   {
     int id = getCountryId(coord);
 
     if (id == 0)
       return nullptr;
 
-    return getCountryMesh(id);
+    return getCountryNode(id);
   }
 
   int CountryOverlay::getCountryId(osg::Vec2f coord)

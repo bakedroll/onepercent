@@ -3,8 +3,10 @@
 #include "simulation/CountriesContainer.h"
 #include "simulation/Country.h"
 
-#include <osgGaming/Helper.h>
 #include <osg/Billboard>
+#include <osg/Switch>
+
+#include <osgGaming/Helper.h>
 #include <osgGaming/ResourceManager.h>
 
 namespace onep
@@ -28,7 +30,7 @@ namespace onep
     osg::ref_ptr<CountriesContainer> countriesContainer;
 
     osg::ref_ptr<osg::Switch> switchNode;
-    const CountryMesh::Map* countryMap;
+    const CountryNode::Map* countryMap;
 
     bool enabled;
   };
@@ -50,7 +52,7 @@ namespace onep
     return m->enabled;
   }
 
-  void CountryNameOverlay::setCountryMap(const CountryMesh::Map& countryMap)
+  void CountryNameOverlay::setCountryMap(const CountryNode::Map& countryMap)
   {
     osg::ref_ptr<osgText::Font> font = m->resourceManager->loadFont("./GameData/fonts/coolvetica rg.ttf");
 
@@ -62,7 +64,7 @@ namespace onep
     billboard->setMode(osg::Billboard::Mode::POINT_ROT_EYE);
 
     int i = 0;
-    for (CountryMesh::Map::const_iterator it = m->countryMap->cbegin(); it != m->countryMap->cend(); ++it)
+    for (CountryNode::Map::const_iterator it = m->countryMap->cbegin(); it != m->countryMap->cend(); ++it)
     {
       osg::Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCenterLatLong());
       Country::Ptr country = m->countriesContainer->getCountry(it->first);

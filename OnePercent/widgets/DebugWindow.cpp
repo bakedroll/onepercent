@@ -120,7 +120,7 @@ namespace onep
     ONumSkillPoints::Ptr oNumSkillPoints;
 
     QPushButton* toggleCountryButton;
-    CountryMesh::Map selectedCountries;
+    CountryNode::Map selectedCountries;
 
     osgGaming::Observer<int>::Ptr notifySelectedCountry;
     osgGaming::Observer<int>::Ptr notifyDay;
@@ -180,12 +180,12 @@ namespace onep
       if (id == 0)
         return;
 
-      CountryMesh::Ptr mesh = countryOverlay->getSelectedCountryMesh();
-      assert_return(mesh.valid());
+      CountryNode::Ptr node = countryOverlay->getSelectedCountryNode();
+      assert_return(node.valid());
 
-      CountryMesh::Map::iterator it = selectedCountries.find(id);
+      CountryNode::Map::iterator it = selectedCountries.find(id);
       if (it == selectedCountries.end())
-        selectedCountries[id] = mesh;
+        selectedCountries[id] = node;
       else
         selectedCountries.erase(it);
 

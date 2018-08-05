@@ -4,7 +4,7 @@
 
 #include "simulation/SkillBranch.h"
 #include "data/CountriesMap.h"
-#include "nodes/CountryMesh.h"
+#include "nodes/CountryNode.h"
 
 #include <osg/Switch>
 
@@ -36,13 +36,13 @@ namespace onep
     void setHoveredCountryId(int id);
     void setAllCountriesVisibility(bool visibility);
 
-    CountryMesh::Map& getCountryMeshs();
+    CountryNode::Map& getCountryNodes();
     CountriesMap::Ptr getCountriesMap();
     NeighbourMap& getNeighbourships();
 
-    CountryMesh::Ptr getSelectedCountryMesh();
-    CountryMesh::Ptr getCountryMesh(int id);
-    CountryMesh::Ptr getCountryMesh(osg::Vec2f coord);
+    CountryNode::Ptr getSelectedCountryNode();
+    CountryNode::Ptr getCountryNode(int id);
+    CountryNode::Ptr getCountryNode(osg::Vec2f coord);
     int getCountryId(osg::Vec2f coord);
 
     int getSelectedCountryId();

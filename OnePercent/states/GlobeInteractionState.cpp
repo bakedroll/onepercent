@@ -146,7 +146,7 @@ namespace onep
 
     void updateCountryMenuWidgetPosition(int id)
     {
-      osg::Vec2f latLong = countryOverlay->getCountryMesh(id)->getCenterLatLong();
+      osg::Vec2f latLong = countryOverlay->getCountryNode(id)->getCenterLatLong();
 
       osg::Vec3f position = osgGaming::getVec3FromEuler(latLong.x(), 0.0, latLong.y()) * paramEarthRadius;
 
@@ -195,12 +195,12 @@ namespace onep
     m->paramCameraScrollSpeed = m->configManager->getNumber<float>("camera.scroll_speed");
     m->paramCameraRotationSpeed = m->configManager->getNumber<float>("camera.rotation_speed");
 
-    CountryMesh::Map& meshs = m->countryOverlay->getCountryMeshs();
+    CountryNode::Map& meshs = m->countryOverlay->getCountryNodes();
     float projAngle = getWorld(getView(0))->getCameraManipulator()->getProjectionAngle();
     float projRatio = getWorld(getView(0))->getCameraManipulator()->getProjectionRatio();
     float minDistance = std::numeric_limits<float>::max();
     float maxDistance = std::numeric_limits<float>::min();
-    for (CountryMesh::Map::iterator it = meshs.begin(); it != meshs.end(); ++it)
+    for (CountryNode::Map::iterator it = meshs.begin(); it != meshs.end(); ++it)
     {
       float dist = it->second->getOptimalCameraDistance(projAngle, projRatio);
       minDistance = std::min<float>(dist, minDistance);
@@ -214,12 +214,12 @@ namespace onep
         double time = getSimulationTime();
         float r = m->paramEarthRadius;
         
-        CountryMesh::Ptr countryMesh = m->countryOverlay->getCountryMesh(id);
+        CountryNode::Ptr countryNode = m->countryOverlay->getCountryNode(id);
         Country::Ptr country = m->countriesContainer->getCountry(id);
         
         OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
 
-        float viewDistance = countryMesh->getOptimalCameraDistance(
+        float viewDistance = countryNode->getOptimalCameraDistance(
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle()),
           float(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio()));
 
@@ -235,7 +235,7 @@ namespace onep
         float dist = t >= 0.0f ? std::max(dist1, dist2) : cosa * viewDistance - r;
         float latitudeShift = acos(osg::clampBetween<float>((r * r + (r + dist) * (r + dist) - viewDistance * viewDistance) / (2.0f * r * (r + dist)), 0.0f, 1.0f));
 
-        osg::Vec2f latLong = countryMesh->getCenterLatLong();
+        osg::Vec2f latLong = countryNode->getCenterLatLong();
         /*
         OSGG_QLOG_DEBUG(QString("Min: %1 Max: %2 ViewDistance: %3 x: %9 Angle: %4 Distance: %5 %10 %11 Shift: %6 Lat: %7 cosa: %8")
           .arg(minDistance)

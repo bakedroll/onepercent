@@ -2,10 +2,9 @@
 
 #include <osgGaming/Injector.h>
 
-#include "nodes/CountryMesh.h"
+#include "nodes/CountryNode.h"
 
 #include <osg/PositionAttitudeTransform>
-#include <osg/Switch>
 
 namespace onep
 {
@@ -17,7 +16,7 @@ namespace onep
 
 		bool getEnabled();
 
-    void setCountryMap(const CountryMesh::Map& countryMap);
+    void setCountryMap(const CountryNode::Map& countryMap);
 		void setEnabled(bool enabled);
 
 	private:
