@@ -88,8 +88,6 @@ namespace onep
       transform->addChild(geode);
 
       transform->addEventCallback(base);
-
-      resourceManager->clearCacheResource(filename);
     }
 
     void makeSun()

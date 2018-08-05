@@ -26,6 +26,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <chrono>
+#include <osgGaming/ResourceManager.h>
 
 namespace onep
 {
@@ -44,6 +45,7 @@ namespace onep
       , skillsContainer(injector.inject<SkillsContainer>())
       , countriesContainer(injector.inject<CountriesContainer>())
       , stateContainer(injector.inject<SimulationStateContainer>())
+      , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , simulation(injector.inject<Simulation>())
       , lua(injector.inject<LuaStateManager>())
       , labelLoadingText(nullptr)
@@ -67,6 +69,7 @@ namespace onep
     osg::ref_ptr<CountriesContainer> countriesContainer;
     osg::ref_ptr<SimulationStateContainer> stateContainer;
 
+    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<LuaStateManager> lua;
 
@@ -189,6 +192,8 @@ namespace onep
 
     // loading simulation
     m->simulation->prepare();
+
+    m->resourceManager->clearCache();
 
 
     /** 
