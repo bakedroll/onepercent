@@ -1,5 +1,8 @@
 #pragma once
 
+#include "scripting/LuaClass.h"
+#include "scripting/LuaClassInstance.h"
+
 #include <osgGaming/Injector.h>
 #include <osgGaming/LogManager.h>
 
@@ -20,21 +23,6 @@ extern "C"
 namespace onep
 {
   typedef std::shared_ptr<luabridge::LuaRef> LuaRefPtr;
-
-  class LuaClass
-  {
-  public:
-    virtual ~LuaClass() {}
-    virtual void registerClass(lua_State* state) = 0;
-  };
-
-  class LuaClassInstance : public LuaClass
-  {
-  public:
-    virtual ~LuaClassInstance() {}
-    virtual std::string instanceVariableName() = 0;
-
-  };
 
   class LuaStateManager : public osg::Referenced
   {
