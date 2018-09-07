@@ -144,7 +144,7 @@ namespace onep
 
     osg::ref_ptr<osg::Shader> frag_shader = m->shaderFactory->make()
       ->type(osg::Shader::FRAGMENT)
-      ->module(m->resourceManager->loadText(QString("./GameData/shaders/modules/%1.glsl").arg("cellular3D").toStdString()))
+      ->module(m->resourceManager->loadText(QString("./GameData/shaders/modules/%1.glsl").arg("noise3D").toStdString()))
       ->module(m->resourceManager->loadText("./GameData/shaders/country.frag"))
       ->build();
 

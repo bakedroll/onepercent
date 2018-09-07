@@ -27,6 +27,9 @@ namespace onep
 
     osg::ref_ptr<osg::Uniform> uniformColor;
     osg::ref_ptr<osg::Uniform> uniformAlpha;
+    osg::ref_ptr<osg::Uniform> uniformTakeover;
+    osg::ref_ptr<osg::Uniform> uniformTakeoverColor;
+    osg::ref_ptr<osg::Uniform> uniformTakeoverScale;
   };
 
   CountryNode::CountryNode(
@@ -53,11 +56,17 @@ namespace onep
     addDrawable(geo);
 
     m->uniformAlpha = new osg::Uniform("alpha", 0.0f);
-    m->uniformColor = new osg::Uniform("color", osg::Vec3f(0.0f, 0.0f, 0.0f));
+    m->uniformColor = new osg::Uniform("overlayColor", osg::Vec3f(0.0f, 0.0f, 0.0f));
+    m->uniformTakeover = new osg::Uniform("takeover", 0.5f);
+    m->uniformTakeoverColor = new osg::Uniform("takeoverColor", osg::Vec4f(1.0f, 1.0f, 1.0f, 0.8f));
+    m->uniformTakeoverScale = new osg::Uniform("takeoverScale", 100.0f);
     
     m->stateSet = getOrCreateStateSet();
     m->stateSet->addUniform(m->uniformAlpha);
     m->stateSet->addUniform(m->uniformColor);
+    m->stateSet->addUniform(m->uniformTakeover);
+    m->stateSet->addUniform(m->uniformTakeoverColor);
+    m->stateSet->addUniform(m->uniformTakeoverScale);
   }
 
   CountryNode::~CountryNode()
@@ -69,7 +78,7 @@ namespace onep
     m->neighbors.push_back(mesh);
   }
 
-  CountryNode::List& CountryNode::getNeighborCountryNodes()
+  CountryNode::List& CountryNode::getNeighborCountryNodes() const
   {
     return m->neighbors;
   }
@@ -79,7 +88,7 @@ namespace onep
     return m->neighbourBorders;
   }
 
-  const std::vector<int>& CountryNode::getNeighborBorderIds(int neighborId)
+  const std::vector<int>& CountryNode::getNeighborBorderIds(int neighborId) const
   {
     BorderIdMap::iterator it = m->neighbourBorders.find(neighborId);
     if (it == m->neighbourBorders.end())
@@ -134,24 +143,24 @@ namespace onep
     }
   }
 
-  osg::Vec2f CountryNode::getCenterLatLong()
+  osg::Vec2f CountryNode::getCenterLatLong() const
   {
     return m->centerLatLong;
   }
 
-  osg::Vec2f CountryNode::getSize()
+  osg::Vec2f CountryNode::getSize() const
   {
     return m->size;
   }
 
-  osg::Vec2f CountryNode::getSurfaceSize()
+  osg::Vec2f CountryNode::getSurfaceSize() const
   {
     return osg::Vec2f(
       2.0f * C_PI * sin(C_PI / 2.0f - abs(m->centerLatLong.x())) * m->earthRadius * m->size.x(),
       C_PI * m->earthRadius * m->size.y());
   }
 
-  float CountryNode::getOptimalCameraDistance(float angle, float ratio)
+  float CountryNode::getOptimalCameraDistance(float angle, float ratio) const
   {
     osg::Vec2f surfaceSize = getSurfaceSize();
 
