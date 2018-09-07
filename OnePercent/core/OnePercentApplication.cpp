@@ -14,6 +14,7 @@
 #include "states/GlobeInteractionState.h"
 #include "scripting/ConfigManager.h"
 #include "scripting/LuaLogger.h"
+#include "scripting/Visuals.h"
 #include "simulation/Simulation.h"
 #include "simulation/SkillsContainer.h"
 #include "simulation/CountriesContainer.h"
@@ -100,6 +101,9 @@ namespace onep
     container.registerSingletonType<CountriesContainer>();
     container.registerSingletonType<SimulationStateContainer>();
 
+    // scripting
+    container.registerSingletonType<Visuals>();
+
     // effects
     container.registerType<osgGaming::FastApproximateAntiAliasingEffect>();
     container.registerType<osgGaming::HighDynamicRangeEffect>();
@@ -123,6 +127,7 @@ namespace onep
     // initialize Lua classes
     osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
     lua->registerClassInstance<Simulation>(injector.inject<Simulation>());
+    lua->registerClassInstance<Visuals>(injector.inject<Visuals>());
     lua->registerClassInstance<LuaLogger>(injector.inject<LuaLogger>());
 
     m->simulation = injector.inject<Simulation>();

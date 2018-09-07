@@ -41,19 +41,19 @@ namespace onep
     ~CountryNode();
 
     void addNeighbor(osg::ref_ptr<CountryNode> mesh);
-    List& getNeighborCountryNodes();
+    List& getNeighborCountryNodes() const;
 
     const BorderIdMap& getNeighborBorders() const;
-    const std::vector<int>& getNeighborBorderIds(int neighborId);
+    const std::vector<int>& getNeighborBorderIds(int neighborId) const;
 
     bool getIsOnOcean() const;
 
     void setColorMode(ColorMode mode);
 
-    osg::Vec2f getCenterLatLong();
-    osg::Vec2f getSize();
-    osg::Vec2f getSurfaceSize();
-    float getOptimalCameraDistance(float angle, float ratio);
+    osg::Vec2f getCenterLatLong() const;
+    osg::Vec2f getSize() const;
+    osg::Vec2f getSurfaceSize() const;
+    float getOptimalCameraDistance(float angle, float ratio) const;
 
   private:
     struct Impl;
