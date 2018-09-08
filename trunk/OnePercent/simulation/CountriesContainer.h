@@ -15,7 +15,7 @@ extern "C"
 
 namespace onep
 {
-  class Country;
+  class LuaCountry;
 
   class CountriesContainer : public osg::Referenced
   {
@@ -25,9 +25,9 @@ namespace onep
     CountriesContainer(osgGaming::Injector& injector);
     ~CountriesContainer();
 
-    std::shared_ptr<Country> getCountry(int id);
+    std::shared_ptr<LuaCountry> getCountry(int id);
 
-    void loadFromLua(const luabridge::LuaRef object);
+    void loadFromLua(const luabridge::LuaRef& object);
     void writeToLua();
 
   private:

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "scripting/LuaObjectMapper.h"
-#include "simulation/LuaValuesTable.h"
+#include "scripting/LuaValuesTable.h"
 
 namespace onep
 {

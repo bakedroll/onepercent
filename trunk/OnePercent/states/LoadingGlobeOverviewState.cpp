@@ -206,8 +206,8 @@ namespace onep
 
     stream << "local countries = {\n";
 
-    Country::Map& countries = m->countriesContainer->getCountryMap();
-    for (Country::Map::iterator it = countries.begin(); it != countries.end(); ++it)
+    LuaCountry::Map& countries = m->countriesContainer->getCountryMap();
+    for (LuaCountry::Map::iterator it = countries.begin(); it != countries.end(); ++it)
     {
       stream << "  {\n";
       stream << QString("    id = %1,\n").arg(it->second->getId());

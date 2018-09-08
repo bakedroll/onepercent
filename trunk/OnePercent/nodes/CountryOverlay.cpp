@@ -6,8 +6,8 @@
 #include "simulation/CountriesContainer.h"
 #include "simulation/SkillsContainer.h"
 #include "simulation/SimulationStateContainer.h"
-#include "simulation/SimulationState.h"
-#include "simulation/Country.h"
+#include "scripting/LuaSimulationState.h"
+#include "scripting/LuaCountry.h"
 
 #include <osgGaming/Observable.h>
 #include <osgGaming/ByteStream.h>
@@ -59,9 +59,9 @@ namespace onep
       countryHoverNodes.insert(CountryHoverNode::Map::value_type(id, hoverNode));
       countryHoverSwitch->addChild(hoverNode, false);
 
-      stateContainer->accessState([=](SimulationState::Ptr state)
+      stateContainer->accessState([=](LuaSimulationState::Ptr state)
       {
-        CountryState::Ptr cstate = state->getCountryState(id);
+        LuaCountryState::Ptr cstate = state->getCountryState(id);
 
         int n = skillsContainer->getNumBranches();
         for (int i = 0; i < n; i++)
@@ -210,7 +210,7 @@ namespace onep
       osg::Vec2f centerLatLong((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI);
       osg::Vec2f size(width, height);
 
-      Country::Ptr country = m->countriesContainer->getCountry(id);
+      LuaCountry::Ptr country = m->countriesContainer->getCountry(id);
 
       NeighborList neighborList;
 
@@ -311,9 +311,9 @@ namespace onep
     for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
     {
       int cid = it->first;
-      m->stateContainer->accessState([=](SimulationState::Ptr state)
+      m->stateContainer->accessState([=](LuaSimulationState::Ptr state)
       {
-        CountryState::Ptr cstate = state->getCountryState(cid);
+        LuaCountryState::Ptr cstate = state->getCountryState(cid);
 
         if (cstate->getBranchesActivatedTable()->getBranchActivated(branchName.c_str()))
           m->setCountryColorMode(it->second, CountryNode::ColorMode(int(CountryNode::MODE_HIGHLIGHT_BANKS) + id));

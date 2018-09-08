@@ -1,7 +1,7 @@
 #pragma once
 
 #include "scripting/LuaObjectMapper.h"
-#include "simulation/SkillBranch.h"
+#include "scripting/LuaSkillBranch.h"
 
 namespace onep
 {
@@ -11,10 +11,10 @@ namespace onep
     explicit LuaBranchesTable(const luabridge::LuaRef& object);
     ~LuaBranchesTable();
 
-    SkillBranch::Ptr getBranchByIndex(int index);
+    LuaSkillBranch::Ptr getBranchByIndex(int index);
 
   private:
-    SkillBranch::List m_branches;
+    LuaSkillBranch::List m_branches;
 
   };
 }

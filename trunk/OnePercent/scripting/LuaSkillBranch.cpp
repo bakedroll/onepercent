@@ -1,11 +1,11 @@
-#include "SkillBranch.h"
-#include "simulation/LuaSkillsTable.h"
+#include "scripting/LuaSkillBranch.h"
+#include "scripting/LuaSkillsTable.h"
 
 #include <osgGaming/Macros.h>
 
 namespace onep
 {
-  struct SkillBranch::Impl
+  struct LuaSkillBranch::Impl
   {
     Impl()
       : id(-1)
@@ -19,7 +19,7 @@ namespace onep
     LuaSkillsTable::Ptr skillsTable;
   };
 
-  SkillBranch::SkillBranch(const luabridge::LuaRef& object)
+  LuaSkillBranch::LuaSkillBranch(const luabridge::LuaRef& object)
     : LuaObjectMapper(object)
     , m(new Impl())
   {
@@ -37,29 +37,29 @@ namespace onep
     m->skillsTable = makeMappedElement<LuaSkillsTable>("skills");
   }
 
-  SkillBranch::~SkillBranch() = default;
+  LuaSkillBranch::~LuaSkillBranch() = default;
 
-  std::shared_ptr<LuaSkillsTable> SkillBranch::getSkillsTable() const
+  std::shared_ptr<LuaSkillsTable> LuaSkillBranch::getSkillsTable() const
   {
     return m->skillsTable;
   }
 
-  int SkillBranch::getBranchId() const
+  int LuaSkillBranch::getBranchId() const
   {
     return m->id;
   }
 
-  const std::string& SkillBranch::getBranchName() const
+  const std::string& LuaSkillBranch::getBranchName() const
   {
     return m->name;
   }
 
-  int SkillBranch::getCost() const
+  int LuaSkillBranch::getCost() const
   {
     return m->cost;
   }
 
-  void SkillBranch::setBranchId(int id)
+  void LuaSkillBranch::setBranchId(int id)
   {
     m->id = id;
   }

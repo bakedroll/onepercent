@@ -3,9 +3,9 @@
 #include "core/Macros.h"
 #include "simulation/SkillsContainer.h"
 #include "simulation/SimulationStateContainer.h"
-#include "simulation/SimulationState.h"
+#include "scripting/LuaSimulationState.h"
+#include "scripting/LuaSkillsTable.h"
 #include "simulation/UpdateThread.h"
-#include "simulation/LuaSkillsTable.h"
 
 #include <QFile>
 #include <QMessageBox>
@@ -37,14 +37,14 @@ namespace onep
 
     QDataStream stream(&file);
 
-    stateContainer->accessState([&](SimulationState::Ptr state)
+    stateContainer->accessState([&](LuaSimulationState::Ptr state)
     {
-      CountryState::Map& cstates = state->getCountryStates();
+      LuaCountryState::Map& cstates = state->getCountryStates();
 
       int numBranches = skillsContainer->getNumBranches();
 
       stream << int(cstates.size());
-      for (CountryState::Map::iterator it = cstates.begin(); it != cstates.end(); ++it)
+      for (LuaCountryState::Map::iterator it = cstates.begin(); it != cstates.end(); ++it)
       {
         stream << it->first;
 
@@ -93,7 +93,7 @@ namespace onep
       stream << numBranches;
       for (int i = 0; i < numBranches; i++)
       {
-        SkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
+        LuaSkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
         std::string branchName = branch->getBranchName();
 
         stream << int(branchName.length());
@@ -104,7 +104,7 @@ namespace onep
 
         for (int j = 0; j < numSkills; j++)
         {
-          Skill::Ptr skill = branch->getSkillsTable()->getSkillByIndex(j);
+          LuaSkill::Ptr skill = branch->getSkillsTable()->getSkillByIndex(j);
           std::string skillName = skill->getSkillName();
 
           stream << int(skillName.length());
@@ -141,9 +141,9 @@ namespace onep
 
     thread->executeLockedTick([&]()
     {
-      stateContainer->accessState([&](SimulationState::Ptr state)
+      stateContainer->accessState([&](LuaSimulationState::Ptr state)
       {
-        CountryState::Map& cstates = state->getCountryStates();
+        LuaCountryState::Map& cstates = state->getCountryStates();
         int numCountries, cid, numValues, numBranches, numSkills, len;
         char buffer[256];
         float value;
@@ -160,7 +160,7 @@ namespace onep
             return;
           }
 
-          CountryState::Ptr cstate = cstates[cid];
+          LuaCountryState::Ptr cstate = cstates[cid];
 
           auto values = cstate->getValuesMap();
           auto branchValues = cstate->getBranchValuesMap();
@@ -237,7 +237,7 @@ namespace onep
           stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
           std::string branchName(buffer);
 
-          SkillBranch::Ptr branch = skillsContainer->getBranchByName(branchName);
+          LuaSkillBranch::Ptr branch = skillsContainer->getBranchByName(branchName);
 
           stream >> numSkills;
           for (int j = 0; j < numSkills; j++)
@@ -253,7 +253,7 @@ namespace onep
               continue;
             }
 
-            Skill::Ptr skill = branch->getSkillsTable()->getSkillByName(skillName);
+            LuaSkill::Ptr skill = branch->getSkillsTable()->getSkillByName(skillName);
             if (activated != skill->getIsActivated())
               skill->setIsActivated(activated);
           }

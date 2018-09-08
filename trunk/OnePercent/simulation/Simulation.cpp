@@ -7,7 +7,7 @@
 #include "simulation/SkillsContainer.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationStateReaderWriter.h"
-#include "simulation/SkillBranch.h"
+#include "scripting/LuaSkillBranch.h"
 #include "simulation/UpdateThread.h"
 
 #include <QTimer>
@@ -83,7 +83,7 @@ namespace onep
 
       LuaStateManager::safeExecute([&]()
       {
-        m->stateContainer->accessState([&](SimulationState::Ptr state)
+        m->stateContainer->accessState([&](LuaSimulationState::Ptr state)
         {
 
           timerTickUpdate.start();

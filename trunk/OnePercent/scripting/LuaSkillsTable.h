@@ -1,7 +1,7 @@
 #pragma once
 
 #include "scripting/LuaObjectMapper.h"
-#include "simulation/Skill.h"
+#include "scripting/LuaSkill.h"
 
 namespace onep
 {
@@ -14,11 +14,11 @@ namespace onep
     ~LuaSkillsTable();
 
     int getNumSkills() const;
-    Skill::Ptr getSkillByIndex(int i) const;
-    Skill::Ptr getSkillByName(std::string name) const;
+    LuaSkill::Ptr getSkillByIndex(int i) const;
+    LuaSkill::Ptr getSkillByName(std::string name) const;
 
   private:
-    Skill::List m_skills;
+    LuaSkill::List m_skills;
 
   };
 }

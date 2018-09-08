@@ -15,7 +15,7 @@ extern "C"
 
 namespace onep
 {
-  class SimulationState;
+  class LuaSimulationState;
 
   class SimulationStateContainer : public osg::Referenced
   {
@@ -25,7 +25,7 @@ namespace onep
     SimulationStateContainer(osgGaming::Injector& injector);
     ~SimulationStateContainer();
 
-    void accessState(std::function<void(std::shared_ptr<SimulationState>)> func);
+    void accessState(std::function<void(std::shared_ptr<LuaSimulationState>)> func);
 
     void loadFromLua(const luabridge::LuaRef object);
 

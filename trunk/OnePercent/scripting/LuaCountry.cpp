@@ -1,10 +1,10 @@
-#include "Country.h"
+#include "LuaCountry.h"
 
 #include <osgGaming/Macros.h>
 
 namespace onep
 {
-  struct Country::Impl
+  struct LuaCountry::Impl
   {
     Impl() {}
     ~Impl() {}
@@ -14,7 +14,7 @@ namespace onep
     std::vector<int> neighbourIds;
   };
 
-  Country::Country(const luabridge::LuaRef& object)
+  LuaCountry::LuaCountry(const luabridge::LuaRef& object)
     : LuaObjectMapper(object)
     , m(new Impl())
   {
@@ -30,24 +30,24 @@ namespace onep
     m->name = nameRef.tostring();
   }
 
-  Country::~Country() = default;
+  LuaCountry::~LuaCountry() = default;
 
-  int Country::getId() const
+  int LuaCountry::getId() const
   {
     return m->id;
   }
 
-  std::string Country::getName() const
+  std::string LuaCountry::getName() const
   {
     return m->name;
   }
 
-  std::vector<int>& Country::getNeighbourIds() const
+  std::vector<int>& LuaCountry::getNeighbourIds() const
   {
     return m->neighbourIds;
   }
 
-  void Country::onUpdate(luabridge::LuaRef& object)
+  void LuaCountry::onUpdate(luabridge::LuaRef& object)
   {
     luabridge::LuaRef refNeighbours = object["neighbours"];
     int i = 1;

@@ -1,6 +1,6 @@
 #include "SimulationStateContainer.h"
 
-#include "simulation/SimulationState.h"
+#include "scripting/LuaSimulationState.h"
 
 #include <QMutex>
 
@@ -11,7 +11,7 @@ namespace onep
     Impl() {}
 
     QMutex mutexState;
-    SimulationState::Ptr state;
+    LuaSimulationState::Ptr state;
   };
 
   SimulationStateContainer::SimulationStateContainer(osgGaming::Injector& injector)
@@ -22,7 +22,7 @@ namespace onep
 
   SimulationStateContainer::~SimulationStateContainer() = default;
 
-  void SimulationStateContainer::accessState(std::function<void(std::shared_ptr<SimulationState>)> func)
+  void SimulationStateContainer::accessState(std::function<void(std::shared_ptr<LuaSimulationState>)> func)
   {
     QMutexLocker lock(&m->mutexState);
     func(m->state);
@@ -31,6 +31,6 @@ namespace onep
   void SimulationStateContainer::loadFromLua(const luabridge::LuaRef object)
   {
     QMutexLocker lock(&m->mutexState);
-    m->state.reset(new SimulationState(object));
+    m->state.reset(new LuaSimulationState(object));
   }
 }

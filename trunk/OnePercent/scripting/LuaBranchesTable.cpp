@@ -1,4 +1,4 @@
-#include "simulation/LuaBranchesTable.h"
+#include "scripting/LuaBranchesTable.h"
 
 namespace onep
 {
@@ -7,11 +7,11 @@ namespace onep
   {
     assert_return(object.isTable());
 
-    std::map<std::string, SkillBranch::Ptr> sortedMap;
+    std::map<std::string, LuaSkillBranch::Ptr> sortedMap;
     foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
     {
       assert_return(key.isString());
-      SkillBranch::Ptr branch = makeMappedElement<SkillBranch>(key);
+      LuaSkillBranch::Ptr branch = makeMappedElement<LuaSkillBranch>(key);
       sortedMap[branch->getBranchName()] = branch;
     });
 
@@ -25,7 +25,7 @@ namespace onep
 
   LuaBranchesTable::~LuaBranchesTable() = default;
 
-  SkillBranch::Ptr LuaBranchesTable::getBranchByIndex(int index)
+  LuaSkillBranch::Ptr LuaBranchesTable::getBranchByIndex(int index)
   {
     return m_branches[index];
   }

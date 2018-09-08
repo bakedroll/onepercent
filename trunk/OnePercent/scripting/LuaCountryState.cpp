@@ -1,9 +1,9 @@
-#include "simulation/CountryState.h"
+#include "scripting/LuaCountryState.h"
 #include "core/Multithreading.h"
 
 namespace onep
 {
-  struct CountryState::Impl
+  struct LuaCountryState::Impl
   {
     Impl() {}
 
@@ -12,7 +12,7 @@ namespace onep
     std::shared_ptr<LuaBranchesActivatedTable> tBranchesActivated;
   };
 
-  CountryState::CountryState(const luabridge::LuaRef& object)
+  LuaCountryState::LuaCountryState(const luabridge::LuaRef& object)
     : LuaObjectMapper(object)
     , m(new Impl())
   {
@@ -23,29 +23,29 @@ namespace onep
     m->tBranchesActivated = makeMappedElement<LuaBranchesActivatedTable>("branches_activated");
   }
 
-  CountryState::~CountryState() = default;
+  LuaCountryState::~LuaCountryState() = default;
 
-  LuaValuesTable::ValuesMap CountryState::getValuesMap() const
+  LuaValuesTable::ValuesMap LuaCountryState::getValuesMap() const
   {
     return m->tValues->getValuesMap();
   }
 
-  LuaBranchValuesTable::BranchValuesMap CountryState::getBranchValuesMap() const
+  LuaBranchValuesTable::BranchValuesMap LuaCountryState::getBranchValuesMap() const
   {
     return m->tBranchValues->getBranchValuesMap();
   }
 
-  std::shared_ptr<LuaValuesTable> CountryState::getValuesTable() const
+  std::shared_ptr<LuaValuesTable> LuaCountryState::getValuesTable() const
   {
     return m->tValues;
   }
 
-  std::shared_ptr<LuaBranchValuesTable> CountryState::getBranchValuesTable() const
+  std::shared_ptr<LuaBranchValuesTable> LuaCountryState::getBranchValuesTable() const
   {
     return m->tBranchValues;
   }
 
-  std::shared_ptr<LuaBranchesActivatedTable> CountryState::getBranchesActivatedTable() const
+  std::shared_ptr<LuaBranchesActivatedTable> LuaCountryState::getBranchesActivatedTable() const
   {
     return m->tBranchesActivated;
   }
