@@ -4,10 +4,12 @@
 #include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "core/Macros.h"
-#include "simulation/SkillsContainer.h"
-#include "simulation/SimulationStateContainer.h"
+#include "simulation/ModelContainer.h"
 #include "simulation/SimulationStateReaderWriter.h"
 #include "scripting/LuaSkillBranch.h"
+#include "scripting/LuaStateManager.h"
+#include "scripting/LuaModel.h"
+#include "scripting/LuaSimulationStateTable.h"
 #include "simulation/UpdateThread.h"
 
 #include <QTimer>
@@ -19,8 +21,7 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
-      , skillsContainer(injector.inject<SkillsContainer>())
-      , stateContainer(injector.inject<SimulationStateContainer>())
+      , modelContainer(injector.inject<ModelContainer>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , oRunning(new osgGaming::Observable<bool>(false))
@@ -28,8 +29,7 @@ namespace onep
 
     osg::ref_ptr<LuaStateManager> lua;
 
-    SkillsContainer::Ptr skillsContainer;
-    SimulationStateContainer::Ptr stateContainer;
+    ModelContainer::Ptr modelContainer;
 
     QTimer timer;
 
@@ -83,9 +83,8 @@ namespace onep
 
       LuaStateManager::safeExecute([&]()
       {
-        m->stateContainer->accessState([&](LuaSimulationState::Ptr state)
+        m->modelContainer->accessModel([&](LuaModel::Ptr model)
         {
-
           timerTickUpdate.start();
           (*m->refUpdate_tick_func)();
           tickElapsed = timerTickUpdate.elapsed();
@@ -99,7 +98,7 @@ namespace onep
           branchesElapsed = timerBranchesUpdate.elapsed();
 
           timerSync.start();
-          state->traverseElementsUpdate();
+          model->getSimulationStateTable()->traverseElementsUpdate();
           syncElapsed = timerSync.elapsed();
 
           Multithreading::uiExecuteOrAsync([this]()
@@ -192,12 +191,12 @@ namespace onep
   void Simulation::saveState(const std::string& filename)
   {
     SimulationStateReaderWriter rw;
-    rw.saveState(filename, m->stateContainer, m->skillsContainer, m->oDay, m->oNumSkillPoints);
+    rw.saveState(filename, m->modelContainer, m->oDay, m->oNumSkillPoints);
   }
 
   void Simulation::loadState(const std::string& filename)
   {
     SimulationStateReaderWriter rw;
-    rw.loadState(filename, m->stateContainer, m->skillsContainer, m->oDay, m->oNumSkillPoints, &m->thread);
+    rw.loadState(filename, m->modelContainer, m->oDay, m->oNumSkillPoints, &m->thread);
   }
 }

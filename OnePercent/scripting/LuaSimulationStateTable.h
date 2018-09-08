@@ -1,17 +1,16 @@
 #pragma once
 
-#include "scripting/LuaStateManager.h"
 #include "scripting/LuaCountryState.h"
 
 namespace onep
 {
-  class LuaSimulationState : public LuaObjectMapper
+  class LuaSimulationStateTable : public LuaObjectMapper
   {
   public:
-    typedef std::shared_ptr<LuaSimulationState> Ptr;
+    typedef std::shared_ptr<LuaSimulationStateTable> Ptr;
 
-    explicit LuaSimulationState(const luabridge::LuaRef& object);
-    ~LuaSimulationState();
+    explicit LuaSimulationStateTable(const luabridge::LuaRef& object);
+    ~LuaSimulationStateTable();
 
     LuaCountryState::Map& getCountryStates() const;
     LuaCountryState::Ptr getCountryState(int cid) const;

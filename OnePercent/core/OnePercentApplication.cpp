@@ -15,11 +15,9 @@
 #include "scripting/LuaConfig.h"
 #include "scripting/LuaLogger.h"
 #include "scripting/LuaVisuals.h"
-#include "simulation/Simulation.h"
-#include "simulation/SkillsContainer.h"
-#include "simulation/CountriesContainer.h"
-#include "simulation/SimulationStateContainer.h"
 #include "scripting/LuaSimulation.h"
+#include "simulation/Simulation.h"
+#include "simulation/ModelContainer.h"
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>
@@ -98,9 +96,7 @@ namespace onep
 
     // simulation
     container.registerSingletonType<Simulation>();
-    container.registerSingletonType<SkillsContainer>();
-    container.registerSingletonType<CountriesContainer>();
-    container.registerSingletonType<SimulationStateContainer>();
+    container.registerSingletonType<ModelContainer>();
 
     // scripting
     container.registerSingletonType<LuaVisuals>();

@@ -29,4 +29,9 @@ namespace onep
   {
     return m_branches[index];
   }
+
+  int LuaBranchesTable::getNumBranches() const
+  {
+    return int(m_branches.size());
+  }
 }

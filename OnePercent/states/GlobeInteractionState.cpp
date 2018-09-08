@@ -6,9 +6,11 @@
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/GlobeModel.h"
 #include "nodes/CountryOverlay.h"
-#include "simulation/CountriesContainer.h"
+#include "scripting/LuaModel.h"
 #include "scripting/LuaCountry.h"
+#include "scripting/LuaCountriesTable.h"
 #include "simulation/Simulation.h"
+#include "simulation/ModelContainer.h"
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 #include "widgets/CountryMenuWidget.h"
@@ -33,7 +35,7 @@ namespace onep
     , simulation(injector.inject<Simulation>())
     , countryOverlay(injector.inject<CountryOverlay>())
     , boundariesMesh(injector.inject<BoundariesMesh>())
-    , countriesContainer(injector.inject<CountriesContainer>())
+    , modelContainer(injector.inject<ModelContainer>())
     , bReady(false)
     , selectedCountry(0)
     , hoveredCountry(0)
@@ -60,7 +62,7 @@ namespace onep
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
 
-    osg::ref_ptr<CountriesContainer> countriesContainer;
+    osg::ref_ptr<ModelContainer> modelContainer;
 
     float paramEarthRadius;
     float paramCameraMinDistance;
@@ -217,7 +219,7 @@ namespace onep
         float r = m->paramEarthRadius;
         
         CountryNode::Ptr countryNode = m->countryOverlay->getCountryNode(id);
-        LuaCountry::Ptr country = m->countriesContainer->getCountry(id);
+        LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getMappedElement<LuaCountry>(id);
         
         OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
 

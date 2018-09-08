@@ -2,12 +2,13 @@
 
 #include "core/Multithreading.h"
 #include "nodes/CountryHoverNode.h"
+#include "simulation/ModelContainer.h"
+#include "scripting/LuaModel.h"
 #include "scripting/LuaConfig.h"
-#include "simulation/CountriesContainer.h"
-#include "simulation/SkillsContainer.h"
-#include "simulation/SimulationStateContainer.h"
-#include "scripting/LuaSimulationState.h"
+#include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaCountry.h"
+#include "scripting/LuaBranchesTable.h"
+#include "scripting/LuaCountriesTable.h"
 
 #include <osgGaming/Observable.h>
 #include <osgGaming/ByteStream.h>
@@ -28,14 +29,13 @@ namespace onep
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
       , shaderFactory(injector.inject<osgGaming::ShaderFactory>())
       , configManager(injector.inject<LuaConfig>())
-      , stateContainer(injector.inject<SimulationStateContainer>())
-      , skillsContainer(injector.inject<SkillsContainer>())
-      , countriesContainer(injector.inject<CountriesContainer>())
+      , modelContainer(injector.inject<ModelContainer>())
       , countrySwitch(new osg::Switch())
       , countryHoverSwitch(new osg::Switch())
       , oSelectedCountryId(new osgGaming::Observable<int>(0))
       , highlightedBranchId(-1)
-    {}
+    {
+    }
 
     void addCountry(
       int id,
@@ -59,14 +59,14 @@ namespace onep
       countryHoverNodes.insert(CountryHoverNode::Map::value_type(id, hoverNode));
       countryHoverSwitch->addChild(hoverNode, false);
 
-      stateContainer->accessState([=](LuaSimulationState::Ptr state)
+      modelContainer->accessModel([=](LuaModel::Ptr model)
       {
-        LuaCountryState::Ptr cstate = state->getCountryState(id);
+        LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryState(id);
 
-        int n = skillsContainer->getNumBranches();
+        int n = model->getBranchesTable()->getNumBranches();
         for (int i = 0; i < n; i++)
         {
-          std::string branchName = skillsContainer->getBranchByIndex(i)->getBranchName();
+          std::string branchName = model->getBranchesTable()->getBranchByIndex(i)->getBranchName();
 
           skillBranchActivatedObservers.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
           {
@@ -98,9 +98,8 @@ namespace onep
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
     osg::ref_ptr<osgGaming::ShaderFactory> shaderFactory;
     osg::ref_ptr<LuaConfig> configManager;
-    osg::ref_ptr<SimulationStateContainer> stateContainer;
-    osg::ref_ptr<SkillsContainer> skillsContainer;
-    CountriesContainer::Ptr countriesContainer;
+
+    ModelContainer::Ptr modelContainer;
 
     osg::ref_ptr<osg::Switch> countrySwitch;
     osg::ref_ptr<osg::Switch> countryHoverSwitch;
@@ -210,7 +209,7 @@ namespace onep
       osg::Vec2f centerLatLong((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI);
       osg::Vec2f size(width, height);
 
-      LuaCountry::Ptr country = m->countriesContainer->getCountry(id);
+      LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getMappedElement<LuaCountry>(id);
 
       NeighborList neighborList;
 
@@ -306,14 +305,14 @@ namespace onep
 
     m->highlightedBranchId = id;
 
-    std::string branchName = m->skillsContainer->getBranchByIndex(id)->getBranchName();
+    std::string branchName = m->modelContainer->getModel()->getBranchesTable()->getBranchByIndex(id)->getBranchName();
 
     for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
     {
       int cid = it->first;
-      m->stateContainer->accessState([=](LuaSimulationState::Ptr state)
+      m->modelContainer->accessModel([=](LuaModel::Ptr model)
       {
-        LuaCountryState::Ptr cstate = state->getCountryState(cid);
+        LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryState(cid);
 
         if (cstate->getBranchesActivatedTable()->getBranchActivated(branchName.c_str()))
           m->setCountryColorMode(it->second, CountryNode::ColorMode(int(CountryNode::MODE_HIGHLIGHT_BANKS) + id));

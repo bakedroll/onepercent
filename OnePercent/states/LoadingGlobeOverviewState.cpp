@@ -9,10 +9,10 @@
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
 #include "scripting/LuaStateManager.h"
+#include "scripting/LuaModel.h"
+#include "scripting/LuaCountriesTable.h"
 #include "simulation/Simulation.h"
-#include "simulation/SkillsContainer.h"
-#include "simulation/CountriesContainer.h"
-#include "simulation/SimulationStateContainer.h"
+#include "simulation/ModelContainer.h"
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 
@@ -25,7 +25,6 @@
 
 #include <QVBoxLayout>
 #include <QLabel>
-#include <chrono>
 #include <osgGaming/ResourceManager.h>
 
 namespace onep
@@ -42,12 +41,10 @@ namespace onep
       , countryNameOverlay(injector.inject<CountryNameOverlay>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , countryOverlay(injector.inject<CountryOverlay>())
-      , skillsContainer(injector.inject<SkillsContainer>())
-      , countriesContainer(injector.inject<CountriesContainer>())
-      , stateContainer(injector.inject<SimulationStateContainer>())
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , simulation(injector.inject<Simulation>())
       , lua(injector.inject<LuaStateManager>())
+      , model(injector.inject<ModelContainer>())
       , labelLoadingText(nullptr)
       , overlay(nullptr)
     {
@@ -65,13 +62,10 @@ namespace onep
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<CountryOverlay> countryOverlay;
 
-    osg::ref_ptr<SkillsContainer> skillsContainer;
-    osg::ref_ptr<CountriesContainer> countriesContainer;
-    osg::ref_ptr<SimulationStateContainer> stateContainer;
-
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<LuaStateManager> lua;
+    osg::ref_ptr<ModelContainer> model;
 
     QLabel* labelLoadingText;
     VirtualOverlay* overlay;
@@ -154,10 +148,7 @@ namespace onep
     luabridge::LuaRef func_initialize_state = m->lua->getObject("control.initialize_state");
     LuaStateManager::safeExecute([&](){ func_initialize_state(); });
 
-    // load data from lua state
-    m->skillsContainer    ->loadFromLua(m->lua->getObject("model.branches"));
-    m->countriesContainer ->loadFromLua(m->lua->getObject("model.countries"));
-    m->stateContainer     ->loadFromLua(m->lua->getObject("model.state"));
+    m->model->initializeLuaModel();
 
     // loading globe
     m->globeOverviewWorld->initialize();
@@ -179,7 +170,8 @@ namespace onep
     m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryNodes());
 
     // update neighbours data
-    m->countriesContainer->writeToLua();
+    m->model->getModel()->getCountriesTable()->traverseElementsUpdate();
+    //m->countriesContainer->writeToLua();
 
     // initialize neighbour states and call on_initialize actions
     luabridge::LuaRef func_initialize_neighbour_states = m->lua->getObject("control.initialize_neighbour_states");

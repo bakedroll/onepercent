@@ -4,14 +4,16 @@
 #include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
-#include "simulation/SkillsContainer.h"
-#include "simulation/CountriesContainer.h"
 #include "scripting/LuaCountry.h"
-#include "simulation/SimulationStateContainer.h"
-#include "scripting/LuaSimulationState.h"
+#include "scripting/LuaSimulationStateTable.h"
+#include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSkillsTable.h"
+#include "scripting/LuaCountriesTable.h"
+#include "scripting/LuaStateManager.h"
+#include "scripting/LuaModel.h"
 #include "simulation/Simulation.h"
 #include "simulation/UpdateThread.h"
+#include "simulation/ModelContainer.h"
 
 #include <osgGaming/Macros.h>
 
@@ -89,9 +91,7 @@ namespace onep
       , countryOverlay(injector.inject<CountryOverlay>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , simulation(injector.inject<Simulation>())
-      , skillsContainer(injector.inject<SkillsContainer>())
-      , countriesContainer(injector.inject<CountriesContainer>())
-      , stateContainer(injector.inject<SimulationStateContainer>())
+      , modelContainer(injector.inject<ModelContainer>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , toggleCountryButton(nullptr)
@@ -115,9 +115,7 @@ namespace onep
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<Simulation> simulation;
-    osg::ref_ptr<SkillsContainer> skillsContainer;
-    osg::ref_ptr<CountriesContainer> countriesContainer;
-    osg::ref_ptr<SimulationStateContainer> stateContainer;
+    osg::ref_ptr<ModelContainer> modelContainer;
 
     ODay::Ptr oDay;
     ONumSkillPoints::Ptr oNumSkillPoints;
@@ -231,9 +229,9 @@ namespace onep
         int id = countryOverlay->getSelectedCountryId();
         if (id == 0) return;
 
-        stateContainer->accessState([=](LuaSimulationState::Ptr state)
+        modelContainer->accessModel([=](LuaModel::Ptr model)
         {
-          LuaCountryState::Ptr cstate = state->getCountryState(id);
+          LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryState(id);
 
           bool ok;
           float value = edit->text().toFloat(&ok);
@@ -319,13 +317,13 @@ namespace onep
       if (selectedId == 0)
         return;
 
-      stateContainer->accessState([=](LuaSimulationState::Ptr state)
+      modelContainer->accessModel([=](LuaModel::Ptr model)
       {
-        LuaCountryState::Map& countryStates = state->getCountryStates();
+        LuaCountryState::Map& countryStates = model->getSimulationStateTable()->getCountryStates();
         if (countryStates.count(selectedId) == 0)
           return;
 
-        LuaCountry::Ptr country = countriesContainer->getCountry(selectedId);
+        LuaCountry::Ptr country = model->getCountriesTable()->getMappedElement<LuaCountry>(selectedId);
         LuaCountryState::Ptr countryState = countryStates[selectedId];
 
         auto values = countryState->getValuesMap();
@@ -452,10 +450,12 @@ namespace onep
 
       branchesLayout->addWidget(radioNoOverlay, 0, 1);
 
-      int n = skillsContainer->getNumBranches();
+      auto branchesTable = modelContainer->getModel()->getBranchesTable();
+
+      int n = branchesTable->getNumBranches();
       for (int i = 0; i < n; i++)
       {
-        std::string name = skillsContainer->getBranchByIndex(i)->getBranchName();
+        std::string name = branchesTable->getBranchByIndex(i)->getBranchName();
 
         QCheckBox* checkBox = new QCheckBox(QString::fromStdString(name));
         QRadioButton* radioButton = new QRadioButton(QObject::tr("Overlay"));
@@ -473,9 +473,9 @@ namespace onep
           // schedule task
           simulation->getUpdateThread()->executeLockedTick([=]()
           {
-            stateContainer->accessState([=](LuaSimulationState::Ptr state)
+            modelContainer->accessModel([=](LuaModel::Ptr model)
             {
-              state->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), checked);
+              model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), checked);
             });
           });
         });
@@ -491,9 +491,10 @@ namespace onep
         {
           if (selected > 0)
           {
-            stateContainer->accessState([=](LuaSimulationState::Ptr state)
+            modelContainer->accessModel([=](LuaModel::Ptr model)
             {
-              checkBox->setChecked(state->getCountryState(selected)->getBranchesActivatedTable()->getBranchActivated(name.c_str()));
+              checkBox->setChecked(
+                model->getSimulationStateTable()->getCountryState(selected)->getBranchesActivatedTable()->getBranchActivated(name.c_str()));
             });
           }
           else
@@ -504,9 +505,9 @@ namespace onep
           checkBox->setEnabled(selected > 0);
         })));
 
-        stateContainer->accessState([this, name, checkBox](LuaSimulationState::Ptr state)
+        modelContainer->accessModel([this, name, checkBox](LuaModel::Ptr model)
         {
-          for(auto& it : state->getCountryStates())
+          for(auto& it : model->getSimulationStateTable()->getCountryStates())
           {
             int cid = it.first;
 
@@ -561,7 +562,7 @@ namespace onep
       // Skills
       for (int i = 0; i < n; i++)
       {
-        LuaSkillBranch::Ptr skillBranch = skillsContainer->getBranchByIndex(i);
+        LuaSkillBranch::Ptr skillBranch = branchesTable->getBranchByIndex(i);
         std::string name = skillBranch->getBranchName();
 
         // Skills
@@ -580,7 +581,7 @@ namespace onep
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
             // No need to schedule thread task here. Skill branch will never be modified from Lua code.
-            stateContainer->accessState([=](LuaSimulationState::Ptr state)
+            modelContainer->accessModel([=](LuaModel::Ptr model)
             {
               skillBranch->getSkillsTable()->getSkillByIndex(j)->setIsActivated(checked);
             });

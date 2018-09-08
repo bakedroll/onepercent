@@ -1,11 +1,12 @@
 #include "SimulationStateReaderWriter.h"
 
 #include "core/Macros.h"
-#include "simulation/SkillsContainer.h"
-#include "simulation/SimulationStateContainer.h"
-#include "scripting/LuaSimulationState.h"
+#include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaSkillsTable.h"
+#include "scripting/LuaModel.h"
+#include "scripting/LuaBranchesTable.h"
 #include "simulation/UpdateThread.h"
+#include "simulation/ModelContainer.h"
 
 #include <QFile>
 #include <QMessageBox>
@@ -23,8 +24,7 @@ namespace onep
 
   bool SimulationStateReaderWriter::saveState(
     const std::string& filename,
-    osg::ref_ptr<SimulationStateContainer> stateContainer,
-    osg::ref_ptr<SkillsContainer> skillsContainer,
+    osg::ref_ptr<ModelContainer> modelContainer,
     osgGaming::Observable<int>::Ptr oDay,
     osgGaming::Observable<int>::Ptr oNumSkillPoints)
   {
@@ -37,11 +37,12 @@ namespace onep
 
     QDataStream stream(&file);
 
-    stateContainer->accessState([&](LuaSimulationState::Ptr state)
+    modelContainer->accessModel([&](LuaModel::Ptr model)
     {
-      LuaCountryState::Map& cstates = state->getCountryStates();
+      LuaCountryState::Map& cstates = model->getSimulationStateTable()->getCountryStates();
 
-      int numBranches = skillsContainer->getNumBranches();
+      auto branchesTable = model->getBranchesTable();
+      int numBranches = branchesTable->getNumBranches();
 
       stream << int(cstates.size());
       for (LuaCountryState::Map::iterator it = cstates.begin(); it != cstates.end(); ++it)
@@ -79,7 +80,7 @@ namespace onep
         stream << numBranches;
         for (int i = 0; i < numBranches; i++)
         {
-          std::string branchName = skillsContainer->getBranchByIndex(i)->getBranchName();
+          std::string branchName = branchesTable->getBranchByIndex(i)->getBranchName();
 
           stream << int(branchName.length());
           stream.writeRawData(branchName.c_str(), branchName.length());
@@ -93,7 +94,7 @@ namespace onep
       stream << numBranches;
       for (int i = 0; i < numBranches; i++)
       {
-        LuaSkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
+        LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
         std::string branchName = branch->getBranchName();
 
         stream << int(branchName.length());
@@ -124,8 +125,7 @@ namespace onep
 
   bool SimulationStateReaderWriter::loadState(
     const std::string& filename,
-    osg::ref_ptr<SimulationStateContainer> stateContainer,
-    osg::ref_ptr<SkillsContainer> skillsContainer,
+    osg::ref_ptr<ModelContainer> modelContainer,
     osgGaming::Observable<int>::Ptr oDay,
     osgGaming::Observable<int>::Ptr oNumSkillPoints,
     UpdateThread* thread)
@@ -141,13 +141,15 @@ namespace onep
 
     thread->executeLockedTick([&]()
     {
-      stateContainer->accessState([&](LuaSimulationState::Ptr state)
+      modelContainer->accessModel([&](LuaModel::Ptr model)
       {
-        LuaCountryState::Map& cstates = state->getCountryStates();
+        LuaCountryState::Map& cstates = model->getSimulationStateTable()->getCountryStates();
         int numCountries, cid, numValues, numBranches, numSkills, len;
         char buffer[256];
         float value;
         bool activated;
+
+        auto branchesTable = model->getBranchesTable();
 
         stream >> numCountries;
         for (int i = 0; i < numCountries; i++)
@@ -220,7 +222,7 @@ namespace onep
 
             stream >> activated;
 
-            if (skillsContainer->getBranchByName(branchName) == nullptr)
+            if (branchesTable->getMappedElement<LuaSkillBranch>(branchName) == nullptr)
             {
               OSGG_QLOG_WARN(QString("Branch not found"));
               continue;
@@ -237,7 +239,7 @@ namespace onep
           stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
           std::string branchName(buffer);
 
-          LuaSkillBranch::Ptr branch = skillsContainer->getBranchByName(branchName);
+          LuaSkillBranch::Ptr branch = branchesTable->getMappedElement<LuaSkillBranch>(branchName);
 
           stream >> numSkills;
           for (int j = 0; j < numSkills; j++)
