@@ -13,13 +13,6 @@
 #include <QTimer>
 #include <QElapsedTimer>
 
-extern "C"
-{
-#include <lua.h>
-}
-
-#include <LuaBridge.h>
-
 namespace onep
 {
   struct Simulation::Impl
@@ -64,7 +57,6 @@ namespace onep
 
   Simulation::Simulation(osgGaming::Injector& injector)
     : osg::Referenced()
-    , LuaClassInstance()
     , m(new Impl(injector))
 
   {
@@ -192,6 +184,11 @@ namespace onep
     return m->oRunning;
   }
 
+  void Simulation::setUpdateTimerInterval(int msecs)
+  {
+    m->timer.setInterval(msecs);
+  }
+
   void Simulation::saveState(const std::string& filename)
   {
     SimulationStateReaderWriter rw;
@@ -202,61 +199,5 @@ namespace onep
   {
     SimulationStateReaderWriter rw;
     rw.loadState(filename, m->stateContainer, m->skillsContainer, m->oDay, m->oNumSkillPoints, &m->thread);
-  }
-
-  void Simulation::registerClass(lua_State* state)
-  {
-    luabridge::getGlobalNamespace(state)
-      .beginClass<Simulation>("Simulation")
-      .addFunction("start", &Simulation::lua_start)
-      .addFunction("stop", &Simulation::lua_stop)
-      .addFunction("set_day", &Simulation::lua_set_day)
-      .addFunction("set_interval", &Simulation::lua_set_interval)
-      .addFunction("set_skill_points", &Simulation::lua_set_skill_points)
-      .addFunction("add_skill_points", &Simulation::lua_add_skill_points)
-    .endClass();
-  }
-
-  std::string Simulation::instanceVariableName()
-  {
-    return "simulation";
-  }
-
-  void Simulation::lua_start(lua_State* state)
-  {
-    Multithreading::uiExecuteOrAsync([this](){ start(); });
-  }
-
-  void Simulation::lua_stop(lua_State* state)
-  {
-    Multithreading::uiExecuteOrAsync([this](){ stop(); });
-  }
-
-  void Simulation::lua_set_skill_points(int points)
-  {
-    OSGG_QLOG_DEBUG(QString("Set skill points: %1").arg(points));
-    Multithreading::uiExecuteOrAsync([=](){ m->oNumSkillPoints->set(points); });
-  }
-
-  void Simulation::lua_add_skill_points(int points)
-  {
-    OSGG_QLOG_DEBUG(QString("Add skill points: %1").arg(points));
-    Multithreading::uiExecuteOrAsync([=]()
-    {
-      int p = m->oNumSkillPoints->get();
-      m->oNumSkillPoints->set(p + points);
-    });
-  }
-
-  void Simulation::lua_set_day(int day)
-  {
-    OSGG_QLOG_DEBUG(QString("Set day: %1").arg(day));
-    Multithreading::uiExecuteOrAsync([=](){ m->oDay->set(day); });
-  }
-
-  void Simulation::lua_set_interval(int interval)
-  {
-    OSGG_QLOG_DEBUG(QString("Set interval: %1").arg(interval));
-    Multithreading::uiExecuteOrAsync([=](){ m->timer.setInterval(interval); });
   }
 }

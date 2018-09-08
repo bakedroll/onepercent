@@ -28,7 +28,7 @@ namespace onep
     Impl(osgGaming::Injector& injector, GlobeInteractionState* b)
     : base(b)
     , pInjector(&injector)
-    , configManager(injector.inject<ConfigManager>())
+    , configManager(injector.inject<LuaConfig>())
     , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
     , simulation(injector.inject<Simulation>())
     , countryOverlay(injector.inject<CountryOverlay>())
@@ -54,7 +54,7 @@ namespace onep
     // only for debug window
     osgGaming::Injector* pInjector;
 
-    osg::ref_ptr<ConfigManager> configManager;
+    osg::ref_ptr<LuaConfig> configManager;
     osg::ref_ptr<GlobeOverviewWorld> globeOverviewWorld;
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<CountryOverlay> countryOverlay;

@@ -1,4 +1,4 @@
-#include "ConfigManager.h"
+#include "LuaConfig.h"
 
 #include "scripting/LuaStateManager.h"
 
@@ -8,7 +8,7 @@
 
 namespace onep
 {
-  struct ConfigManager::Impl
+  struct LuaConfig::Impl
   {
     Impl(osgGaming::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
@@ -21,22 +21,22 @@ namespace onep
 
   };
 
-  ConfigManager::ConfigManager(osgGaming::Injector& injector)
+  LuaConfig::LuaConfig(osgGaming::Injector& injector)
     : m(new Impl(injector))
   {
   }
 
-  ConfigManager::~ConfigManager()
+  LuaConfig::~LuaConfig()
   {
     clearCache();
   }
 
-  void ConfigManager::clearCache()
+  void LuaConfig::clearCache()
   {
     m->cache.clear();
   }
 
-  std::shared_ptr<ConfigManager::ValueTypeBase> ConfigManager::getValuePtr(
+  std::shared_ptr<LuaConfig::ValueTypeBase> LuaConfig::getValuePtr(
     const std::string& name,
     std::function<std::shared_ptr<ValueTypeBase>(luabridge::LuaRef& ref)> getFunc)
   {

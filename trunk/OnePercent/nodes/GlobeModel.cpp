@@ -2,7 +2,7 @@
 
 #include "BoundariesMesh.h"
 #include "CountryOverlay.h"
-#include "scripting/ConfigManager.h"
+#include "scripting/LuaConfig.h"
 
 #include <osg/BlendFunc>
 #include <osg/Geode>
@@ -23,7 +23,7 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector, GlobeModel* b)
       : base(b)
-      , configManager(injector.inject<ConfigManager>())
+      , configManager(injector.inject<LuaConfig>())
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
@@ -369,7 +369,7 @@ namespace onep
 
     GlobeModel* base;
 
-    osg::ref_ptr<ConfigManager> configManager;
+    osg::ref_ptr<LuaConfig> configManager;
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
 

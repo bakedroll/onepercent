@@ -1,3 +1,6 @@
+#pragma once
+
+#include <osgGaming/Injector.h>
 #include <osgGaming/Observable.h>
 
 #define DEF_INT_OBSERVABLE(name) \

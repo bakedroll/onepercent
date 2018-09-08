@@ -12,13 +12,14 @@
 #include "states/MainMenuState.h"
 #include "states/LoadingGlobeOverviewState.h"
 #include "states/GlobeInteractionState.h"
-#include "scripting/ConfigManager.h"
+#include "scripting/LuaConfig.h"
 #include "scripting/LuaLogger.h"
-#include "scripting/Visuals.h"
+#include "scripting/LuaVisuals.h"
 #include "simulation/Simulation.h"
 #include "simulation/SkillsContainer.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/SimulationStateContainer.h"
+#include "scripting/LuaSimulation.h"
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>
@@ -102,17 +103,16 @@ namespace onep
     container.registerSingletonType<SimulationStateContainer>();
 
     // scripting
-    container.registerSingletonType<Visuals>();
+    container.registerSingletonType<LuaVisuals>();
+    container.registerSingletonType<LuaStateManager>();
+    container.registerSingletonType<LuaLogger>();
+    container.registerSingletonType<LuaConfig>();
+    container.registerSingletonType<LuaSimulation>();
 
     // effects
     container.registerType<osgGaming::FastApproximateAntiAliasingEffect>();
     container.registerType<osgGaming::HighDynamicRangeEffect>();
     container.registerType<osgGaming::DepthOfFieldEffect>();
-
-    // wrapper
-    container.registerSingletonType<LuaStateManager>();
-    container.registerSingletonType<LuaLogger>();
-    container.registerSingletonType<ConfigManager>();
 
     // Observables
     container.registerSingletonType<ONumSkillPoints>();
@@ -126,8 +126,8 @@ namespace onep
 
     // initialize Lua classes
     osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
-    lua->registerClassInstance<Simulation>(injector.inject<Simulation>());
-    lua->registerClassInstance<Visuals>(injector.inject<Visuals>());
+    lua->registerClassInstance<LuaSimulation>(injector.inject<LuaSimulation>());
+    lua->registerClassInstance<LuaVisuals>(injector.inject<LuaVisuals>());
     lua->registerClassInstance<LuaLogger>(injector.inject<LuaLogger>());
 
     m->simulation = injector.inject<Simulation>();

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "scripting/LuaStateManager.h"
-
+#include <osgGaming/Injector.h>
 #include <osgGaming/Observable.h>
 
 namespace onep
@@ -9,7 +8,7 @@ namespace onep
   class SimulationState;
   class UpdateThread;
 
-	class Simulation : public osg::Referenced, public LuaClassInstance
+	class Simulation : public osg::Referenced
 	{
 	public:
     typedef osg::ref_ptr<Simulation> Ptr;
@@ -29,19 +28,10 @@ namespace onep
     bool running() const;
     osgGaming::Observable<bool>::Ptr getORunning() const;
 
+    void setUpdateTimerInterval(int msecs);
+
     void saveState(const std::string& filename);
     void loadState(const std::string& filename);
-
-    virtual void registerClass(lua_State* state) override;
-    virtual std::string instanceVariableName() override;
-
-    // Lua functions
-    void lua_start(lua_State* state);
-    void lua_stop(lua_State* state);
-    void lua_set_skill_points(int points);
-    void lua_add_skill_points(int points);
-    void lua_set_day(int day);
-    void lua_set_interval(int interval);
 
 	private:
     struct Impl;
