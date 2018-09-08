@@ -2,7 +2,7 @@
 
 #include "core/Multithreading.h"
 #include "nodes/CountryHoverNode.h"
-#include "scripting/ConfigManager.h"
+#include "scripting/LuaConfig.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/SkillsContainer.h"
 #include "simulation/SimulationStateContainer.h"
@@ -27,7 +27,7 @@ namespace onep
       : resourceManager(injector.inject<osgGaming::ResourceManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
       , shaderFactory(injector.inject<osgGaming::ShaderFactory>())
-      , configManager(injector.inject<ConfigManager>())
+      , configManager(injector.inject<LuaConfig>())
       , stateContainer(injector.inject<SimulationStateContainer>())
       , skillsContainer(injector.inject<SkillsContainer>())
       , countriesContainer(injector.inject<CountriesContainer>())
@@ -97,7 +97,7 @@ namespace onep
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
     osg::ref_ptr<osgGaming::ShaderFactory> shaderFactory;
-    osg::ref_ptr<ConfigManager> configManager;
+    osg::ref_ptr<LuaConfig> configManager;
     osg::ref_ptr<SimulationStateContainer> stateContainer;
     osg::ref_ptr<SkillsContainer> skillsContainer;
     CountriesContainer::Ptr countriesContainer;

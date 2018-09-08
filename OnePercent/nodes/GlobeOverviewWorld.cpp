@@ -13,7 +13,7 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector, GlobeOverviewWorld* b)
       : base(b)
-      , configManager(injector.inject<ConfigManager>())
+      , configManager(injector.inject<LuaConfig>())
       , globeModel(injector.inject<GlobeModel>())
       , countryNameOverlay(injector.inject<CountryNameOverlay>())
       , backgroundModel(injector.inject<BackgroundModel>())
@@ -43,7 +43,7 @@ namespace onep
 
     GlobeOverviewWorld* base;
 
-    osg::ref_ptr<ConfigManager> configManager;
+    osg::ref_ptr<LuaConfig> configManager;
 
     float paramEarthRadius;
 

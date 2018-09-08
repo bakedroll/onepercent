@@ -19,11 +19,11 @@ extern "C"
 
 namespace onep
 {
-  class ConfigManager : public osg::Referenced
+  class LuaConfig : public osg::Referenced
   {
   public:
-    explicit ConfigManager(osgGaming::Injector& injector);
-    ~ConfigManager();
+    explicit LuaConfig(osgGaming::Injector& injector);
+    ~LuaConfig();
 
     template<typename T>
     T getNumber(const std::string& name)

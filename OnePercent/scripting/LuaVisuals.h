@@ -4,11 +4,11 @@
 
 namespace onep
 {
-  class Visuals : public osg::Referenced, public LuaClassInstance
+  class LuaVisuals : public osg::Referenced, public LuaClassInstance
   {
   public:
-    Visuals(osgGaming::Injector& injector);
-    ~Visuals();
+    LuaVisuals(osgGaming::Injector& injector);
+    ~LuaVisuals();
 
     virtual void registerClass(lua_State* state) override;
     virtual std::string instanceVariableName() override;

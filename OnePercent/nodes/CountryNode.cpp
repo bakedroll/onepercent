@@ -33,7 +33,7 @@ namespace onep
   };
 
   CountryNode::CountryNode(
-    osg::ref_ptr<ConfigManager> configManager,
+    osg::ref_ptr<LuaConfig> configManager,
     osg::Vec2f centerLatLong,
     osg::Vec2f size,
     osg::ref_ptr<osg::Vec3Array> vertices,

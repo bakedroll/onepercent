@@ -15,7 +15,7 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector)
       : resourceManager(injector.inject<osgGaming::ResourceManager>())
-      , configManager(injector.inject<ConfigManager>())
+      , configManager(injector.inject<LuaConfig>())
       , countriesContainer(injector.inject<CountriesContainer>())
       , enabled(true)
     {
@@ -26,7 +26,7 @@ namespace onep
     }
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
-    osg::ref_ptr<ConfigManager> configManager;
+    osg::ref_ptr<LuaConfig> configManager;
     osg::ref_ptr<CountriesContainer> countriesContainer;
 
     osg::ref_ptr<osg::Switch> switchNode;
