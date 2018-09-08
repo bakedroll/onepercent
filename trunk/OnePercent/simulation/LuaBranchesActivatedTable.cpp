@@ -2,6 +2,8 @@
 
 #include "core/Multithreading.h"
 
+#include <QMutex>
+
 namespace onep
 {
   struct LuaBranchesActivatedTable::Impl
