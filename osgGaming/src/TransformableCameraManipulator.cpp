@@ -38,19 +38,6 @@ void TransformableCameraManipulator::updateCamera(osg::Camera &camera)
   }
 
   updateCameraAlignedQuads();
-  
-
-  /*camera.setViewMatrix(getViewMatrix());
-  camera.setProjectionMatrix(_projectionMatrix);
-
-  if (_updateClearColor)
-  {
-    camera.setClearColor(_clearColor);
-
-    _updateClearColor = false;
-  }
-
-  updateCameraAlignedQuads();*/
 }
 
 Matrixd TransformableCameraManipulator::getMatrix() const
