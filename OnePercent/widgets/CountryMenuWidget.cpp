@@ -5,6 +5,7 @@
 #include "core/QConnectFunctor.h"
 
 #include "simulation/Simulation.h"
+#include "simulation/SkillsContainer.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
 #include "simulation/SkillBranch.h"
@@ -42,7 +43,7 @@ namespace onep
     {
       notifiesActivated.clear();
 
-      if (!country.valid())
+      if (!country)
         return;
 
       int cid = country->getId();
@@ -60,7 +61,7 @@ namespace onep
           SkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
           std::string name = branch->getBranchName();
 
-          notifiesActivated.push_back(cstate->getOActivatedBranch(name.c_str())->connectAndNotify(osgGaming::Func<bool>([=](bool activated)
+          notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name.c_str())->connectAndNotify(osgGaming::Func<bool>([=](bool activated)
           {
             Multithreading::uiExecuteOrAsync([=]()
             {
@@ -113,7 +114,7 @@ namespace onep
 
       QConnectFunctor::connect(button, SIGNAL(clicked()), [=]()
       {
-        if (!m->country.valid())
+        if (!m->country)
           return;
 
         int costs = branch->getCost();
@@ -127,7 +128,7 @@ namespace onep
         {
           m->stateContainer->accessState([=](SimulationState::Ptr state)
           {
-            state->getCountryState(cid)->setBranchActivated(name.c_str(), true);
+            state->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), true);
           });
         });
 

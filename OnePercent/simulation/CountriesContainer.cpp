@@ -2,45 +2,10 @@
 
 #include "scripting/LuaObjectMapper.h"
 #include "simulation/Country.h"
-#include "simulation/SkillsContainer.h"
-
-#include <osgGaming/Macros.h>
+#include "simulation/LuaCountriesTable.h"
 
 namespace onep
 {
-  class LuaCountriesTable : public LuaObjectMapper
-  {
-  public:
-    LuaCountriesTable(const luabridge::LuaRef& object)
-      : LuaObjectMapper(object)
-    {
-      assert_return(object.isTable());
-
-      for (luabridge::Iterator it(object); !it.isNil(); ++it)
-      {
-        luabridge::LuaRef ref = *it;
-        assert_continue(ref.isTable());
-
-        Country::Ptr country = new Country(ref);
-        countries[country->getId()] = country;
-      }
-    }
-
-    ~LuaCountriesTable() {}
-
-    Country::Map countries;
-
-  protected:
-    virtual void writeObject(luabridge::LuaRef& object) const override
-    {
-      for (Country::Map::const_iterator it = countries.cbegin(); it != countries.cend(); ++it)
-        it->second->write();
-    }
-
-    virtual void readObject(const luabridge::LuaRef& object) override {}
-
-  };
-
   struct CountriesContainer::Impl
   {
     Impl() {}
@@ -58,15 +23,9 @@ namespace onep
   {
   }
 
-  std::map<int, osg::ref_ptr<Country>>& CountriesContainer::getCountryMap() const
+  std::shared_ptr<Country> CountriesContainer::getCountry(int id)
   {
-    return m->countriesTable->countries;
-  }
-
-  osg::ref_ptr<Country> CountriesContainer::getCountry(int id)
-  {
-    assert_return(m->countriesTable->countries.count(id) > 0, nullptr);
-    return m->countriesTable->countries[id];
+    return m->countriesTable->getMappedElement<Country>(id);
   }
 
   void CountriesContainer::loadFromLua(const luabridge::LuaRef object)
@@ -76,6 +35,6 @@ namespace onep
 
   void CountriesContainer::writeToLua()
   {
-    m->countriesTable->write();
+    m->countriesTable->traverseElementsUpdate();
   }
 }

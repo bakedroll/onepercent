@@ -4,6 +4,7 @@
 #include "nodes/CountryHoverNode.h"
 #include "scripting/ConfigManager.h"
 #include "simulation/CountriesContainer.h"
+#include "simulation/SkillsContainer.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
 #include "simulation/Country.h"
@@ -67,7 +68,7 @@ namespace onep
         {
           std::string branchName = skillsContainer->getBranchByIndex(i)->getBranchName();
 
-          skillBranchActivatedObservers.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
+          skillBranchActivatedObservers.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
           {
             Multithreading::uiExecuteOrAsync([=]()
             {
@@ -219,7 +220,7 @@ namespace onep
         int neighbourId = stream.read<int>();
         neighborList.push_back(neighbourId);
 
-        if (country.valid())
+        if (country)
           country->getNeighbourIds().push_back(neighbourId);
       }
 
@@ -314,7 +315,7 @@ namespace onep
       {
         CountryState::Ptr cstate = state->getCountryState(cid);
 
-        if (cstate->getBranchActivated(branchName.c_str()))
+        if (cstate->getBranchesActivatedTable()->getBranchActivated(branchName.c_str()))
           m->setCountryColorMode(it->second, CountryNode::ColorMode(int(CountryNode::MODE_HIGHLIGHT_BANKS) + id));
       });
     }

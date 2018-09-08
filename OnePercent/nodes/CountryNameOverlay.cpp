@@ -69,7 +69,7 @@ namespace onep
       osg::Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCenterLatLong());
       Country::Ptr country = m->countriesContainer->getCountry(it->first);
 
-      if (!pos.valid() || !country.valid())
+      if (!pos.valid() || !country)
         continue;
 
       std::string name = osgGaming::utf8ToLatin1(country->getName().c_str());

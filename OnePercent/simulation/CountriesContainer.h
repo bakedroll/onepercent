@@ -25,8 +25,7 @@ namespace onep
     CountriesContainer(osgGaming::Injector& injector);
     ~CountriesContainer();
 
-    std::map<int, osg::ref_ptr<Country>>& getCountryMap() const;
-    osg::ref_ptr<Country> getCountry(int id);
+    std::shared_ptr<Country> getCountry(int id);
 
     void loadFromLua(const luabridge::LuaRef object);
     void writeToLua();

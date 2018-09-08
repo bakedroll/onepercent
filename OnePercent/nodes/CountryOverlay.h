@@ -1,8 +1,8 @@
 #pragma once
 
 #include <osgGaming/Injector.h>
+#include <osgGaming/Observable.h>
 
-#include "simulation/SkillBranch.h"
 #include "data/CountriesMap.h"
 #include "nodes/CountryNode.h"
 

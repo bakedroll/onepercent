@@ -25,7 +25,7 @@ namespace onep
     SimulationStateContainer(osgGaming::Injector& injector);
     ~SimulationStateContainer();
 
-    void accessState(std::function<void(osg::ref_ptr<SimulationState>)> func);
+    void accessState(std::function<void(std::shared_ptr<SimulationState>)> func);
 
     void loadFromLua(const luabridge::LuaRef object);
 

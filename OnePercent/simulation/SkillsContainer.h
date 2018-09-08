@@ -1,7 +1,6 @@
 #pragma once
 
 #include "simulation/SkillBranch.h"
-#include "scripting/LuaStateManager.h"
 
 #include <osgGaming/Injector.h>
 
@@ -21,8 +20,8 @@ namespace onep
     ~SkillsContainer();
 
     int getNumBranches();
-    osg::ref_ptr<SkillBranch> getBranchByIndex(int i);
-    osg::ref_ptr<SkillBranch> getBranchByName(std::string name);
+    std::shared_ptr<SkillBranch> getBranchByIndex(int i);
+    std::shared_ptr<SkillBranch> getBranchByName(std::string name);
 
     void loadFromLua(const luabridge::LuaRef branches);
     
