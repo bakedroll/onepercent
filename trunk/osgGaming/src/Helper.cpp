@@ -121,10 +121,10 @@ bool osgGaming::pointInRect(Vec2f point, Vec2f leftbottom, Vec2f righttop)
 		&& point.x() <= righttop.x() && point.y() <= righttop.y());
 }
 
-bool osgGaming::sphereLineIntersection(Vec3f sphereCenter, float sphereRadius, Vec3f lineOrigin, Vec3f lineDirectionNornalized, Vec3f& result)
+bool osgGaming::sphereLineIntersection(Vec3f sphereCenter, float sphereRadius, Vec3f lineOrigin, Vec3f lineDirectionNormalized, Vec3f& result)
 {
-	float a = lineDirectionNornalized * lineDirectionNornalized;
-	float b = lineDirectionNornalized * ((lineOrigin - sphereCenter) * 2.0f);
+	float a = lineDirectionNormalized * lineDirectionNormalized;
+	float b = lineDirectionNormalized * ((lineOrigin - sphereCenter) * 2.0f);
 	float c = (sphereCenter * sphereCenter) + (lineOrigin * lineOrigin) - 2.0f * (lineOrigin * sphereCenter) - sphereRadius * sphereRadius;
 	float D = b * b + (-4.0f) * a * c;
 
@@ -135,10 +135,10 @@ bool osgGaming::sphereLineIntersection(Vec3f sphereCenter, float sphereRadius, V
 
 	D = sqrtf(D);
 
-	float t = (-0.5f) * (b + D) / a;
+	float t = a == 0.0f ? 1.0f : (-0.5f) * (b + D) / a;
 	if (t > 0.0f)
 	{
-		result = lineOrigin + lineDirectionNornalized * t;
+		result = lineOrigin + lineDirectionNormalized * t;
 	}
 	else
 	{
