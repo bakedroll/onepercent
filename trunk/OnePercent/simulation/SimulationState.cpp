@@ -14,25 +14,20 @@ namespace onep
   };
 
   SimulationState::SimulationState(const luabridge::LuaRef& object)
-    : osg::Referenced()
-    , LuaObjectMapper(object)
+    : LuaObjectMapper(object)
     , m(new Impl())
   {
     assert_return(object.isTable());
 
-    for (luabridge::Iterator it(object); !it.isNil(); ++it)
+    foreachElementDo([this](luabridge::LuaRef& key, luabridge::LuaRef& value)
     {
-      luabridge::LuaRef ref = *it;
-      assert_continue(ref.isTable());
-      assert_continue(it.key().isNumber());
+      assert_return(key.isNumber());
 
-      m->countryStates[int(it.key())] = new CountryState(ref);
-    }
+      m->countryStates[int(key)] = makeMappedElement<CountryState>(key);
+    });
   }
 
-  SimulationState::~SimulationState()
-  {
-  }
+  SimulationState::~SimulationState() = default;
 
   CountryState::Map& SimulationState::getCountryStates() const
   {
@@ -41,19 +36,6 @@ namespace onep
 
   CountryState::Ptr SimulationState::getCountryState(int cid) const
   {
-    assert_return(m->countryStates.count(cid) > 0, nullptr);
-    return m->countryStates[cid];
-  }
-
-  void SimulationState::writeObject(luabridge::LuaRef& object) const
-  {
-    for (CountryState::Map::const_iterator it = m->countryStates.cbegin(); it != m->countryStates.cend(); ++it)
-      it->second->write();
-  }
-
-  void SimulationState::readObject(const luabridge::LuaRef& object)
-  {
-    for (CountryState::Map::const_iterator it = m->countryStates.cbegin(); it != m->countryStates.cend(); ++it)
-      it->second->read();
+    return getMappedElement<CountryState>(cid);
   }
 }

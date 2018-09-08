@@ -7,11 +7,11 @@
 #include "simulation/SkillsContainer.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationStateReaderWriter.h"
-#include "simulation/CountryState.h"
 #include "simulation/SkillBranch.h"
 #include "simulation/UpdateThread.h"
 
 #include <QTimer>
+#include <QElapsedTimer>
 
 extern "C"
 {
@@ -31,7 +31,6 @@ namespace onep
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , oRunning(new osgGaming::Observable<bool>(false))
-      , bSyncing(false)
     {}
 
     osg::ref_ptr<LuaStateManager> lua;
@@ -46,15 +45,11 @@ namespace onep
 
     LuaRefPtr refUpdate_skills_func;
     LuaRefPtr refUpdate_branches_func;
-    LuaRefPtr refUpdate_Tick_func;
+    LuaRefPtr refUpdate_tick_func;
 
     osgGaming::Observable<bool>::Ptr oRunning;
 
-    std::vector<osgGaming::Observer<bool>::Ptr> notifyActivatedList;
-
     UpdateThread thread;
-
-    bool bSyncing;
 
     LuaRefPtr getLuaFunction(const char* path)
     {
@@ -79,23 +74,63 @@ namespace onep
     m->timer.setSingleShot(false);
     m->timer.setInterval(1000);
 
+    m->thread.onTick([this]()
+    {
+      QElapsedTimer timerTickUpdate;
+      QElapsedTimer timerSkillsUpdate;
+      QElapsedTimer timerBranchesUpdate;
+      QElapsedTimer timerSync;
+      QElapsedTimer timerTotal;
+
+      qint64 tickElapsed;
+      qint64 skillsElapsed = 0;
+      qint64 branchesElapsed = 0;
+      qint64 syncElapsed = 0;
+
+      timerTotal.start();
+
+      LuaStateManager::safeExecute([&]()
+      {
+        m->stateContainer->accessState([&](SimulationState::Ptr state)
+        {
+
+          timerTickUpdate.start();
+          (*m->refUpdate_tick_func)();
+          tickElapsed = timerTickUpdate.elapsed();
+
+          timerSkillsUpdate.start();
+          (*m->refUpdate_skills_func)();
+          skillsElapsed = timerSkillsUpdate.elapsed();
+
+          timerBranchesUpdate.start();
+          (*m->refUpdate_branches_func)();
+          branchesElapsed = timerBranchesUpdate.elapsed();
+
+          timerSync.start();
+          state->traverseElementsUpdate();
+          syncElapsed = timerSync.elapsed();
+
+          Multithreading::uiExecuteOrAsync([this]()
+          {
+            m->oDay->set(m->oDay->get() + 1);
+          });
+        });
+      });
+
+      long totalElapsed = timerTotal.elapsed();
+
+      OSGG_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Total: %5ms")
+        .arg(tickElapsed)
+        .arg(skillsElapsed)
+        .arg(branchesElapsed)
+        .arg(syncElapsed)
+        .arg(totalElapsed));
+    });
+
     QConnectFunctor::connect(&m->timer, SIGNAL(timeout()), [this]()
     {
       m->thread.doNextStep();
     });
-
-    // DirectConnection: Code is executed in UpdateThread
-    QConnectFunctor::connect(&m->thread, SIGNAL(onStateUpdated()), [this]()
-    {
-      // synchronize with lua state
-      // Caution: lua state mutex is locked here
-      m->bSyncing = true;
-      m->stateContainer->accessState([](SimulationState::Ptr state){ state->read(); });
-      m->bSyncing = false;
-
-      // increment day
-      Multithreading::uiExecuteOrAsync([this](){ m->oDay->set(m->oDay->get() + 1); });
-    }, nullptr, Qt::DirectConnection);
   }
 
   Simulation::~Simulation()
@@ -106,50 +141,8 @@ namespace onep
   {
     m->refUpdate_skills_func = m->getLuaFunction("control.update_skills_func");
     m->refUpdate_branches_func = m->getLuaFunction("control.update_branches_func");
-    m->refUpdate_Tick_func = m->getLuaFunction("control.update_tick_func");
+    m->refUpdate_tick_func = m->getLuaFunction("control.update_tick_func");
 
-    int nBranches = m->skillsContainer->getNumBranches();
-
-    m->stateContainer->accessState([this, nBranches](SimulationState::Ptr state)
-    {
-      for(auto& it : state->getCountryStates())
-      {
-        CountryState::Ptr cstate = it.second;
-
-        for (int i = 0; i < nBranches; i++)
-        {
-          std::string branchName = m->skillsContainer->getBranchByIndex(i)->getBranchName();
-
-          m->notifyActivatedList.push_back(cstate->getOActivatedBranch(branchName.c_str())->connect(osgGaming::Func<bool>([this, cstate](bool activated)
-          {
-            // cancel when already written
-            if (m->bSyncing)
-              return;
-
-            // We are in a scheduled Lua task already
-            m->thread.executeLockedLuaState([&cstate](){ cstate->writeBranchesActivated(); });
-          })));
-        }
-      }
-    });
-
-
-    for (int i = 0; i < nBranches; i++)
-    {
-      SkillBranch::Ptr branch = m->skillsContainer->getBranchByIndex(i);
-     
-      int nskills = branch->getNumSkills();
-      for (int j = 0; j < nskills; j++)
-      {
-        Skill::Ptr skill = branch->getSkillByIndex(j);
-        m->notifyActivatedList.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([this, skill](bool activated)
-        {
-          m->thread.executeLockedLuaState([&skill](){ skill->write(); });
-        })));
-      }
-    }
-
-    m->thread.setUpdateFunctions(m->refUpdate_Tick_func, m->refUpdate_skills_func, m->refUpdate_branches_func);
     m->thread.start();
   }
 
@@ -208,10 +201,7 @@ namespace onep
   void Simulation::loadState(const std::string& filename)
   {
     SimulationStateReaderWriter rw;
-
-    m->bSyncing = true;
     rw.loadState(filename, m->stateContainer, m->skillsContainer, m->oDay, m->oNumSkillPoints, &m->thread);
-    m->bSyncing = false;
   }
 
   void Simulation::registerClass(lua_State* state)

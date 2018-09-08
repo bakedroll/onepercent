@@ -15,12 +15,11 @@ namespace onep
     UpdateThread();
     ~UpdateThread();
 
-    void setUpdateFunctions(LuaRefPtr refUpdate_tick_func, LuaRefPtr refUpdate_skills_func, LuaRefPtr refUpdate_branches_func);
+    void onTick(std::function<void()> func);
 
     virtual void run() override;
 
     void doNextStep();
-    void executeLockedLuaState(const std::function<void()>& task);
     void executeLockedTick(const std::function<void()>& task);
     void shutdown();
 
@@ -30,7 +29,6 @@ namespace onep
 
   signals:
     void nextStep();
-    void onStateUpdated();
 
   };
 }

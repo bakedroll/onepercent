@@ -7,6 +7,7 @@ namespace onep
   struct Country::Impl
   {
     Impl() {}
+    ~Impl() {}
 
     int id;
     std::string name;
@@ -14,10 +15,11 @@ namespace onep
   };
 
   Country::Country(const luabridge::LuaRef& object)
-    : osg::Referenced()
-    , LuaObjectMapper(object)
+    : LuaObjectMapper(object)
     , m(new Impl())
   {
+    assert_return(object.isTable());
+
     luabridge::LuaRef idRef         = object["id"];
     luabridge::LuaRef nameRef       = object["name"];
 
@@ -28,9 +30,7 @@ namespace onep
     m->name = nameRef.tostring();
   }
 
-  Country::~Country()
-  {
-  }
+  Country::~Country() = default;
 
   int Country::getId() const
   {
@@ -47,15 +47,11 @@ namespace onep
     return m->neighbourIds;
   }
 
-  void Country::writeObject(luabridge::LuaRef& object) const
+  void Country::onUpdate(luabridge::LuaRef& object)
   {
     luabridge::LuaRef refNeighbours = object["neighbours"];
     int i = 1;
     for (std::vector<int>::const_iterator it = m->neighbourIds.cbegin(); it != m->neighbourIds.cend(); ++it)
       refNeighbours[i++] = *it;
-  }
-
-  void Country::readObject(const luabridge::LuaRef& object)
-  {
   }
 }

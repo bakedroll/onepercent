@@ -5,20 +5,16 @@
 
 namespace onep
 {
-  class SimulationState : public osg::Referenced, public LuaObjectMapper
+  class SimulationState : public LuaObjectMapper
   {
   public:
-    typedef osg::ref_ptr<SimulationState> Ptr;
+    typedef std::shared_ptr<SimulationState> Ptr;
 
-    SimulationState(const luabridge::LuaRef& object);
+    explicit SimulationState(const luabridge::LuaRef& object);
     ~SimulationState();
 
     CountryState::Map& getCountryStates() const;
     CountryState::Ptr getCountryState(int cid) const;
-
-  protected:
-    virtual void writeObject(luabridge::LuaRef& object) const override;
-    virtual void readObject(const luabridge::LuaRef& object) override;
 
   private:
     struct Impl;

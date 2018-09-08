@@ -20,11 +20,9 @@ namespace onep
   {
   }
 
-  SimulationStateContainer::~SimulationStateContainer()
-  {
-  }
+  SimulationStateContainer::~SimulationStateContainer() = default;
 
-  void SimulationStateContainer::accessState(std::function<void(osg::ref_ptr<SimulationState>)> func)
+  void SimulationStateContainer::accessState(std::function<void(std::shared_ptr<SimulationState>)> func)
   {
     QMutexLocker lock(&m->mutexState);
     func(m->state);
@@ -33,6 +31,6 @@ namespace onep
   void SimulationStateContainer::loadFromLua(const luabridge::LuaRef object)
   {
     QMutexLocker lock(&m->mutexState);
-    m->state = new SimulationState(object);
+    m->state.reset(new SimulationState(object));
   }
 }

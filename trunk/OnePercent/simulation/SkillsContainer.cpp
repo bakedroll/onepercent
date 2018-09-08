@@ -1,52 +1,11 @@
-#include "SkillsContainer.h"
-
+#include "simulation/SkillsContainer.h"
+#include "simulation/LuaBranchesTable.h"
 #include "scripting/LuaObjectMapper.h"
-
-#include <osgGaming/Macros.h>
 
 #include <LuaBridge.h>
 
 namespace onep
 {
-  class LuaBranchesTable : public LuaObjectMapper
-  {
-  public:
-    LuaBranchesTable(const luabridge::LuaRef& object)
-      : LuaObjectMapper(object)
-    {
-      assert_return(object.isTable());
-
-      std::map<std::string, SkillBranch::Ptr> sortedMap;
-      for (luabridge::Iterator it(object); !it.isNil(); ++it)
-      {
-        luabridge::LuaRef ref = *it;
-        assert_continue(ref.isTable());
-        
-        SkillBranch::Ptr branch = new SkillBranch(ref, int(branches.size()));
-        sortedMap[branch->getBranchName()] = branch;
-      }
-
-      for (auto& it : sortedMap)
-      {
-        branches.push_back(it.second);
-        nameIndexMap[it.first] = int(branches.size()) - 1;
-      }
-
-      return;
-    }
-
-    ~LuaBranchesTable() {}
-
-    SkillBranch::List branches;
-    std::map<std::string, int> nameIndexMap;
-
-  protected:
-    virtual void writeObject(luabridge::LuaRef& object) const override {}
-    virtual void readObject(const luabridge::LuaRef& object) override {}
-
-  };
-
-
   struct SkillsContainer::Impl
   {
     Impl() {}
@@ -67,17 +26,17 @@ namespace onep
 
   int SkillsContainer::getNumBranches()
   {
-    return int(m->branchesTable->branches.size());
+    return m->branchesTable->getNumElements();
   }
 
   SkillBranch::Ptr SkillsContainer::getBranchByIndex(int i)
   {
-    return m->branchesTable->branches[i];
+    return m->branchesTable->getBranchByIndex(i);
   }
 
   SkillBranch::Ptr SkillsContainer::getBranchByName(std::string name)
   {
-    return m->branchesTable->branches[m->branchesTable->nameIndexMap[name]];
+    return m->branchesTable->getMappedElement<SkillBranch>(name);
   }
 
   void SkillsContainer::loadFromLua(const luabridge::LuaRef branches)

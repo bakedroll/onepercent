@@ -1,9 +1,11 @@
 #include "SimulationStateReaderWriter.h"
 
 #include "core/Macros.h"
+#include "simulation/SkillsContainer.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
 #include "simulation/UpdateThread.h"
+#include "simulation/LuaSkillsTable.h"
 
 #include <QFile>
 #include <QMessageBox>
@@ -46,11 +48,11 @@ namespace onep
       {
         stream << it->first;
 
-        CountryState::ValuesMap& values = it->second->getValuesMap();
-        CountryState::BranchValuesMap& branchValues = it->second->getBranchValuesMap();
+        auto values = it->second->getValuesMap();
+        auto branchValues = it->second->getBranchValuesMap();
 
         stream << int(values.size());
-        for (CountryState::ValuesMap::iterator vit = values.begin(); vit != values.end(); ++vit)
+        for (auto vit = values.begin(); vit != values.end(); ++vit)
         {
           stream << int(vit->first.length());
           stream.writeRawData(vit->first.c_str(), vit->first.length());
@@ -59,13 +61,13 @@ namespace onep
         }
 
         stream << int(branchValues.size());
-        for (CountryState::BranchValuesMap::iterator bit = branchValues.begin(); bit != branchValues.end(); ++bit)
+        for (auto bit = branchValues.begin(); bit != branchValues.end(); ++bit)
         {
           stream << int(bit->first.length());
           stream.writeRawData(bit->first.c_str(), bit->first.length());
 
           stream << int(bit->second.size());
-          for (CountryState::ValuesMap::iterator vit = bit->second.begin(); vit != bit->second.end(); ++vit)
+          for (auto vit = bit->second.begin(); vit != bit->second.end(); ++vit)
           {
             stream << int(vit->first.length());
             stream.writeRawData(vit->first.c_str(), vit->first.length());
@@ -82,7 +84,7 @@ namespace onep
           stream << int(branchName.length());
           stream.writeRawData(branchName.c_str(), branchName.length());
 
-          bool activated = it->second->getBranchActivated(branchName.c_str());
+          bool activated = it->second->getBranchesActivatedTable()->getBranchActivated(branchName.c_str());
 
           stream << activated;
         }
@@ -97,18 +99,18 @@ namespace onep
         stream << int(branchName.length());
         stream.writeRawData(branchName.c_str(), branchName.length());
 
-        int numSkills = branch->getNumSkills();
+        int numSkills = branch->getSkillsTable()->getNumSkills();
         stream << numSkills;
 
         for (int j = 0; j < numSkills; j++)
         {
-          Skill::Ptr skill = branch->getSkillByIndex(j);
+          Skill::Ptr skill = branch->getSkillsTable()->getSkillByIndex(j);
           std::string skillName = skill->getSkillName();
 
           stream << int(skillName.length());
           stream.writeRawData(skillName.c_str(), skillName.length());
 
-          stream << skill->getObActivated()->get();
+          stream << skill->getIsActivated();
         }
       }
 
@@ -160,8 +162,8 @@ namespace onep
 
           CountryState::Ptr cstate = cstates[cid];
 
-          CountryState::ValuesMap& values = cstate->getValuesMap();
-          CountryState::BranchValuesMap& branchValues = cstate->getBranchValuesMap();
+          auto values = cstate->getValuesMap();
+          auto branchValues = cstate->getBranchValuesMap();
 
           stream >> numValues;
           for (int j = 0; j < numValues; j++)
@@ -177,7 +179,7 @@ namespace onep
               continue;
             }
 
-            values[valueName] = value;
+            cstate->getValuesTable()->setValue(valueName, value);
           }
 
           stream >> numBranches;
@@ -206,7 +208,7 @@ namespace onep
                 continue;
               }
 
-              branchValues[branchName][valueName] = value;
+              cstate->getBranchValuesTable()->getBranch(branchName)->setValue(valueName, value);
             }
           }
 
@@ -224,8 +226,8 @@ namespace onep
               continue;
             }
 
-            osgGaming::Observable<bool>::Ptr obs = cstate->getOActivatedBranch(branchName.c_str());
-            if (obs->get() != activated) obs->set(activated);
+            if (activated != cstate->getBranchesActivatedTable()->getBranchActivated(branchName))
+              cstate->getBranchesActivatedTable()->setBranchActivated(branchName, activated);
           }
         }
 
@@ -245,18 +247,17 @@ namespace onep
 
             stream >> activated;
 
-            if (!branch.valid() || !branch->getSkillByName(skillName))
+            if (!branch || !branch->getSkillsTable()->getSkillByName(skillName))
             {
               OSGG_QLOG_WARN(QString("Skill %1 not found").arg(skillName.c_str()));
               continue;
             }
 
-            Skill::Ptr skill = branch->getSkillByName(skillName);
-            if (activated != skill->getObActivated()->get()) skill->getObActivated()->set(activated);
+            Skill::Ptr skill = branch->getSkillsTable()->getSkillByName(skillName);
+            if (activated != skill->getIsActivated())
+              skill->setIsActivated(activated);
           }
         }
-
-        thread->executeLockedLuaState([&state](){ state->write(); });
       });
     });
 

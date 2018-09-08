@@ -4,12 +4,14 @@
 #include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
+#include "simulation/SkillsContainer.h"
 #include "simulation/CountriesContainer.h"
 #include "simulation/Country.h"
 #include "simulation/Simulation.h"
 #include "simulation/SimulationStateContainer.h"
 #include "simulation/SimulationState.h"
 #include "simulation/UpdateThread.h"
+#include "simulation/LuaSkillsTable.h"
 
 #include <osgGaming/Macros.h>
 
@@ -326,8 +328,8 @@ namespace onep
         Country::Ptr country = countriesContainer->getCountry(selectedId);
         CountryState::Ptr countryState = countryStates[selectedId];
 
-        CountryState::ValuesMap& values = countryState->getValuesMap();
-        CountryState::BranchValuesMap& branchValues = countryState->getBranchValuesMap();
+        auto values = countryState->getValuesMap();
+        auto branchValues = countryState->getBranchValuesMap();
 
         if (layoutStats == nullptr)
         {
@@ -342,33 +344,25 @@ namespace onep
 
           layoutStats->addWidget(labelCountry);
 
-          for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
+          for (auto it = values.begin(); it != values.end(); ++it)
           {
             std::string name = it->first;
             ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
             {
-              simulation->getUpdateThread()->executeLockedLuaState([cstate, name, value]()
-              {
-                cstate->getValuesMap()[name] = value;
-                cstate->writeValues();
-              });
+              cstate->getValuesTable()->setValue(name, value);
             });
             valueWidgets[it->first] = widget;
           }
 
-          for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
+          for (auto it = branchValues.begin(); it != branchValues.end(); ++it)
           {
-            for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+            for (auto vit = it->second.begin(); vit != it->second.end(); ++vit)
             {
               std::string branchName = it->first;
               std::string name = vit->first;
               ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
               {
-                simulation->getUpdateThread()->executeLockedLuaState([cstate, branchName, name, value]()
-                {
-                  cstate->getBranchValuesMap()[branchName][name] = value;
-                  cstate->writeBranchValues();
-                });
+                cstate->getBranchValuesTable()->getBranch(branchName)->setValue(name, value);
               });
               branchValueWidgets[it->first][vit->first] = widget;
             }
@@ -387,7 +381,7 @@ namespace onep
 
         labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getName().c_str())).arg(country->getId()));
 
-        for (CountryState::ValuesMap::iterator it = values.begin(); it != values.end(); ++it)
+        for (auto it = values.begin(); it != values.end(); ++it)
         {
           valueWidgets[it->first].edit->setText(QString::number(it->second));
           valueWidgets[it->first].progressBar->setValue(osg::clampBetween<int>(int(it->second * 100.0f), 0, 100));
@@ -396,9 +390,9 @@ namespace onep
             updateValueGraph(valueWidgets[it->first], it->second);
         }
 
-        for (CountryState::BranchValuesMap::iterator it = branchValues.begin(); it != branchValues.end(); ++it)
+        for (auto it = branchValues.begin(); it != branchValues.end(); ++it)
         {
-          for (CountryState::ValuesMap::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
+          for (auto vit = it->second.begin(); vit != it->second.end(); ++vit)
           {
             branchValueWidgets[it->first][vit->first].edit->setText(QString::number(vit->second));
             branchValueWidgets[it->first][vit->first].progressBar->setValue(osg::clampBetween<int>(int(vit->second * 100.0f), 0, 100));
@@ -481,7 +475,7 @@ namespace onep
           {
             stateContainer->accessState([=](SimulationState::Ptr state)
             {
-              state->getCountryState(cid)->setBranchActivated(name.c_str(), checked);
+              state->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), checked);
             });
           });
         });
@@ -499,7 +493,7 @@ namespace onep
           {
             stateContainer->accessState([=](SimulationState::Ptr state)
             {
-              checkBox->setChecked(state->getCountryState(selected)->getBranchActivated(name.c_str()));
+              checkBox->setChecked(state->getCountryState(selected)->getBranchesActivatedTable()->getBranchActivated(name.c_str()));
             });
           }
           else
@@ -516,7 +510,7 @@ namespace onep
           {
             int cid = it.first;
 
-            skillBranchActivatedObservers.push_back(it.second->getOActivatedBranch(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
+            skillBranchActivatedObservers.push_back(it.second->getBranchesActivatedTable()->getOBranchActivated(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
             {
               Multithreading::uiExecuteOrAsync([=]()
               {
@@ -571,14 +565,14 @@ namespace onep
         std::string name = skillBranch->getBranchName();
 
         // Skills
-        int nskills = skillBranch->getNumSkills();
+        int nskills = skillBranch->getSkillsTable()->getNumSkills();
 
         QLabel* label = new QLabel(QString::fromStdString(name));
         rightLayout->addWidget(label);
 
         for (int j = 0; j < nskills; j++)
         {
-          Skill::Ptr skill = skillBranch->getSkillByIndex(j);
+          Skill::Ptr skill = skillBranch->getSkillsTable()->getSkillByIndex(j);
 
           QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getDisplayName()));
           rightLayout->addWidget(checkBox);
@@ -586,7 +580,10 @@ namespace onep
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
             // No need to schedule thread task here. Skill branch will never be modified from Lua code.
-            skillBranch->getSkillByIndex(j)->getObActivated()->set(checked);
+            stateContainer->accessState([=](SimulationState::Ptr state)
+            {
+              skillBranch->getSkillsTable()->getSkillByIndex(j)->setIsActivated(checked);
+            });
           });
 
           skillActivatedObservers.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([=](bool activated)
@@ -737,6 +734,6 @@ namespace onep
   void DebugWindow::onCommandEntered(const QString& command)
   {
     std::string c = command.toStdString();
-    m->simulation->getUpdateThread()->executeLockedLuaState([this, c]() { m->lua->executeCode(c); });
+    m->simulation->getUpdateThread()->executeLockedTick([this, c]() { m->lua->executeCode(c); });
   }
 }

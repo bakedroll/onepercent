@@ -1,39 +1,34 @@
 #pragma once
 
-#include "Skill.h"
 #include "scripting/LuaObjectMapper.h"
 
-#include <osg/ref_ptr>
-
 #include <memory>
+#include <vector>
 
 namespace onep
 {
-  class SkillBranch : public osg::Referenced, public LuaObjectMapper
+  class LuaSkillsTable;
+  class Skill;
+
+  class SkillBranch : public LuaObjectMapper
   {
   public:
-    typedef osg::ref_ptr<SkillBranch> Ptr;
+    typedef std::shared_ptr<SkillBranch> Ptr;
     typedef std::vector<Ptr> List;
 
-    SkillBranch(const luabridge::LuaRef& object, int id);
+    explicit SkillBranch(const luabridge::LuaRef& object);
     ~SkillBranch();
 
+    std::shared_ptr<LuaSkillsTable> getSkillsTable() const;
     int getBranchId() const;
     const std::string& getBranchName() const;
-    int getNumSkills() const;
-    Skill::Ptr getSkillByIndex(int i) const;
-    Skill::Ptr getSkillByName(std::string name) const;
-
     int getCost() const;
 
-  protected:
-
-    virtual void writeObject(luabridge::LuaRef& object) const override;
-    virtual void readObject(const luabridge::LuaRef& object) override;
+    void setBranchId(int id);
 
   private:
     struct Impl;
-    std::unique_ptr<Impl> m;
+    std::shared_ptr<Impl> m;
 
   };
 }

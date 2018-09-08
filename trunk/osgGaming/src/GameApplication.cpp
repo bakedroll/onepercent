@@ -82,8 +82,6 @@ namespace osgGaming
     {
       if (!state->isLoadingState())
       {
-        // TODO: what does that do?
-
         //base->setDefaultWorld(state->getWorld());
         //base->setDefaultHud(state->getHud());
       }
@@ -213,7 +211,6 @@ namespace osgGaming
 
             ref_ptr<AbstractGameState> nextState = *nextStates.begin();
 
-            // TODO: refactor
             View::Ptr view = m->viewer->getView(0);
             if (!view)
               assert(false);
@@ -319,7 +316,6 @@ namespace osgGaming
   {
     if (!m->defaultWorld.valid())
     {
-      // TODO: overthink that
       setDefaultWorld(m_injector->inject<World>());
     }
 
@@ -330,7 +326,6 @@ namespace osgGaming
   {
     if (!m->defaultHud.valid())
     {
-      // TODO: look at this again
       setDefaultHud(m_injector->inject<Hud>());
     }
 
