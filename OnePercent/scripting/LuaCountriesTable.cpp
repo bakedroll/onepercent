@@ -1,6 +1,6 @@
-#include "simulation/LuaCountriesTable.h"
+#include "scripting/LuaCountriesTable.h"
 
-#include "simulation/Country.h"
+#include "scripting/LuaCountry.h"
 
 namespace onep
 {
@@ -9,7 +9,7 @@ namespace onep
   {
     assert_return(object.isTable());
 
-    makeAllMappedElements<Country>();
+    makeAllMappedElements<LuaCountry>();
   }
 
   LuaCountriesTable::~LuaCountriesTable() = default;

@@ -7,7 +7,7 @@
 #include "nodes/GlobeModel.h"
 #include "nodes/CountryOverlay.h"
 #include "simulation/CountriesContainer.h"
-#include "simulation/Country.h"
+#include "scripting/LuaCountry.h"
 #include "simulation/Simulation.h"
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
@@ -217,7 +217,7 @@ namespace onep
         float r = m->paramEarthRadius;
         
         CountryNode::Ptr countryNode = m->countryOverlay->getCountryNode(id);
-        Country::Ptr country = m->countriesContainer->getCountry(id);
+        LuaCountry::Ptr country = m->countriesContainer->getCountry(id);
         
         OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
 

@@ -1,4 +1,4 @@
-#include "simulation/LuaSkillsTable.h"
+#include "scripting/LuaSkillsTable.h"
 
 namespace onep
 {
@@ -7,12 +7,12 @@ namespace onep
   {
     assert_return(object.isTable());
 
-    std::map<std::string, Skill::Ptr> sortedMap;
+    std::map<std::string, LuaSkill::Ptr> sortedMap;
 
     foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
     {
       assert_return(key.isString());
-      Skill::Ptr skill = makeMappedElement<Skill>(key);
+      LuaSkill::Ptr skill = makeMappedElement<LuaSkill>(key);
       sortedMap[skill->getSkillName()] = skill;
     });
 
@@ -29,13 +29,13 @@ namespace onep
     return int(m_skills.size());
   }
 
-  Skill::Ptr LuaSkillsTable::getSkillByIndex(int i) const
+  LuaSkill::Ptr LuaSkillsTable::getSkillByIndex(int i) const
   {
     return m_skills[i];
   }
 
-  Skill::Ptr LuaSkillsTable::getSkillByName(std::string name) const
+  LuaSkill::Ptr LuaSkillsTable::getSkillByName(std::string name) const
   {
-    return getMappedElement<Skill>(name);
+    return getMappedElement<LuaSkill>(name);
   }
 }

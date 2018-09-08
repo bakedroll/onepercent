@@ -8,16 +8,16 @@
 namespace onep
 {
   class LuaSkillsTable;
-  class Skill;
+  class LuaSkill;
 
-  class SkillBranch : public LuaObjectMapper
+  class LuaSkillBranch : public LuaObjectMapper
   {
   public:
-    typedef std::shared_ptr<SkillBranch> Ptr;
+    typedef std::shared_ptr<LuaSkillBranch> Ptr;
     typedef std::vector<Ptr> List;
 
-    explicit SkillBranch(const luabridge::LuaRef& object);
-    ~SkillBranch();
+    explicit LuaSkillBranch(const luabridge::LuaRef& object);
+    ~LuaSkillBranch();
 
     std::shared_ptr<LuaSkillsTable> getSkillsTable() const;
     int getBranchId() const;

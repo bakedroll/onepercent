@@ -1,8 +1,8 @@
-#include "CountriesContainer.h"
+#include "simulation/CountriesContainer.h"
 
 #include "scripting/LuaObjectMapper.h"
-#include "simulation/Country.h"
-#include "simulation/LuaCountriesTable.h"
+#include "scripting/LuaCountry.h"
+#include "scripting/LuaCountriesTable.h"
 
 namespace onep
 {
@@ -23,12 +23,12 @@ namespace onep
   {
   }
 
-  std::shared_ptr<Country> CountriesContainer::getCountry(int id)
+  std::shared_ptr<LuaCountry> CountriesContainer::getCountry(int id)
   {
-    return m->countriesTable->getMappedElement<Country>(id);
+    return m->countriesTable->getMappedElement<LuaCountry>(id);
   }
 
-  void CountriesContainer::loadFromLua(const luabridge::LuaRef object)
+  void CountriesContainer::loadFromLua(const luabridge::LuaRef& object)
   {
     m->countriesTable.reset(new LuaCountriesTable(object));
   }

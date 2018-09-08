@@ -1,6 +1,6 @@
 #pragma once
 
-#include "simulation/SimulationState.h"
+#include "scripting/LuaSimulationState.h"
 
 #include <QThread>
 #include <memory>

@@ -1,5 +1,5 @@
 #include "simulation/SkillsContainer.h"
-#include "simulation/LuaBranchesTable.h"
+#include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaObjectMapper.h"
 
 #include <LuaBridge.h>
@@ -29,14 +29,14 @@ namespace onep
     return m->branchesTable->getNumElements();
   }
 
-  SkillBranch::Ptr SkillsContainer::getBranchByIndex(int i)
+  LuaSkillBranch::Ptr SkillsContainer::getBranchByIndex(int i)
   {
     return m->branchesTable->getBranchByIndex(i);
   }
 
-  SkillBranch::Ptr SkillsContainer::getBranchByName(std::string name)
+  LuaSkillBranch::Ptr SkillsContainer::getBranchByName(std::string name)
   {
-    return m->branchesTable->getMappedElement<SkillBranch>(name);
+    return m->branchesTable->getMappedElement<LuaSkillBranch>(name);
   }
 
   void SkillsContainer::loadFromLua(const luabridge::LuaRef branches)

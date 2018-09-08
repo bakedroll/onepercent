@@ -5,7 +5,7 @@
 
 namespace onep
 {
-  class SimulationState;
+  class LuaSimulationState;
   class UpdateThread;
 
 	class Simulation : public osg::Referenced

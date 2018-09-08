@@ -6,12 +6,12 @@
 #include "core/QConnectFunctor.h"
 #include "simulation/SkillsContainer.h"
 #include "simulation/CountriesContainer.h"
-#include "simulation/Country.h"
-#include "simulation/Simulation.h"
+#include "scripting/LuaCountry.h"
 #include "simulation/SimulationStateContainer.h"
-#include "simulation/SimulationState.h"
+#include "scripting/LuaSimulationState.h"
+#include "scripting/LuaSkillsTable.h"
+#include "simulation/Simulation.h"
 #include "simulation/UpdateThread.h"
-#include "simulation/LuaSkillsTable.h"
 
 #include <osgGaming/Macros.h>
 
@@ -196,7 +196,7 @@ namespace onep
       updateBoundaries();
     }
 
-    ValueWidget createValueWidgets(const QString& labelText, std::function<void(float, CountryState::Ptr)> setFunc)
+    ValueWidget createValueWidgets(const QString& labelText, std::function<void(float, LuaCountryState::Ptr)> setFunc)
     {
       ValueWidget widget;
 
@@ -231,9 +231,9 @@ namespace onep
         int id = countryOverlay->getSelectedCountryId();
         if (id == 0) return;
 
-        stateContainer->accessState([=](SimulationState::Ptr state)
+        stateContainer->accessState([=](LuaSimulationState::Ptr state)
         {
-          CountryState::Ptr cstate = state->getCountryState(id);
+          LuaCountryState::Ptr cstate = state->getCountryState(id);
 
           bool ok;
           float value = edit->text().toFloat(&ok);
@@ -319,14 +319,14 @@ namespace onep
       if (selectedId == 0)
         return;
 
-      stateContainer->accessState([=](SimulationState::Ptr state)
+      stateContainer->accessState([=](LuaSimulationState::Ptr state)
       {
-        CountryState::Map& countryStates = state->getCountryStates();
+        LuaCountryState::Map& countryStates = state->getCountryStates();
         if (countryStates.count(selectedId) == 0)
           return;
 
-        Country::Ptr country = countriesContainer->getCountry(selectedId);
-        CountryState::Ptr countryState = countryStates[selectedId];
+        LuaCountry::Ptr country = countriesContainer->getCountry(selectedId);
+        LuaCountryState::Ptr countryState = countryStates[selectedId];
 
         auto values = countryState->getValuesMap();
         auto branchValues = countryState->getBranchValuesMap();
@@ -347,7 +347,7 @@ namespace onep
           for (auto it = values.begin(); it != values.end(); ++it)
           {
             std::string name = it->first;
-            ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
+            ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()), [=](float value, LuaCountryState::Ptr cstate)
             {
               cstate->getValuesTable()->setValue(name, value);
             });
@@ -360,7 +360,7 @@ namespace onep
             {
               std::string branchName = it->first;
               std::string name = vit->first;
-              ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()), [=](float value, CountryState::Ptr cstate)
+              ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()), [=](float value, LuaCountryState::Ptr cstate)
               {
                 cstate->getBranchValuesTable()->getBranch(branchName)->setValue(name, value);
               });
@@ -473,7 +473,7 @@ namespace onep
           // schedule task
           simulation->getUpdateThread()->executeLockedTick([=]()
           {
-            stateContainer->accessState([=](SimulationState::Ptr state)
+            stateContainer->accessState([=](LuaSimulationState::Ptr state)
             {
               state->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), checked);
             });
@@ -491,7 +491,7 @@ namespace onep
         {
           if (selected > 0)
           {
-            stateContainer->accessState([=](SimulationState::Ptr state)
+            stateContainer->accessState([=](LuaSimulationState::Ptr state)
             {
               checkBox->setChecked(state->getCountryState(selected)->getBranchesActivatedTable()->getBranchActivated(name.c_str()));
             });
@@ -504,7 +504,7 @@ namespace onep
           checkBox->setEnabled(selected > 0);
         })));
 
-        stateContainer->accessState([this, name, checkBox](SimulationState::Ptr state)
+        stateContainer->accessState([this, name, checkBox](LuaSimulationState::Ptr state)
         {
           for(auto& it : state->getCountryStates())
           {
@@ -561,7 +561,7 @@ namespace onep
       // Skills
       for (int i = 0; i < n; i++)
       {
-        SkillBranch::Ptr skillBranch = skillsContainer->getBranchByIndex(i);
+        LuaSkillBranch::Ptr skillBranch = skillsContainer->getBranchByIndex(i);
         std::string name = skillBranch->getBranchName();
 
         // Skills
@@ -572,7 +572,7 @@ namespace onep
 
         for (int j = 0; j < nskills; j++)
         {
-          Skill::Ptr skill = skillBranch->getSkillsTable()->getSkillByIndex(j);
+          LuaSkill::Ptr skill = skillBranch->getSkillsTable()->getSkillByIndex(j);
 
           QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getDisplayName()));
           rightLayout->addWidget(checkBox);
@@ -580,7 +580,7 @@ namespace onep
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
             // No need to schedule thread task here. Skill branch will never be modified from Lua code.
-            stateContainer->accessState([=](SimulationState::Ptr state)
+            stateContainer->accessState([=](LuaSimulationState::Ptr state)
             {
               skillBranch->getSkillsTable()->getSkillByIndex(j)->setIsActivated(checked);
             });

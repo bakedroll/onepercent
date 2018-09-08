@@ -1,6 +1,6 @@
 #pragma once
 
-#include "simulation/SkillBranch.h"
+#include "scripting/LuaSkillBranch.h"
 
 #include <osgGaming/Injector.h>
 
@@ -9,7 +9,7 @@
 
 namespace onep
 {
-  class SkillBranch;
+  class LuaSkillBranch;
 
   class SkillsContainer : public osg::Referenced
   {
@@ -20,8 +20,8 @@ namespace onep
     ~SkillsContainer();
 
     int getNumBranches();
-    std::shared_ptr<SkillBranch> getBranchByIndex(int i);
-    std::shared_ptr<SkillBranch> getBranchByName(std::string name);
+    std::shared_ptr<LuaSkillBranch> getBranchByIndex(int i);
+    std::shared_ptr<LuaSkillBranch> getBranchByName(std::string name);
 
     void loadFromLua(const luabridge::LuaRef branches);
     

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "simulation/Country.h"
+#include "scripting/LuaCountry.h"
 #include "widgets/VirtualOverlay.h"
 
 #include <memory>
@@ -16,7 +16,7 @@ namespace onep
 		~CountryMenuWidget();
 
 		void setCenterPosition(int x, int y);
-    void setCountry(Country::Ptr country);
+    void setCountry(LuaCountry::Ptr country);
 
 	private:
 		struct Impl;

@@ -1,7 +1,7 @@
 #include "CountryNameOverlay.h"
 
 #include "simulation/CountriesContainer.h"
-#include "simulation/Country.h"
+#include "scripting/LuaCountry.h"
 
 #include <osg/Billboard>
 #include <osg/Switch>
@@ -67,7 +67,7 @@ namespace onep
     for (CountryNode::Map::const_iterator it = m->countryMap->cbegin(); it != m->countryMap->cend(); ++it)
     {
       osg::Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCenterLatLong());
-      Country::Ptr country = m->countriesContainer->getCountry(it->first);
+      LuaCountry::Ptr country = m->countriesContainer->getCountry(it->first);
 
       if (!pos.valid() || !country)
         continue;

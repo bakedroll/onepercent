@@ -7,14 +7,14 @@
 
 namespace onep
 {
-  class Country : public LuaObjectMapper
+  class LuaCountry : public LuaObjectMapper
   {
   public:
-    typedef std::shared_ptr<Country> Ptr;
+    typedef std::shared_ptr<LuaCountry> Ptr;
     typedef std::map<int, Ptr> Map;
 
-    explicit Country(const luabridge::LuaRef& object);
-    ~Country();
+    explicit LuaCountry(const luabridge::LuaRef& object);
+    ~LuaCountry();
 
     int getId() const;
     std::string getName() const;

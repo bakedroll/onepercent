@@ -9,15 +9,15 @@
 
 namespace onep
 {
-	class Skill : public LuaObjectMapper
+	class LuaSkill : public LuaObjectMapper
 	{
 	public:
-    typedef std::shared_ptr<Skill> Ptr;
+    typedef std::shared_ptr<LuaSkill> Ptr;
     typedef std::vector<Ptr> List;
     typedef std::map<std::string, Ptr> Map;
 
-	  explicit Skill(const luabridge::LuaRef& object);
-    ~Skill();
+	  explicit LuaSkill(const luabridge::LuaRef& object);
+    ~LuaSkill();
 
 		std::string getSkillName() const;
     std::string getDisplayName() const;

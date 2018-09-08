@@ -1,19 +1,19 @@
 #pragma once
 
-#include "simulation/LuaValuesTable.h"
-#include "simulation/LuaBranchValuesTable.h"
-#include "simulation/LuaBranchesActivatedTable.h"
+#include "scripting/LuaValuesTable.h"
+#include "scripting/LuaBranchValuesTable.h"
+#include "scripting/LuaBranchesActivatedTable.h"
 
 namespace onep
 {
-  class CountryState : public LuaObjectMapper
+  class LuaCountryState : public LuaObjectMapper
   {
   public:
-    typedef std::shared_ptr<CountryState> Ptr;
+    typedef std::shared_ptr<LuaCountryState> Ptr;
     typedef std::map<int, Ptr> Map;
 
-    explicit CountryState(const luabridge::LuaRef& object);
-    ~CountryState();
+    explicit LuaCountryState(const luabridge::LuaRef& object);
+    ~LuaCountryState();
 
     LuaValuesTable::ValuesMap getValuesMap() const;
     LuaBranchValuesTable::BranchValuesMap getBranchValuesMap() const;

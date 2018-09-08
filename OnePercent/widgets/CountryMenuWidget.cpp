@@ -7,8 +7,8 @@
 #include "simulation/Simulation.h"
 #include "simulation/SkillsContainer.h"
 #include "simulation/SimulationStateContainer.h"
-#include "simulation/SimulationState.h"
-#include "simulation/SkillBranch.h"
+#include "scripting/LuaSimulationState.h"
+#include "scripting/LuaSkillBranch.h"
 #include "simulation/UpdateThread.h"
 
 #include <osgGaming/Helper.h>
@@ -26,7 +26,7 @@ namespace onep
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
     {}
 
-    Country::Ptr country;
+    LuaCountry::Ptr country;
 
     Simulation::Ptr simulation;
     SkillsContainer::Ptr skillsContainer;
@@ -48,17 +48,17 @@ namespace onep
 
       int cid = country->getId();
 
-      stateContainer->accessState([=](SimulationState::Ptr state)
+      stateContainer->accessState([=](LuaSimulationState::Ptr state)
       {
         if (state->getCountryStates().count(cid) == 0)
           return;
 
-        CountryState::Ptr cstate = state->getCountryStates()[cid];
+        LuaCountryState::Ptr cstate = state->getCountryStates()[cid];
 
         int n = skillsContainer->getNumBranches();
         for (int i = 0; i < n; i++)
         {
-          SkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
+          LuaSkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
           std::string name = branch->getBranchName();
 
           notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name.c_str())->connectAndNotify(osgGaming::Func<bool>([=](bool activated)
@@ -98,7 +98,7 @@ namespace onep
     int n = m->skillsContainer->getNumBranches();
     for (int i = 0; i<n; i++)
     {
-      SkillBranch::Ptr branch = m->skillsContainer->getBranchByIndex(i);
+      LuaSkillBranch::Ptr branch = m->skillsContainer->getBranchByIndex(i);
       std::string name = branch->getBranchName();
 
       QPushButton* button = new QPushButton(QString::fromStdString(name));
@@ -126,7 +126,7 @@ namespace onep
         // schedule task
         m->simulation->getUpdateThread()->executeLockedTick([=]()
         {
-          m->stateContainer->accessState([=](SimulationState::Ptr state)
+          m->stateContainer->accessState([=](LuaSimulationState::Ptr state)
           {
             state->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), true);
           });
@@ -153,7 +153,7 @@ namespace onep
     setGeometry(x - geo.width() / 2, y - geo.height() / 2, geo.width(), geo.height());
 	}
 
-  void CountryMenuWidget::setCountry(Country::Ptr country)
+  void CountryMenuWidget::setCountry(LuaCountry::Ptr country)
   {
     m->country = country;
     m->updateUi();

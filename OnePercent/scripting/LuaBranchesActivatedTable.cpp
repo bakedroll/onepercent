@@ -1,4 +1,4 @@
-#include "simulation/LuaBranchesActivatedTable.h"
+#include "scripting/LuaBranchesActivatedTable.h"
 
 #include "core/Multithreading.h"
 

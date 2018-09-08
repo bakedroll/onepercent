@@ -1,11 +1,11 @@
-#include "simulation/Skill.h"
+#include "scripting/LuaSkill.h"
 #include "core/Multithreading.h"
 
 #include <osgGaming/Macros.h>
 
 namespace onep
 {
-  struct Skill::Impl
+  struct LuaSkill::Impl
   {
     Impl()
       : obActivated(new osgGaming::Observable<bool>(false))
@@ -19,7 +19,7 @@ namespace onep
     osgGaming::Observable<bool>::Ptr obActivated;
   };
 
-  Skill::Skill(const luabridge::LuaRef& object)
+  LuaSkill::LuaSkill(const luabridge::LuaRef& object)
     : LuaObjectMapper(object)
     , m(new Impl())
   {
@@ -44,35 +44,35 @@ namespace onep
     m->obActivated->set(bool(activatedRef));
   }
 
-  Skill::~Skill() = default;
+  LuaSkill::~LuaSkill() = default;
 
-  std::string Skill::getSkillName() const
+  std::string LuaSkill::getSkillName() const
   {
     return m->name;
   }
 
-  std::string Skill::getDisplayName() const
+  std::string LuaSkill::getDisplayName() const
   {
     return m->displayName;
   }
 
-  bool Skill::getIsActivated() const
+  bool LuaSkill::getIsActivated() const
   {
     return m->obActivated->get();
   }
 
-  void Skill::setIsActivated(bool activated)
+  void LuaSkill::setIsActivated(bool activated)
   {
     luaref()["activated"] = activated;
     Multithreading::uiExecuteOrAsync([=](){ m->obActivated->set(activated); });
   }
 
-  osgGaming::Observable<bool>::Ptr Skill::getObActivated() const
+  osgGaming::Observable<bool>::Ptr LuaSkill::getObActivated() const
   {
     return m->obActivated;
   }
 
-  void Skill::onUpdate(luabridge::LuaRef& object)
+  void LuaSkill::onUpdate(luabridge::LuaRef& object)
   {
     bool activated = bool(object["activated"]);
     if (activated != getIsActivated())
