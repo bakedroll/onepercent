@@ -8,8 +8,7 @@
 
 namespace onep
 {
-  class SimulationStateContainer;
-  class SkillsContainer;
+  class ModelContainer;
   class UpdateThread;
 
   class SimulationStateReaderWriter
@@ -20,15 +19,13 @@ namespace onep
 
     bool saveState(
       const std::string& filename,
-      osg::ref_ptr<SimulationStateContainer> stateContainer,
-      osg::ref_ptr<SkillsContainer> skillsContainer,
+      osg::ref_ptr<ModelContainer> modelContainer,
       osgGaming::Observable<int>::Ptr oDay,
       osgGaming::Observable<int>::Ptr oNumSkillPoints);
 
     bool loadState(
       const std::string& filename,
-      osg::ref_ptr<SimulationStateContainer> stateContainer,
-      osg::ref_ptr<SkillsContainer> skillsContainer,
+      osg::ref_ptr<ModelContainer> modelContainer,
       osgGaming::Observable<int>::Ptr oDay,
       osgGaming::Observable<int>::Ptr oNumSkillPoints,
       UpdateThread* thread);

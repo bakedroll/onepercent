@@ -27,6 +27,8 @@ namespace onep
   class LuaStateManager : public osg::Referenced
   {
   public:
+    using Ptr = osg::ref_ptr<LuaStateManager>;
+
     explicit LuaStateManager(osgGaming::Injector& injector);
     ~LuaStateManager();
 

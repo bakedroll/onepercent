@@ -1,9 +1,8 @@
 #pragma once
 
-#include "scripting/LuaSimulationState.h"
-
 #include <QThread>
 #include <memory>
+#include <functional>
 
 namespace onep
 {

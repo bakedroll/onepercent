@@ -5,9 +5,10 @@
 #include "core/QConnectFunctor.h"
 
 #include "simulation/Simulation.h"
-#include "simulation/SkillsContainer.h"
-#include "simulation/SimulationStateContainer.h"
-#include "scripting/LuaSimulationState.h"
+#include "simulation/ModelContainer.h"
+#include "scripting/LuaModel.h"
+#include "scripting/LuaBranchesTable.h"
+#include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaSkillBranch.h"
 #include "simulation/UpdateThread.h"
 
@@ -21,16 +22,14 @@ namespace onep
 	{
     Impl(osgGaming::Injector& injector)
       : simulation(injector.inject<Simulation>())
-      , skillsContainer(injector.inject<SkillsContainer>())
-      , stateContainer(injector.inject<SimulationStateContainer>())
+      , modelContainer(injector.inject<ModelContainer>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
     {}
 
     LuaCountry::Ptr country;
 
     Simulation::Ptr simulation;
-    SkillsContainer::Ptr skillsContainer;
-    SimulationStateContainer::Ptr stateContainer;
+    ModelContainer::Ptr modelContainer;
 
     std::vector<QPushButton*> buttons;
 
@@ -48,17 +47,18 @@ namespace onep
 
       int cid = country->getId();
 
-      stateContainer->accessState([=](LuaSimulationState::Ptr state)
+      modelContainer->accessModel([=](LuaModel::Ptr model)
       {
-        if (state->getCountryStates().count(cid) == 0)
+        if (model->getSimulationStateTable()->getCountryStates().count(cid) == 0)
           return;
 
-        LuaCountryState::Ptr cstate = state->getCountryStates()[cid];
+        LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryStates()[cid];
+        auto branchesTable = model->getBranchesTable();
 
-        int n = skillsContainer->getNumBranches();
+        int n = branchesTable->getNumBranches();
         for (int i = 0; i < n; i++)
         {
-          LuaSkillBranch::Ptr branch = skillsContainer->getBranchByIndex(i);
+          LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
           std::string name = branch->getBranchName();
 
           notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name.c_str())->connectAndNotify(osgGaming::Func<bool>([=](bool activated)
@@ -95,10 +95,12 @@ namespace onep
 
     setFixedSize(size);
 
-    int n = m->skillsContainer->getNumBranches();
+    auto branchesTable = m->modelContainer->getModel()->getBranchesTable();
+
+    int n = branchesTable->getNumBranches();
     for (int i = 0; i<n; i++)
     {
-      LuaSkillBranch::Ptr branch = m->skillsContainer->getBranchByIndex(i);
+      LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
       std::string name = branch->getBranchName();
 
       QPushButton* button = new QPushButton(QString::fromStdString(name));
@@ -126,9 +128,9 @@ namespace onep
         // schedule task
         m->simulation->getUpdateThread()->executeLockedTick([=]()
         {
-          m->stateContainer->accessState([=](LuaSimulationState::Ptr state)
+          m->modelContainer->accessModel([=](LuaModel::Ptr model)
           {
-            state->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), true);
+            model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), true);
           });
         });
 

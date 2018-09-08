@@ -1,5 +1,6 @@
 #include "UpdateThread.h"
 
+#include "core/Macros.h"
 #include "core/Multithreading.h"
 
 #include <QMutex>

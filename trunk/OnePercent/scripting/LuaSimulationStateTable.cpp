@@ -1,19 +1,18 @@
-#include "LuaSimulationState.h"
-
+#include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaCountryState.h"
 
 #include <osgGaming/Macros.h>
 
 namespace onep
 {
-  struct LuaSimulationState::Impl
+  struct LuaSimulationStateTable::Impl
   {
     Impl() {}
 
     LuaCountryState::Map countryStates;
   };
 
-  LuaSimulationState::LuaSimulationState(const luabridge::LuaRef& object)
+  LuaSimulationStateTable::LuaSimulationStateTable(const luabridge::LuaRef& object)
     : LuaObjectMapper(object)
     , m(new Impl())
   {
@@ -27,14 +26,14 @@ namespace onep
     });
   }
 
-  LuaSimulationState::~LuaSimulationState() = default;
+  LuaSimulationStateTable::~LuaSimulationStateTable() = default;
 
-  LuaCountryState::Map& LuaSimulationState::getCountryStates() const
+  LuaCountryState::Map& LuaSimulationStateTable::getCountryStates() const
   {
     return m->countryStates;
   }
 
-  LuaCountryState::Ptr LuaSimulationState::getCountryState(int cid) const
+  LuaCountryState::Ptr LuaSimulationStateTable::getCountryState(int cid) const
   {
     return getMappedElement<LuaCountryState>(cid);
   }
