@@ -219,7 +219,7 @@ namespace onep
         float r = m->paramEarthRadius;
         
         CountryNode::Ptr countryNode = m->countryOverlay->getCountryNode(id);
-        LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getMappedElement<LuaCountry>(id);
+        LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(id);
         
         OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
 

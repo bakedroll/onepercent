@@ -10,9 +10,14 @@ namespace onep
 
   LuaBranchesTable::~LuaBranchesTable() = default;
 
-  LuaSkillBranch::Ptr LuaBranchesTable::getBranchByIndex(int index)
+  LuaSkillBranch::Ptr LuaBranchesTable::getBranchByIndex(int index) const
   {
     return m_branches[index];
+  }
+
+  LuaSkillBranch::Ptr LuaBranchesTable::getBranchByName(const std::string& name) const
+  {
+    return getMappedElement<LuaSkillBranch>(name);
   }
 
   int LuaBranchesTable::getNumBranches() const

@@ -209,7 +209,7 @@ namespace onep
       osg::Vec2f centerLatLong((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI);
       osg::Vec2f size(width, height);
 
-      LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getMappedElement<LuaCountry>(id);
+      LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(id);
 
       NeighborList neighborList;
 

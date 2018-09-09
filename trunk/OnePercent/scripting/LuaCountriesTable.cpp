@@ -16,6 +16,11 @@ namespace onep
     traverseElements(static_cast<int>(ModelTraversalType::UPDATE_NEIGHBOURS));
   }
 
+  std::shared_ptr<LuaCountry> LuaCountriesTable::getCountryById(int id) const
+  {
+    return getMappedElement<LuaCountry>(id);
+  }
+
   void LuaCountriesTable::onTraverse(int type, luabridge::LuaRef& object)
   {
     if (type != static_cast<int>(ModelTraversalType::INITIALIZE_DATA))
