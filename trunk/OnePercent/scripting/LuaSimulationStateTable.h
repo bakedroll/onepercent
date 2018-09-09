@@ -17,9 +17,6 @@ namespace onep
 
     void triggerObservables();
 
-  protected:
-    virtual void onTraverse(int type, luabridge::LuaRef& object) override;
-
   private:
     struct Impl;
     std::unique_ptr<Impl> m;

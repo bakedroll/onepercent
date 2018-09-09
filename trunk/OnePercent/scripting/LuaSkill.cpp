@@ -43,6 +43,13 @@ namespace onep
     m->type         = typeRef.tostring();
     m->cost         = costRef;
     m->obActivated->set(bool(activatedRef));
+
+    addVisitorFunc(static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES), [this](luabridge::LuaRef&)
+    {
+      bool activated = bool(luaref()["activated"]);
+      if (activated != getIsActivated())
+        setIsActivated(activated);
+    });
   }
 
   LuaSkill::~LuaSkill() = default;
@@ -71,15 +78,5 @@ namespace onep
   osgGaming::Observable<bool>::Ptr LuaSkill::getObActivated() const
   {
     return m->obActivated;
-  }
-
-  void LuaSkill::onTraverse(int type, luabridge::LuaRef& object)
-  {
-    if (type != static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES))
-      return;
-
-    bool activated = bool(object["activated"]);
-    if (activated != getIsActivated())
-      setIsActivated(activated);
   }
 }

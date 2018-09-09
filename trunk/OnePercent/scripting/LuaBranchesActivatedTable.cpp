@@ -28,6 +28,23 @@ namespace onep
 
       m->oActivatedBranches[key.tostring()] = new osgGaming::Observable<bool>(bool(value));
     });
+
+    addVisitorFunc(static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES), [this](luabridge::LuaRef&)
+    {
+      foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
+      {
+        assert_return(value.type() == LUA_TBOOLEAN);
+        assert_return(key.isString());
+
+        bool activated = bool(value);
+
+        osgGaming::Observable<bool>::Ptr oActivated = m->oActivatedBranches[key.tostring()];
+        assert_return(oActivated.valid());
+
+        if (oActivated->get() != activated)
+          oActivated->set(activated);
+      });
+    });
   }
 
   LuaBranchesActivatedTable::~LuaBranchesActivatedTable() = default;
@@ -49,25 +66,5 @@ namespace onep
   {
     assert_return(m->oActivatedBranches.count(name) > 0, osgGaming::Observable<bool>::Ptr());
     return m->oActivatedBranches.find(name)->second;
-  }
-
-  void LuaBranchesActivatedTable::onTraverse(int type, luabridge::LuaRef& object)
-  {
-    if (type != static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES))
-      return;
-    
-    foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
-    {
-      assert_return(value.type() == LUA_TBOOLEAN);
-      assert_return(key.isString());
-
-      bool activated = bool(value);
-
-      osgGaming::Observable<bool>::Ptr oActivated = m->oActivatedBranches[key.tostring()];
-      assert_return(oActivated.valid());
-
-      if (oActivated->get() != activated)
-        oActivated->set(activated);
-    });
   }
 }

@@ -20,6 +20,11 @@ namespace onep
     return *m_ref;
   }
 
+  void LuaObjectMapper::addVisitorFunc(int type, VisitorFunc func)
+  {
+    m_visitorFuncs[type] = func;
+  }
+
   void LuaObjectMapper::foreachElementDo(std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func)
   {
     for (luabridge::Iterator it(*m_ref); !it.isNil(); ++it)
@@ -33,12 +38,12 @@ namespace onep
 
   void LuaObjectMapper::traverseElements(int type)
   {
-    onTraverse(type, *m_ref);
+    if (m_visitorFuncs.size() > 0 && m_visitorFuncs.count(type) > 0)
+      m_visitorFuncs[type](*m_ref);
+
     for (auto& elem : m_elements)
     {
       auto luaObject = elem.second.get();
-
-      //luaObject->onTraverse(type, *luaObject->m_ref);
       luaObject->traverseElements(type);
     }
   }
@@ -46,9 +51,5 @@ namespace onep
   int LuaObjectMapper::getNumElements() const
   {
     return int(m_elements.size());
-  }
-
-  void LuaObjectMapper::onTraverse(int type, luabridge::LuaRef& object)
-  {
   }
 }

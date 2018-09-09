@@ -7,6 +7,11 @@ namespace onep
   LuaCountriesTable::LuaCountriesTable(const luabridge::LuaRef& object, lua_State* luaState)
     : LuaObjectMapper(object, luaState)
   {
+    addVisitorFunc(static_cast<int>(ModelTraversalType::INITIALIZE_DATA), [this](luabridge::LuaRef&)
+    {
+      assert_return(luaref().isTable());
+      makeAllMappedElements<LuaCountry>();
+    });
   }
 
   LuaCountriesTable::~LuaCountriesTable() = default;
@@ -19,14 +24,5 @@ namespace onep
   std::shared_ptr<LuaCountry> LuaCountriesTable::getCountryById(int id) const
   {
     return getMappedElement<LuaCountry>(id);
-  }
-
-  void LuaCountriesTable::onTraverse(int type, luabridge::LuaRef& object)
-  {
-    if (type != static_cast<int>(ModelTraversalType::INITIALIZE_DATA))
-      return;
-
-    assert_return(object.isTable());
-    makeAllMappedElements<LuaCountry>();
   }
 }

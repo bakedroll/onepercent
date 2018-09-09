@@ -21,9 +21,6 @@ namespace onep
 
     osgGaming::Observable<bool>::Ptr getOBranchActivated(const std::string& name) const;
 
-  protected:
-    virtual void onTraverse(int type, luabridge::LuaRef& object) override;
-
   private:
     struct Impl;
     std::unique_ptr<Impl> m;

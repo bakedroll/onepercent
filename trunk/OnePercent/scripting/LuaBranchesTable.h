@@ -17,9 +17,6 @@ namespace onep
     LuaSkillBranch::Ptr getBranchByName(const std::string& name) const;
     int getNumBranches() const;
 
-  protected:
-    virtual void onTraverse(int type, luabridge::LuaRef& object) override;
-
   private:
     LuaSkillBranch::List m_branches;
 

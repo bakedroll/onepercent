@@ -25,9 +25,6 @@ namespace onep
     bool getIsActivated() const;
     void setIsActivated(bool activated);
     osgGaming::Observable<bool>::Ptr getObActivated() const;
-
-  protected:
-    virtual void onTraverse(int type, luabridge::LuaRef& object) override;
 	  
   private:
     struct Impl;
