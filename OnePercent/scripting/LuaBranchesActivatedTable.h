@@ -13,7 +13,7 @@ namespace onep
   public:
     typedef std::map<std::string, osgGaming::Observable<bool>::Ptr> BranchActivatedMap;
 
-    explicit LuaBranchesActivatedTable(const luabridge::LuaRef& object);
+    explicit LuaBranchesActivatedTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaBranchesActivatedTable();
 
     bool getBranchActivated(const std::string& name) const;
@@ -22,7 +22,7 @@ namespace onep
     osgGaming::Observable<bool>::Ptr getOBranchActivated(const std::string& name) const;
 
   protected:
-    virtual void onUpdate(luabridge::LuaRef& object) override;
+    virtual void onTraverse(int type, luabridge::LuaRef& object) override;
 
   private:
     struct Impl;

@@ -10,7 +10,7 @@ namespace onep
   public:
     using Ptr = std::shared_ptr<LuaSkillsTable>;
 
-    explicit LuaSkillsTable(const luabridge::LuaRef& object);
+    explicit LuaSkillsTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaSkillsTable();
 
     int getNumSkills() const;

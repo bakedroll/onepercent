@@ -19,8 +19,8 @@ namespace onep
     LuaSkillsTable::Ptr skillsTable;
   };
 
-  LuaSkillBranch::LuaSkillBranch(const luabridge::LuaRef& object)
-    : LuaObjectMapper(object)
+  LuaSkillBranch::LuaSkillBranch(const luabridge::LuaRef& object, lua_State* luaState)
+    : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
     assert_return(object.isTable());

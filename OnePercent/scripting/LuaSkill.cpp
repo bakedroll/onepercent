@@ -1,5 +1,6 @@
 #include "scripting/LuaSkill.h"
 #include "core/Multithreading.h"
+#include "core/Enums.h"
 
 #include <osgGaming/Macros.h>
 
@@ -19,8 +20,8 @@ namespace onep
     osgGaming::Observable<bool>::Ptr obActivated;
   };
 
-  LuaSkill::LuaSkill(const luabridge::LuaRef& object)
-    : LuaObjectMapper(object)
+  LuaSkill::LuaSkill(const luabridge::LuaRef& object, lua_State* luaState)
+    : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
     assert_return(object.isTable());
@@ -72,8 +73,11 @@ namespace onep
     return m->obActivated;
   }
 
-  void LuaSkill::onUpdate(luabridge::LuaRef& object)
+  void LuaSkill::onTraverse(int type, luabridge::LuaRef& object)
   {
+    if (type != static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES))
+      return;
+
     bool activated = bool(object["activated"]);
     if (activated != getIsActivated())
       setIsActivated(activated);

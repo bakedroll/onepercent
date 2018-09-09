@@ -10,10 +10,11 @@ namespace onep
   public:
     using BranchValuesMap = std::map<std::string, LuaValuesTable::ValuesMap>;
 
-    explicit LuaBranchValuesTable(const luabridge::LuaRef& object);
+    explicit LuaBranchValuesTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaBranchValuesTable();
 
     BranchValuesMap getBranchValuesMap();
     LuaValuesTable::Ptr getBranch(const std::string& name) const;
+
   };
 }

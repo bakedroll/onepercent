@@ -1,6 +1,7 @@
 #include "scripting/LuaBranchesActivatedTable.h"
 
 #include "core/Multithreading.h"
+#include "core/Enums.h"
 
 #include <QMutex>
 
@@ -14,8 +15,8 @@ namespace onep
     QMutex mutexActivated;
   };
 
-  LuaBranchesActivatedTable::LuaBranchesActivatedTable(const luabridge::LuaRef& object)
-    : LuaObjectMapper(object)
+  LuaBranchesActivatedTable::LuaBranchesActivatedTable(const luabridge::LuaRef& object, lua_State* luaState)
+    : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
     assert_return(object.isTable());
@@ -50,8 +51,11 @@ namespace onep
     return m->oActivatedBranches.find(name)->second;
   }
 
-  void LuaBranchesActivatedTable::onUpdate(luabridge::LuaRef& object)
+  void LuaBranchesActivatedTable::onTraverse(int type, luabridge::LuaRef& object)
   {
+    if (type != static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES))
+      return;
+    
     foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
     {
       assert_return(value.type() == LUA_TBOOLEAN);
