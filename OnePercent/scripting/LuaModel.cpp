@@ -22,6 +22,13 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
+    addVisitorFunc(static_cast<int>(ModelTraversalType::BOOTSTRAP), [this](luabridge::LuaRef&)
+    {
+      m->countriesTable = newMappedElement<LuaCountriesTable>("countries");
+      m->branchesTable = newMappedElement<LuaBranchesTable>("branches");
+      m->stateTable = newMappedElement<LuaSimulationStateTable>("state");
+      m->valuesTable = newMappedElement<LuaValuesDefTable>("values");
+    });
   }
 
   LuaModel::~LuaModel() = default;
@@ -39,16 +46,5 @@ namespace onep
   std::shared_ptr<LuaSimulationStateTable> LuaModel::getSimulationStateTable() const
   {
     return m->stateTable;
-  }
-
-  void LuaModel::onTraverse(int type, luabridge::LuaRef& ref)
-  {
-    if (type != static_cast<int>(ModelTraversalType::BOOTSTRAP))
-      return;
-
-    m->countriesTable = newMappedElement<LuaCountriesTable>("countries");
-    m->branchesTable = newMappedElement<LuaBranchesTable>("branches");
-    m->stateTable = newMappedElement<LuaSimulationStateTable>("state");
-    m->valuesTable = newMappedElement<LuaValuesDefTable>("values");
   }
 }

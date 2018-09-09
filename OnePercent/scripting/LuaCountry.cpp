@@ -29,6 +29,14 @@ namespace onep
 
     m->id = idRef;
     m->name = nameRef.tostring();
+
+    addVisitorFunc(static_cast<int>(ModelTraversalType::UPDATE_NEIGHBOURS), [this](luabridge::LuaRef&)
+    {
+      luabridge::LuaRef refNeighbours = luaref()["neighbours"];
+      int i = 1;
+      for (std::vector<int>::const_iterator it = m->neighbourIds.cbegin(); it != m->neighbourIds.cend(); ++it)
+        refNeighbours[i++] = *it;
+    });
   }
 
   LuaCountry::~LuaCountry() = default;
@@ -46,16 +54,5 @@ namespace onep
   std::vector<int>& LuaCountry::getNeighbourIds() const
   {
     return m->neighbourIds;
-  }
-
-  void LuaCountry::onTraverse(int type, luabridge::LuaRef& object)
-  {
-    if (type != static_cast<int>(ModelTraversalType::UPDATE_NEIGHBOURS))
-      return;
-
-    luabridge::LuaRef refNeighbours = object["neighbours"];
-    int i = 1;
-    for (std::vector<int>::const_iterator it = m->neighbourIds.cbegin(); it != m->neighbourIds.cend(); ++it)
-      refNeighbours[i++] = *it;
   }
 }

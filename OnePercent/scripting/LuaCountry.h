@@ -20,9 +20,6 @@ namespace onep
     std::string getName() const;
     std::vector<int>& getNeighbourIds() const;
 
-  protected:
-    virtual void onTraverse(int type, luabridge::LuaRef& object) override;
-
   private:
     struct Impl;
     std::unique_ptr<Impl> m;

@@ -20,9 +20,6 @@ namespace onep
     std::shared_ptr<LuaBranchesTable> getBranchesTable() const;
     std::shared_ptr<LuaSimulationStateTable> getSimulationStateTable() const;
 
-  protected:
-    void onTraverse(int type, luabridge::LuaRef& ref) override;
-
   private:
     struct Impl;
     std::shared_ptr<Impl> m;
