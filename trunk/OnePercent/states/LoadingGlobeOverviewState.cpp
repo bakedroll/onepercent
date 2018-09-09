@@ -130,6 +130,8 @@ namespace onep
 
   void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
+    m->model->bootstrapLuaModel();
+
     // Loading scripts
     m->lua->loadScript("./GameData/scripts/core.lua");
     m->lua->loadScript("./GameData/scripts/gameplay.lua");
@@ -148,7 +150,7 @@ namespace onep
     luabridge::LuaRef func_initialize_state = m->lua->getObject("control.initialize_state");
     LuaStateManager::safeExecute([&](){ func_initialize_state(); });
 
-    m->model->initializeLuaModel();
+    m->model->initializeLuaModelData();
 
     // loading globe
     m->globeOverviewWorld->initialize();
@@ -170,8 +172,7 @@ namespace onep
     m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryNodes());
 
     // update neighbours data
-    m->model->getModel()->getCountriesTable()->traverseElementsUpdate();
-    //m->countriesContainer->writeToLua();
+    m->model->getModel()->getCountriesTable()->updateNeighbours();
 
     // initialize neighbour states and call on_initialize actions
     luabridge::LuaRef func_initialize_neighbour_states = m->lua->getObject("control.initialize_neighbour_states");

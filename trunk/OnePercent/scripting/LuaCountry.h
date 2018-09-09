@@ -13,7 +13,7 @@ namespace onep
     typedef std::shared_ptr<LuaCountry> Ptr;
     typedef std::map<int, Ptr> Map;
 
-    explicit LuaCountry(const luabridge::LuaRef& object);
+    explicit LuaCountry(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaCountry();
 
     int getId() const;
@@ -21,7 +21,7 @@ namespace onep
     std::vector<int>& getNeighbourIds() const;
 
   protected:
-    virtual void onUpdate(luabridge::LuaRef& object) override;
+    virtual void onTraverse(int type, luabridge::LuaRef& object) override;
 
   private:
     struct Impl;

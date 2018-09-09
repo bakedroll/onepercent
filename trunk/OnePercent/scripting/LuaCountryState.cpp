@@ -12,14 +12,14 @@ namespace onep
     std::shared_ptr<LuaBranchesActivatedTable> tBranchesActivated;
   };
 
-  LuaCountryState::LuaCountryState(const luabridge::LuaRef& object)
-    : LuaObjectMapper(object)
+  LuaCountryState::LuaCountryState(const luabridge::LuaRef& object, lua_State* luaState)
+    : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
     assert_return(object.isTable());
 
-    m->tValues            = makeMappedElement<LuaValuesTable>("values");
-    m->tBranchValues      = makeMappedElement<LuaBranchValuesTable>("branch_values");
+    m->tValues = makeMappedElement<LuaValuesTable>("values");
+    m->tBranchValues = makeMappedElement<LuaBranchValuesTable>("branch_values");
     m->tBranchesActivated = makeMappedElement<LuaBranchesActivatedTable>("branches_activated");
   }
 

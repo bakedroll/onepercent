@@ -1,9 +1,10 @@
 #include "scripting/LuaSkillsTable.h"
+#include "core/Enums.h"
 
 namespace onep
 {
-  LuaSkillsTable::LuaSkillsTable(const luabridge::LuaRef& object)
-    : LuaObjectMapper(object)
+  LuaSkillsTable::LuaSkillsTable(const luabridge::LuaRef& object, lua_State* luaState)
+    : LuaObjectMapper(object, luaState)
   {
     assert_return(object.isTable());
 

@@ -1,6 +1,7 @@
 #include "simulation/ModelContainer.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaStateManager.h"
+#include "core/Enums.h"
 
 #include <QMutex>
 
@@ -26,10 +27,15 @@ namespace onep
 
   ModelContainer::~ModelContainer() = default;
 
-  void ModelContainer::initializeLuaModel()
+  void ModelContainer::bootstrapLuaModel()
   {
-    luabridge::LuaRef refModel = m->lua->getGlobal("model");
-    m->model.reset(new LuaModel(refModel));
+    m->model = m->lua->newGlobalElement<LuaModel>("model");
+    m->model->traverseElements(static_cast<int>(ModelTraversalType::BOOTSTRAP));
+  }
+
+  void ModelContainer::initializeLuaModelData()
+  {
+    m->model->traverseElements(static_cast<int>(ModelTraversalType::INITIALIZE_DATA));
   }
 
   std::shared_ptr<LuaModel> ModelContainer::getModel() const

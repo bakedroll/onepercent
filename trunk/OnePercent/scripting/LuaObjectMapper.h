@@ -25,26 +25,29 @@ namespace onep
   public:
     using Ptr = std::shared_ptr<LuaObjectMapper>;
 
-    explicit LuaObjectMapper(const luabridge::LuaRef& object);
+    explicit LuaObjectMapper(const luabridge::LuaRef& object, lua_State* luaState);
     virtual ~LuaObjectMapper();
 
     luabridge::LuaRef& luaref() const;
 
     void foreachElementDo(std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func);
-    void traverseElementsUpdate();
+    void traverseElements(int type);
 
     int getNumElements() const;
 
-    template <typename LuaObject>
-    std::shared_ptr<LuaObject> makeMappedElement(const std::string& key)
+    template <typename LuaObject, typename KeyType>
+    std::shared_ptr<LuaObject> newMappedElement(KeyType key)
     {
-      return makeMappedElement<const std::string&, LuaObject>(key);
+      luabridge::LuaRef ref = luabridge::newTable(m_luaState);
+      (*m_ref)[key] = ref;
+      return makeSharedAndAddElement<LuaObject, KeyType>(ref, key);
     }
 
-    template <typename LuaObject>
-    std::shared_ptr<LuaObject> makeMappedElement(int key)
+    template <typename LuaObject, typename KeyType>
+    std::shared_ptr<LuaObject> makeMappedElement(KeyType key)
     {
-      return makeMappedElement<int, LuaObject>(key);
+      luabridge::LuaRef ref = (*m_ref)[key];
+      return makeSharedAndAddElement<LuaObject, KeyType>(ref, key);
     }
 
     template <typename LuaObject>
@@ -92,13 +95,14 @@ namespace onep
     }
 
   protected:
-    virtual void onUpdate(luabridge::LuaRef& object);
+    virtual void onTraverse(int type, luabridge::LuaRef& object);
 
   private:
     using ElementsMap = std::map<std::string, Ptr>;
 
     std::unique_ptr<luabridge::LuaRef> m_ref;
     ElementsMap m_elements;
+    lua_State* m_luaState;
 
     template <typename LuaObject>
     void addToElementsMap(int key, std::shared_ptr<LuaObject>& elem)
@@ -112,15 +116,13 @@ namespace onep
       m_elements[key] = elem;
     }
 
-    template <typename KeyType, typename LuaObject>
-    std::shared_ptr<LuaObject> makeMappedElement(KeyType key)
+    template <typename LuaObject, typename KeyType>
+    std::shared_ptr<LuaObject> makeSharedAndAddElement(luabridge::LuaRef& ref, KeyType key)
     {
-      luabridge::LuaRef ref = (*m_ref)[key];
-      std::shared_ptr<LuaObject> elem = std::make_shared<LuaObject>(ref);
+      std::shared_ptr<LuaObject> elem = std::make_shared<LuaObject>(ref, m_luaState);
       addToElementsMap<LuaObject>(key, elem);
       return elem;
     }
-
   };
 
 }

@@ -16,7 +16,7 @@ namespace onep
     typedef std::vector<Ptr> List;
     typedef std::map<std::string, Ptr> Map;
 
-	  explicit LuaSkill(const luabridge::LuaRef& object);
+    explicit LuaSkill(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaSkill();
 
 		std::string getSkillName() const;
@@ -27,7 +27,7 @@ namespace onep
     osgGaming::Observable<bool>::Ptr getObActivated() const;
 
   protected:
-    virtual void onUpdate(luabridge::LuaRef& object) override;
+    virtual void onTraverse(int type, luabridge::LuaRef& object) override;
 	  
   private:
     struct Impl;

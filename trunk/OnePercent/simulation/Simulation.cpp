@@ -14,6 +14,7 @@
 
 #include <QTimer>
 #include <QElapsedTimer>
+#include <core/Enums.h>
 
 namespace onep
 {
@@ -98,7 +99,7 @@ namespace onep
           branchesElapsed = timerBranchesUpdate.elapsed();
 
           timerSync.start();
-          model->getSimulationStateTable()->traverseElementsUpdate();
+          model->getSimulationStateTable()->triggerObservables();
           syncElapsed = timerSync.elapsed();
 
           Multithreading::uiExecuteOrAsync([this]()

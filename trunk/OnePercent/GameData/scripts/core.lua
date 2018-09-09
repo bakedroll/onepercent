@@ -1,12 +1,3 @@
--- the underlying model
-model = 
-{
-  branches = {},
-  values = {},
-  countries = {},
-  state = {}
-}
-
 -- core function definitions
 control =
 {

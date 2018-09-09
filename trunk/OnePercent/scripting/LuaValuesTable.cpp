@@ -2,8 +2,8 @@
 
 namespace onep
 {
-  LuaValuesTable::LuaValuesTable(const luabridge::LuaRef& object)
-    : LuaObjectMapper(object)
+  LuaValuesTable::LuaValuesTable(const luabridge::LuaRef& object, lua_State* luaState)
+    : LuaObjectMapper(object, luaState)
   {
     assert_return(object.isTable());
   }

@@ -13,12 +13,15 @@ namespace onep
   public:
     using Ptr = std::shared_ptr<LuaModel>;
 
-    LuaModel(const luabridge::LuaRef& object);
+    LuaModel(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaModel();
 
     std::shared_ptr<LuaCountriesTable> getCountriesTable() const;
     std::shared_ptr<LuaBranchesTable> getBranchesTable() const;
     std::shared_ptr<LuaSimulationStateTable> getSimulationStateTable() const;
+
+  protected:
+    void onTraverse(int type, luabridge::LuaRef& ref) override;
 
   private:
     struct Impl;

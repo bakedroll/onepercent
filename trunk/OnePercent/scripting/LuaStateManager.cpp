@@ -7,7 +7,6 @@
 
 #include <algorithm>
 
-#include <QMutex>
 #include <QString>
 #include <QStringList>
 
@@ -20,13 +19,12 @@ namespace onep
     {}
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
-    QMutex luaLock;
   };
 
   LuaStateManager::LuaStateManager(osgGaming::Injector& injector)
     : m(new Impl(injector))
   {
-    QMutexLocker lock(&m->luaLock);
+    QMutexLocker lock(&m_luaLock);
 
     m_state = luaL_newstate();
 
@@ -35,19 +33,19 @@ namespace onep
 
   LuaStateManager::~LuaStateManager()
   {
-    QMutexLocker lock(&m->luaLock);
+    QMutexLocker lock(&m_luaLock);
     lua_close(m_state);
   }
 
   luabridge::LuaRef LuaStateManager::getGlobal(const char* name) const
   {
-    QMutexLocker lock(&m->luaLock);
+    QMutexLocker lock(&m_luaLock);
     return luabridge::getGlobal(m_state, name);
   }
 
   luabridge::LuaRef LuaStateManager::getObject(const char* name) const
   {
-    QMutexLocker lock(&m->luaLock);
+    QMutexLocker lock(&m_luaLock);
     QString namestr(name);
 
     QStringList names = namestr.split('.');
@@ -70,9 +68,21 @@ namespace onep
     return current;
   }
 
+  luabridge::LuaRef LuaStateManager::newTable() const
+  {
+    QMutexLocker lock(&m_luaLock);
+    return luabridge::newTable(m_state);
+  }
+
+  void LuaStateManager::setGlobal(const char* name, const luabridge::LuaRef& ref)
+  {
+    QMutexLocker lock(&m_luaLock);
+    luabridge::setGlobal(m_state, ref, name);
+  }
+
   bool LuaStateManager::executeCode(std::string code)
   {
-    QMutexLocker lock(&m->luaLock);
+    QMutexLocker lock(&m_luaLock);
 
     if (luaL_dostring(m_state, code.c_str()))
     {

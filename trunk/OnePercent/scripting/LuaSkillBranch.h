@@ -16,7 +16,7 @@ namespace onep
     typedef std::shared_ptr<LuaSkillBranch> Ptr;
     typedef std::vector<Ptr> List;
 
-    explicit LuaSkillBranch(const luabridge::LuaRef& object);
+    explicit LuaSkillBranch(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaSkillBranch();
 
     std::shared_ptr<LuaSkillsTable> getSkillsTable() const;

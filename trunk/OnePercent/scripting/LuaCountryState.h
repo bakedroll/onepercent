@@ -12,7 +12,7 @@ namespace onep
     typedef std::shared_ptr<LuaCountryState> Ptr;
     typedef std::map<int, Ptr> Map;
 
-    explicit LuaCountryState(const luabridge::LuaRef& object);
+    explicit LuaCountryState(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaCountryState();
 
     LuaValuesTable::ValuesMap getValuesMap() const;

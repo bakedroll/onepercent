@@ -1,4 +1,5 @@
-#include "LuaCountry.h"
+#include "scripting/LuaCountry.h"
+#include "core/Enums.h"
 
 #include <osgGaming/Macros.h>
 
@@ -14,14 +15,14 @@ namespace onep
     std::vector<int> neighbourIds;
   };
 
-  LuaCountry::LuaCountry(const luabridge::LuaRef& object)
-    : LuaObjectMapper(object)
+  LuaCountry::LuaCountry(const luabridge::LuaRef& object, lua_State* luaState)
+    : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
     assert_return(object.isTable());
 
-    luabridge::LuaRef idRef         = object["id"];
-    luabridge::LuaRef nameRef       = object["name"];
+    luabridge::LuaRef idRef = object["id"];
+    luabridge::LuaRef nameRef = object["name"];
 
     assert_return(idRef.isNumber());
     assert_return(nameRef.isString());
@@ -47,8 +48,11 @@ namespace onep
     return m->neighbourIds;
   }
 
-  void LuaCountry::onUpdate(luabridge::LuaRef& object)
+  void LuaCountry::onTraverse(int type, luabridge::LuaRef& object)
   {
+    if (type != static_cast<int>(ModelTraversalType::UPDATE_NEIGHBOURS))
+      return;
+
     luabridge::LuaRef refNeighbours = object["neighbours"];
     int i = 1;
     for (std::vector<int>::const_iterator it = m->neighbourIds.cbegin(); it != m->neighbourIds.cend(); ++it)

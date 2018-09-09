@@ -9,6 +9,8 @@
 #include <memory>
 #include <functional>
 
+#include <QMutex>
+
 extern "C"
 {
 #include <lua.h>
@@ -34,9 +36,29 @@ namespace onep
 
     luabridge::LuaRef getGlobal(const char* name) const;
     luabridge::LuaRef getObject(const char* name) const;
+    luabridge::LuaRef newTable() const;
+
+    void setGlobal(const char* name, const luabridge::LuaRef& ref);
 
     bool executeCode(std::string code);
     bool loadScript(std::string filename);
+
+    template <typename LuaObject>
+    std::shared_ptr<LuaObject> makeGlobalElement(const char* key)
+    {
+      QMutexLocker lock(&m_luaLock);
+      luabridge::LuaRef ref = luabridge::getGlobal(m_state, key);
+      return std::make_shared<LuaObject>(ref, m_state);
+    }
+
+    template <typename LuaObject>
+    std::shared_ptr<LuaObject> newGlobalElement(const char* key)
+    {
+      QMutexLocker lock(&m_luaLock);
+      luabridge::LuaRef ref = luabridge::newTable(m_state);
+      luabridge::setGlobal(m_state, ref, key);
+      return std::make_shared<LuaObject>(ref, m_state);
+    }
 
     static void safeExecute(std::function<void()> func);
 
@@ -79,6 +101,8 @@ namespace onep
     struct Impl;
     std::unique_ptr<Impl> m;
 
+    mutable QMutex m_luaLock;
     lua_State* m_state;
+
   };
 }

@@ -7,8 +7,9 @@ namespace onep
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
   }
 
-  LuaObjectMapper::LuaObjectMapper(const luabridge::LuaRef& object)
+  LuaObjectMapper::LuaObjectMapper(const luabridge::LuaRef& object, lua_State* luaState)
     : m_ref(make_unique<luabridge::LuaRef>(object))
+    , m_luaState(luaState)
   {
   }
 
@@ -30,14 +31,15 @@ namespace onep
     }
   }
 
-  void LuaObjectMapper::traverseElementsUpdate()
+  void LuaObjectMapper::traverseElements(int type)
   {
+    onTraverse(type, *m_ref);
     for (auto& elem : m_elements)
     {
       auto luaObject = elem.second.get();
 
-      luaObject->onUpdate(*luaObject->m_ref);
-      luaObject->traverseElementsUpdate();
+      //luaObject->onTraverse(type, *luaObject->m_ref);
+      luaObject->traverseElements(type);
     }
   }
 
@@ -46,7 +48,7 @@ namespace onep
     return int(m_elements.size());
   }
 
-  void LuaObjectMapper::onUpdate(luabridge::LuaRef& object)
+  void LuaObjectMapper::onTraverse(int type, luabridge::LuaRef& object)
   {
   }
 }
