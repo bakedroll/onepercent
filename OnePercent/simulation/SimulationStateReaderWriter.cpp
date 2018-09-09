@@ -222,7 +222,7 @@ namespace onep
 
             stream >> activated;
 
-            if (branchesTable->getMappedElement<LuaSkillBranch>(branchName) == nullptr)
+            if (branchesTable->getBranchByName(branchName) == nullptr)
             {
               OSGG_QLOG_WARN(QString("Branch not found"));
               continue;
@@ -239,7 +239,7 @@ namespace onep
           stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
           std::string branchName(buffer);
 
-          LuaSkillBranch::Ptr branch = branchesTable->getMappedElement<LuaSkillBranch>(branchName);
+          LuaSkillBranch::Ptr branch = branchesTable->getBranchByName(branchName);
 
           stream >> numSkills;
           for (int j = 0; j < numSkills; j++)

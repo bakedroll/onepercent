@@ -4,6 +4,8 @@
 
 namespace onep
 {
+  class LuaCountry;
+
   class LuaCountriesTable : public LuaObjectMapper
   {
   public:
@@ -13,6 +15,8 @@ namespace onep
     ~LuaCountriesTable();
 
     void updateNeighbours();
+    
+    std::shared_ptr<LuaCountry> getCountryById(int id) const;
 
   protected:
     virtual void onTraverse(int type, luabridge::LuaRef& object) override;

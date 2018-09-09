@@ -45,7 +45,7 @@ namespace onep
 
   void ModelContainer::accessModel(std::function<void(std::shared_ptr<LuaModel>)> func) const
   {
-    QMutexLocker(&m->mutexModel);
+    QMutexLocker lock(&m->mutexModel);
     func(m->model);
   }
 }

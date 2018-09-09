@@ -323,7 +323,7 @@ namespace onep
         if (countryStates.count(selectedId) == 0)
           return;
 
-        LuaCountry::Ptr country = model->getCountriesTable()->getMappedElement<LuaCountry>(selectedId);
+        LuaCountry::Ptr country = model->getCountriesTable()->getCountryById(selectedId);
         LuaCountryState::Ptr countryState = countryStates[selectedId];
 
         auto values = countryState->getValuesMap();

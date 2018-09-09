@@ -70,7 +70,7 @@ namespace onep
     for (CountryNode::Map::const_iterator it = m->countryMap->cbegin(); it != m->countryMap->cend(); ++it)
     {
       osg::Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCenterLatLong());
-      LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getMappedElement<LuaCountry>(it->first);
+      LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(it->first);
 
       if (!pos.valid() || !country)
         continue;
