@@ -16,12 +16,13 @@ namespace onep
     LuaModel(const luabridge::LuaRef& object);
     ~LuaModel();
 
-    LuaCountriesTable* getCountriesTable() const;
-    LuaBranchesTable* getBranchesTable() const;
-    LuaSimulationStateTable* getSimulationStateTable() const;
+    std::shared_ptr<LuaCountriesTable> getCountriesTable() const;
+    std::shared_ptr<LuaBranchesTable> getBranchesTable() const;
+    std::shared_ptr<LuaSimulationStateTable> getSimulationStateTable() const;
 
   private:
     struct Impl;
     std::shared_ptr<Impl> m;
+
   };
 }
