@@ -1,7 +1,7 @@
 #include "scripting/LuaModel.h"
-#include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSimulationStateTable.h"
+#include "scripting/LuaCountriesTable.h"
 
 namespace onep
 {
@@ -26,21 +26,18 @@ namespace onep
 
   LuaModel::~LuaModel() = default;
 
-  LuaCountriesTable* LuaModel::getCountriesTable() const
+  std::shared_ptr<LuaCountriesTable> LuaModel::getCountriesTable() const
   {
-    auto& a = m->countriesTable;
-    auto b = a.get();
-
-    return m->countriesTable.get();
+    return m->countriesTable;
   }
 
-  LuaBranchesTable* LuaModel::getBranchesTable() const
+  std::shared_ptr<LuaBranchesTable> LuaModel::getBranchesTable() const
   {
-    return m->branchesTable.get();
+    return m->branchesTable;
   }
 
-  LuaSimulationStateTable* LuaModel::getSimulationStateTable() const
+  std::shared_ptr<LuaSimulationStateTable> LuaModel::getSimulationStateTable() const
   {
-    return m->stateTable.get();
+    return m->stateTable;
   }
 }
