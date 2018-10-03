@@ -29,7 +29,7 @@ namespace onep
 
   void ModelContainer::bootstrapLuaModel()
   {
-    m->model = m->lua->newGlobalElement<LuaModel>("model");
+    m->model = m->lua->createElement<LuaModel>("model");
     m->model->traverseElements(static_cast<int>(ModelTraversalType::BOOTSTRAP));
   }
 

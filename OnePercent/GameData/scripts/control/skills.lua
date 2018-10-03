@@ -1,4 +1,4 @@
-control.on_skill_action("found_party", function(branch_name, country_state)
+control_tmp:on_skill_update_action("found_party", function(branch_name, country_state)
 
   local influence = country_state.values["political_influence"]
   influence = gameplay.raise_value(influence, 0.4, 0.02, 0.0001, 5)
@@ -6,7 +6,7 @@ control.on_skill_action("found_party", function(branch_name, country_state)
 
 end)
 
-control.on_skill_action("canvassing", function(branch_name, country_state)
+control_tmp:on_skill_update_action("canvassing", function(branch_name, country_state)
 
   local ideology = country_state.values["ideology"]
   local influence = country_state.values["political_influence"]
@@ -16,7 +16,7 @@ control.on_skill_action("canvassing", function(branch_name, country_state)
 
 end)
 
-control.on_skill_action("campaign_pledges", function(branch_name, country_state)
+control_tmp:on_skill_update_action("campaign_pledges", function(branch_name, country_state)
 
   local ideology = country_state.values["ideology"]
   local divisiveness = country_state.values["divisiveness"]
@@ -30,37 +30,37 @@ control.on_skill_action("campaign_pledges", function(branch_name, country_state)
 
 end)
 
-control.on_skill_action("propagation_banks", function(branch_name, country_state)
+control_tmp:on_skill_update_action("propagation_banks", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control.on_skill_action("propagation_control", function(branch_name, country_state)
+control_tmp:on_skill_update_action("propagation_control", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control.on_skill_action("propagation_media", function(branch_name, country_state)
+control_tmp:on_skill_update_action("propagation_media", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control.on_skill_action("propagation_concerns", function(branch_name, country_state)
+control_tmp:on_skill_update_action("propagation_concerns", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control.on_skill_action("propagation_politics", function(branch_name, country_state)
+control_tmp:on_skill_update_action("propagation_politics", function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control.on_branch_action(function(branch_name, country_state)
+control_tmp:on_branch_update_action(function(branch_name, country_state)
 
   if (country_state.branches_activated[branch_name] == true) then
 

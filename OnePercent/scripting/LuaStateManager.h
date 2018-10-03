@@ -14,8 +14,6 @@
 extern "C"
 {
 #include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
 }
 
 #include <LuaBridge.h>
@@ -37,11 +35,16 @@ namespace onep
     luabridge::LuaRef getGlobal(const char* name) const;
     luabridge::LuaRef getObject(const char* name) const;
     luabridge::LuaRef newTable() const;
+    luabridge::LuaRef createGlobalTable(const std::string& name) const;
+    luabridge::LuaRef createTable(const std::string& name, const luabridge::LuaRef& parentTable);
 
     void setGlobal(const char* name, const luabridge::LuaRef& ref);
 
     bool executeCode(std::string code);
     bool loadScript(std::string filename);
+
+    std::string getStackTrace() const;
+    bool checkIsType(const luabridge::LuaRef& ref, int luaType);
 
     template <typename LuaObject>
     std::shared_ptr<LuaObject> makeGlobalElement(const char* key)
@@ -52,12 +55,17 @@ namespace onep
     }
 
     template <typename LuaObject>
-    std::shared_ptr<LuaObject> newGlobalElement(const char* key)
+    std::shared_ptr<LuaObject> createElement(const std::string& name)
     {
-      QMutexLocker lock(&m_luaLock);
-      luabridge::LuaRef ref = luabridge::newTable(m_state);
-      luabridge::setGlobal(m_state, ref, key);
-      return std::make_shared<LuaObject>(ref, m_state);
+      luabridge::LuaRef table = createGlobalTable(name);
+      return std::make_shared<LuaObject>(table, m_state);
+    }
+
+    template <typename LuaObject>
+    std::shared_ptr<LuaObject> createElement(const std::string& name, const luabridge::LuaRef& parentTable)
+    {
+      luabridge::LuaRef table = createTable(name, parentTable);
+      return std::make_shared<LuaObject>(table, m_state);
     }
 
     static void safeExecute(std::function<void()> func);

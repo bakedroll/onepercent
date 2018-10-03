@@ -580,7 +580,6 @@ namespace onep
 
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
-            // No need to schedule thread task here. Skill branch will never be modified from Lua code.
             modelContainer->accessModel([=](LuaModel::Ptr model)
             {
               skillBranch->getSkillsTable()->getSkillByIndex(j)->setIsActivated(checked);
