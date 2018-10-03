@@ -1,5 +1,6 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 set(PROJECT_NAME OnePercent)
 
@@ -16,7 +17,9 @@ add_other_directory(ONE_PERCENT_SOURCE GameData/shaders)
 add_other_directory(ONE_PERCENT_SOURCE GameData/scripts)
 
 # add executable OnePercent
-add_executable(${PROJECT_NAME} ${ONE_PERCENT_SOURCE})
+add_executable(${PROJECT_NAME}
+  ${ONE_PERCENT_SOURCE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/resources.qrc)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
 
@@ -27,6 +30,7 @@ if (WIN32)
 endif()
 
 source_group(GeneratedFiles FILES ${CMAKE_CURRENT_BINARY_DIR}/OnePercent_automoc.cpp)
+source_group(Resources FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources.qrc)
 
 # specify needed osg libraries
 set(OSG_LIBRARIES_TMP "osg osgViewer osgUtil osgGA osgDB osgText OpenThreads")
@@ -106,3 +110,4 @@ configure_file("../CMake/templates/make_run.sh.in" "${CMAKE_BINARY_DIR}/make_run
 
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 set(CMAKE_AUTOMOC OFF)
+set(CMAKE_AUTORCC OFF)

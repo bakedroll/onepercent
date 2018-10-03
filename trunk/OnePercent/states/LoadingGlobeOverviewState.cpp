@@ -25,6 +25,8 @@
 
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QFile>
+
 #include <osgGaming/ResourceManager.h>
 
 namespace onep
@@ -133,9 +135,10 @@ namespace onep
     m->model->bootstrapLuaModel();
 
     // Loading scripts
-    m->lua->loadScript("./GameData/scripts/core.lua");
-    m->lua->loadScript("./GameData/scripts/gameplay.lua");
-    m->lua->loadScript("./GameData/scripts/helper.lua");
+    m->lua->loadScript(":/Resources/scripts/core.lua");
+    m->lua->loadScript(":/Resources/scripts/gameplay.lua");
+    m->lua->loadScript(":/Resources/scripts/helper.lua");
+
     m->lua->loadScript("./GameData/scripts/data/config.lua");
 
     m->lua->loadScript("./GameData/scripts/data/branches.lua");

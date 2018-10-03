@@ -9,6 +9,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QFile>
 
 namespace onep
 {
@@ -110,9 +111,27 @@ namespace onep
 
   bool LuaStateManager::loadScript(std::string filename)
   {
-    std::string script = m->resourceManager->loadText(filename);
-    bool success = executeCode(script);
-    return success;
+    std::string script;
+
+    if (filename[0] == ':')
+    {
+      auto qfilename = QString::fromStdString(filename);
+      QFile file(qfilename);
+      if (!file.open(QIODevice::ReadOnly))
+      {
+        OSGG_QLOG_WARN(QString("Could not load resource file %1.").arg(qfilename));
+        return false;
+      }
+
+      script = file.readAll().toStdString();
+      file.close();
+    }
+    else
+    {
+      script = m->resourceManager->loadText(filename);
+    }
+
+    return executeCode(script);
   }
 
   std::string LuaStateManager::getStackTrace() const
