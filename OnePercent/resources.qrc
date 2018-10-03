@@ -1,0 +1,7 @@
+<RCC>
+    <qresource>
+        <file>Resources/scripts/core.lua</file>
+        <file>Resources/scripts/gameplay.lua</file>
+        <file>Resources/scripts/helper.lua</file>
+    </qresource>
+</RCC>
