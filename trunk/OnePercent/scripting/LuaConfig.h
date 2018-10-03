@@ -1,5 +1,7 @@
 #pragma once
 
+#include "scripting/LuaClassInstance.h"
+
 #include <osgGaming/Macros.h>
 
 #include <osg/Referenced>
@@ -19,11 +21,13 @@ extern "C"
 
 namespace onep
 {
-  class LuaConfig : public osg::Referenced
+  class LuaConfig : public osg::Referenced, public LuaClassInstance
   {
   public:
     explicit LuaConfig(osgGaming::Injector& injector);
     ~LuaConfig();
+
+    virtual void registerClass(lua_State* state) override;
 
     template<typename T>
     T getNumber(const std::string& name)
@@ -46,6 +50,8 @@ namespace onep
     }
 
     void clearCache();
+
+    void luaExtend(luabridge::LuaRef ref);
 
   private:
     struct Impl;

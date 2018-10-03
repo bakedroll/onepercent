@@ -1,13 +1,5 @@
 -- core function definitions
 control_old = {}
-config      = {}
-
-
-function config.extend(table)
-
-  helper.merge(config, table)
-
-end
 
 -- adds branches to the model and passes them to the c++ code
 function control_old.create_branches(branches)
