@@ -147,7 +147,7 @@ namespace onep
     m->lua->loadScript("./GameData/scripts/control/skills.lua");
 
     // initialize simulation state in lua
-    luabridge::LuaRef func_initialize_state = m->lua->getObject("control.initialize_state");
+    luabridge::LuaRef func_initialize_state = m->lua->getObject("control_old.initialize_state");
     LuaStateManager::safeExecute([&](){ func_initialize_state(); });
 
     m->model->initializeLuaModelData();
@@ -175,8 +175,8 @@ namespace onep
     m->model->getModel()->getCountriesTable()->updateNeighbours();
 
     // initialize neighbour states and call on_initialize actions
-    luabridge::LuaRef func_initialize_neighbour_states = m->lua->getObject("control.initialize_neighbour_states");
-    luabridge::LuaRef func_perform_on_initialize_actions = m->lua->getObject("control.perform_on_initialize_actions");
+    luabridge::LuaRef func_initialize_neighbour_states = m->lua->getObject("control_old.initialize_neighbour_states");
+    luabridge::LuaRef func_perform_on_initialize_actions = m->lua->getObject("control_old.perform_on_initialize_actions");
     LuaStateManager::safeExecute([&]()
     {
       func_initialize_neighbour_states();

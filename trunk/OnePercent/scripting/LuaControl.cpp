@@ -47,7 +47,7 @@ namespace onep
 
   std::string LuaControl::instanceVariableName()
   {
-    return "control_tmp";
+    return "control";
   }
 
   void LuaControl::luaOnInitializeAction(luabridge::LuaRef func)
