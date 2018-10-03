@@ -124,6 +124,7 @@ namespace onep
 
     // initialize Lua classes
     osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
+    lua->registerClassInstance<LuaConfig>(injector.inject<LuaConfig>());
     lua->registerClassInstance<LuaControl>(injector.inject<LuaControl>());
     lua->registerClassInstance<LuaSimulation>(injector.inject<LuaSimulation>());
     lua->registerClassInstance<LuaVisuals>(injector.inject<LuaVisuals>());

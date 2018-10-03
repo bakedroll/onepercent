@@ -1,4 +1,4 @@
-config.extend(
+config:extend(
 {
   camera = {
     min_distance = 7.5,
