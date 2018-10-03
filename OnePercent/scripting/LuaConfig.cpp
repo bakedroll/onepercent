@@ -1,11 +1,10 @@
 #include "LuaConfig.h"
 
 #include "scripting/LuaStateManager.h"
-#include "scripting/LuaMapTable.h"
 
 #include <unordered_map>
 
-#define CONFIG_DATA_PATH "config_data"
+#define CONFIG_DATA_TABLE_NAME "config_data"
 
 namespace onep
 {
@@ -14,21 +13,19 @@ namespace onep
     Impl(osgGaming::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
     {
-      configDataTable = lua->createElement<LuaMapTable>(CONFIG_DATA_PATH);
+      lua->createGlobalTable(CONFIG_DATA_TABLE_NAME);
     }
 
     typedef std::unordered_map<std::string, std::shared_ptr<ValueTypeBase>> Cache;
 
     osg::ref_ptr<LuaStateManager> lua;
-
-    LuaMapTable::Ptr configDataTable;
     Cache cache;
 
   };
 
   LuaConfig::LuaConfig(osgGaming::Injector& injector)
-    : m(new Impl(injector))
-    , LuaClassInstance("config")
+    : LuaClassInstance("config")
+    , m(new Impl(injector))
   {
   }
 
@@ -57,7 +54,10 @@ namespace onep
     auto mergeFunc = m->lua->getObject("helper.merge");
     assert_return(m->lua->checkIsType(mergeFunc, LUA_TFUNCTION));
 
-    mergeFunc(m->configDataTable->luaref(), ref);
+    auto configDataTable = m->lua->getGlobal(CONFIG_DATA_TABLE_NAME);
+    assert_return(m->lua->checkIsType(configDataTable, LUA_TTABLE));
+
+    mergeFunc(configDataTable, ref);
   }
 
   std::shared_ptr<LuaConfig::ValueTypeBase> LuaConfig::getValuePtr(
@@ -71,7 +71,7 @@ namespace onep
     std::shared_ptr<ValueTypeBase> result;
     m->lua->safeExecute([&]()
     {
-      std::string path = CONFIG_DATA_PATH + std::string(".") + name;
+      std::string path = CONFIG_DATA_TABLE_NAME + std::string(".") + name;
 
       luabridge::LuaRef ref = m->lua->getObject(path.c_str());
       result = getFunc(ref);

@@ -32,10 +32,10 @@ namespace onep
     template<typename T>
     T getNumber(const std::string& name)
     {
-      return (T)std::dynamic_pointer_cast<ValueType<float>>(
+      return (T)std::dynamic_pointer_cast<ValueType<T>>(
         getValuePtr(name, [this](luabridge::LuaRef& ref)
       {
-        return std::make_shared<ValueType<float>>((float)ref);
+        return std::make_shared<ValueType<T>>((T)ref);
       }))->value;
     }
 
