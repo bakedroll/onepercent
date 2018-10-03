@@ -82,7 +82,7 @@ namespace onep
         return;
       }
 
-      std::string varName = inst->instanceVariableName();
+      auto varName = inst->getInstanceVariableName();
 
       inst->registerClass(m_state);
 

@@ -11,7 +11,6 @@ namespace onep
     ~LuaControl();
 
     virtual void registerClass(lua_State* state) override;
-    virtual std::string instanceVariableName() override;
 
     void luaOnInitializeAction(luabridge::LuaRef func);
     void luaOnTickAction(luabridge::LuaRef func);

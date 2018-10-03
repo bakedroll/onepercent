@@ -27,7 +27,7 @@ namespace onep
 
   LuaControl::LuaControl(osgGaming::Injector& injector)
     : osg::Referenced()
-    , LuaClassInstance()
+    , LuaClassInstance("control")
     , m(new Impl(injector))
   {
   }
@@ -43,11 +43,6 @@ namespace onep
       .addFunction("on_skill_update_action",  &LuaControl::luaOnSkillUpdateAction)
       .addFunction("on_branch_update_action", &LuaControl::luaOnBranchUpdateAction)
       .endClass();
-  }
-
-  std::string LuaControl::instanceVariableName()
-  {
-    return "control";
   }
 
   void LuaControl::luaOnInitializeAction(luabridge::LuaRef func)

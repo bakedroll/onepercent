@@ -11,7 +11,6 @@ namespace onep
     ~LuaLogger();
 
     virtual void registerClass(lua_State* state) override;
-    virtual std::string instanceVariableName() override;
 
     void lua_debug(std::string message);
     void lua_info(std::string message);

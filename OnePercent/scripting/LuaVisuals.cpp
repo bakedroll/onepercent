@@ -4,7 +4,7 @@ namespace onep
 {
   LuaVisuals::LuaVisuals(osgGaming::Injector& injector)
     : osg::Referenced()
-    , LuaClassInstance()
+    , LuaClassInstance("visuals")
   {
   }
 
@@ -18,10 +18,5 @@ namespace onep
       .beginClass<LuaVisuals>("Visuals")
       //.addFunction("debug", &LuaVisuals::lua_debug)
       .endClass();
-  }
-
-  std::string LuaVisuals::instanceVariableName()
-  {
-    return "visuals";
   }
 }

@@ -6,7 +6,7 @@ namespace onep
 {
   LuaLogger::LuaLogger(osgGaming::Injector& injector)
     : osg::Referenced()
-    , LuaClassInstance()
+    , LuaClassInstance("log")
   {
   }
 
@@ -23,11 +23,6 @@ namespace onep
       .addFunction("warn", &LuaLogger::lua_warn)
       .addFunction("fatal", &LuaLogger::lua_fatal)
       .endClass();
-  }
-
-  std::string LuaLogger::instanceVariableName()
-  {
-    return "log";
   }
 
   void LuaLogger::lua_debug(std::string message)
