@@ -39,13 +39,11 @@ namespace onep
 
   luabridge::LuaRef LuaStateManager::getGlobal(const char* name) const
   {
-    QMutexLocker lock(&m_luaLock);
     return luabridge::getGlobal(m_state, name);
   }
 
   luabridge::LuaRef LuaStateManager::getObject(const char* name) const
   {
-    QMutexLocker lock(&m_luaLock);
     QString namestr(name);
 
     QStringList names = namestr.split('.');
@@ -70,13 +68,25 @@ namespace onep
 
   luabridge::LuaRef LuaStateManager::newTable() const
   {
-    QMutexLocker lock(&m_luaLock);
     return luabridge::newTable(m_state);
+  }
+
+  luabridge::LuaRef LuaStateManager::createGlobalTable(const std::string& name) const
+  {
+    luabridge::LuaRef table = newTable();
+    luabridge::setGlobal(m_state, table, name.c_str());
+    return table;
+  }
+
+  luabridge::LuaRef LuaStateManager::createTable(const std::string& name, const luabridge::LuaRef& parentTable)
+  {
+    luabridge::LuaRef table = newTable();
+    parentTable[name] = table;
+    return table;
   }
 
   void LuaStateManager::setGlobal(const char* name, const luabridge::LuaRef& ref)
   {
-    QMutexLocker lock(&m_luaLock);
     luabridge::setGlobal(m_state, ref, name);
   }
 
@@ -103,6 +113,43 @@ namespace onep
     std::string script = m->resourceManager->loadText(filename);
     bool success = executeCode(script);
     return success;
+  }
+
+  std::string LuaStateManager::getStackTrace() const
+  {
+    std::stringstream ss;
+    lua_Debug info;
+    int level = 0;
+    while (lua_getstack(m_state, level, &info))
+    {
+      if (level > 0)
+        ss << std::endl;
+
+      lua_getinfo(m_state, "nSl", &info);
+      QString current = QString("  [%1] %2:%3 -- [%4]")
+        .arg(level)
+        .arg(info.short_src)
+        .arg(info.currentline)
+        .arg((info.name ? info.name : "<unknown>"));
+      ss << current.toStdString();
+      ++level;
+    }
+
+    return ss.str();
+  }
+
+  bool LuaStateManager::checkIsType(const luabridge::LuaRef& ref, int luaType)
+  {
+    if (ref.type() == luaType)
+    {
+      return true;
+    }
+
+    std::string message = "Lua typecheck failed\n";
+    message.append(getStackTrace());
+    OSGG_LOG_WARN(message);
+
+    return false;
   }
 
   void LuaStateManager::safeExecute(std::function<void()> func)

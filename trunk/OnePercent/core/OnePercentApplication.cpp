@@ -14,6 +14,7 @@
 #include "states/GlobeInteractionState.h"
 #include "scripting/LuaConfig.h"
 #include "scripting/LuaLogger.h"
+#include "scripting/LuaControl.h"
 #include "scripting/LuaVisuals.h"
 #include "scripting/LuaSimulation.h"
 #include "simulation/Simulation.h"
@@ -99,6 +100,7 @@ namespace onep
     container.registerSingletonType<ModelContainer>();
 
     // scripting
+    container.registerSingletonType<LuaControl>();
     container.registerSingletonType<LuaVisuals>();
     container.registerSingletonType<LuaStateManager>();
     container.registerSingletonType<LuaLogger>();
@@ -122,6 +124,7 @@ namespace onep
 
     // initialize Lua classes
     osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
+    lua->registerClassInstance<LuaControl>(injector.inject<LuaControl>());
     lua->registerClassInstance<LuaSimulation>(injector.inject<LuaSimulation>());
     lua->registerClassInstance<LuaVisuals>(injector.inject<LuaVisuals>());
     lua->registerClassInstance<LuaLogger>(injector.inject<LuaLogger>());

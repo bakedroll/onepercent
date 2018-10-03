@@ -16,32 +16,6 @@ function config.extend(table)
 
 end
 
-function control.on_initialize_action(func)
-
-  table.insert(control.on_initialize_actions, func)
-
-end
-
-function control.on_skill_action(skill_name, func)
-
-  local actions = control.skill_actions
-  if (actions[skill_name] == nil) then actions[skill_name] = {} end
-  table.insert(actions[skill_name], func)
-
-end
-
-function control.on_branch_action(func)
-
-  table.insert(control.branch_actions, func)
-
-end
-
-function control.on_tick_action(func)
-
-  table.insert(control.tick_actions, func)
-
-end
-
 -- adds branches to the model and passes them to the c++ code
 function control.create_branches(branches)
 
@@ -150,13 +124,13 @@ end
 
 function control.perform_on_initialize_actions()
 
-  for _, func in ipairs(control.on_initialize_actions) do func() end
+  for _, func in ipairs(actions.on_initialize) do func() end
 
 end
 
 function control.update_tick_func()
 
-  for _, func in ipairs(control.tick_actions) do func() end
+  for _, func in ipairs(actions.on_tick) do func() end
 
 end
 
@@ -167,8 +141,9 @@ function control.update_skills_func()
   local branches = model.branches
   local countries = model.countries
   local state = model.state
-  local skill_actions = control.skill_actions
+  local skill_actions = actions.on_skill_update
   local country_state
+  local a
 
   for cid, country in pairs(countries) do
 
@@ -177,10 +152,10 @@ function control.update_skills_func()
         country_state = state[cid]
 
         if (skill.activated == true and country_state.branches_activated[skill.branch] == true) then
-          actions = skill_actions[skill.name]
+          a = skill_actions[skill.name]
 
-          if (actions ~= nil) then
-            for _, func in ipairs(actions) do
+          if (a ~= nil) then
+            for _, func in ipairs(a) do
               func(branch.name, country_state)
             end
           end
@@ -199,7 +174,7 @@ function control.update_branches_func()
   local branches = model.branches
   local countries = model.countries
   local state = model.state
-  local branch_actions = control.branch_actions
+  local branch_actions = actions.on_branch_update
 
   for cid, country in pairs(countries) do
     for _, branch in pairs(branches) do
