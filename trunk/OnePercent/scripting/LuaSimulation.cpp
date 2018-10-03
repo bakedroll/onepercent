@@ -15,7 +15,7 @@ namespace onep
 {
   LuaSimulation::LuaSimulation(osgGaming::Injector& injector)
     : osg::Referenced()
-    , LuaClassInstance()
+    , LuaClassInstance("simulation")
     , m_simulation(injector.inject<Simulation>())
     , m_oDay(injector.inject<ODay>())
     , m_oNumSkillPoints(injector.inject<ONumSkillPoints>())
@@ -73,10 +73,5 @@ namespace onep
       .addFunction("set_skill_points", &LuaSimulation::lua_set_skill_points)
       .addFunction("add_skill_points", &LuaSimulation::lua_add_skill_points)
       .endClass();
-  }
-
-  std::string LuaSimulation::instanceVariableName()
-  {
-    return "simulation";
   }
 }

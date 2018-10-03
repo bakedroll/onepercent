@@ -24,7 +24,6 @@ namespace onep
     void lua_set_interval(int interval);
 
     virtual void registerClass(lua_State* state) override;
-    virtual std::string instanceVariableName() override;
 
   private:
     osg::ref_ptr<Simulation> m_simulation;

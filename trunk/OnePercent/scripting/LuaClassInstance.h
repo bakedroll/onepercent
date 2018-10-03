@@ -9,10 +9,13 @@ namespace onep
   class LuaClassInstance : public LuaClass
   {
   public:
+    explicit LuaClassInstance(const std::string instanceVariableName);
     virtual ~LuaClassInstance() = default;
 
-    // TODO: move to constructor parameter
-    virtual std::string instanceVariableName() = 0;
+    std::string getInstanceVariableName() const;
+
+  private:
+    std::string m_instanceVariableName;
 
   };
 }

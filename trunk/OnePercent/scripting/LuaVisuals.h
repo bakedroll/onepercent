@@ -11,7 +11,6 @@ namespace onep
     ~LuaVisuals();
 
     virtual void registerClass(lua_State* state) override;
-    virtual std::string instanceVariableName() override;
 
   };
 }
