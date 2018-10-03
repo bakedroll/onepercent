@@ -131,9 +131,9 @@ namespace onep
 
   void Simulation::prepare()
   {
-    m->refUpdate_skills_func = m->getLuaFunction("control.update_skills_func");
-    m->refUpdate_branches_func = m->getLuaFunction("control.update_branches_func");
-    m->refUpdate_tick_func = m->getLuaFunction("control.update_tick_func");
+    m->refUpdate_skills_func = m->getLuaFunction("control_old.update_skills_func");
+    m->refUpdate_branches_func = m->getLuaFunction("control_old.update_branches_func");
+    m->refUpdate_tick_func = m->getLuaFunction("control_old.update_tick_func");
 
     m->thread.start();
   }

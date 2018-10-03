@@ -1,13 +1,6 @@
 -- core function definitions
-control =
-{
-  skill_actions = {},
-  branch_actions = {},
-  tick_actions = {},
-  on_initialize_actions = {}
-}
-
-config = {}
+control_old = {}
+config      = {}
 
 
 function config.extend(table)
@@ -17,7 +10,7 @@ function config.extend(table)
 end
 
 -- adds branches to the model and passes them to the c++ code
-function control.create_branches(branches)
+function control_old.create_branches(branches)
 
   local b = model.branches
   for _, v in ipairs(branches) do
@@ -28,7 +21,7 @@ function control.create_branches(branches)
 end
 
 -- same here with the skills
-function control.create_skills(skills)
+function control_old.create_skills(skills)
 
   local branches = model.branches
   local branch
@@ -47,7 +40,7 @@ function control.create_skills(skills)
 end
 
 -- ..and the countries
-function control.create_countries(countries)
+function control_old.create_countries(countries)
 
   local c = model.countries
   local branches = model.branches
@@ -59,7 +52,7 @@ function control.create_countries(countries)
 end
 
 -- ..and last but not least the values
-function control.create_values(values)
+function control_old.create_values(values)
 
   local val = model.values
   for _, v in ipairs(values) do val[v.name] = v end
@@ -67,7 +60,7 @@ function control.create_values(values)
 end
 
 -- initializes the state for all countries with its values and branch_activated
-function control.initialize_state()
+function control_old.initialize_state()
 
   local branches = model.branches
   local countries = model.countries
@@ -108,7 +101,7 @@ function control.initialize_state()
 end
 
 -- update neighbours data
-function control.initialize_neighbour_states()
+function control_old.initialize_neighbour_states()
 
   local countries = model.countries
   local state = model.state
@@ -122,13 +115,13 @@ function control.initialize_neighbour_states()
 
 end
 
-function control.perform_on_initialize_actions()
+function control_old.perform_on_initialize_actions()
 
   for _, func in ipairs(actions.on_initialize) do func() end
 
 end
 
-function control.update_tick_func()
+function control_old.update_tick_func()
 
   for _, func in ipairs(actions.on_tick) do func() end
 
@@ -136,7 +129,7 @@ end
 
 -- calls the skill_actions functions for each country
 -- and skill that is activated in an active branch
-function control.update_skills_func()
+function control_old.update_skills_func()
 
   local branches = model.branches
   local countries = model.countries
@@ -169,7 +162,7 @@ end
 
 -- calls the branch_actions functions for each country
 -- and each branch
-function control.update_branches_func()
+function control_old.update_branches_func()
 
   local branches = model.branches
   local countries = model.countries

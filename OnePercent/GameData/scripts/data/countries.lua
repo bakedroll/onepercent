@@ -913,4 +913,4 @@ local countries = {
   }
 }
 
-control.create_countries(countries)
+control_old.create_countries(countries)
