@@ -37,6 +37,7 @@ namespace onep
     luabridge::LuaRef newTable() const;
     luabridge::LuaRef createGlobalTable(const std::string& name) const;
     luabridge::LuaRef createTable(const std::string& name, const luabridge::LuaRef& parentTable);
+    luabridge::LuaRef copyTable(const luabridge::LuaRef& table) const;
 
     void setGlobal(const char* name, const luabridge::LuaRef& ref);
 

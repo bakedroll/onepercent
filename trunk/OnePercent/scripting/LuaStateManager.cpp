@@ -21,6 +21,18 @@ namespace onep
     {}
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+
+    luabridge::LuaRef& getLuaFunction(std::string name, LuaRefPtr& cache)
+    {
+      if (!cache)
+      {
+        
+      }
+
+      return *cache.get();
+    }
+
+    std::map<QString, LuaRefPtr> objectCache;
   };
 
   LuaStateManager::LuaStateManager(osgGaming::Injector& injector)
@@ -47,6 +59,10 @@ namespace onep
   luabridge::LuaRef LuaStateManager::getObject(const char* name) const
   {
     QString namestr(name);
+    if (m->objectCache.count(namestr) > 0)
+    {
+      return *m->objectCache[namestr].get();
+    }
 
     QStringList names = namestr.split('.');
 
@@ -65,6 +81,7 @@ namespace onep
       current = next;
     }
 
+    m->objectCache[namestr] = MAKE_LUAREF_PTR(current);
     return current;
   }
 
@@ -85,6 +102,14 @@ namespace onep
     luabridge::LuaRef table = newTable();
     parentTable[name] = table;
     return table;
+  }
+
+  luabridge::LuaRef LuaStateManager::copyTable(const luabridge::LuaRef& table) const
+  {
+    auto copyFunc = getGlobal("helper.deepcopy");
+    assert_return(copyFunc.isFunction(), luabridge::LuaRef(m_state));
+
+    return copyFunc(table);
   }
 
   void LuaStateManager::setGlobal(const char* name, const luabridge::LuaRef& ref)
