@@ -36,11 +36,15 @@ namespace onep
     assert_return(displayNameRef.isString());
     assert_return(typeRef.isString());
     assert_return(costRef.isNumber());
-    assert_return(activatedRef.type() == LUA_TBOOLEAN);
+    //assert_return(activatedRef.isBool());
 
-    m->name         = nameRef.tostring();
-    m->displayName  = displayNameRef.tostring();
-    m->type         = typeRef.tostring();
+    std::string name        = nameRef;
+    std::string displayName = displayNameRef;
+    std::string type        = typeRef;
+
+    m->name         = name;
+    m->displayName  = displayName;
+    m->type         = type;
     m->cost         = costRef;
     m->obActivated->set(bool(activatedRef));
 

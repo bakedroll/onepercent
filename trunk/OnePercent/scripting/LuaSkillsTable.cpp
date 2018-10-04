@@ -1,26 +1,11 @@
 #include "scripting/LuaSkillsTable.h"
-#include "core/Enums.h"
 
 namespace onep
 {
   LuaSkillsTable::LuaSkillsTable(const luabridge::LuaRef& object, lua_State* luaState)
-    : LuaObjectMapper(object, luaState)
+    : LuaMapTable(object, luaState)
   {
     assert_return(object.isTable());
-
-    std::map<std::string, LuaSkill::Ptr> sortedMap;
-
-    foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
-    {
-      assert_return(key.isString());
-      LuaSkill::Ptr skill = makeMappedElement<LuaSkill>(key);
-      sortedMap[skill->getSkillName()] = skill;
-    });
-
-    for (auto& it : sortedMap)
-    {
-      m_skills.push_back(it.second);
-    }
   }
 
   LuaSkillsTable::~LuaSkillsTable() = default;
@@ -30,13 +15,29 @@ namespace onep
     return int(m_skills.size());
   }
 
-  LuaSkill::Ptr LuaSkillsTable::getSkillByIndex(int i) const
+  LuaSkill::Ptr LuaSkillsTable::getSkillByIndex(int index) const
   {
-    return m_skills[i];
+    // TODO: optimize
+    auto i = 0;
+    for (auto& branch : m_skills)
+    {
+      if (i == index)
+        return branch.second;
+      ++i;
+    }
+
+    assert(false);
+    return LuaSkill::Ptr();
   }
 
   LuaSkill::Ptr LuaSkillsTable::getSkillByName(std::string name) const
   {
     return getMappedElement<LuaSkill>(name);
+  }
+
+  void LuaSkillsTable::addSkill(const std::string& name, luabridge::LuaRef& ref)
+  {
+    auto skill = addMappedElement<LuaSkill>(name, ref);
+    m_skills[name] = skill;
   }
 }

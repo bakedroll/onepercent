@@ -16,7 +16,7 @@ extern "C"
 #include <lua.h>
 }
 
-#include <LuaBridge.h>
+#include <LuaBridge/LuaBridge.h>
 
 #define MAKE_LUAREF_PTR(luaRef) std::make_shared<luabridge::LuaRef>(luaRef)
 

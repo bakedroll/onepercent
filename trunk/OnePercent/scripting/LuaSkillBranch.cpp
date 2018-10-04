@@ -8,11 +8,9 @@ namespace onep
   struct LuaSkillBranch::Impl
   {
     Impl()
-      : id(-1)
-      , cost(0)
+      : cost(0)
     {}
 
-    int id;
     std::string name;
     int cost;
 
@@ -25,13 +23,15 @@ namespace onep
   {
     assert_return(object.isTable());
 
-    luabridge::LuaRef nameRef = object["name"];
-    luabridge::LuaRef costRef = object["cost"];
+    auto nameRef = object["name"];
+    auto costRef = object["cost"];
 
     assert_return(nameRef.isString());
     assert_return(costRef.isNumber());
 
-    m->name = nameRef.tostring();
+    std::string name = nameRef;
+
+    m->name = name;
     m->cost = costRef;
 
     m->skillsTable = makeMappedElement<LuaSkillsTable>("skills");
@@ -44,11 +44,6 @@ namespace onep
     return m->skillsTable;
   }
 
-  int LuaSkillBranch::getBranchId() const
-  {
-    return m->id;
-  }
-
   const std::string& LuaSkillBranch::getBranchName() const
   {
     return m->name;
@@ -57,10 +52,5 @@ namespace onep
   int LuaSkillBranch::getCost() const
   {
     return m->cost;
-  }
-
-  void LuaSkillBranch::setBranchId(int id)
-  {
-    m->id = id;
   }
 }

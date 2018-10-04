@@ -1,36 +1,6 @@
 -- core function definitions
 control_old = {}
 
--- adds branches to the model and passes them to the c++ code
-function control_old.create_branches(branches)
-
-  local b = model.branches
-  for _, v in ipairs(branches) do
-    v.skills = {}
-    b[v.name] = v
-  end
-
-end
-
--- same here with the skills
-function control_old.create_skills(skills)
-
-  local branches = model.branches
-  local branch
-
-  for _, v in ipairs(skills) do
-    branch = branches[v.branch]
-
-    if branch ~= nil then
-      v.activated = false
-      branch.skills[v.name] = v
-    else
-      log:warn("Could not add skill '" .. v.name .. "'. Branch '" .. v.branch .. "' not found")
-    end
-  end
-
-end
-
 -- ..and the countries
 function control_old.create_countries(countries)
 

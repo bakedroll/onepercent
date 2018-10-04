@@ -1,37 +1,28 @@
 #include "scripting/LuaBranchesTable.h"
-#include "core/Enums.h"
 
 namespace onep
 {
   LuaBranchesTable::LuaBranchesTable(const luabridge::LuaRef& object, lua_State* luaState)
-    : LuaObjectMapper(object, luaState)
+    : LuaMapTable(object, luaState)
   {
-    addVisitorFunc(static_cast<int>(ModelTraversalType::INITIALIZE_DATA), [this](luabridge::LuaRef&)
-    {
-      assert_return(luaref().isTable());
-
-      std::map<std::string, LuaSkillBranch::Ptr> sortedMap;
-      foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
-      {
-        assert_return(key.isString());
-        LuaSkillBranch::Ptr branch = makeMappedElement<LuaSkillBranch>(key);
-        sortedMap[branch->getBranchName()] = branch;
-      });
-
-      int id = 0;
-      for (auto& it : sortedMap)
-      {
-        it.second->setBranchId(id++);
-        m_branches.push_back(it.second);
-      }
-    });
+    assert_return(object.isTable());
   }
 
   LuaBranchesTable::~LuaBranchesTable() = default;
 
   LuaSkillBranch::Ptr LuaBranchesTable::getBranchByIndex(int index) const
   {
-    return m_branches[index];
+    // TODO: optimize
+    auto i = 0;
+    for (auto& branch : m_branches)
+    {
+      if (i == index)
+        return branch.second;
+      ++i;
+    }
+
+    assert(false);
+    return LuaSkillBranch::Ptr();
   }
 
   LuaSkillBranch::Ptr LuaBranchesTable::getBranchByName(const std::string& name) const
@@ -42,5 +33,11 @@ namespace onep
   int LuaBranchesTable::getNumBranches() const
   {
     return int(m_branches.size());
+  }
+
+  void LuaBranchesTable::addBranch(const std::string& name, luabridge::LuaRef& ref)
+  {
+    auto branch = addMappedElement<LuaSkillBranch>(name, ref);
+    m_branches[name] = branch;
   }
 }

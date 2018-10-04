@@ -6,6 +6,7 @@
 #include <osgGaming/Macros.h>
 
 #include <algorithm>
+#include <sstream>
 
 #include <QString>
 #include <QStringList>
