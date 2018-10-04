@@ -9,7 +9,7 @@ extern "C"
 #include <lua.h>
 }
 
-#include <LuaBridge.h>
+#include <LuaBridge/LuaBridge.h>
 
 namespace onep
 {

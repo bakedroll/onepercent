@@ -16,7 +16,7 @@ extern "C"
 #include <lualib.h>
 }
 
-#include <LuaBridge.h>
+#include <LuaBridge/LuaBridge.h>
 
 namespace onep
 {
@@ -39,11 +39,17 @@ namespace onep
     int getNumElements() const;
 
     template <typename LuaObject, typename KeyType>
+    std::shared_ptr<LuaObject> addMappedElement(KeyType key, luabridge::LuaRef& ref)
+    {
+      (*m_ref)[key] = ref;
+      return makeSharedAndAddElement<LuaObject, KeyType>(ref, key);
+    }
+
+    template <typename LuaObject, typename KeyType>
     std::shared_ptr<LuaObject> newMappedElement(KeyType key)
     {
       luabridge::LuaRef ref = luabridge::newTable(m_luaState);
-      (*m_ref)[key] = ref;
-      return makeSharedAndAddElement<LuaObject, KeyType>(ref, key);
+      return addMappedElement<LuaObject, KeyType>(key, ref);
     }
 
     template <typename LuaObject, typename KeyType>

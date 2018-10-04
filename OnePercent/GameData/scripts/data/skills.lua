@@ -67,4 +67,4 @@ local skills = {
   },
 }
 
-control_old.create_skills(skills)
+control:create_skills(skills)

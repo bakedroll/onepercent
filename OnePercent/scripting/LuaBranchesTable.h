@@ -1,11 +1,11 @@
 #pragma once
 
-#include "scripting/LuaObjectMapper.h"
+#include "scripting/LuaMapTable.h"
 #include "scripting/LuaSkillBranch.h"
 
 namespace onep
 {
-  class LuaBranchesTable : public LuaObjectMapper
+  class LuaBranchesTable : public LuaMapTable
   {
   public:
     using Ptr = std::shared_ptr<LuaBranchesTable>;
@@ -17,8 +17,10 @@ namespace onep
     LuaSkillBranch::Ptr getBranchByName(const std::string& name) const;
     int getNumBranches() const;
 
+    void addBranch(const std::string& name, luabridge::LuaRef& ref);
+
   private:
-    LuaSkillBranch::List m_branches;
+    LuaSkillBranch::Map m_branches;
 
   };
 }

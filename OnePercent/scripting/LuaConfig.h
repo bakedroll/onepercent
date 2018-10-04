@@ -17,7 +17,7 @@ extern "C"
 #include <lualib.h>
 }
 
-#include <LuaBridge.h>
+#include <LuaBridge/LuaBridge.h>
 
 namespace onep
 {
@@ -83,7 +83,7 @@ namespace onep
       int i = 0;
       for (luabridge::Iterator it(ref); !it.isNil(); ++it)
       {
-        luabridge::LuaRef val = *it;
+        luabridge::LuaRef val = it.value();
         assert_return(val.isNumber(), vec);
         vec._v[i++] = (float)val;
       }

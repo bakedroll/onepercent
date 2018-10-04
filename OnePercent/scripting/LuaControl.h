@@ -17,6 +17,9 @@ namespace onep
     void luaOnSkillUpdateAction(const std::string& name, luabridge::LuaRef func);
     void luaOnBranchUpdateAction(luabridge::LuaRef func);
 
+    void luaCreateBranches(luabridge::LuaRef branches);
+    void luaCreateSkills(luabridge::LuaRef skills);
+
   private:
     struct Impl;
     std::unique_ptr<Impl> m;

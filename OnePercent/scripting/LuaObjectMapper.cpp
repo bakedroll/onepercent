@@ -29,8 +29,8 @@ namespace onep
   {
     for (luabridge::Iterator it(*m_ref); !it.isNil(); ++it)
     {
-      luabridge::LuaRef value = *it;
-      luabridge::LuaRef key = it.key();
+      luabridge::LuaRef value = it.value();
+      luabridge::LuaRef key   = it.key();
 
       func(key, value);
     }
