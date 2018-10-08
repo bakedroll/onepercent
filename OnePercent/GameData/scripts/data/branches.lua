@@ -1,4 +1,4 @@
-local branches = {
+control:create_branches({
   {
     name = "banks",
     cost = 120
@@ -19,6 +19,4 @@ local branches = {
     name = "politics",
     cost = 50
   }
-}
-
-control:create_branches(branches)
+})

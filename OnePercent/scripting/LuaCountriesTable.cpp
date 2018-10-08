@@ -25,4 +25,9 @@ namespace onep
   {
     return getMappedElement<LuaCountry>(id);
   }
+
+  void LuaCountriesTable::addCountry(int id, luabridge::LuaRef& country)
+  {
+    addMappedElement<LuaCountry>(id, country);
+  }
 }

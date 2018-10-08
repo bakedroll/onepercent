@@ -19,6 +19,8 @@ namespace onep
 
     void luaCreateBranches(luabridge::LuaRef branches);
     void luaCreateSkills(luabridge::LuaRef skills);
+    void luaCreateCountries(luabridge::LuaRef countries);
+    void luaCreateValues(luabridge::LuaRef values);
 
   private:
     struct Impl;

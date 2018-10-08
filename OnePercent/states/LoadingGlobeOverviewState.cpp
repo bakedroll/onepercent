@@ -25,7 +25,6 @@
 
 #include <QVBoxLayout>
 #include <QLabel>
-#include <QFile>
 
 #include <osgGaming/ResourceManager.h>
 

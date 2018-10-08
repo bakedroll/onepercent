@@ -30,23 +30,20 @@ namespace onep
     luabridge::LuaRef displayNameRef  = object["display_name"];
     luabridge::LuaRef typeRef         = object["type"];
     luabridge::LuaRef costRef         = object["cost"];
-    luabridge::LuaRef activatedRef    = object["activated"];
 
     assert_return(nameRef.isString());
     assert_return(displayNameRef.isString());
     assert_return(typeRef.isString());
     assert_return(costRef.isNumber());
-    //assert_return(activatedRef.isBool());
 
-    std::string name        = nameRef;
-    std::string displayName = displayNameRef;
-    std::string type        = typeRef;
+    auto bActivared = false;
+    object["activated"] = bActivared;
 
-    m->name         = name;
-    m->displayName  = displayName;
-    m->type         = type;
+    m->name         = nameRef.tostring();
+    m->displayName  = displayNameRef.tostring();
+    m->type         = typeRef.tostring();
     m->cost         = costRef;
-    m->obActivated->set(bool(activatedRef));
+    m->obActivated->set(bActivared);
 
     addVisitorFunc(static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES), [this](luabridge::LuaRef&)
     {

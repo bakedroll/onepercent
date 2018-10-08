@@ -1,4 +1,4 @@
-local countries = {
+control:create_countries({
   {
     id = 1,
     name = "Afghanistan",
@@ -911,6 +911,4 @@ local countries = {
       ["wealth"] =  1000
     }
   }
-}
-
-control_old.create_countries(countries)
+})

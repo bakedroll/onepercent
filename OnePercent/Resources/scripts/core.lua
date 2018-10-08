@@ -1,26 +1,6 @@
 -- core function definitions
 control_old = {}
 
--- ..and the countries
-function control_old.create_countries(countries)
-
-  local c = model.countries
-  local branches = model.branches
-  for _, v in ipairs(countries) do
-    v.neighbours = {}
-    c[v.id] = v
-  end
-
-end
-
--- ..and last but not least the values
-function control_old.create_values(values)
-
-  local val = model.values
-  for _, v in ipairs(values) do val[v.name] = v end
-
-end
-
 -- initializes the state for all countries with its values and branch_activated
 function control_old.initialize_state()
 

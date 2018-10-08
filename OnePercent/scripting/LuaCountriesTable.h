@@ -17,5 +17,7 @@ namespace onep
     void updateNeighbours();
     
     std::shared_ptr<LuaCountry> getCountryById(int id) const;
+
+    void addCountry(int id, luabridge::LuaRef& country);
   };
 }
