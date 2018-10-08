@@ -5,6 +5,8 @@
 #include "scripting/LuaModel.h"
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSkillsTable.h"
+#include "scripting/LuaCountriesTable.h"
+#include "scripting/LuaValuesDefTable.h"
 #include "simulation/ModelContainer.h"
 
 #include <QString>
@@ -54,6 +56,8 @@ namespace onep
       .addFunction("on_branch_update_action", &LuaControl::luaOnBranchUpdateAction)
       .addFunction("create_branches",         &LuaControl::luaCreateBranches)
       .addFunction("create_skills",           &LuaControl::luaCreateSkills)
+      .addFunction("create_countries",        &LuaControl::luaCreateCountries)
+      .addFunction("create_values",           &LuaControl::luaCreateValues)
       .endClass();
   }
 
@@ -112,7 +116,6 @@ namespace onep
         auto nameRef = branchRef["name"];
         assert_continue(m->lua->checkIsType(nameRef, LUA_TSTRING));
 
-        branchRef["skills"] = m->lua->newTable();
         model->getBranchesTable()->addBranch(nameRef, branchRef);
       }
     });
@@ -144,8 +147,45 @@ namespace onep
           continue;
         }
 
-        skillRef["acivated"] = false;
         branch->getSkillsTable()->addSkill(skillNameRef, skillRef);
+      }
+    });
+  }
+
+  void LuaControl::luaCreateCountries(luabridge::LuaRef countries)
+  {
+    assert_return(m->lua->checkIsType(countries, LUA_TTABLE));
+
+    m->modelContainer->accessModel([&](std::shared_ptr<LuaModel> model)
+    {
+      for (luabridge::Iterator it(countries); !it.isNil(); ++it)
+      {
+        auto countryRef = it.value();
+        assert_continue(m->lua->checkIsType(countryRef, LUA_TTABLE));
+
+        auto idRef = countryRef["id"];
+        assert_continue(m->lua->checkIsType(idRef, LUA_TNUMBER));
+
+        model->getCountriesTable()->addCountry(idRef, countryRef);
+      }
+    });
+  }
+
+  void LuaControl::luaCreateValues(luabridge::LuaRef values)
+  {
+    assert_return(m->lua->checkIsType(values, LUA_TTABLE));
+
+    m->modelContainer->accessModel([&](std::shared_ptr<LuaModel> model)
+    {
+      for (luabridge::Iterator it(values); !it.isNil(); ++it)
+      {
+        auto valueRef = it.value();
+        assert_continue(m->lua->checkIsType(valueRef, LUA_TTABLE));
+
+        auto nameRef = valueRef["name"];
+        assert_continue(m->lua->checkIsType(nameRef, LUA_TSTRING));
+
+        model->getValuesDefTable()->addValue(nameRef, valueRef);
       }
     });
   }

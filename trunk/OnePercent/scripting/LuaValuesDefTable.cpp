@@ -1,4 +1,5 @@
 #include "scripting/LuaValuesDefTable.h"
+#include "scripting/LuaValueDef.h"
 
 namespace onep
 {
@@ -9,4 +10,9 @@ namespace onep
   }
 
   LuaValuesDefTable::~LuaValuesDefTable() = default;
+
+  void LuaValuesDefTable::addValue(const std::string& name, luabridge::LuaRef ref)
+  {
+    addMappedElement<LuaValueDef>(name, ref);
+  }
 }

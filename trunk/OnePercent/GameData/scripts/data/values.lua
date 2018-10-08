@@ -1,4 +1,4 @@
-local values = {
+control:create_values({
   -- Individual values per country
   {
     name = "population",
@@ -61,6 +61,4 @@ local values = {
     type = "branch",
     init = 0.0
   }
-}
-
-control_old.create_values(values)
+})

@@ -47,4 +47,9 @@ namespace onep
   {
     return m->stateTable;
   }
+
+  std::shared_ptr<LuaValuesDefTable> LuaModel::getValuesDefTable() const
+  {
+    return m->valuesTable;
+  }
 }

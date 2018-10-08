@@ -7,6 +7,7 @@ namespace onep
   class LuaCountriesTable;
   class LuaBranchesTable;
   class LuaSimulationStateTable;
+  class LuaValuesDefTable;
 
   class LuaModel : public LuaObjectMapper
   {
@@ -19,6 +20,7 @@ namespace onep
     std::shared_ptr<LuaCountriesTable> getCountriesTable() const;
     std::shared_ptr<LuaBranchesTable> getBranchesTable() const;
     std::shared_ptr<LuaSimulationStateTable> getSimulationStateTable() const;
+    std::shared_ptr<LuaValuesDefTable> getValuesDefTable() const;
 
   private:
     struct Impl;

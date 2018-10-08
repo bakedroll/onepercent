@@ -23,18 +23,16 @@ namespace onep
   {
     assert_return(object.isTable());
 
-    auto nameRef = object["name"];
-    auto costRef = object["cost"];
+    luabridge::LuaRef nameRef = object["name"];
+    luabridge::LuaRef costRef = object["cost"];
 
     assert_return(nameRef.isString());
     assert_return(costRef.isNumber());
 
-    std::string name = nameRef;
-
-    m->name = name;
+    m->name = nameRef.tostring();
     m->cost = costRef;
 
-    m->skillsTable = makeMappedElement<LuaSkillsTable>("skills");
+    m->skillsTable = newMappedElement<LuaSkillsTable>("skills");
   }
 
   LuaSkillBranch::~LuaSkillBranch() = default;

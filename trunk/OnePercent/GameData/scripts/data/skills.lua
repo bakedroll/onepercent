@@ -1,4 +1,4 @@
-local skills = {
+control:create_skills({
 
   -- politics
   {
@@ -65,6 +65,4 @@ local skills = {
     branch = "politics",
     cost = 10
   },
-}
-
-control:create_skills(skills)
+})

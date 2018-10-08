@@ -27,6 +27,8 @@ namespace onep
     assert_return(idRef.isNumber());
     assert_return(nameRef.isString());
 
+    object["neighbours"] = luabridge::newTable(luaState);
+
     m->id = idRef;
     m->name = nameRef.tostring();
 
