@@ -131,8 +131,6 @@ namespace onep
 
   void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
-    m->model->bootstrapLuaModel();
-
     // Loading scripts
     m->lua->loadScript(":/Resources/scripts/core.lua");
     m->lua->loadScript(":/Resources/scripts/gameplay.lua");
