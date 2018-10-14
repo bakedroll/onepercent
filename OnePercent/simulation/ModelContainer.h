@@ -17,12 +17,13 @@ namespace onep
     ModelContainer(osgGaming::Injector& injector);
     ~ModelContainer();
 
-    void bootstrapLuaModel();
     void initializeLuaModelData();
 
     std::shared_ptr<LuaModel> getModel() const;
 
     void accessModel(std::function<void(std::shared_ptr<LuaModel>)> func) const;
+
+    void initializeState();
 
   private:
     struct Impl;

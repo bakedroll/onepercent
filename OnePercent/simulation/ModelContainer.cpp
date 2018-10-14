@@ -23,15 +23,10 @@ namespace onep
     : osg::Referenced()
     , m(new Impl(injector))
   {
+    m->model = m->lua->createElement<LuaModel>("model");
   }
 
   ModelContainer::~ModelContainer() = default;
-
-  void ModelContainer::bootstrapLuaModel()
-  {
-    m->model = m->lua->createElement<LuaModel>("model");
-    m->model->traverseElements(static_cast<int>(ModelTraversalType::BOOTSTRAP));
-  }
 
   void ModelContainer::initializeLuaModelData()
   {
@@ -47,5 +42,10 @@ namespace onep
   {
     QMutexLocker lock(&m->mutexModel);
     func(m->model);
+  }
+
+  void ModelContainer::initializeState()
+  {
+
   }
 }

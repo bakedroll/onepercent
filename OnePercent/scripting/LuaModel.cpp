@@ -22,13 +22,10 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    addVisitorFunc(static_cast<int>(ModelTraversalType::BOOTSTRAP), [this](luabridge::LuaRef&)
-    {
-      m->countriesTable = newMappedElement<LuaCountriesTable>("countries");
-      m->branchesTable = newMappedElement<LuaBranchesTable>("branches");
-      m->stateTable = newMappedElement<LuaSimulationStateTable>("state");
-      m->valuesTable = newMappedElement<LuaValuesDefTable>("values");
-    });
+    m->countriesTable = newMappedElement<LuaCountriesTable>("countries");
+    m->branchesTable = newMappedElement<LuaBranchesTable>("branches");
+    m->stateTable = newMappedElement<LuaSimulationStateTable>("state");
+    m->valuesTable = newMappedElement<LuaValuesDefTable>("values");
   }
 
   LuaModel::~LuaModel() = default;
