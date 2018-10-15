@@ -11,6 +11,7 @@
 #include "scripting/LuaStateManager.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaCountriesTable.h"
+#include "scripting/LuaControl.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 #include "widgets/OverlayCompositor.h"
@@ -46,6 +47,7 @@ namespace onep
       , simulation(injector.inject<Simulation>())
       , lua(injector.inject<LuaStateManager>())
       , model(injector.inject<ModelContainer>())
+      , luaControl(injector.inject<LuaControl>())
       , labelLoadingText(nullptr)
       , overlay(nullptr)
     {
@@ -67,6 +69,7 @@ namespace onep
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<LuaStateManager> lua;
     osg::ref_ptr<ModelContainer> model;
+    osg::ref_ptr<LuaControl> luaControl;
 
     QLabel* labelLoadingText;
     VirtualOverlay* overlay;
@@ -146,11 +149,7 @@ namespace onep
     m->lua->loadScript("./GameData/scripts/control/misc.lua");
     m->lua->loadScript("./GameData/scripts/control/skills.lua");
 
-    // initialize simulation state in lua
-    luabridge::LuaRef func_initialize_state = m->lua->getObject("control_old.initialize_state");
-    LuaStateManager::safeExecute([&](){ func_initialize_state(); });
-
-    m->model->initializeLuaModelData();
+    m->model->initializeState();
 
     // loading globe
     m->globeOverviewWorld->initialize();
@@ -172,16 +171,9 @@ namespace onep
     m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryNodes());
 
     // update neighbours data
-    m->model->getModel()->getCountriesTable()->updateNeighbours();
+    m->model->initializeCountryNeighbours(m->countryOverlay->getNeighbourships());
 
-    // initialize neighbour states and call on_initialize actions
-    luabridge::LuaRef func_initialize_neighbour_states = m->lua->getObject("control_old.initialize_neighbour_states");
-    luabridge::LuaRef func_perform_on_initialize_actions = m->lua->getObject("control_old.perform_on_initialize_actions");
-    LuaStateManager::safeExecute([&]()
-    {
-      func_initialize_neighbour_states();
-      func_perform_on_initialize_actions();
-    });
+    m->luaControl->triggerOnInitializeEvents();
 
     // loading simulation
     m->simulation->prepare();

@@ -27,6 +27,15 @@ namespace onep
       branchActionsTable        = lua->createElement<LuaArrayTable>("on_branch_update", refActions);
     }
 
+    void callLuaFunctions(LuaArrayTable::Ptr& table)
+    {
+      table->foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
+      {
+        assert_return(lua->checkIsType(value, LUA_TFUNCTION));
+        value();
+      });
+    }
+
     LuaStateManager::Ptr lua;
 
     ModelContainer::Ptr modelContainer;
@@ -59,6 +68,16 @@ namespace onep
       .addFunction("create_countries",        &LuaControl::luaCreateCountries)
       .addFunction("create_values",           &LuaControl::luaCreateValues)
       .endClass();
+  }
+
+  void LuaControl::triggerOnInitializeEvents()
+  {
+    m->callLuaFunctions(m->initializeActionsTable);
+  }
+
+  void LuaControl::triggerOnTickActions()
+  {
+    m->callLuaFunctions(m->tickActionsTable);
   }
 
   void LuaControl::luaOnInitializeAction(luabridge::LuaRef func)

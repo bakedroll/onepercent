@@ -22,6 +22,8 @@ namespace onep
     std::shared_ptr<LuaBranchValuesTable> getBranchValuesTable() const;
     std::shared_ptr<LuaBranchesActivatedTable> getBranchesActivatedTable() const;
 
+    void addNeighbourState(int cid, luabridge::LuaRef& state);
+
   private:
     struct Impl;
     std::unique_ptr<Impl> m;

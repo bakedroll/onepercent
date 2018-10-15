@@ -14,6 +14,7 @@ namespace onep
     ~LuaValuesTable();
 
     ValuesMap getValuesMap();
+
     float getValue(const std::string& name) const;
     void setValue(const std::string&, float value);
 

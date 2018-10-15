@@ -16,6 +16,8 @@ namespace onep
     explicit LuaBranchesActivatedTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaBranchesActivatedTable();
 
+    void addBranchActivated(const std::string& name);
+
     bool getBranchActivated(const std::string& name) const;
     void setBranchActivated(const std::string& name, bool activated);
 

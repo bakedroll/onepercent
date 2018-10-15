@@ -10,11 +10,11 @@
 #include "scripting/LuaStateManager.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
+#include "scripting/LuaControl.h"
 #include "simulation/UpdateThread.h"
 
 #include <QTimer>
 #include <QElapsedTimer>
-#include <core/Enums.h>
 
 namespace onep
 {
@@ -25,6 +25,7 @@ namespace onep
       , modelContainer(injector.inject<ModelContainer>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
+      , luaControl(injector.inject<LuaControl>())
       , oRunning(new osgGaming::Observable<bool>(false))
     {}
 
@@ -39,7 +40,8 @@ namespace onep
 
     LuaRefPtr refUpdate_skills_func;
     LuaRefPtr refUpdate_branches_func;
-    LuaRefPtr refUpdate_tick_func;
+
+    osg::ref_ptr<LuaControl> luaControl;
 
     osgGaming::Observable<bool>::Ptr oRunning;
 
@@ -87,7 +89,7 @@ namespace onep
         m->modelContainer->accessModel([&](LuaModel::Ptr model)
         {
           timerTickUpdate.start();
-          (*m->refUpdate_tick_func)();
+          m->luaControl->triggerOnTickActions();
           tickElapsed = timerTickUpdate.elapsed();
 
           timerSkillsUpdate.start();
@@ -131,9 +133,8 @@ namespace onep
 
   void Simulation::prepare()
   {
-    m->refUpdate_skills_func = m->getLuaFunction("control_old.update_skills_func");
-    m->refUpdate_branches_func = m->getLuaFunction("control_old.update_branches_func");
-    m->refUpdate_tick_func = m->getLuaFunction("control_old.update_tick_func");
+    m->refUpdate_skills_func = m->getLuaFunction("core.update_skills_func");
+    m->refUpdate_branches_func = m->getLuaFunction("core.update_branches_func");
 
     m->thread.start();
   }

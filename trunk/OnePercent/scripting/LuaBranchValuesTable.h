@@ -13,6 +13,8 @@ namespace onep
     explicit LuaBranchValuesTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaBranchValuesTable();
 
+    void addBranch(const std::string& name);
+
     BranchValuesMap getBranchValuesMap();
     LuaValuesTable::Ptr getBranch(const std::string& name) const;
 

@@ -17,16 +17,7 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    addVisitorFunc(static_cast<int>(ModelTraversalType::INITIALIZE_DATA), [this](luabridge::LuaRef&)
-    {
-      assert_return(luaref().isTable());
-
-      foreachElementDo([this](luabridge::LuaRef& key, luabridge::LuaRef& value)
-      {
-        assert_return(key.isNumber());
-        m->countryStates[int(key)] = makeMappedElement<LuaCountryState>(key);
-      });
-    });
+    assert_return(object.isTable());
   }
 
   LuaSimulationStateTable::~LuaSimulationStateTable() = default;
@@ -39,6 +30,11 @@ namespace onep
   LuaCountryState::Ptr LuaSimulationStateTable::getCountryState(int cid) const
   {
     return getMappedElement<LuaCountryState>(cid);
+  }
+
+  void LuaSimulationStateTable::addCountryState(int id)
+  {
+    m->countryStates[id] = newMappedElement<LuaCountryState>(id);
   }
 
   void LuaSimulationStateTable::triggerObservables()

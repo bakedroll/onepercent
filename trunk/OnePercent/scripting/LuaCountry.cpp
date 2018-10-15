@@ -12,7 +12,6 @@ namespace onep
 
     int id;
     std::string name;
-    std::vector<int> neighbourIds;
   };
 
   LuaCountry::LuaCountry(const luabridge::LuaRef& object, lua_State* luaState)
@@ -27,18 +26,13 @@ namespace onep
     assert_return(idRef.isNumber());
     assert_return(nameRef.isString());
 
-    object["neighbours"] = luabridge::newTable(luaState);
+    if (object["init_values"].isNil())
+    {
+      object["init_values"] = luabridge::newTable(luaState);
+    }
 
     m->id = idRef;
     m->name = nameRef.tostring();
-
-    addVisitorFunc(static_cast<int>(ModelTraversalType::UPDATE_NEIGHBOURS), [this](luabridge::LuaRef&)
-    {
-      luabridge::LuaRef refNeighbours = luaref()["neighbours"];
-      int i = 1;
-      for (std::vector<int>::const_iterator it = m->neighbourIds.cbegin(); it != m->neighbourIds.cend(); ++it)
-        refNeighbours[i++] = *it;
-    });
   }
 
   LuaCountry::~LuaCountry() = default;
@@ -53,8 +47,17 @@ namespace onep
     return m->name;
   }
 
-  std::vector<int>& LuaCountry::getNeighbourIds() const
+  float LuaCountry::getInitValue(const std::string valueName, float defaultValue) const
   {
-    return m->neighbourIds;
+    luabridge::LuaRef initValuesRef = luaref()["init_values"];
+    luabridge::LuaRef initValueRef  = initValuesRef[valueName];
+
+    if (initValueRef.isNil())
+    {
+      return defaultValue;
+    }
+
+    assert_return(initValueRef.isNumber(), defaultValue);
+    return initValueRef;
   }
 }

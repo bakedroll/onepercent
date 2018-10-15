@@ -1,5 +1,7 @@
 #include "scripting/LuaValueDef.h"
 
+#include <QString>
+
 namespace onep
 {
   struct LuaValueDef::Impl
@@ -7,7 +9,7 @@ namespace onep
     Impl() {}
 
     std::string name;
-    std::string type;
+    Type type;
     float init;
   };
 
@@ -25,10 +27,40 @@ namespace onep
     assert_return(typeRef.isString());
     assert_return(initRef.isNumber());
 
+    auto typeStr = typeRef.tostring();
+
     m->name = nameRef.tostring();
-    m->type = typeRef.tostring();
     m->init = initRef;
+
+    if (typeStr == "default")
+    {
+      m->type = Type::Default;
+    }
+    else if (typeStr == "branch")
+    {
+      m->type = Type::Branch;
+    }
+    else
+    {
+      assert(false);
+      OSGG_QLOG_WARN(QString("Unknown value type '%1'").arg(QString::fromStdString(typeStr)));
+    }
   }
 
   LuaValueDef::~LuaValueDef() = default;
+
+  std::string LuaValueDef::getName() const
+  {
+    return m->name;
+  }
+
+  LuaValueDef::Type LuaValueDef::getType() const
+  {
+    return m->type;
+  }
+
+  float LuaValueDef::getInit() const
+  {
+    return m->init;
+  }
 }

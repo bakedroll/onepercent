@@ -1,4 +1,5 @@
 #include "scripting/LuaCountryState.h"
+#include "scripting/LuaMapTable.h"
 #include "core/Multithreading.h"
 
 namespace onep
@@ -18,9 +19,11 @@ namespace onep
   {
     assert_return(object.isTable());
 
-    m->tValues = makeMappedElement<LuaValuesTable>("values");
-    m->tBranchValues = makeMappedElement<LuaBranchValuesTable>("branch_values");
-    m->tBranchesActivated = makeMappedElement<LuaBranchesActivatedTable>("branches_activated");
+    m->tValues            = newMappedElement<LuaValuesTable>("values");
+    m->tBranchValues      = newMappedElement<LuaBranchValuesTable>("branch_values");
+    m->tBranchesActivated = newMappedElement<LuaBranchesActivatedTable>("branches_activated");
+
+    newMappedElement<LuaMapTable>("neighbour_states");
   }
 
   LuaCountryState::~LuaCountryState() = default;
@@ -48,5 +51,11 @@ namespace onep
   std::shared_ptr<LuaBranchesActivatedTable> LuaCountryState::getBranchesActivatedTable() const
   {
     return m->tBranchesActivated;
+  }
+
+  void LuaCountryState::addNeighbourState(int cid, luabridge::LuaRef& state)
+  {
+    auto table = getMappedElement<LuaMapTable>("neighbour_states");
+    table->insert(std::to_string(cid), state);
   }
 }

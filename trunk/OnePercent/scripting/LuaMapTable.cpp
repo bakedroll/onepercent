@@ -9,7 +9,7 @@ namespace onep
 
   LuaMapTable::~LuaMapTable() = default;
 
-  bool LuaMapTable::contains(const std::string& key) const
+  /*bool LuaMapTable::contains(const std::string& key) const
   {
     return !luaref()[key].isNil();
   }
@@ -22,5 +22,5 @@ namespace onep
   luabridge::LuaRef LuaMapTable::getElement(const std::string& key) const
   {
     return luaref()[key];
-  }
+  }*/
 }
