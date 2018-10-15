@@ -15,6 +15,8 @@ namespace onep
     LuaCountryState::Map& getCountryStates() const;
     LuaCountryState::Ptr getCountryState(int cid) const;
 
+    void addCountryState(int id);
+
     void triggerObservables();
 
   private:

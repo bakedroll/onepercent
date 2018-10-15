@@ -13,8 +13,6 @@ namespace onep
 
     explicit LuaCountriesTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaCountriesTable();
-
-    void updateNeighbours();
     
     std::shared_ptr<LuaCountry> getCountryById(int id) const;
 

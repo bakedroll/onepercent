@@ -12,6 +12,9 @@ namespace onep
 
     virtual void registerClass(lua_State* state) override;
 
+    void triggerOnInitializeEvents();
+    void triggerOnTickActions();
+
     void luaOnInitializeAction(luabridge::LuaRef func);
     void luaOnTickAction(luabridge::LuaRef func);
     void luaOnSkillUpdateAction(const std::string& name, luabridge::LuaRef func);

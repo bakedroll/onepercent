@@ -21,14 +21,6 @@ namespace onep
   {
     assert_return(object.isTable());
 
-    foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
-    {
-      assert_return(value.type() == LUA_TBOOLEAN);
-      assert_return(key.isString());
-
-      m->oActivatedBranches[key.tostring()] = new osgGaming::Observable<bool>(bool(value));
-    });
-
     addVisitorFunc(static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES), [this](luabridge::LuaRef&)
     {
       foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
@@ -48,6 +40,13 @@ namespace onep
   }
 
   LuaBranchesActivatedTable::~LuaBranchesActivatedTable() = default;
+
+  void LuaBranchesActivatedTable::addBranchActivated(const std::string& name)
+  {
+    auto init                   = false;
+    luaref()[name]              = init;
+    m->oActivatedBranches[name] = new osgGaming::Observable<bool>(init);
+  }
 
   bool LuaBranchesActivatedTable::getBranchActivated(const std::string& name) const
   {

@@ -209,8 +209,6 @@ namespace onep
       osg::Vec2f centerLatLong((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI);
       osg::Vec2f size(width, height);
 
-      LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(id);
-
       NeighborList neighborList;
 
       int neighbors_count = stream.read<int>();
@@ -218,9 +216,6 @@ namespace onep
       {
         int neighbourId = stream.read<int>();
         neighborList.push_back(neighbourId);
-
-        if (country)
-          country->getNeighbourIds().push_back(neighbourId);
       }
 
       m->neighbourMap.insert(NeighbourMap::value_type(id, neighborList));

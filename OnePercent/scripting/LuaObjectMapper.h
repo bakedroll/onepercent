@@ -38,6 +38,15 @@ namespace onep
 
     int getNumElements() const;
 
+    template<typename LuaObject>
+    void foreachMappedElementDo(std::function<void(std::shared_ptr<LuaObject>&)> func)
+    {
+      for (auto element : m_elements)
+      {
+        func(std::dynamic_pointer_cast<LuaObject>(element.second));
+      }
+    }
+
     template <typename LuaObject, typename KeyType>
     std::shared_ptr<LuaObject> addMappedElement(KeyType key, luabridge::LuaRef& ref)
     {

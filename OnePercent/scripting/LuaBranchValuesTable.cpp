@@ -7,10 +7,14 @@ namespace onep
     : LuaObjectMapper(object, luaState)
   {
     assert_return(object.isTable());
-    makeAllMappedElements<LuaValuesTable>();
   }
 
   LuaBranchValuesTable::~LuaBranchValuesTable() = default;
+
+  void LuaBranchValuesTable::addBranch(const std::string& name)
+  {
+    newMappedElement<LuaValuesTable>(name);
+  }
 
   LuaBranchValuesTable::BranchValuesMap LuaBranchValuesTable::getBranchValuesMap()
   {

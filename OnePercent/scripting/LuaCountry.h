@@ -18,7 +18,8 @@ namespace onep
 
     int getId() const;
     std::string getName() const;
-    std::vector<int>& getNeighbourIds() const;
+
+    float getInitValue(const std::string valueName, float defaultValue = 0.0f) const;
 
   private:
     struct Impl;
