@@ -43,7 +43,8 @@ namespace onep
     {
       for (auto element : m_elements)
       {
-        func(std::dynamic_pointer_cast<LuaObject>(element.second));
+        auto object = std::dynamic_pointer_cast<LuaObject>(element.second);
+        func(object);
       }
     }
 

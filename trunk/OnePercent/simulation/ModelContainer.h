@@ -4,6 +4,7 @@
 #include <osgGaming/Injector.h>
 
 #include <functional>
+#include <vector>
 
 namespace onep
 {
