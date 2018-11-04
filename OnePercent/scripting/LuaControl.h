@@ -12,6 +12,9 @@ namespace onep
 
     virtual void registerClass(lua_State* state) override;
 
+    void doSkillsUpdate();
+    void doBranchesUpdate();
+
     void triggerOnInitializeEvents();
     void triggerOnTickActions();
 

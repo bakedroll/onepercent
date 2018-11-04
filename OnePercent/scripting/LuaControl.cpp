@@ -7,9 +7,11 @@
 #include "scripting/LuaSkillsTable.h"
 #include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaValuesDefTable.h"
+#include "scripting/LuaSimulationStateTable.h"
 #include "simulation/ModelContainer.h"
 
 #include <QString>
+#include "LuaCountryState.h"
 
 namespace onep
 {
@@ -68,6 +70,67 @@ namespace onep
       .addFunction("create_countries",        &LuaControl::luaCreateCountries)
       .addFunction("create_values",           &LuaControl::luaCreateValues)
       .endClass();
+  }
+
+  void LuaControl::doSkillsUpdate()
+  {
+    auto model    = m->modelContainer->getModel();
+    auto states   = model->getSimulationStateTable();
+    auto branches = model->getBranchesTable();
+
+    states->foreachMappedElementDo<LuaCountryState>([this, &branches](LuaCountryState::Ptr& state)
+    {
+      auto branchesActivated = state->getBranchesActivatedTable();
+      auto countryState      = state->luaref();
+
+      branches->foreachMappedElementDo<LuaSkillBranch>([this, &branchesActivated, &countryState](LuaSkillBranch::Ptr& branch)
+      {
+        auto branchName = branch->getBranchName();
+        if (!branchesActivated->getBranchActivated(branchName))
+        {
+          return;
+        }
+
+        auto skills = branch->getSkillsTable();
+        skills->foreachMappedElementDo<LuaSkill>([this, &branchName, &countryState](LuaSkill::Ptr& skill)
+        {
+          auto skillName = skill->getSkillName();
+          if (!skill->getIsActivated() || !m->skillActionsTable->contains(skillName))
+          {
+            return;
+          }
+
+          auto funcs = m->skillActionsTable->getElement(skillName);
+          assert_return(funcs.isTable());
+
+          for (luabridge::Iterator it(funcs); !it.isNil(); ++it)
+          {
+            auto func = it.value();
+            func(branchName, countryState);
+          }
+        });
+      });
+    });
+  }
+
+  void LuaControl::doBranchesUpdate()
+  {
+    auto model    = m->modelContainer->getModel();
+    auto states   = model->getSimulationStateTable();
+    auto branches = model->getBranchesTable();
+
+    states->foreachMappedElementDo<LuaCountryState>([this, &branches](LuaCountryState::Ptr& state)
+    {
+      auto countryState = state->luaref();
+
+      branches->foreachMappedElementDo<LuaSkillBranch>([this, &countryState](LuaSkillBranch::Ptr& branch)
+      {
+        m->branchActionsTable->foreachElementDo([&branch, &countryState](luabridge::LuaRef& key, luabridge::LuaRef& value)
+        {
+          value(branch->getBranchName(), countryState);
+        });
+      });
+    });
   }
 
   void LuaControl::triggerOnInitializeEvents()

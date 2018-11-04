@@ -11,6 +11,12 @@ namespace onep
 	class Simulation : public osg::Referenced
 	{
 	public:
+    enum class TickUpdateMode
+    {
+      LUA,
+      CPP
+    };
+
     typedef osg::ref_ptr<Simulation> Ptr;
 
 		Simulation(osgGaming::Injector& injector);
@@ -29,6 +35,7 @@ namespace onep
     osgGaming::Observable<bool>::Ptr getORunning() const;
 
     void setUpdateTimerInterval(int msecs);
+    void setTickUpdateMode(TickUpdateMode mode);
 
     void saveState(const std::string& filename);
     void loadState(const std::string& filename);

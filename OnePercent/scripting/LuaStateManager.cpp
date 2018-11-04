@@ -12,6 +12,12 @@
 #include <QStringList>
 #include <QFile>
 
+extern "C"
+{
+#include <lauxlib.h>
+#include <lualib.h>
+}
+
 namespace onep
 {
   struct LuaStateManager::Impl
