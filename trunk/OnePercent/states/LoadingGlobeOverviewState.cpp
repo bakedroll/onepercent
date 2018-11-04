@@ -138,6 +138,7 @@ namespace onep
     m->lua->loadScript(":/Resources/scripts/core.lua");
     m->lua->loadScript(":/Resources/scripts/gameplay.lua");
     m->lua->loadScript(":/Resources/scripts/helper.lua");
+    m->lua->loadScript(":/Resources/scripts/defines.lua");
 
     m->lua->loadScript("./GameData/scripts/data/config.lua");
 

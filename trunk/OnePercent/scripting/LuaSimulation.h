@@ -6,6 +6,11 @@
 #include <osg/Referenced>
 #include <osgGaming/Injector.h>
 
+extern "C"
+{
+#include <lua.h>
+}
+
 namespace onep
 {
   class Simulation;
@@ -22,6 +27,7 @@ namespace onep
     void lua_add_skill_points(int points);
     void lua_set_day(int day);
     void lua_set_interval(int interval);
+    void lua_set_tick_update_mode(int mode);
 
     virtual void registerClass(lua_State* state) override;
 

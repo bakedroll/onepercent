@@ -62,6 +62,11 @@ namespace onep
     Multithreading::uiExecuteOrAsync([=](){ m_simulation->setUpdateTimerInterval(interval); });
   }
 
+  void LuaSimulation::lua_set_tick_update_mode(int mode)
+  {
+    m_simulation->setTickUpdateMode(static_cast<Simulation::TickUpdateMode>(mode));
+  }
+
   void LuaSimulation::registerClass(lua_State* state)
   {
     luabridge::getGlobalNamespace(state)
@@ -72,6 +77,7 @@ namespace onep
       .addFunction("set_interval", &LuaSimulation::lua_set_interval)
       .addFunction("set_skill_points", &LuaSimulation::lua_set_skill_points)
       .addFunction("add_skill_points", &LuaSimulation::lua_add_skill_points)
+      .addFunction("set_tick_update_mode", &LuaSimulation::lua_set_tick_update_mode)
       .endClass();
   }
 }

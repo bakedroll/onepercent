@@ -1,6 +1,7 @@
 #include "Simulation.h"
 
 #include "core/QConnectFunctor.h"
+#include "core/Helper.h"
 #include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "core/Macros.h"
@@ -14,7 +15,6 @@
 #include "simulation/UpdateThread.h"
 
 #include <QTimer>
-#include <QElapsedTimer>
 
 namespace onep
 {
@@ -27,6 +27,7 @@ namespace onep
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , luaControl(injector.inject<LuaControl>())
       , oRunning(new osgGaming::Observable<bool>(false))
+      , tickUpdateMode(TickUpdateMode::CPP)
     {}
 
     osg::ref_ptr<LuaStateManager> lua;
@@ -45,6 +46,7 @@ namespace onep
 
     osgGaming::Observable<bool>::Ptr oRunning;
 
+    TickUpdateMode tickUpdateMode;
     UpdateThread thread;
 
     LuaRefPtr getLuaFunction(const char* path)
@@ -71,47 +73,40 @@ namespace onep
 
     m->thread.onTick([this]()
     {
-      QElapsedTimer timerTickUpdate;
-      QElapsedTimer timerSkillsUpdate;
-      QElapsedTimer timerBranchesUpdate;
-      QElapsedTimer timerSync;
-      QElapsedTimer timerTotal;
+      auto tickElapsed     = 0L;
+      auto skillsElapsed   = 0L;
+      auto branchesElapsed = 0L;
+      auto syncElapsed     = 0L;
 
-      qint64 tickElapsed;
-      qint64 skillsElapsed = 0;
-      qint64 branchesElapsed = 0;
-      qint64 syncElapsed = 0;
-
-      timerTotal.start();
-
-      LuaStateManager::safeExecute([&]()
+      auto totalElapsed = Helper::measureMsecs([&]()
       {
-        m->modelContainer->accessModel([&](LuaModel::Ptr model)
+        LuaStateManager::safeExecute([&]()
         {
-          timerTickUpdate.start();
-          m->luaControl->triggerOnTickActions();
-          tickElapsed = timerTickUpdate.elapsed();
-
-          timerSkillsUpdate.start();
-          (*m->refUpdate_skills_func)();
-          skillsElapsed = timerSkillsUpdate.elapsed();
-
-          timerBranchesUpdate.start();
-          (*m->refUpdate_branches_func)();
-          branchesElapsed = timerBranchesUpdate.elapsed();
-
-          timerSync.start();
-          model->getSimulationStateTable()->triggerObservables();
-          syncElapsed = timerSync.elapsed();
-
-          Multithreading::uiExecuteOrAsync([this]()
+          m->modelContainer->accessModel([&](LuaModel::Ptr model)
           {
-            m->oDay->set(m->oDay->get() + 1);
+            tickElapsed = Helper::measureMsecs([this](){ m->luaControl->triggerOnTickActions(); });
+
+            switch (m->tickUpdateMode)
+            {
+            case TickUpdateMode::CPP:
+              skillsElapsed   = Helper::measureMsecs([this](){ m->luaControl->doSkillsUpdate(); });
+              branchesElapsed = Helper::measureMsecs([this](){ m->luaControl->doBranchesUpdate(); });
+              break;
+            case TickUpdateMode::LUA:
+              skillsElapsed   = Helper::measureMsecs([this](){ (*m->refUpdate_skills_func)(); });
+              branchesElapsed = Helper::measureMsecs([this](){ (*m->refUpdate_branches_func)(); });
+              break;
+            }
+
+            syncElapsed = Helper::measureMsecs([&model](){ model->getSimulationStateTable()->triggerObservables(); });
+
+            Multithreading::uiExecuteOrAsync([this]()
+            {
+              m->oDay->set(m->oDay->get() + 1);
+            });
           });
         });
       });
-
-      long totalElapsed = timerTotal.elapsed();
 
       OSGG_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Total: %5ms")
         .arg(tickElapsed)
@@ -188,6 +183,11 @@ namespace onep
   void Simulation::setUpdateTimerInterval(int msecs)
   {
     m->timer.setInterval(msecs);
+  }
+
+  void Simulation::setTickUpdateMode(TickUpdateMode mode)
+  {
+    m->tickUpdateMode = mode;
   }
 
   void Simulation::saveState(const std::string& filename)

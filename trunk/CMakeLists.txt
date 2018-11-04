@@ -122,13 +122,15 @@ endif()
 find_package(Threads)
 
 # Lua
-find_package(Lua)
+if (NOT EXISTS ${LUA_INCLUDE_PREFIX})
+  find_package(Lua REQUIRED)
+endif()
 
 if (NOT EXISTS ${LUA_LIB_DEBUG})
   set(LUA_LIB_DEBUG ${LUA_LIB_RELEASE} CACHE STRING "Lua debug library")
 endif()
 
-adjust_cached_path_if_exists(LUA_INCLUDE_PREFIX "Lua include dir" "${LUA_INCLUDE_PREFIX}" MESSAGES ERROR_MESSAGES CACHE)
+#adjust_cached_path_if_exists(LUA_INCLUDE_PREFIX "Lua include dir" "${LUA_INCLUDE_PREFIX}" MESSAGES ERROR_MESSAGES CACHE)
 adjust_cached_path_if_exists(LUA_LIB_RELEASE "Lua release library" "${LUA_LIB_RELEASE}" MESSAGES ERROR_MESSAGES)
 adjust_cached_path_if_exists(LUA_LIB_DEBUG "Lua debug library" "${LUA_LIB_DEBUG}" MESSAGES ERROR_MESSAGES CACHE)
 
