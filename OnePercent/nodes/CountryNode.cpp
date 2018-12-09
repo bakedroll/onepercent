@@ -56,9 +56,9 @@ namespace onep
     addDrawable(geo);
 
     m->uniformAlpha = new osg::Uniform("alpha", 0.0f);
-    m->uniformColor = new osg::Uniform("overlayColor", osg::Vec3f(0.0f, 0.0f, 0.0f));
-    m->uniformTakeover = new osg::Uniform("takeover", 0.5f);
-    m->uniformTakeoverColor = new osg::Uniform("takeoverColor", osg::Vec4f(1.0f, 1.0f, 1.0f, 0.8f));
+    m->uniformColor = new osg::Uniform("overlayColor", osg::Vec3f(0.3f, 0.3f, 0.3f));
+    m->uniformTakeover = new osg::Uniform("takeover", 0.0f);
+    m->uniformTakeoverColor = new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 1.0f, 0.8f));
     m->uniformTakeoverScale = new osg::Uniform("takeoverScale", 100.0f);
     
     m->stateSet = getOrCreateStateSet();
@@ -98,6 +98,11 @@ namespace onep
     }
 
     return it->second;
+  }
+
+  osg::ref_ptr<osg::Uniform>& CountryNode::getTakeoverUniform() const
+  {
+    return m->uniformTakeover;
   }
 
   bool CountryNode::getIsOnOcean() const

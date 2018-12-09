@@ -149,6 +149,7 @@ namespace onep
 
     m->lua->loadScript("./GameData/scripts/control/misc.lua");
     m->lua->loadScript("./GameData/scripts/control/skills.lua");
+    m->lua->loadScript("./GameData/scripts/control/visuals.lua");
 
     m->model->initializeState();
 

@@ -17,6 +17,5 @@ namespace onep
 
     BranchValuesMap getBranchValuesMap();
     LuaValuesTable::Ptr getBranch(const std::string& name) const;
-
   };
 }

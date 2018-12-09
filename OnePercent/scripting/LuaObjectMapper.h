@@ -36,6 +36,12 @@ namespace onep
     void foreachElementDo(std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func);
     void traverseElements(int type);
 
+    template <typename KeyType>
+    bool containsMappedElement(const KeyType& key)
+    {
+      return m_elements.count(key) > 0;
+    }
+
     int getNumElements() const;
 
     template<typename LuaObject>

@@ -39,7 +39,9 @@ namespace onep
   void LuaObjectMapper::traverseElements(int type)
   {
     if (m_visitorFuncs.size() > 0 && m_visitorFuncs.count(type) > 0)
+    {
       m_visitorFuncs[type](*m_ref);
+    }
 
     for (auto& elem : m_elements)
     {

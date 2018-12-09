@@ -1,3 +1,5 @@
+--[[
+
 control:on_initialize_action(function()
 
   log:debug("on_initialize_action_new")
@@ -10,5 +12,5 @@ control:on_tick_action(function()
 
 end)
 
+]]--
 
--- control.bind_branch_value_to_visuals("propagation", "takeover")

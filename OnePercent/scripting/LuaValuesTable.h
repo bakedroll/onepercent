@@ -1,10 +1,11 @@
 #pragma once
 
 #include "scripting/LuaObjectMapper.h"
+#include "scripting/LuaMapTable.h"
 
 namespace onep
 {
-  class LuaValuesTable : public LuaObjectMapper
+  class LuaValuesTable : public LuaMapTable
   {
   public:
     using ValuesMap = std::map<std::string, float>;
