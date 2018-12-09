@@ -75,12 +75,12 @@ control:on_branch_update_action(function(branch_name, country_state)
 
     local propagated = country_state.branch_values[branch_name]["propagated"]
     for _, neighbour_state in pairs(country_state.neighbour_states) do
-      propagated = propagated + neighbour_state.branch_values[branch_name]["propagation"]
+      propagated = propagated + neighbour_state.branch_values[branch_name]["propagation"] * 0.05
     end
 
     country_state.branch_values[branch_name]["propagated"] = propagated
 
-    if (propagated >= 20) then
+    if (propagated >= 1.0) then
       country_state.branches_activated[branch_name] = true
     end
   end

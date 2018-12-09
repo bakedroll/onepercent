@@ -12,6 +12,7 @@
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaControl.h"
+#include "scripting/LuaVisuals.h"
 #include "simulation/UpdateThread.h"
 
 #include <QTimer>
@@ -23,6 +24,7 @@ namespace onep
     Impl(osgGaming::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
+      , visuals(injector.inject<LuaVisuals>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , luaControl(injector.inject<LuaControl>())
@@ -33,6 +35,7 @@ namespace onep
     osg::ref_ptr<LuaStateManager> lua;
 
     ModelContainer::Ptr modelContainer;
+    LuaVisuals::Ptr     visuals;
 
     QTimer timer;
 
@@ -77,6 +80,7 @@ namespace onep
       auto skillsElapsed   = 0L;
       auto branchesElapsed = 0L;
       auto syncElapsed     = 0L;
+      auto visualsElapsed  = 0L;
 
       auto totalElapsed = Helper::measureMsecs([&]()
       {
@@ -98,7 +102,8 @@ namespace onep
               break;
             }
 
-            syncElapsed = Helper::measureMsecs([&model](){ model->getSimulationStateTable()->triggerObservables(); });
+            syncElapsed    = Helper::measureMsecs([&model](){ model->getSimulationStateTable()->triggerObservables(); });
+            visualsElapsed = Helper::measureMsecs([this](){  m->visuals->updateVisualBindings(); });
 
             Multithreading::uiExecuteOrAsync([this]()
             {
@@ -108,11 +113,12 @@ namespace onep
         });
       });
 
-      OSGG_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Total: %5ms")
+      OSGG_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Visuals: %5ms Total: %6ms")
         .arg(tickElapsed)
         .arg(skillsElapsed)
         .arg(branchesElapsed)
         .arg(syncElapsed)
+        .arg(visualsElapsed)
         .arg(totalElapsed));
     });
 

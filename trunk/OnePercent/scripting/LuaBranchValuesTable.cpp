@@ -1,5 +1,4 @@
 #include "scripting/LuaBranchValuesTable.h"
-#include "core/Enums.h"
 
 namespace onep
 {
