@@ -1,30 +1,36 @@
 #pragma once
 
-#include "scripting/LuaObjectMapper.h"
+#include "scripting/LuaClass.h"
 
 #include <osgGaming/Observable.h>
+
+#include <LuaBridge/LuaBridge.h>
 
 #include <vector>
 #include <memory>
 
 namespace onep
 {
-	class LuaSkill : public LuaObjectMapper
+	class LuaSkill : public LuaClass
 	{
 	public:
     typedef std::shared_ptr<LuaSkill> Ptr;
     typedef std::vector<Ptr> List;
     typedef std::map<std::string, Ptr> Map;
 
-    explicit LuaSkill(const luabridge::LuaRef& object, lua_State* luaState);
+    LuaSkill();
+    explicit LuaSkill(const luabridge::LuaRef& object);
     ~LuaSkill();
 
-		std::string getSkillName() const;
+		std::string getName() const;
+    std::string getBranchName() const;
     std::string getDisplayName() const;
 
     bool getIsActivated() const;
     void setIsActivated(bool activated);
     osgGaming::Observable<bool>::Ptr getObActivated() const;
+
+    void registerClass(lua_State* state) override;
 	  
   private:
     struct Impl;

@@ -64,7 +64,7 @@ namespace onep
 
   void LuaSimulation::lua_set_tick_update_mode(int mode)
   {
-    m_simulation->setTickUpdateMode(static_cast<Simulation::TickUpdateMode>(mode));
+    m_simulation->setTickUpdateMode(static_cast<LuaDefines::TickUpdateMode>(mode));
   }
 
   void LuaSimulation::registerClass(lua_State* state)

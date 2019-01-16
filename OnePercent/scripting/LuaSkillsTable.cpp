@@ -30,14 +30,21 @@ namespace onep
     return LuaSkill::Ptr();
   }
 
-  LuaSkill::Ptr LuaSkillsTable::getSkillByName(std::string name) const
+  LuaSkill::Ptr LuaSkillsTable::getSkillByName(const std::string& name) const
   {
-    return getMappedElement<LuaSkill>(name);
+    assert_return(m_skills.count(name) > 0, nullptr);
+    return m_skills.find(name)->second;
   }
 
   void LuaSkillsTable::addSkill(const std::string& name, luabridge::LuaRef& ref)
   {
-    auto skill = addMappedElement<LuaSkill>(name, ref);
+    auto skill = std::make_shared<LuaSkill>(ref);
+    luaref()[name] = skill.get();
     m_skills[name] = skill;
+  }
+
+  LuaSkill::Map& LuaSkillsTable::getSkillsMap()
+  {
+    return m_skills;
   }
 }

@@ -50,12 +50,11 @@ namespace onep
 
   LuaControl::LuaControl(osgGaming::Injector& injector)
     : osg::Referenced()
+    , LuaCallbackRegistry()
     , LuaClassInstance("control")
     , m(new Impl(injector))
   {
   }
-
-  LuaControl::~LuaControl() = default;
 
   void LuaControl::registerClass(lua_State* state)
   {
@@ -92,10 +91,10 @@ namespace onep
         }
 
         auto skills = branch->getSkillsTable();
-        skills->foreachMappedElementDo<LuaSkill>([this, &branchName, &countryState](LuaSkill::Ptr& skill)
+        for (auto& skill : skills->getSkillsMap())
         {
-          auto skillName = skill->getSkillName();
-          if (!skill->getIsActivated() || !m->skillActionsTable->contains(skillName))
+          auto skillName = skill.second->getName();
+          if (!skill.second->getIsActivated() || !m->skillActionsTable->contains(skillName))
           {
             return;
           }
@@ -108,7 +107,7 @@ namespace onep
             auto func = it.value();
             func(branchName, countryState);
           }
-        });
+        }
       });
     });
   }

@@ -17,6 +17,7 @@
 #include "scripting/LuaControl.h"
 #include "scripting/LuaVisuals.h"
 #include "scripting/LuaSimulation.h"
+#include "scripting/LuaSkill.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 
@@ -129,6 +130,8 @@ namespace onep
     lua->registerClassInstance<LuaSimulation>(injector.inject<LuaSimulation>());
     lua->registerClassInstance<LuaVisuals>(injector.inject<LuaVisuals>());
     lua->registerClassInstance<LuaLogger>(injector.inject<LuaLogger>());
+
+    lua->registerClass<LuaSkill>();
 
     m->simulation = injector.inject<Simulation>();
 
