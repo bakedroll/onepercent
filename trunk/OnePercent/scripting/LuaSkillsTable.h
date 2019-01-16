@@ -15,9 +15,11 @@ namespace onep
 
     int getNumSkills() const;
     LuaSkill::Ptr getSkillByIndex(int index) const;
-    LuaSkill::Ptr getSkillByName(std::string name) const;
+    LuaSkill::Ptr getSkillByName(const std::string& name) const;
 
     void addSkill(const std::string& name, luabridge::LuaRef& ref);
+
+    LuaSkill::Map& getSkillsMap();
 
   private:
     LuaSkill::Map m_skills;

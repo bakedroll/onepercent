@@ -1,6 +1,5 @@
 #include "scripting/LuaSkill.h"
 #include "core/Multithreading.h"
-#include "core/Enums.h"
 
 #include <osgGaming/Macros.h>
 
@@ -13,6 +12,7 @@ namespace onep
     {}
 
     std::string name;
+    std::string branch;
     std::string displayName;
     std::string type;
     int cost;
@@ -20,18 +20,27 @@ namespace onep
     osgGaming::Observable<bool>::Ptr obActivated;
   };
 
-  LuaSkill::LuaSkill(const luabridge::LuaRef& object, lua_State* luaState)
-    : LuaObjectMapper(object, luaState)
+  LuaSkill::LuaSkill()
+    : LuaClass()
+    , m(new Impl())
+  {
+    //assert(false);
+  }
+
+  LuaSkill::LuaSkill(const luabridge::LuaRef& object)
+    : LuaClass()
     , m(new Impl())
   {
     assert_return(object.isTable());
 
     luabridge::LuaRef nameRef         = object["name"];
+    luabridge::LuaRef branchRef       = object["branch"];
     luabridge::LuaRef displayNameRef  = object["display_name"];
     luabridge::LuaRef typeRef         = object["type"];
     luabridge::LuaRef costRef         = object["cost"];
 
     assert_return(nameRef.isString());
+    assert_return(branchRef.isString());
     assert_return(displayNameRef.isString());
     assert_return(typeRef.isString());
     assert_return(costRef.isNumber());
@@ -40,24 +49,23 @@ namespace onep
     object["activated"] = bActivared;
 
     m->name         = nameRef.tostring();
+    m->branch       = branchRef.tostring();
     m->displayName  = displayNameRef.tostring();
     m->type         = typeRef.tostring();
     m->cost         = costRef;
     m->obActivated->set(bActivared);
-
-    addVisitorFunc(static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES), [this](luabridge::LuaRef&)
-    {
-      bool activated = bool(luaref()["activated"]);
-      if (activated != getIsActivated())
-        setIsActivated(activated);
-    });
   }
 
   LuaSkill::~LuaSkill() = default;
 
-  std::string LuaSkill::getSkillName() const
+  std::string LuaSkill::getName() const
   {
     return m->name;
+  }
+
+  std::string LuaSkill::getBranchName() const
+  {
+    return m->branch;
   }
 
   std::string LuaSkill::getDisplayName() const
@@ -72,12 +80,21 @@ namespace onep
 
   void LuaSkill::setIsActivated(bool activated)
   {
-    luaref()["activated"] = activated;
     Multithreading::uiExecuteOrAsync([=](){ m->obActivated->set(activated); });
   }
 
   osgGaming::Observable<bool>::Ptr LuaSkill::getObActivated() const
   {
     return m->obActivated;
+  }
+
+  void LuaSkill::registerClass(lua_State* state)
+  {
+    luabridge::getGlobalNamespace(state)
+      .beginClass<LuaSkill>("LuaSkill")
+      .addProperty("activated", &LuaSkill::getIsActivated, &LuaSkill::setIsActivated)
+      .addProperty("name", &LuaSkill::getName)
+      .addProperty("branch", &LuaSkill::getBranchName)
+      .endClass();
   }
 }

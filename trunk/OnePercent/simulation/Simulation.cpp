@@ -29,7 +29,7 @@ namespace onep
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , luaControl(injector.inject<LuaControl>())
       , oRunning(new osgGaming::Observable<bool>(false))
-      , tickUpdateMode(TickUpdateMode::CPP)
+      , tickUpdateMode(LuaDefines::TickUpdateMode::LUA)
     {}
 
     osg::ref_ptr<LuaStateManager> lua;
@@ -49,7 +49,7 @@ namespace onep
 
     osgGaming::Observable<bool>::Ptr oRunning;
 
-    TickUpdateMode tickUpdateMode;
+    LuaDefines::TickUpdateMode tickUpdateMode;
     UpdateThread thread;
 
     LuaRefPtr getLuaFunction(const char* path)
@@ -92,11 +92,11 @@ namespace onep
 
             switch (m->tickUpdateMode)
             {
-            case TickUpdateMode::CPP:
+            case LuaDefines::TickUpdateMode::CPP:
               skillsElapsed   = Helper::measureMsecs([this](){ m->luaControl->doSkillsUpdate(); });
               branchesElapsed = Helper::measureMsecs([this](){ m->luaControl->doBranchesUpdate(); });
               break;
-            case TickUpdateMode::LUA:
+            case LuaDefines::TickUpdateMode::LUA:
               skillsElapsed   = Helper::measureMsecs([this](){ (*m->refUpdate_skills_func)(); });
               branchesElapsed = Helper::measureMsecs([this](){ (*m->refUpdate_branches_func)(); });
               break;
@@ -191,7 +191,7 @@ namespace onep
     m->timer.setInterval(msecs);
   }
 
-  void Simulation::setTickUpdateMode(TickUpdateMode mode)
+  void Simulation::setTickUpdateMode(LuaDefines::TickUpdateMode mode)
   {
     m->tickUpdateMode = mode;
   }

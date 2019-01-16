@@ -1,14 +1,14 @@
 #pragma once
 
 #include "scripting/LuaStateManager.h"
+#include "scripting/LuaCallbackRegistry.h"
 
 namespace onep
 {
-  class LuaControl : public osg::Referenced, public LuaClassInstance
+  class LuaControl : public osg::Referenced, public LuaCallbackRegistry, public LuaClassInstance
   {
   public:
     LuaControl(osgGaming::Injector& injector);
-    ~LuaControl();
 
     virtual void registerClass(lua_State* state) override;
 

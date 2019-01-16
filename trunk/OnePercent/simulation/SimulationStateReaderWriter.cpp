@@ -106,7 +106,7 @@ namespace onep
         for (int j = 0; j < numSkills; j++)
         {
           LuaSkill::Ptr skill = branch->getSkillsTable()->getSkillByIndex(j);
-          std::string skillName = skill->getSkillName();
+          std::string skillName = skill->getName();
 
           stream << int(skillName.length());
           stream.writeRawData(skillName.c_str(), skillName.length());
