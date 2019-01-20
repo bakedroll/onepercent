@@ -49,7 +49,7 @@ namespace onep
   };
 
   LuaControl::LuaControl(osgGaming::Injector& injector)
-    : LuaCallbackRegistry()
+    : LuaCallbackRegistry(injector.inject<LuaStateManager>())
     , m(new Impl(injector))
   {
     registerLuaCallback(LuaDefines::Callback::ON_INITIALIZE);
@@ -163,7 +163,7 @@ namespace onep
           continue;
         }
 
-        branch->getSkillsTable()->addSkill(skillNameRef, skillRef);
+        branch->getSkillsTable()->addSkill(m->lua, skillNameRef, skillRef);
       }
     });
   }

@@ -10,12 +10,21 @@ namespace onep
       .endClass();
   }
 
+  LuaCallbackRegistry::LuaCallbackRegistry(const LuaStateManager::Ptr& lua)
+    : m_lua(lua)
+  {
+  }
+
   void LuaCallbackRegistry::luaOnEvent(int eventId, luabridge::LuaRef func)
   {
     const auto& it = m_callbacks.find(static_cast<LuaDefines::Callback>(eventId));
     assert_return(it != m_callbacks.end());
 
-    it->second->addFunction(func);
+    m_lua->safeExecute([this, &it, &func]()
+    {
+      assert_return(m_lua->checkIsType(func, LUA_TFUNCTION));
+      it->second->addFunction(func);
+    });
   }
 
   void LuaCallbackRegistry::registerLuaCallback(LuaDefines::Callback id, LuaCallback::Ptr callback)

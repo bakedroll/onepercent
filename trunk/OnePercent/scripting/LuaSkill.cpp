@@ -31,8 +31,8 @@ namespace onep
     osgGaming::Observable<bool>::Ptr obActivated;
   };
 
-  LuaSkill::LuaSkill(const luabridge::LuaRef& object)
-    : LuaCallbackRegistry()
+  LuaSkill::LuaSkill(const LuaStateManager::Ptr& lua, const luabridge::LuaRef& object)
+    : LuaCallbackRegistry(lua)
     , m(new Impl())
   {
     assert_return(object.isTable());
