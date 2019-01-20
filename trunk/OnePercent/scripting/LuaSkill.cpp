@@ -8,10 +8,11 @@ namespace onep
   void LuaSkill::Definition::registerClass(lua_State* state)
   {
     luabridge::getGlobalNamespace(state)
-      .beginClass<LuaSkill>("LuaSkill")
+      .deriveClass<LuaSkill, LuaCallbackRegistry>("LuaSkill")
       .addProperty("activated", &LuaSkill::getIsActivated, &LuaSkill::setIsActivated)
       .addProperty("name", &LuaSkill::getName)
       .addProperty("branch", &LuaSkill::getBranchName)
+      .addFunction("update", &LuaSkill::update)
       .endClass();
   }
 
@@ -31,7 +32,8 @@ namespace onep
   };
 
   LuaSkill::LuaSkill(const luabridge::LuaRef& object)
-    : m(new Impl())
+    : LuaCallbackRegistry()
+    , m(new Impl())
   {
     assert_return(object.isTable());
 
@@ -56,9 +58,16 @@ namespace onep
     m->type         = typeRef.tostring();
     m->cost         = costRef;
     m->obActivated->set(bActivared);
+
+    registerLuaCallback(LuaDefines::Callback::ON_SKILL_UPDATE);
   }
 
   LuaSkill::~LuaSkill() = default;
+
+  void LuaSkill::update(const std::string& branchName, luabridge::LuaRef countryState)
+  {
+    triggerLuaCallback(LuaDefines::Callback::ON_SKILL_UPDATE, branchName, countryState);
+  }
 
   std::string LuaSkill::getName() const
   {

@@ -2,6 +2,7 @@
 
 #include "scripting/LuaMapTable.h"
 #include "scripting/LuaSkillBranch.h"
+#include "scripting/LuaSkill.h"
 
 namespace onep
 {
@@ -18,6 +19,8 @@ namespace onep
     int getNumBranches() const;
 
     void addBranch(const std::string& name, luabridge::LuaRef& ref);
+
+    LuaSkill::Ptr findSkill(const std::string& name) const;
 
   private:
     LuaSkillBranch::Map m_branches;

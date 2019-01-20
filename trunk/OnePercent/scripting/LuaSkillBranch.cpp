@@ -42,7 +42,7 @@ namespace onep
     return m->skillsTable;
   }
 
-  const std::string& LuaSkillBranch::getBranchName() const
+  const std::string& LuaSkillBranch::getName() const
   {
     return m->name;
   }

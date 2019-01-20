@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scripting/LuaClassDefinition.h"
+#include "scripting/LuaCallbackRegistry.h"
 
 #include <osgGaming/Observable.h>
 
@@ -11,7 +12,7 @@
 
 namespace onep
 {
-	class LuaSkill
+	class LuaSkill : public LuaCallbackRegistry
 	{
 	public:
     class Definition : public LuaClassDefinition
@@ -26,6 +27,8 @@ namespace onep
 
     explicit LuaSkill(const luabridge::LuaRef& object);
     ~LuaSkill();
+
+    void update(const std::string& branchName, luabridge::LuaRef countryState);
 
 		std::string getName() const;
     std::string getBranchName() const;

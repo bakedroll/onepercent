@@ -1,7 +1,6 @@
 #include "scripting/LuaControl.h"
 
 #include "scripting/LuaArrayTable.h"
-#include "scripting/LuaMapTable.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSkillsTable.h"
@@ -19,11 +18,12 @@ namespace onep
   {
     luabridge::getGlobalNamespace(state)
       .deriveClass<LuaControl, LuaCallbackRegistry>("Control")
-      .addFunction("on_skill_update_action", &LuaControl::luaOnSkillUpdateAction)
       .addFunction("create_branches", &LuaControl::luaCreateBranches)
       .addFunction("create_skills", &LuaControl::luaCreateSkills)
       .addFunction("create_countries", &LuaControl::luaCreateCountries)
       .addFunction("create_values", &LuaControl::luaCreateValues)
+      .addFunction("skill", &LuaControl::getSkill)
+      .addFunction("update_branch", &LuaControl::updateBranch)
       .endClass();
   }
 
@@ -33,9 +33,6 @@ namespace onep
       : lua(injector.inject<LuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
     {
-      luabridge::LuaRef refActions = lua->createGlobalTable("actions");
-
-      skillActionsTable         = lua->createElement<LuaMapTable>  ("on_skill_update",  refActions);
     }
 
     void callLuaFunctions(LuaArrayTable::Ptr& table)
@@ -48,10 +45,7 @@ namespace onep
     }
 
     LuaStateManager::Ptr lua;
-
     ModelContainer::Ptr modelContainer;
-
-    LuaMapTable::Ptr     skillActionsTable;
   };
 
   LuaControl::LuaControl(osgGaming::Injector& injector)
@@ -76,7 +70,7 @@ namespace onep
 
       branches->foreachMappedElementDo<LuaSkillBranch>([this, &branchesActivated, &countryState](LuaSkillBranch::Ptr& branch)
       {
-        auto branchName = branch->getBranchName();
+        auto branchName = branch->getName();
         if (!branchesActivated->getBranchActivated(branchName))
         {
           return;
@@ -86,19 +80,12 @@ namespace onep
         for (auto& skill : skills->getSkillsMap())
         {
           auto skillName = skill.second->getName();
-          if (!skill.second->getIsActivated() || !m->skillActionsTable->contains(skillName))
+          if (!skill.second->getIsActivated())
           {
             return;
           }
 
-          auto funcs = m->skillActionsTable->getElement(skillName);
-          assert_return(funcs.isTable());
-
-          for (luabridge::Iterator it(funcs); !it.isNil(); ++it)
-          {
-            auto func = it.value();
-            func(branchName, countryState);
-          }
+          skill.second->update(branchName, countryState);
         }
       });
     });
@@ -116,23 +103,19 @@ namespace onep
 
       branches->foreachMappedElementDo<LuaSkillBranch>([this, &countryState](LuaSkillBranch::Ptr& branch)
       {
-        triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE, branch->getBranchName(), countryState);
+        updateBranch(branch->getName(), countryState);
       });
     });
   }
 
-  void LuaControl::luaOnSkillUpdateAction(const std::string& name, luabridge::LuaRef func)
+  LuaSkill* LuaControl::getSkill(const std::string& name)
   {
-    m->lua->safeExecute([&]()
-    {
-      assert_return(m->lua->checkIsType(func, LUA_TFUNCTION));
-      if (!m->skillActionsTable->contains(name))
-      {
-        m->skillActionsTable->insert(name, m->lua->newTable());
-      }
+    return m->modelContainer->getModel()->getBranchesTable()->findSkill(name).get();
+  }
 
-      m->skillActionsTable->getElement(name).append(func);
-    });
+  void LuaControl::updateBranch(const std::string& name, luabridge::LuaRef countryState)
+  {
+    triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE, name, countryState);
   }
 
   void LuaControl::luaCreateBranches(luabridge::LuaRef branches)
