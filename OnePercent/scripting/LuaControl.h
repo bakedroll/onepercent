@@ -20,7 +20,6 @@ namespace onep
     void doBranchesUpdate();
 
     void luaOnSkillUpdateAction(const std::string& name, luabridge::LuaRef func);
-    void luaOnBranchUpdateAction(luabridge::LuaRef func);
 
     void luaCreateBranches(luabridge::LuaRef branches);
     void luaCreateSkills(luabridge::LuaRef skills);
