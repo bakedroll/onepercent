@@ -11,12 +11,6 @@ namespace onep
 
     LuaMapTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaMapTable();
-
-    /*bool contains(const std::string& key) const;
-    void insert(const std::string& key, const luabridge::LuaRef& elem);
-    luabridge::LuaRef getElement(const std::string& key) const;
-    */
-   
     
     template<typename KeyType>
     bool contains(const KeyType& key) const

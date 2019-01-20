@@ -20,7 +20,6 @@ namespace onep
     luabridge::getGlobalNamespace(state)
       .deriveClass<LuaControl, LuaCallbackRegistry>("Control")
       .addFunction("on_skill_update_action", &LuaControl::luaOnSkillUpdateAction)
-      .addFunction("on_branch_update_action", &LuaControl::luaOnBranchUpdateAction)
       .addFunction("create_branches", &LuaControl::luaCreateBranches)
       .addFunction("create_skills", &LuaControl::luaCreateSkills)
       .addFunction("create_countries", &LuaControl::luaCreateCountries)
@@ -37,7 +36,6 @@ namespace onep
       luabridge::LuaRef refActions = lua->createGlobalTable("actions");
 
       skillActionsTable         = lua->createElement<LuaMapTable>  ("on_skill_update",  refActions);
-      branchActionsTable        = lua->createElement<LuaArrayTable>("on_branch_update", refActions);
     }
 
     void callLuaFunctions(LuaArrayTable::Ptr& table)
@@ -54,7 +52,6 @@ namespace onep
     ModelContainer::Ptr modelContainer;
 
     LuaMapTable::Ptr     skillActionsTable;
-    LuaArrayTable::Ptr   branchActionsTable;
   };
 
   LuaControl::LuaControl(osgGaming::Injector& injector)
@@ -63,6 +60,7 @@ namespace onep
   {
     registerLuaCallback(LuaDefines::Callback::ON_INITIALIZE);
     registerLuaCallback(LuaDefines::Callback::ON_TICK);
+    registerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE);
   }
 
   void LuaControl::doSkillsUpdate()
@@ -118,10 +116,7 @@ namespace onep
 
       branches->foreachMappedElementDo<LuaSkillBranch>([this, &countryState](LuaSkillBranch::Ptr& branch)
       {
-        m->branchActionsTable->foreachElementDo([&branch, &countryState](luabridge::LuaRef& key, luabridge::LuaRef& value)
-        {
-          value(branch->getBranchName(), countryState);
-        });
+        triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE, branch->getBranchName(), countryState);
       });
     });
   }
@@ -137,15 +132,6 @@ namespace onep
       }
 
       m->skillActionsTable->getElement(name).append(func);
-    });
-  }
-
-  void LuaControl::luaOnBranchUpdateAction(luabridge::LuaRef func)
-  {
-    m->lua->safeExecute([&]()
-    {
-      assert_return(m->lua->checkIsType(func, LUA_TFUNCTION));
-      m->branchActionsTable->addEement(func);
     });
   }
 

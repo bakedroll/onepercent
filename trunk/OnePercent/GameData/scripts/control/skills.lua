@@ -60,7 +60,7 @@ control:on_skill_update_action("propagation_politics", function(branch_name, cou
 
 end)
 
-control:on_branch_update_action(function(branch_name, country_state)
+control:on_event(defines.callback.on_branch_update, function(branch_name, country_state)
 
   if (country_state.branches_activated[branch_name] == true) then
 
