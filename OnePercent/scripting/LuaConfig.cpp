@@ -8,6 +8,14 @@
 
 namespace onep
 {
+  void LuaConfig::Definition::registerClass(lua_State* state)
+  {
+    luabridge::getGlobalNamespace(state)
+      .beginClass<LuaConfig>("Config")
+      .addFunction("extend", &LuaConfig::luaExtend)
+      .endClass();
+  }
+
   struct LuaConfig::Impl
   {
     Impl(osgGaming::Injector& injector)
@@ -24,22 +32,13 @@ namespace onep
   };
 
   LuaConfig::LuaConfig(osgGaming::Injector& injector)
-    : LuaClassInstance("config")
-    , m(new Impl(injector))
+    : m(new Impl(injector))
   {
   }
 
   LuaConfig::~LuaConfig()
   {
     clearCache();
-  }
-
-  void LuaConfig::registerClass(lua_State* state)
-  {
-    luabridge::getGlobalNamespace(state)
-      .beginClass<LuaConfig>("Config")
-      .addFunction("extend", &LuaConfig::luaExtend)
-      .endClass();
   }
 
   void LuaConfig::clearCache()

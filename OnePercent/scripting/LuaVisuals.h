@@ -4,15 +4,19 @@
 
 namespace onep
 {
-  class LuaVisuals : public osg::Referenced, public LuaClassInstance
+  class LuaVisuals : public osg::Referenced
   {
   public:
+    class Definition : public LuaClassDefinition
+    {
+    public:
+      void registerClass(lua_State* state) override;
+    };
+
     using Ptr = osg::ref_ptr<LuaVisuals>;
 
     LuaVisuals(osgGaming::Injector& injector);
     ~LuaVisuals();
-
-    virtual void registerClass(lua_State* state) override;
 
     void updateVisualBindings();
 

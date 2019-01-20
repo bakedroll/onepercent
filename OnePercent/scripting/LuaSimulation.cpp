@@ -13,9 +13,22 @@ extern "C"
 
 namespace onep
 {
+  void LuaSimulation::Definition::registerClass(lua_State* state)
+  {
+    luabridge::getGlobalNamespace(state)
+      .beginClass<LuaSimulation>("Simulation")
+      .addFunction("start", &LuaSimulation::lua_start)
+      .addFunction("stop", &LuaSimulation::lua_stop)
+      .addFunction("set_day", &LuaSimulation::lua_set_day)
+      .addFunction("set_interval", &LuaSimulation::lua_set_interval)
+      .addFunction("set_skill_points", &LuaSimulation::lua_set_skill_points)
+      .addFunction("add_skill_points", &LuaSimulation::lua_add_skill_points)
+      .addFunction("set_tick_update_mode", &LuaSimulation::lua_set_tick_update_mode)
+      .endClass();
+  }
+
   LuaSimulation::LuaSimulation(osgGaming::Injector& injector)
     : osg::Referenced()
-    , LuaClassInstance("simulation")
     , m_simulation(injector.inject<Simulation>())
     , m_oDay(injector.inject<ODay>())
     , m_oNumSkillPoints(injector.inject<ONumSkillPoints>())
@@ -65,19 +78,5 @@ namespace onep
   void LuaSimulation::lua_set_tick_update_mode(int mode)
   {
     m_simulation->setTickUpdateMode(static_cast<LuaDefines::TickUpdateMode>(mode));
-  }
-
-  void LuaSimulation::registerClass(lua_State* state)
-  {
-    luabridge::getGlobalNamespace(state)
-      .beginClass<LuaSimulation>("Simulation")
-      .addFunction("start", &LuaSimulation::lua_start)
-      .addFunction("stop", &LuaSimulation::lua_stop)
-      .addFunction("set_day", &LuaSimulation::lua_set_day)
-      .addFunction("set_interval", &LuaSimulation::lua_set_interval)
-      .addFunction("set_skill_points", &LuaSimulation::lua_set_skill_points)
-      .addFunction("add_skill_points", &LuaSimulation::lua_add_skill_points)
-      .addFunction("set_tick_update_mode", &LuaSimulation::lua_set_tick_update_mode)
-      .endClass();
   }
 }

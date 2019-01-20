@@ -31,6 +31,26 @@
 
 namespace onep
 {
+  void registerLuaClasses(osgGaming::Injector& injector)
+  {
+    osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
+
+    lua->registerClass<LuaCallbackRegistry::Definition>();
+    lua->registerClass<LuaSkill::Definition>();
+
+    lua->registerClass<LuaConfig::Definition>();
+    lua->registerClass<LuaControl::Definition>();
+    lua->registerClass<LuaSimulation::Definition>();
+    lua->registerClass<LuaVisuals::Definition>();
+    lua->registerClass<LuaLogger::Definition>();
+
+    lua->makeGlobalInstance("config", injector.inject<LuaConfig>().get());
+    lua->makeGlobalInstance("control", injector.inject<LuaControl>().get());
+    lua->makeGlobalInstance("simulation", injector.inject<LuaSimulation>().get());
+    lua->makeGlobalInstance("visuals", injector.inject<LuaVisuals>().get());
+    lua->makeGlobalInstance("log", injector.inject<LuaLogger>().get());
+  }
+
   struct OnePercentApplication::Impl
   {
     Impl(OnePercentApplication* b) : base(b) {}
@@ -123,15 +143,7 @@ namespace onep
     OSGG_LOG_INFO("Loading fonts");
     injector.inject<osgGaming::ResourceManager>()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
 
-    // initialize Lua classes
-    osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
-    lua->registerClassInstance<LuaConfig>(injector.inject<LuaConfig>());
-    lua->registerClassInstance<LuaControl>(injector.inject<LuaControl>());
-    lua->registerClassInstance<LuaSimulation>(injector.inject<LuaSimulation>());
-    lua->registerClassInstance<LuaVisuals>(injector.inject<LuaVisuals>());
-    lua->registerClassInstance<LuaLogger>(injector.inject<LuaLogger>());
-
-    lua->registerClass<LuaSkill>();
+    registerLuaClasses(injector);
 
     m->simulation = injector.inject<Simulation>();
 

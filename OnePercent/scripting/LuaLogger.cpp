@@ -4,17 +4,7 @@
 
 namespace onep
 {
-  LuaLogger::LuaLogger(osgGaming::Injector& injector)
-    : osg::Referenced()
-    , LuaClassInstance("log")
-  {
-  }
-
-  LuaLogger::~LuaLogger()
-  {
-  }
-
-  void LuaLogger::registerClass(lua_State* state)
+  void LuaLogger::Definition::registerClass(lua_State* state)
   {
     luabridge::getGlobalNamespace(state)
       .beginClass<LuaLogger>("LuaLogger")
@@ -24,6 +14,13 @@ namespace onep
       .addFunction("fatal", &LuaLogger::lua_fatal)
       .endClass();
   }
+
+  LuaLogger::LuaLogger(osgGaming::Injector& injector)
+    : osg::Referenced()
+  {
+  }
+
+  LuaLogger::~LuaLogger() = default;
 
   void LuaLogger::lua_debug(std::string message)
   {

@@ -1,10 +1,8 @@
 #pragma once
 
-#include "scripting/LuaClass.h"
-#include "scripting/LuaClassInstance.h"
+#include "scripting/LuaClassDefinition.h"
 
 #include <osgGaming/Injector.h>
-#include <osgGaming/LogManager.h>
 
 #include <memory>
 #include <functional>
@@ -71,39 +69,19 @@ namespace onep
 
     static void safeExecute(std::function<void()> func);
 
-    template<typename T>
-    void registerClassInstance(LuaClassInstance* inst)
+    template<typename LuaClassType>
+    void makeGlobalInstance(const std::string name, LuaClassType* inst)
     {
-      T* tinst = dynamic_cast<T*>(inst);
-      if (tinst == nullptr)
-      {
-        OSGG_LOG_WARN("T should derive from LuaClassInstance");
-
-        assert(false);
-        return;
-      }
-
-      auto varName = inst->getInstanceVariableName();
-
-      inst->registerClass(m_state);
-
-      luabridge::push<T*>(m_state, tinst);
-      lua_setglobal(m_state, varName.c_str());
+      luabridge::push<LuaClassType*>(m_state, inst);
+      lua_setglobal(m_state, name.c_str());
     }
 
-    template<typename T>
+    template<
+      typename ClassDefinitionType,
+      typename = typename std::enable_if<std::is_base_of<LuaClassDefinition, ClassDefinitionType>::value>::type>
     void registerClass()
     {
-      T inst;
-      if (dynamic_cast<LuaClass*>(&inst) == nullptr)
-      {
-        OSGG_LOG_WARN("T should derive from LuaClass");
-
-        assert(false);
-        return;
-      }
-
-      inst.registerClass(m_state);
+      ClassDefinitionType().registerClass(m_state);
     }
 
   private:

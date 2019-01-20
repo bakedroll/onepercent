@@ -175,7 +175,7 @@ namespace onep
     // update neighbours data
     m->model->initializeCountryNeighbours(m->countryOverlay->getNeighbourships());
 
-    m->luaControl->triggerOnInitializeEvents();
+    m->luaControl->triggerLuaCallback(LuaDefines::Callback::ON_INITIALIZE);
 
     // loading simulation
     m->simulation->prepare();

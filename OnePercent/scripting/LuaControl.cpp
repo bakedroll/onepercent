@@ -15,6 +15,19 @@
 
 namespace onep
 {
+  void LuaControl::Definition::registerClass(lua_State* state)
+  {
+    luabridge::getGlobalNamespace(state)
+      .deriveClass<LuaControl, LuaCallbackRegistry>("Control")
+      .addFunction("on_skill_update_action", &LuaControl::luaOnSkillUpdateAction)
+      .addFunction("on_branch_update_action", &LuaControl::luaOnBranchUpdateAction)
+      .addFunction("create_branches", &LuaControl::luaCreateBranches)
+      .addFunction("create_skills", &LuaControl::luaCreateSkills)
+      .addFunction("create_countries", &LuaControl::luaCreateCountries)
+      .addFunction("create_values", &LuaControl::luaCreateValues)
+      .endClass();
+  }
+
   struct LuaControl::Impl
   {
     Impl(osgGaming::Injector& injector)
@@ -23,8 +36,6 @@ namespace onep
     {
       luabridge::LuaRef refActions = lua->createGlobalTable("actions");
 
-      initializeActionsTable    = lua->createElement<LuaArrayTable>("on_initialize",    refActions);
-      tickActionsTable          = lua->createElement<LuaArrayTable>("on_tick",          refActions);
       skillActionsTable         = lua->createElement<LuaMapTable>  ("on_skill_update",  refActions);
       branchActionsTable        = lua->createElement<LuaArrayTable>("on_branch_update", refActions);
     }
@@ -42,33 +53,16 @@ namespace onep
 
     ModelContainer::Ptr modelContainer;
 
-    LuaArrayTable::Ptr   initializeActionsTable;
     LuaMapTable::Ptr     skillActionsTable;
     LuaArrayTable::Ptr   branchActionsTable;
-    LuaArrayTable::Ptr   tickActionsTable;
   };
 
   LuaControl::LuaControl(osgGaming::Injector& injector)
-    : osg::Referenced()
-    , LuaCallbackRegistry()
-    , LuaClassInstance("control")
+    : LuaCallbackRegistry()
     , m(new Impl(injector))
   {
-  }
-
-  void LuaControl::registerClass(lua_State* state)
-  {
-    luabridge::getGlobalNamespace(state)
-      .beginClass<LuaControl>("Control")
-      .addFunction("on_initialize_action",    &LuaControl::luaOnInitializeAction)
-      .addFunction("on_tick_action",          &LuaControl::luaOnTickAction)
-      .addFunction("on_skill_update_action",  &LuaControl::luaOnSkillUpdateAction)
-      .addFunction("on_branch_update_action", &LuaControl::luaOnBranchUpdateAction)
-      .addFunction("create_branches",         &LuaControl::luaCreateBranches)
-      .addFunction("create_skills",           &LuaControl::luaCreateSkills)
-      .addFunction("create_countries",        &LuaControl::luaCreateCountries)
-      .addFunction("create_values",           &LuaControl::luaCreateValues)
-      .endClass();
+    registerLuaCallback(LuaDefines::Callback::ON_INITIALIZE);
+    registerLuaCallback(LuaDefines::Callback::ON_TICK);
   }
 
   void LuaControl::doSkillsUpdate()
@@ -129,34 +123,6 @@ namespace onep
           value(branch->getBranchName(), countryState);
         });
       });
-    });
-  }
-
-  void LuaControl::triggerOnInitializeEvents()
-  {
-    m->callLuaFunctions(m->initializeActionsTable);
-  }
-
-  void LuaControl::triggerOnTickActions()
-  {
-    m->callLuaFunctions(m->tickActionsTable);
-  }
-
-  void LuaControl::luaOnInitializeAction(luabridge::LuaRef func)
-  {
-    m->lua->safeExecute([this, &func]()
-    {
-      assert_return(m->lua->checkIsType(func, LUA_TFUNCTION));
-      m->initializeActionsTable->addEement(func);
-    });
-  }
-
-  void LuaControl::luaOnTickAction(luabridge::LuaRef func)
-  {
-    m->lua->safeExecute([&]()
-    {
-      assert_return(m->lua->checkIsType(func, LUA_TFUNCTION));
-      m->tickActionsTable->addEement(func);
     });
   }
 

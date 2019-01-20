@@ -29,7 +29,7 @@ namespace onep
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , luaControl(injector.inject<LuaControl>())
       , oRunning(new osgGaming::Observable<bool>(false))
-      , tickUpdateMode(LuaDefines::TickUpdateMode::LUA)
+      , tickUpdateMode(LuaDefines::TickUpdateMode::CPP)
     {}
 
     osg::ref_ptr<LuaStateManager> lua;
@@ -88,7 +88,7 @@ namespace onep
         {
           m->modelContainer->accessModel([&](LuaModel::Ptr model)
           {
-            tickElapsed = Helper::measureMsecs([this](){ m->luaControl->triggerOnTickActions(); });
+            tickElapsed = Helper::measureMsecs([this](){ m->luaControl->triggerLuaCallback(LuaDefines::Callback::ON_TICK); });
 
             switch (m->tickUpdateMode)
             {

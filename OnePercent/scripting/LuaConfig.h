@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scripting/LuaClassInstance.h"
+#include "scripting/LuaClassDefinition.h"
 
 #include <osgGaming/Macros.h>
 
@@ -21,13 +21,17 @@ extern "C"
 
 namespace onep
 {
-  class LuaConfig : public osg::Referenced, public LuaClassInstance
+  class LuaConfig : public osg::Referenced
   {
   public:
+    class Definition : public LuaClassDefinition
+    {
+    public:
+      void registerClass(lua_State* state) override;
+    };
+
     explicit LuaConfig(osgGaming::Injector& injector);
     ~LuaConfig();
-
-    virtual void registerClass(lua_State* state) override;
 
     template<typename T>
     T getNumber(const std::string& name)

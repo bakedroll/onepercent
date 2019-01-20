@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/Observables.h"
-#include "scripting/LuaClassInstance.h"
+#include "scripting/LuaClassDefinition.h"
 
 #include <osg/Referenced>
 #include <osgGaming/Injector.h>
@@ -15,9 +15,15 @@ namespace onep
 {
   class Simulation;
 
-  class LuaSimulation : public osg::Referenced, public LuaClassInstance
+  class LuaSimulation : public osg::Referenced
   {
   public:
+    class Definition : public LuaClassDefinition
+    {
+    public:
+      void registerClass(lua_State* state) override;
+    };
+
     LuaSimulation(osgGaming::Injector& injector);
     ~LuaSimulation();
 
@@ -28,8 +34,6 @@ namespace onep
     void lua_set_day(int day);
     void lua_set_interval(int interval);
     void lua_set_tick_update_mode(int mode);
-
-    virtual void registerClass(lua_State* state) override;
 
   private:
     osg::ref_ptr<Simulation> m_simulation;
