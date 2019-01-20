@@ -3,6 +3,7 @@
 #include "scripting/LuaDefines.h"
 #include "scripting/LuaCallback.h"
 #include "scripting/LuaClassDefinition.h"
+#include "scripting/LuaStateManager.h"
 
 #include <osgGaming/Macros.h>
 #include <osg/Referenced>
@@ -27,6 +28,8 @@ namespace onep
       void registerClass(lua_State* state) override;
     };
 
+    explicit LuaCallbackRegistry(const LuaStateManager::Ptr& lua);
+
     void luaOnEvent(int eventId, luabridge::LuaRef func);
 
     template <typename... Args>
@@ -44,6 +47,7 @@ namespace onep
   private:
     using CallbackMap = std::map<LuaDefines::Callback, LuaCallback::Ptr>;
 
-    CallbackMap m_callbacks;
+    CallbackMap           m_callbacks;
+    LuaStateManager::Ptr  m_lua;
   };
 }

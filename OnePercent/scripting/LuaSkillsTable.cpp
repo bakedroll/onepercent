@@ -36,9 +36,9 @@ namespace onep
     return m_skills.find(name)->second;
   }
 
-  void LuaSkillsTable::addSkill(const std::string& name, luabridge::LuaRef& ref)
+  void LuaSkillsTable::addSkill(LuaStateManager::Ptr lua, const std::string& name, luabridge::LuaRef& ref)
   {
-    auto skill = std::make_shared<LuaSkill>(ref);
+    auto skill = std::make_shared<LuaSkill>(lua, ref);
     luaref()[name] = skill.get();
     m_skills[name] = skill;
   }
