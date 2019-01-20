@@ -59,7 +59,7 @@ namespace onep
         for (int i = 0; i < n; i++)
         {
           LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
-          std::string name = branch->getBranchName();
+          std::string name = branch->getName();
 
           notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name.c_str())->connectAndNotify(osgGaming::Func<bool>([=](bool activated)
           {
@@ -101,7 +101,7 @@ namespace onep
     for (int i = 0; i<n; i++)
     {
       LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
-      std::string name = branch->getBranchName();
+      std::string name = branch->getName();
 
       QPushButton* button = new QPushButton(QString::fromStdString(name));
       button->setParent(this);

@@ -66,7 +66,7 @@ namespace onep
         int n = model->getBranchesTable()->getNumBranches();
         for (int i = 0; i < n; i++)
         {
-          std::string branchName = model->getBranchesTable()->getBranchByIndex(i)->getBranchName();
+          std::string branchName = model->getBranchesTable()->getBranchByIndex(i)->getName();
 
           skillBranchActivatedObservers.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
           {
@@ -300,7 +300,7 @@ namespace onep
 
     m->highlightedBranchId = id;
 
-    std::string branchName = m->modelContainer->getModel()->getBranchesTable()->getBranchByIndex(id)->getBranchName();
+    std::string branchName = m->modelContainer->getModel()->getBranchesTable()->getBranchByIndex(id)->getName();
 
     for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
     {

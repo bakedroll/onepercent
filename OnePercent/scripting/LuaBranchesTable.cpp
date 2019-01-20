@@ -1,4 +1,5 @@
 #include "scripting/LuaBranchesTable.h"
+#include "scripting/LuaSkillsTable.h"
 
 namespace onep
 {
@@ -39,5 +40,19 @@ namespace onep
   {
     auto branch = addMappedElement<LuaSkillBranch>(name, ref);
     m_branches[name] = branch;
+  }
+
+  LuaSkill::Ptr LuaBranchesTable::findSkill(const std::string& name) const
+  {
+    for (const auto& branch : m_branches)
+    {
+      auto skills = branch.second->getSkillsTable();
+      if (skills->contains(name))
+      {
+        return skills->getSkillByName(name);
+      }
+    }
+
+    return nullptr;
   }
 }

@@ -455,7 +455,7 @@ namespace onep
       int n = branchesTable->getNumBranches();
       for (int i = 0; i < n; i++)
       {
-        std::string name = branchesTable->getBranchByIndex(i)->getBranchName();
+        std::string name = branchesTable->getBranchByIndex(i)->getName();
 
         QCheckBox* checkBox = new QCheckBox(QString::fromStdString(name));
         QRadioButton* radioButton = new QRadioButton(QObject::tr("Overlay"));
@@ -563,7 +563,7 @@ namespace onep
       for (int i = 0; i < n; i++)
       {
         LuaSkillBranch::Ptr skillBranch = branchesTable->getBranchByIndex(i);
-        std::string name = skillBranch->getBranchName();
+        std::string name = skillBranch->getName();
 
         // Skills
         int nskills = skillBranch->getSkillsTable()->getNumSkills();

@@ -21,7 +21,7 @@ namespace onep
     ~LuaSkillBranch();
 
     std::shared_ptr<LuaSkillsTable> getSkillsTable() const;
-    const std::string& getBranchName() const;
+    const std::string& getName() const;
     int getCost() const;
 
   private:

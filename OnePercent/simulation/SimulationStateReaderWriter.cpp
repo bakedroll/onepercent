@@ -80,7 +80,7 @@ namespace onep
         stream << numBranches;
         for (int i = 0; i < numBranches; i++)
         {
-          std::string branchName = branchesTable->getBranchByIndex(i)->getBranchName();
+          std::string branchName = branchesTable->getBranchByIndex(i)->getName();
 
           stream << int(branchName.length());
           stream.writeRawData(branchName.c_str(), branchName.length());
@@ -95,7 +95,7 @@ namespace onep
       for (int i = 0; i < numBranches; i++)
       {
         LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
-        std::string branchName = branch->getBranchName();
+        std::string branchName = branch->getName();
 
         stream << int(branchName.length());
         stream.writeRawData(branchName.c_str(), branchName.length());

@@ -5,6 +5,8 @@
 
 namespace onep
 {
+  class LuaSkill;
+
   class LuaControl : public LuaCallbackRegistry
   {
   public:
@@ -19,7 +21,9 @@ namespace onep
     void doSkillsUpdate();
     void doBranchesUpdate();
 
-    void luaOnSkillUpdateAction(const std::string& name, luabridge::LuaRef func);
+    LuaSkill* getSkill(const std::string& name);
+
+    void updateBranch(const std::string& name, luabridge::LuaRef countryState);
 
     void luaCreateBranches(luabridge::LuaRef branches);
     void luaCreateSkills(luabridge::LuaRef skills);

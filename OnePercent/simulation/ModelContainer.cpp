@@ -62,7 +62,7 @@ namespace onep
 
       branchesTable->foreachMappedElementDo<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
       {
-        auto name = branch->getBranchName();
+        auto name = branch->getName();
         state->getBranchesActivatedTable()->addBranchActivated(name);
         state->getBranchValuesTable()->addBranch(name);
       });
@@ -83,7 +83,7 @@ namespace onep
           {
             branchesTable->foreachMappedElementDo<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
             {
-              state->getBranchValuesTable()->getBranch(branch->getBranchName())->setValue(name, init);
+              state->getBranchValuesTable()->getBranch(branch->getName())->setValue(name, init);
             });
             break;
           }
