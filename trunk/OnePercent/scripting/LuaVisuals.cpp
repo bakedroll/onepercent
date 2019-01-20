@@ -10,6 +10,15 @@
 
 namespace onep
 {
+  void LuaVisuals::Definition::registerClass(lua_State* state)
+  {
+    luabridge::getGlobalNamespace(state)
+      .beginClass<LuaVisuals>("Visuals")
+      .addFunction("bind_value_to_visuals", &LuaVisuals::luaBindValueToVisuals)
+      .addFunction("bind_branch_value_to_visuals", &LuaVisuals::luaBindBranchValueToVisuals)
+      .endClass();
+  }
+
   struct LuaVisuals::Impl
   {
     Impl(osgGaming::Injector& injector)
@@ -88,22 +97,12 @@ namespace onep
 
   LuaVisuals::LuaVisuals(osgGaming::Injector& injector)
     : osg::Referenced()
-    , LuaClassInstance("visuals")
     , m(new Impl(injector))
   {
   }
 
   LuaVisuals::~LuaVisuals()
   {
-  }
-
-  void LuaVisuals::registerClass(lua_State* state)
-  {
-    luabridge::getGlobalNamespace(state)
-      .beginClass<LuaVisuals>("Visuals")
-      .addFunction("bind_value_to_visuals", &LuaVisuals::luaBindValueToVisuals)
-      .addFunction("bind_branch_value_to_visuals", &LuaVisuals::luaBindBranchValueToVisuals)
-      .endClass();
   }
 
   void LuaVisuals::updateVisualBindings()

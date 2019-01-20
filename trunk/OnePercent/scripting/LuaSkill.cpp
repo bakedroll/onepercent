@@ -5,6 +5,16 @@
 
 namespace onep
 {
+  void LuaSkill::Definition::registerClass(lua_State* state)
+  {
+    luabridge::getGlobalNamespace(state)
+      .beginClass<LuaSkill>("LuaSkill")
+      .addProperty("activated", &LuaSkill::getIsActivated, &LuaSkill::setIsActivated)
+      .addProperty("name", &LuaSkill::getName)
+      .addProperty("branch", &LuaSkill::getBranchName)
+      .endClass();
+  }
+
   struct LuaSkill::Impl
   {
     Impl()
@@ -20,16 +30,8 @@ namespace onep
     osgGaming::Observable<bool>::Ptr obActivated;
   };
 
-  LuaSkill::LuaSkill()
-    : LuaClass()
-    , m(new Impl())
-  {
-    //assert(false);
-  }
-
   LuaSkill::LuaSkill(const luabridge::LuaRef& object)
-    : LuaClass()
-    , m(new Impl())
+    : m(new Impl())
   {
     assert_return(object.isTable());
 
@@ -86,15 +88,5 @@ namespace onep
   osgGaming::Observable<bool>::Ptr LuaSkill::getObActivated() const
   {
     return m->obActivated;
-  }
-
-  void LuaSkill::registerClass(lua_State* state)
-  {
-    luabridge::getGlobalNamespace(state)
-      .beginClass<LuaSkill>("LuaSkill")
-      .addProperty("activated", &LuaSkill::getIsActivated, &LuaSkill::setIsActivated)
-      .addProperty("name", &LuaSkill::getName)
-      .addProperty("branch", &LuaSkill::getBranchName)
-      .endClass();
   }
 }

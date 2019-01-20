@@ -1,31 +1,30 @@
 #include "scripting/LuaCallbackRegistry.h"
 
-#include <map>
-
 namespace onep
 {
-  struct LuaCallbackRegistry::Impl
+  void LuaCallbackRegistry::Definition::registerClass(lua_State* state)
   {
-    using IdCallbackMap = std::map<std::string, LuaCallback::Ptr>;
-    using CallbackMap   = std::map<LuaDefines::Callback, IdCallbackMap>;
-
-    CallbackMap callbacks;
-  };
-
-  LuaCallbackRegistry::LuaCallbackRegistry()
-    : m(new Impl())
-  {
+    luabridge::getGlobalNamespace(state)
+      .beginClass<LuaCallbackRegistry>("CallbackRegistry")
+      .addFunction("on_event", &LuaCallbackRegistry::luaOnEvent)
+      .endClass();
   }
 
-  LuaCallbackRegistry::~LuaCallbackRegistry() = default;
-
-  void LuaCallbackRegistry::luaRegisterCallback(int id, luabridge::LuaRef param2, luabridge::LuaRef param3)
+  void LuaCallbackRegistry::luaOnEvent(int eventId, luabridge::LuaRef func)
   {
+    const auto& it = m_callbacks.find(static_cast<LuaDefines::Callback>(eventId));
+    assert_return(it != m_callbacks.end());
 
+    it->second->addFunction(func);
   }
 
-  void LuaCallbackRegistry::registerLuaCallbacks(LuaDefines::Callback id, LuaCallback::Ptr callback, std::string category)
+  void LuaCallbackRegistry::registerLuaCallback(LuaDefines::Callback id, LuaCallback::Ptr callback)
   {
-    m->callbacks[id][category] = callback;
+    if (!callback)
+    {
+      callback = std::make_shared<LuaCallback>();
+    }
+
+    m_callbacks[id] = callback;
   }
 }

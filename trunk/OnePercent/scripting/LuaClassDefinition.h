@@ -9,10 +9,10 @@ extern "C"
 
 namespace onep
 {
-  class LuaClass
+  class LuaClassDefinition
   {
   public:
-    virtual ~LuaClass() = default;
+    virtual ~LuaClassDefinition() = default;
     virtual void registerClass(lua_State* state) = 0;
   };
 }

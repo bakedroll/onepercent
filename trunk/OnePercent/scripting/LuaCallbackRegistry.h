@@ -2,8 +2,10 @@
 
 #include "scripting/LuaDefines.h"
 #include "scripting/LuaCallback.h"
+#include "scripting/LuaClassDefinition.h"
 
-#include <string>
+#include <osgGaming/Macros.h>
+#include <osg/Referenced>
 
 extern "C"
 {
@@ -16,22 +18,32 @@ extern "C"
 
 namespace onep
 {
-  class LuaCallbackRegistry
+  class LuaCallbackRegistry : public osg::Referenced
   {
   public:
-    LuaCallbackRegistry();
-    virtual ~LuaCallbackRegistry();
+    class Definition : public LuaClassDefinition
+    {
+    public:
+      void registerClass(lua_State* state) override;
+    };
 
-  public:
-    void luaRegisterCallback(int id, luabridge::LuaRef param2, luabridge::LuaRef param3);
+    void luaOnEvent(int eventId, luabridge::LuaRef func);
+
+    template <typename... Args>
+    void triggerLuaCallback(LuaDefines::Callback id, Args... args)
+    {
+      const auto& it = m_callbacks.find(id);
+      assert_return(it != m_callbacks.end());
+
+      it->second->trigger(args...);
+    }
 
   protected:
-    void registerLuaCallbacks(LuaDefines::Callback id, LuaCallback::Ptr callback, std::string category = "");
-    void triggerLuaCallbacks();
+    void registerLuaCallback(LuaDefines::Callback id, LuaCallback::Ptr callback = nullptr);
 
   private:
-    struct Impl;
-    std::unique_ptr<Impl> m;
+    using CallbackMap = std::map<LuaDefines::Callback, LuaCallback::Ptr>;
 
+    CallbackMap m_callbacks;
   };
 }
