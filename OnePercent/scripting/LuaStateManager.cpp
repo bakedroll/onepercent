@@ -42,7 +42,9 @@ namespace onep
   };
 
   LuaStateManager::LuaStateManager(osgGaming::Injector& injector)
-    : m(new Impl(injector))
+    : osg::Referenced()
+    , m(new Impl(injector))
+    , m_luaLock(QMutex::Recursive)
   {
     QMutexLocker lock(&m_luaLock);
 
@@ -207,6 +209,7 @@ namespace onep
   {
     try
     {
+      QMutexLocker locker(&m_luaLock);
       func();
     }
     catch (luabridge::LuaException& e)

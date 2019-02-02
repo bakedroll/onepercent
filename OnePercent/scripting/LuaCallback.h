@@ -1,5 +1,7 @@
 #pragma once
 
+#include "scripting/LuaStateManager.h"
+
 #include <memory>
 #include <vector>
 
@@ -22,12 +24,15 @@ namespace onep
     void addFunction(const luabridge::LuaRef& func);
 
     template<typename... Args>
-    void trigger(Args... args) const
+    void trigger(const LuaStateManager::Ptr& lua, Args... args) const
     {
-      for (const auto& func : m_funcs)
+      lua->safeExecute([this, &args...]()
       {
-        func(args...);
-      }
+        for (const auto& func : m_funcs)
+        {
+          func(args...);
+        }
+      });
     }
 
   private:

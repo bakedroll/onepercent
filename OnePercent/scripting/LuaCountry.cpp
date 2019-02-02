@@ -1,5 +1,4 @@
 #include "scripting/LuaCountry.h"
-#include "core/Enums.h"
 
 #include <osgGaming/Macros.h>
 

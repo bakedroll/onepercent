@@ -10,11 +10,11 @@ namespace onep
   class LuaObservableCallback : public LuaCallback
   {
   public:
-    LuaObservableCallback(const typename osgGaming::Observable<T>::Ptr& observable)
+    LuaObservableCallback(const LuaStateManager::Ptr& lua, const typename osgGaming::Observable<T>::Ptr& observable)
     {
-      m_observer = observable->connect(osgGaming::Func<T>([this](T value)
+      m_observer = observable->connect(osgGaming::Func<T>([this, &lua](T value)
       {
-        trigger(value);
+        trigger(lua, value);
       }));
     }
 

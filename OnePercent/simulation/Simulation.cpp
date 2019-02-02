@@ -84,7 +84,7 @@ namespace onep
 
       auto totalElapsed = Helper::measureMsecs([&]()
       {
-        LuaStateManager::safeExecute([&]()
+        m->lua->safeExecute([&]()
         {
           m->modelContainer->accessModel([&](LuaModel::Ptr model)
           {

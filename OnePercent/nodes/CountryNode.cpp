@@ -10,9 +10,19 @@
 
 namespace onep
 {
+  void CountryNode::Definition::registerClass(lua_State* state)
+  {
+    luabridge::getGlobalNamespace(state)
+      .beginClass<CountryNode>("CountryNode")
+      .addFunction("get_name", &CountryNode::getName)
+      .endClass();
+  }
+
   struct CountryNode::Impl
   {
     Impl() {}
+
+    std::string name;
 
     osg::Vec2f centerLatLong;
     osg::Vec2f size;
@@ -26,6 +36,7 @@ namespace onep
     osg::ref_ptr<osg::StateSet> stateSet;
 
     osg::ref_ptr<osg::Uniform> uniformColor;
+    osg::ref_ptr<osg::Uniform> uniformBlendColor;
     osg::ref_ptr<osg::Uniform> uniformAlpha;
     osg::ref_ptr<osg::Uniform> uniformTakeover;
     osg::ref_ptr<osg::Uniform> uniformTakeoverColor;
@@ -34,6 +45,7 @@ namespace onep
 
   CountryNode::CountryNode(
     osg::ref_ptr<LuaConfig> configManager,
+    const std::string& countryName,
     osg::Vec2f centerLatLong,
     osg::Vec2f size,
     osg::ref_ptr<osg::Vec3Array> vertices,
@@ -44,6 +56,8 @@ namespace onep
     : osg::Geode()
     , m(new Impl())
   {
+    m->name = countryName;
+
     m->earthRadius = configManager->getNumber<float>("earth.radius");
     m->cameraZoom = configManager->getNumber<float>("camera.country_zoom");
 
@@ -57,6 +71,7 @@ namespace onep
 
     m->uniformAlpha = new osg::Uniform("alpha", 0.0f);
     m->uniformColor = new osg::Uniform("overlayColor", osg::Vec3f(0.3f, 0.3f, 0.3f));
+    m->uniformBlendColor = new osg::Uniform("overlayBlendColor", osg::Vec3f(1.0f, 0.0f, 0.0f));
     m->uniformTakeover = new osg::Uniform("takeover", 0.0f);
     m->uniformTakeoverColor = new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 1.0f, 0.8f));
     m->uniformTakeoverScale = new osg::Uniform("takeoverScale", 100.0f);
@@ -64,6 +79,7 @@ namespace onep
     m->stateSet = getOrCreateStateSet();
     m->stateSet->addUniform(m->uniformAlpha);
     m->stateSet->addUniform(m->uniformColor);
+    m->stateSet->addUniform(m->uniformBlendColor);
     m->stateSet->addUniform(m->uniformTakeover);
     m->stateSet->addUniform(m->uniformTakeoverColor);
     m->stateSet->addUniform(m->uniformTakeoverScale);
@@ -108,6 +124,11 @@ namespace onep
   bool CountryNode::getIsOnOcean() const
   {
     return m->neighbourBorders.find(-1) != m->neighbourBorders.end();
+  }
+
+  std::string CountryNode::getName() const
+  {
+    return m->name;
   }
 
   void CountryNode::setColorMode(ColorMode mode)
