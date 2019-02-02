@@ -6,6 +6,9 @@ end)
 
 control:on_event(defines.callback.on_country_changed, function(cid)
 
-	log:debug("COUNTRY CHANGED")
+	local node = countries:get_country_node(cid)
+	if node == nil then return end
+
+	log:debug("COUNTRY CHANGED: " .. node:get_name())
 
 end)

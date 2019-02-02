@@ -67,7 +67,7 @@ namespace onep
       return std::make_shared<LuaObject>(table, m_state);
     }
 
-    static void safeExecute(std::function<void()> func);
+    void safeExecute(std::function<void()> func);
 
     template<typename LuaClassType>
     void makeGlobalInstance(const std::string name, LuaClassType* inst)
@@ -79,10 +79,10 @@ namespace onep
     template<
       typename ClassDefinitionType,
       typename = typename std::enable_if<std::is_base_of<LuaClassDefinition, ClassDefinitionType>::value>::type>
-    void registerClass()
-    {
-      ClassDefinitionType().registerClass(m_state);
-    }
+      void registerClass()
+      {
+        ClassDefinitionType().registerClass(m_state);
+      }
 
   private:
     struct Impl;

@@ -11,6 +11,12 @@ namespace onep
   class CountryNode : public osg::Geode
   {
   public:
+    class Definition : public LuaClassDefinition
+    {
+    public:
+      void registerClass(lua_State* state) override;
+    };
+
     typedef std::map<int, std::vector<int>> BorderIdMap;
 
     typedef osg::ref_ptr<CountryNode> Ptr;
@@ -30,6 +36,7 @@ namespace onep
 
     CountryNode(
       osg::ref_ptr<LuaConfig> configManager,
+      const std::string& countryName,
       osg::Vec2f centerLatLong,
       osg::Vec2f size,
       osg::ref_ptr<osg::Vec3Array> vertices,
@@ -49,6 +56,7 @@ namespace onep
     osg::ref_ptr<osg::Uniform>& getTakeoverUniform() const;
 
     bool getIsOnOcean() const;
+    std::string getName() const;
 
     void setColorMode(ColorMode mode);
 

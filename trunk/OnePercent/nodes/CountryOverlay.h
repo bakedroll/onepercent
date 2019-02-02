@@ -13,6 +13,12 @@ namespace onep
   class CountryOverlay : public osg::Group
   {
   public:
+    class Definition : public LuaClassDefinition
+    {
+    public:
+      void registerClass(lua_State* state) override;
+    };
+
     typedef osg::ref_ptr<CountryOverlay> Ptr;
 
     typedef std::vector<int> NeighborList;
@@ -39,12 +45,14 @@ namespace onep
     NeighbourMap& getNeighbourships();
 
     CountryNode::Ptr getSelectedCountryNode();
-    CountryNode::Ptr getCountryNode(int id);
+    CountryNode::Ptr getCountryNode(int id) const;
     CountryNode::Ptr getCountryNode(osg::Vec2f coord);
     int getCountryId(osg::Vec2f coord);
 
     int getSelectedCountryId();
     osgGaming::Observable<int>::Ptr getSelectedCountryIdObservable();
+
+    CountryNode* luaGetCountryNode(int id) const;
 
   private:
     struct Impl;

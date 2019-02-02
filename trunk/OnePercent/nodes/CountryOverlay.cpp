@@ -22,6 +22,14 @@
 
 namespace onep
 {
+  void CountryOverlay::Definition::registerClass(lua_State* state)
+  {
+    luabridge::getGlobalNamespace(state)
+      .beginClass<CountryOverlay>("CountryOverlay")
+      .addFunction("get_country_node", &CountryOverlay::luaGetCountryNode)
+      .endClass();
+  }
+
   struct CountryOverlay::Impl
   {
     Impl(osgGaming::Injector& injector, CountryOverlay* b)
@@ -50,7 +58,12 @@ namespace onep
       if (countryNodes.find(id) != countryNodes.end())
         return;
 
-      CountryNode::Ptr node = new CountryNode(configManager, centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
+      auto country = modelContainer->getModel()->getCountriesTable()->getCountryById(id);
+      assert_return(country);
+
+      CountryNode::Ptr node = new CountryNode(
+        configManager, country->getName(), centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
+
       CountryHoverNode::Ptr hoverNode = new CountryHoverNode(vertices, texcoords1, triangles);
 
       countryNodes.insert(CountryNode::Map::value_type(id, node));
@@ -365,7 +378,7 @@ namespace onep
     return m->countryNodes.find(m->oSelectedCountryId->get())->second;
   }
 
-  CountryNode::Ptr CountryOverlay::getCountryNode(int id)
+  CountryNode::Ptr CountryOverlay::getCountryNode(int id) const
   {
     CountryNode::Map::iterator countryNode = m->countryNodes.find(id);
 
@@ -403,5 +416,10 @@ namespace onep
   osgGaming::Observable<int>::Ptr CountryOverlay::getSelectedCountryIdObservable()
   {
     return m->oSelectedCountryId;
+  }
+
+  CountryNode* CountryOverlay::luaGetCountryNode(int id) const
+  {
+    return getCountryNode(id).get();
   }
 }

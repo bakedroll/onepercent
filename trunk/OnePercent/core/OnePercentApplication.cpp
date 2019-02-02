@@ -37,6 +37,8 @@ namespace onep
 
     lua->registerClass<LuaCallbackRegistry::Definition>();
     lua->registerClass<LuaSkill::Definition>();
+    lua->registerClass<CountryOverlay::Definition>();
+    lua->registerClass<CountryNode::Definition>();
 
     lua->registerClass<LuaConfig::Definition>();
     lua->registerClass<LuaControl::Definition>();
@@ -49,6 +51,7 @@ namespace onep
     lua->makeGlobalInstance("simulation", injector.inject<LuaSimulation>().get());
     lua->makeGlobalInstance("visuals", injector.inject<LuaVisuals>().get());
     lua->makeGlobalInstance("log", injector.inject<LuaLogger>().get());
+    lua->makeGlobalInstance("countries", injector.inject<CountryOverlay>().get());
   }
 
   struct OnePercentApplication::Impl

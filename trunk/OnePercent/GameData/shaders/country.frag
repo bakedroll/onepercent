@@ -2,6 +2,7 @@ uniform sampler2D distancemap;
 
 uniform float alpha;
 uniform vec3  overlayColor;
+uniform vec3  overlayBlendColor;
 uniform float takeover;
 uniform float takeoverScale;
 uniform vec4  takeoverColor;
@@ -23,9 +24,9 @@ void main (void)
     noiseVal);
 
   vec4 takeoverLayerColor = vec4(takeoverColor.rgb, takeoverColor.a * val);
-
-  gl_FragColor = vec4(
+  vec3 baseColor = 
     backgroundColor.rgb * (1.0 - takeoverLayerColor.a) +
-    takeoverLayerColor.rgb * takeoverLayerColor.a,
-    backgroundColor.a);
+    takeoverLayerColor.rgb * takeoverLayerColor.a;
+
+  gl_FragColor = vec4(baseColor * overlayBlendColor, backgroundColor.a);
 }

@@ -38,7 +38,7 @@ namespace onep
       const auto& it = m_callbacks.find(id);
       assert_return(it != m_callbacks.end());
 
-      it->second->trigger(args...);
+      it->second->trigger(m_lua, args...);
     }
 
   protected:

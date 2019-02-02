@@ -58,7 +58,7 @@ namespace onep
     registerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE);
     
     registerLuaCallback(LuaDefines::Callback::ON_COUNTRY_CHANGED,
-      std::make_shared<LuaObservableCallback<int>>(
+      std::make_shared<LuaObservableCallback<int>>(m->lua,
       injector.inject<CountryOverlay>()->getSelectedCountryIdObservable()));
 
     /*registerLuaCallback(LuaDefines::Callback::ON_OVERLAY_CHANGED,

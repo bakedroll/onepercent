@@ -3,7 +3,6 @@
 #include "scripting/LuaObjectMapper.h"
 
 #include <map>
-#include <vector>
 
 namespace onep
 {
