@@ -1,6 +1,8 @@
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSkillsTable.h"
 
+#include <QString>
+
 namespace onep
 {
   LuaBranchesTable::LuaBranchesTable(const luabridge::LuaRef& object, lua_State* luaState)
@@ -53,6 +55,7 @@ namespace onep
       }
     }
 
+    OSGG_QLOG_WARN(QString("Skill '%1' not found").arg(QString::fromStdString(name)));
     return nullptr;
   }
 }

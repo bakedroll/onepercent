@@ -1,5 +1,6 @@
 #include "scripting/LuaControl.h"
 
+#include "nodes/CountryOverlay.h"
 #include "scripting/LuaArrayTable.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaBranchesTable.h"
@@ -7,10 +8,10 @@
 #include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaValuesDefTable.h"
 #include "scripting/LuaSimulationStateTable.h"
+#include "scripting/LuaObservableCallback.h"
 #include "simulation/ModelContainer.h"
 
 #include <QString>
-#include "LuaCountryState.h"
 
 namespace onep
 {
@@ -55,6 +56,14 @@ namespace onep
     registerLuaCallback(LuaDefines::Callback::ON_INITIALIZE);
     registerLuaCallback(LuaDefines::Callback::ON_TICK);
     registerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE);
+    
+    registerLuaCallback(LuaDefines::Callback::ON_COUNTRY_CHANGED,
+      std::make_shared<LuaObservableCallback<int>>(
+      injector.inject<CountryOverlay>()->getSelectedCountryIdObservable()));
+
+    /*registerLuaCallback(LuaDefines::Callback::ON_OVERLAY_CHANGED,
+      std::make_shared<LuaObservableCallback<int>>(
+      injector.inject<OCurrentOverlay>()));*/
   }
 
   void LuaControl::doSkillsUpdate()
