@@ -38,6 +38,7 @@ namespace onep
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
       , shaderFactory(injector.inject<osgGaming::ShaderFactory>())
       , configManager(injector.inject<LuaConfig>())
+      , lua(injector.inject<LuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
       , countrySwitch(new osg::Switch())
       , countryHoverSwitch(new osg::Switch())
@@ -63,7 +64,7 @@ namespace onep
       assert_return(country);
 
       CountryNode::Ptr node = new CountryNode(
-        configManager, country->getName(), centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
+        configManager, lua, country->getName(), centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
 
       CountryHoverNode::Ptr hoverNode = new CountryHoverNode(vertices, texcoords1, triangles);
 
@@ -114,6 +115,7 @@ namespace onep
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
     osg::ref_ptr<osgGaming::ShaderFactory> shaderFactory;
     osg::ref_ptr<LuaConfig> configManager;
+    osg::ref_ptr<LuaStateManager> lua;
 
     ModelContainer::Ptr modelContainer;
 

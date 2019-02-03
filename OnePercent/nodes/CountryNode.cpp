@@ -1,6 +1,7 @@
 #include "CountryNode.h"
 
 #include "nodes/CountryGeometry.h"
+#include "scripting/LuaStateManager.h"
 
 #include <osg/Geometry>
 #include <osgGaming/Helper.h>
@@ -15,6 +16,7 @@ namespace onep
     luabridge::getGlobalNamespace(state)
       .beginClass<CountryNode>("CountryNode")
       .addFunction("get_name", &CountryNode::getName)
+      .addFunction("get_neighbours", &CountryNode::luaGetNeighbours)
       .endClass();
   }
 
@@ -41,10 +43,13 @@ namespace onep
     osg::ref_ptr<osg::Uniform> uniformTakeover;
     osg::ref_ptr<osg::Uniform> uniformTakeoverColor;
     osg::ref_ptr<osg::Uniform> uniformTakeoverScale;
+
+    LuaRefPtr refNeighbours;
   };
 
   CountryNode::CountryNode(
-    osg::ref_ptr<LuaConfig> configManager,
+    const LuaConfig::Ptr& configManager,
+    const LuaStateManager::Ptr& lua,
     const std::string& countryName,
     osg::Vec2f centerLatLong,
     osg::Vec2f size,
@@ -83,6 +88,8 @@ namespace onep
     m->stateSet->addUniform(m->uniformTakeover);
     m->stateSet->addUniform(m->uniformTakeoverColor);
     m->stateSet->addUniform(m->uniformTakeoverScale);
+
+    m->refNeighbours = MAKE_LUAREF_PTR(lua->newTable());
   }
 
   CountryNode::~CountryNode()
@@ -91,6 +98,7 @@ namespace onep
 
   void CountryNode::addNeighbor(osg::ref_ptr<CountryNode> mesh)
   {
+    m->refNeighbours->append(mesh.get());
     m->neighbors.push_back(mesh);
   }
 
@@ -194,5 +202,10 @@ namespace onep
     float vdistance = surfaceSize.y() * m->cameraZoom / (2.0f * tan(angle * C_PI / 360.0f));
 
     return std::max(hdistance, vdistance);
+  }
+
+  luabridge::LuaRef CountryNode::luaGetNeighbours() const
+  {
+    return *m->refNeighbours.get();
   }
 }
