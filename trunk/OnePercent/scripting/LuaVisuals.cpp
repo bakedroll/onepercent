@@ -36,38 +36,17 @@ namespace onep
       uniformGetters["takeover"] = [this](int cid) { return countryOverlay->getCountryNode(cid)->getTakeoverUniform(); };
     }
 
-    bool isValueOfTypeExisting(const LuaModel::Ptr& model, const std::string& name, LuaValueDef::Type type) const
+    bool isValueOfTypeExisting(const std::string& name, LuaValueDef::Type type) const
     {
-      auto valuesTable = model->getValuesDefTable();
+      auto valuesTable = modelContainer->getModel()->getValuesDefTable();
 
       return (valuesTable->containsMappedElement(name) && 
         (valuesTable->getMappedElement<LuaValueDef>(name)->getType() == type));
     }
 
-    bool isBranchExisting(const LuaModel::Ptr& model, const std::string& name) const
+    bool isBranchExisting(const std::string& name) const
     {
-      return model->getBranchesTable()->containsMappedElement(name);
-    }
-
-    bool isValueExisting(const std::string& value) const
-    {
-      auto existing = false;
-      modelContainer->accessModel([this, &value, &existing](const LuaModel::Ptr& model)
-      {
-        existing = isValueOfTypeExisting(model, value, LuaValueDef::Type::Default);
-      });
-      return existing;
-    }
-
-    bool isBranchValueExisting(const std::string& branch, const std::string& value) const
-    {
-      auto existing = false;
-      modelContainer->accessModel([this, &branch, &value, &existing](const LuaModel::Ptr& model)
-      {
-        existing = (isValueOfTypeExisting(model, value, LuaValueDef::Type::Branch) &&
-          isBranchExisting(model, branch));
-      });
-      return existing;
+      return modelContainer->getModel()->getBranchesTable()->containsMappedElement(name);
     }
 
     template <typename T>
@@ -133,7 +112,7 @@ namespace onep
 
   void LuaVisuals::luaBindValueToVisuals(const std::string& value, const std::string& visual)
   {
-    if (!m->isValueExisting(value))
+    if (!m->isValueOfTypeExisting(value, LuaValueDef::Type::Default))
     {
       OSGG_QLOG_WARN(QString("Value '%1' does not exist.").arg(value.c_str()));
       return;
@@ -148,7 +127,7 @@ namespace onep
 
   void LuaVisuals::luaBindBranchValueToVisuals(const std::string& branchName, const std::string& branchValue, const std::string& visual)
   {
-    if (!m->isBranchValueExisting(branchName, branchValue))
+    if (!(m->isValueOfTypeExisting(branchValue, LuaValueDef::Type::Branch) && m->isBranchExisting(branchName)))
     {
       OSGG_QLOG_WARN(QString("Branch value '%1.%2' does not exist.").arg(branchName.c_str()).arg(branchValue.c_str()));
       return;
