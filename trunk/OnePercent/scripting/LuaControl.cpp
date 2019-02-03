@@ -59,11 +59,11 @@ namespace onep
     
     registerLuaCallback(LuaDefines::Callback::ON_COUNTRY_CHANGED,
       std::make_shared<LuaObservableCallback<int>>(m->lua,
-      injector.inject<CountryOverlay>()->getSelectedCountryIdObservable()));
+      injector.inject<CountryOverlay>()->getOSelectedCountryId()));
 
-    /*registerLuaCallback(LuaDefines::Callback::ON_OVERLAY_CHANGED,
-      std::make_shared<LuaObservableCallback<int>>(
-      injector.inject<OCurrentOverlay>()));*/
+    registerLuaCallback(LuaDefines::Callback::ON_OVERLAY_CHANGED,
+      std::make_shared<LuaObservableCallback<int>>(m->lua,
+      injector.inject<CountryOverlay>()->getOCurrentOverlayBranchId()));
   }
 
   void LuaControl::doSkillsUpdate(const LuaModel::Ptr& model)
