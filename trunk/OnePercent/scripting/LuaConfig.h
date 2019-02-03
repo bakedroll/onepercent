@@ -24,6 +24,8 @@ namespace onep
   class LuaConfig : public osg::Referenced
   {
   public:
+    using Ptr = osg::ref_ptr<LuaConfig>;
+
     class Definition : public LuaClassDefinition
     {
     public:

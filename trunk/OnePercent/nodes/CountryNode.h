@@ -8,6 +8,8 @@
 
 namespace onep
 {
+  class LuaStateManager;
+
   class CountryNode : public osg::Geode
   {
   public:
@@ -35,7 +37,8 @@ namespace onep
     } ColorMode;
 
     CountryNode(
-      osg::ref_ptr<LuaConfig> configManager,
+      const osg::ref_ptr<LuaConfig>& configManager,
+      const osg::ref_ptr<LuaStateManager>& lua,
       const std::string& countryName,
       osg::Vec2f centerLatLong,
       osg::Vec2f size,
@@ -64,6 +67,8 @@ namespace onep
     osg::Vec2f getSize() const;
     osg::Vec2f getSurfaceSize() const;
     float getOptimalCameraDistance(float angle, float ratio) const;
+
+    luabridge::LuaRef luaGetNeighbours() const;
 
   private:
     struct Impl;
