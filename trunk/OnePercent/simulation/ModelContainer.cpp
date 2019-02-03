@@ -16,6 +16,7 @@ namespace onep
   {
     Impl(osgGaming::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
+      , mutexModel(QMutex::Recursive)
     {}
 
     LuaStateManager::Ptr lua;

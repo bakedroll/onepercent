@@ -1,13 +1,15 @@
-#include "core/Multithreading.h"
 #include "scripting/LuaVisuals.h"
+
+#include "core/Multithreading.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
+#include "scripting/LuaBranchesTable.h"
+#include "scripting/LuaValuesDefTable.h"
+#include "scripting/LuaValueDef.h"
 #include "simulation/ModelContainer.h"
 #include "nodes/CountryOverlay.h"
 
 #include <osg/Uniform>
-
-#include <QString>
 
 namespace onep
 {
@@ -34,45 +36,38 @@ namespace onep
       uniformGetters["takeover"] = [this](int cid) { return countryOverlay->getCountryNode(cid)->getTakeoverUniform(); };
     }
 
-    LuaCountryState::Ptr getFirstCountryState() const
+    bool isValueOfTypeExisting(const LuaModel::Ptr& model, const std::string& name, LuaValueDef::Type type) const
     {
-      auto& cstates = modelContainer->getModel()->getSimulationStateTable()->getCountryStates();
+      auto valuesTable = model->getValuesDefTable();
 
-      auto cstateIt = cstates.begin();
-      if (cstateIt == std::end(cstates))
-      {
-        return LuaCountryState::Ptr();
-      }
+      return (valuesTable->containsMappedElement(name) && 
+        (valuesTable->getMappedElement<LuaValueDef>(name)->getType() == type));
+    }
 
-      return cstateIt->second;
+    bool isBranchExisting(const LuaModel::Ptr& model, const std::string& name) const
+    {
+      return model->getBranchesTable()->containsMappedElement(name);
     }
 
     bool isValueExisting(const std::string& value) const
     {
-      auto cstate = getFirstCountryState();
-      if (!cstate)
+      auto existing = false;
+      modelContainer->accessModel([this, &value, &existing](const LuaModel::Ptr& model)
       {
-        return false;
-      }
-
-      return cstate->getValuesTable()->contains(value);
+        existing = isValueOfTypeExisting(model, value, LuaValueDef::Type::Default);
+      });
+      return existing;
     }
 
-    bool isBranchValueExisting(const std::string& branchName, const std::string& valueName) const
+    bool isBranchValueExisting(const std::string& branch, const std::string& value) const
     {
-      auto cstate = getFirstCountryState();
-      if (!cstate)
+      auto existing = false;
+      modelContainer->accessModel([this, &branch, &value, &existing](const LuaModel::Ptr& model)
       {
-        return false;
-      }
-
-      auto branchValuesTable = cstate->getBranchValuesTable();
-      if (!cstate->getBranchValuesTable()->containsMappedElement(branchName))
-      {
-        return false;
-      }
-
-      return branchValuesTable->getBranch(branchName)->contains(valueName);
+        existing = (isValueOfTypeExisting(model, value, LuaValueDef::Type::Branch) &&
+          isBranchExisting(model, branch));
+      });
+      return existing;
     }
 
     template <typename T>
