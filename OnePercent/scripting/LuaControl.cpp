@@ -66,9 +66,8 @@ namespace onep
       injector.inject<OCurrentOverlay>()));*/
   }
 
-  void LuaControl::doSkillsUpdate()
+  void LuaControl::doSkillsUpdate(const LuaModel::Ptr& model)
   {
-    auto model    = m->modelContainer->getModel();
     auto states   = model->getSimulationStateTable();
     auto branches = model->getBranchesTable();
 
@@ -100,9 +99,8 @@ namespace onep
     });
   }
 
-  void LuaControl::doBranchesUpdate()
+  void LuaControl::doBranchesUpdate(const LuaModel::Ptr& model)
   {
-    auto model    = m->modelContainer->getModel();
     auto states   = model->getSimulationStateTable();
     auto branches = model->getBranchesTable();
 

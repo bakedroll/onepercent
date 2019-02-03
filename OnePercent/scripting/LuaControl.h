@@ -5,6 +5,7 @@
 
 namespace onep
 {
+  class LuaModel;
   class LuaSkill;
 
   class LuaControl : public LuaCallbackRegistry
@@ -18,8 +19,8 @@ namespace onep
 
     LuaControl(osgGaming::Injector& injector);
 
-    void doSkillsUpdate();
-    void doBranchesUpdate();
+    void doSkillsUpdate(const std::shared_ptr<LuaModel>& model);
+    void doBranchesUpdate(const std::shared_ptr<LuaModel>& model);
 
     LuaSkill* getSkill(const std::string& name);
 

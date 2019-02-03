@@ -93,8 +93,8 @@ namespace onep
             switch (m->tickUpdateMode)
             {
             case LuaDefines::TickUpdateMode::CPP:
-              skillsElapsed   = Helper::measureMsecs([this](){ m->luaControl->doSkillsUpdate(); });
-              branchesElapsed = Helper::measureMsecs([this](){ m->luaControl->doBranchesUpdate(); });
+              skillsElapsed   = Helper::measureMsecs([this, &model](){ m->luaControl->doSkillsUpdate(model); });
+              branchesElapsed = Helper::measureMsecs([this, &model](){ m->luaControl->doBranchesUpdate(model); });
               break;
             case LuaDefines::TickUpdateMode::LUA:
               skillsElapsed   = Helper::measureMsecs([this](){ (*m->refUpdate_skills_func)(); });
