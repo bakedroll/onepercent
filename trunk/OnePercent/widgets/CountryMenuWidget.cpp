@@ -47,7 +47,7 @@ namespace onep
 
       int cid = country->getId();
 
-      modelContainer->accessModel([=](LuaModel::Ptr model)
+      modelContainer->accessModel([=](const LuaModel::Ptr& model)
       {
         if (model->getSimulationStateTable()->getCountryStates().count(cid) == 0)
           return;
@@ -128,7 +128,7 @@ namespace onep
         // schedule task
         m->simulation->getUpdateThread()->executeLockedTick([=]()
         {
-          m->modelContainer->accessModel([=](LuaModel::Ptr model)
+          m->modelContainer->accessModel([=](const LuaModel::Ptr& model)
           {
             model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), true);
           });

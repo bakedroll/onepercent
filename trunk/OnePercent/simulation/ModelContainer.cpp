@@ -38,7 +38,7 @@ namespace onep
     return m->model;
   }
 
-  void ModelContainer::accessModel(std::function<void(std::shared_ptr<LuaModel>)> func) const
+  void ModelContainer::accessModel(std::function<void(const LuaModel::Ptr&)> func) const
   {
     QMutexLocker lock(&m->mutexModel);
     func(m->model);
@@ -46,71 +46,79 @@ namespace onep
 
   void ModelContainer::initializeState()
   {
-    QMutexLocker lock(&m->mutexModel);
-
-    auto stateTable     = m->model->getSimulationStateTable();
-    auto branchesTable  = m->model->getBranchesTable();
-    auto countriesTable = m->model->getCountriesTable();
-    auto valuesTable    = m->model->getValuesDefTable();
-
-    countriesTable->foreachMappedElementDo<LuaCountry>([&](LuaCountry::Ptr country)
+    m->lua->safeExecute([this]()
     {
-      auto cid = country->getId();
+      QMutexLocker lock(&m->mutexModel);
 
-      stateTable->addCountryState(country->getId());
-      auto state = stateTable->getCountryState(cid);
+      auto stateTable = m->model->getSimulationStateTable();
+      auto branchesTable = m->model->getBranchesTable();
+      auto countriesTable = m->model->getCountriesTable();
+      auto valuesTable = m->model->getValuesDefTable();
 
-      branchesTable->foreachMappedElementDo<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
+      countriesTable->foreachMappedElementDo<LuaCountry>([&](LuaCountry::Ptr country)
       {
-        auto name = branch->getName();
-        state->getBranchesActivatedTable()->addBranchActivated(name);
-        state->getBranchValuesTable()->addBranch(name);
-      });
+        auto cid = country->getId();
 
-      valuesTable->foreachMappedElementDo<LuaValueDef>([&](LuaValueDef::Ptr& def)
-      {
-        auto name = def->getName();
-        auto init = country->getInitValue(name, def->getInit());
+        stateTable->addCountryState(country->getId());
+        auto state = stateTable->getCountryState(cid);
 
-        switch (def->getType())
+        branchesTable->foreachMappedElementDo<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
         {
-          case LuaValueDef::Type::Default:
+          auto name = branch->getName();
+          state->getBranchesActivatedTable()->addBranchActivated(name);
+          state->getBranchValuesTable()->addBranch(name);
+        });
+
+        valuesTable->foreachMappedElementDo<LuaValueDef>([&](LuaValueDef::Ptr& def)
+        {
+          auto name = def->getName();
+          auto init = country->getInitValue(name, def->getInit());
+
+          switch (def->getType())
           {
-            state->getValuesTable()->setValue(name, init);
-            break;
-          }
-          case LuaValueDef::Type::Branch:
-          {
-            branchesTable->foreachMappedElementDo<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
+            case LuaValueDef::Type::Default:
             {
-              state->getBranchValuesTable()->getBranch(branch->getName())->setValue(name, init);
-            });
-            break;
+              state->getValuesTable()->setValue(name, init);
+              break;
+            }
+            case LuaValueDef::Type::Branch:
+            {
+              branchesTable->foreachMappedElementDo<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
+              {
+                state->getBranchValuesTable()->getBranch(branch->getName())->setValue(name, init);
+              });
+              break;
+            }
+            default:
+            {
+              assert(false);
+              break;
+            }
           }
-          default:
-          {
-            assert(false);
-            break;
-          }
-        }
+        });
       });
     });
   }
 
   void ModelContainer::initializeCountryNeighbours(const std::map<int, std::vector<int>>& neighbourships)
   {
-    auto statesTable = m->model->getSimulationStateTable();
-
-    for (auto& neighbourship : neighbourships)
+    m->lua->safeExecute([this, &neighbourships]()
     {
-      auto cid  = neighbourship.first;
-      auto nids = neighbourship.second;
+      QMutexLocker lock(&m->mutexModel);
 
-      for (auto nid : nids)
+      auto statesTable = m->model->getSimulationStateTable();
+
+      for (auto& neighbourship : neighbourships)
       {
-        luabridge::LuaRef stateRef = statesTable->getCountryState(nid)->luaref();
-        statesTable->getCountryState(cid)->addNeighbourState(nid, stateRef);
+        auto cid = neighbourship.first;
+        auto nids = neighbourship.second;
+
+        for (auto nid : nids)
+        {
+          luabridge::LuaRef stateRef = statesTable->getCountryState(nid)->luaref();
+          statesTable->getCountryState(cid)->addNeighbourState(nid, stateRef);
+        }
       }
-    }
+    });
   }
 }

@@ -125,25 +125,27 @@ namespace onep
     luabridge::setGlobal(m_state, ref, name);
   }
 
-  bool LuaStateManager::executeCode(std::string code)
+  bool LuaStateManager::executeCode(const std::string& code)
   {
-    QMutexLocker lock(&m_luaLock);
-
-    if (luaL_dostring(m_state, code.c_str()))
+    auto success = false;
+    safeExecute([this, &success, &code]()
     {
-      std::string msg = lua_tostring(m_state, -1);
+      if (luaL_dostring(m_state, code.c_str()))
+      {
+        std::string msg = lua_tostring(m_state, -1);
 
-      std::replace(msg.begin(), msg.end(), '\r', '\n');
-      OSGG_LOG_FATAL("Lua Error: " + msg);
+        std::replace(msg.begin(), msg.end(), '\r', '\n');
+        OSGG_LOG_FATAL("Lua Error: " + msg);
 
-      lua_pop(m_state, 1);
-      return true;
-    }
+        lua_pop(m_state, 1);
+        success = true;
+      }
+    });
 
-    return false;
+    return success;
   }
 
-  bool LuaStateManager::loadScript(std::string filename)
+  bool LuaStateManager::loadScript(const std::string& filename)
   {
     std::string script;
 

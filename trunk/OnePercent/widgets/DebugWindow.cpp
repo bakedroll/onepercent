@@ -229,7 +229,7 @@ namespace onep
         int id = countryOverlay->getSelectedCountryId();
         if (id == 0) return;
 
-        modelContainer->accessModel([=](LuaModel::Ptr model)
+        modelContainer->accessModel([=](const LuaModel::Ptr& model)
         {
           LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryState(id);
 
@@ -317,7 +317,7 @@ namespace onep
       if (selectedId == 0)
         return;
 
-      modelContainer->accessModel([=](LuaModel::Ptr model)
+      modelContainer->accessModel([=](const LuaModel::Ptr& model)
       {
         LuaCountryState::Map& countryStates = model->getSimulationStateTable()->getCountryStates();
         if (countryStates.count(selectedId) == 0)
@@ -473,7 +473,7 @@ namespace onep
           // schedule task
           simulation->getUpdateThread()->executeLockedTick([=]()
           {
-            modelContainer->accessModel([=](LuaModel::Ptr model)
+            modelContainer->accessModel([=](const LuaModel::Ptr& model)
             {
               model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), checked);
             });
@@ -491,7 +491,7 @@ namespace onep
         {
           if (selected > 0)
           {
-            modelContainer->accessModel([=](LuaModel::Ptr model)
+            modelContainer->accessModel([=](const LuaModel::Ptr& model)
             {
               checkBox->setChecked(
                 model->getSimulationStateTable()->getCountryState(selected)->getBranchesActivatedTable()->getBranchActivated(name.c_str()));
@@ -505,7 +505,7 @@ namespace onep
           checkBox->setEnabled(selected > 0);
         })));
 
-        modelContainer->accessModel([this, name, checkBox](LuaModel::Ptr model)
+        modelContainer->accessModel([this, name, checkBox](const LuaModel::Ptr& model)
         {
           for(auto& it : model->getSimulationStateTable()->getCountryStates())
           {
@@ -580,7 +580,7 @@ namespace onep
 
           QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
           {
-            modelContainer->accessModel([=](LuaModel::Ptr model)
+            modelContainer->accessModel([=](const LuaModel::Ptr& model)
             {
               skillBranch->getSkillsTable()->getSkillByIndex(j)->setIsActivated(checked);
             });

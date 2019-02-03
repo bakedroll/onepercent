@@ -1,3 +1,4 @@
+#include "core/Multithreading.h"
 #include "scripting/LuaVisuals.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
@@ -107,26 +108,32 @@ namespace onep
 
   void LuaVisuals::updateVisualBindings()
   {
-    auto& states = m->modelContainer->getModel()->getSimulationStateTable()->getCountryStates();
-    for (auto& state : states)
+    Multithreading::uiExecuteAsync([this]()
     {
-      auto branchValuesTable = state.second->getBranchValuesTable();
-      auto valuesTable       = state.second->getValuesTable();
-
-      for (auto& visual : m->valueBindings)
+      m->modelContainer->accessModel([this](const LuaModel::Ptr& model)
       {
-        m->setUniform(state.first, visual.second, valuesTable->getValue(visual.first));
-      }
-
-      for (auto& branchBindings : m->branchValueBindings)
-      {
-        auto  branch = branchValuesTable->getBranch(branchBindings.first);
-        for (auto& visual : branchBindings.second)
+        auto& states = model->getSimulationStateTable()->getCountryStates();
+        for (auto& state : states)
         {
-          m->setUniform(state.first, visual.second, branch->getValue(visual.first));
+          auto branchValuesTable = state.second->getBranchValuesTable();
+          auto valuesTable = state.second->getValuesTable();
+
+          for (auto& visual : m->valueBindings)
+          {
+            m->setUniform(state.first, visual.second, valuesTable->getValue(visual.first));
+          }
+
+          for (auto& branchBindings : m->branchValueBindings)
+          {
+            auto  branch = branchValuesTable->getBranch(branchBindings.first);
+            for (auto& visual : branchBindings.second)
+            {
+              m->setUniform(state.first, visual.second, branch->getValue(visual.first));
+            }
+          }
         }
-      }
-    }
+      });
+    });
   }
 
   void LuaVisuals::luaBindValueToVisuals(const std::string& value, const std::string& visual)
