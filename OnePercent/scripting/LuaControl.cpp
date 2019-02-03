@@ -23,8 +23,8 @@ namespace onep
       .addFunction("create_skills", &LuaControl::luaCreateSkills)
       .addFunction("create_countries", &LuaControl::luaCreateCountries)
       .addFunction("create_values", &LuaControl::luaCreateValues)
-      .addFunction("skill", &LuaControl::getSkill)
-      .addFunction("update_branch", &LuaControl::updateBranch)
+      .addFunction("skill", &LuaControl::luaGetSkill)
+      .addFunction("update_branch", &LuaControl::luaUpdateBranch)
       .endClass();
   }
 
@@ -110,17 +110,17 @@ namespace onep
 
       branches->foreachMappedElementDo<LuaSkillBranch>([this, &countryState](LuaSkillBranch::Ptr& branch)
       {
-        updateBranch(branch->getName(), countryState);
+        luaUpdateBranch(branch->getName(), countryState);
       });
     });
   }
 
-  LuaSkill* LuaControl::getSkill(const std::string& name)
+  LuaSkill* LuaControl::luaGetSkill(const std::string& name)
   {
     return m->modelContainer->getModel()->getBranchesTable()->findSkill(name).get();
   }
 
-  void LuaControl::updateBranch(const std::string& name, luabridge::LuaRef countryState)
+  void LuaControl::luaUpdateBranch(const std::string& name, luabridge::LuaRef countryState)
   {
     triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE, name, countryState);
   }
