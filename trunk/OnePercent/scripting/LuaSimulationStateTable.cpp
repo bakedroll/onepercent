@@ -1,6 +1,5 @@
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaCountryState.h"
-#include "core/Enums.h"
 
 #include <osgGaming/Macros.h>
 
@@ -37,8 +36,11 @@ namespace onep
     m->countryStates[id] = newMappedElement<LuaCountryState>(id);
   }
 
-  void LuaSimulationStateTable::triggerObservables()
+  void LuaSimulationStateTable::updateObservables()
   {
-    traverseElements(static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES));
+    for (const auto& state : m->countryStates)
+    {
+      state.second->getBranchesActivatedTable()->updateObservables();
+    }
   }
 }

@@ -1,6 +1,5 @@
 #include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaCountry.h"
-#include "core/Enums.h"
 
 namespace onep
 {
