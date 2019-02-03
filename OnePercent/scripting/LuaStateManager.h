@@ -39,8 +39,8 @@ namespace onep
 
     void setGlobal(const char* name, const luabridge::LuaRef& ref);
 
-    bool executeCode(std::string code);
-    bool loadScript(std::string filename);
+    bool executeCode(const std::string& code);
+    bool loadScript(const std::string& filename);
 
     std::string getStackTrace() const;
     bool checkIsType(const luabridge::LuaRef& ref, int luaType);

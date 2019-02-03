@@ -86,7 +86,7 @@ namespace onep
       {
         m->lua->safeExecute([&]()
         {
-          m->modelContainer->accessModel([&](LuaModel::Ptr model)
+          m->modelContainer->accessModel([&](const LuaModel::Ptr& model)
           {
             tickElapsed = Helper::measureMsecs([this](){ m->luaControl->triggerLuaCallback(LuaDefines::Callback::ON_TICK); });
 
@@ -105,7 +105,7 @@ namespace onep
             syncElapsed    = Helper::measureMsecs([&model](){ model->getSimulationStateTable()->triggerObservables(); });
             visualsElapsed = Helper::measureMsecs([this](){  m->visuals->updateVisualBindings(); });
 
-            Multithreading::uiExecuteOrAsync([this]()
+            Multithreading::uiExecuteAsync([this]()
             {
               m->oDay->set(m->oDay->get() + 1);
             });
@@ -134,8 +134,11 @@ namespace onep
 
   void Simulation::prepare()
   {
-    m->refUpdate_skills_func = m->getLuaFunction("core.update_skills_func");
-    m->refUpdate_branches_func = m->getLuaFunction("core.update_branches_func");
+    m->lua->safeExecute([this]()
+    {
+      m->refUpdate_skills_func = m->getLuaFunction("core.update_skills_func");
+      m->refUpdate_branches_func = m->getLuaFunction("core.update_branches_func");
+    });
 
     m->thread.start();
   }
@@ -198,13 +201,19 @@ namespace onep
 
   void Simulation::saveState(const std::string& filename)
   {
-    SimulationStateReaderWriter rw;
-    rw.saveState(filename, m->modelContainer, m->oDay, m->oNumSkillPoints);
+    m->lua->safeExecute([this, &filename]()
+    {
+      SimulationStateReaderWriter rw;
+      rw.saveState(filename, m->modelContainer, m->oDay, m->oNumSkillPoints);
+    });
   }
 
   void Simulation::loadState(const std::string& filename)
   {
-    SimulationStateReaderWriter rw;
-    rw.loadState(filename, m->modelContainer, m->oDay, m->oNumSkillPoints, &m->thread);
+    m->lua->safeExecute([this, &filename]()
+    {
+      SimulationStateReaderWriter rw;
+      rw.loadState(filename, m->modelContainer, m->oDay, m->oNumSkillPoints, &m->thread);
+    });
   }
 }

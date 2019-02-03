@@ -37,7 +37,7 @@ namespace onep
 
     QDataStream stream(&file);
 
-    modelContainer->accessModel([&](LuaModel::Ptr model)
+    modelContainer->accessModel([&](const LuaModel::Ptr& model)
     {
       LuaCountryState::Map& cstates = model->getSimulationStateTable()->getCountryStates();
 
@@ -141,7 +141,7 @@ namespace onep
 
     thread->executeLockedTick([&]()
     {
-      modelContainer->accessModel([&](LuaModel::Ptr model)
+      modelContainer->accessModel([&](const LuaModel::Ptr& model)
       {
         LuaCountryState::Map& cstates = model->getSimulationStateTable()->getCountryStates();
         int numCountries, cid, numValues, numBranches, numSkills, len;

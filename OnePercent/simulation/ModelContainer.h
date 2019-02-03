@@ -20,11 +20,10 @@ namespace onep
 
     std::shared_ptr<LuaModel> getModel() const;
 
-    void accessModel(std::function<void(std::shared_ptr<LuaModel>)> func) const;
+    void accessModel(std::function<void(const std::shared_ptr<LuaModel>&)> func) const;
 
     void initializeState();
     void initializeCountryNeighbours(const std::map<int, std::vector<int>>& neighbourships);
-    void triggerOnInitializeEvents();
 
   private:
     struct Impl;

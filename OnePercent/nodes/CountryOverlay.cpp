@@ -72,7 +72,7 @@ namespace onep
       countryHoverNodes.insert(CountryHoverNode::Map::value_type(id, hoverNode));
       countryHoverSwitch->addChild(hoverNode, false);
 
-      modelContainer->accessModel([=](LuaModel::Ptr model)
+      modelContainer->accessModel([=](const LuaModel::Ptr& model)
       {
         LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryState(id);
 
@@ -313,19 +313,19 @@ namespace onep
 
     m->highlightedBranchId = id;
 
-    std::string branchName = m->modelContainer->getModel()->getBranchesTable()->getBranchByIndex(id)->getName();
-
-    for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
+    m->modelContainer->accessModel([this](const LuaModel::Ptr& model)
     {
-      int cid = it->first;
-      m->modelContainer->accessModel([=](LuaModel::Ptr model)
+      std::string branchName = model->getBranchesTable()->getBranchByIndex(m->highlightedBranchId)->getName();
+
+      for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
       {
+        int cid = it->first;
         LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryState(cid);
 
         if (cstate->getBranchesActivatedTable()->getBranchActivated(branchName.c_str()))
-          m->setCountryColorMode(it->second, CountryNode::ColorMode(int(CountryNode::MODE_HIGHLIGHT_BANKS) + id));
-      });
-    }
+          m->setCountryColorMode(it->second, CountryNode::ColorMode(int(CountryNode::MODE_HIGHLIGHT_BANKS) + m->highlightedBranchId));
+      }
+    });
   }
 
   void CountryOverlay::setHoveredCountryId(int id)

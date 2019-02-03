@@ -131,7 +131,7 @@ namespace onep
   {
     assert_return(m->lua->checkIsType(branches, LUA_TTABLE));
 
-    m->modelContainer->accessModel([&](std::shared_ptr<LuaModel> model)
+    m->modelContainer->accessModel([&](const LuaModel::Ptr& model)
     {
       for (luabridge::Iterator it(branches); !it.isNil(); ++it)
       {
@@ -150,7 +150,7 @@ namespace onep
   {
     assert_return(m->lua->checkIsType(skills, LUA_TTABLE));
 
-    m->modelContainer->accessModel([&](std::shared_ptr<LuaModel> model)
+    m->modelContainer->accessModel([&](const LuaModel::Ptr& model)
     {
       for (luabridge::Iterator it(skills); !it.isNil(); ++it)
       {
@@ -181,7 +181,7 @@ namespace onep
   {
     assert_return(m->lua->checkIsType(countries, LUA_TTABLE));
 
-    m->modelContainer->accessModel([&](std::shared_ptr<LuaModel> model)
+    m->modelContainer->accessModel([&](const LuaModel::Ptr& model)
     {
       for (luabridge::Iterator it(countries); !it.isNil(); ++it)
       {
@@ -200,7 +200,7 @@ namespace onep
   {
     assert_return(m->lua->checkIsType(values, LUA_TTABLE));
 
-    m->modelContainer->accessModel([&](std::shared_ptr<LuaModel> model)
+    m->modelContainer->accessModel([&](const LuaModel::Ptr& model)
     {
       for (luabridge::Iterator it(values); !it.isNil(); ++it)
       {
