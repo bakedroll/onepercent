@@ -3,7 +3,6 @@
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaValuesDefTable.h"
-#include "core/Enums.h"
 
 namespace onep
 {

@@ -102,7 +102,7 @@ namespace onep
               break;
             }
 
-            syncElapsed    = Helper::measureMsecs([&model](){ model->getSimulationStateTable()->triggerObservables(); });
+            syncElapsed    = Helper::measureMsecs([&model](){ model->getSimulationStateTable()->updateObservables(); });
             visualsElapsed = Helper::measureMsecs([this](){  m->visuals->updateVisualBindings(); });
 
             Multithreading::uiExecuteAsync([this]()

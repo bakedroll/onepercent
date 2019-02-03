@@ -21,6 +21,8 @@ namespace onep
     bool getBranchActivated(const std::string& name) const;
     void setBranchActivated(const std::string& name, bool activated);
 
+    void updateObservables();
+
     osgGaming::Observable<bool>::Ptr getOBranchActivated(const std::string& name) const;
 
   private:

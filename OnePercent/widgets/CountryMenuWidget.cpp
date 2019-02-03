@@ -21,13 +21,15 @@ namespace onep
 	struct CountryMenuWidget::Impl
 	{
     Impl(osgGaming::Injector& injector)
-      : simulation(injector.inject<Simulation>())
+      : lua(injector.inject<LuaStateManager>())
+      , simulation(injector.inject<Simulation>())
       , modelContainer(injector.inject<ModelContainer>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
     {}
 
     LuaCountry::Ptr country;
 
+    LuaStateManager::Ptr lua;
     Simulation::Ptr simulation;
     ModelContainer::Ptr modelContainer;
 
@@ -101,7 +103,7 @@ namespace onep
     for (int i = 0; i<n; i++)
     {
       LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
-      std::string name = branch->getName();
+      auto& name = branch->getName();
 
       QPushButton* button = new QPushButton(QString::fromStdString(name));
       button->setParent(this);
@@ -125,12 +127,14 @@ namespace onep
 
         int cid = m->country->getId();
 
-        // schedule task
-        m->simulation->getUpdateThread()->executeLockedTick([=]()
+        m->lua->safeExecute([this, &cid, &name]()
         {
-          m->modelContainer->accessModel([=](const LuaModel::Ptr& model)
+          m->simulation->getUpdateThread()->executeLockedTick([this, &cid, &name]()
           {
-            model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), true);
+            m->modelContainer->accessModel([&cid, &name](const LuaModel::Ptr& model)
+            {
+              model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), true);
+            });
           });
         });
 

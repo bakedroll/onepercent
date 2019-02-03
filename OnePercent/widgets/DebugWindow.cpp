@@ -470,12 +470,14 @@ namespace onep
           if (cid == 0)
             return;
 
-          // schedule task
-          simulation->getUpdateThread()->executeLockedTick([=]()
+          lua->safeExecute([this, &cid, &name, &checked]()
           {
-            modelContainer->accessModel([=](const LuaModel::Ptr& model)
+            simulation->getUpdateThread()->executeLockedTick([this, &cid, &name, &checked]()
             {
-              model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), checked);
+              modelContainer->accessModel([&cid, &name, &checked](const LuaModel::Ptr& model)
+              {
+                model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), checked);
+              });
             });
           });
         });

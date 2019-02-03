@@ -1,7 +1,6 @@
 #include "scripting/LuaBranchesActivatedTable.h"
 
 #include "core/Multithreading.h"
-#include "core/Enums.h"
 
 #include <QMutex>
 
@@ -20,23 +19,6 @@ namespace onep
     , m(new Impl())
   {
     assert_return(object.isTable());
-
-    addVisitorFunc(static_cast<int>(ModelTraversalType::TRIGGER_OBSERVABLES), [this](luabridge::LuaRef&)
-    {
-      foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
-      {
-        assert_return(value.type() == LUA_TBOOLEAN);
-        assert_return(key.isString());
-
-        bool activated = bool(value);
-
-        osgGaming::Observable<bool>::Ptr oActivated = m->oActivatedBranches[key.tostring()];
-        assert_return(oActivated.valid());
-
-        if (oActivated->get() != activated)
-          oActivated->set(activated);
-      });
-    });
   }
 
   LuaBranchesActivatedTable::~LuaBranchesActivatedTable() = default;
@@ -56,9 +38,31 @@ namespace onep
 
   void LuaBranchesActivatedTable::setBranchActivated(const std::string& name, bool activated)
   {
-    QMutexLocker lock(&m->mutexActivated);
     luaref()[name] = activated;
-    Multithreading::uiExecuteOrAsync([=]() { getOBranchActivated(name)->set(activated); });
+    Multithreading::uiExecuteOrAsync([=]()
+    {
+      QMutexLocker lock(&m->mutexActivated);
+      getOBranchActivated(name)->set(activated);
+    });
+  }
+
+  void LuaBranchesActivatedTable::updateObservables()
+  {
+    foreachElementDo([this](luabridge::LuaRef& key, luabridge::LuaRef& value)
+    {
+      assert_return(value.type() == LUA_TBOOLEAN);
+      assert_return(key.isString());
+
+      bool activated = bool(value);
+
+      QMutexLocker lock(&m->mutexActivated);
+
+      osgGaming::Observable<bool>::Ptr oActivated = m->oActivatedBranches[key.tostring()];
+      assert_return(oActivated.valid());
+
+      if (oActivated->get() != activated)
+        oActivated->set(activated);
+    });
   }
 
   osgGaming::Observable<bool>::Ptr LuaBranchesActivatedTable::getOBranchActivated(const std::string& name) const

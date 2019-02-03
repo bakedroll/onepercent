@@ -17,7 +17,7 @@ namespace onep
 
     void addCountryState(int id);
 
-    void triggerObservables();
+    void updateObservables();
 
   private:
     struct Impl;

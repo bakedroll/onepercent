@@ -24,17 +24,13 @@ namespace onep
   {
   public:
     using Ptr = std::shared_ptr<LuaObjectMapper>;
-    using VisitorFunc = std::function<void(luabridge::LuaRef&)>;
 
     explicit LuaObjectMapper(const luabridge::LuaRef& object, lua_State* luaState);
     virtual ~LuaObjectMapper();
 
     luabridge::LuaRef& luaref() const;
 
-    void addVisitorFunc(int type, VisitorFunc func);
-
     void foreachElementDo(std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func);
-    void traverseElements(int type);
 
     template <typename KeyType>
     bool containsMappedElement(const KeyType& key)
@@ -121,11 +117,9 @@ namespace onep
 
   private:
     using ElementsMap = std::map<std::string, Ptr>;
-    using TraversalMap = std::map<int, VisitorFunc>;
 
     std::unique_ptr<luabridge::LuaRef> m_ref;
     ElementsMap m_elements;
-    TraversalMap m_visitorFuncs;
     lua_State* m_luaState;
 
     template <typename LuaObject>
