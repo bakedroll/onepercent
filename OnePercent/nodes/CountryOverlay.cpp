@@ -33,7 +33,8 @@ namespace onep
   struct CountryOverlay::Impl
   {
     Impl(osgGaming::Injector& injector, CountryOverlay* b)
-      : resourceManager(injector.inject<osgGaming::ResourceManager>())
+      : base(b)
+      , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
       , shaderFactory(injector.inject<osgGaming::ShaderFactory>())
       , configManager(injector.inject<LuaConfig>())
@@ -41,7 +42,7 @@ namespace onep
       , countrySwitch(new osg::Switch())
       , countryHoverSwitch(new osg::Switch())
       , oSelectedCountryId(new osgGaming::Observable<int>(0))
-      , highlightedBranchId(-1)
+      , oCurrentOverlayBranchId(new osgGaming::Observable<int>(-1))
     {
     }
 
@@ -88,7 +89,7 @@ namespace onep
               if (!activated)
                 return;
 
-              if (oSelectedCountryId->get() == 0 && highlightedBranchId == i)
+              if (oSelectedCountryId->get() == 0 && base->getCurrentOverlayBranchId() == i)
                 setCountryColorMode(node, CountryNode::ColorMode(CountryNode::MODE_HIGHLIGHT_BANKS + i));
             });
           })));
@@ -107,6 +108,8 @@ namespace onep
         highlightedCountries.insert(mesh);
     }
 
+    CountryOverlay* base;
+
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
     osg::ref_ptr<osgGaming::ShaderFactory> shaderFactory;
@@ -122,8 +125,7 @@ namespace onep
     CountriesMap::Ptr countriesMap;
 
     osgGaming::Observable<int>::Ptr oSelectedCountryId;
-
-    int highlightedBranchId;
+    osgGaming::Observable<int>::Ptr oCurrentOverlayBranchId;
 
     std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
 
@@ -131,6 +133,9 @@ namespace onep
     CountryHoverNode::Ptr hoveredCountryNode;
 
     NeighbourMap neighbourMap;
+
+    QMutex currentBranchIdMutex;
+    QMutex selectedCountryMutex;
   };
 
   CountryOverlay::CountryOverlay(osgGaming::Injector& injector)
@@ -282,28 +287,9 @@ namespace onep
   void CountryOverlay::clearHighlightedCountries()
   {
     setAllCountriesVisibility(false);
-    m->highlightedBranchId = -1;
+    setCurrentOverlayBranchId(-1);
 
     m->highlightedCountries.clear();
-  }
-
-  void CountryOverlay::setSelectedCountry(int countryId)
-  {
-    m->oSelectedCountryId->set(countryId);
-
-    clearHighlightedCountries();
-
-    if (countryId == 0)
-      return;
-
-    m->highlightedBranchId = -1;
-
-    CountryNode::Ptr node = m->countryNodes.find(countryId)->second;
-    m->setCountryColorMode(node, CountryNode::MODE_SELECTED);
-
-    CountryNode::List& neighbors = node->getNeighborCountryNodes();
-    for (CountryNode::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
-      m->setCountryColorMode(*it, CountryNode::MODE_NEIGHBOR);
   }
 
   void CountryOverlay::setHighlightedSkillBranch(int id)
@@ -311,11 +297,11 @@ namespace onep
     m->oSelectedCountryId->set(0);
     clearHighlightedCountries();
 
-    m->highlightedBranchId = id;
+    setCurrentOverlayBranchId(id);
 
-    m->modelContainer->accessModel([this](const LuaModel::Ptr& model)
+    m->modelContainer->accessModel([this, id](const LuaModel::Ptr& model)
     {
-      std::string branchName = model->getBranchesTable()->getBranchByIndex(m->highlightedBranchId)->getName();
+      std::string branchName = model->getBranchesTable()->getBranchByIndex(id)->getName();
 
       for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
       {
@@ -323,7 +309,7 @@ namespace onep
         LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryState(cid);
 
         if (cstate->getBranchesActivatedTable()->getBranchActivated(branchName.c_str()))
-          m->setCountryColorMode(it->second, CountryNode::ColorMode(int(CountryNode::MODE_HIGHLIGHT_BANKS) + m->highlightedBranchId));
+          m->setCountryColorMode(it->second, CountryNode::ColorMode(int(CountryNode::MODE_HIGHLIGHT_BANKS) + id));
       }
     });
   }
@@ -408,14 +394,56 @@ namespace onep
     return m->countriesMap->getDataAt(ix, iy);
   }
 
+  void CountryOverlay::setSelectedCountry(int countryId)
+  {
+    Multithreading::uiExecuteOrAsync([this, countryId]()
+    {
+      QMutexLocker lock(&m->selectedCountryMutex);
+      m->oSelectedCountryId->set(countryId);
+    });
+
+    clearHighlightedCountries();
+
+    if (countryId == 0)
+      return;
+
+    CountryNode::Ptr node = m->countryNodes.find(countryId)->second;
+    m->setCountryColorMode(node, CountryNode::MODE_SELECTED);
+
+    CountryNode::List& neighbors = node->getNeighborCountryNodes();
+    for (CountryNode::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+      m->setCountryColorMode(*it, CountryNode::MODE_NEIGHBOR);
+  }
+
   int CountryOverlay::getSelectedCountryId()
   {
+    QMutexLocker lock(&m->selectedCountryMutex);
     return m->oSelectedCountryId->get();
   }
 
-  osgGaming::Observable<int>::Ptr CountryOverlay::getSelectedCountryIdObservable()
+  osgGaming::Observable<int>::Ptr CountryOverlay::getOSelectedCountryId()
   {
     return m->oSelectedCountryId;
+  }
+
+  int CountryOverlay::getCurrentOverlayBranchId() const
+  {
+    QMutexLocker lock(&m->currentBranchIdMutex);
+    return m->oCurrentOverlayBranchId->get();
+  }
+
+  void CountryOverlay::setCurrentOverlayBranchId(int branchId)
+  {
+    Multithreading::uiExecuteOrAsync([this, branchId]()
+    {
+      QMutexLocker lock(&m->currentBranchIdMutex);
+      m->oCurrentOverlayBranchId->set(branchId);
+    });
+  }
+
+  osgGaming::Observable<int>::Ptr CountryOverlay::getOCurrentOverlayBranchId() const
+  {
+    return m->oCurrentOverlayBranchId;
   }
 
   CountryNode* CountryOverlay::luaGetCountryNode(int id) const

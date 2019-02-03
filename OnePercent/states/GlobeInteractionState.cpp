@@ -211,7 +211,7 @@ namespace onep
       maxDistance = std::max<float>(dist, maxDistance);
     }
 
-    m->selectedCountryObserver = m->countryOverlay->getSelectedCountryIdObservable()->connect(osgGaming::Func<int>([this, minDistance, maxDistance](int id)
+    m->selectedCountryObserver = m->countryOverlay->getOSelectedCountryId()->connect(osgGaming::Func<int>([this, minDistance, maxDistance](int id)
     {
       if (id > 0)
       {

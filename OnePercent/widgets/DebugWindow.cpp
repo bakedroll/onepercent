@@ -307,11 +307,14 @@ namespace onep
 
     void updateCountryInfo()
     {
+      updateCountryInfo(countryOverlay->getSelectedCountryId());
+    }
+
+    void updateCountryInfo(int selectedId)
+    {
       // cancel update if DebugWindow is not shown
       if (!base->isVisible())
         return;
-
-      int selectedId = countryOverlay->getSelectedCountryId();
 
       widgetStats->setVisible(selectedId > 0);
       if (selectedId == 0)
@@ -489,7 +492,7 @@ namespace onep
           bSettingHighlightedBranch = false;
         });
 
-        selectedCountryIdObservers.push_back(countryOverlay->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([=](int selected)
+        selectedCountryIdObservers.push_back(countryOverlay->getOSelectedCountryId()->connectAndNotify(osgGaming::Func<int>([=](int selected)
         {
           if (selected > 0)
           {
@@ -701,12 +704,12 @@ namespace onep
       m->labelSkillpoints->setText(QString("Skill Points: %1").arg(skillPoints));
     }));
 
-    m->notifySelectedCountry = m->countryOverlay->getSelectedCountryIdObservable()->connectAndNotify(osgGaming::Func<int>([this](int selected)
+    m->notifySelectedCountry = m->countryOverlay->getOSelectedCountryId()->connectAndNotify(osgGaming::Func<int>([this](int selected)
     {
       if (m->bSettingHighlightedBranch)
         return;
 
-      m->updateCountryInfo();
+      m->updateCountryInfo(selected);
 
       m->toggleCountryButton->setEnabled(selected > 0);
       m->radioNoOverlay->setChecked(true);
