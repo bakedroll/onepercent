@@ -14,7 +14,7 @@ namespace onep
   void CountryNode::Definition::registerClass(lua_State* state)
   {
     luabridge::getGlobalNamespace(state)
-      .beginClass<CountryNode>("CountryNode")
+      .deriveClass<CountryNode, LuaVisualOsgNode<osg::Geode>>("CountryNode")
       .addFunction("get_name", &CountryNode::getName)
       .addFunction("get_neighbours", &CountryNode::luaGetNeighbours)
       .endClass();
@@ -58,36 +58,35 @@ namespace onep
     osg::ref_ptr<osg::Vec3Array> texcoords2,
     osg::ref_ptr<osg::DrawElementsUInt> triangles,
     BorderIdMap& neighbourBorders)
-    : osg::Geode()
+    : LuaVisualOsgNode<osg::Geode>()
     , m(new Impl())
   {
     m->name = countryName;
 
     m->earthRadius = configManager->getNumber<float>("earth.radius");
-    m->cameraZoom = configManager->getNumber<float>("camera.country_zoom");
+    m->cameraZoom  = configManager->getNumber<float>("camera.country_zoom");
 
     m->centerLatLong = centerLatLong;
-    m->size = size;
+    m->size          = size;
 
     m->neighbourBorders = neighbourBorders;
 
     osg::ref_ptr<CountryGeometry> geo = new CountryGeometry(vertices, texcoords1, texcoords2, triangles);
     addDrawable(geo);
 
-    m->uniformAlpha = new osg::Uniform("alpha", 0.0f);
-    m->uniformColor = new osg::Uniform("overlayColor", osg::Vec3f(0.3f, 0.3f, 0.3f));
-    m->uniformBlendColor = new osg::Uniform("overlayBlendColor", osg::Vec3f(1.0f, 0.0f, 0.0f));
-    m->uniformTakeover = new osg::Uniform("takeover", 0.0f);
+    m->uniformAlpha         = new osg::Uniform("alpha", 0.0f);
+    m->uniformColor         = new osg::Uniform("overlayColor", osg::Vec3f(0.3f, 0.3f, 0.3f));
+    m->uniformBlendColor    = new osg::Uniform("overlayBlendColor", osg::Vec3f(1.0f, 0.0f, 0.0f));
+    m->uniformTakeover      = new osg::Uniform("takeover", 0.0f);
     m->uniformTakeoverColor = new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 1.0f, 0.8f));
     m->uniformTakeoverScale = new osg::Uniform("takeoverScale", 100.0f);
-    
-    m->stateSet = getOrCreateStateSet();
-    m->stateSet->addUniform(m->uniformAlpha);
-    m->stateSet->addUniform(m->uniformColor);
-    m->stateSet->addUniform(m->uniformBlendColor);
-    m->stateSet->addUniform(m->uniformTakeover);
-    m->stateSet->addUniform(m->uniformTakeoverColor);
-    m->stateSet->addUniform(m->uniformTakeoverScale);
+
+    addStateSetUniform(m->uniformAlpha);
+    addStateSetUniform(m->uniformColor);
+    addStateSetUniform(m->uniformBlendColor);
+    addStateSetUniform(m->uniformTakeover);
+    addStateSetUniform(m->uniformTakeoverColor);
+    addStateSetUniform(m->uniformTakeoverScale);
 
     m->refNeighbours = MAKE_LUAREF_PTR(lua->newTable());
   }
