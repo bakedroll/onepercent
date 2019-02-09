@@ -1,6 +1,6 @@
 control:on_event(defines.callback.on_initialize, function()
 
-  -- visuals:bind_branch_value_to_visuals("politics", "propagated", "takeover")
+  visuals:bind_branch_value_to_visuals("politics", "propagated", "takeover")
 
 end)
 
@@ -11,7 +11,7 @@ control:on_event(defines.callback.on_country_changed, function(cid)
 
 	local neighbours = node:get_neighbours()
 
-	log:debug("COUNTRY CHANGED: " .. node:get_name())
+	log:debug("COUNTRY CHANGED: " .. node:get_country_name())
 	log:debug(helper.dump_object(neighbours))
 
 	node:set_uniform_float("takeover", 0.5)
