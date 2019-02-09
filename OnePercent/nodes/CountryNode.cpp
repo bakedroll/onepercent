@@ -15,7 +15,7 @@ namespace onep
   {
     luabridge::getGlobalNamespace(state)
       .deriveClass<CountryNode, LuaVisualOsgNode<osg::Geode>>("CountryNode")
-      .addFunction("get_name", &CountryNode::getName)
+      .addFunction("get_country_name", &CountryNode::getCountryName)
       .addFunction("get_neighbours", &CountryNode::luaGetNeighbours)
       .endClass();
   }
@@ -35,14 +35,8 @@ namespace onep
     List neighbors;
     BorderIdMap neighbourBorders;
 
-    osg::ref_ptr<osg::StateSet> stateSet;
-
     osg::ref_ptr<osg::Uniform> uniformColor;
-    osg::ref_ptr<osg::Uniform> uniformBlendColor;
     osg::ref_ptr<osg::Uniform> uniformAlpha;
-    osg::ref_ptr<osg::Uniform> uniformTakeover;
-    osg::ref_ptr<osg::Uniform> uniformTakeoverColor;
-    osg::ref_ptr<osg::Uniform> uniformTakeoverScale;
 
     LuaRefPtr refNeighbours;
   };
@@ -74,19 +68,15 @@ namespace onep
     osg::ref_ptr<CountryGeometry> geo = new CountryGeometry(vertices, texcoords1, texcoords2, triangles);
     addDrawable(geo);
 
-    m->uniformAlpha         = new osg::Uniform("alpha", 0.0f);
-    m->uniformColor         = new osg::Uniform("overlayColor", osg::Vec3f(0.3f, 0.3f, 0.3f));
-    m->uniformBlendColor    = new osg::Uniform("overlayBlendColor", osg::Vec3f(1.0f, 0.0f, 0.0f));
-    m->uniformTakeover      = new osg::Uniform("takeover", 0.0f);
-    m->uniformTakeoverColor = new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 1.0f, 0.8f));
-    m->uniformTakeoverScale = new osg::Uniform("takeoverScale", 100.0f);
+    m->uniformAlpha = new osg::Uniform("alpha", 0.0f);
+    m->uniformColor = new osg::Uniform("overlayColor", osg::Vec3f(0.3f, 0.3f, 0.3f));
 
     addStateSetUniform(m->uniformAlpha);
     addStateSetUniform(m->uniformColor);
-    addStateSetUniform(m->uniformBlendColor);
-    addStateSetUniform(m->uniformTakeover);
-    addStateSetUniform(m->uniformTakeoverColor);
-    addStateSetUniform(m->uniformTakeoverScale);
+    addStateSetUniform(new osg::Uniform("overlayBlendColor", osg::Vec3f(1.0f, 0.0f, 0.0f)));
+    addStateSetUniform(new osg::Uniform("takeover", 0.0f));
+    addStateSetUniform(new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 1.0f, 0.8f)));
+    addStateSetUniform(new osg::Uniform("takeoverScale", 100.0f));
 
     m->refNeighbours = MAKE_LUAREF_PTR(lua->newTable());
   }
@@ -123,17 +113,12 @@ namespace onep
     return it->second;
   }
 
-  osg::ref_ptr<osg::Uniform>& CountryNode::getTakeoverUniform() const
-  {
-    return m->uniformTakeover;
-  }
-
   bool CountryNode::getIsOnOcean() const
   {
     return m->neighbourBorders.find(-1) != m->neighbourBorders.end();
   }
 
-  std::string CountryNode::getName() const
+  std::string CountryNode::getCountryName() const
   {
     return m->name;
   }

@@ -57,10 +57,8 @@ namespace onep
     const BorderIdMap& getNeighborBorders() const;
     const std::vector<int>& getNeighborBorderIds(int neighborId) const;
 
-    osg::ref_ptr<osg::Uniform>& getTakeoverUniform() const;
-
     bool getIsOnOcean() const;
-    std::string getName() const;
+    std::string getCountryName() const;
 
     void setColorMode(ColorMode mode);
 

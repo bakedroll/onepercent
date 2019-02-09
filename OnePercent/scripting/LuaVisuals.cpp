@@ -9,8 +9,6 @@
 #include "simulation/ModelContainer.h"
 #include "nodes/CountryOverlay.h"
 
-#include <osg/Uniform>
-
 namespace onep
 {
   void LuaVisuals::Definition::registerClass(lua_State* state)
@@ -28,12 +26,6 @@ namespace onep
       : modelContainer(injector.inject<ModelContainer>())
       , countryOverlay(injector.inject<CountryOverlay>())
     {
-      initializeUniformGetters();
-    }
-
-    void initializeUniformGetters()
-    {
-      uniformGetters["takeover"] = [this](int cid) { return countryOverlay->getCountryNode(cid)->getTakeoverUniform(); };
     }
 
     bool isValueOfTypeExisting(const std::string& name, LuaValueDef::Type type) const
@@ -49,23 +41,25 @@ namespace onep
       return modelContainer->getModel()->getBranchesTable()->containsMappedElement(name);
     }
 
-    template <typename T>
-    void setUniform(int cid, const std::string& visual, const T& value)
+    template <typename ValueType>
+    void setUniform(const CountryNode::Ptr& node, const std::string& visual, const ValueType& value)
     {
-      auto& getter = uniformGetters[visual];
-      auto  uniform = getter(cid);
+      auto uniform = node->getStateSetUniform(visual);
+      assert_return(uniform);
+
+      if (!uniform)
+      {
+        OSGG_QLOG_WARN(QString("Uniform %1 not found.").arg(visual.c_str()));
+      }
 
       uniform->set(value);
     }
 
-    using UniformGetter     = std::function<osg::ref_ptr<osg::Uniform>(int cid)>;
-    using UniformGetterMap  = std::map<std::string, UniformGetter>;
     using VisualBindingsMap = std::map<std::string, std::string>;
     using BranchBindingsMap = std::map<std::string, VisualBindingsMap>;
 
     ModelContainer::Ptr modelContainer;
     CountryOverlay::Ptr countryOverlay;
-    UniformGetterMap    uniformGetters;
     VisualBindingsMap   valueBindings;
     BranchBindingsMap   branchValueBindings;
   };
@@ -89,12 +83,14 @@ namespace onep
         auto& states = model->getSimulationStateTable()->getCountryStates();
         for (auto& state : states)
         {
+          const auto node = m->countryOverlay->getCountryNode(state.first);
+
           auto branchValuesTable = state.second->getBranchValuesTable();
           auto valuesTable = state.second->getValuesTable();
 
           for (auto& visual : m->valueBindings)
           {
-            m->setUniform(state.first, visual.second, valuesTable->getValue(visual.first));
+            m->setUniform(node, visual.second, valuesTable->getValue(visual.first));
           }
 
           for (auto& branchBindings : m->branchValueBindings)
@@ -102,7 +98,7 @@ namespace onep
             auto  branch = branchValuesTable->getBranch(branchBindings.first);
             for (auto& visual : branchBindings.second)
             {
-              m->setUniform(state.first, visual.second, branch->getValue(visual.first));
+              m->setUniform(node, visual.second, branch->getValue(visual.first));
             }
           }
         }

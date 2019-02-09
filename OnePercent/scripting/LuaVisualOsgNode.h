@@ -1,6 +1,10 @@
 #pragma once
 
+#include "core/Macros.h"
+
 #include <osg/Node>
+
+#include <QString>
 
 namespace onep
 {
@@ -46,16 +50,29 @@ namespace onep
       m_uniforms[uniform->getName()] = uniform;
     }
 
-    template <typename ValueType>
-    void luaSetUniform(const std::string& name, ValueType value)
+    OsgUniformPtr getStateSetUniform(const std::string& name) const
     {
       const auto& it = m_uniforms.find(name);
       if (it == m_uniforms.end())
       {
-        assert_return(false);
+        assert_return(false, nullptr);
       }
 
-      it->second->set(value);
+      return it->second;
+    }
+
+    template <typename ValueType>
+    void luaSetUniform(const std::string& name, ValueType value)
+    {
+      auto uniform = getStateSetUniform(name);
+      assert_return(uniform);
+
+      if (!uniform)
+      {
+        OSGG_QLOG_WARN(QString("Uniform %1 not found.").arg(name.c_str()));
+      }
+
+      uniform->set(value);
     }
 
   private:
