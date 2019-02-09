@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scripting/LuaConfig.h"
+#include "scripting/LuaVisualOsgNode.h"
 
 #include <osg/Geode>
 
@@ -10,7 +11,7 @@ namespace onep
 {
   class LuaStateManager;
 
-  class CountryNode : public osg::Geode
+  class CountryNode : public LuaVisualOsgNode<osg::Geode>
   {
   public:
     class Definition : public LuaClassDefinition

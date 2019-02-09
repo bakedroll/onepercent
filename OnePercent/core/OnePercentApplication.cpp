@@ -12,6 +12,7 @@
 #include "states/MainMenuState.h"
 #include "states/LoadingGlobeOverviewState.h"
 #include "states/GlobeInteractionState.h"
+#include "scripting/LuaExternalClassDefinitions.h"
 #include "scripting/LuaConfig.h"
 #include "scripting/LuaLogger.h"
 #include "scripting/LuaControl.h"
@@ -35,7 +36,11 @@ namespace onep
   {
     osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
 
+    lua->registerClass<LuaExternalClassDefinitions>();
+
     lua->registerClass<LuaCallbackRegistry::Definition>();
+    lua->registerClass<LuaVisualOsgNode<osg::Geode>::Definition>();
+
     lua->registerClass<LuaSkill::Definition>();
     lua->registerClass<CountryOverlay::Definition>();
     lua->registerClass<CountryNode::Definition>();
