@@ -138,9 +138,10 @@ namespace onep
     QPushButton* buttonStartStop;
     QCheckBox* checkBoxEnableGraph;
 
-    std::vector<osgGaming::Observer<int>::Ptr> selectedCountryIdObservers;
-    std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
-    std::vector<osgGaming::Observer<bool>::Ptr> skillActivatedObservers;
+    std::vector<osgGaming::Observer<int>::Ptr>         selectedCountryIdObservers;
+    std::vector<osgGaming::Observer<bool>::Ptr>        skillBranchActivatedObservers;
+    std::vector<osgGaming::Observer<bool>::Ptr>        skillActivatedObservers;
+    std::vector<osgGaming::Observer<std::string>::Ptr> currentOverlayBranchNameObservers;
 
     struct ValueWidget
     {
@@ -435,9 +436,8 @@ namespace onep
         updateBoundaries();
       });
 
-      QGridLayout* branchesLayout = new QGridLayout();
-
-      QButtonGroup* radioGroup = new QButtonGroup(base);
+      auto branchesLayout = new QGridLayout();
+      auto radioGroup     = new QButtonGroup(base);
 
       radioNoOverlay = new QRadioButton(QObject::tr("No Overlay"));
       radioNoOverlay->setChecked(true);
@@ -487,14 +487,32 @@ namespace onep
           countryOverlay->setCurrentOverlayBranchName(name);
         });
 
-        selectedCountryIdObservers.push_back(countryOverlay->getOSelectedCountryId()->connectAndNotify(osgGaming::Func<int>([=](int selected)
+        currentOverlayBranchNameObservers.push_back(countryOverlay->getOCurrentOverlayBranchName()->connectAndNotify(
+          osgGaming::Func<std::string>([=](std::string currentName)
+        {
+          if (currentName.empty())
+          {
+            QSignalBlocker blocker(radioNoOverlay);
+            radioNoOverlay->setChecked(true);
+            return;
+          }
+
+          if (currentName == name)
+          {
+            QSignalBlocker blocker(radioButton);
+            radioButton->setChecked(true);
+          }
+        })));
+
+        selectedCountryIdObservers.push_back(countryOverlay->getOSelectedCountryId()->connectAndNotify(
+          osgGaming::Func<int>([=](int selected)
         {
           if (selected > 0)
           {
             modelContainer->accessModel([=](const LuaModel::Ptr& model)
             {
               checkBox->setChecked(
-                model->getSimulationStateTable()->getCountryState(selected)->getBranchesActivatedTable()->getBranchActivated(name.c_str()));
+                model->getSimulationStateTable()->getCountryState(selected)->getBranchesActivatedTable()->getBranchActivated(name));
             });
           }
           else

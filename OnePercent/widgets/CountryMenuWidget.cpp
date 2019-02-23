@@ -3,7 +3,7 @@
 #include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
-
+#include "nodes/CountryOverlay.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 #include "scripting/LuaModel.h"
@@ -24,20 +24,22 @@ namespace onep
       : lua(injector.inject<LuaStateManager>())
       , simulation(injector.inject<Simulation>())
       , modelContainer(injector.inject<ModelContainer>())
+      , countryOverlay(injector.inject<CountryOverlay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
     {}
 
     LuaCountry::Ptr country;
 
     LuaStateManager::Ptr lua;
-    Simulation::Ptr simulation;
-    ModelContainer::Ptr modelContainer;
+    Simulation::Ptr      simulation;
+    ModelContainer::Ptr  modelContainer;
+    CountryOverlay::Ptr  countryOverlay;
 
     std::vector<QPushButton*> buttons;
 
     ONumSkillPoints::Ptr oNumSkillPoints;
 
-    osgGaming::Observer<int>::Ptr notifySkillPoints;
+    osgGaming::Observer<int>::Ptr               notifySkillPoints;
     std::vector<osgGaming::Observer<bool>::Ptr> notifiesActivated;
 
     void updateUi()
@@ -145,6 +147,9 @@ namespace onep
             });
           });
         });
+
+        // todo: move to lua event
+        m->countryOverlay->setCurrentOverlayBranchName(name);
 
         if (!m->simulation->running())
         {

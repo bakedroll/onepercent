@@ -18,10 +18,13 @@ namespace onep
     LuaVisuals(osgGaming::Injector& injector);
     ~LuaVisuals();
 
-    void updateVisualBindings();
+    void updateBindings();
 
     void luaBindValueToVisuals(const std::string& value, const std::string& visual);
     void luaBindBranchValueToVisuals(const std::string& branchName, const std::string& branchValue, const std::string& visual);
+
+    void luaUnbindValue(const std::string& value);
+    void luaUnbindBranchValue(const std::string& branchName, const std::string& branchValue);
 
   private:
     struct Impl;
