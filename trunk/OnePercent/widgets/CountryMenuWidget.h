@@ -16,7 +16,7 @@ namespace onep
 		~CountryMenuWidget();
 
 		void setCenterPosition(int x, int y);
-    void setCountry(LuaCountry::Ptr country);
+    void setCountry(const LuaCountry::Ptr& country);
 
 	private:
 		struct Impl;

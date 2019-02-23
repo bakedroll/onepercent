@@ -41,17 +41,17 @@ namespace onep
       const osg::ref_ptr<LuaConfig>& configManager,
       const osg::ref_ptr<LuaStateManager>& lua,
       const std::string& countryName,
-      osg::Vec2f centerLatLong,
-      osg::Vec2f size,
-      osg::ref_ptr<osg::Vec3Array> vertices,
-      osg::ref_ptr<osg::Vec2Array> texcoords1,
-      osg::ref_ptr<osg::Vec3Array> texcoords2,
-      osg::ref_ptr<osg::DrawElementsUInt> triangles,
+      const osg::Vec2f& centerLatLong,
+      const osg::Vec2f& size,
+      const osg::ref_ptr<osg::Vec3Array>& vertices,
+      const osg::ref_ptr<osg::Vec2Array>& texcoords1,
+      const osg::ref_ptr<osg::Vec3Array>& texcoords2,
+      const osg::ref_ptr<osg::DrawElementsUInt>& triangles,
       BorderIdMap& neighbourBorders);
 
-    ~CountryNode();
+    ~CountryNode() override;
 
-    void addNeighbor(osg::ref_ptr<CountryNode> mesh);
+    void addNeighbor(const osg::ref_ptr<CountryNode>& mesh);
     List& getNeighborCountryNodes() const;
 
     const BorderIdMap& getNeighborBorders() const;
@@ -59,8 +59,6 @@ namespace onep
 
     bool getIsOnOcean() const;
     std::string getCountryName() const;
-
-    void setColorMode(ColorMode mode);
 
     osg::Vec2f getCenterLatLong() const;
     osg::Vec2f getSize() const;

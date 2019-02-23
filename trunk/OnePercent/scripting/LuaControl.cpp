@@ -62,8 +62,8 @@ namespace onep
       injector.inject<CountryOverlay>()->getOSelectedCountryId()));
 
     registerLuaCallback(LuaDefines::Callback::ON_OVERLAY_CHANGED,
-      std::make_shared<LuaObservableCallback<int>>(m->lua,
-      injector.inject<CountryOverlay>()->getOCurrentOverlayBranchId()));
+      std::make_shared<LuaObservableCallback<std::string>>(m->lua,
+      injector.inject<CountryOverlay>()->getOCurrentOverlayBranchName()));
   }
 
   void LuaControl::doSkillsUpdate(const LuaModel::Ptr& model)
@@ -115,7 +115,7 @@ namespace onep
     });
   }
 
-  LuaSkill* LuaControl::luaGetSkill(const std::string& name)
+  LuaSkill* LuaControl::luaGetSkill(const std::string& name) const
   {
     return m->modelContainer->getModel()->getBranchesTable()->findSkill(name).get();
   }

@@ -105,7 +105,6 @@ namespace onep
       , checkBoxEnableGraph(nullptr)
       , bWireframe(false)
       , borderThickness(0.1f)
-      , bSettingHighlightedBranch(false)
     {
     }
 
@@ -163,7 +162,6 @@ namespace onep
 
     bool bWireframe;
     float borderThickness;
-    bool bSettingHighlightedBranch;
 
     void updateBoundaries()
     {
@@ -445,27 +443,26 @@ namespace onep
       radioNoOverlay->setChecked(true);
       radioGroup->addButton(radioNoOverlay);
 
-      QConnectBoolFunctor::connect(radioNoOverlay, SIGNAL(clicked(bool)), [=](bool checked)
+      QConnectBoolFunctor::connect(radioNoOverlay, SIGNAL(clicked(bool)), [=](bool)
       {
-        if (checked)
-          countryOverlay->clearHighlightedCountries();
+        countryOverlay->setCurrentOverlayBranchName({});
       });
 
       branchesLayout->addWidget(radioNoOverlay, 0, 1);
 
-      auto branchesTable = modelContainer->getModel()->getBranchesTable();
+      const auto& branches = modelContainer->getModel()->getBranchesTable()->getBranches();
+      auto        index    = 0;
 
-      int n = branchesTable->getNumBranches();
-      for (int i = 0; i < n; i++)
+      for (const auto& branch : branches)
       {
-        std::string name = branchesTable->getBranchByIndex(i)->getName();
+        const auto& name = branch.second->getName();
 
         QCheckBox* checkBox = new QCheckBox(QString::fromStdString(name));
         QRadioButton* radioButton = new QRadioButton(QObject::tr("Overlay"));
         radioGroup->addButton(radioButton);
 
-        branchesLayout->addWidget(checkBox, 1 + i, 0);
-        branchesLayout->addWidget(radioButton, 1 + i, 1);
+        branchesLayout->addWidget(checkBox, 1 + index, 0);
+        branchesLayout->addWidget(radioButton, 1 + index, 1);
 
         QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
         {
@@ -479,17 +476,15 @@ namespace onep
             {
               modelContainer->accessModel([&cid, &name, &checked](const LuaModel::Ptr& model)
               {
-                model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), checked);
+                model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name, checked);
               });
             });
           });
         });
 
-        QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool checked)
+        QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool)
         {
-          bSettingHighlightedBranch = true;
-          countryOverlay->setHighlightedSkillBranch(i);
-          bSettingHighlightedBranch = false;
+          countryOverlay->setCurrentOverlayBranchName(name);
         });
 
         selectedCountryIdObservers.push_back(countryOverlay->getOSelectedCountryId()->connectAndNotify(osgGaming::Func<int>([=](int selected)
@@ -527,6 +522,7 @@ namespace onep
           }
         });
 
+        index++;
       }
 
       luaConsoleEdit = new ConsoleEdit();
@@ -565,20 +561,19 @@ namespace onep
       QVBoxLayout* rightLayout = new QVBoxLayout();
 
       // Skills
-      for (int i = 0; i < n; i++)
+      for (const auto& branch : branches)
       {
-        LuaSkillBranch::Ptr skillBranch = branchesTable->getBranchByIndex(i);
-        std::string name = skillBranch->getName();
+        const auto& name = branch.second->getName();
 
         // Skills
-        int nskills = skillBranch->getSkillsTable()->getNumSkills();
+        int nskills = branch.second->getSkillsTable()->getNumSkills();
 
         QLabel* label = new QLabel(QString::fromStdString(name));
         rightLayout->addWidget(label);
 
         for (int j = 0; j < nskills; j++)
         {
-          LuaSkill::Ptr skill = skillBranch->getSkillsTable()->getSkillByIndex(j);
+          LuaSkill::Ptr skill = branch.second->getSkillsTable()->getSkillByIndex(j);
 
           QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getDisplayName()));
           rightLayout->addWidget(checkBox);
@@ -587,7 +582,7 @@ namespace onep
           {
             modelContainer->accessModel([=](const LuaModel::Ptr& model)
             {
-              skillBranch->getSkillsTable()->getSkillByIndex(j)->setIsActivated(checked);
+              branch.second->getSkillsTable()->getSkillByIndex(j)->setIsActivated(checked);
             });
           });
 
@@ -690,7 +685,7 @@ namespace onep
     , m(new Impl(injector, this))
   {
     setWindowTitle("Debug Window");
-    setGeometry(100, 100, 500, 800);
+    setGeometry(10, 10, 800, 800);
 
     m->setupUi();
 
@@ -706,13 +701,9 @@ namespace onep
 
     m->notifySelectedCountry = m->countryOverlay->getOSelectedCountryId()->connectAndNotify(osgGaming::Func<int>([this](int selected)
     {
-      if (m->bSettingHighlightedBranch)
-        return;
-
       m->updateCountryInfo(selected);
 
       m->toggleCountryButton->setEnabled(selected > 0);
-      m->radioNoOverlay->setChecked(true);
     }));
   }
 

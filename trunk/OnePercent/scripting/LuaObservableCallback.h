@@ -11,14 +11,18 @@ namespace onep
   {
   public:
     LuaObservableCallback(const LuaStateManager::Ptr& lua, const typename osgGaming::Observable<T>::Ptr& observable)
+      : m_oldValue(observable->get())
     {
       m_observer = observable->connect(osgGaming::Func<T>([this, &lua](T value)
       {
-        trigger(lua, value);
+        trigger(lua, m_oldValue, value);
+        m_oldValue = value;
       }));
     }
 
   private:
     typename osgGaming::Observer<T>::Ptr m_observer;
+    T                                    m_oldValue;
+
   };
 }

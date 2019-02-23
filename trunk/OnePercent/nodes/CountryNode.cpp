@@ -7,7 +7,7 @@
 #include <osgGaming/Helper.h>
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 
 namespace onep
 {
@@ -22,7 +22,11 @@ namespace onep
 
   struct CountryNode::Impl
   {
-    Impl() {}
+    Impl()
+      : earthRadius(0.0f)
+      , cameraZoom(0.0f)
+    {
+    }
 
     std::string name;
 
@@ -32,25 +36,21 @@ namespace onep
     float earthRadius;
     float cameraZoom;
 
-    List neighbors;
+    List        neighbors;
     BorderIdMap neighbourBorders;
-
-    osg::ref_ptr<osg::Uniform> uniformColor;
-    osg::ref_ptr<osg::Uniform> uniformAlpha;
-
-    LuaRefPtr refNeighbours;
+    LuaRefPtr   refNeighbours;
   };
 
   CountryNode::CountryNode(
     const LuaConfig::Ptr& configManager,
     const LuaStateManager::Ptr& lua,
     const std::string& countryName,
-    osg::Vec2f centerLatLong,
-    osg::Vec2f size,
-    osg::ref_ptr<osg::Vec3Array> vertices,
-    osg::ref_ptr<osg::Vec2Array> texcoords1,
-    osg::ref_ptr<osg::Vec3Array> texcoords2,
-    osg::ref_ptr<osg::DrawElementsUInt> triangles,
+    const osg::Vec2f& centerLatLong,
+    const osg::Vec2f& size,
+    const osg::ref_ptr<osg::Vec3Array>& vertices,
+    const osg::ref_ptr<osg::Vec2Array>& texcoords1,
+    const osg::ref_ptr<osg::Vec3Array>& texcoords2,
+    const osg::ref_ptr<osg::DrawElementsUInt>& triangles,
     BorderIdMap& neighbourBorders)
     : LuaVisualOsgNode<osg::Geode>()
     , m(new Impl())
@@ -68,24 +68,15 @@ namespace onep
     osg::ref_ptr<CountryGeometry> geo = new CountryGeometry(vertices, texcoords1, texcoords2, triangles);
     addDrawable(geo);
 
-    m->uniformAlpha = new osg::Uniform("alpha", 0.0f);
-    m->uniformColor = new osg::Uniform("overlayColor", osg::Vec3f(0.3f, 0.3f, 0.3f));
-
-    addStateSetUniform(m->uniformAlpha);
-    addStateSetUniform(m->uniformColor);
-    addStateSetUniform(new osg::Uniform("overlayBlendColor", osg::Vec3f(1.0f, 0.0f, 0.0f)));
+    addStateSetUniform(new osg::Uniform("overlayColor", osg::Vec4f(0.3f, 0.3f, 0.3f, 0.0f)));
     addStateSetUniform(new osg::Uniform("takeover", 0.0f));
-    addStateSetUniform(new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 1.0f, 0.8f)));
-    addStateSetUniform(new osg::Uniform("takeoverScale", 100.0f));
 
     m->refNeighbours = MAKE_LUAREF_PTR(lua->newTable());
   }
 
-  CountryNode::~CountryNode()
-  {
-  }
+  CountryNode::~CountryNode() = default;
 
-  void CountryNode::addNeighbor(osg::ref_ptr<CountryNode> mesh)
+  void CountryNode::addNeighbor(const osg::ref_ptr<CountryNode>& mesh)
   {
     m->refNeighbours->append(mesh.get());
     m->neighbors.push_back(mesh);
@@ -103,7 +94,7 @@ namespace onep
 
   const std::vector<int>& CountryNode::getNeighborBorderIds(int neighborId) const
   {
-    BorderIdMap::iterator it = m->neighbourBorders.find(neighborId);
+    auto it = m->neighbourBorders.find(neighborId);
     if (it == m->neighbourBorders.end())
     {
       assert(false);
@@ -121,44 +112,6 @@ namespace onep
   std::string CountryNode::getCountryName() const
   {
     return m->name;
-  }
-
-  void CountryNode::setColorMode(ColorMode mode)
-  {
-    switch (mode)
-    {
-    case MODE_SELECTED:
-      m->uniformAlpha->set(0.5f);
-      m->uniformColor->set(osg::Vec3f(0.5f, 0.69f, 1.0f));
-      break;
-    case MODE_NEIGHBOR:
-      m->uniformAlpha->set(0.4f);
-      m->uniformColor->set(osg::Vec3f(0.5f, 0.5f, 0.5f));
-      break;
-    case MODE_HIGHLIGHT_BANKS:
-      m->uniformAlpha->set(0.3f);
-      m->uniformColor->set(osg::Vec3f(0.0f, 0.0f, 0.8f));
-      break;
-    case MODE_HIGHLIGHT_CONTROL:
-      m->uniformAlpha->set(0.3f);
-      m->uniformColor->set(osg::Vec3f(0.635f, 0.439f, 0.031f)); // #A27008
-      break;
-    case MODE_HIGHLIGHT_CONCERNS:
-      m->uniformAlpha->set(0.3f);
-      m->uniformColor->set(osg::Vec3f(0.118f, 0.753f, 0.208f)); // #1EC035
-      break;
-    case MODE_HIGHLIGHT_MEDIA:
-      m->uniformAlpha->set(0.3f);
-      m->uniformColor->set(osg::Vec3f(0.902f, 1.0f, 0.357f)); // #E6FF5B
-      break;
-    case MODE_HIGHLIGHT_POLITICS:
-      m->uniformAlpha->set(0.3f);
-      m->uniformColor->set(osg::Vec3f(0.69f, 0.247f, 0.624f));
-      break;
-    default:
-      assert(false);
-      break;
-    }
   }
 
   osg::Vec2f CountryNode::getCenterLatLong() const

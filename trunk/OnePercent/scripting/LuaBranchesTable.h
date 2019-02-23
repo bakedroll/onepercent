@@ -14,10 +14,8 @@ namespace onep
     explicit LuaBranchesTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaBranchesTable();
 
-    LuaSkillBranch::Ptr getBranchByIndex(int index) const;
+    const LuaSkillBranch::Map& getBranches() const;
     LuaSkillBranch::Ptr getBranchByName(const std::string& name) const;
-    int getNumBranches() const;
-
     void addBranch(const std::string& name, luabridge::LuaRef& ref);
 
     LuaSkill::Ptr findSkill(const std::string& name) const;

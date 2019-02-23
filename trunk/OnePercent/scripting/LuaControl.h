@@ -22,7 +22,7 @@ namespace onep
     void doSkillsUpdate(const std::shared_ptr<LuaModel>& model);
     void doBranchesUpdate(const std::shared_ptr<LuaModel>& model);
 
-    LuaSkill* luaGetSkill(const std::string& name);
+    LuaSkill* luaGetSkill(const std::string& name) const;
 
     void luaUpdateBranch(const std::string& name, luabridge::LuaRef countryState);
 
