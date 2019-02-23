@@ -45,43 +45,48 @@ namespace onep
       notifiesActivated.clear();
 
       if (!country)
+      {
         return;
+      }
 
-      int cid = country->getId();
+      auto cid = country->getId();
 
       modelContainer->accessModel([=](const LuaModel::Ptr& model)
       {
         if (model->getSimulationStateTable()->getCountryStates().count(cid) == 0)
-          return;
-
-        LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryStates()[cid];
-        auto branchesTable = model->getBranchesTable();
-
-        int n = branchesTable->getNumBranches();
-        for (int i = 0; i < n; i++)
         {
-          LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
-          std::string name = branch->getName();
+          return;
+        }
 
-          notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name.c_str())->connectAndNotify(osgGaming::Func<bool>([=](bool activated)
+        auto&       cstate   = model->getSimulationStateTable()->getCountryStates()[cid];
+        const auto& branches = model->getBranchesTable()->getBranches();
+        auto        index    = 0;
+
+        for (const auto& branch : branches)
+        {
+          const auto& name = branch.second->getName();
+
+          notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name)->connectAndNotify(
+            osgGaming::Func<bool>([this, index, branch, name](bool activated)
           {
-            Multithreading::uiExecuteOrAsync([=]()
+            Multithreading::uiExecuteOrAsync([this, index, branch, name, activated]()
             {
               if (activated)
               {
-                buttons[i]->setText(QString("%1\n%2").arg(QString::fromStdString(name)).arg(tr("(Unlocked)")));
-                buttons[i]->setEnabled(false);
+                buttons[index]->setText(QString("%1\n%2").arg(QString::fromStdString(name)).arg(tr("(Unlocked)")));
+                buttons[index]->setEnabled(false);
               }
               else
               {
-                int costs = branch->getCost();
+                auto costs = branch.second->getCost();
 
-                buttons[i]->setText(QString("%1\n(%2 SP to unlock)").arg(QString::fromStdString(name)).arg(costs));
-                buttons[i]->setEnabled(oNumSkillPoints->get() >= costs);
+                buttons[index]->setText(QString("%1\n(%2 SP to unlock)").arg(QString::fromStdString(name)).arg(costs));
+                buttons[index]->setEnabled(oNumSkillPoints->get() >= costs);
               }
             });
           })));
 
+          index++;
         }
       });
 
@@ -97,35 +102,38 @@ namespace onep
 
     setFixedSize(size);
 
-    auto branchesTable = m->modelContainer->getModel()->getBranchesTable();
+    const auto& branches    = m->modelContainer->getModel()->getBranchesTable()->getBranches();
+    auto        numBranches = static_cast<int>(branches.size());
+    auto        index       = 0;
 
-    int n = branchesTable->getNumBranches();
-    for (int i = 0; i<n; i++)
+    for (const auto& branch : branches)
     {
-      LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
-      auto& name = branch->getName();
+      const auto& name = branch.second->getName();
 
-      QPushButton* button = new QPushButton(QString::fromStdString(name));
+      auto posX = size.width()  / 2 + static_cast<int>(sin(index * C_2PI / numBranches) * 110.0f) - buttonSize.width()  / 2;
+      auto posY = size.height() / 2 + static_cast<int>(cos(index * C_2PI / numBranches) * 110.0f) - buttonSize.height() / 2;
+
+      auto button = new QPushButton(QString::fromStdString(name));
       button->setParent(this);
       button->setFixedSize(buttonSize);
-      button->setGeometry(
-        size.width() / 2 + sin(float(i) * C_2PI / float(n)) * 110 - buttonSize.width() / 2,
-        size.height() / 2 + cos(float(i) * C_2PI / float(n)) * 110 - buttonSize.height() / 2,
-        buttonSize.width(),
-        buttonSize.height());
+      button->setGeometry(posX, posY, buttonSize.width(), buttonSize.height());
 
       m->buttons.push_back(button);
 
       QConnectFunctor::connect(button, SIGNAL(clicked()), [=]()
       {
         if (!m->country)
+        {
           return;
+        }
 
-        int costs = branch->getCost();
+        auto costs = branch.second->getCost();
         if (!m->simulation->paySkillPoints(costs))
+        {
           return;
+        }
 
-        int cid = m->country->getId();
+        auto cid = m->country->getId();
 
         m->lua->safeExecute([this, &cid, &name]()
         {
@@ -133,14 +141,18 @@ namespace onep
           {
             m->modelContainer->accessModel([&cid, &name](const LuaModel::Ptr& model)
             {
-              model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name.c_str(), true);
+              model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name, true);
             });
           });
         });
 
         if (!m->simulation->running())
+        {
           m->simulation->start();
+        }
       });
+
+      index++;
     }
 
     m->notifySkillPoints = m->oNumSkillPoints->connect(osgGaming::Func<int>([this](int skillPoints)
@@ -149,17 +161,15 @@ namespace onep
     }));
 	}
 
-	CountryMenuWidget::~CountryMenuWidget()
-	{
-	}
+	CountryMenuWidget::~CountryMenuWidget() = default;
 
   void CountryMenuWidget::setCenterPosition(int x, int y)
 	{
-    QRect geo = geometry();
+    const auto& geo = geometry();
     setGeometry(x - geo.width() / 2, y - geo.height() / 2, geo.width(), geo.height());
 	}
 
-  void CountryMenuWidget::setCountry(LuaCountry::Ptr country)
+  void CountryMenuWidget::setCountry(const LuaCountry::Ptr& country)
   {
     m->country = country;
     m->updateUi();

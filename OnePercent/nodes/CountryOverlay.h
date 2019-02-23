@@ -10,7 +10,7 @@
 
 namespace onep
 {
-  class CountryOverlay : public osg::Group
+  class CountryOverlay : public LuaVisualOsgNode<osg::Group>
   {
   public:
     class Definition : public LuaClassDefinition
@@ -19,46 +19,45 @@ namespace onep
       void registerClass(lua_State* state) override;
     };
 
-    typedef osg::ref_ptr<CountryOverlay> Ptr;
+    using OSelectedCountryId        = osgGaming::Observable<int>;
+    using OCurrentOverlayBranchName = osgGaming::Observable<std::string>;
 
-    typedef std::vector<int> NeighborList;
-    typedef std::map<int, NeighborList> NeighbourMap;
+    using Ptr = osg::ref_ptr<CountryOverlay>;
+
+    using NeighborList = std::vector<int>;
+    using NeighbourMap = std::map<int, NeighborList>;
 
     CountryOverlay(osgGaming::Injector& injector);
     ~CountryOverlay();
 
     void loadCountries(
-      std::string countriesFilename,
-      std::string distanceMapFilename,
-      osg::ref_ptr<osg::Vec3Array> vertices,
-      osg::ref_ptr<osg::Vec2Array> texcoords);
-
-    void clearHighlightedCountries();
-    void setHighlightedSkillBranch(int id);
+      const std::string& countriesFilename,
+      const std::string& distanceMapFilename,
+      const osg::ref_ptr<osg::Vec3Array>& vertices,
+      const osg::ref_ptr<osg::Vec2Array>& texcoords);
 
     void setHoveredCountryId(int id);
-    void setAllCountriesVisibility(bool visibility);
 
-    CountryNode::Map& getCountryNodes();
-    CountriesMap::Ptr getCountriesMap();
-    NeighbourMap& getNeighbourships();
+    const CountryNode::Map& getCountryNodes() const;
+    CountriesMap::Ptr       getCountriesMap() const;
+    const NeighbourMap&     getNeighbourships() const;
 
-    CountryNode::Ptr getSelectedCountryNode();
+    CountryNode::Ptr getSelectedCountryNode() const;
     CountryNode::Ptr getCountryNode(int id) const;
-    CountryNode::Ptr getCountryNode(osg::Vec2f coord);
-    int getCountryId(osg::Vec2f coord);
+    CountryNode::Ptr getCountryNode(const osg::Vec2f& coord) const;
+    int              getCountryId(const osg::Vec2f& coord) const;
 
-    void setSelectedCountry(int countryId);
-    int getSelectedCountryId();
-    osgGaming::Observable<int>::Ptr getOSelectedCountryId();
+    void                    setSelectedCountry(int countryId);
+    int                     getSelectedCountryId() const;
+    OSelectedCountryId::Ptr getOSelectedCountryId() const;
 
-    int getCurrentOverlayBranchId() const;
-    void setCurrentOverlayBranchId(int branchId);
-    osgGaming::Observable<int>::Ptr getOCurrentOverlayBranchId() const;
+    std::string                    getCurrentOverlayBranchName() const;
+    void                           setCurrentOverlayBranchName(const std::string& branchName);
+    OCurrentOverlayBranchName::Ptr getOCurrentOverlayBranchName() const;
 
     CountryNode* luaGetCountryNode(int id) const;
 
-  private:
+private:
     struct Impl;
     std::unique_ptr<Impl> m;
 

@@ -5,7 +5,6 @@
 #include "simulation/ModelContainer.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaConfig.h"
-#include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaCountry.h"
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaCountriesTable.h"
@@ -19,13 +18,14 @@
 
 #include <osg/Switch>
 #include <osg/Texture2D>
+#include <osg/BlendFunc>
 
 namespace onep
 {
   void CountryOverlay::Definition::registerClass(lua_State* state)
   {
     luabridge::getGlobalNamespace(state)
-      .beginClass<CountryOverlay>("CountryOverlay")
+      .deriveClass<CountryOverlay, LuaVisualOsgNode<osg::Group>>("CountryOverlay")
       .addFunction("get_country_node", &CountryOverlay::luaGetCountryNode)
       .endClass();
   }
@@ -43,95 +43,60 @@ namespace onep
       , countrySwitch(new osg::Switch())
       , countryHoverSwitch(new osg::Switch())
       , oSelectedCountryId(new osgGaming::Observable<int>(0))
-      , oCurrentOverlayBranchId(new osgGaming::Observable<int>(-1))
+      , oCurrentOverlayBranchId(new osgGaming::Observable<std::string>({}))
     {
     }
 
     void addCountry(
       int id,
-      osg::Vec2f centerLatLong,
-      osg::Vec2f size,
-      osg::ref_ptr<osg::DrawElementsUInt> triangles,
+      const osg::Vec2f& centerLatLong,
+      const osg::Vec2f& size,
+      const osg::ref_ptr<osg::DrawElementsUInt>& triangles,
       CountryNode::BorderIdMap& neighborBorders,
-      osg::ref_ptr<osg::Vec3Array> vertices,
-      osg::ref_ptr<osg::Vec2Array> texcoords1,
-      osg::ref_ptr<osg::Vec3Array> texcoords2)
+      const osg::ref_ptr<osg::Vec3Array>& vertices,
+      const osg::ref_ptr<osg::Vec2Array>& texcoords1,
+      const osg::ref_ptr<osg::Vec3Array>& texcoords2)
     {
       if (countryNodes.find(id) != countryNodes.end())
+      {
         return;
+      }
 
       auto country = modelContainer->getModel()->getCountriesTable()->getCountryById(id);
       assert_return(country);
 
-      CountryNode::Ptr node = new CountryNode(
-        configManager, lua, country->getName(), centerLatLong, size, vertices, texcoords1, texcoords2, triangles, neighborBorders);
+      CountryNode::Ptr node(new CountryNode(configManager, lua, country->getName(), centerLatLong, size, vertices,
+                                            texcoords1, texcoords2, triangles, neighborBorders));
 
-      CountryHoverNode::Ptr hoverNode = new CountryHoverNode(vertices, texcoords1, triangles);
+      CountryHoverNode::Ptr hoverNode(new CountryHoverNode(vertices, texcoords1, triangles));
 
       countryNodes.insert(CountryNode::Map::value_type(id, node));
-      countrySwitch->addChild(node, false);
+      countrySwitch->addChild(node, true);
 
       countryHoverNodes.insert(CountryHoverNode::Map::value_type(id, hoverNode));
       countryHoverSwitch->addChild(hoverNode, false);
-
-      modelContainer->accessModel([=](const LuaModel::Ptr& model)
-      {
-        LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryState(id);
-
-        int n = model->getBranchesTable()->getNumBranches();
-        for (int i = 0; i < n; i++)
-        {
-          std::string branchName = model->getBranchesTable()->getBranchByIndex(i)->getName();
-
-          skillBranchActivatedObservers.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(branchName.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
-          {
-            Multithreading::uiExecuteOrAsync([=]()
-            {
-              if (!activated)
-                return;
-
-              if (oSelectedCountryId->get() == 0 && base->getCurrentOverlayBranchId() == i)
-                setCountryColorMode(node, CountryNode::ColorMode(CountryNode::MODE_HIGHLIGHT_BANKS + i));
-            });
-          })));
-        }
-      });
-
-
-    }
-
-    void setCountryColorMode(CountryNode::Ptr mesh, CountryNode::ColorMode mode)
-    {
-      mesh->setColorMode(mode);
-      countrySwitch->setChildValue(mesh, true);
-
-      if (highlightedCountries.count(mesh) == 0)
-        highlightedCountries.insert(mesh);
     }
 
     CountryOverlay* base;
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
-    osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
-    osg::ref_ptr<osgGaming::ShaderFactory> shaderFactory;
-    osg::ref_ptr<LuaConfig> configManager;
-    osg::ref_ptr<LuaStateManager> lua;
+    osg::ref_ptr<osgGaming::TextureFactory>  textureFactory;
+    osg::ref_ptr<osgGaming::ShaderFactory>   shaderFactory;
+    osg::ref_ptr<LuaConfig>                  configManager;
+    osg::ref_ptr<LuaStateManager>            lua;
 
     ModelContainer::Ptr modelContainer;
 
     osg::ref_ptr<osg::Switch> countrySwitch;
     osg::ref_ptr<osg::Switch> countryHoverSwitch;
 
-    CountryNode::Map countryNodes;
+    CountryNode::Map      countryNodes;
     CountryHoverNode::Map countryHoverNodes;
-    CountriesMap::Ptr countriesMap;
+    CountriesMap::Ptr     countriesMap;
 
-    osgGaming::Observable<int>::Ptr oSelectedCountryId;
-    osgGaming::Observable<int>::Ptr oCurrentOverlayBranchId;
+    OSelectedCountryId::Ptr        oSelectedCountryId;
+    OCurrentOverlayBranchName::Ptr oCurrentOverlayBranchId;
 
-    std::vector<osgGaming::Observer<bool>::Ptr> skillBranchActivatedObservers;
-
-    std::set<CountryNode::Ptr> highlightedCountries;
     CountryHoverNode::Ptr hoveredCountryNode;
 
     NeighbourMap neighbourMap;
@@ -141,39 +106,40 @@ namespace onep
   };
 
   CountryOverlay::CountryOverlay(osgGaming::Injector& injector)
-    : osg::Group()
+    : LuaVisualOsgNode<osg::Group>()
     , m(new Impl(injector, this))
   {
     addChild(m->countrySwitch);
     addChild(m->countryHoverSwitch);
+
+    addStateSetUniform(new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 1.0f, 0.4f)), m->countrySwitch);
+    addStateSetUniform(new osg::Uniform("takeoverScale", 100.0f), m->countrySwitch);
   }
 
-  CountryOverlay::~CountryOverlay()
-  {
-  }
+  CountryOverlay::~CountryOverlay() = default;
 
   void CountryOverlay::loadCountries(
-    std::string countriesFilename,
-    std::string distanceMapFilename,
-    osg::ref_ptr<osg::Vec3Array> vertices,
-    osg::ref_ptr<osg::Vec2Array> texcoords)
+    const std::string& countriesFilename,
+    const std::string& distanceMapFilename,
+    const osg::ref_ptr<osg::Vec3Array>& vertices,
+    const osg::ref_ptr<osg::Vec2Array>& texcoords)
   {
     // Load shaders
-    osg::ref_ptr<osg::Program> cnProgram = new osg::Program();
-    osg::ref_ptr<osg::Program> chnProgram = new osg::Program();
+    osg::ref_ptr<osg::Program> cnProgram(new osg::Program());
+    osg::ref_ptr<osg::Program> chnProgram(new osg::Program());
 
-    osg::ref_ptr<osg::Shader> frag_shader = m->shaderFactory->make()
+    auto frag_shader = m->shaderFactory->make()
       ->type(osg::Shader::FRAGMENT)
       ->module(m->resourceManager->loadText(QString("./GameData/shaders/modules/%1.glsl").arg("noise3D").toStdString()))
       ->module(m->resourceManager->loadText("./GameData/shaders/country.frag"))
       ->build();
 
-    osg::ref_ptr<osg::Shader> frag_shader_hover = m->shaderFactory->make()
+    auto frag_shader_hover = m->shaderFactory->make()
       ->type(osg::Shader::FRAGMENT)
       ->module(m->resourceManager->loadText("./GameData/shaders/countryHover.frag"))
       ->build();
 
-    osg::ref_ptr<osg::Shader> vert_shader = m->resourceManager->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
+    auto vert_shader = m->resourceManager->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
 
     cnProgram->addShader(frag_shader);
     cnProgram->addShader(vert_shader);
@@ -182,12 +148,12 @@ namespace onep
     chnProgram->addShader(vert_shader);
 
     // Load distance texture
-    osg::ref_ptr<osg::Texture2D> distanceTexture = m->textureFactory->make()
+    auto distanceTexture = m->textureFactory->make()
       ->image(m->resourceManager->loadImage(distanceMapFilename))
       ->build();
 
     // Create statesets
-    osg::ref_ptr<osg::StateSet> stateSet = getOrCreateStateSet();
+    auto stateSet = getOrCreateStateSet();
 
     stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
@@ -197,70 +163,75 @@ namespace onep
     stateSet->addUniform(new osg::Uniform("distancemap", 0));
     stateSet->setTextureAttributeAndModes(0, distanceTexture, osg::StateAttribute::ON);
 
-    osg::ref_ptr<osg::StateSet> csStateSet = m->countrySwitch->getOrCreateStateSet();
+    auto csStateSet = m->countrySwitch->getOrCreateStateSet();
     csStateSet->setAttributeAndModes(cnProgram, osg::StateAttribute::ON);
+    csStateSet->setAttributeAndModes(new osg::BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), osg::StateAttribute::ON);
     csStateSet->setRenderBinDetails(0, "RenderBin");
 
-    osg::ref_ptr<osg::StateSet> chsStateSet = m->countryHoverSwitch->getOrCreateStateSet();
+    auto chsStateSet = m->countryHoverSwitch->getOrCreateStateSet();
     chsStateSet->setAttributeAndModes(chnProgram, osg::StateAttribute::ON);
     chsStateSet->setRenderBinDetails(1, "RenderBin");
 
     m->neighbourMap.clear();
 
     // Calculate 2nd texcoord layer
-    float radius = m->configManager->getNumber<float>("earth.radius");
-    osg::ref_ptr<osg::Vec3Array> texcoords2 = new osg::Vec3Array();
-    for (osg::Vec3Array::iterator it = vertices->begin(); it != vertices->end(); ++it)
-      texcoords2->push_back((*it / radius + osg::Vec3f(1.0f, 1.0f, 1.0f)) / 2.0f);
+    auto radius = m->configManager->getNumber<float>("earth.radius");
+    osg::ref_ptr<osg::Vec3Array> texcoords2(new osg::Vec3Array());
+    for (const auto& vertex : *vertices)
+    {
+      texcoords2->push_back((vertex / radius + osg::Vec3f(1.0f, 1.0f, 1.0f)) / 2.0f);
+    }
 
-    char* bytes = m->resourceManager->loadBinary(countriesFilename);
+    auto bytes = m->resourceManager->loadBinary(countriesFilename);
 
     osgGaming::ByteStream stream(bytes);
 
-    int ncountries = stream.read<int>();
-    for (int i = 0; i < ncountries; i++)
+    auto ncountries = stream.read<int>();
+    for (auto i = 0; i < ncountries; i++)
     {
-      int id = stream.read<int>();
-      float centerX = stream.read<float>();
-      float centerY = stream.read<float>();
-      float width = stream.read<float>();
-      float height = stream.read<float>();
+      auto id = stream.read<int>();
+      auto centerX = stream.read<float>();
+      auto centerY = stream.read<float>();
+      auto width = stream.read<float>();
+      auto height = stream.read<float>();
 
       osg::Vec2f centerLatLong((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI);
       osg::Vec2f size(width, height);
 
       NeighborList neighborList;
 
-      int neighbors_count = stream.read<int>();
-      for (int j = 0; j < neighbors_count; j++)
+      auto neighbors_count = stream.read<int>();
+      for (auto j = 0; j < neighbors_count; j++)
       {
-        int neighbourId = stream.read<int>();
+        auto neighbourId = stream.read<int>();
         neighborList.push_back(neighbourId);
       }
 
       m->neighbourMap.insert(NeighbourMap::value_type(id, neighborList));
 
       CountryNode::BorderIdMap neighborBorderMap;
-      int neighborBorderCount = stream.read<int>();
-      for (int j = 0; j < neighborBorderCount; j++)
+      auto neighborBorderCount = stream.read<int>();
+      for (auto j = 0; j < neighborBorderCount; j++)
       {
         std::vector<int> borders;
 
-        int nid = stream.read<int>();
-        int bcount = stream.read<int>();
-        for (int k = 0; k < bcount; k++)
+        auto nid = stream.read<int>();
+        auto bcount = stream.read<int>();
+        for (auto k = 0; k < bcount; k++)
+        {
           borders.push_back(stream.read<int>());
+        }
 
         neighborBorderMap[nid] = borders;
       }
 
-      osg::ref_ptr<osg::DrawElementsUInt> triangles = new osg::DrawElementsUInt(GL_TRIANGLES, 0);
-      int triangles_count = stream.read<int>();
-      for (int j = 0; j < triangles_count; j++)
+      osg::ref_ptr<osg::DrawElementsUInt> triangles(new osg::DrawElementsUInt(GL_TRIANGLES, 0));
+      auto triangles_count = stream.read<int>();
+      for (auto j = 0; j < triangles_count; j++)
       {
-        int v0 = stream.read<int>();
-        int v1 = stream.read<int>();
-        int v2 = stream.read<int>();
+        auto v0 = stream.read<int>();
+        auto v1 = stream.read<int>();
+        auto v2 = stream.read<int>();
 
         triangles->push_back(v0);
         triangles->push_back(v2);
@@ -270,58 +241,30 @@ namespace onep
       m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords, texcoords2);
     }
 
-    for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
+    for (const auto& countryNode : m->countryNodes)
     {
-      NeighborList neighborList = m->neighbourMap.find(it->first)->second;
+      NeighborList neighbours = m->neighbourMap.find(countryNode.first)->second;
 
-      for (NeighborList::iterator nit = neighborList.begin(); nit != neighborList.end(); ++nit)
+      for (const auto& neighbour : neighbours)
       {
-        it->second->addNeighbor(getCountryNode(*nit));
+        countryNode.second->addNeighbor(getCountryNode(neighbour));
       }
     }
 
-    int mapWidth = stream.read<int>();
-    int mapHeight = stream.read<int>();
+    auto mapWidth  = stream.read<int>();
+    auto mapHeight = stream.read<int>();
 
     m->countriesMap = new CountriesMap(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
   }
 
-  void CountryOverlay::clearHighlightedCountries()
-  {
-    setAllCountriesVisibility(false);
-    setCurrentOverlayBranchId(-1);
-
-    m->highlightedCountries.clear();
-  }
-
-  void CountryOverlay::setHighlightedSkillBranch(int id)
-  {
-    m->oSelectedCountryId->set(0);
-    clearHighlightedCountries();
-
-    setCurrentOverlayBranchId(id);
-
-    m->modelContainer->accessModel([this, id](const LuaModel::Ptr& model)
-    {
-      std::string branchName = model->getBranchesTable()->getBranchByIndex(id)->getName();
-
-      for (CountryNode::Map::iterator it = m->countryNodes.begin(); it != m->countryNodes.end(); ++it)
-      {
-        int cid = it->first;
-        LuaCountryState::Ptr cstate = model->getSimulationStateTable()->getCountryState(cid);
-
-        if (cstate->getBranchesActivatedTable()->getBranchActivated(branchName.c_str()))
-          m->setCountryColorMode(it->second, CountryNode::ColorMode(int(CountryNode::MODE_HIGHLIGHT_BANKS) + id));
-      }
-    });
-  }
-
   void CountryOverlay::setHoveredCountryId(int id)
   {
-    CountryHoverNode::Ptr countryHoverNode = m->countryHoverNodes.count(id) > 0 ? m->countryHoverNodes[id] : nullptr;
+    const auto& countryHoverNode = m->countryHoverNodes.count(id) > 0 ? m->countryHoverNodes[id] : nullptr;
 
     if (countryHoverNode == m->hoveredCountryNode)
+    {
       return;
+    }
 
     if (m->hoveredCountryNode)
     {
@@ -338,60 +281,56 @@ namespace onep
     m->hoveredCountryNode = countryHoverNode;
   }
 
-  void CountryOverlay::setAllCountriesVisibility(bool visibility)
-  {
-    if (visibility)
-      m->countrySwitch->setAllChildrenOn();
-    else
-      m->countrySwitch->setAllChildrenOff();
-  }
-
-  CountryNode::Map& CountryOverlay::getCountryNodes()
+  const CountryNode::Map& CountryOverlay::getCountryNodes() const
   {
     return m->countryNodes;
   }
 
-  CountriesMap::Ptr CountryOverlay::getCountriesMap()
+  CountriesMap::Ptr CountryOverlay::getCountriesMap() const
   {
     return m->countriesMap;
   }
 
-  CountryOverlay::NeighbourMap& CountryOverlay::getNeighbourships()
+  const CountryOverlay::NeighbourMap& CountryOverlay::getNeighbourships() const
   {
     return m->neighbourMap;
   }
 
-  CountryNode::Ptr CountryOverlay::getSelectedCountryNode()
+  CountryNode::Ptr CountryOverlay::getSelectedCountryNode() const
   {
     return m->countryNodes.find(m->oSelectedCountryId->get())->second;
   }
 
   CountryNode::Ptr CountryOverlay::getCountryNode(int id) const
   {
-    CountryNode::Map::iterator countryNode = m->countryNodes.find(id);
+    auto countryNode = m->countryNodes.find(id);
 
     if (countryNode == m->countryNodes.end())
+    {
       return nullptr;
+    }
 
-    return m->countryNodes.find(id)->second;
+    return countryNode->second;
   }
 
-  CountryNode::Ptr CountryOverlay::getCountryNode(osg::Vec2f coord)
+  CountryNode::Ptr CountryOverlay::getCountryNode(const osg::Vec2f& coord) const
   {
-    int id = getCountryId(coord);
+    auto id = getCountryId(coord);
 
     if (id == 0)
+    {
       return nullptr;
+    }
 
     return getCountryNode(id);
   }
 
-  int CountryOverlay::getCountryId(osg::Vec2f coord)
+  int CountryOverlay::getCountryId(const osg::Vec2f& coord) const
   {
-    osg::Vec2i mapSize = m->countriesMap->getSize();
+    auto mapSize = m->countriesMap->getSize();
 
-    int ix = int(coord.x() * float(mapSize.x()));
-    int iy = int(coord.y() * float(mapSize.y()));
+    auto ix = static_cast<int>(coord.x() * mapSize.x());
+    auto iy = static_cast<int>(coord.y() * mapSize.y());
 
     return m->countriesMap->getDataAt(ix, iy);
   }
@@ -403,47 +342,35 @@ namespace onep
       QMutexLocker lock(&m->selectedCountryMutex);
       m->oSelectedCountryId->set(countryId);
     });
-
-    clearHighlightedCountries();
-
-    if (countryId == 0)
-      return;
-
-    CountryNode::Ptr node = m->countryNodes.find(countryId)->second;
-    m->setCountryColorMode(node, CountryNode::MODE_SELECTED);
-
-    CountryNode::List& neighbors = node->getNeighborCountryNodes();
-    for (CountryNode::List::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
-      m->setCountryColorMode(*it, CountryNode::MODE_NEIGHBOR);
   }
 
-  int CountryOverlay::getSelectedCountryId()
+  int CountryOverlay::getSelectedCountryId() const
   {
     QMutexLocker lock(&m->selectedCountryMutex);
     return m->oSelectedCountryId->get();
   }
 
-  osgGaming::Observable<int>::Ptr CountryOverlay::getOSelectedCountryId()
+  CountryOverlay::OSelectedCountryId::Ptr CountryOverlay::getOSelectedCountryId() const
   {
     return m->oSelectedCountryId;
   }
 
-  int CountryOverlay::getCurrentOverlayBranchId() const
+  std::string CountryOverlay::getCurrentOverlayBranchName() const
   {
     QMutexLocker lock(&m->currentBranchIdMutex);
     return m->oCurrentOverlayBranchId->get();
   }
 
-  void CountryOverlay::setCurrentOverlayBranchId(int branchId)
+  void CountryOverlay::setCurrentOverlayBranchName(const std::string& branchName)
   {
-    Multithreading::uiExecuteOrAsync([this, branchId]()
+    Multithreading::uiExecuteOrAsync([this, branchName]()
     {
       QMutexLocker lock(&m->currentBranchIdMutex);
-      m->oCurrentOverlayBranchId->set(branchId);
+      m->oCurrentOverlayBranchId->set(branchName);
     });
   }
 
-  osgGaming::Observable<int>::Ptr CountryOverlay::getOCurrentOverlayBranchId() const
+  CountryOverlay::OCurrentOverlayBranchName::Ptr CountryOverlay::getOCurrentOverlayBranchName() const
   {
     return m->oCurrentOverlayBranchId;
   }

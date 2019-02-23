@@ -14,19 +14,15 @@
 
 namespace onep
 {
-  SimulationStateReaderWriter::SimulationStateReaderWriter()
-  {
-  }
+  SimulationStateReaderWriter::SimulationStateReaderWriter() = default;
 
-  SimulationStateReaderWriter::~SimulationStateReaderWriter()
-  {
-  }
+  SimulationStateReaderWriter::~SimulationStateReaderWriter() = default;
 
   bool SimulationStateReaderWriter::saveState(
     const std::string& filename,
-    osg::ref_ptr<ModelContainer> modelContainer,
-    osgGaming::Observable<int>::Ptr oDay,
-    osgGaming::Observable<int>::Ptr oNumSkillPoints)
+    const osg::ref_ptr<ModelContainer>& modelContainer,
+    const osgGaming::Observable<int>::Ptr& oDay,
+    const osgGaming::Observable<int>::Ptr& oNumSkillPoints)
   {
     QFile file(QString::fromStdString(filename));
     if (!file.open(QIODevice::WriteOnly))
@@ -39,77 +35,75 @@ namespace onep
 
     modelContainer->accessModel([&](const LuaModel::Ptr& model)
     {
-      LuaCountryState::Map& cstates = model->getSimulationStateTable()->getCountryStates();
+      const auto& cstates     = model->getSimulationStateTable()->getCountryStates();
+      const auto& branches    = model->getBranchesTable()->getBranches();
+      const auto  numBranches = static_cast<int>(branches.size());
 
-      auto branchesTable = model->getBranchesTable();
-      int numBranches = branchesTable->getNumBranches();
-
-      stream << int(cstates.size());
-      for (LuaCountryState::Map::iterator it = cstates.begin(); it != cstates.end(); ++it)
+      stream << static_cast<int>(cstates.size());
+      for (const auto& cstate : cstates)
       {
-        stream << it->first;
+        stream << cstate.first;
 
-        auto values = it->second->getValuesMap();
-        auto branchValues = it->second->getBranchValuesMap();
+        auto values       = cstate.second->getValuesMap();
+        auto branchValues = cstate.second->getBranchValuesMap();
 
-        stream << int(values.size());
-        for (auto vit = values.begin(); vit != values.end(); ++vit)
+        stream << static_cast<int>(values.size());
+        for (const auto& value : values)
         {
-          stream << int(vit->first.length());
-          stream.writeRawData(vit->first.c_str(), vit->first.length());
+          stream << static_cast<int>(value.first.length());
+          stream.writeRawData(value.first.c_str(), static_cast<int>(value.first.length()));
 
-          stream << float(vit->second);
+          stream << static_cast<float>(value.second);
         }
 
-        stream << int(branchValues.size());
-        for (auto bit = branchValues.begin(); bit != branchValues.end(); ++bit)
+        stream << static_cast<int>(branchValues.size());
+        for (const auto& branchValue : branchValues)
         {
-          stream << int(bit->first.length());
-          stream.writeRawData(bit->first.c_str(), bit->first.length());
+          stream << static_cast<int>(branchValue.first.length());
+          stream.writeRawData(branchValue.first.c_str(), static_cast<int>(branchValue.first.length()));
 
-          stream << int(bit->second.size());
-          for (auto vit = bit->second.begin(); vit != bit->second.end(); ++vit)
+          stream << static_cast<int>(branchValue.second.size());
+          for (const auto& vit : branchValue.second)
           {
-            stream << int(vit->first.length());
-            stream.writeRawData(vit->first.c_str(), vit->first.length());
+            stream << static_cast<int>(vit.first.length());
+            stream.writeRawData(vit.first.c_str(), static_cast<int>(vit.first.length()));
 
-            stream << float(vit->second);
+            stream << float(vit.second);
           }
         }
 
         stream << numBranches;
-        for (int i = 0; i < numBranches; i++)
+        for (const auto& branch : branches)
         {
-          std::string branchName = branchesTable->getBranchByIndex(i)->getName();
+          const auto& branchName = branch.second->getName();
 
-          stream << int(branchName.length());
-          stream.writeRawData(branchName.c_str(), branchName.length());
+          stream << static_cast<int>(branchName.length());
+          stream.writeRawData(branchName.c_str(), static_cast<int>(branchName.length()));
 
-          bool activated = it->second->getBranchesActivatedTable()->getBranchActivated(branchName.c_str());
+          const auto activated = cstate.second->getBranchesActivatedTable()->getBranchActivated(branchName);
 
           stream << activated;
         }
       }
 
       stream << numBranches;
-      for (int i = 0; i < numBranches; i++)
+      for (const auto& branch : branches)
       {
-        LuaSkillBranch::Ptr branch = branchesTable->getBranchByIndex(i);
-        std::string branchName = branch->getName();
+        const auto& branchName = branch.second->getName();
 
-        stream << int(branchName.length());
-        stream.writeRawData(branchName.c_str(), branchName.length());
+        stream << static_cast<int>(branchName.length());
+        stream.writeRawData(branchName.c_str(), static_cast<int>(branchName.length()));
 
-        int numSkills = branch->getSkillsTable()->getNumSkills();
+        auto numSkills = branch.second->getSkillsTable()->getNumSkills();
         stream << numSkills;
 
-        for (int j = 0; j < numSkills; j++)
+        for (auto j = 0; j < numSkills; j++)
         {
-          LuaSkill::Ptr skill = branch->getSkillsTable()->getSkillByIndex(j);
-          std::string skillName = skill->getName();
+          auto        skill     = branch.second->getSkillsTable()->getSkillByIndex(j);
+          const auto& skillName = skill->getName();
 
-          stream << int(skillName.length());
-          stream.writeRawData(skillName.c_str(), skillName.length());
+          stream << static_cast<int>(skillName.length());
+          stream.writeRawData(skillName.c_str(), static_cast<int>(skillName.length()));
 
           stream << skill->getIsActivated();
         }
@@ -125,9 +119,9 @@ namespace onep
 
   bool SimulationStateReaderWriter::loadState(
     const std::string& filename,
-    osg::ref_ptr<ModelContainer> modelContainer,
-    osgGaming::Observable<int>::Ptr oDay,
-    osgGaming::Observable<int>::Ptr oNumSkillPoints,
+    const osg::ref_ptr<ModelContainer>& modelContainer,
+    const osgGaming::Observable<int>::Ptr& oDay,
+    const osgGaming::Observable<int>::Ptr& oNumSkillPoints,
     UpdateThread* thread)
   {
     QFile file(QString::fromStdString(filename));
@@ -143,16 +137,17 @@ namespace onep
     {
       modelContainer->accessModel([&](const LuaModel::Ptr& model)
       {
-        LuaCountryState::Map& cstates = model->getSimulationStateTable()->getCountryStates();
-        int numCountries, cid, numValues, numBranches, numSkills, len;
-        char buffer[256];
+        auto& cstates = model->getSimulationStateTable()->getCountryStates();
+
+        int   numCountries, cid, numValues, numBranches, numSkills, len;
+        char  buffer[256];
         float value;
-        bool activated;
+        bool  activated;
 
         auto branchesTable = model->getBranchesTable();
 
         stream >> numCountries;
-        for (int i = 0; i < numCountries; i++)
+        for (auto i = 0; i < numCountries; i++)
         {
           stream >> cid;
 
@@ -162,15 +157,16 @@ namespace onep
             return;
           }
 
-          LuaCountryState::Ptr cstate = cstates[cid];
-
-          auto values = cstate->getValuesMap();
-          auto branchValues = cstate->getBranchValuesMap();
+          auto& cstate       = cstates[cid];
+          auto  values       = cstate->getValuesMap();
+          auto  branchValues = cstate->getBranchValuesMap();
 
           stream >> numValues;
-          for (int j = 0; j < numValues; j++)
+          for (auto j = 0; j < numValues; j++)
           {
-            stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+            stream >> len;
+            stream.readRawData(buffer, len);
+            buffer[len] = '\0';
             std::string valueName(buffer);
 
             stream >> value;
@@ -185,15 +181,19 @@ namespace onep
           }
 
           stream >> numBranches;
-          for (int j = 0; j < numBranches; j++)
+          for (auto j = 0; j < numBranches; j++)
           {
-            stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+            stream >> len;
+            stream.readRawData(buffer, len);
+            buffer[len] = '\0';
             std::string branchName(buffer);
 
             stream >> numValues;
-            for (int k = 0; k < numValues; k++)
+            for (auto k = 0; k < numValues; k++)
             {
-              stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+              stream >> len;
+              stream.readRawData(buffer, len);
+              buffer[len] = '\0';
               std::string valueName(buffer);
 
               stream >> value;
@@ -215,9 +215,11 @@ namespace onep
           }
 
           stream >> numBranches;
-          for (int j = 0; j < numBranches; j++)
+          for (auto j = 0; j < numBranches; j++)
           {
-            stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+            stream >> len;
+            stream.readRawData(buffer, len);
+            buffer[len] = '\0';
             std::string branchName(buffer);
 
             stream >> activated;
@@ -229,22 +231,28 @@ namespace onep
             }
 
             if (activated != cstate->getBranchesActivatedTable()->getBranchActivated(branchName))
+            {
               cstate->getBranchesActivatedTable()->setBranchActivated(branchName, activated);
+            }
           }
         }
 
         stream >> numBranches;
-        for (int i = 0; i < numBranches; i++)
+        for (auto i = 0; i < numBranches; i++)
         {
-          stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+          stream >> len;
+          stream.readRawData(buffer, len);
+          buffer[len] = '\0';
           std::string branchName(buffer);
 
-          LuaSkillBranch::Ptr branch = branchesTable->getBranchByName(branchName);
+          auto branch = branchesTable->getBranchByName(branchName);
 
           stream >> numSkills;
-          for (int j = 0; j < numSkills; j++)
+          for (auto j = 0; j < numSkills; j++)
           {
-            stream >> len; stream.readRawData(buffer, len); buffer[len] = '\0';
+            stream >> len;
+            stream.readRawData(buffer, len);
+            buffer[len] = '\0';
             std::string skillName(buffer);
 
             stream >> activated;
@@ -255,9 +263,11 @@ namespace onep
               continue;
             }
 
-            LuaSkill::Ptr skill = branch->getSkillsTable()->getSkillByName(skillName);
+            auto skill = branch->getSkillsTable()->getSkillByName(skillName);
             if (activated != skill->getIsActivated())
+            {
               skill->setIsActivated(activated);
+            }
           }
         }
       });

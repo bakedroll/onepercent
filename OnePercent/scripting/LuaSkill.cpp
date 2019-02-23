@@ -69,17 +69,17 @@ namespace onep
     triggerLuaCallback(LuaDefines::Callback::ON_SKILL_UPDATE, branchName, countryState);
   }
 
-  std::string LuaSkill::getName() const
+  const std::string& LuaSkill::getName() const
   {
     return m->name;
   }
 
-  std::string LuaSkill::getBranchName() const
+  const std::string& LuaSkill::getBranchName() const
   {
     return m->branch;
   }
 
-  std::string LuaSkill::getDisplayName() const
+  const std::string& LuaSkill::getDisplayName() const
   {
     return m->displayName;
   }

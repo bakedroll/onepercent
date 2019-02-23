@@ -199,14 +199,15 @@ namespace onep
     m->paramCameraScrollSpeed = m->configManager->getNumber<float>("camera.scroll_speed");
     m->paramCameraRotationSpeed = m->configManager->getNumber<float>("camera.rotation_speed");
 
-    CountryNode::Map& meshs = m->countryOverlay->getCountryNodes();
-    float projAngle = getWorld(getView(0))->getCameraManipulator()->getProjectionAngle();
-    float projRatio = getWorld(getView(0))->getCameraManipulator()->getProjectionRatio();
-    float minDistance = std::numeric_limits<float>::max();
-    float maxDistance = std::numeric_limits<float>::min();
-    for (CountryNode::Map::iterator it = meshs.begin(); it != meshs.end(); ++it)
+    const auto& nodes       = m->countryOverlay->getCountryNodes();
+    auto        projAngle   = static_cast<float>(getWorld(getView(0))->getCameraManipulator()->getProjectionAngle());
+    auto        projRatio   = static_cast<float>(getWorld(getView(0))->getCameraManipulator()->getProjectionRatio());
+    auto        minDistance = std::numeric_limits<float>::max();
+    auto        maxDistance = std::numeric_limits<float>::min();
+
+    for (const auto& node : nodes)
     {
-      float dist = it->second->getOptimalCameraDistance(projAngle, projRatio);
+      auto dist = node.second->getOptimalCameraDistance(projAngle, projRatio);
       minDistance = std::min<float>(dist, minDistance);
       maxDistance = std::max<float>(dist, maxDistance);
     }
@@ -215,11 +216,11 @@ namespace onep
     {
       if (id > 0)
       {
-        double time = getSimulationTime();
-        float r = m->paramEarthRadius;
+        auto time = getSimulationTime();
+        auto r = m->paramEarthRadius;
         
-        CountryNode::Ptr countryNode = m->countryOverlay->getCountryNode(id);
-        LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(id);
+        auto countryNode = m->countryOverlay->getCountryNode(id);
+        auto country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(id);
         
         OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
 

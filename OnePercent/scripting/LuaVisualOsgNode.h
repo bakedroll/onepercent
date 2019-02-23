@@ -44,9 +44,10 @@ namespace onep
       : NodeType()
     {}
 
-    void addStateSetUniform(const OsgUniformPtr& uniform)
+    void addStateSetUniform(const OsgUniformPtr& uniform, const osg::ref_ptr<osg::Node>& alternateNode = nullptr)
     {
-      this->getOrCreateStateSet()->addUniform(uniform);
+      auto stateSet = alternateNode ? alternateNode->getOrCreateStateSet() : this->getOrCreateStateSet();
+      stateSet->addUniform(uniform);
       m_uniforms[uniform->getName()] = uniform;
     }
 

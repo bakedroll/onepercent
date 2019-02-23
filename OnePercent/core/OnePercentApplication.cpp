@@ -39,6 +39,7 @@ namespace onep
     lua->registerClass<LuaExternalClassDefinitions>();
 
     lua->registerClass<LuaCallbackRegistry::Definition>();
+    lua->registerClass<LuaVisualOsgNode<osg::Group>::Definition>();
     lua->registerClass<LuaVisualOsgNode<osg::Geode>::Definition>();
 
     lua->registerClass<LuaSkill::Definition>();
