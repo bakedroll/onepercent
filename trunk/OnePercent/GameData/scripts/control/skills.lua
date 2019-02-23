@@ -65,7 +65,7 @@ control:on_event(defines.callback.on_branch_update, function(branch_name, countr
   if (country_state.branches_activated[branch_name] == true) then
 
     if branch_name == "politics" then
-      if country_state.values["first_skill_points_politics"] == 0 and country_state.values["political_influence"] >= 5 then
+      if country_state.values["first_skill_points_politics"] == 0 and country_state.values["political_influence"] >= 0.25 then
         simulation:add_skill_points(30)
         country_state.values["first_skill_points_politics"] = 1
       end
@@ -75,7 +75,7 @@ control:on_event(defines.callback.on_branch_update, function(branch_name, countr
 
     local propagated = country_state.branch_values[branch_name]["propagated"]
     for _, neighbour_state in pairs(country_state.neighbour_states) do
-      propagated = propagated + neighbour_state.branch_values[branch_name]["propagation"] * 0.05
+      propagated = propagated + neighbour_state.branch_values[branch_name]["propagation"] * 0.005
     end
 
     country_state.branch_values[branch_name]["propagated"] = propagated
@@ -84,5 +84,12 @@ control:on_event(defines.callback.on_branch_update, function(branch_name, countr
       country_state.branches_activated[branch_name] = true
     end
   end
+
+end)
+
+control:on_event(defines.callback.on_branch_purchased, function(branch_name, country_state)
+
+  country_state.branch_values[branch_name]["propagated"] = 1.0
+  countries:set_current_overlay_branch_name(branch_name)
 
 end)

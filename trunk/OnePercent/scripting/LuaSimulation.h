@@ -34,6 +34,7 @@ namespace onep
     void lua_set_day(int day);
     void lua_set_interval(int interval);
     void lua_set_tick_update_mode(int mode);
+    void lua_set_profiling_logs_enabled(bool enabled);
 
   private:
     osg::ref_ptr<Simulation> m_simulation;

@@ -17,7 +17,8 @@ namespace onep
       ON_SKILL_UPDATE     = 2,
       ON_BRANCH_UPDATE    = 3,
       ON_COUNTRY_CHANGED  = 4,
-      ON_OVERLAY_CHANGED  = 5
+      ON_OVERLAY_CHANGED  = 5,
+      ON_BRANCH_PURCHASED = 6
     };
   }
 }

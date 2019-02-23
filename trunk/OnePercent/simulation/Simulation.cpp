@@ -19,6 +19,8 @@
 
 namespace onep
 {
+  const int TickIntervalMs = 100;
+
   struct Simulation::Impl
   {
     Impl(osgGaming::Injector& injector)
@@ -30,6 +32,7 @@ namespace onep
       , luaControl(injector.inject<LuaControl>())
       , oRunning(new osgGaming::Observable<bool>(false))
       , tickUpdateMode(LuaDefines::TickUpdateMode::CPP)
+      , profilingLogsEnabled(false)
     {}
 
     osg::ref_ptr<LuaStateManager> lua;
@@ -39,7 +42,7 @@ namespace onep
 
     QTimer timer;
 
-    ODay::Ptr oDay;
+    ODay::Ptr            oDay;
     ONumSkillPoints::Ptr oNumSkillPoints;
 
     LuaRefPtr refUpdate_skills_func;
@@ -50,14 +53,18 @@ namespace onep
     osgGaming::Observable<bool>::Ptr oRunning;
 
     LuaDefines::TickUpdateMode tickUpdateMode;
-    UpdateThread thread;
+    UpdateThread               thread;
 
-    LuaRefPtr getLuaFunction(const char* path)
+    bool profilingLogsEnabled;
+
+    LuaRefPtr getLuaFunction(const char* path) const
     {
-      LuaRefPtr ptr = MAKE_LUAREF_PTR(lua->getObject(path));
+      auto ptr = MAKE_LUAREF_PTR(lua->getObject(path));
 
       if (!ptr->isFunction())
+      {
         OSGG_QLOG_FATAL(QString("Could not load lua function '%1'").arg(path));
+      }
 
       return ptr;
     }
@@ -72,7 +79,7 @@ namespace onep
     m->oNumSkillPoints->set(50);
 
     m->timer.setSingleShot(false);
-    m->timer.setInterval(1000);
+    m->timer.setInterval(TickIntervalMs);
 
     m->thread.onTick([this]()
     {
@@ -113,13 +120,16 @@ namespace onep
         });
       });
 
-      OSGG_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Visuals: %5ms Total: %6ms")
-        .arg(tickElapsed)
-        .arg(skillsElapsed)
-        .arg(branchesElapsed)
-        .arg(syncElapsed)
-        .arg(visualsElapsed)
-        .arg(totalElapsed));
+      if (m->profilingLogsEnabled)
+      {
+        OSGG_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Visuals: %5ms Total: %6ms")
+          .arg(tickElapsed)
+          .arg(skillsElapsed)
+          .arg(branchesElapsed)
+          .arg(syncElapsed)
+          .arg(visualsElapsed)
+          .arg(totalElapsed));
+      }
     });
 
     QConnectFunctor::connect(&m->timer, SIGNAL(timeout()), [this]()
@@ -192,6 +202,11 @@ namespace onep
   void Simulation::setUpdateTimerInterval(int msecs)
   {
     m->timer.setInterval(msecs);
+  }
+
+  void Simulation::setProfilingLogsEnabled(bool enabled)
+  {
+    m->profilingLogsEnabled = enabled;
   }
 
   void Simulation::setTickUpdateMode(LuaDefines::TickUpdateMode mode)
