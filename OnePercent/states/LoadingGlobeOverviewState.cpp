@@ -9,7 +9,6 @@
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
 #include "scripting/LuaStateManager.h"
-#include "scripting/LuaModel.h"
 #include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaControl.h"
 #include "simulation/Simulation.h"
@@ -147,7 +146,6 @@ namespace onep
     m->lua->loadScript("./GameData/scripts/data/countries.lua");
     m->lua->loadScript("./GameData/scripts/data/values.lua");
 
-    m->lua->loadScript("./GameData/scripts/control/misc.lua");
     m->lua->loadScript("./GameData/scripts/control/skills.lua");
     m->lua->loadScript("./GameData/scripts/control/visuals.lua");
 

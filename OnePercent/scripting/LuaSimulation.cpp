@@ -24,6 +24,7 @@ namespace onep
       .addFunction("set_skill_points", &LuaSimulation::lua_set_skill_points)
       .addFunction("add_skill_points", &LuaSimulation::lua_add_skill_points)
       .addFunction("set_tick_update_mode", &LuaSimulation::lua_set_tick_update_mode)
+      .addFunction("set_profiling_logs_enabled", &LuaSimulation::lua_set_profiling_logs_enabled)
       .endClass();
   }
 
@@ -79,4 +80,9 @@ namespace onep
   {
     m_simulation->setTickUpdateMode(static_cast<LuaDefines::TickUpdateMode>(mode));
   }
+
+void LuaSimulation::lua_set_profiling_logs_enabled(bool enabled)
+{
+    m_simulation->setProfilingLogsEnabled(enabled);
+}
 }

@@ -17,6 +17,8 @@ namespace onep
       void registerClass(lua_State* state) override;
     };
 
+    using Ptr = osg::ref_ptr<LuaControl>;
+
     LuaControl(osgGaming::Injector& injector);
 
     void doSkillsUpdate(const std::shared_ptr<LuaModel>& model);

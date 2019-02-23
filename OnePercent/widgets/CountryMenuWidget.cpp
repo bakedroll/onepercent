@@ -10,6 +10,7 @@
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaSkillBranch.h"
+#include "scripting/LuaControl.h"
 #include "simulation/UpdateThread.h"
 
 #include <osgGaming/Helper.h>
@@ -22,6 +23,7 @@ namespace onep
 	{
     Impl(osgGaming::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
+      , luaControl(injector.inject<LuaControl>())
       , simulation(injector.inject<Simulation>())
       , modelContainer(injector.inject<ModelContainer>())
       , countryOverlay(injector.inject<CountryOverlay>())
@@ -31,6 +33,7 @@ namespace onep
     LuaCountry::Ptr country;
 
     LuaStateManager::Ptr lua;
+    LuaControl::Ptr      luaControl;
     Simulation::Ptr      simulation;
     ModelContainer::Ptr  modelContainer;
     CountryOverlay::Ptr  countryOverlay;
@@ -141,15 +144,16 @@ namespace onep
         {
           m->simulation->getUpdateThread()->executeLockedTick([this, &cid, &name]()
           {
-            m->modelContainer->accessModel([&cid, &name](const LuaModel::Ptr& model)
+            m->modelContainer->accessModel([this, &cid, &name](const LuaModel::Ptr& model)
             {
-              model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name, true);
+              auto cstate = model->getSimulationStateTable()->getCountryState(cid);
+
+              cstate->getBranchesActivatedTable()->setBranchActivated(name, true);
+
+              m->luaControl->triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_PURCHASED, name, cstate->luaref());
             });
           });
         });
-
-        // todo: move to lua event
-        m->countryOverlay->setCurrentOverlayBranchName(name);
 
         if (!m->simulation->running())
         {

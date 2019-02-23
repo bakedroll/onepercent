@@ -31,6 +31,7 @@ namespace onep
     osgGaming::Observable<bool>::Ptr getORunning() const;
 
     void setUpdateTimerInterval(int msecs);
+    void setProfilingLogsEnabled(bool enabled);
     void setTickUpdateMode(LuaDefines::TickUpdateMode mode);
 
     void saveState(const std::string& filename);
