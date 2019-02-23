@@ -112,7 +112,7 @@ namespace onep
     addChild(m->countrySwitch);
     addChild(m->countryHoverSwitch);
 
-    addStateSetUniform(new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 1.0f, 0.4f)), m->countrySwitch);
+    addStateSetUniform(new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 0.0f, 0.0f)), m->countrySwitch);
     addStateSetUniform(new osg::Uniform("takeoverScale", 100.0f), m->countrySwitch);
   }
 

@@ -11,12 +11,29 @@
 
 namespace onep
 {
+  template <typename ValueType>
+  void setUniform(const CountryNode::Ptr& node, const std::string& visual, const ValueType& value)
+  {
+    auto uniform = node->getStateSetUniform(visual);
+    assert_return(uniform);
+
+    if (!uniform)
+    {
+      OSGG_QLOG_WARN(QString("Uniform %1 not found.").arg(visual.c_str()));
+    }
+
+    uniform->set(value);
+  }
+
   void LuaVisuals::Definition::registerClass(lua_State* state)
   {
     luabridge::getGlobalNamespace(state)
       .beginClass<LuaVisuals>("Visuals")
       .addFunction("bind_value_to_visuals", &LuaVisuals::luaBindValueToVisuals)
       .addFunction("bind_branch_value_to_visuals", &LuaVisuals::luaBindBranchValueToVisuals)
+      .addFunction("unbind_value", &LuaVisuals::luaUnbindValue)
+      .addFunction("unbind_branch_value", &LuaVisuals::luaUnbindBranchValue)
+      .addFunction("update_bindings", &LuaVisuals::updateBindings)
       .endClass();
   }
 
@@ -41,20 +58,6 @@ namespace onep
       return modelContainer->getModel()->getBranchesTable()->containsMappedElement(name);
     }
 
-    template <typename ValueType>
-    void setUniform(const CountryNode::Ptr& node, const std::string& visual, const ValueType& value)
-    {
-      auto uniform = node->getStateSetUniform(visual);
-      assert_return(uniform);
-
-      if (!uniform)
-      {
-        OSGG_QLOG_WARN(QString("Uniform %1 not found.").arg(visual.c_str()));
-      }
-
-      uniform->set(value);
-    }
-
     using VisualBindingsMap = std::map<std::string, std::string>;
     using BranchBindingsMap = std::map<std::string, VisualBindingsMap>;
 
@@ -70,13 +73,11 @@ namespace onep
   {
   }
 
-  LuaVisuals::~LuaVisuals()
-  {
-  }
+  LuaVisuals::~LuaVisuals() = default;
 
-  void LuaVisuals::updateVisualBindings()
+  void LuaVisuals::updateBindings()
   {
-    Multithreading::uiExecuteAsync([this]()
+    Multithreading::uiExecuteOrAsync([this]()
     {
       m->modelContainer->accessModel([this](const LuaModel::Ptr& model)
       {
@@ -90,7 +91,7 @@ namespace onep
 
           for (auto& visual : m->valueBindings)
           {
-            m->setUniform(node, visual.second, valuesTable->getValue(visual.first));
+            setUniform(node, visual.second, valuesTable->getValue(visual.first));
           }
 
           for (auto& branchBindings : m->branchValueBindings)
@@ -98,7 +99,7 @@ namespace onep
             auto  branch = branchValuesTable->getBranch(branchBindings.first);
             for (auto& visual : branchBindings.second)
             {
-              m->setUniform(node, visual.second, branch->getValue(visual.first));
+              setUniform(node, visual.second, branch->getValue(visual.first));
             }
           }
         }
@@ -110,8 +111,8 @@ namespace onep
   {
     if (!m->isValueOfTypeExisting(value, LuaValueDef::Type::Default))
     {
-      OSGG_QLOG_WARN(QString("Value '%1' does not exist.").arg(value.c_str()));
-      return;
+      OSGG_QLOG_WARN(QString("Visuals binding: Value '%1' does not exist.").arg(value.c_str()));
+      assert_return(false);
     }
 
     m->valueBindings[value] = visual;
@@ -125,8 +126,8 @@ namespace onep
   {
     if (!(m->isValueOfTypeExisting(branchValue, LuaValueDef::Type::Branch) && m->isBranchExisting(branchName)))
     {
-      OSGG_QLOG_WARN(QString("Branch value '%1.%2' does not exist.").arg(branchName.c_str()).arg(branchValue.c_str()));
-      return;
+      OSGG_QLOG_WARN(QString("Visuals binding: Branch value '%1.%2' does not exist.").arg(branchName.c_str()).arg(branchValue.c_str()));
+      assert_return(false);
     }
 
     m->branchValueBindings[branchName][branchValue] = visual;
@@ -136,4 +137,40 @@ namespace onep
       .arg(branchValue.c_str())
       .arg(visual.c_str()));
   }
+
+  void LuaVisuals::luaUnbindValue(const std::string& value)
+  {
+    auto it = m->valueBindings.find(value);
+    if (it == m->valueBindings.end())
+    {
+      OSGG_QLOG_WARN(QString("Visuals unbinding: Binding for value '%1' does not exist").arg(value.c_str()));
+      assert_return(false);
+    }
+
+    m->valueBindings.erase(it);
+  }
+
+  void LuaVisuals::luaUnbindBranchValue(const std::string& branchName, const std::string& branchValue)
+  {
+    auto bit = m->branchValueBindings.find(branchName);
+    if (bit == m->branchValueBindings.end())
+    {
+      OSGG_QLOG_WARN(QString("Visuals unbinding: Binding for branch '%1' does not exist").arg(branchName.c_str()));
+      assert_return(false);
+    }
+
+    auto it = bit->second.find(branchValue);
+    if (it == bit->second.end())
+    {
+      OSGG_QLOG_WARN(QString("Visuals unbinding: Binding for branch value '%1' does not exist").arg(branchValue.c_str()));
+      assert_return(false);
+    }
+
+    bit->second.erase(it);
+    if (bit->second.empty())
+    {
+      m->branchValueBindings.erase(bit);
+    }
+  }
+
 }

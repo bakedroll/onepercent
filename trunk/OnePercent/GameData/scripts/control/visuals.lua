@@ -1,4 +1,5 @@
 local countries = countries
+local visuals   = visuals
 
 local color_transparent = Vec4f(0.0, 0.0, 0.0, 0.0)
 local color_selected    = Vec4f(0.5, 0.69, 1.0, 0.5)
@@ -27,12 +28,6 @@ local function set_country_node_color(cid, color, neighbourcolor)
 
 end
 
-control:on_event(defines.callback.on_initialize, function()
-
-  visuals:bind_branch_value_to_visuals("politics", "propagated", "takeover")
-
-end)
-
 control:on_event(defines.callback.on_country_changed, function(old_cid, cid)
 
 	set_country_node_color(old_cid, color_transparent, color_transparent)
@@ -42,6 +37,17 @@ end)
 
 control:on_event(defines.callback.on_overlay_changed, function(old_branch, branch)
 
-	log:debug("OVERLAY CHANGED: " .. branch)
+	countries:set_uniform_vec4f("takeoverColor",
+		(branch == '') and color_transparent or colors_overlay[branch])
+
+	if old_branch ~= '' then
+		visuals:unbind_branch_value(old_branch, "propagated")
+	end
+
+ 	if branch ~= '' then
+		visuals:bind_branch_value_to_visuals(branch, "propagated", "takeover")
+	end
+
+	visuals:update_bindings()
 
 end)
