@@ -44,7 +44,7 @@ namespace onep
       , countrySwitch(new osg::Switch())
       , countryHoverSwitch(new osg::Switch())
       , oSelectedCountryId(new osgGaming::Observable<int>(0))
-      , oCurrentOverlayBranchId(new osgGaming::Observable<std::string>({}))
+      , oCurrentOverlayBranchId(new osgGaming::Observable<std::string>(""))
     {
     }
 

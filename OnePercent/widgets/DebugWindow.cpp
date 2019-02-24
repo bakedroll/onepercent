@@ -445,7 +445,7 @@ namespace onep
 
       QConnectBoolFunctor::connect(radioNoOverlay, SIGNAL(clicked(bool)), [=](bool)
       {
-        countryOverlay->setCurrentOverlayBranchName({});
+        countryOverlay->setCurrentOverlayBranchName("");
       });
 
       branchesLayout->addWidget(radioNoOverlay, 0, 1);
