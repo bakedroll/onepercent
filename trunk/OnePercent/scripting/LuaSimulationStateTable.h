@@ -7,7 +7,23 @@ namespace onep
   class LuaSimulationStateTable : public LuaObjectMapper
   {
   public:
-    typedef std::shared_ptr<LuaSimulationStateTable> Ptr;
+    struct CountryBranch
+    {
+      CountryBranch(int cid, const std::string& branch)
+        : countryId(cid)
+        , branchName(branch)
+      {}
+
+      CountryBranch()
+        : CountryBranch(0, "")
+      {}
+
+      int         countryId;
+      std::string branchName;
+    };
+
+    using Ptr                    = std::shared_ptr<LuaSimulationStateTable>;
+    using OCountryBranchAcivated = osgGaming::Observable<CountryBranch>;
 
     explicit LuaSimulationStateTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaSimulationStateTable();
@@ -15,8 +31,11 @@ namespace onep
     LuaCountryState::Map& getCountryStates() const;
     LuaCountryState::Ptr getCountryState(int cid) const;
 
+    OCountryBranchAcivated::Ptr getOCountryBranchActivated() const;
+
     void addCountryState(int id);
 
+    void initializeCountryBranchActivated();
     void updateObservables();
 
   private:

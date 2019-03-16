@@ -47,6 +47,8 @@ namespace onep
 
     LuaStateManager::Ptr lua;
     ModelContainer::Ptr modelContainer;
+
+    osgGaming::Observer<LuaSimulationStateTable::CountryBranch>::Ptr branchActivatedObserver;
   };
 
   LuaControl::LuaControl(osgGaming::Injector& injector)
@@ -57,6 +59,7 @@ namespace onep
     registerLuaCallback(LuaDefines::Callback::ON_TICK);
     registerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE);
     registerLuaCallback(LuaDefines::Callback::ON_BRANCH_PURCHASED);
+    registerLuaCallback(LuaDefines::Callback::ON_BRANCH_ACTIVATED);
     
     registerLuaCallback(LuaDefines::Callback::ON_COUNTRY_CHANGED,
       std::make_shared<LuaObservableCallback<int>>(m->lua,
@@ -65,6 +68,18 @@ namespace onep
     registerLuaCallback(LuaDefines::Callback::ON_OVERLAY_CHANGED,
       std::make_shared<LuaObservableCallback<std::string>>(m->lua,
       injector.inject<CountryOverlay>()->getOCurrentOverlayBranchName()));
+
+    const auto simState = m->modelContainer->getModel()->getSimulationStateTable();
+
+    m->branchActivatedObserver = simState->getOCountryBranchActivated()->connect(
+      osgGaming::Func<LuaSimulationStateTable::CountryBranch>([this](const LuaSimulationStateTable::CountryBranch& cb)
+    {
+      m->modelContainer->accessModel([this, &cb](const LuaModel::Ptr& model)
+      {
+        auto cstate = model->getSimulationStateTable()->getCountryState(cb.countryId);
+        triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_ACTIVATED, cb.branchName, cstate->luaref());
+      });
+    }));
   }
 
   void LuaControl::doSkillsUpdate(const LuaModel::Ptr& model)

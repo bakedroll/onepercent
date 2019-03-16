@@ -62,27 +62,25 @@ end)
 
 control:on_event(defines.callback.on_branch_update, function(branch_name, country_state)
 
-  if (country_state.branches_activated[branch_name] == true) then
+  if (country_state.branches_activated[branch_name] == true) then return end
 
-    if branch_name == "politics" then
-      if country_state.values["first_skill_points_politics"] == 0 and country_state.values["political_influence"] >= 0.25 then
-        simulation:add_skill_points(30)
-        country_state.values["first_skill_points_politics"] = 1
-      end
-    end
+  local propagated = country_state.branch_values[branch_name]["propagated"]
+  for _, neighbour_state in pairs(country_state.neighbour_states) do
+    propagated = propagated + neighbour_state.branch_values[branch_name]["propagation"] * 0.005
+  end
 
-  else
+  country_state.branch_values[branch_name]["propagated"] = propagated
 
-    local propagated = country_state.branch_values[branch_name]["propagated"]
-    for _, neighbour_state in pairs(country_state.neighbour_states) do
-      propagated = propagated + neighbour_state.branch_values[branch_name]["propagation"] * 0.005
-    end
+  if (propagated >= 1.0) then
+    country_state.branches_activated[branch_name] = true
+  end
 
-    country_state.branch_values[branch_name]["propagated"] = propagated
+end)
 
-    if (propagated >= 1.0) then
-      country_state.branches_activated[branch_name] = true
-    end
+control:on_event(defines.callback.on_branch_activated, function(branch_name, country_state)
+
+  if (branch_name == "politics") then
+    simulation:add_skill_points(30)
   end
 
 end)
