@@ -47,11 +47,6 @@ control:create_values({
     init = 0.0
   },
   {
-    name = "first_skill_points_politics",
-    type = "default",
-    init = 0.0
-  },
-  {
     name = "propagated",
     type = "branch",
     init = 0.0

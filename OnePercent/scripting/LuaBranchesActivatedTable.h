@@ -24,6 +24,7 @@ namespace onep
     void updateObservables();
 
     osgGaming::Observable<bool>::Ptr getOBranchActivated(const std::string& name) const;
+    const BranchActivatedMap& getBranchActivatedMap() const;
 
   private:
     struct Impl;

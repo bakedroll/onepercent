@@ -70,4 +70,10 @@ namespace onep
     assert_return(m->oActivatedBranches.count(name) > 0, osgGaming::Observable<bool>::Ptr());
     return m->oActivatedBranches.find(name)->second;
   }
+
+  const LuaBranchesActivatedTable::BranchActivatedMap& LuaBranchesActivatedTable::getBranchActivatedMap() const
+  {
+    return m->oActivatedBranches;
+  }
+
 }

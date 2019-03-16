@@ -98,6 +98,8 @@ namespace onep
           }
         });
       });
+
+      stateTable->initializeCountryBranchActivated();
     });
   }
 
