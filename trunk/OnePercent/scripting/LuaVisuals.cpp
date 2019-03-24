@@ -96,7 +96,9 @@ namespace onep
 
           for (auto& branchBindings : m->branchValueBindings)
           {
-            auto  branch = branchValuesTable->getBranch(branchBindings.first);
+            auto branch = branchValuesTable->getBranch(branchBindings.first);
+            assert_continue(branch);
+
             for (auto& visual : branchBindings.second)
             {
               setUniform(node, visual.second, branch->getValue(visual.first));

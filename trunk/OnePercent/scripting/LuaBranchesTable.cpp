@@ -8,7 +8,6 @@ namespace onep
   LuaBranchesTable::LuaBranchesTable(const luabridge::LuaRef& object, lua_State* luaState)
     : LuaMapTable(object, luaState)
   {
-    assert_return(object.isTable());
   }
 
   LuaBranchesTable::~LuaBranchesTable() = default;
@@ -26,7 +25,10 @@ LuaSkillBranch::Ptr LuaBranchesTable::getBranchByName(const std::string& name) c
   void LuaBranchesTable::addBranch(const std::string& name, luabridge::LuaRef& ref)
   {
     auto branch = addMappedElement<LuaSkillBranch>(name, ref);
-    m_branches[name] = branch;
+    if (branch)
+    {
+      m_branches[name] = branch;
+    }
   }
 
   LuaSkill::Ptr LuaBranchesTable::findSkill(const std::string& name) const

@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include <QString>
 #include <QStringList>
 #include <QFile>
 

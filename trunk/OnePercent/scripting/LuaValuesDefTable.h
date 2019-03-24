@@ -13,6 +13,5 @@ namespace onep
     ~LuaValuesDefTable();
 
     void addValue(const std::string& name, luabridge::LuaRef ref);
-
   };
 }

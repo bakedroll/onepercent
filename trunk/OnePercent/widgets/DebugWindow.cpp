@@ -324,12 +324,16 @@ namespace onep
 
       modelContainer->accessModel([=](const LuaModel::Ptr& model)
       {
-        LuaCountryState::Map& countryStates = model->getSimulationStateTable()->getCountryStates();
+        auto& countryStates = model->getSimulationStateTable()->getCountryStates();
         if (countryStates.count(selectedId) == 0)
+        {
           return;
+        }
 
-        LuaCountry::Ptr country = model->getCountriesTable()->getCountryById(selectedId);
-        LuaCountryState::Ptr countryState = countryStates[selectedId];
+        auto country = model->getCountriesTable()->getCountryById(selectedId);
+        assert_return(country);
+
+        auto countryState = countryStates[selectedId];
 
         auto values = countryState->getValuesMap();
         auto branchValues = countryState->getBranchValuesMap();
@@ -365,7 +369,12 @@ namespace onep
               std::string name = vit->first;
               ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()), [=](float value, LuaCountryState::Ptr cstate)
               {
-                cstate->getBranchValuesTable()->getBranch(branchName)->setValue(name, value);
+                auto branch = cstate->getBranchValuesTable()->getBranch(branchName);
+
+                if (branch)
+                {
+                  branch->setValue(name, value);
+                }
               });
               branchValueWidgets[it->first][vit->first] = widget;
             }
@@ -595,27 +604,27 @@ namespace onep
         const auto& name = branch.second->getName();
 
         // Skills
-        int nskills = branch.second->getSkillsTable()->getNumSkills();
+        const auto& skills = branch.second->getSkillsTable()->getSkills();
 
         QLabel* label = new QLabel(QString::fromStdString(name));
         rightLayout->addWidget(label);
 
-        for (int j = 0; j < nskills; j++)
+        for (const auto& skill : skills)
         {
-          LuaSkill::Ptr skill = branch.second->getSkillsTable()->getSkillByIndex(j);
-
-          QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill->getDisplayName()));
+          QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill.second->getDisplayName()));
           rightLayout->addWidget(checkBox);
 
-          QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
+          auto skillPtr = skill.second;
+
+          QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [this, skillPtr](bool checked)
           {
-            modelContainer->accessModel([=](const LuaModel::Ptr& model)
+            modelContainer->accessModel([this, skillPtr, checked](const LuaModel::Ptr&)
             {
-              branch.second->getSkillsTable()->getSkillByIndex(j)->setIsActivated(checked);
+              skillPtr->setIsActivated(checked);
             });
           });
 
-          skillActivatedObservers.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([=](bool activated)
+          skillActivatedObservers.push_back(skillPtr->getObActivated()->connect(osgGaming::Func<bool>([=](bool activated)
           {
             QSignalBlocker blocker(checkBox);
             checkBox->setChecked(activated);

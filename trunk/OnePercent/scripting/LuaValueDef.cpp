@@ -6,26 +6,29 @@ namespace onep
 {
   struct LuaValueDef::Impl
   {
-    Impl() {}
+    Impl()
+      : type(Type::Default)
+      , init(0.0)
+    {}
 
     std::string name;
-    Type type;
-    float init;
+    Type        type;
+    float       init;
   };
 
   LuaValueDef::LuaValueDef(const luabridge::LuaRef& object, lua_State* luaState)
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    assert_return(object.isTable());
+    checkForConsistency("name", LUA_TSTRING);
+    checkForConsistency("type", LUA_TSTRING);
+    checkForConsistency("init", LUA_TNUMBER);
+
+    assert_return(!hasAnyInconsistency());
 
     luabridge::LuaRef nameRef = object["name"];
     luabridge::LuaRef typeRef = object["type"];
     luabridge::LuaRef initRef = object["init"];
-
-    assert_return(nameRef.isString());
-    assert_return(typeRef.isString());
-    assert_return(initRef.isNumber());
 
     auto typeStr = typeRef.tostring();
 

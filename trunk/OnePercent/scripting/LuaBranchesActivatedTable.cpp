@@ -11,14 +11,13 @@ namespace onep
     Impl() = default;
 
     BranchActivatedMap oActivatedBranches;
-    QMutex mutexActivated;
+    QMutex             mutexActivated;
   };
 
   LuaBranchesActivatedTable::LuaBranchesActivatedTable(const luabridge::LuaRef& object, lua_State* luaState)
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    assert_return(object.isTable());
   }
 
   LuaBranchesActivatedTable::~LuaBranchesActivatedTable() = default;

@@ -6,10 +6,10 @@ namespace onep
 {
   struct LuaCountry::Impl
   {
-    Impl() {}
-    ~Impl() {}
+    Impl() : id(-1) {}
+    ~Impl() = default;
 
-    int id;
+    int         id;
     std::string name;
   };
 
@@ -17,20 +17,20 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    assert_return(object.isTable());
+    checkForConsistency("id", LUA_TNUMBER);
+    checkForConsistency("name", LUA_TSTRING);
 
-    luabridge::LuaRef idRef = object["id"];
+    assert_return(!hasAnyInconsistency());
+
+    luabridge::LuaRef idRef   = object["id"];
     luabridge::LuaRef nameRef = object["name"];
-
-    assert_return(idRef.isNumber());
-    assert_return(nameRef.isString());
 
     if (object["init_values"].isNil())
     {
       object["init_values"] = luabridge::newTable(luaState);
     }
 
-    m->id = idRef;
+    m->id   = idRef;
     m->name = nameRef.tostring();
   }
 
@@ -41,12 +41,12 @@ namespace onep
     return m->id;
   }
 
-  std::string LuaCountry::getName() const
+  const std::string& LuaCountry::getName() const
   {
     return m->name;
   }
 
-  float LuaCountry::getInitValue(const std::string valueName, float defaultValue) const
+  float LuaCountry::getInitValue(const std::string& valueName, float defaultValue) const
   {
     luabridge::LuaRef initValuesRef = luaref()["init_values"];
     luabridge::LuaRef initValueRef  = initValuesRef[valueName];

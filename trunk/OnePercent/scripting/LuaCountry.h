@@ -15,10 +15,10 @@ namespace onep
     explicit LuaCountry(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaCountry();
 
-    int getId() const;
-    std::string getName() const;
+    int                getId() const;
+    const std::string& getName() const;
 
-    float getInitValue(const std::string valueName, float defaultValue = 0.0f) const;
+    float getInitValue(const std::string& valueName, float defaultValue = 0.0f) const;
 
   private:
     struct Impl;

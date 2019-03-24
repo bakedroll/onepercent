@@ -221,6 +221,8 @@ namespace onep
         
         auto countryNode = m->countryOverlay->getCountryNode(id);
         auto country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(id);
+
+        assert_return(country);
         
         OSGG_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
 

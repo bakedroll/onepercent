@@ -6,7 +6,6 @@ namespace onep
   LuaCountriesTable::LuaCountriesTable(const luabridge::LuaRef& object, lua_State* luaState)
     : LuaObjectMapper(object, luaState)
   {
-    assert_return(luaref().isTable());
   }
 
   LuaCountriesTable::~LuaCountriesTable() = default;
