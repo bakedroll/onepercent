@@ -8,13 +8,13 @@ namespace onep
 {
   struct LuaModel::Impl
   {
-    Impl() {}
-    ~Impl() {}
+    Impl()  = default;
+    ~Impl() = default;
 
-    LuaCountriesTable::Ptr countriesTable;
-    LuaBranchesTable::Ptr branchesTable;
+    LuaCountriesTable::Ptr       countriesTable;
+    LuaBranchesTable::Ptr        branchesTable;
     LuaSimulationStateTable::Ptr stateTable;
-    LuaValuesDefTable::Ptr valuesTable;
+    LuaValuesDefTable::Ptr       valuesTable;
   };
 
   LuaModel::LuaModel(const luabridge::LuaRef& object, lua_State* luaState)
@@ -22,9 +22,9 @@ namespace onep
     , m(new Impl())
   {
     m->countriesTable = newMappedElement<LuaCountriesTable>("countries");
-    m->branchesTable = newMappedElement<LuaBranchesTable>("branches");
-    m->stateTable = newMappedElement<LuaSimulationStateTable>("state");
-    m->valuesTable = newMappedElement<LuaValuesDefTable>("values");
+    m->branchesTable  = newMappedElement<LuaBranchesTable>("branches");
+    m->stateTable     = newMappedElement<LuaSimulationStateTable>("state");
+    m->valuesTable    = newMappedElement<LuaValuesDefTable>("values");
   }
 
   LuaModel::~LuaModel() = default;

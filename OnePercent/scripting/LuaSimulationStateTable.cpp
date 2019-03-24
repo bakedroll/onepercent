@@ -25,7 +25,6 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    assert_return(object.isTable());
   }
 
   LuaSimulationStateTable::~LuaSimulationStateTable() = default;

@@ -64,5 +64,5 @@ control:create_skills({
     type = "passive",
     branch = "politics",
     cost = 10
-  },
+  }
 })

@@ -3,6 +3,7 @@
 #include "scripting/LuaClassDefinition.h"
 #include "scripting/LuaCallbackRegistry.h"
 #include "scripting/LuaStateManager.h"
+#include "scripting/LuaObjectMapper.h"
 
 #include <osgGaming/Observable.h>
 
@@ -13,7 +14,7 @@
 
 namespace onep
 {
-	class LuaSkill : public LuaCallbackRegistry
+	class LuaSkill : public LuaCallbackRegistry, public LuaObjectMapper
 	{
 	public:
     class Definition : public LuaClassDefinition
@@ -26,7 +27,7 @@ namespace onep
     typedef std::vector<Ptr> List;
     typedef std::map<std::string, Ptr> Map;
 
-    LuaSkill(const LuaStateManager::Ptr& lua, const luabridge::LuaRef& object);
+    LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const LuaStateManager::Ptr& luaStateManager);
     ~LuaSkill();
 
     void update(const std::string& branchName, luabridge::LuaRef countryState);

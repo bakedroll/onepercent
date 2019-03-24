@@ -14,9 +14,8 @@ namespace onep
     explicit LuaSkillsTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaSkillsTable();
 
-    int getNumSkills() const;
-    LuaSkill::Ptr getSkillByIndex(int index) const;
-    LuaSkill::Ptr getSkillByName(const std::string& name) const;
+    const LuaSkill::Map& getSkills() const;
+    LuaSkill::Ptr        getSkillByName(const std::string& name) const;
 
     void addSkill(LuaStateManager::Ptr lua, const std::string& name, luabridge::LuaRef& ref);
 

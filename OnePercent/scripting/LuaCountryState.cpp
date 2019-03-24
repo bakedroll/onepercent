@@ -8,8 +8,8 @@ namespace onep
   {
     Impl() = default;
 
-    std::shared_ptr<LuaValuesTable> tValues;
-    std::shared_ptr<LuaBranchValuesTable> tBranchValues;
+    std::shared_ptr<LuaValuesTable>            tValues;
+    std::shared_ptr<LuaBranchValuesTable>      tBranchValues;
     std::shared_ptr<LuaBranchesActivatedTable> tBranchesActivated;
   };
 
@@ -17,8 +17,6 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    assert_return(object.isTable());
-
     m->tValues            = newMappedElement<LuaValuesTable>("values");
     m->tBranchValues      = newMappedElement<LuaBranchValuesTable>("branch_values");
     m->tBranchesActivated = newMappedElement<LuaBranchesActivatedTable>("branches_activated");

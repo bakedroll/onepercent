@@ -31,23 +31,24 @@ namespace onep
     osgGaming::Observable<bool>::Ptr obActivated;
   };
 
-  LuaSkill::LuaSkill(const LuaStateManager::Ptr& lua, const luabridge::LuaRef& object)
-    : LuaCallbackRegistry(lua)
+  LuaSkill::LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const LuaStateManager::Ptr& luaStateManager)
+    : LuaCallbackRegistry(luaStateManager)
+    , LuaObjectMapper(object, lua)
     , m(new Impl())
   {
-    assert_return(object.isTable());
+    checkForConsistency("name", LUA_TSTRING);
+    checkForConsistency("branch", LUA_TSTRING);
+    checkForConsistency("display_name", LUA_TSTRING);
+    checkForConsistency("type", LUA_TSTRING);
+    checkForConsistency("cost", LUA_TNUMBER);
+
+    assert_return(!hasAnyInconsistency());
 
     luabridge::LuaRef nameRef         = object["name"];
     luabridge::LuaRef branchRef       = object["branch"];
     luabridge::LuaRef displayNameRef  = object["display_name"];
     luabridge::LuaRef typeRef         = object["type"];
     luabridge::LuaRef costRef         = object["cost"];
-
-    assert_return(nameRef.isString());
-    assert_return(branchRef.isString());
-    assert_return(displayNameRef.isString());
-    assert_return(typeRef.isString());
-    assert_return(costRef.isNumber());
 
     auto bActivared = false;
     object["activated"] = bActivared;

@@ -12,7 +12,7 @@ namespace onep
     {}
 
     std::string name;
-    int cost;
+    int         cost;
 
     LuaSkillsTable::Ptr skillsTable;
   };
@@ -21,13 +21,13 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    assert_return(object.isTable());
+    checkForConsistency("name", LUA_TSTRING);
+    checkForConsistency("cost", LUA_TNUMBER);
+
+    assert_return(!hasAnyInconsistency());
 
     luabridge::LuaRef nameRef = object["name"];
     luabridge::LuaRef costRef = object["cost"];
-
-    assert_return(nameRef.isString());
-    assert_return(costRef.isNumber());
 
     m->name = nameRef.tostring();
     m->cost = costRef;

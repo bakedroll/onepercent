@@ -94,18 +94,17 @@ namespace onep
         stream << static_cast<int>(branchName.length());
         stream.writeRawData(branchName.c_str(), static_cast<int>(branchName.length()));
 
-        auto numSkills = branch.second->getSkillsTable()->getNumSkills();
-        stream << numSkills;
+        const auto& skills = branch.second->getSkillsTable()->getSkills();
+        stream << static_cast<int>(skills.size());
 
-        for (auto j = 0; j < numSkills; j++)
+        for (const auto& skill : skills)
         {
-          auto        skill     = branch.second->getSkillsTable()->getSkillByIndex(j);
-          const auto& skillName = skill->getName();
+          const auto& skillName = skill.second->getName();
 
           stream << static_cast<int>(skillName.length());
           stream.writeRawData(skillName.c_str(), static_cast<int>(skillName.length()));
 
-          stream << skill->getIsActivated();
+          stream << skill.second->getIsActivated();
         }
       }
 
@@ -210,7 +209,14 @@ namespace onep
                 continue;
               }
 
-              cstate->getBranchValuesTable()->getBranch(branchName)->setValue(valueName, value);
+              auto branch = cstate->getBranchValuesTable()->getBranch(branchName);
+              if (!branch)
+              {
+                OSGG_QLOG_WARN(QString("Branch %1 not found").arg(branchName.c_str()));
+                continue;
+              }
+
+              branch->setValue(valueName, value);
             }
           }
 
