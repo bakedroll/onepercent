@@ -11,6 +11,7 @@
 #include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaStateManager.h"
 #include "scripting/LuaModel.h"
+#include "scripting/LuaControl.h"
 #include "simulation/Simulation.h"
 #include "simulation/UpdateThread.h"
 #include "simulation/ModelContainer.h"
@@ -92,6 +93,7 @@ namespace onep
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , simulation(injector.inject<Simulation>())
       , modelContainer(injector.inject<ModelContainer>())
+      , luaControl(injector.inject<LuaControl>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , toggleCountryButton(nullptr)
@@ -115,6 +117,7 @@ namespace onep
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<ModelContainer> modelContainer;
+    LuaControl::Ptr luaControl;
 
     ODay::Ptr oDay;
     ONumSkillPoints::Ptr oNumSkillPoints;
@@ -468,18 +471,21 @@ namespace onep
         {
           int cid = countryOverlay->getSelectedCountryId();
           if (cid == 0)
-            return;
-
-          lua->safeExecute([this, &cid, &name, &checked]()
           {
-            simulation->getUpdateThread()->executeLockedTick([this, &cid, &name, &checked]()
+            return;
+          }
+
+          if (checked)
+          {
+            modelContainer->accessModel([this, &branch](const LuaModel::Ptr&)
             {
-              modelContainer->accessModel([&cid, &name, &checked](const LuaModel::Ptr& model)
-              {
-                model->getSimulationStateTable()->getCountryState(cid)->getBranchesActivatedTable()->setBranchActivated(name, checked);
-              });
+              simulation->addSkillPoints(branch.second->getCost());
             });
-          });
+          }
+
+          simulation->switchSkillBranchState(cid, branch.second,
+                                             checked ? Simulation::SkillBranchState::PURCHASED
+                                                     : Simulation::SkillBranchState::RESIGNED);
         });
 
         QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool)
@@ -507,6 +513,8 @@ namespace onep
         selectedCountryIdObservers.push_back(countryOverlay->getOSelectedCountryId()->connectAndNotify(
           osgGaming::Func<int>([=](int selected)
         {
+          QSignalBlocker blocker(checkBox);
+
           if (selected > 0)
           {
             modelContainer->accessModel([=](const LuaModel::Ptr& model)
@@ -529,12 +537,15 @@ namespace onep
           {
             int cid = it.first;
 
-            skillBranchActivatedObservers.push_back(it.second->getBranchesActivatedTable()->getOBranchActivated(name.c_str())->connect(osgGaming::Func<bool>([=](bool activated)
+            skillBranchActivatedObservers.push_back(it.second->getBranchesActivatedTable()->getOBranchActivated(name)->connect(osgGaming::Func<bool>([=](bool activated)
             {
               Multithreading::uiExecuteOrAsync([=]()
               {
                 if (cid == countryOverlay->getSelectedCountryId())
+                {
+                  QSignalBlocker blocker(checkBox);
                   checkBox->setChecked(activated);
+                }
               });
             })));
           }
@@ -606,6 +617,7 @@ namespace onep
 
           skillActivatedObservers.push_back(skill->getObActivated()->connect(osgGaming::Func<bool>([=](bool activated)
           {
+            QSignalBlocker blocker(checkBox);
             checkBox->setChecked(activated);
           })));
         }

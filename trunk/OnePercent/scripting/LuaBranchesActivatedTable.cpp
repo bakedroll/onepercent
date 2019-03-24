@@ -8,7 +8,7 @@ namespace onep
 {
   struct LuaBranchesActivatedTable::Impl
   {
-    Impl() {}
+    Impl() = default;
 
     BranchActivatedMap oActivatedBranches;
     QMutex mutexActivated;
@@ -38,31 +38,25 @@ namespace onep
 
   void LuaBranchesActivatedTable::setBranchActivated(const std::string& name, bool activated)
   {
+    QMutexLocker lock(&m->mutexActivated);
     luaref()[name] = activated;
-    Multithreading::uiExecuteOrAsync([=]()
-    {
-      QMutexLocker lock(&m->mutexActivated);
-      getOBranchActivated(name)->set(activated);
-    });
+    getOBranchActivated(name)->set(activated);
   }
 
   void LuaBranchesActivatedTable::updateObservables()
   {
-    foreachElementDo([this](luabridge::LuaRef& key, luabridge::LuaRef& value)
+    QMutexLocker lock(&m->mutexActivated);
+
+    auto table = luaref();
+    for (const auto& oActivated : m->oActivatedBranches)
     {
-      assert_return(value.type() == LUA_TBOOLEAN);
-      assert_return(key.isString());
+      auto activated = static_cast<bool>(table[oActivated.first]);
 
-      bool activated = bool(value);
-
-      QMutexLocker lock(&m->mutexActivated);
-
-      osgGaming::Observable<bool>::Ptr oActivated = m->oActivatedBranches[key.tostring()];
-      assert_return(oActivated.valid());
-
-      if (oActivated->get() != activated)
-        oActivated->set(activated);
-    });
+      if (oActivated.second->get() != activated)
+      {
+        oActivated.second->set(activated);
+      }
+    }
   }
 
   osgGaming::Observable<bool>::Ptr LuaBranchesActivatedTable::getOBranchActivated(const std::string& name) const

@@ -132,28 +132,8 @@ namespace onep
           return;
         }
 
-        auto costs = branch.second->getCost();
-        if (!m->simulation->paySkillPoints(costs))
-        {
-          return;
-        }
-
-        auto cid = m->country->getId();
-
-        m->lua->safeExecute([this, &cid, &name]()
-        {
-          m->simulation->getUpdateThread()->executeLockedTick([this, &cid, &name]()
-          {
-            m->modelContainer->accessModel([this, &cid, &name](const LuaModel::Ptr& model)
-            {
-              auto cstate = model->getSimulationStateTable()->getCountryState(cid);
-
-              cstate->getBranchesActivatedTable()->setBranchActivated(name, true);
-
-              m->luaControl->triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_PURCHASED, name, cstate->luaref());
-            });
-          });
-        });
+        m->simulation->switchSkillBranchState(m->country->getId(), branch.second,
+                                              Simulation::SkillBranchState::PURCHASED);
 
         if (!m->simulation->running())
         {

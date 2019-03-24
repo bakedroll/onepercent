@@ -19,7 +19,8 @@ namespace onep
       ON_COUNTRY_CHANGED  = 4,
       ON_OVERLAY_CHANGED  = 5,
       ON_BRANCH_PURCHASED = 6,
-      ON_BRANCH_ACTIVATED = 7
+      ON_BRANCH_ACTIVATED = 7,
+      ON_BRANCH_RESIGNED  = 8
     };
   }
 }

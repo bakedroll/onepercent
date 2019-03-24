@@ -8,11 +8,18 @@
 namespace onep
 {
   class LuaSimulationStateTable;
+  class LuaSkillBranch;
   class UpdateThread;
 
 	class Simulation : public osg::Referenced
 	{
 	public:
+    enum class SkillBranchState
+    {
+      PURCHASED,
+      RESIGNED
+    };
+
     typedef osg::ref_ptr<Simulation> Ptr;
 
 		Simulation(osgGaming::Injector& injector);
@@ -23,7 +30,9 @@ namespace onep
 
     UpdateThread* getUpdateThread();
 
+    void addSkillPoints(int points);
     bool paySkillPoints(int points);
+    bool switchSkillBranchState(int countryId, const std::shared_ptr<LuaSkillBranch>& branch, SkillBranchState state);
 
     void start();
     void stop();

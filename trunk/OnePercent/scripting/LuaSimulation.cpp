@@ -57,11 +57,7 @@ namespace onep
   void LuaSimulation::lua_add_skill_points(int points)
   {
     OSGG_QLOG_DEBUG(QString("Add skill points: %1").arg(points));
-    Multithreading::uiExecuteOrAsync([=]()
-    {
-      int p = m_oNumSkillPoints->get();
-      m_oNumSkillPoints->set(p + points);
-    });
+    Multithreading::uiExecuteOrAsync([=]() { m_simulation->addSkillPoints(points); });
   }
 
   void LuaSimulation::lua_set_day(int day)

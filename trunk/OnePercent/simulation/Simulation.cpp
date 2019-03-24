@@ -165,14 +165,58 @@ namespace onep
     return &m->thread;
   }
 
+  void Simulation::addSkillPoints(int points)
+  {
+      auto p = m->oNumSkillPoints->get();
+      m->oNumSkillPoints->set(p + points);
+  }
+
   bool Simulation::paySkillPoints(int points)
   {
     int amount = m->oNumSkillPoints->get();
     if (amount < points)
+    {
       return false;
+    }
 
     m->oNumSkillPoints->set(amount - points);
     return true;
+  }
+
+  bool Simulation::switchSkillBranchState(int countryId, const std::shared_ptr<LuaSkillBranch>& branch,
+    SkillBranchState state)
+  {
+    auto result = true;
+
+    m->lua->safeExecute([this, countryId, &branch, state, &result]()
+    {
+      m->thread.executeLockedTick([this, countryId, &branch, state, &result]()
+      {
+        m->modelContainer->accessModel([this, countryId, &branch, state, &result](const LuaModel::Ptr& model)
+        {
+          auto        activated      = (state == SkillBranchState::PURCHASED);
+          const auto& name           = branch->getName();
+          const auto  cstate         = model->getSimulationStateTable()->getCountryState(countryId);
+          auto        activatedTable = cstate->getBranchesActivatedTable();
+
+          assert_return(activatedTable->getBranchActivated(name) != activated);
+
+          auto costs = branch->getCost();
+          if (activated && !paySkillPoints(costs))
+          {
+            result = false;
+            return;
+          }
+
+          cstate->getBranchesActivatedTable()->setBranchActivated(name, activated);
+          m->luaControl->triggerLuaCallback(activated ? LuaDefines::Callback::ON_BRANCH_PURCHASED
+                                                      : LuaDefines::Callback::ON_BRANCH_RESIGNED,
+                                            name, cstate->luaref());
+        });
+      });
+    });
+
+    return result;
   }
 
   void Simulation::start()
