@@ -6,7 +6,7 @@ namespace onep
 {
   struct LuaCountryState::Impl
   {
-    Impl() {}
+    Impl() = default;
 
     std::shared_ptr<LuaValuesTable> tValues;
     std::shared_ptr<LuaBranchValuesTable> tBranchValues;

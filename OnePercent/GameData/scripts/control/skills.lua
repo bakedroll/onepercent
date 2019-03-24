@@ -91,3 +91,9 @@ control:on_event(defines.callback.on_branch_purchased, function(branch_name, cou
   countries:set_current_overlay_branch_name(branch_name)
 
 end)
+
+control:on_event(defines.callback.on_branch_resigned, function(branch_name, country_state)
+
+  country_state.branch_values[branch_name]["propagated"] = 0.0
+
+end)
