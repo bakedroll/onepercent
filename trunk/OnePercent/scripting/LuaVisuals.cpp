@@ -27,7 +27,7 @@ namespace onep
 
   void LuaVisuals::Definition::registerClass(lua_State* state)
   {
-    luabridge::getGlobalNamespace(state)
+    getGlobalNamespace(state)
       .beginClass<LuaVisuals>("Visuals")
       .addFunction("bind_value_to_visuals", &LuaVisuals::luaBindValueToVisuals)
       .addFunction("bind_branch_value_to_visuals", &LuaVisuals::luaBindBranchValueToVisuals)

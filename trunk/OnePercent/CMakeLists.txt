@@ -41,7 +41,6 @@ get_libraries(OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${O
 # set include directories
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/osgGaming/include
   ${OSG_INCLUDE_DIR}
   ${OSGPPU_INCLUDE_DIR}
   ${LUA_INCLUDE_PREFIX}/include
@@ -53,8 +52,13 @@ foreach(module ${QT5_MODULES})
 endforeach()
 
 # set debug and release libs
-target_link_libraries(${PROJECT_NAME}
-  osgGaming)
+
+if (LUADOC_ENABLE)
+  add_definitions(-DLUADOC_ENABLED)
+  target_link_libraries(${PROJECT_NAME} luadoc)
+endif()
+
+target_link_libraries(${PROJECT_NAME} osgGaming)
 
 target_link_libraries(${PROJECT_NAME}
   optimized ${OSGPPU_LIBRARY_RELEASE} ${LUA_LIBRARY})

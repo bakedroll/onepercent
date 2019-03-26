@@ -6,7 +6,7 @@ namespace onep
 {
   void LuaLogger::Definition::registerClass(lua_State* state)
   {
-    luabridge::getGlobalNamespace(state)
+    getGlobalNamespace(state)
       .beginClass<LuaLogger>("LuaLogger")
       .addFunction("debug", &LuaLogger::lua_debug)
       .addFunction("info", &LuaLogger::lua_info)

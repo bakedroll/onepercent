@@ -13,7 +13,7 @@ namespace onep
 {
   void CountryNode::Definition::registerClass(lua_State* state)
   {
-    luabridge::getGlobalNamespace(state)
+    getGlobalNamespace(state)
       .deriveClass<CountryNode, LuaVisualOsgNode<osg::Geode>>("CountryNode")
       .addFunction("get_country_name", &CountryNode::getCountryName)
       .addFunction("get_neighbours", &CountryNode::luaGetNeighbours)

@@ -17,7 +17,7 @@ namespace onep
 {
   void LuaControl::Definition::registerClass(lua_State* state)
   {
-    luabridge::getGlobalNamespace(state)
+    getGlobalNamespace(state)
       .deriveClass<LuaControl, LuaCallbackRegistry>("Control")
       .addFunction("create_branches", &LuaControl::luaCreateBranches)
       .addFunction("create_skills", &LuaControl::luaCreateSkills)
