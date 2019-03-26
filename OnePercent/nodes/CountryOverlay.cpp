@@ -24,7 +24,7 @@ namespace onep
 {
   void CountryOverlay::Definition::registerClass(lua_State* state)
   {
-    luabridge::getGlobalNamespace(state)
+    getGlobalNamespace(state)
       .deriveClass<CountryOverlay, LuaVisualOsgNode<osg::Group>>("CountryOverlay")
       .addFunction("get_country_node", &CountryOverlay::luaGetCountryNode)
       .addFunction("set_current_overlay_branch_name", &CountryOverlay::setCurrentOverlayBranchName)

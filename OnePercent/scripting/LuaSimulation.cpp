@@ -15,7 +15,7 @@ namespace onep
 {
   void LuaSimulation::Definition::registerClass(lua_State* state)
   {
-    luabridge::getGlobalNamespace(state)
+    getGlobalNamespace(state)
       .beginClass<LuaSimulation>("Simulation")
       .addFunction("start", &LuaSimulation::lua_start)
       .addFunction("stop", &LuaSimulation::lua_stop)

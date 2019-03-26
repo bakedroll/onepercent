@@ -35,6 +35,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 option(BUILD_ENABLE_CONSOLE "Builds a console application (Windows only)" ON)
 option(OSG_LIBRARIES_DEBUG_SUFFIX "osg debug libraries suffix" ON)
+option(LUADOC_ENABLE "enable luadoc" OFF)
 
 # find Qt5
 set(QT5_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "Qt5 root directory")
@@ -210,6 +211,11 @@ endif()
 
 # add subdirectories
 add_subdirectory(osgGaming)
+
+if (LUADOC_ENABLE)
+  add_subdirectory(luadoc)
+endif()
+
 add_subdirectory(OnePercent)
 
 if (OPENCV_FOUND)

@@ -10,7 +10,7 @@ namespace onep
 {
   void LuaConfig::Definition::registerClass(lua_State* state)
   {
-    luabridge::getGlobalNamespace(state)
+    getGlobalNamespace(state)
       .beginClass<LuaConfig>("Config")
       .addFunction("extend", &LuaConfig::luaExtend)
       .endClass();

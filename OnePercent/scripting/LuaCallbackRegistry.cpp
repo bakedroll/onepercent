@@ -4,7 +4,7 @@ namespace onep
 {
   void LuaCallbackRegistry::Definition::registerClass(lua_State* state)
   {
-    luabridge::getGlobalNamespace(state)
+    getGlobalNamespace(state)
       .beginClass<LuaCallbackRegistry>("CallbackRegistry")
       .addFunction("on_event", &LuaCallbackRegistry::luaOnEvent)
       .endClass();

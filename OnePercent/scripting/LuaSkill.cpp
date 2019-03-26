@@ -7,7 +7,7 @@ namespace onep
 {
   void LuaSkill::Definition::registerClass(lua_State* state)
   {
-    luabridge::getGlobalNamespace(state)
+    getGlobalNamespace(state)
       .deriveClass<LuaSkill, LuaCallbackRegistry>("LuaSkill")
       .addProperty("activated", &LuaSkill::getIsActivated, &LuaSkill::setIsActivated)
       .addProperty("name", &LuaSkill::getName)
@@ -19,7 +19,8 @@ namespace onep
   struct LuaSkill::Impl
   {
     Impl()
-      : obActivated(new osgGaming::Observable<bool>(false))
+      : cost(0)
+      , obActivated(new osgGaming::Observable<bool>(false))
     {}
 
     std::string name;

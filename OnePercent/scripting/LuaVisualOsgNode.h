@@ -26,7 +26,7 @@ namespace onep
         std::string osgClassName = node->className();
         std::string luaClassName = "VisualOsg" + osgClassName;
 
-        luabridge::getGlobalNamespace(state)
+        getGlobalNamespace(state)
           .beginClass<LuaVisualOsgNode<NodeType>>(luaClassName.c_str())
           .addFunction("set_uniform_float",  &LuaVisualOsgNode<NodeType>::template luaSetUniform<float>)
           .addFunction("set_uniform_double", &LuaVisualOsgNode<NodeType>::template luaSetUniform<double>)

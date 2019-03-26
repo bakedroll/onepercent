@@ -70,7 +70,7 @@ namespace onep
     void safeExecute(std::function<void()> func);
 
     template<typename LuaClassType>
-    void makeGlobalInstance(const std::string name, LuaClassType* inst)
+    void makeGlobalInstance(const std::string& name, LuaClassType* inst)
     {
       luabridge::push<LuaClassType*>(m_state, inst);
       lua_setglobal(m_state, name.c_str());
@@ -79,10 +79,10 @@ namespace onep
     template<
       typename ClassDefinitionType,
       typename = typename std::enable_if<std::is_base_of<LuaClassDefinition, ClassDefinitionType>::value>::type>
-      void registerClass()
-      {
-        ClassDefinitionType().registerClass(m_state);
-      }
+    void registerClass()
+    {
+      ClassDefinitionType().registerClass(m_state);
+    }
 
   private:
     struct Impl;
