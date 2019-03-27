@@ -9,8 +9,10 @@ extern "C"
 
 #ifdef LUADOC_ENABLED
 #include <luadoc/Namespace.h>
+#define luans luadoc
 #else
 #include <LuaBridge/LuaBridge.h>
+#define luans luabridge
 #endif
 
 namespace onep
@@ -22,11 +24,7 @@ namespace onep
     virtual void registerClass(lua_State* state) = 0;
 
   protected:
-#ifdef LUADOC_ENABLED
-    static luadoc::Namespace getGlobalNamespace(lua_State* L);
-#else
-    static luabridge::Namespace getGlobalNamespace(lua_State* L);
-#endif
+    static luans::Namespace getGlobalNamespace(lua_State* L);
 
   };
 }
