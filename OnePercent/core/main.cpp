@@ -22,7 +22,6 @@ int main(int argc, char** argv)
 
 	ResourceManager::getInstance()->setResourceLoader(resourceLoader);*/
 
-
 #ifdef INITIALIZE_QT
 
 #ifdef WIN32
