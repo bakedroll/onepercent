@@ -214,6 +214,10 @@ add_subdirectory(osgGaming)
 
 if (LUADOC_ENABLE)
   add_subdirectory(luadoc)
+
+  if (GTEST_FOUND)
+    add_subdirectory(luadocTest)
+  endif()
 endif()
 
 add_subdirectory(OnePercent)
