@@ -61,6 +61,11 @@ namespace luadoc
       goUpPath.append(QString("..%1").arg((i == (depth-1)) ? "" : "/"));
     }
 
+    if (goUpPath.isEmpty())
+    {
+      return target->docsFilename.right(target->docsFilename.length() - 1);
+    }
+
     return goUpPath + target->docsFilename;
   }
 
