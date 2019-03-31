@@ -14,6 +14,16 @@ StaticLibInitializer staticLibInitializer;
 
 namespace luadoc
 {
+  QString surroundByDivTag(const QString& text, const QString& id = "", const QString& className = "")
+  {
+    const auto& result = QString("<div%1%2>%3</div>")
+                                 .arg(id.isEmpty() ? "" : QString(" id='%1'").arg(id))
+                                 .arg(id.isEmpty() ? "" : QString(" class='%1'").arg(id))
+                                 .arg(text);
+
+    return result;
+  }
+
   QString getShortenedTypeName(const QString& typeName)
   {
     QString result = typeName;
@@ -52,7 +62,7 @@ namespace luadoc
     return true;
   }
 
-  QString getRelativePath(const DocsGenerator::ClassDefPtr& source, const DocsGenerator::ClassDefPtr& target)
+  QString getRelativeClassFilePath(const DocsGenerator::ClassDefPtr& source, const DocsGenerator::ClassDefPtr& target)
   {
     auto depth = source->docsFilename.count('/') - 1;
     QString goUpPath;
@@ -61,86 +71,7 @@ namespace luadoc
       goUpPath.append(QString("..%1").arg((i == (depth-1)) ? "" : "/"));
     }
 
-    if (goUpPath.isEmpty())
-    {
-      return target->docsFilename.right(target->docsFilename.length() - 1);
-    }
-
-    return goUpPath + target->docsFilename;
-  }
-
-  DocsGenerator& DocsGenerator::instance()
-  {
-    static DocsGenerator instance;
-    return instance;
-  }
-
-  bool DocsGenerator::generate(const QString& projectName, const QString& outputPath, const QString& descriptionsFilename)
-  {
-    m_descriptions.clear();
-    m_navigationReplaceHtml.clear();
-
-    readDescriptionsFromCSV(descriptionsFilename);
-
-    assert_return(!m_nsStack.empty(), false);
-
-    QDir outputDir(outputPath);
-
-    assert_return(outputDir.exists(), false);
-
-    outputDir.mkdir("content");
-    outputDir.mkdir("css");
-
-    assert_return(outputDir.exists("content"), false);
-    assert_return(outputDir.exists("css"), false);
-
-    assert_return(writeToFile(outputDir.filePath("index.html"), readFromFile(":/templates/index.html")), false);
-    assert_return(writeToFile(outputDir.filePath("css/stylesheet.css"), readFromFile(":/templates/css/stylesheet.css")), false);
-
-    auto navigationHtml = readFromFile(":/templates/content/navigation.html");
-
-    traverseNamespace(*m_nsStack.cbegin(), QDir(outputDir.filePath("content/namespaces")));
-
-    navigationHtml.replace("{NAVIGATION_LIST}", m_navigationReplaceHtml);
-    m_navigationReplaceHtml.clear();
-
-    assert_return(writeToFile(outputDir.filePath("content/navigation.html"), navigationHtml), false);
-
-    auto mainHtml = readFromFile(":/templates/content/main.html");
-    mainHtml.replace("{PROJECT_NAME}", projectName);
-
-    assert_return(writeToFile(outputDir.filePath("content/main.html"), mainHtml), false);
-    assert_return(writeDescriptionsToCSV(descriptionsFilename), false);
-
-    return true;
-  }
-
-  void DocsGenerator::beginNamespace(const QString& name)
-  {
-    auto ns  = std::make_shared<NamespaceDefinition>();
-    ns->name = name;
-
-    const auto& currentNs = *m_nsStack.rbegin();
-
-    currentNs->namespaces[ns->name] = ns;
-    m_nsStack.push_back(ns);
-  }
-
-  void DocsGenerator::endNamespace()
-  {
-    m_nsStack.pop_back();
-  }
-
-  void DocsGenerator::endClass()
-  {
-
-    m_currentClass.reset();
-  }
-
-  DocsGenerator::DocsGenerator()
-  : m_idCounter(0)
-  , m_nsStack({std::make_shared<NamespaceDefinition>()})
-  {
+    return (goUpPath.isEmpty() ? "." : goUpPath) + target->docsFilename;
   }
 
   bool needsDoubleQuotes(const QString& value)
@@ -223,6 +154,82 @@ namespace luadoc
     }
 
     return values;
+  }
+
+  DocsGenerator& DocsGenerator::instance()
+  {
+    static DocsGenerator instance;
+    return instance;
+  }
+
+  bool DocsGenerator::generate(const QString& projectName, const QString& outputPath, const QString& descriptionsFilename)
+  {
+    m_descriptions.clear();
+    m_navigationReplaceHtml.clear();
+
+    readDescriptionsFromCSV(descriptionsFilename);
+
+    assert_return(!m_nsStack.empty(), false);
+
+    QDir outputDir(outputPath);
+
+    assert_return(outputDir.exists(), false);
+
+    outputDir.mkdir("content");
+    outputDir.mkdir("css");
+
+    assert_return(outputDir.exists("content"), false);
+    assert_return(outputDir.exists("css"), false);
+
+    assert_return(writeToFile(outputDir.filePath("index.html"), readFromFile(":/templates/index.html")), false);
+    assert_return(writeToFile(outputDir.filePath("css/stylesheet.css"), readFromFile(":/templates/css/stylesheet.css")), false);
+
+    auto templateHtml   = readFromFile(":/templates/content/template.html");
+    auto navigationHtml = templateHtml;
+    auto mainHtml       = templateHtml;
+
+    traverseNamespace(*m_nsStack.cbegin(), QDir(outputDir.filePath("content/namespaces")));
+
+    m_navigationReplaceHtml = surroundByDivTag(m_navigationReplaceHtml, "navigation");
+    navigationHtml.replace("{CONTENT}", m_navigationReplaceHtml);
+
+    assert_return(writeToFile(outputDir.filePath("content/navigation.html"), navigationHtml), false);
+
+    auto nameReplaceHtml = surroundByDivTag(QString("<h3>Lua API</h3><h2>%1</h2>").arg(projectName), "content");
+    mainHtml.replace("{CONTENT}", nameReplaceHtml);
+
+    assert_return(writeToFile(outputDir.filePath("content/main.html"), mainHtml), false);
+    assert_return(writeDescriptionsToCSV(descriptionsFilename), false);
+
+    return true;
+  }
+
+  void DocsGenerator::beginNamespace(const QString& name)
+  {
+    auto ns  = std::make_shared<NamespaceDefinition>();
+    ns->name = name;
+
+    const auto& currentNs = *m_nsStack.rbegin();
+
+    currentNs->namespaces[ns->name] = ns;
+    m_nsStack.push_back(ns);
+  }
+
+  void DocsGenerator::endNamespace()
+  {
+    m_nsStack.pop_back();
+  }
+
+  void DocsGenerator::endClass()
+  {
+
+    m_currentClass.reset();
+  }
+
+  DocsGenerator::DocsGenerator()
+  : m_idCounter(0)
+  , m_nsStack({std::make_shared<NamespaceDefinition>()})
+  {
   }
 
   bool DocsGenerator::writeDescriptionsToCSV(const QString& filename) const
@@ -369,7 +376,7 @@ namespace luadoc
 
   void DocsGenerator::generateClass(const QDir& directory, const QString& namespacePath, const ClassDefPtr& classPtr)
   {
-    auto classHtml = readFromFile(":/templates/content/class.html");
+    auto classHtml = readFromFile(":/templates/content/template.html");
     if (classHtml.isEmpty())
     {
       return;
@@ -379,7 +386,7 @@ namespace luadoc
     if (classPtr->baseClass)
     {
       classDescription.append(QString("<p><i>Inherits from</i> class <a href='%1' target='content'>%2</a></p>")
-                                      .arg(getRelativePath(classPtr, classPtr->baseClass), classPtr->baseClass->name));
+                                      .arg(getRelativeClassFilePath(classPtr, classPtr->baseClass), classPtr->baseClass->name));
     }
 
     if (!classPtr->functions.empty())
@@ -419,8 +426,10 @@ namespace luadoc
       classDescription.append("</table>");
     }
 
-    classHtml.replace("{CLASS_NAME}", classPtr->name);
-    classHtml.replace("{CLASS_DESCRIPTION}", classDescription);
+    auto classReplaceHtml =
+            surroundByDivTag(QString("<h3>class %1</h3>%2").arg(classPtr->name).arg(classDescription), "content");
+
+    classHtml.replace("{CONTENT}", classReplaceHtml);
 
     auto filename = QFileInfo(classPtr->docsFilename).fileName();
     QFile classFile(directory.filePath(filename));
@@ -451,7 +460,7 @@ namespace luadoc
       for (const auto& cl : currentNamespace->classes)
       {
         m_navigationReplaceHtml.append(
-                QString("<li><a href='namespaces%1' target='content'>%2</a></li>").arg(cl.second->docsFilename).arg(cl.second->name));
+                QString("<li><a href='./namespaces%1' target='content'>%2</a></li>").arg(cl.second->docsFilename).arg(cl.second->name));
 
         generateClass(currentNamespaceDir, currentNamespacePath, cl.second);
       }
