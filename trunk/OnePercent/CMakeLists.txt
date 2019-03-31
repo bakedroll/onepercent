@@ -29,7 +29,9 @@ if (WIN32)
   endif()
 endif()
 
-source_group(GeneratedFiles FILES ${CMAKE_CURRENT_BINARY_DIR}/OnePercent_automoc.cpp)
+source_group(GeneratedFiles FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_autogen/moc_compilation.cpp)
+
 source_group(Resources FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources.qrc)
 
 # specify needed osg libraries
@@ -54,7 +56,10 @@ endforeach()
 # set debug and release libs
 
 if (LUADOC_ENABLE)
-  add_definitions(-DLUADOC_ENABLED)
+  add_definitions(
+    -DLUADOC_ENABLED
+    -DLUADOC_DESCRIPTIONS_FILE="${CMAKE_SOURCE_DIR}/Resources/luaapi.csv")
+  
   target_link_libraries(${PROJECT_NAME} luadoc)
 endif()
 

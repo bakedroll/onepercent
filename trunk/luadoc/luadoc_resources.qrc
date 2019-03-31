@@ -1,0 +1,9 @@
+<RCC>
+    <qresource>
+        <file>templates/index.html</file>
+        <file>templates/content/class.html</file>
+        <file>templates/content/main.html</file>
+        <file>templates/content/navigation.html</file>
+        <file>templates/css/stylesheet.css</file>
+    </qresource>
+</RCC>

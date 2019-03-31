@@ -27,7 +27,6 @@
 #include <osgGaming/DepthOfFieldEffect.h>
 #include <osgGaming/HighDynamicRangeEffect.h>
 
-#include <QFile>
 #include <QDir>
 
 namespace onep
