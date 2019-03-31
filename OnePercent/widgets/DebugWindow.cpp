@@ -419,6 +419,25 @@ namespace onep
 
     void setupUi()
     {
+      auto generateLuaDocButton = new QPushButton("Generate LuaDoc");
+#ifdef LUADOC_ENABLED
+      connect(generateLuaDocButton, &QPushButton::clicked, [this]()
+      {
+        auto dir = QFileDialog::getExistingDirectory(base, "Select output directory", QDir::current().path());
+        if (dir.isEmpty())
+        {
+          return;
+        }
+
+        luadoc::DocsGenerator::instance().generate("OnePercent", dir, LUADOC_DESCRIPTIONS_FILE);
+      });
+#else
+      generateLuaDocButton->setEnabled(false);
+      generateLuaDocButton->setToolTip("LuaDoc not enabled for this build");
+#endif
+      
+
+
       toggleCountryButton = new QPushButton("Toggle selected country");
       toggleCountryButton->setFocusPolicy(Qt::NoFocus);
 
@@ -677,6 +696,7 @@ namespace onep
       saveLoadStateLayout->addWidget(saveStateButton);
 
       QVBoxLayout* miscControlsLayout = new QVBoxLayout();
+      miscControlsLayout->addWidget(generateLuaDocButton);
       miscControlsLayout->addWidget(toggleCountryButton);
       miscControlsLayout->addWidget(checkBoxWireframe);
       miscControlsLayout->addWidget(spinboxThickness);
