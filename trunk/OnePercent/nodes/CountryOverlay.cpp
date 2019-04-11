@@ -22,7 +22,7 @@
 
 namespace onep
 {
-  void CountryOverlay::Definition::registerClass(lua_State* state)
+  void CountryOverlay::Definition::registerDefinition(lua_State* state)
   {
     getGlobalNamespace(state)
       .deriveClass<CountryOverlay, LuaVisualOsgNode<osg::Group>>("CountryOverlay")

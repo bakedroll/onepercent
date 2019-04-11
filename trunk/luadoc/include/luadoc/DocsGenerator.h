@@ -102,7 +102,7 @@ namespace luadoc
     void addCurrentClassFunction(const QString& name)
     {
       assert_return(m_currentClass);
-      const auto& type = typeid(luabridge::FuncTraits<MemFn>::ReturnType);
+      const auto& type = typeid(typename luabridge::FuncTraits<MemFn>::ReturnType);
       m_currentClass->functions[name] = { name, type.name() };
     }
 

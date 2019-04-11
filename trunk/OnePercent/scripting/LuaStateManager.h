@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scripting/LuaClassDefinition.h"
+#include "scripting/LuaBridgeDefinition.h"
 
 #include <osgGaming/Injector.h>
 
@@ -72,16 +72,18 @@ namespace onep
     template<typename LuaClassType>
     void makeGlobalInstance(const std::string& name, LuaClassType* inst)
     {
+      //LuaBridgeDefinition::getGlobalNamespace(m_state).addProperty(name, inst);
+
       luabridge::push<LuaClassType*>(m_state, inst);
       lua_setglobal(m_state, name.c_str());
     }
 
     template<
-      typename ClassDefinitionType,
-      typename = typename std::enable_if<std::is_base_of<LuaClassDefinition, ClassDefinitionType>::value>::type>
-    void registerClass()
+      typename DefinitionType,
+      typename = typename std::enable_if<std::is_base_of<LuaBridgeDefinition, DefinitionType>::value>::type>
+    void registerDefinition()
     {
-      ClassDefinitionType().registerClass(m_state);
+      DefinitionType().registerDefinition(m_state);
     }
 
   private:

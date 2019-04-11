@@ -17,11 +17,11 @@ extern "C"
 
 namespace onep
 {
-  class LuaClassDefinition
+  class LuaBridgeDefinition
   {
   public:
-    virtual ~LuaClassDefinition() = default;
-    virtual void registerClass(lua_State* state) = 0;
+    virtual ~LuaBridgeDefinition() = default;
+    virtual void registerDefinition(lua_State* state) = 0;
 
   protected:
     static luans::Namespace getGlobalNamespace(lua_State* L);

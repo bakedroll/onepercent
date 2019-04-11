@@ -2,7 +2,7 @@
 
 #include "scripting/LuaDefines.h"
 #include "scripting/LuaCallback.h"
-#include "scripting/LuaClassDefinition.h"
+#include "scripting/LuaBridgeDefinition.h"
 #include "scripting/LuaStateManager.h"
 
 #include <osgGaming/Macros.h>
@@ -22,10 +22,10 @@ namespace onep
   class LuaCallbackRegistry : public osg::Referenced
   {
   public:
-    class Definition : public LuaClassDefinition
+    class Definition : public LuaBridgeDefinition
     {
     public:
-      void registerClass(lua_State* state) override;
+      void registerDefinition(lua_State* state) override;
     };
 
     explicit LuaCallbackRegistry(const LuaStateManager::Ptr& lua);

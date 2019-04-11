@@ -32,10 +32,22 @@ namespace luadoc
       result = result.right(result.length() - 6);
     }
 
-    auto index = result.indexOf('<');
-    if (index >= 0)
+    auto templateIndex = result.indexOf('<');
+    if (templateIndex >= 0)
     {
-      result = result.left(index).append("<...>");
+      result = result.left(templateIndex);
+    }
+
+    auto nsIndex = result.lastIndexOf("::");
+    if (nsIndex >= 0)
+    {
+      result = result.right(result.length() - nsIndex - 2);
+    }
+
+    auto spaceIndex = result.indexOf(' ');
+    if (spaceIndex >= 0)
+    {
+      result = result.left(spaceIndex);
     }
 
     return result;
@@ -156,6 +168,23 @@ namespace luadoc
     return values;
   }
 
+  QString makePageFromTemplate(const QString& content, int pathDepth)
+  {
+    QString stylesheetPath;
+    for (auto i=0; i<pathDepth; i++)
+    {
+      stylesheetPath.append("../");
+    }
+
+    stylesheetPath.append("css/stylesheet.css");
+
+    auto templateHtml = readFromFile(":/templates/content/template.html");
+    templateHtml.replace("{CONTENT}", content);
+    templateHtml.replace("{STYLESHEET_PATH}", stylesheetPath);
+
+    return templateHtml;
+  }
+
   DocsGenerator& DocsGenerator::instance()
   {
     static DocsGenerator instance;
@@ -178,25 +207,23 @@ namespace luadoc
     outputDir.mkdir("content");
     outputDir.mkdir("css");
 
+    QString namespacesHtmlPath = "content/namespaces";
+
     assert_return(outputDir.exists("content"), false);
     assert_return(outputDir.exists("css"), false);
 
     assert_return(writeToFile(outputDir.filePath("index.html"), readFromFile(":/templates/index.html")), false);
     assert_return(writeToFile(outputDir.filePath("css/stylesheet.css"), readFromFile(":/templates/css/stylesheet.css")), false);
 
-    auto templateHtml   = readFromFile(":/templates/content/template.html");
-    auto navigationHtml = templateHtml;
-    auto mainHtml       = templateHtml;
-
-    traverseNamespace(*m_nsStack.cbegin(), QDir(outputDir.filePath("content/namespaces")));
+    traverseNamespace(*m_nsStack.cbegin(), QDir(outputDir.filePath(namespacesHtmlPath)));
 
     m_navigationReplaceHtml = surroundByDivTag(m_navigationReplaceHtml, "navigation");
-    navigationHtml.replace("{CONTENT}", m_navigationReplaceHtml);
+    auto navigationHtml     = makePageFromTemplate(m_navigationReplaceHtml, 1);
 
     assert_return(writeToFile(outputDir.filePath("content/navigation.html"), navigationHtml), false);
 
     auto nameReplaceHtml = surroundByDivTag(QString("<h3>Lua API</h3><h2>%1</h2>").arg(projectName), "content");
-    mainHtml.replace("{CONTENT}", nameReplaceHtml);
+    auto mainHtml        = makePageFromTemplate(nameReplaceHtml, 1);
 
     assert_return(writeToFile(outputDir.filePath("content/main.html"), mainHtml), false);
     assert_return(writeDescriptionsToCSV(descriptionsFilename), false);
@@ -376,60 +403,94 @@ namespace luadoc
 
   void DocsGenerator::generateClass(const QDir& directory, const QString& namespacePath, const ClassDefPtr& classPtr)
   {
-    auto classHtml = readFromFile(":/templates/content/template.html");
-    if (classHtml.isEmpty())
-    {
-      return;
-    }
+    auto hasFunctions  = !classPtr->functions.empty();
+    auto hasProperties = !classPtr->properties.empty();
 
     QString classDescription;
+    QString membersDescription;
+
     if (classPtr->baseClass)
     {
       classDescription.append(QString("<p><i>Inherits from</i> class <a href='%1' target='content'>%2</a></p>")
                                       .arg(getRelativeClassFilePath(classPtr, classPtr->baseClass), classPtr->baseClass->name));
     }
 
-    if (!classPtr->functions.empty())
+    if (hasFunctions || hasProperties)
+    {
+      membersDescription.append("<h4>Detailed description</h4>");
+    }
+
+    auto memberCounter = 0;
+
+    if (hasFunctions)
     {
       classDescription.append("<h4>Functions</h4>");
       classDescription.append("<table>");
 
       for (const auto& function : classPtr->functions)
       {
-        const auto& description = getOrCreateDescription({ namespacePath, classPtr->name, function.second.name });
+        const auto& description = getOrCreateDescription({namespacePath, classPtr->name, function.second.name});
+        const auto  returnType  = getShortenedTypeName(function.second.returnType).toHtmlEscaped();
 
-        classDescription.append(QString("<tr><td>%1() &rarr; %2</td><td>%3</td></tr>")
-                                        .arg(function.second.name)
-                                        .arg(getShortenedTypeName(function.second.returnType).toHtmlEscaped())
-                                        .arg(description.shortDescription));
+        classDescription.append(
+                QString("<tr><td><a href='#member_%1'>%2()</a> &rarr; %3</td><td>%4</td></tr>")
+                        .arg(memberCounter)
+                        .arg(function.second.name)
+                        .arg(returnType)
+                        .arg(description.shortDescription));
+
+        membersDescription.append(
+                QString("<p class='detailed_class' id='member_%1'>%2() &rarr; %3</p><p class='detailed_description'>%4</p>")
+                        .arg(memberCounter)
+                        .arg(function.second.name)
+                        .arg(returnType)
+                        .arg(description.description));
+
+        memberCounter++;
       }
 
       classDescription.append("</table>");
     }
 
-    if (!classPtr->properties.empty())
+    if (hasProperties)
     {
       classDescription.append("<h4>Properties</h4>");
       classDescription.append("<table>");
 
       for (const auto& property : classPtr->properties)
       {
-        const auto& description = getOrCreateDescription({ namespacePath, classPtr->name, property.second.name });
+        const auto& description   = getOrCreateDescription({namespacePath, classPtr->name, property.second.name});
+        const auto  returnType    = getShortenedTypeName(property.second.type).toHtmlEscaped();
+        const auto  accessibility = (property.second.isReadonly ? "R" : "RW");
 
-        classDescription.append(QString("<tr><td>%1 :: %2 <i>[%3]</i></td><td>%4</td></tr>")
+        classDescription.append(QString("<tr><td><a href='#member_%1'>%2</a> :: %3 <i>[%4]</i></td><td>%5</td></tr>")
+                                        .arg(memberCounter)
                                         .arg(property.second.name)
-                                        .arg(getShortenedTypeName(property.second.type).toHtmlEscaped())
-                                        .arg(property.second.isReadonly ? "R" : "RW")
+                                        .arg(returnType)
+                                        .arg(accessibility)
                                         .arg(description.shortDescription));
+
+        membersDescription.append(QString("<p class='detailed_class' id='member_%1'>%2 :: %3 <i>[%4]</i></p><p "
+                                          "class='detailed_description'>%5</p>")
+                                          .arg(memberCounter)
+                                          .arg(property.second.name)
+                                          .arg(returnType)
+                                          .arg(accessibility)
+                                          .arg(description.shortDescription));
+
+        memberCounter++;
       }
 
       classDescription.append("</table>");
     }
 
-    auto classReplaceHtml =
-            surroundByDivTag(QString("<h3>class %1</h3>%2").arg(classPtr->name).arg(classDescription), "content");
+    auto classReplaceHtml = surroundByDivTag(
+            QString("<h3>class %1</h3>%2%3").arg(classPtr->name).arg(classDescription).arg(membersDescription),
+            "content");
 
-    classHtml.replace("{CONTENT}", classReplaceHtml);
+
+    auto pathDepth = 2 + namespacePath.count('/') + (namespacePath.isEmpty() ? 0 : 1);
+    auto classHtml = makePageFromTemplate(classReplaceHtml, pathDepth);
 
     auto filename = QFileInfo(classPtr->docsFilename).fileName();
     QFile classFile(directory.filePath(filename));

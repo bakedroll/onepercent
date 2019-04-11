@@ -1,12 +1,12 @@
 #pragma once
 
-#include "scripting/LuaClassDefinition.h"
+#include "scripting/LuaBridgeDefinition.h"
 
 namespace onep
 {
-    class LuaExternalClassDefinitions : public LuaClassDefinition
+    class LuaExternalClassDefinitions : public LuaBridgeDefinition
     {
     public:
-      void registerClass(lua_State* state) override;
+      void registerDefinition(lua_State* state) override;
     };
 }

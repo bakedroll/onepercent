@@ -10,7 +10,7 @@ namespace onep
   struct LuaSimulationStateTable::Impl
   {
     Impl()
-      : oCountryBranchActivated(new OCountryBranchAcivated({}))
+      : oCountryBranchActivated(new OCountryBranchAcivated(CountryBranch()))
     {}
 
     LuaCountryState::Map        countryStates;

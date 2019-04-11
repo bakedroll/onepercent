@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scripting/LuaClassDefinition.h"
+#include "scripting/LuaBridgeDefinition.h"
 
 #include <osgGaming/Macros.h>
 
@@ -26,10 +26,10 @@ namespace onep
   public:
     using Ptr = osg::ref_ptr<LuaConfig>;
 
-    class Definition : public LuaClassDefinition
+    class Definition : public LuaBridgeDefinition
     {
     public:
-      void registerClass(lua_State* state) override;
+      void registerDefinition(lua_State* state) override;
     };
 
     explicit LuaConfig(osgGaming::Injector& injector);
