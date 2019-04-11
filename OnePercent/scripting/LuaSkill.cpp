@@ -5,7 +5,7 @@
 
 namespace onep
 {
-  void LuaSkill::Definition::registerClass(lua_State* state)
+  void LuaSkill::Definition::registerDefinition(lua_State* state)
   {
     getGlobalNamespace(state)
       .deriveClass<LuaSkill, LuaCallbackRegistry>("LuaSkill")

@@ -35,21 +35,21 @@ namespace onep
   {
     osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
 
-    lua->registerClass<LuaExternalClassDefinitions>();
+    lua->registerDefinition<LuaExternalClassDefinitions>();
 
-    lua->registerClass<LuaCallbackRegistry::Definition>();
-    lua->registerClass<LuaVisualOsgNode<osg::Group>::Definition>();
-    lua->registerClass<LuaVisualOsgNode<osg::Geode>::Definition>();
+    lua->registerDefinition<LuaCallbackRegistry::Definition>();
+    lua->registerDefinition<LuaVisualOsgNode<osg::Group>::Definition>();
+    lua->registerDefinition<LuaVisualOsgNode<osg::Geode>::Definition>();
 
-    lua->registerClass<LuaSkill::Definition>();
-    lua->registerClass<CountryOverlay::Definition>();
-    lua->registerClass<CountryNode::Definition>();
+    lua->registerDefinition<LuaSkill::Definition>();
+    lua->registerDefinition<CountryOverlay::Definition>();
+    lua->registerDefinition<CountryNode::Definition>();
 
-    lua->registerClass<LuaConfig::Definition>();
-    lua->registerClass<LuaControl::Definition>();
-    lua->registerClass<LuaSimulation::Definition>();
-    lua->registerClass<LuaVisuals::Definition>();
-    lua->registerClass<LuaLogger::Definition>();
+    lua->registerDefinition<LuaConfig::Definition>();
+    lua->registerDefinition<LuaControl::Definition>();
+    lua->registerDefinition<LuaSimulation::Definition>();
+    lua->registerDefinition<LuaVisuals::Definition>();
+    lua->registerDefinition<LuaLogger::Definition>();
 
     lua->makeGlobalInstance("config", injector.inject<LuaConfig>().get());
     lua->makeGlobalInstance("control", injector.inject<LuaControl>().get());

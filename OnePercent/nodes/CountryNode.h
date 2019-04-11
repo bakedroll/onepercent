@@ -14,10 +14,10 @@ namespace onep
   class CountryNode : public LuaVisualOsgNode<osg::Geode>
   {
   public:
-    class Definition : public LuaClassDefinition
+    class Definition : public LuaBridgeDefinition
     {
     public:
-      void registerClass(lua_State* state) override;
+      void registerDefinition(lua_State* state) override;
     };
 
     typedef std::map<int, std::vector<int>> BorderIdMap;

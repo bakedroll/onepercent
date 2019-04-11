@@ -7,10 +7,10 @@ namespace onep
   class LuaVisuals : public osg::Referenced
   {
   public:
-    class Definition : public LuaClassDefinition
+    class Definition : public LuaBridgeDefinition
     {
     public:
-      void registerClass(lua_State* state) override;
+      void registerDefinition(lua_State* state) override;
     };
 
     using Ptr = osg::ref_ptr<LuaVisuals>;

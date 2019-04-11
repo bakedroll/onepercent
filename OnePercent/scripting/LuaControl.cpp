@@ -15,7 +15,7 @@
 
 namespace onep
 {
-  void LuaControl::Definition::registerClass(lua_State* state)
+  void LuaControl::Definition::registerDefinition(lua_State* state)
   {
     getGlobalNamespace(state)
       .deriveClass<LuaControl, LuaCallbackRegistry>("Control")

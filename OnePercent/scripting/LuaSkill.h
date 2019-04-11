@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scripting/LuaClassDefinition.h"
+#include "scripting/LuaBridgeDefinition.h"
 #include "scripting/LuaCallbackRegistry.h"
 #include "scripting/LuaStateManager.h"
 #include "scripting/LuaObjectMapper.h"
@@ -17,10 +17,10 @@ namespace onep
 	class LuaSkill : public LuaCallbackRegistry, public LuaObjectMapper
 	{
 	public:
-    class Definition : public LuaClassDefinition
+    class Definition : public LuaBridgeDefinition
     {
     public:
-      void registerClass(lua_State* state) override;
+      void registerDefinition(lua_State* state) override;
     };
 
     typedef std::shared_ptr<LuaSkill> Ptr;

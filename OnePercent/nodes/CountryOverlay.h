@@ -13,10 +13,10 @@ namespace onep
   class CountryOverlay : public LuaVisualOsgNode<osg::Group>
   {
   public:
-    class Definition : public LuaClassDefinition
+    class Definition : public LuaBridgeDefinition
     {
     public:
-      void registerClass(lua_State* state) override;
+      void registerDefinition(lua_State* state) override;
     };
 
     using OSelectedCountryId        = osgGaming::Observable<int>;

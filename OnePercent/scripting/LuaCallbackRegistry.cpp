@@ -2,7 +2,7 @@
 
 namespace onep
 {
-  void LuaCallbackRegistry::Definition::registerClass(lua_State* state)
+  void LuaCallbackRegistry::Definition::registerDefinition(lua_State* state)
   {
     getGlobalNamespace(state)
       .beginClass<LuaCallbackRegistry>("CallbackRegistry")

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/Observables.h"
-#include "scripting/LuaClassDefinition.h"
+#include "scripting/LuaBridgeDefinition.h"
 
 #include <osg/Referenced>
 #include <osgGaming/Injector.h>
@@ -18,10 +18,10 @@ namespace onep
   class LuaSimulation : public osg::Referenced
   {
   public:
-    class Definition : public LuaClassDefinition
+    class Definition : public LuaBridgeDefinition
     {
     public:
-      void registerClass(lua_State* state) override;
+      void registerDefinition(lua_State* state) override;
     };
 
     LuaSimulation(osgGaming::Injector& injector);

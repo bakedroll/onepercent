@@ -13,7 +13,7 @@ extern "C"
 
 namespace onep
 {
-  void LuaSimulation::Definition::registerClass(lua_State* state)
+  void LuaSimulation::Definition::registerDefinition(lua_State* state)
   {
     getGlobalNamespace(state)
       .beginClass<LuaSimulation>("Simulation")

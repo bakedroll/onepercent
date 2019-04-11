@@ -25,7 +25,7 @@ namespace onep
     uniform->set(value);
   }
 
-  void LuaVisuals::Definition::registerClass(lua_State* state)
+  void LuaVisuals::Definition::registerDefinition(lua_State* state)
   {
     getGlobalNamespace(state)
       .beginClass<LuaVisuals>("Visuals")

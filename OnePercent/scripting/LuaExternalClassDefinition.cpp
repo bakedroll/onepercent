@@ -8,7 +8,7 @@
 
 namespace onep
 {
-  void LuaExternalClassDefinitions::registerClass(lua_State* state)
+  void LuaExternalClassDefinitions::registerDefinition(lua_State* state)
   {
     getGlobalNamespace(state)
       .beginClass<osg::Vec2f>("Vec2f")

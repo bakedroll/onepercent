@@ -7,10 +7,10 @@ namespace onep
   class LuaLogger : public osg::Referenced
   {
   public:
-    class Definition : public LuaClassDefinition
+    class Definition : public LuaBridgeDefinition
     {
     public:
-      void registerClass(lua_State* state) override;
+      void registerDefinition(lua_State* state) override;
     };
 
     explicit LuaLogger(osgGaming::Injector& injector);
