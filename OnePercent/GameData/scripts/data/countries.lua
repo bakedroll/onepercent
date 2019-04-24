@@ -1,4 +1,4 @@
-control:create_countries({
+lua.control:create_countries({
   {
     id = 1,
     name = "Afghanistan",

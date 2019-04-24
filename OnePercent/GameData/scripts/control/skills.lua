@@ -1,4 +1,4 @@
-control:skill("found_party"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
+lua.control:skill("found_party"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
   local influence = country_state.values["political_influence"]
   influence = gameplay.raise_value(influence, 0.4, 0.02, 0.0001, 5)
@@ -6,7 +6,7 @@ control:skill("found_party"):on_event(defines.callback.on_skill_update, function
 
 end)
 
-control:skill("canvassing"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
+lua.control:skill("canvassing"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
   local ideology = country_state.values["ideology"]
   local influence = country_state.values["political_influence"]
@@ -16,7 +16,7 @@ control:skill("canvassing"):on_event(defines.callback.on_skill_update, function(
 
 end)
 
-control:skill("campaign_pledges"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
+lua.control:skill("campaign_pledges"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
   local ideology = country_state.values["ideology"]
   local divisiveness = country_state.values["divisiveness"]
@@ -30,37 +30,37 @@ control:skill("campaign_pledges"):on_event(defines.callback.on_skill_update, fun
 
 end)
 
-control:skill("propagation_banks"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
+lua.control:skill("propagation_banks"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control:skill("propagation_control"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
+lua.control:skill("propagation_control"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control:skill("propagation_media"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
+lua.control:skill("propagation_media"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control:skill("propagation_concerns"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
+lua.control:skill("propagation_concerns"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control:skill("propagation_politics"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
+lua.control:skill("propagation_politics"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagation"] = 1.0
 
 end)
 
-control:on_event(defines.callback.on_branch_update, function(branch_name, country_state)
+lua.control:on_event(defines.callback.on_branch_update, function(branch_name, country_state)
 
   if (country_state.branches_activated[branch_name] == true) then return end
 
@@ -77,22 +77,22 @@ control:on_event(defines.callback.on_branch_update, function(branch_name, countr
 
 end)
 
-control:on_event(defines.callback.on_branch_activated, function(branch_name, country_state)
+lua.control:on_event(defines.callback.on_branch_activated, function(branch_name, country_state)
 
   if (branch_name == "politics") then
-    simulation:add_skill_points(30)
+    lua.simulation:add_skill_points(30)
   end
 
 end)
 
-control:on_event(defines.callback.on_branch_purchased, function(branch_name, country_state)
+lua.control:on_event(defines.callback.on_branch_purchased, function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagated"] = 1.0
-  countries:set_current_overlay_branch_name(branch_name)
+  lua.countries:set_current_overlay_branch_name(branch_name)
 
 end)
 
-control:on_event(defines.callback.on_branch_resigned, function(branch_name, country_state)
+lua.control:on_event(defines.callback.on_branch_resigned, function(branch_name, country_state)
 
   country_state.branch_values[branch_name]["propagated"] = 0.0
 

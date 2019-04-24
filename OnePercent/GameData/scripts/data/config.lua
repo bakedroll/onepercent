@@ -1,4 +1,4 @@
-config:extend(
+lua.config:extend(
 {
   camera = {
     min_distance = 7.5,

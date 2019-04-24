@@ -1,4 +1,4 @@
-control:create_skills({
+lua.control:create_skills({
 
   -- politics
   {

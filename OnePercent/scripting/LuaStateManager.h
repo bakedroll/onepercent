@@ -80,10 +80,11 @@ namespace onep
 
     template<
       typename DefinitionType,
-      typename = typename std::enable_if<std::is_base_of<LuaBridgeDefinition, DefinitionType>::value>::type>
-    void registerDefinition()
+      typename = typename std::enable_if<std::is_base_of<LuaBridgeDefinition, DefinitionType>::value>::type,
+      typename... Args>
+    void registerDefinition(Args... args)
     {
-      DefinitionType().registerDefinition(m_state);
+      DefinitionType(args...).registerDefinition(m_state);
     }
 
   private:

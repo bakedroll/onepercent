@@ -7,6 +7,8 @@ namespace onep
   class LuaLogger : public osg::Referenced
   {
   public:
+    using Ptr = osg::ref_ptr<LuaLogger>;
+
     class Definition : public LuaBridgeDefinition
     {
     public:

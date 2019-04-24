@@ -1,4 +1,4 @@
-control:create_branches({
+lua.control:create_branches({
   {
     name = "banks",
     cost = 120
