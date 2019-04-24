@@ -72,8 +72,6 @@ namespace onep
     template<typename LuaClassType>
     void makeGlobalInstance(const std::string& name, LuaClassType* inst)
     {
-      //LuaBridgeDefinition::getGlobalNamespace(m_state).addProperty(name, inst);
-
       luabridge::push<LuaClassType*>(m_state, inst);
       lua_setglobal(m_state, name.c_str());
     }
