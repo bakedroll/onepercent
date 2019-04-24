@@ -1,5 +1,6 @@
-local countries = countries
-local visuals   = visuals
+local countries = lua.countries
+local visuals   = lua.visuals
+local control   = lua.control
 
 local color_transparent = Vec4f(0.0, 0.0, 0.0, 0.0)
 local color_selected    = Vec4f(0.5, 0.69, 1.0, 0.5)

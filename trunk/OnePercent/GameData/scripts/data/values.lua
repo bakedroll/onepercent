@@ -1,4 +1,4 @@
-control:create_values({
+lua.control:create_values({
   -- Individual values per country
   {
     name = "population",

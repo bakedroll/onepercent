@@ -19,6 +19,7 @@
 #include "scripting/LuaVisuals.h"
 #include "scripting/LuaSimulation.h"
 #include "scripting/LuaSkill.h"
+#include "scripting/LuaPropertyDefinitions.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 
@@ -51,12 +52,7 @@ namespace onep
     lua->registerDefinition<LuaVisuals::Definition>();
     lua->registerDefinition<LuaLogger::Definition>();
 
-    lua->makeGlobalInstance("config", injector.inject<LuaConfig>().get());
-    lua->makeGlobalInstance("control", injector.inject<LuaControl>().get());
-    lua->makeGlobalInstance("simulation", injector.inject<LuaSimulation>().get());
-    lua->makeGlobalInstance("visuals", injector.inject<LuaVisuals>().get());
-    lua->makeGlobalInstance("log", injector.inject<LuaLogger>().get());
-    lua->makeGlobalInstance("countries", injector.inject<CountryOverlay>().get());
+    lua->registerDefinition<LuaPropertyDefinitions>(injector);
   }
 
   struct OnePercentApplication::Impl

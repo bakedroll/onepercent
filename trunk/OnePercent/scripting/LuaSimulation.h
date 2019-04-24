@@ -18,6 +18,8 @@ namespace onep
   class LuaSimulation : public osg::Referenced
   {
   public:
+    using Ptr = osg::ref_ptr<LuaSimulation>;
+
     class Definition : public LuaBridgeDefinition
     {
     public:
