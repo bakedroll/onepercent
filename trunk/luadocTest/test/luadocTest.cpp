@@ -40,6 +40,11 @@ public:
   std::string property_r_getter() const { return ""; }
 };
 
+C* testPropertyGet()
+{
+  return nullptr;
+}
+
 TEST(LuaDocTest, Test)
 {
   auto L = luaL_newstate();
@@ -63,6 +68,7 @@ TEST(LuaDocTest, Test)
       .endNamespace()
     .endNamespace()
     .beginNamespace("ns_b")
+      .addProperty("testProperty", testPropertyGet)
       .deriveClass<C, B>("C")
       .addFunction("function_void", &C::function_void)
       .addFunction("function_int", &C::function_int)

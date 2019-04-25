@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scripting/LuaBridgeDefinition.h"
+#include "scripting/LuaStaticProperty.h"
 
 #include <osgGaming/Injector.h>
 
@@ -15,7 +16,17 @@ namespace onep
       void registerDefinition(lua_State* state) override;
 
     private:
-      struct Impl;
-      std::unique_ptr<Impl> m;
+      osgGaming::Injector& m_injector;
+
+      template <typename T>
+      void addProperty(lua_State* state, const char* name)
+      {
+        LuaStaticProperty<T>::set(m_injector.inject<T>().get());
+        getGlobalNamespace(state)
+          .beginNamespace("lua")
+          .addProperty(name, LuaStaticProperty<T>::get)
+          .endNamespace();
+      }
+
     };
 }
