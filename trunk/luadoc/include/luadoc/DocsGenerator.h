@@ -43,24 +43,32 @@ namespace luadoc
       bool    isReadonly;
     };
 
-    struct ClassDefinition
+    struct ScopeDefinition
+    {
+      virtual ~ScopeDefinition() = default;
+      bool hasAnyDeclarations() const;
+      bool hasMember(const QString& name) const;
+
+      QString                               name;
+      std::map<QString, FunctionDefinition> functions;
+      std::map<QString, PropertyDefinition> properties;
+    };
+
+    using ScopeDefPtr = std::shared_ptr<ScopeDefinition>;
+
+    struct ClassDefinition : ScopeDefinition
     {
       int         id;
       QString     docsFilename;
-      QString     name;
       ClassDefPtr baseClass;
       QString     returnType;
-
-      std::map<QString, FunctionDefinition> functions;
-      std::map<QString, PropertyDefinition> properties;
     };
 
     struct NamespaceDefinition;
     using NamespaceDefPtr = std::shared_ptr<NamespaceDefinition>;
 
-    struct NamespaceDefinition
+    struct NamespaceDefinition : ScopeDefinition
     {
-      QString                            name;
       std::map<QString, NamespaceDefPtr> namespaces;
       std::map<QString, ClassDefPtr>     classes;
     };
@@ -99,19 +107,43 @@ namespace luadoc
     void endClass();
 
     template <typename MemFn>
+    void addScopeFunction(const ScopeDefPtr& scope, const QString& name)
+    {
+      assert_return(scope);
+      const auto& type = typeid(typename luabridge::FuncTraits<MemFn>::ReturnType);
+      scope->functions[name] = { name, type.name() };
+    }
+
+    template <typename ReturnType>
+    void addScopeProperty(const ScopeDefPtr& scope, const QString& name, bool isReadonly)
+    {
+      assert_return(scope);
+      const auto& type = typeid(ReturnType);
+      scope->properties[name] = { name, type.name(), isReadonly };
+    }
+
+    template <typename MemFn>
     void addCurrentClassFunction(const QString& name)
     {
-      assert_return(m_currentClass);
-      const auto& type = typeid(typename luabridge::FuncTraits<MemFn>::ReturnType);
-      m_currentClass->functions[name] = { name, type.name() };
+      addScopeFunction<MemFn>(m_currentClass, name);
     }
 
     template <typename ReturnType>
     void addCurrentClassProperty(const QString& name, bool isReadonly)
     {
-      assert_return(m_currentClass);
-      const auto& type = typeid(ReturnType);
-      m_currentClass->properties[name] = { name, type.name(), isReadonly };
+      addScopeProperty<ReturnType>(m_currentClass, name, isReadonly);
+    }
+
+    template <typename MemFn>
+    void addCurrentNamespaceFunction(const QString& name)
+    {
+      addScopeFunction<MemFn>(*m_nsStack.rbegin(), name);
+    }
+
+    template <typename ReturnType>
+    void addCurrentNamespaceProperty(const QString& name, bool isReadonly)
+    {
+      addScopeProperty<ReturnType>(*m_nsStack.rbegin(), name, isReadonly);
     }
 
   private:
@@ -149,6 +181,9 @@ namespace luadoc
     bool               isMemberForDescriptionExisting(const DescriptionKey& key) const;
     const Description& getOrCreateDescription(const DescriptionKey& key);
 
+    QString generateScopeMembersHtml(const ScopeDefPtr& scopePtr, const QString& namespacePath, const QString& head = "");
+
+    void generateNamespace(const QDir& directory, const QString& namespacePath, const NamespaceDefPtr& namespacePtr);
     void generateClass(const QDir& directory, const QString& namespacePath, const ClassDefPtr& classPtr);
 
     template <typename T>
