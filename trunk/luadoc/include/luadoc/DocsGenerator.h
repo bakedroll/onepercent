@@ -32,15 +32,23 @@ namespace luadoc
 
     struct FunctionDefinition
     {
-      QString name;
-      QString returnType;
+      using Ptr = std::shared_ptr<FunctionDefinition>;
+
+      FunctionDefinition(const QString& n, const std::type_info& rt);
+
+      QString               name;
+      const std::type_info& returnType;
     };
 
     struct PropertyDefinition
     {
-      QString name;
-      QString type;
-      bool    isReadonly;
+      using Ptr = std::shared_ptr<PropertyDefinition>;
+
+      PropertyDefinition(const QString& n, const std::type_info& t, bool ro);
+
+      QString               name;
+      const std::type_info& type;
+      bool                  isReadonly;
     };
 
     struct ScopeDefinition
@@ -49,9 +57,10 @@ namespace luadoc
       bool hasAnyDeclarations() const;
       bool hasMember(const QString& name) const;
 
-      QString                               name;
-      std::map<QString, FunctionDefinition> functions;
-      std::map<QString, PropertyDefinition> properties;
+      QString                                    name;
+      QString                                    docsFilename;
+      std::map<QString, FunctionDefinition::Ptr> functions;
+      std::map<QString, PropertyDefinition::Ptr> properties;
     };
 
     using ScopeDefPtr = std::shared_ptr<ScopeDefinition>;
@@ -59,7 +68,6 @@ namespace luadoc
     struct ClassDefinition : ScopeDefinition
     {
       int         id;
-      QString     docsFilename;
       ClassDefPtr baseClass;
       QString     returnType;
     };
@@ -107,19 +115,19 @@ namespace luadoc
     void endClass();
 
     template <typename MemFn>
-    void addScopeFunction(const ScopeDefPtr& scope, const QString& name)
+    void addScopeFunction(const ScopeDefPtr& scope, const QString& name) const
     {
       assert_return(scope);
       const auto& type = typeid(typename luabridge::FuncTraits<MemFn>::ReturnType);
-      scope->functions[name] = { name, type.name() };
+      scope->functions[name] = std::make_shared<FunctionDefinition>(name, type);
     }
 
     template <typename ReturnType>
-    void addScopeProperty(const ScopeDefPtr& scope, const QString& name, bool isReadonly)
+    void addScopeProperty(const ScopeDefPtr& scope, const QString& name, bool isReadonly) const
     {
       assert_return(scope);
       const auto& type = typeid(ReturnType);
-      scope->properties[name] = { name, type.name(), isReadonly };
+      scope->properties[name] = std::make_shared<PropertyDefinition>(name, type, isReadonly);
     }
 
     template <typename MemFn>
@@ -180,6 +188,7 @@ namespace luadoc
     QString            getCurrentPath() const;
     bool               isMemberForDescriptionExisting(const DescriptionKey& key) const;
     const Description& getOrCreateDescription(const DescriptionKey& key);
+    QString            tryGetHyperlinkOfScope(const ScopeDefPtr& classPtr, const std::type_info& type) const;
 
     QString generateScopeMembersHtml(const ScopeDefPtr& scopePtr, const QString& namespacePath, const QString& head = "");
 
@@ -202,6 +211,7 @@ namespace luadoc
       currentNs->classes[name] = classDef;
       m_currentClass           = classDef;
       m_classes[typeid(T)]     = classDef;
+      m_classes[typeid(T*)]    = classDef;
 
       return classDef;
     }
