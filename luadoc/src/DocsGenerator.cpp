@@ -89,7 +89,7 @@ namespace luadoc
     return true;
   }
 
-  QString getRelativeClassFilePath(const DocsGenerator::ClassDefPtr& source, const DocsGenerator::ClassDefPtr& target)
+  QString getRelativeClassFilePath(const DocsGenerator::ScopeDefPtr& source, const DocsGenerator::ScopeDefPtr& target)
   {
     auto depth = source->docsFilename.count('/') - 1;
     QString goUpPath;
@@ -200,6 +200,20 @@ namespace luadoc
     return templateHtml;
   }
 
+  DocsGenerator::FunctionDefinition::FunctionDefinition(const QString& n, const std::type_info& rt)
+    : name(n)
+    , returnType(rt)
+  {
+
+  }
+
+  DocsGenerator::PropertyDefinition::PropertyDefinition(const QString& n, const std::type_info& t, bool ro)
+    : name(n)
+    , type(t)
+    , isReadonly(ro)
+  {
+  }
+
   bool DocsGenerator::ScopeDefinition::hasAnyDeclarations() const
   {
     return !properties.empty() || !functions.empty();
@@ -258,8 +272,14 @@ namespace luadoc
 
   void DocsGenerator::beginNamespace(const QString& name)
   {
-    auto ns  = std::make_shared<NamespaceDefinition>();
-    ns->name = name;
+    auto path = getCurrentPath();
+    auto ns   = std::make_shared<NamespaceDefinition>();
+    ns->name  = name;
+
+    if (!path.isEmpty())
+    {
+      ns->docsFilename = QString("%1%2.html").arg(path).arg(name);
+    }
 
     const auto& currentNs = *m_nsStack.rbegin();
 
@@ -391,7 +411,7 @@ namespace luadoc
 
     if (!key.ns.isEmpty())
     {
-      auto namespaces       = key.ns.split('/');
+      auto namespaces = key.ns.split('/');
 
       for (const auto& ns : namespaces)
       {
@@ -430,8 +450,21 @@ namespace luadoc
     return m_descriptions[key];
   }
 
+  QString DocsGenerator::tryGetHyperlinkOfScope(const ScopeDefPtr& scopePtr, const std::type_info& type) const
+  {
+    auto name = getShortenedTypeName(type.name()).toHtmlEscaped();
+
+    const auto it = m_classes.find(type);
+    if (it != m_classes.cend())
+    {
+      name = QString("<a href='%1' target='content'>%2</a>").arg(getRelativeClassFilePath(scopePtr, it->second)).arg(name);
+    }
+
+    return name;
+  }
+
   QString DocsGenerator::generateScopeMembersHtml(const ScopeDefPtr& scopePtr, const QString& namespacePath,
-                                                const QString& head)
+                                                  const QString& head)
   {
     auto hasFunctions  = !scopePtr->functions.empty();
     auto hasProperties = !scopePtr->properties.empty();
@@ -455,20 +488,20 @@ namespace luadoc
 
       for (const auto& function : scopePtr->functions)
       {
-        const auto& description = getOrCreateDescription({namespacePath, className, function.second.name});
-        const auto  returnType  = getShortenedTypeName(function.second.returnType).toHtmlEscaped();
+        const auto& description = getOrCreateDescription({namespacePath, className, function.second->name});
+        const auto  returnType  = tryGetHyperlinkOfScope(scopePtr, function.second->returnType);
 
         classDescription.append(
                 QString("<tr><td><a href='#member_%1'>%2()</a> &rarr; %3</td><td>%4</td></tr>")
                         .arg(memberCounter)
-                        .arg(function.second.name)
+                        .arg(function.second->name)
                         .arg(returnType)
                         .arg(description.shortDescription));
 
         membersDescription.append(
                 QString("<p class='detailed_class' id='member_%1'>%2() &rarr; %3</p><p class='detailed_description'>%4</p>")
                         .arg(memberCounter)
-                        .arg(function.second.name)
+                        .arg(function.second->name)
                         .arg(returnType)
                         .arg(description.description));
 
@@ -485,13 +518,15 @@ namespace luadoc
 
       for (const auto& property : scopePtr->properties)
       {
-        const auto& description   = getOrCreateDescription({namespacePath, className, property.second.name});
-        const auto  returnType    = getShortenedTypeName(property.second.type).toHtmlEscaped();
-        const auto  accessibility = (property.second.isReadonly ? "R" : "RW");
+        const auto& description   = getOrCreateDescription({namespacePath, className, property.second->name});
+        const auto  returnType    = tryGetHyperlinkOfScope(scopePtr, property.second->type);
+        const auto  accessibility = (property.second->isReadonly ? "R" : "RW");
+
+
 
         classDescription.append(QString("<tr><td><a href='#member_%1'>%2</a> :: %3 <i>[%4]</i></td><td>%5</td></tr>")
                                         .arg(memberCounter)
-                                        .arg(property.second.name)
+                                        .arg(property.second->name)
                                         .arg(returnType)
                                         .arg(accessibility)
                                         .arg(description.shortDescription));
@@ -499,7 +534,7 @@ namespace luadoc
         membersDescription.append(QString("<p class='detailed_class' id='member_%1'>%2 :: %3 <i>[%4]</i></p><p "
                                           "class='detailed_description'>%5</p>")
                                           .arg(memberCounter)
-                                          .arg(property.second.name)
+                                          .arg(property.second->name)
                                           .arg(returnType)
                                           .arg(accessibility)
                                           .arg(description.description));
@@ -574,13 +609,15 @@ namespace luadoc
       auto nsName = currentNamespacePath;
       nsName.replace('/', '.');
 
-      if (!currentNamespace->name.isEmpty())
+      if (isGlobalNs)
       {
-
-
+        m_navigationReplaceHtml.append("<h4>Global namespace</h4>");
+      }
+      else
+      {
         m_navigationReplaceHtml.append(QString("<a href='./namespaces/%1.html' target='content'><h4>%2</h4></a>")
                                                .arg(currentNamespacePath)
-                                               .arg(isGlobalNs ? "Global namespace" : nsName));
+                                               .arg(nsName));
 
         generateNamespace(currentNamespaceDir, currentNamespacePath, currentNamespace);
       }

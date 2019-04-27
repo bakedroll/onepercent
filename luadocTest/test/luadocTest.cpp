@@ -33,6 +33,7 @@ public:
   void        function_void() {}
   int         function_int() { return 0; }
   std::string function_string() { return ""; }
+  B*          function_b() { return nullptr; }
 
   int  property_rw_getter() const { return 0; }
   void property_rw_setter(int value) {}
@@ -73,6 +74,7 @@ TEST(LuaDocTest, Test)
       .addFunction("function_void", &C::function_void)
       .addFunction("function_int", &C::function_int)
       .addFunction("function_string", &C::function_string)
+      .addFunction("function_b", &C::function_b)
       .addProperty("property_rw", &C::property_rw_getter, &C::property_rw_setter)
       .addProperty("property_r", &C::property_r_getter)
       .endClass()
