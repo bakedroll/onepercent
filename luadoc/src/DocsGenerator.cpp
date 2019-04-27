@@ -272,18 +272,28 @@ namespace luadoc
 
   void DocsGenerator::beginNamespace(const QString& name)
   {
-    auto path = getCurrentPath();
-    auto ns   = std::make_shared<NamespaceDefinition>();
-    ns->name  = name;
-
-    if (!path.isEmpty())
-    {
-      ns->docsFilename = QString("%1%2.html").arg(path).arg(name);
-    }
-
     const auto& currentNs = *m_nsStack.rbegin();
 
-    currentNs->namespaces[ns->name] = ns;
+    NamespaceDefPtr ns;
+
+    if (!currentNs->namespaces.count(name))
+    {
+      auto path = getCurrentPath();
+      ns        = std::make_shared<NamespaceDefinition>();
+      ns->name  = name;
+
+      if (!path.isEmpty())
+      {
+        ns->docsFilename = QString("%1%2.html").arg(path).arg(name);
+      }
+
+      currentNs->namespaces[ns->name] = ns;
+    }
+    else
+    {
+      ns = currentNs->namespaces[name];
+    }
+
     m_nsStack.push_back(ns);
   }
 
@@ -615,9 +625,10 @@ namespace luadoc
       }
       else
       {
-        m_navigationReplaceHtml.append(QString("<a href='./namespaces/%1.html' target='content'><h4>%2</h4></a>")
-                                               .arg(currentNamespacePath)
-                                               .arg(nsName));
+        m_navigationReplaceHtml.append(
+                QString("<h4>Namespace <a href='./namespaces/%1.html' target='content'>%2</a></h4>")
+                        .arg(currentNamespacePath)
+                        .arg(nsName));
 
         generateNamespace(currentNamespaceDir, currentNamespacePath, currentNamespace);
       }

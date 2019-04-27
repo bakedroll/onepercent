@@ -198,20 +198,29 @@ namespace luadoc
     template <typename T>
     ClassDefPtr createClassDefinition(const QString& name)
     {
-      m_idCounter++;
-
-      auto path = getCurrentPath();
-
       const auto& currentNs  = *m_nsStack.rbegin();
-      auto        classDef   = std::make_shared<ClassDefinition>();
-      classDef->id           = m_idCounter;
-      classDef->docsFilename = QDir(path).filePath(QString("%1.html").arg(m_idCounter));
-      classDef->name         = name;
 
-      currentNs->classes[name] = classDef;
-      m_currentClass           = classDef;
-      m_classes[typeid(T)]     = classDef;
-      m_classes[typeid(T*)]    = classDef;
+      ClassDefPtr classDef;
+
+      if (!currentNs->classes.count(name))
+      {
+        m_idCounter++;
+        auto path = getCurrentPath();
+
+        classDef               = std::make_shared<ClassDefinition>();
+        classDef->id           = m_idCounter;
+        classDef->docsFilename = QDir(path).filePath(QString("%1.html").arg(m_idCounter));
+        classDef->name         = name;
+
+        currentNs->classes[name] = classDef;
+        m_currentClass           = classDef;
+        m_classes[typeid(T)]     = classDef;
+        m_classes[typeid(T*)]    = classDef;
+      }
+      else
+      {
+        classDef = currentNs->classes[name];
+      }
 
       return classDef;
     }
