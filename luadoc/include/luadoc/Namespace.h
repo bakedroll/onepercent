@@ -142,6 +142,7 @@ namespace luadoc
     template <typename TG, typename TS = TG>
     Namespace& addProperty(char const* name, TG (*get) (), void (*set)(TS) = 0)
     {
+      DocsGenerator::instance().addCurrentNamespaceProperty<TG>(name, set == 0);
       luabridge::Namespace::addProperty(name, get, set);
       return *this;
     }
@@ -149,6 +150,7 @@ namespace luadoc
     template <typename FP>
     Namespace& addFunction(char const* name, FP const fp)
     {
+      DocsGenerator::instance().addCurrentNamespaceFunction<FP>(name);
       luabridge::Namespace::addFunction(name, fp);
       return *this;
     }

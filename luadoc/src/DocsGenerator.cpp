@@ -14,6 +14,12 @@ StaticLibInitializer staticLibInitializer;
 
 namespace luadoc
 {
+  enum class ScopeType
+  {
+    Namespace,
+    Class
+  };
+
   QString surroundByDivTag(const QString& text, const QString& id = "", const QString& className = "")
   {
     const auto& result = QString("<div%1%2>%3</div>")
@@ -22,6 +28,15 @@ namespace luadoc
                                  .arg(text);
 
     return result;
+  }
+
+  QString generateScopeHtml(ScopeType type, const DocsGenerator::ScopeDefPtr& scopePtr, const QString& content)
+  {
+    return surroundByDivTag(QString("<h3>%1 %2</h3>%3")
+                                    .arg(type == ScopeType::Namespace ? "namespace" : "class")
+                                    .arg(scopePtr->name)
+                                    .arg(content),
+                            "content");
   }
 
   QString getShortenedTypeName(const QString& typeName)
@@ -183,6 +198,16 @@ namespace luadoc
     templateHtml.replace("{STYLESHEET_PATH}", stylesheetPath);
 
     return templateHtml;
+  }
+
+  bool DocsGenerator::ScopeDefinition::hasAnyDeclarations() const
+  {
+    return !properties.empty() || !functions.empty();
+  }
+
+  bool DocsGenerator::ScopeDefinition::hasMember(const QString& name) const
+  {
+    return functions.count(name) || properties.count(name);
   }
 
   DocsGenerator& DocsGenerator::instance()
@@ -363,22 +388,26 @@ namespace luadoc
   bool DocsGenerator::isMemberForDescriptionExisting(const DescriptionKey& key) const
   {
     auto currentNamespace = *m_nsStack.cbegin();
-    auto namespaces       = key.ns.split('/');
 
-    for (const auto& ns : namespaces)
+    if (!key.ns.isEmpty())
     {
-      auto it = currentNamespace->namespaces.find(ns);
-      if (it == currentNamespace->namespaces.end())
-      {
-        return false;
-      }
+      auto namespaces       = key.ns.split('/');
 
-      currentNamespace = it->second;
+      for (const auto& ns : namespaces)
+      {
+        auto it = currentNamespace->namespaces.find(ns);
+        if (it == currentNamespace->namespaces.end())
+        { 
+          return false;
+        }
+
+        currentNamespace = it->second;
+      }
     }
 
     if (key.cl.isEmpty())
     {
-      return false;
+      return currentNamespace->hasMember(key.name);
     }
 
     auto it = currentNamespace->classes.find(key.cl);
@@ -387,7 +416,7 @@ namespace luadoc
       return false;
     }
 
-    return it->second->functions.count(key.name) || it->second->properties.count(key.name);
+    return it->second->hasMember(key.name);
   }
 
   const DocsGenerator::Description& DocsGenerator::getOrCreateDescription(const DescriptionKey& key)
@@ -401,19 +430,16 @@ namespace luadoc
     return m_descriptions[key];
   }
 
-  void DocsGenerator::generateClass(const QDir& directory, const QString& namespacePath, const ClassDefPtr& classPtr)
+  QString DocsGenerator::generateScopeMembersHtml(const ScopeDefPtr& scopePtr, const QString& namespacePath,
+                                                const QString& head)
   {
-    auto hasFunctions  = !classPtr->functions.empty();
-    auto hasProperties = !classPtr->properties.empty();
+    auto hasFunctions  = !scopePtr->functions.empty();
+    auto hasProperties = !scopePtr->properties.empty();
 
-    QString classDescription;
+    auto className = std::dynamic_pointer_cast<ClassDefinition>(scopePtr) ? scopePtr->name : "";
+
+    QString classDescription = head;
     QString membersDescription;
-
-    if (classPtr->baseClass)
-    {
-      classDescription.append(QString("<p><i>Inherits from</i> class <a href='%1' target='content'>%2</a></p>")
-                                      .arg(getRelativeClassFilePath(classPtr, classPtr->baseClass), classPtr->baseClass->name));
-    }
 
     if (hasFunctions || hasProperties)
     {
@@ -427,9 +453,9 @@ namespace luadoc
       classDescription.append("<h4>Functions</h4>");
       classDescription.append("<table>");
 
-      for (const auto& function : classPtr->functions)
+      for (const auto& function : scopePtr->functions)
       {
-        const auto& description = getOrCreateDescription({namespacePath, classPtr->name, function.second.name});
+        const auto& description = getOrCreateDescription({namespacePath, className, function.second.name});
         const auto  returnType  = getShortenedTypeName(function.second.returnType).toHtmlEscaped();
 
         classDescription.append(
@@ -457,9 +483,9 @@ namespace luadoc
       classDescription.append("<h4>Properties</h4>");
       classDescription.append("<table>");
 
-      for (const auto& property : classPtr->properties)
+      for (const auto& property : scopePtr->properties)
       {
-        const auto& description   = getOrCreateDescription({namespacePath, classPtr->name, property.second.name});
+        const auto& description   = getOrCreateDescription({namespacePath, className, property.second.name});
         const auto  returnType    = getShortenedTypeName(property.second.type).toHtmlEscaped();
         const auto  accessibility = (property.second.isReadonly ? "R" : "RW");
 
@@ -476,7 +502,7 @@ namespace luadoc
                                           .arg(property.second.name)
                                           .arg(returnType)
                                           .arg(accessibility)
-                                          .arg(description.shortDescription));
+                                          .arg(description.description));
 
         memberCounter++;
       }
@@ -484,10 +510,40 @@ namespace luadoc
       classDescription.append("</table>");
     }
 
-    auto classReplaceHtml = surroundByDivTag(
-            QString("<h3>class %1</h3>%2%3").arg(classPtr->name).arg(classDescription).arg(membersDescription),
-            "content");
+    return classDescription.append(membersDescription);
+  }
 
+  void DocsGenerator::generateNamespace(const QDir& directory, const QString& namespacePath,
+                                        const NamespaceDefPtr& namespacePtr)
+  {
+    auto namespaceDescription = generateScopeMembersHtml(namespacePtr, namespacePath);
+    auto namespaceReplaceHtml = generateScopeHtml(ScopeType::Namespace, namespacePtr, namespaceDescription);
+
+    auto pathDepth     = 2 + namespacePath.count('/');
+    auto namespaceHtml = makePageFromTemplate(namespaceReplaceHtml, pathDepth);
+
+    QFile namespaceFile(directory.path() + ".html");
+    if (!namespaceFile.open(QIODevice::WriteOnly))
+    {
+      return;
+    }
+
+    QTextStream stream(&namespaceFile);
+    stream << namespaceHtml;
+  }
+
+  void DocsGenerator::generateClass(const QDir& directory, const QString& namespacePath, const ClassDefPtr& classPtr)
+  {
+    QString classDescription;
+
+    if (classPtr->baseClass)
+    {
+      classDescription.append(QString("<p><i>Inherits from</i> class <a href='%1' target='content'>%2</a></p>")
+                                      .arg(getRelativeClassFilePath(classPtr, classPtr->baseClass), classPtr->baseClass->name));
+    }
+
+    classDescription      = generateScopeMembersHtml(classPtr, namespacePath, classDescription);
+    auto classReplaceHtml = generateScopeHtml(ScopeType::Class, classPtr, classDescription);
 
     auto pathDepth = 2 + namespacePath.count('/') + (namespacePath.isEmpty() ? 0 : 1);
     auto classHtml = makePageFromTemplate(classReplaceHtml, pathDepth);
@@ -510,22 +566,37 @@ namespace luadoc
 
     auto isGlobalNs = currentNamespacePath.isEmpty();
 
-    if (!currentNamespace->classes.empty())
+    auto hasClasses      = !currentNamespace->classes.empty();
+    auto hasDeclarations = currentNamespace->hasAnyDeclarations();
+
+    if (hasClasses || hasDeclarations)
     {
       auto nsName = currentNamespacePath;
       nsName.replace('/', '.');
 
-      m_navigationReplaceHtml.append(QString("<h4>%1</h4>").arg(isGlobalNs ? "Global namespace" : nsName));
-
-      m_navigationReplaceHtml.append("<ul>");
-      for (const auto& cl : currentNamespace->classes)
+      if (!currentNamespace->name.isEmpty())
       {
-        m_navigationReplaceHtml.append(
-                QString("<li><a href='./namespaces%1' target='content'>%2</a></li>").arg(cl.second->docsFilename).arg(cl.second->name));
 
-        generateClass(currentNamespaceDir, currentNamespacePath, cl.second);
+
+        m_navigationReplaceHtml.append(QString("<a href='./namespaces/%1.html' target='content'><h4>%2</h4></a>")
+                                               .arg(currentNamespacePath)
+                                               .arg(isGlobalNs ? "Global namespace" : nsName));
+
+        generateNamespace(currentNamespaceDir, currentNamespacePath, currentNamespace);
       }
-      m_navigationReplaceHtml.append("</ul>");
+
+      if (hasClasses)
+      {
+        m_navigationReplaceHtml.append("<ul>");
+        for (const auto& cl : currentNamespace->classes)
+        {
+          m_navigationReplaceHtml.append(
+                  QString("<li><a href='./namespaces%1' target='content'>%2</a></li>").arg(cl.second->docsFilename).arg(cl.second->name));
+
+          generateClass(currentNamespaceDir, currentNamespacePath, cl.second);
+        }
+        m_navigationReplaceHtml.append("</ul>");
+      }
     }
 
     for (const auto& ns : currentNamespace->namespaces)
