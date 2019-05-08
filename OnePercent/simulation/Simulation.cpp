@@ -18,6 +18,8 @@
 
 namespace onep
 {
+  const int autoPauseTicks = 50;
+
   struct Simulation::Impl
   {
     Impl(osgGaming::Injector& injector)
@@ -30,6 +32,9 @@ namespace onep
       , oState(new osgGaming::Observable<State>(State::Paused))
       , tickUpdateMode(LuaDefines::TickUpdateMode::CPP)
       , profilingLogsEnabled(false)
+      , autoPauseEnabled(true)
+      , justStarted(false)
+      , tickNumber(0)
     {}
 
     osg::ref_ptr<LuaStateManager> lua;
@@ -53,6 +58,10 @@ namespace onep
     UpdateThread               thread;
 
     bool profilingLogsEnabled;
+    bool autoPauseEnabled;
+    bool justStarted;
+
+    int tickNumber;
 
     LuaRefPtr getLuaFunction(const char* path) const
     {
@@ -131,6 +140,14 @@ namespace onep
 
     QObject::connect(&m->timer, &QTimer::timeout, [this]()
     {
+      if (m->autoPauseEnabled && !m->justStarted && (m->tickNumber % autoPauseTicks == 0))
+      {
+        stop();
+        return;
+      }
+
+      m->tickNumber++;
+      m->justStarted = false;
       m->thread.doNextStep();
     });
   }
@@ -231,9 +248,15 @@ namespace onep
     }
 
     setUpdateTimerInterval(underlying(state));
+    m->justStarted = true;
     m->timer.start();
 
     OSGG_LOG_DEBUG("Simulation started");
+  }
+
+  void Simulation::setAutoPause(bool enabled)
+  {
+    m->autoPauseEnabled = enabled;
   }
 
   void Simulation::start()
@@ -249,6 +272,11 @@ namespace onep
   bool Simulation::isRunning() const
   {
     return m->timer.isActive();
+  }
+
+  bool Simulation::isAutoPauseEnabled() const
+  {
+    return m->autoPauseEnabled;
   }
 
   osgGaming::Observable<Simulation::State>::Ptr Simulation::getOState() const
