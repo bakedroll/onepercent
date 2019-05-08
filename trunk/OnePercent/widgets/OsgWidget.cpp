@@ -164,14 +164,14 @@ namespace onep
 
   struct OsgWidget::Impl
   {
-    Impl(OsgWidget* b, osg::ref_ptr<osgViewer::CompositeViewer> viewer)
+    Impl(OsgWidget* b, const osg::ref_ptr<osgViewer::CompositeViewer>& viewer)
       : base(b)
       , viewer(viewer)
       , isInitialized(false)
     {
-      for (IntMap::iterator it = c_buttons.begin(); it != c_buttons.end(); ++it)
+      for (auto& c_button : c_buttons)
       {
-        mouseButtons.push_back(it->first);
+        mouseButtons.push_back(c_button.first);
         mouseButtonsState.push_back(false);
       }
     }
@@ -210,7 +210,7 @@ namespace onep
     std::vector<bool> mouseButtonsState;
   };
 
-  OsgWidget::OsgWidget(osg::ref_ptr<osgViewer::CompositeViewer> viewer, QWidget* parent, Qt::WindowFlags f)
+  OsgWidget::OsgWidget(const osg::ref_ptr<osgViewer::CompositeViewer>& viewer, QWidget* parent, Qt::WindowFlags f)
     : QGLWidget(parent, nullptr, f)
     , InputManager()
     , m(new Impl(this, viewer))
@@ -253,11 +253,9 @@ namespace onep
     m->updateTimer.start();
   }
 
-  OsgWidget::~OsgWidget()
-  {
-  }
+  OsgWidget::~OsgWidget() = default;
 
-  void OsgWidget::setOverlayCompositor(std::shared_ptr<OverlayCompositor> compositor)
+  void OsgWidget::setOverlayCompositor(const std::shared_ptr<OverlayCompositor>& compositor)
   {
     m->compositor = compositor;
   }

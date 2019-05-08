@@ -16,10 +16,10 @@ namespace onep
     Q_OBJECT
 
   public:
-    OsgWidget(osg::ref_ptr<osgViewer::CompositeViewer> viewer, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    OsgWidget(const osg::ref_ptr<osgViewer::CompositeViewer>& viewer, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
     ~OsgWidget();
 
-    void setOverlayCompositor(std::shared_ptr<OverlayCompositor> compositor);
+    void setOverlayCompositor(const std::shared_ptr<OverlayCompositor>& compositor);
 
   protected:
     virtual void paintGL() override;
