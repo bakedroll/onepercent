@@ -27,7 +27,7 @@ namespace onep
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , luaControl(injector.inject<LuaControl>())
-      , oRunning(new osgGaming::Observable<bool>(false))
+      , oState(new osgGaming::Observable<State>(State::Paused))
       , tickUpdateMode(LuaDefines::TickUpdateMode::CPP)
       , profilingLogsEnabled(false)
     {}
@@ -47,7 +47,7 @@ namespace onep
 
     osg::ref_ptr<LuaControl> luaControl;
 
-    osgGaming::Observable<bool>::Ptr oRunning;
+    osgGaming::Observable<State>::Ptr oState;
 
     LuaDefines::TickUpdateMode tickUpdateMode;
     UpdateThread               thread;
@@ -76,7 +76,7 @@ namespace onep
     m->oNumSkillPoints->set(50);
 
     m->timer.setSingleShot(false);
-    m->timer.setInterval(underlying(UpdateTimerInterval::NormalSpeed));
+    m->timer.setInterval(underlying(State::NormalSpeed));
 
     m->thread.onTick([this]()
     {
@@ -214,43 +214,46 @@ namespace onep
     return result;
   }
 
-  void Simulation::start()
+  void Simulation::setState(State state)
   {
-    if (m->oRunning->get())
+    if (m->oState->get() == state)
     {
       return;
     }
 
-    m->oRunning->set(true);
+    m->oState->set(state);
+
+    if (state == State::Paused)
+    {
+      m->timer.stop();
+      OSGG_LOG_DEBUG("Simulation stopped");
+      return;
+    }
+
+    setUpdateTimerInterval(underlying(state));
     m->timer.start();
+
     OSGG_LOG_DEBUG("Simulation started");
+  }
+
+  void Simulation::start()
+  {
+    setState(State::NormalSpeed);
   }
 
   void Simulation::stop()
   {
-    if (!m->oRunning->get())
-    {
-      return;
-    }
-
-    m->timer.stop();
-    m->oRunning->set(false);
-    OSGG_LOG_DEBUG("Simulation stopped");
+    setState(State::Paused);
   }
 
-  bool Simulation::running() const
+  bool Simulation::isRunning() const
   {
     return m->timer.isActive();
   }
 
-  osgGaming::Observable<bool>::Ptr Simulation::getORunning() const
+  osgGaming::Observable<Simulation::State>::Ptr Simulation::getOState() const
   {
-    return m->oRunning;
-  }
-
-  void Simulation::setUpdateTimerInterval(UpdateTimerInterval interval)
-  {
-    setUpdateTimerInterval(underlying(interval));
+    return m->oState;
   }
 
   void Simulation::setUpdateTimerInterval(int msecs)

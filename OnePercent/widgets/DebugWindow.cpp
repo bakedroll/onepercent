@@ -124,11 +124,11 @@ namespace onep
     QPushButton* toggleCountryButton;
     CountryNode::Map selectedCountries;
 
-    osgGaming::Observer<int>::Ptr notifySelectedCountry;
-    osgGaming::Observer<int>::Ptr notifyDay;
-    osgGaming::Observer<int>::Ptr notifySkillpoints;
-    osgGaming::Observer<bool>::Ptr notifyRunningValues;
-    osgGaming::Observer<bool>::Ptr notifyRunningButton;
+    osgGaming::Observer<int>::Ptr               notifySelectedCountry;
+    osgGaming::Observer<int>::Ptr               notifyDay;
+    osgGaming::Observer<int>::Ptr               notifySkillpoints;
+    osgGaming::Observer<Simulation::State>::Ptr notifyRunningValues;
+    osgGaming::Observer<Simulation::State>::Ptr notifyRunningButton;
 
     QScrollArea* scrollAreaStats;
     QWidget* widgetStats;
@@ -379,14 +379,16 @@ namespace onep
             }
           }
 
-          notifyRunningValues = simulation->getORunning()->connectAndNotify(osgGaming::Func<bool>([this](bool running)
+          notifyRunningValues = simulation->getOState()->connectAndNotify(osgGaming::Func<Simulation::State>([this](Simulation::State state)
           {
+            auto paused = (state == Simulation::State::Paused);
+
             for (ValueWidgets::iterator it = valueWidgets.begin(); it != valueWidgets.end(); ++it)
-              it->second.edit->setEnabled(!running);
+              it->second.edit->setEnabled(paused);
 
             for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
               for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-                vit->second.edit->setEnabled(!running);
+                vit->second.edit->setEnabled(paused);
           }));
         }
 
@@ -590,15 +592,15 @@ namespace onep
 
       connect(buttonStartStop, &QPushButton::clicked, [&]()
       {
-        if (simulation->running())
+        if (simulation->isRunning())
           simulation->stop();
         else
           simulation->start();
       });
 
-      notifyRunningButton = simulation->getORunning()->connectAndNotify(osgGaming::Func<bool>([&](bool running)
+      notifyRunningButton = simulation->getOState()->connectAndNotify(osgGaming::Func<Simulation::State>([&](Simulation::State state)
       {
-        if (running)
+        if (state != Simulation::State::Paused)
           buttonStartStop->setText("Stop simulation");
         else
           buttonStartStop->setText("Start simulation");

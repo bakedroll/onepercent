@@ -20,10 +20,11 @@ namespace onep
       RESIGNED
     };
 
-    enum class UpdateTimerInterval : int
+    enum class State : int
     {
-      NormalSpeed = 100,
-      FasterSpeed = 50
+      Paused,
+      NormalSpeed     = 100,
+      FastForward = 50
     };
 
     typedef osg::ref_ptr<Simulation> Ptr;
@@ -40,12 +41,13 @@ namespace onep
     bool paySkillPoints(int points);
     bool switchSkillBranchState(int countryId, const std::shared_ptr<LuaSkillBranch>& branch, SkillBranchState state);
 
+    void setState(State state);
+
     void start();
     void stop();
-    bool running() const;
-    osgGaming::Observable<bool>::Ptr getORunning() const;
+    bool isRunning() const;
+    osgGaming::Observable<State>::Ptr getOState() const;
 
-    void setUpdateTimerInterval(UpdateTimerInterval interval);
     void setUpdateTimerInterval(int msecs);
     void setProfilingLogsEnabled(bool enabled);
     void setTickUpdateMode(LuaDefines::TickUpdateMode mode);

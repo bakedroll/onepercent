@@ -332,7 +332,7 @@ namespace onep
   {
     if (key == osgGA::GUIEventAdapter::KEY_Space)
     {
-      if (m->simulation->running())
+      if (m->simulation->isRunning())
       {
         m->simulation->stop();
 
