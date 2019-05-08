@@ -71,7 +71,7 @@ namespace onep
       buttonAutoPause->setObjectName("ButtonAutoPause");
       buttonAutoPause->setIcon(QIcon("./GameData/ui/icon_auto_pause.png"));
       buttonAutoPause->setEnabled(false);
-      buttonAutoPause->setChecked(true);
+      buttonAutoPause->setChecked(simulation->isAutoPauseEnabled());
 
       auto buttonPause = new QRadioButton();
       buttonPause->setObjectName("ButtonPause");
@@ -176,6 +176,11 @@ namespace onep
         simulation->setState(static_cast<Simulation::State>(id));
       });
 
+      connect(buttonAutoPause, &QRadioButton::toggled, [this](bool checked)
+      {
+        simulation->setAutoPause(checked);
+      });
+
       connect(buttonSkills, &QPushButton::clicked, [this]()
       {
         if (widgetEnabled)
@@ -190,11 +195,6 @@ namespace onep
       observerDay = oDay->connectAndNotify(osgGaming::Func<int>([this, labelDays, buttonAutoPause](int day)
       {
         labelDays->setText(tr("Day %1").arg(day));
-
-        if (buttonAutoPause->isChecked() && (day != 0) && (day % 100 == 0))
-        {
-          simulation->stop();
-        }
       }));
 
       osg::ref_ptr<osgGaming::FpsUpdateCallback> fpsCallback = new osgGaming::FpsUpdateCallback();

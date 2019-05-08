@@ -42,10 +42,14 @@ namespace onep
     bool switchSkillBranchState(int countryId, const std::shared_ptr<LuaSkillBranch>& branch, SkillBranchState state);
 
     void setState(State state);
+    void setAutoPause(bool enabled);
 
     void start();
     void stop();
+
     bool isRunning() const;
+    bool isAutoPauseEnabled() const;
+
     osgGaming::Observable<State>::Ptr getOState() const;
 
     void setUpdateTimerInterval(int msecs);
