@@ -10,16 +10,16 @@ namespace onep
 	{
 	public:
 		MainMenuState(osgGaming::Injector& injector);
-    ~MainMenuState();
+    virtual ~MainMenuState();
 
-		virtual void initialize() override;
+		void initialize() override;
 
-		virtual osgGaming::GameState::StateEvent* update() override;
-    virtual void onResizeEvent(float width, float height) override;
-    virtual void onKeyPressedEvent(int key) override;
+    StateEvent* update() override;
+    void        onResizeEvent(float width, float height) override;
+    void        onKeyPressedEvent(int key) override;
 
-	protected:
-		virtual osg::ref_ptr<osgGaming::Hud> injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view) override;
+  protected:
+		osg::ref_ptr<osgGaming::Hud> injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view) override;
 
     void setupUi();
 

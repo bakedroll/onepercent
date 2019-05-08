@@ -29,7 +29,7 @@ namespace onep
     typedef osg::ref_ptr<Simulation> Ptr;
 
 		Simulation(osgGaming::Injector& injector);
-    ~Simulation();
+    virtual ~Simulation();
 
     void prepare();
     void shutdownUpdateThread();

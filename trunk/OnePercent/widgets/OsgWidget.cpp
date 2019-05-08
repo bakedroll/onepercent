@@ -2,9 +2,10 @@
 
 #include "widgets/OverlayCompositor.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include <osgGaming/LogManager.h>
+
 #include <QTimer>
 #include <QResizeEvent>
 

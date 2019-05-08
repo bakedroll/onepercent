@@ -2,7 +2,6 @@
 
 #include "core/Multithreading.h"
 #include "core/Observables.h"
-#include "core/QConnectFunctor.h"
 #include "nodes/CountryOverlay.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
@@ -125,7 +124,7 @@ namespace onep
 
       m->buttons.push_back(button);
 
-      QConnectFunctor::connect(button, SIGNAL(clicked()), [=]()
+      connect(button, &QPushButton::clicked, [=]()
       {
         if (!m->country)
         {

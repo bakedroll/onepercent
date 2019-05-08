@@ -1,7 +1,6 @@
 #include "GlobeInteractionState.h"
 
 #include "core/Macros.h"
-#include "core/QConnectFunctor.h"
 #include "nodes/BoundariesMesh.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/GlobeModel.h"
@@ -466,14 +465,12 @@ namespace onep
     m->mainFrameWidget = new MainFrameWidget(*m->pInjector);
     m->mainFrameWidget->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
 
-    /*m->labelDays = new QLabel(QString());
-    m->labelDays->setObjectName("LabelDays");
-
-    */
-    QConnectFunctor::connect(m->mainFrameWidget, SIGNAL(clickedButtonDebug()), [this]()
+    QObject::connect(m->mainFrameWidget, &MainFrameWidget::clickedButtonDebug, [this]()
     {
       if (m->debugWindow == nullptr)
+      {
         m->debugWindow = new DebugWindow(*m->pInjector);
+      }
        
       if (!m->debugWindow->isVisible())
       {

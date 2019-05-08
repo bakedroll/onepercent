@@ -47,7 +47,7 @@ namespace onep
     OSGG_LOG_DEBUG("Starting up update thread");
 
     QEventLoop eventLoop;
-    connect(this, SIGNAL(nextStep()), &eventLoop, SLOT(quit()));
+    connect(this, &UpdateThread::nextStep, &eventLoop, &QEventLoop::quit);
 
     while (!m->shallShutdown())
     {
