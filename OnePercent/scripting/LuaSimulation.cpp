@@ -40,36 +40,36 @@ namespace onep
 
   void LuaSimulation::lua_start(lua_State* state)
   {
-    Multithreading::uiExecuteOrAsync([this](){ m_simulation->start(); });
+    Multithreading::executeInUiAsync([this](){ m_simulation->start(); });
   }
 
   void LuaSimulation::lua_stop(lua_State* state)
   {
-    Multithreading::uiExecuteOrAsync([this](){ m_simulation->stop(); });
+    Multithreading::executeInUiAsync([this](){ m_simulation->stop(); });
   }
 
   void LuaSimulation::lua_set_skill_points(int points)
   {
     OSGG_QLOG_DEBUG(QString("Set skill points: %1").arg(points));
-    Multithreading::uiExecuteOrAsync([=](){ m_oNumSkillPoints->set(points); });
+    Multithreading::executeInUiAsync([=](){ m_oNumSkillPoints->set(points); });
   }
 
   void LuaSimulation::lua_add_skill_points(int points)
   {
     OSGG_QLOG_DEBUG(QString("Add skill points: %1").arg(points));
-    Multithreading::uiExecuteOrAsync([=]() { m_simulation->addSkillPoints(points); });
+    Multithreading::executeInUiAsync([=]() { m_simulation->addSkillPoints(points); });
   }
 
   void LuaSimulation::lua_set_day(int day)
   {
     OSGG_QLOG_DEBUG(QString("Set day: %1").arg(day));
-    Multithreading::uiExecuteOrAsync([=](){ m_oDay->set(day); });
+    Multithreading::executeInUiAsync([=](){ m_oDay->set(day); });
   }
 
   void LuaSimulation::lua_set_interval(int interval)
   {
     OSGG_QLOG_DEBUG(QString("Set interval: %1").arg(interval));
-    Multithreading::uiExecuteOrAsync([=](){ m_simulation->setUpdateTimerInterval(interval); });
+    Multithreading::executeInUiAsync([=](){ m_simulation->setUpdateTimerInterval(interval); });
   }
 
   void LuaSimulation::lua_set_tick_update_mode(int mode)

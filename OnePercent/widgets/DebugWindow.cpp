@@ -568,7 +568,7 @@ namespace onep
 
             skillBranchActivatedObservers.push_back(it.second->getBranchesActivatedTable()->getOBranchActivated(name)->connect(osgGaming::Func<bool>([=](bool activated)
             {
-              Multithreading::uiExecuteOrAsync([=]()
+              Multithreading::executeInUiAsync([=]()
               {
                 if (cid == countryOverlay->getSelectedCountryId())
                 {

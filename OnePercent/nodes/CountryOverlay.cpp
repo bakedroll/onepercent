@@ -338,7 +338,7 @@ namespace onep
 
   void CountryOverlay::setSelectedCountry(int countryId)
   {
-    Multithreading::uiExecuteOrAsync([this, countryId]()
+    Multithreading::executeInUiAsync([this, countryId]()
     {
       QMutexLocker lock(&m->selectedCountryMutex);
       m->oSelectedCountryId->set(countryId);
@@ -364,7 +364,7 @@ namespace onep
 
   void CountryOverlay::setCurrentOverlayBranchName(const std::string& branchName)
   {
-    Multithreading::uiExecuteOrAsync([this, branchName]()
+    Multithreading::executeInUiAsync([this, branchName]()
     {
       QMutexLocker lock(&m->currentBranchIdMutex);
       m->oCurrentOverlayBranchId->set(branchName);

@@ -2,34 +2,47 @@
 
 #include <QApplication>
 #include <functional>
-#include <mutex>
 
-namespace onep
+/*!
+ *  \class Multithreading
+ *  This class provides static functions that ensure that code is executed in the UI thread
+ *  The Qt application has to inherit this class to work properly
+ */
+class Multithreading : public QApplication
 {
-  class Multithreading : public QApplication
-  {
     Q_OBJECT
 
-  public:
-    Multithreading(int& argc, char **argv);
+public:
+    /*!
+     *  The constructor
+     *  \param argc The number of arguments
+     *  \param argv The command line arguments
+     */
+    Multithreading(int& argc, char** argv);
     virtual ~Multithreading();
 
-    static void ignoreAnyFurtherUiEvents();
-    static void uiExecute(std::function<void()> func);
-    static void uiExecuteAsync(std::function<void()> func, bool executeInUIThread = false);
-    static void uiExecuteOrAsync(std::function<void()> func);
+    /*!
+     *  Executes a function in UI thread. Blocks the current thread until the execution
+     *  of the function is finished
+     *  \param func The function to execute
+     */
+    static void executeInUiBlocking(std::function<void()> func);
+
+    /*!
+     *  Executes a function in UI thread. The function is executed asynchronously
+     *  This function should not be called from UI thread
+     *  \param func              The function to execute
+     *  \param executeInUIThread true if this function in executed in UI thread
+     */
+    static void executeInUiAsync(std::function<void()> func, bool executeInUIThread = false);
+
+    //! \returns true if this function is called from UI thread
     static bool isInUIThread();
 
-  public slots:
-    void executeInUIThread(void* exceptionContext);
-    void executeInUIThreadAsync(void* exceptionContext);
+Q_SIGNALS:
+    void executeFunctionAsync(std::function<void()> func);
+    void executeFunctionBlocking(std::function<void()> func);
 
-  private:
-    static bool ignoringAnyFurtherUiEvents();
-
-    static bool m_ignoreFurtherEvents;
-    static std::mutex m_ignoreFurtherEventsMutex;
-
-  };
-
-}
+private Q_SLOTS:
+    void executeFunction(std::function<void()> func) const;
+};
