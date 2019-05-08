@@ -1,4 +1,5 @@
-onep--OsgWidget QPushButton
+onep--OsgWidget QPushButton,
+onep--OsgWidget QRadioButton
 {
   margin: 0px;
   padding: 0px;
@@ -6,29 +7,45 @@ onep--OsgWidget QPushButton
   border-image: url(./GameData/ui/button_normal.png) 10px stretch;
 }
 
-onep--OsgWidget QPushButton:hover
+onep--OsgWidget QPushButton:hover,
+onep--OsgWidget QRadioButton:hover
 {
   border-image: url(./GameData/ui/button_hover.png) 10px stretch;
 }
 
-onep--OsgWidget QPushButton:pressed
+onep--OsgWidget QPushButton:pressed,
+onep--OsgWidget QRadioButton:pressed
 {
   border-image: url(./GameData/ui/button_pressed.png) 10px stretch;
 }
 
-onep--OsgWidget QPushButton:disabled
+onep--OsgWidget QPushButton:checked,
+onep--OsgWidget QRadioButton:checked
+{
+  border-image: url(./GameData/ui/button_pressed.png) 10px stretch;
+}
+
+onep--OsgWidget QPushButton:disabled,
+onep--OsgWidget QRadioButton:disabled
 {
   border-image: url(./GameData/ui/button_disabled.png) 10px stretch;
 }
 
-QLabel#LabelLoadingText
+onep--OsgWidget QRadioButton::indicator
+{
+  image: none;
+  width: 0px;
+  height: 0px;
+}
+
+onep--OsgWidget QLabel#LabelLoadingText
 {
   color: #fff;
   font-size: 20pt;
   margin: 10px;
 }
 
-QPushButton#ButtonMainMenu
+onep--OsgWidget QPushButton#ButtonMainMenu
 {
   min-width: 400px;
   min-height: 45px;

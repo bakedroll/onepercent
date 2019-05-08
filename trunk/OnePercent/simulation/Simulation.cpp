@@ -19,8 +19,6 @@
 
 namespace onep
 {
-  const int TickIntervalMs = 100;
-
   struct Simulation::Impl
   {
     Impl(osgGaming::Injector& injector)
@@ -79,7 +77,7 @@ namespace onep
     m->oNumSkillPoints->set(50);
 
     m->timer.setSingleShot(false);
-    m->timer.setInterval(TickIntervalMs);
+    m->timer.setInterval(static_cast<int>(UpdateTimerInterval::NormalSpeed));
 
     m->thread.onTick([this]()
     {
@@ -221,6 +219,11 @@ namespace onep
 
   void Simulation::start()
   {
+    if (m->oRunning->get())
+    {
+      return;
+    }
+
     m->oRunning->set(true);
     m->timer.start();
     OSGG_LOG_DEBUG("Simulation started");
@@ -228,6 +231,11 @@ namespace onep
 
   void Simulation::stop()
   {
+    if (!m->oRunning->get())
+    {
+      return;
+    }
+
     m->timer.stop();
     m->oRunning->set(false);
     OSGG_LOG_DEBUG("Simulation stopped");
@@ -241,6 +249,11 @@ namespace onep
   osgGaming::Observable<bool>::Ptr Simulation::getORunning() const
   {
     return m->oRunning;
+  }
+
+  void Simulation::setUpdateTimerInterval(UpdateTimerInterval interval)
+  {
+    setUpdateTimerInterval(static_cast<int>(interval));
   }
 
   void Simulation::setUpdateTimerInterval(int msecs)

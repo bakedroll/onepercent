@@ -41,3 +41,25 @@ onep--MainFrameWidget QPushButton
   min-height: 26px;
   min-width: 100px;
 }
+
+onep--MainFrameWidget QPushButton
+{
+  min-height: 26px;
+  min-width: 100px;
+}
+
+onep--MainFrameWidget QRadioButton#ButtonAutoPause,
+onep--MainFrameWidget QRadioButton#ButtonPause,
+onep--MainFrameWidget QRadioButton#ButtonPlay,
+onep--MainFrameWidget QRadioButton#ButtonFastForward
+{
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+}
+
+onep--MainFrameWidget QRadioButton#ButtonAutoPause
+{
+  margin-right: 4px;
+}

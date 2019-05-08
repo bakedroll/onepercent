@@ -20,6 +20,12 @@ namespace onep
       RESIGNED
     };
 
+    enum class UpdateTimerInterval : int
+    {
+      NormalSpeed = 100,
+      FasterSpeed = 50
+    };
+
     typedef osg::ref_ptr<Simulation> Ptr;
 
 		Simulation(osgGaming::Injector& injector);
@@ -39,6 +45,7 @@ namespace onep
     bool running() const;
     osgGaming::Observable<bool>::Ptr getORunning() const;
 
+    void setUpdateTimerInterval(UpdateTimerInterval interval);
     void setUpdateTimerInterval(int msecs);
     void setProfilingLogsEnabled(bool enabled);
     void setTickUpdateMode(LuaDefines::TickUpdateMode mode);

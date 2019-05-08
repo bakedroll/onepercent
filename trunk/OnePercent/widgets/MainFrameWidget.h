@@ -12,7 +12,7 @@ namespace onep
 
   public:
     MainFrameWidget(osgGaming::Injector& injector);
-    ~MainFrameWidget();
+    virtual ~MainFrameWidget();
 
   private:
     struct Impl;
