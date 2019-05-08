@@ -134,7 +134,7 @@ namespace onep
         m->simulation->switchSkillBranchState(m->country->getId(), branch.second,
                                               Simulation::SkillBranchState::PURCHASED);
 
-        if (!m->simulation->running())
+        if (!m->simulation->isRunning())
         {
           m->simulation->start();
         }

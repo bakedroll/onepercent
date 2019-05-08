@@ -16,13 +16,6 @@
 
 namespace onep
 {
-  enum class SimulationButton
-  {
-    Pause,
-    Play,
-    FastForward
-  };
-
   struct MainFrameWidget::Impl
   {
     Impl(osgGaming::Injector& injector, MainFrameWidget* b)
@@ -46,8 +39,8 @@ namespace onep
     GlobeModel::Ptr globeModel;
     Simulation::Ptr simulation;
 
-    osgGaming::Observer<int>::Ptr  observerDay;
-    osgGaming::Observer<bool>::Ptr observerRunning;
+    osgGaming::Observer<int>::Ptr               observerDay;
+    osgGaming::Observer<Simulation::State>::Ptr observerRunning;
 
     void setCenterWidgetEnabled(QWidget* widget)
     {
@@ -97,9 +90,9 @@ namespace onep
       buttonFastForward->setEnabled(false);
 
       auto simulationButtonsGroup = new QButtonGroup(base);
-      simulationButtonsGroup->addButton(buttonPause, underlying(SimulationButton::Pause));
-      simulationButtonsGroup->addButton(buttonPlay, underlying(SimulationButton::Play));
-      simulationButtonsGroup->addButton(buttonFastForward, underlying(SimulationButton::FastForward));
+      simulationButtonsGroup->addButton(buttonPause, underlying(Simulation::State::Paused));
+      simulationButtonsGroup->addButton(buttonPlay, underlying(Simulation::State::NormalSpeed));
+      simulationButtonsGroup->addButton(buttonFastForward, underlying(Simulation::State::FastForward));
 
       // Top Bar
       auto layoutTopBar = new QHBoxLayout();
@@ -146,19 +139,26 @@ namespace onep
 
       connect(buttonDebug,&QPushButton::clicked, base, &MainFrameWidget::clickedButtonDebug);
 
-      observerRunning = simulation->getORunning()->connect(
-        osgGaming::Func<bool>([this, buttonAutoPause, buttonPause, buttonPlay, buttonFastForward, simulationButtonsGroup](bool running)
+      observerRunning = simulation->getOState()->connect(
+        osgGaming::Func<Simulation::State>([this, buttonAutoPause, buttonPause, buttonPlay, buttonFastForward, simulationButtonsGroup](Simulation::State state)
         {
           QSignalBlocker blocker(simulationButtonsGroup);
 
-          if (running)
+          if (state != Simulation::State::Paused)
           {
             buttonAutoPause->setEnabled(true);
             buttonPause->setEnabled(true);
             buttonPlay->setEnabled(true);
             buttonFastForward->setEnabled(true);
 
-            buttonPlay->setChecked(true);
+            if (state == Simulation::State::NormalSpeed)
+            {
+              buttonPlay->setChecked(true);
+            }
+            else
+            {
+              buttonFastForward->setChecked(true);
+            }
           }
           else
           {
@@ -173,22 +173,7 @@ namespace onep
           return;
         }
 
-        switch (static_cast<SimulationButton>(id))
-        {
-        case SimulationButton::Pause:
-          simulation->stop();
-          break;
-        case SimulationButton::Play:
-          simulation->setUpdateTimerInterval(Simulation::UpdateTimerInterval::NormalSpeed);
-          simulation->start();
-          break;
-        case SimulationButton::FastForward:
-          simulation->setUpdateTimerInterval(Simulation::UpdateTimerInterval::FasterSpeed);
-          simulation->start();
-          break;
-        default:
-          break;
-        }
+        simulation->setState(static_cast<Simulation::State>(id));
       });
 
       connect(buttonSkills, &QPushButton::clicked, [this]()
