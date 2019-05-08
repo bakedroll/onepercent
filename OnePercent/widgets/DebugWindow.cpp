@@ -3,7 +3,6 @@
 #include "core/Macros.h"
 #include "core/Multithreading.h"
 #include "core/Observables.h"
-#include "core/QConnectFunctor.h"
 #include "scripting/LuaCountry.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaBranchesTable.h"
@@ -43,7 +42,7 @@ namespace onep
   {
     setFont(QFont("Lucida Console", 12));
 
-    QConnectFunctor::connect(this, SIGNAL(returnPressed()), [&]()
+    connect(this, &QLineEdit::returnPressed, [&]()
     {
       QString command = text();
       m_latestCommands.push_back(command);
@@ -220,13 +219,13 @@ namespace onep
       widget.labelGraph->setPixmap(widget.pixGraph);
 
       QPushButton* button = widget.buttonSet;
-      QConnectFunctor::connect(widget.edit, SIGNAL(textEdited(QString)), [button]()
+      connect(widget.edit, &QLineEdit::textEdited, [button]()
       {
         button->setEnabled(true);
       });
 
       QLineEdit* edit = widget.edit;
-      QConnectFunctor::connect(widget.buttonSet, SIGNAL(clicked()), [=]()
+      connect(widget.buttonSet, &QPushButton::clicked, [=]()
       {
         int id = countryOverlay->getSelectedCountryId();
         if (id == 0) return;
@@ -450,18 +449,18 @@ namespace onep
       spinboxThickness->setRange(0.01, 999.0);
       spinboxThickness->setSingleStep(0.01);
 
-      QConnectFunctor::connect(toggleCountryButton, SIGNAL(clicked()), [this]()
+      connect(toggleCountryButton, &QPushButton::clicked, [this]()
       {
         toggleCountry();
       });
 
-      QConnectBoolFunctor::connect(checkBoxWireframe, SIGNAL(toggled(bool)), [this](bool checked)
+      connect(checkBoxWireframe, &QCheckBox::toggled, [this](bool checked)
       {
         bWireframe = checked;
         updateBoundaries();
       });
 
-      QConnectDoubleFunctor::connect(spinboxThickness, SIGNAL(valueChanged(double)), [this](double value)
+      connect(spinboxThickness, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [this](double value)
       {
         borderThickness = float(value);
         updateBoundaries();
@@ -474,7 +473,7 @@ namespace onep
       radioNoOverlay->setChecked(true);
       radioGroup->addButton(radioNoOverlay);
 
-      QConnectBoolFunctor::connect(radioNoOverlay, SIGNAL(clicked(bool)), [=](bool)
+      connect(radioNoOverlay, &QRadioButton::clicked, [=]()
       {
         countryOverlay->setCurrentOverlayBranchName("");
       });
@@ -495,7 +494,7 @@ namespace onep
         branchesLayout->addWidget(checkBox, 1 + index, 0);
         branchesLayout->addWidget(radioButton, 1 + index, 1);
 
-        QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [=](bool checked)
+        connect(checkBox, &QCheckBox::clicked, [=](bool checked)
         {
           int cid = countryOverlay->getSelectedCountryId();
           if (cid == 0)
@@ -516,7 +515,7 @@ namespace onep
                                                      : Simulation::SkillBranchState::RESIGNED);
         });
 
-        QConnectBoolFunctor::connect(radioButton, SIGNAL(clicked(bool)), [=](bool)
+        connect(radioButton, &QRadioButton::clicked, [=](bool)
         {
           countryOverlay->setCurrentOverlayBranchName(name);
         });
@@ -587,9 +586,9 @@ namespace onep
       buttonStartStop->setFixedWidth(100);
       buttonStartStop->setFocusPolicy(Qt::NoFocus);
 
-      connect(luaConsoleEdit, SIGNAL(commandEntered(QString)), base, SLOT(onCommandEntered(QString)));
+      connect(luaConsoleEdit, &ConsoleEdit::commandEntered, base, &DebugWindow::onCommandEntered);
 
-      QConnectFunctor::connect(buttonStartStop, SIGNAL(clicked()), [&]()
+      connect(buttonStartStop, &QPushButton::clicked, [&]()
       {
         if (simulation->running())
           simulation->stop();
@@ -635,7 +634,7 @@ namespace onep
 
           auto skillPtr = skill.second;
 
-          QConnectBoolFunctor::connect(checkBox, SIGNAL(clicked(bool)), [this, skillPtr](bool checked)
+          connect(checkBox, &QCheckBox::clicked, [this, skillPtr](bool checked)
           {
             modelContainer->accessModel([this, skillPtr, checked](const LuaModel::Ptr&)
             {
@@ -667,13 +666,15 @@ namespace onep
       checkBoxEnableGraph = new QCheckBox(tr("Enable graph"));
       checkBoxEnableGraph->setChecked(true);
 
-      QConnectBoolFunctor::connect(checkBoxEnableGraph, SIGNAL(toggled(bool)), [this](bool checked)
+      connect(checkBoxEnableGraph, &QCheckBox::toggled, [this](bool checked)
       {
         if (!checked)
+        {
           clearValueGraphs();
+        }
       });
 
-      QConnectFunctor::connect(loadStateButton, SIGNAL(clicked()), [this]()
+      connect(loadStateButton, &QPushButton::clicked, [this]()
       {
         QString filename = QFileDialog::getOpenFileName(base, "Load state", QDir::currentPath(), "State files (*.ste)");
         if (!filename.isEmpty())
@@ -683,7 +684,7 @@ namespace onep
         }
       });
 
-      QConnectFunctor::connect(saveStateButton, SIGNAL(clicked()), [this]()
+      connect(saveStateButton, &QPushButton::clicked, [this]()
       {
         QString filename = QFileDialog::getSaveFileName(base, "Save state", QDir::currentPath(), "State files (*.ste)");
         if (!filename.isEmpty())

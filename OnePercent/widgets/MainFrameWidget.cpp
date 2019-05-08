@@ -2,7 +2,6 @@
 
 #include "core/Macros.h"
 #include "core/Observables.h"
-#include "core/QConnectFunctor.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "widgets/SkillsWidget.h"
 #include "simulation/Simulation.h"
@@ -145,7 +144,7 @@ namespace onep
       base->setObjectName("MainFrameWidget");
       base->setLayout(layoutMain);
 
-      connect(buttonDebug, SIGNAL(clicked()), base, SIGNAL(clickedButtonDebug()));
+      connect(buttonDebug,&QPushButton::clicked, base, &MainFrameWidget::clickedButtonDebug);
 
       observerRunning = simulation->getORunning()->connect(
         osgGaming::Func<bool>([this, buttonAutoPause, buttonPause, buttonPlay, buttonFastForward, simulationButtonsGroup](bool running)
@@ -192,12 +191,15 @@ namespace onep
         }
       });
 
-      QConnectFunctor::connect(buttonSkills, SIGNAL(clicked()), [this]()
+      connect(buttonSkills, &QPushButton::clicked, [this]()
       {
         if (widgetEnabled)
+        {
           setCenterWidgetEnabled(nullptr);
-        else
-          setCenterWidgetEnabled(skillsWidget);
+          return;
+        }
+
+        setCenterWidgetEnabled(skillsWidget);
       });
 
       observerDay = oDay->connectAndNotify(osgGaming::Func<int>([this, labelDays, buttonAutoPause](int day)

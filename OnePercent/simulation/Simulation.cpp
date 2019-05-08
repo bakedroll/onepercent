@@ -1,6 +1,5 @@
 #include "Simulation.h"
 
-#include "core/QConnectFunctor.h"
 #include "core/Helper.h"
 #include "core/Multithreading.h"
 #include "core/Observables.h"
@@ -130,15 +129,13 @@ namespace onep
       }
     });
 
-    QConnectFunctor::connect(&m->timer, SIGNAL(timeout()), [this]()
+    QObject::connect(&m->timer, &QTimer::timeout, [this]()
     {
       m->thread.doNextStep();
     });
   }
 
-  Simulation::~Simulation()
-  {
-  }
+  Simulation::~Simulation() = default;
 
   void Simulation::prepare()
   {
