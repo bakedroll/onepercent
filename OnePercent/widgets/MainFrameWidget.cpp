@@ -1,5 +1,6 @@
 #include "MainFrameWidget.h"
 
+#include "core/Macros.h"
 #include "core/Observables.h"
 #include "core/QConnectFunctor.h"
 #include "nodes/GlobeOverviewWorld.h"
@@ -97,9 +98,9 @@ namespace onep
       buttonFastForward->setEnabled(false);
 
       auto simulationButtonsGroup = new QButtonGroup(base);
-      simulationButtonsGroup->addButton(buttonPause, static_cast<int>(SimulationButton::Pause));
-      simulationButtonsGroup->addButton(buttonPlay, static_cast<int>(SimulationButton::Play));
-      simulationButtonsGroup->addButton(buttonFastForward, static_cast<int>(SimulationButton::FastForward));
+      simulationButtonsGroup->addButton(buttonPause, underlying(SimulationButton::Pause));
+      simulationButtonsGroup->addButton(buttonPlay, underlying(SimulationButton::Play));
+      simulationButtonsGroup->addButton(buttonFastForward, underlying(SimulationButton::FastForward));
 
       // Top Bar
       auto layoutTopBar = new QHBoxLayout();

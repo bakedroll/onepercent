@@ -77,7 +77,7 @@ namespace onep
     m->oNumSkillPoints->set(50);
 
     m->timer.setSingleShot(false);
-    m->timer.setInterval(static_cast<int>(UpdateTimerInterval::NormalSpeed));
+    m->timer.setInterval(underlying(UpdateTimerInterval::NormalSpeed));
 
     m->thread.onTick([this]()
     {
@@ -253,7 +253,7 @@ namespace onep
 
   void Simulation::setUpdateTimerInterval(UpdateTimerInterval interval)
   {
-    setUpdateTimerInterval(static_cast<int>(interval));
+    setUpdateTimerInterval(underlying(interval));
   }
 
   void Simulation::setUpdateTimerInterval(int msecs)
