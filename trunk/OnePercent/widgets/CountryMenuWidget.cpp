@@ -73,7 +73,7 @@ namespace onep
           notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name)->connectAndNotify(
             osgGaming::Func<bool>([this, index, branch, name](bool activated)
           {
-            Multithreading::uiExecuteOrAsync([this, index, branch, name, activated]()
+            Multithreading::executeInUiAsync([this, index, branch, name, activated]()
             {
               if (activated)
               {

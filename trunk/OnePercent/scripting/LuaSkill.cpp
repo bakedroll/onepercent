@@ -93,7 +93,7 @@ namespace onep
 
   void LuaSkill::setIsActivated(bool activated)
   {
-    Multithreading::uiExecuteOrAsync([=](){ m->obActivated->set(activated); });
+    Multithreading::executeInUiAsync([=](){ m->obActivated->set(activated); });
   }
 
   osgGaming::Observable<bool>::Ptr LuaSkill::getObActivated() const

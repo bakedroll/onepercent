@@ -77,7 +77,7 @@ namespace onep
 
   void LuaVisuals::updateBindings()
   {
-    Multithreading::uiExecuteOrAsync([this]()
+    Multithreading::executeInUiAsync([this]()
     {
       m->modelContainer->accessModel([this](const LuaModel::Ptr& model)
       {
