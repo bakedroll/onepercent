@@ -32,7 +32,7 @@ namespace onep
       , oState(new osgGaming::Observable<State>(State::Paused))
       , tickUpdateMode(LuaDefines::TickUpdateMode::CPP)
       , profilingLogsEnabled(false)
-      , autoPauseEnabled(true)
+      , autoPauseEnabled(false)
       , justStarted(false)
       , tickNumber(0)
     {}

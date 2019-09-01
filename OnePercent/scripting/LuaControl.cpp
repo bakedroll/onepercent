@@ -107,7 +107,7 @@ namespace onep
           auto skillName = skill.second->getName();
           if (!skill.second->getIsActivated())
           {
-            return;
+            continue;
           }
 
           skill.second->update(branchName, countryState);
