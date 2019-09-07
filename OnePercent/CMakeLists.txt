@@ -46,6 +46,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${OSG_INCLUDE_DIR}
   ${OSGPPU_INCLUDE_DIR}
   ${LUA_INCLUDE_PREFIX}/include
+  ${LUA_INCLUDE_DIR}
   ${LUABRIDGE_INCLUDE_DIR})
 
 foreach(module ${QT5_MODULES})

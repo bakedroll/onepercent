@@ -334,8 +334,8 @@ namespace helper
       IdPointMap::iterator itp1 = graph.points.find(it->directedEdge.first);
       IdPointMap::iterator itp2 = graph.points.find(it->directedEdge.second);
 
-      cv::circle(image, itp1->second * scale, 5, cvScalar(0, 50, 255), -1);
-      cv::circle(image, itp2->second * scale, 3, cvScalar(0, 255, 255), -1);
+      cv::circle(image, itp1->second * scale, 5, cv::Scalar(0, 50, 255), -1);
+      cv::circle(image, itp2->second * scale, 3, cv::Scalar(0, 255, 255), -1);
 
       drawAdjacentCycleNumbers(image, itp1->second, itp2->second, it->adjacentCycleIds[0], it->adjacentCycleIds[1], scale);
     }

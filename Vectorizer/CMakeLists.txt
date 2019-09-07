@@ -11,10 +11,10 @@ set(OSG_LIBRARIES_TMP "osg osgUtil osgText OpenThreads")
 get_libraries(OSG_LIBRARIES ${OSG_LIBRARY} "" ${OSG_LIBRARIES_TMP})
 get_libraries(OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${OSG_LIBRARIES_TMP})
 
-set(OPENCV_LIBRARIES_TMP "opencv_core300 opencv_highgui300 opencv_imgcodecs300 opencv_imgproc300")
+set(OPENCV_LIBRARIES_TMP "opencv_core opencv_highgui opencv_imgcodecs opencv_imgproc")
 
-get_libraries(OPENCV_LIBRARIES ${OPENCV_LIB_DIR_OPT} "" ${OPENCV_LIBRARIES_TMP})
-get_libraries(OPENCV_LIBRARIES_DEBUG ${OPENCV_LIB_DIR_DBG} ${OPENCV_LIBRARY_SUFFIX} ${OPENCV_LIBRARIES_TMP})
+get_libraries(OPENCV_LIBRARIES ${OPENCV_LIB_DIR_OPT} "${OPENCV_VERSION_SUFFIX}" ${OPENCV_LIBRARIES_TMP})
+get_libraries(OPENCV_LIBRARIES_DEBUG ${OPENCV_LIB_DIR_DBG} "${OPENCV_VERSION_SUFFIX}${OPENCV_LIBRARY_SUFFIX}" ${OPENCV_LIBRARIES_TMP})
 
 # set include directories
 target_include_directories(Vectorizer PUBLIC
@@ -43,12 +43,12 @@ endforeach()
   
 # copy dlls
 if (WIN32 AND EXISTS ${OPENCV_BIN_DIR_OPT})
-  copy_dlls(${OPENCV_BIN_DIR_OPT} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "opencv_" ""
-    "core300 highgui300 imgcodecs300 imgproc300 videoio300")
+  copy_dlls(${OPENCV_BIN_DIR_OPT} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "opencv_" "${OPENCV_VERSION_SUFFIX}"
+    "core highgui imgcodecs imgproc videoio")
   
   if (OPENCV_LIBRARIES_DEBUG_SUFFIX AND EXISTS ${OPENCV_BIN_DIR_DBG})
-    copy_dlls(${OPENCV_BIN_DIR_DBG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "opencv_" ${OPENCV_LIBRARY_SUFFIX}
-      "core300 highgui300 imgcodecs300 imgproc300 videoio300")
+    copy_dlls(${OPENCV_BIN_DIR_DBG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "opencv_" "${OPENCV_VERSION_SUFFIX}${OPENCV_LIBRARY_SUFFIX}"
+      "core highgui imgcodecs imgproc videoio")
   endif()
 endif()
 

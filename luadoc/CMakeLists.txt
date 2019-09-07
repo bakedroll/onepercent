@@ -20,6 +20,7 @@ source_group(Resources FILES ${CMAKE_CURRENT_SOURCE_DIR}/luadoc_resources.qrc)
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${LUADOC_INCLUDE_DIR}
   ${LUA_INCLUDE_PREFIX}/include
+  ${LUA_INCLUDE_DIR}
   ${LUABRIDGE_INCLUDE_DIR}
   ${Qt5Core_INCLUDE_DIRS}
   ${OSGGAMING_INCLUDE_DIR})

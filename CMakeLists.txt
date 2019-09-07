@@ -110,6 +110,7 @@ endif()
 if (EXISTS ${OPENCV_LIB_DIR_OPT} AND EXISTS ${OPENCV_INCLUDE_DIR})
   set(OPENCV_FOUND true)
   
+  SET(OPENCV_VERSION_SUFFIX "300" CACHE STRING "The OpenCV version suffix")
   option(OPENCV_LIBRARIES_DEBUG_SUFFIX "OpenCV debug libraries suffix" ON)
 
   if (OPENCV_LIBRARIES_DEBUG_SUFFIX)
@@ -124,7 +125,9 @@ find_package(Threads)
 
 # Lua
 if (NOT EXISTS ${LUA_INCLUDE_PREFIX})
-  find_package(Lua REQUIRED)
+  if (NOT EXISTS ${LUA_INCLUDE_DIR})
+    find_package(Lua REQUIRED)
+  endif()
 endif()
 
 if (NOT EXISTS ${LUA_LIB_DEBUG})

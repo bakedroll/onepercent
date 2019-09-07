@@ -187,10 +187,10 @@ int detectLines(int argc, char** argv)
   cv::Mat filledCycleImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
   //cv::Mat boundariesImage(int(image.rows * displayScale), int(image.cols * displayScale), CV_8UC3);
 
-  cvtColor(image, displayImage, CV_GRAY2RGB);
+  cvtColor(image, displayImage, cv::COLOR_GRAY2RGB);
 
   if (useThres)
-    cv::threshold(image, image, 30, 255, CV_THRESH_BINARY);
+    cv::threshold(image, image, 30, 255, cv::THRESH_BINARY);
 
   // detecting lines
   helper::Graph graph;

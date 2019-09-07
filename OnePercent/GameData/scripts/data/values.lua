@@ -27,6 +27,16 @@ lua.control:create_values({
     type = "default",
     init = 0.0
   },
+  {
+    name = "education",
+    type = "default",
+    init = 0.0
+  },
+  {
+    name = "satisfaction",
+    type = "default",
+    init = 0.0
+  },
 
   -- banks
   {
