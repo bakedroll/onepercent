@@ -6,8 +6,15 @@
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaValuesDefTable.h"
 #include "scripting/LuaValueDef.h"
+#include "scripting/LuaModelPrototype.h"
 #include "simulation/ModelContainer.h"
 #include "nodes/CountryOverlay.h"
+
+#include <osgGaming/Helper.h>
+
+#include <osg/PositionAttitudeTransform>
+
+#include <osgDB/ReadFile>
 
 namespace onep
 {
@@ -34,6 +41,9 @@ namespace onep
       .addFunction("unbind_value", &LuaVisuals::luaUnbindValue)
       .addFunction("unbind_branch_value", &LuaVisuals::luaUnbindBranchValue)
       .addFunction("update_bindings", &LuaVisuals::updateBindings)
+      .addFunction("register_model_prototype", &LuaVisuals::luaRegisterModelPrototype)
+      .addFunction("set_country_indicator_model", &LuaVisuals::luaSetCountryIndicatorModel)
+      .addFunction("remove_country_indicator_model", &LuaVisuals::luaRemoveCountryIndicatorModel)
       .endClass();
   }
 
@@ -42,6 +52,7 @@ namespace onep
     Impl(osgGaming::Injector& injector)
       : modelContainer(injector.inject<ModelContainer>())
       , countryOverlay(injector.inject<CountryOverlay>())
+      , lua(injector.inject<LuaStateManager>())
     {
     }
 
@@ -60,11 +71,15 @@ namespace onep
 
     using VisualBindingsMap = std::map<std::string, std::string>;
     using BranchBindingsMap = std::map<std::string, VisualBindingsMap>;
+    using PrototypeMap      = std::map<std::string, osg::ref_ptr<osg::Node>>;
 
-    ModelContainer::Ptr modelContainer;
-    CountryOverlay::Ptr countryOverlay;
-    VisualBindingsMap   valueBindings;
-    BranchBindingsMap   branchValueBindings;
+    ModelContainer::Ptr  modelContainer;
+    CountryOverlay::Ptr  countryOverlay;
+    VisualBindingsMap    valueBindings;
+    BranchBindingsMap    branchValueBindings;
+    LuaStateManager::Ptr lua;
+
+    PrototypeMap prototypes;
   };
 
   LuaVisuals::LuaVisuals(osgGaming::Injector& injector)
@@ -175,4 +190,43 @@ namespace onep
     }
   }
 
+  void LuaVisuals::luaRegisterModelPrototype(const std::string& prototypeName, luabridge::LuaRef table)
+  {
+    auto prototype = m->lua->makeElementFromTable<LuaModelPrototype>(table);
+    auto filename  = prototype->getFilename();
+
+    if (filename.empty())
+    {
+      return;
+    }
+
+    auto node = osgDB::readNodeFile(filename);
+    auto rotation = prototype->getRotationDeg();
+    auto degToRad = 180.0f / C_PI;
+
+    osg::ref_ptr<osg::PositionAttitudeTransform> transform = new osg::PositionAttitudeTransform();
+    transform->setScale(prototype->getScale());
+    transform->setAttitude(osgGaming::getQuatFromEuler(rotation.x() / degToRad, rotation.y() / degToRad, rotation.z() / degToRad));
+    transform->setPosition(prototype->getPosition());
+
+    transform->addChild(node);
+
+    m->prototypes[prototypeName] = transform;
+  }
+
+  void LuaVisuals::luaSetCountryIndicatorModel(int cid, const std::string prototypeName)
+  {
+    if (m->prototypes.count(prototypeName) == 0)
+    {
+      OSGG_QLOG_WARN(QString("Model prototype '%1' not registered.").arg(QString::fromStdString(prototypeName)));
+      return;
+    }
+
+    m->countryOverlay->setCountryIndicatorNode(cid, m->prototypes[prototypeName]);
+  }
+
+  void LuaVisuals::luaRemoveCountryIndicatorModel(int cid)
+  {
+    m->countryOverlay->removeCountryIndicatorNode(cid);
+  }
 }

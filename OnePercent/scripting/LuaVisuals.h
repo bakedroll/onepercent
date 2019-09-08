@@ -26,6 +26,11 @@ namespace onep
     void luaUnbindValue(const std::string& value);
     void luaUnbindBranchValue(const std::string& branchName, const std::string& branchValue);
 
+    void luaRegisterModelPrototype(const std::string& prototypeName, luabridge::LuaRef table);
+
+    void luaSetCountryIndicatorModel(int cid, const std::string prototypeName);
+    void luaRemoveCountryIndicatorModel(int cid);
+
   private:
     struct Impl;
     std::unique_ptr<Impl> m;

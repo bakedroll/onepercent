@@ -19,6 +19,9 @@
 #include <osg/Switch>
 #include <osg/Texture2D>
 #include <osg/BlendFunc>
+#include <osg/MatrixTransform>
+
+#include <osg/ShapeDrawable>
 
 namespace onep
 {
@@ -104,6 +107,8 @@ namespace onep
 
     QMutex currentBranchIdMutex;
     QMutex selectedCountryMutex;
+
+    std::map<int, osg::ref_ptr<Node>> indicatorNodes;
   };
 
   CountryOverlay::CountryOverlay(osgGaming::Injector& injector)
@@ -374,6 +379,53 @@ namespace onep
   CountryOverlay::OCurrentOverlayBranchName::Ptr CountryOverlay::getOCurrentOverlayBranchName() const
   {
     return m->oCurrentOverlayBranchId;
+  }
+
+  void CountryOverlay::setCountryIndicatorNode(int cid, osg::ref_ptr<osg::Node> node)
+  {
+      if (m->countryNodes.count(cid) == 0)
+      {
+        OSGG_QLOG_WARN(QString("Country with id %1 not found.").arg(cid));
+        return;
+      }
+
+      if (m->indicatorNodes.count(cid) > 0)
+      {
+        removeCountryIndicatorNode(cid);
+      }
+
+      auto cnode   = m->countryNodes[cid];
+      auto latLong = cnode->getCenterLatLong();
+      auto radius  = m->configManager->getNumber<float>("earth.radius");
+
+      //auto geode = new osg::Geode();
+      //geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3f(0, 0, 0), 1.0f)));
+
+      auto matRot = osg::Matrix::rotate(
+              osgGaming::getQuatFromEuler(-latLong.x(), 0.0f, fmodf(latLong.y() + C_PI, C_PI * 2.0f)));
+
+      auto matMove = osg::Matrix::translate(osg::Vec3f(0.0f, -radius, 0.0f));
+
+      osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
+      transform->setMatrix(matMove * matRot);
+
+      addChild(transform);
+      transform->addChild(node);
+
+      m->indicatorNodes[cid] = transform;
+  }
+
+  void CountryOverlay::removeCountryIndicatorNode(int cid)
+  {
+    if (m->indicatorNodes.count(cid) == 0)
+    {
+      OSGG_QLOG_WARN(QString("Country with id %1 has no indicator node set").arg(cid));
+    }
+
+    auto it = m->indicatorNodes.find(cid);
+    removeChild(it->second);
+
+    m->indicatorNodes.erase(it);
   }
 
   CountryNode* CountryOverlay::luaGetCountryNode(int id) const

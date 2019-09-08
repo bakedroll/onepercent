@@ -55,6 +55,9 @@ namespace onep
     void                           setCurrentOverlayBranchName(const std::string& branchName);
     OCurrentOverlayBranchName::Ptr getOCurrentOverlayBranchName() const;
 
+    void setCountryIndicatorNode(int cid, osg::ref_ptr<osg::Node> node);
+    void removeCountryIndicatorNode(int cid);
+
     CountryNode* luaGetCountryNode(int id) const;
 
 private:

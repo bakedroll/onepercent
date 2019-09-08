@@ -16,6 +16,8 @@
 #include "widgets/OverlayCompositor.h"
 #include "widgets/VirtualOverlay.h"
 
+#include <osgDB/ReadFile>
+
 #include <osgGaming/Injector.h>
 #include <osgGaming/View.h>
 
@@ -148,6 +150,7 @@ namespace onep
 
     m->lua->loadScript("./GameData/scripts/control/skills.lua");
     m->lua->loadScript("./GameData/scripts/control/visuals.lua");
+    m->lua->loadScript("./GameData/scripts/control/prototypes.lua");
 
     m->model->initializeState();
 
