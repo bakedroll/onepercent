@@ -3,6 +3,8 @@
 #include "core/Multithreading.h"
 #include "nodes/BoundariesMesh.h"
 #include "nodes/CountryHoverNode.h"
+#include "nodes/CountryPresenter.h"
+#include "nodes/NodeSwitch.h"
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaConfig.h"
 #include "scripting/LuaCountriesTable.h"
@@ -19,21 +21,12 @@
 
 #include <osg/BlendFunc>
 #include <osg/MatrixTransform>
-#include <osg/Switch>
 #include <osg/Texture2D>
 
 #include <osg/ShapeDrawable>
 
 namespace onep
 {
-
-enum class NodeSwitch
-{
-  Boundaries,
-  CountryNodes,
-  CountryHoverNodes,
-  CountryPresenter
-};
 
 enum class NodeSwitchType
 {
@@ -70,21 +63,23 @@ struct CountryOverlay::Impl
       lua(injector.inject<LuaStateManager>()),
       modelContainer(injector.inject<ModelContainer>()),
       oSelectedCountryId(new osgGaming::Observable<int>(0)),
-      oCurrentOverlayBranchId(new osgGaming::Observable<std::string>(""))
+      oCurrentOverlayBranchId(new osgGaming::Observable<std::string>("")),
+      hoveredCountryId(0)
   {
-    initializeNodeSwitch(NodeSwitch::CountryNodes,      NodeSwitchType::Transparent, 0);
-    initializeNodeSwitch(NodeSwitch::CountryHoverNodes, NodeSwitchType::Transparent, 1);
-    initializeNodeSwitch(NodeSwitch::Boundaries,        NodeSwitchType::Transparent, 2);
-    initializeNodeSwitch(NodeSwitch::CountryPresenter,  NodeSwitchType::Transparent, 20);
+    initializeNodeSwitch(switchCountryNodes,      NodeSwitchType::Transparent, 0);
+    initializeNodeSwitch(switchCountryHoverNodes, NodeSwitchType::Transparent, 1);
+    initializeNodeSwitch(switchBoundariesMesh,    NodeSwitchType::Transparent, 2);
+    initializeNodeSwitch(switchCountryPresenters, NodeSwitchType::Opaque     , 20);
 
-    nodeSwitches[NodeSwitch::Boundaries]->addChild(injector.inject<BoundariesMesh>(), true);
+    switchBoundariesMesh->addChild(0, injector.inject<BoundariesMesh>());
   }
 
-  void initializeNodeSwitch(NodeSwitch nodeSwitch, NodeSwitchType type, int renderBin)
+  template <typename TNode>
+  void initializeNodeSwitch(osg::ref_ptr<NodeSwitch<int, TNode>>& nodeSwitch, NodeSwitchType type, int renderBin)
   {
-    auto s = new osg::Switch();
+    nodeSwitch = new NodeSwitch<int, TNode>();
 
-    auto stateSet = s->getOrCreateStateSet();
+    auto stateSet = nodeSwitch->getOrCreateStateSet();
     if (type == NodeSwitchType::Opaque)
     {
       stateSet->setMode(GL_LIGHTING, osg::StateAttribute::ON);
@@ -101,8 +96,7 @@ struct CountryOverlay::Impl
 
     stateSet->setRenderBinDetails(renderBin, "RenderBin");
 
-    base->addChild(s);
-    nodeSwitches[nodeSwitch] = s;
+    base->addChild(nodeSwitch);
   }
 
   void addCountry(int id, const osg::Vec2f& centerLatLong, const osg::Vec2f& size,
@@ -110,7 +104,7 @@ struct CountryOverlay::Impl
                   const osg::ref_ptr<osg::Vec3Array>& vertices, const osg::ref_ptr<osg::Vec2Array>& texcoords1,
                   const osg::ref_ptr<osg::Vec3Array>& texcoords2)
   {
-    if (countryNodes.find(id) != countryNodes.end())
+    if (switchCountryNodes->hasChild(id))
     {
       return;
     }
@@ -123,15 +117,10 @@ struct CountryOverlay::Impl
 
     CountryHoverNode::Ptr hoverNode(new CountryHoverNode(vertices, texcoords1, triangles));
 
-    countryNodes.insert(CountryNode::Map::value_type(id, node));
-    nodeSwitches[NodeSwitch::CountryNodes]->addChild(node, true);
-
-    countryHoverNodes.insert(CountryHoverNode::Map::value_type(id, hoverNode));
-    nodeSwitches[NodeSwitch::CountryHoverNodes]->addChild(hoverNode, false);
+    switchCountryNodes->addChild(id, node, true);
+    switchCountryHoverNodes->addChild(id, hoverNode, false);
+    switchCountryPresenters->addChild(id, new CountryPresenter(), true);
   }
-
-  using SwitchPtr       = osg::ref_ptr<osg::Switch>;
-  using NodeSwitchesMap = std::map<NodeSwitch, SwitchPtr>;
 
   CountryOverlay* base;
 
@@ -143,36 +132,34 @@ struct CountryOverlay::Impl
 
   ModelContainer::Ptr modelContainer;
 
-  std::map<NodeSwitch, osg::ref_ptr<osg::Switch>> nodeSwitches;
+  osg::ref_ptr<NodeSwitch<int, CountryNode>>      switchCountryNodes;
+  osg::ref_ptr<NodeSwitch<int, CountryHoverNode>> switchCountryHoverNodes;
+  osg::ref_ptr<NodeSwitch<int, BoundariesMesh>>   switchBoundariesMesh;
+  osg::ref_ptr<NodeSwitch<int, CountryPresenter>> switchCountryPresenters;
 
-  CountryNode::Map      countryNodes;
-  CountryHoverNode::Map countryHoverNodes;
-  CountriesMap::Ptr     countriesMap;
+  CountriesMap::Ptr countriesMap;
 
   OSelectedCountryId::Ptr        oSelectedCountryId;
   OCurrentOverlayBranchName::Ptr oCurrentOverlayBranchId;
 
-  CountryHoverNode::Ptr hoveredCountryNode;
+  int hoveredCountryId;
 
   NeighbourMap neighbourMap;
 
   QMutex currentBranchIdMutex;
   QMutex selectedCountryMutex;
-
-  std::map<int, osg::ref_ptr<Node>> indicatorNodes;
 };
 
 CountryOverlay::CountryOverlay(osgGaming::Injector& injector)
   : LuaVisualOsgNode<osg::Group>(), m(new Impl(injector, this))
 {
-  addStateSetUniform(new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 0.0f, 0.0f)),
-                     m->nodeSwitches[NodeSwitch::CountryNodes]);
-  addStateSetUniform(new osg::Uniform("takeoverScale", 100.0f), m->nodeSwitches[NodeSwitch::CountryNodes]);
+  addStateSetUniform(new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 0.0f, 0.0f)), m->switchCountryNodes);
+  addStateSetUniform(new osg::Uniform("takeoverScale", 100.0f), m->switchCountryNodes);
 }
 
 CountryOverlay::~CountryOverlay()
 {
-  for (auto& node : m->countryNodes)
+  for (const auto& node : m->switchCountryNodes->getNodes())
   {
     node.second->clearNeighbors();
   }
@@ -210,12 +197,12 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
   auto distanceTexture = m->textureFactory->make()->image(m->resourceManager->loadImage(distanceMapFilename))->build();
 
   // Create statesets
-  auto csStateSet = m->nodeSwitches[NodeSwitch::CountryNodes]->getOrCreateStateSet();
+  auto csStateSet = m->switchCountryNodes->getOrCreateStateSet();
   csStateSet->setAttributeAndModes(cnProgram, osg::StateAttribute::ON);
   setStateSetTexture(csStateSet, distanceTexture, "distanceMap");
   csStateSet->setAttributeAndModes(new osg::BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), osg::StateAttribute::ON);
 
-  auto chsStateSet = m->nodeSwitches[NodeSwitch::CountryHoverNodes]->getOrCreateStateSet();
+  auto chsStateSet = m->switchCountryHoverNodes->getOrCreateStateSet();
   chsStateSet->setAttributeAndModes(chnProgram, osg::StateAttribute::ON);
   setStateSetTexture(chsStateSet, distanceTexture, "distanceMap");
 
@@ -288,7 +275,7 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
     m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords, texcoords2);
   }
 
-  for (const auto& countryNode : m->countryNodes)
+  for (const auto& countryNode : m->switchCountryNodes->getNodes())
   {
     NeighborList neighbours = m->neighbourMap.find(countryNode.first)->second;
 
@@ -306,31 +293,29 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
 
 void CountryOverlay::setHoveredCountryId(int id)
 {
-  const auto& countryHoverNode = m->countryHoverNodes.count(id) > 0 ? m->countryHoverNodes[id] : nullptr;
-
-  if (countryHoverNode == m->hoveredCountryNode)
+  if (id == m->hoveredCountryId)
   {
     return;
   }
 
-  if (m->hoveredCountryNode)
+  if (m->hoveredCountryId > 0)
   {
-    m->nodeSwitches[NodeSwitch::CountryHoverNodes]->setChildValue(m->hoveredCountryNode, false);
-    m->hoveredCountryNode->setHoverEnabled(false);
+    m->switchCountryHoverNodes->setKeyValue(m->hoveredCountryId, false);
+    m->switchCountryHoverNodes->getChild(m->hoveredCountryId)->setHoverEnabled(false);
   }
 
-  if (countryHoverNode)
+  if (id > 0)
   {
-    m->nodeSwitches[NodeSwitch::CountryHoverNodes]->setChildValue(countryHoverNode, true);
-    countryHoverNode->setHoverEnabled(true);
+    m->switchCountryHoverNodes->setKeyValue(id, true);
+    m->switchCountryHoverNodes->getChild(id)->setHoverEnabled(true);
   }
 
-  m->hoveredCountryNode = countryHoverNode;
+  m->hoveredCountryId = id;
 }
 
 const CountryNode::Map& CountryOverlay::getCountryNodes() const
 {
-  return m->countryNodes;
+  return m->switchCountryNodes->getNodes();
 }
 
 CountriesMap::Ptr CountryOverlay::getCountriesMap() const
@@ -345,19 +330,12 @@ const CountryOverlay::NeighbourMap& CountryOverlay::getNeighbourships() const
 
 CountryNode::Ptr CountryOverlay::getSelectedCountryNode() const
 {
-  return m->countryNodes.find(m->oSelectedCountryId->get())->second;
+  return getCountryNode(m->oSelectedCountryId->get());
 }
 
 CountryNode::Ptr CountryOverlay::getCountryNode(int id) const
 {
-  auto countryNode = m->countryNodes.find(id);
-
-  if (countryNode == m->countryNodes.end())
-  {
-    return nullptr;
-  }
-
-  return countryNode->second;
+   return m->switchCountryNodes->getChild(id);
 }
 
 CountryNode::Ptr CountryOverlay::getCountryNode(const osg::Vec2f& coord) const
@@ -422,18 +400,19 @@ CountryOverlay::OCurrentOverlayBranchName::Ptr CountryOverlay::getOCurrentOverla
 
 void CountryOverlay::setCountryIndicatorNode(int cid, osg::ref_ptr<osg::Node> node)
 {
-  if (m->countryNodes.count(cid) == 0)
+  if (!m->switchCountryPresenters->hasChild(cid))
   {
     OSGG_QLOG_WARN(QString("Country with id %1 not found.").arg(cid));
     return;
   }
 
-  if (m->indicatorNodes.count(cid) > 0)
+  auto presenter = m->switchCountryPresenters->getChild(cid);
+  if (presenter->getNumChildren() > 0)
   {
     removeCountryIndicatorNode(cid);
   }
 
-  auto cnode   = m->countryNodes[cid];
+  auto cnode   = m->switchCountryNodes->getChild(cid);
   auto latLong = cnode->getCenterLatLong();
   auto radius  = m->configManager->getNumber<float>("earth.radius");
 
@@ -445,23 +424,23 @@ void CountryOverlay::setCountryIndicatorNode(int cid, osg::ref_ptr<osg::Node> no
   osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
   transform->setMatrix(matMove * matRot);
 
-  m->nodeSwitches[NodeSwitch::CountryPresenter]->addChild(transform);
+  presenter->addChild(transform);
   transform->addChild(node);
-
-  m->indicatorNodes[cid] = transform;
 }
 
 void CountryOverlay::removeCountryIndicatorNode(int cid)
 {
-  if (m->indicatorNodes.count(cid) == 0)
+  if (!m->switchCountryPresenters->hasChild(cid))
   {
     OSGG_QLOG_WARN(QString("Country with id %1 has no indicator node set").arg(cid));
   }
 
-  auto it = m->indicatorNodes.find(cid);
-  m->nodeSwitches[NodeSwitch::CountryPresenter]->removeChild(it->second);
-
-  m->indicatorNodes.erase(it);
+  auto presenter = m->switchCountryPresenters->getChild(cid);
+  const auto n = presenter->getNumChildren();
+  for (auto i=0U; i<n; i++)
+  {
+    presenter->removeChild(presenter->getChild(0));
+  }
 }
 
 CountryNode* CountryOverlay::luaGetCountryNode(int id) const
