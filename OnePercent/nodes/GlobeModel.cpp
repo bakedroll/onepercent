@@ -1,6 +1,5 @@
 #include "GlobeModel.h"
 
-#include "BoundariesMesh.h"
 #include "CountryOverlay.h"
 #include "scripting/LuaConfig.h"
 
@@ -26,10 +25,8 @@ namespace onep
       , configManager(injector.inject<LuaConfig>())
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , textureFactory(injector.inject<osgGaming::TextureFactory>())
-      , boundariesMesh(injector.inject<BoundariesMesh>())
       , countryOverlay(injector.inject<CountryOverlay>())
     {
-      base->addChild(boundariesMesh);
       base->addChild(countryOverlay);
     }
 
@@ -384,7 +381,6 @@ namespace onep
     osg::ref_ptr<osg::PositionAttitudeTransform> cloudsTransform;
     osg::ref_ptr<osg::Uniform> uniformTime;
 
-    osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<CountryOverlay> countryOverlay;
 
     osg::ref_ptr<osgGaming::CameraAlignedQuad> scatteringQuad;

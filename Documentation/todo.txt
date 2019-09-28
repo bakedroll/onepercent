@@ -1,1 +1,2 @@
-cleanup countryoverlay pointers
+- less constructor parameters of CountryNode by passing CountryGeometry directly
+- cleanup countryoverlay pointers

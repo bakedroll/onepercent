@@ -177,13 +177,6 @@ namespace onep
     : osg::Group()
     , m(new Impl(injector))
   {
-    osg::ref_ptr<osg::StateSet> stateSet = getOrCreateStateSet();
-
-    stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-    stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
-    stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    stateSet->setRenderBinDetails(2, "RenderBin");
   }
 
   BoundariesMesh::~BoundariesMesh()

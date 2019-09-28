@@ -1,7 +1,6 @@
 #include "GlobeInteractionState.h"
 
 #include "core/Macros.h"
-#include "nodes/BoundariesMesh.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/GlobeModel.h"
 #include "nodes/CountryOverlay.h"
@@ -33,7 +32,6 @@ namespace onep
     , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
     , simulation(injector.inject<Simulation>())
     , countryOverlay(injector.inject<CountryOverlay>())
-    , boundariesMesh(injector.inject<BoundariesMesh>())
     , modelContainer(injector.inject<ModelContainer>())
     , bReady(false)
     , selectedCountry(0)
@@ -59,7 +57,6 @@ namespace onep
     osg::ref_ptr<GlobeOverviewWorld> globeOverviewWorld;
     osg::ref_ptr<Simulation> simulation;
     osg::ref_ptr<CountryOverlay> countryOverlay;
-    osg::ref_ptr<BoundariesMesh> boundariesMesh;
 
     osg::ref_ptr<ModelContainer> modelContainer;
 
