@@ -145,4 +145,9 @@ namespace onep
   {
     return *m->refNeighbours.get();
   }
+
+  void CountryNode::clearNeighbors()
+  {
+    m->neighbors.clear();
+  }
 }

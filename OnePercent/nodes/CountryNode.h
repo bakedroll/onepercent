@@ -22,20 +22,9 @@ namespace onep
 
     typedef std::map<int, std::vector<int>> BorderIdMap;
 
-    typedef osg::ref_ptr<CountryNode> Ptr;
-    typedef std::map<int, Ptr> Map;
-    typedef std::vector<Ptr> List;
-
-    typedef enum _colorMode
-    {
-      MODE_SELECTED = 1,
-      MODE_NEIGHBOR = 2,
-      MODE_HIGHLIGHT_BANKS = 3,
-      MODE_HIGHLIGHT_CONTROL = 4,
-      MODE_HIGHLIGHT_MEDIA = 5,
-      MODE_HIGHLIGHT_CONCERNS = 6,
-      MODE_HIGHLIGHT_POLITICS = 7
-    } ColorMode;
+    using Ptr  = osg::ref_ptr<CountryNode>;
+    using Map  = std::map<int, Ptr>;
+    using List = std::vector<Ptr>;
 
     CountryNode(
       const osg::ref_ptr<LuaConfig>& configManager,
@@ -66,6 +55,8 @@ namespace onep
     float getOptimalCameraDistance(float angle, float ratio) const;
 
     luabridge::LuaRef luaGetNeighbours() const;
+
+    void clearNeighbors();
 
   private:
     struct Impl;

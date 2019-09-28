@@ -200,7 +200,7 @@ namespace onep
       return;
     }
 
-    auto node = osgDB::readNodeFile(filename);
+    auto node     = osgDB::readNodeFile(filename);
     auto rotation = prototype->getRotationDeg();
     auto degToRad = 180.0f / C_PI;
 
