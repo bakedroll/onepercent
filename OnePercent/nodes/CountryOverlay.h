@@ -5,6 +5,7 @@
 
 #include "data/CountriesMap.h"
 #include "nodes/CountryNode.h"
+#include "nodes/CountryPresenter.h"
 
 #include <memory>
 
@@ -38,14 +39,17 @@ namespace onep
 
     void setHoveredCountryId(int id);
 
-    const CountryNode::Map& getCountryNodes() const;
+    const CountryNode::Map&      getCountryNodes() const;
+    const CountryPresenter::Map& getCountryPresenters() const;
+
     CountriesMap::Ptr       getCountriesMap() const;
     const NeighbourMap&     getNeighbourships() const;
 
-    CountryNode::Ptr getSelectedCountryNode() const;
-    CountryNode::Ptr getCountryNode(int id) const;
-    CountryNode::Ptr getCountryNode(const osg::Vec2f& coord) const;
-    int              getCountryId(const osg::Vec2f& coord) const;
+    CountryNode::Ptr      getSelectedCountryNode() const;
+    CountryNode::Ptr      getCountryNode(int id) const;
+    CountryNode::Ptr      getCountryNode(const osg::Vec2f& coord) const;
+    CountryPresenter::Ptr getCountryPresenter(int id) const;
+    int                   getCountryId(const osg::Vec2f& coord) const;
 
     void                    setSelectedCountry(int countryId);
     int                     getSelectedCountryId() const;
@@ -55,10 +59,8 @@ namespace onep
     void                           setCurrentOverlayBranchName(const std::string& branchName);
     OCurrentOverlayBranchName::Ptr getOCurrentOverlayBranchName() const;
 
-    void setCountryIndicatorNode(int cid, osg::ref_ptr<osg::Node> node);
-    void removeCountryIndicatorNode(int cid);
-
-    CountryNode* luaGetCountryNode(int id) const;
+    CountryNode*      luaGetCountryNode(int id) const;
+    CountryPresenter* luaGetCountryPresenter(int id) const;
 
 private:
     struct Impl;

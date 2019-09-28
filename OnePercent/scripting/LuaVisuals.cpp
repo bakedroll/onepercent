@@ -42,8 +42,7 @@ namespace onep
       .addFunction("unbind_branch_value", &LuaVisuals::luaUnbindBranchValue)
       .addFunction("update_bindings", &LuaVisuals::updateBindings)
       .addFunction("register_model_prototype", &LuaVisuals::luaRegisterModelPrototype)
-      .addFunction("set_country_indicator_model", &LuaVisuals::luaSetCountryIndicatorModel)
-      .addFunction("remove_country_indicator_model", &LuaVisuals::luaRemoveCountryIndicatorModel)
+      .addFunction("get_model_prototype", &LuaVisuals::luaGetModelPrototype)
       .endClass();
   }
 
@@ -214,19 +213,14 @@ namespace onep
     m->prototypes[prototypeName] = transform;
   }
 
-  void LuaVisuals::luaSetCountryIndicatorModel(int cid, const std::string prototypeName)
+  osg::Node* LuaVisuals::luaGetModelPrototype(const std::string& prototypeName) const
   {
     if (m->prototypes.count(prototypeName) == 0)
     {
       OSGG_QLOG_WARN(QString("Model prototype '%1' not registered.").arg(QString::fromStdString(prototypeName)));
-      return;
+      return nullptr;
     }
 
-    m->countryOverlay->setCountryIndicatorNode(cid, m->prototypes[prototypeName]);
-  }
-
-  void LuaVisuals::luaRemoveCountryIndicatorModel(int cid)
-  {
-    m->countryOverlay->removeCountryIndicatorNode(cid);
+    return m->prototypes.find(prototypeName)->second;
   }
 }

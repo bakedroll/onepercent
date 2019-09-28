@@ -33,7 +33,6 @@ namespace onep
     ModelContainer::Ptr modelContainer;
 
     osg::ref_ptr<osg::Switch> switchNode;
-    const CountryNode::Map* countryMap;
 
     bool enabled;
   };
@@ -55,22 +54,20 @@ namespace onep
     return m->enabled;
   }
 
-  void CountryNameOverlay::setCountryMap(const CountryNode::Map& countryMap)
+  void CountryNameOverlay::initialize(const CountryPresenter::Map& countryPresenters)
   {
     osg::ref_ptr<osgText::Font> font = m->resourceManager->loadFont("./GameData/fonts/coolvetica rg.ttf");
 
     float earthRadius = m->configManager->getNumber<float>("earth.radius");
 
-    m->countryMap = &countryMap;
-
     osg::ref_ptr<osg::Billboard> billboard = new osg::Billboard();
     billboard->setMode(osg::Billboard::Mode::POINT_ROT_EYE);
 
     int i = 0;
-    for (CountryNode::Map::const_iterator it = m->countryMap->cbegin(); it != m->countryMap->cend(); ++it)
+    for (const auto& presenter : countryPresenters)
     {
-      osg::Vec3f pos = osgGaming::getCartesianFromPolar(it->second->getCenterLatLong());
-      LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(it->first);
+      osg::Vec3f pos = osgGaming::getCartesianFromPolar(presenter.second->getCenterLatLong());
+      LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(presenter.first);
 
       if (!pos.valid() || !country)
         continue;

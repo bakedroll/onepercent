@@ -1,8 +1,8 @@
 #pragma once
 
-#include <osgGaming/Injector.h>
+#include "nodes/CountryPresenter.h"
 
-#include "nodes/CountryNode.h"
+#include <osgGaming/Injector.h>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -16,7 +16,7 @@ namespace onep
 
 		bool getEnabled();
 
-    void setCountryMap(const CountryNode::Map& countryMap);
+    void initialize(const CountryPresenter::Map& countryPresenters);
 		void setEnabled(bool enabled);
 
 	private:

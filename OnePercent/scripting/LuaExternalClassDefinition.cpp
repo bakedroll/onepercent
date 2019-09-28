@@ -5,6 +5,7 @@
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 #include <osg/Vec4d>
+#include <osg/Node>
 
 namespace onep
 {
@@ -38,6 +39,10 @@ namespace onep
     getGlobalNamespace(state)
       .beginClass<osg::Vec4d>("Vec4d")
       .addConstructor<void (*) (double, double, double, double)>()
+      .endClass();
+
+    getGlobalNamespace(state)
+      .beginClass<osg::Node>("Node")
       .endClass();
   }
 }

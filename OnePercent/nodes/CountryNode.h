@@ -27,11 +27,8 @@ namespace onep
     using List = std::vector<Ptr>;
 
     CountryNode(
-      const osg::ref_ptr<LuaConfig>& configManager,
       const osg::ref_ptr<LuaStateManager>& lua,
       const std::string& countryName,
-      const osg::Vec2f& centerLatLong,
-      const osg::Vec2f& size,
       const osg::ref_ptr<osg::Vec3Array>& vertices,
       const osg::ref_ptr<osg::Vec2Array>& texcoords1,
       const osg::ref_ptr<osg::Vec3Array>& texcoords2,
@@ -48,11 +45,6 @@ namespace onep
 
     bool getIsOnOcean() const;
     std::string getCountryName() const;
-
-    osg::Vec2f getCenterLatLong() const;
-    osg::Vec2f getSize() const;
-    osg::Vec2f getSurfaceSize() const;
-    float getOptimalCameraDistance(float angle, float ratio) const;
 
     luabridge::LuaRef luaGetNeighbours() const;
 

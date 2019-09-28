@@ -32,11 +32,12 @@ end
 control:on_event(defines.callback.on_country_changed, function(old_cid, cid)
 
 	if old_cid > 0 then
-		visuals:remove_country_indicator_model(old_cid)
+		countries:get_country_presenter(old_cid):clear_nodes()
 	end
 
 	if cid > 0 then
-		visuals:set_country_indicator_model(cid, "prototype_capitol")
+		local node = visuals:get_model_prototype("prototype_capitol")
+		countries:get_country_presenter(cid):add_node(node)
 	end
 
 	set_country_node_color(old_cid, color_transparent, color_transparent)

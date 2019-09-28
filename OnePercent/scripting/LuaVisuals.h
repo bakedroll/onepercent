@@ -2,6 +2,8 @@
 
 #include "scripting/LuaStateManager.h"
 
+#include <osg/Node>
+
 namespace onep
 {
   class LuaVisuals : public osg::Referenced
@@ -27,9 +29,7 @@ namespace onep
     void luaUnbindBranchValue(const std::string& branchName, const std::string& branchValue);
 
     void luaRegisterModelPrototype(const std::string& prototypeName, luabridge::LuaRef table);
-
-    void luaSetCountryIndicatorModel(int cid, const std::string prototypeName);
-    void luaRemoveCountryIndicatorModel(int cid);
+    osg::Node* luaGetModelPrototype(const std::string& prototypeName) const;
 
   private:
     struct Impl;

@@ -171,7 +171,7 @@ namespace onep
       m->boundariesMesh->getCountryTexcoords());
 
     m->countryNameOverlay->setEnabled(false);
-    m->countryNameOverlay->setCountryMap(m->countryOverlay->getCountryNodes());
+    m->countryNameOverlay->initialize(m->countryOverlay->getCountryPresenters());
 
     // update neighbours data
     m->model->initializeCountryNeighbours(m->countryOverlay->getNeighbourships());

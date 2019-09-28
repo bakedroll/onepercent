@@ -8,6 +8,7 @@
 #include "nodes/CountryOverlay.h"
 #include "nodes/BackgroundModel.h"
 #include "nodes/BoundariesMesh.h"
+#include "nodes/CountryPresenter.h"
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
 #include "states/LoadingGlobeOverviewState.h"
@@ -45,6 +46,7 @@ namespace onep
     lua->registerDefinition<LuaSkill::Definition>();
     lua->registerDefinition<CountryOverlay::Definition>();
     lua->registerDefinition<CountryNode::Definition>();
+    lua->registerDefinition<CountryPresenter::Definition>();
 
     lua->registerDefinition<LuaConfig::Definition>();
     lua->registerDefinition<LuaControl::Definition>();
