@@ -1,4 +1,5 @@
 #include "nodes/CountryPresenter.h"
+#include "core/Macros.h"
 
 #include <osg/MatrixTransform>
 
@@ -11,6 +12,8 @@ namespace onep
     getGlobalNamespace(state)
       .beginClass<CountryPresenter>("CountryPresenter")
       .addFunction("add_node", &CountryPresenter::luaAddNode)
+      .addFunction("add_node_to_bin", &CountryPresenter::luaAddNodeToBin)
+      .addFunction("remove_node_bin", &CountryPresenter::luaRemoveNodeBin)
       .addFunction("clear_nodes", &CountryPresenter::luaClearNodes)
       .endClass();
   }
@@ -53,6 +56,43 @@ namespace onep
 
   void CountryPresenter::luaAddNode(osg::Node* node)
   {
+      addTransformFromNode(node);
+  }
+
+  void CountryPresenter::luaAddNodeToBin(osg::Node* node, const std::string& nodeBin)
+  {
+      m_transformBins[nodeBin].push_back(addTransformFromNode(node));
+  }
+
+  void CountryPresenter::luaRemoveNodeBin(const std::string& nodeBin)
+  {
+    if (m_transformBins.count(nodeBin) == 0)
+    {
+      OSGG_QLOG_WARN(QString("Node bin '%1' not found").arg(nodeBin.c_str()));
+      return;
+    }
+
+    auto it = m_transformBins.find(nodeBin);
+    for (const auto& transform : it->second)
+    {
+      removeChild(transform);
+    }
+    m_transformBins.erase(it);
+  }
+
+  void CountryPresenter::luaClearNodes()
+  {
+    m_transformBins.clear();
+
+    const auto numChilds = getNumChildren();
+    for (auto i = 0U; i < numChilds; i++)
+    {
+      removeChild(getChild(i));
+    }
+  }
+
+  CountryPresenter::MatrixTransformPtr CountryPresenter::addTransformFromNode(osg::Node* node)
+  {
     auto matRot = osg::Matrix::rotate(
             osgGaming::getQuatFromEuler(-m_centerLatLong.x(), 0.0f, fmodf(m_centerLatLong.y() + C_PI, C_PI * 2.0f)));
 
@@ -63,14 +103,7 @@ namespace onep
 
     transform->addChild(node);
     addChild(transform);
-  }
 
-  void CountryPresenter::luaClearNodes()
-  {
-    const auto numChilds = getNumChildren();
-    for (auto i = 0U; i < numChilds; i++)
-    {
-      removeChild(getChild(i));
-    }
+    return transform;
   }
 }

@@ -77,9 +77,9 @@ namespace onep
 
     assert_return(!names.empty(), luabridge::LuaRef(m_state));
 
-    std::string currentName = names[0].toStdString();
-    luabridge::LuaRef first = luabridge::getGlobal(m_state, currentName.c_str());
-    luabridge::LuaRef current = first;
+    std::string       currentName = names[0].toStdString();
+    luabridge::LuaRef first       = luabridge::getGlobal(m_state, currentName.c_str());
+    luabridge::LuaRef current     = first;
 
     for (auto i = 1; i < names.size(); i++)
     {

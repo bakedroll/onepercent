@@ -27,13 +27,22 @@ namespace onep
     float      getOptimalCameraDistance(float angle, float ratio) const;
 
     void luaAddNode(osg::Node* node);
+    void luaAddNodeToBin(osg::Node* node, const std::string& nodeBin);
+    void luaRemoveNodeBin(const std::string& nodeBin);
     void luaClearNodes();
 
 private:
+    using MatrixTransformPtr     = osg::ref_ptr<osg::MatrixTransform>;
+    using MatrixTransformPtrList = std::vector<MatrixTransformPtr>;
+
     osg::Vec2f m_centerLatLong;
     osg::Vec2f m_size;
     float      m_earthRadius;
     float      m_cameraZoom;
+
+    std::map<std::string, MatrixTransformPtrList> m_transformBins;
+
+    MatrixTransformPtr addTransformFromNode(osg::Node* node);
 
   };
 }
