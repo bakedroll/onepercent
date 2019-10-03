@@ -55,6 +55,8 @@ namespace onep
   LuaStateManager::~LuaStateManager()
   {
     QMutexLocker lock(&m_luaLock);
+    m->objectCache.clear();
+
     lua_close(m_state);
   }
 
@@ -73,13 +75,13 @@ namespace onep
 
     QStringList names = namestr.split('.');
 
-    assert_return(names.size() > 0, luabridge::LuaRef(m_state));
+    assert_return(!names.empty(), luabridge::LuaRef(m_state));
 
     std::string currentName = names[0].toStdString();
     luabridge::LuaRef first = luabridge::getGlobal(m_state, currentName.c_str());
     luabridge::LuaRef current = first;
 
-    for (int i = 1; i < names.size(); i++)
+    for (auto i = 1; i < names.size(); i++)
     {
       assert_return(current.isTable(), luabridge::LuaRef(m_state));
 
