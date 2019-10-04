@@ -117,7 +117,8 @@ namespace onep
               true);
 
       switchCountryHoverNodes->addChild(id, new CountryHoverNode(vertices, texcoords1, triangles), false);
-      switchCountryPresenters->addChild(id, new CountryPresenter(configManager, centerLatLong, size), true);
+      switchCountryPresenters->addChild(id, new CountryPresenter(configManager, countriesMap, centerLatLong, size),
+                                        true);
     }
 
     CountryOverlay* base;

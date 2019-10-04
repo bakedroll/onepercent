@@ -37,10 +37,7 @@ control:on_event(defines.callback.on_country_changed, function(old_cid, cid)
 
 	if cid > 0 then
 		local node = visuals:get_model_prototype("prototype_chicken")
-		countries:get_country_presenter(cid):add_node_to_bin_at(node, "chicken", Vec2f(0.0, 0.0))
-		countries:get_country_presenter(cid):add_node_to_bin_at(node, "chicken", Vec2f(1.0, 0.0))
-		countries:get_country_presenter(cid):add_node_to_bin_at(node, "chicken", Vec2f(0.0, 1.0))
-		countries:get_country_presenter(cid):add_node_to_bin_at(node, "chicken", Vec2f(1.0, 1.0))
+		countries:get_country_presenter(cid):scatter_nodes_to_bin(node, "chicken", 5.0)
 	end
 
 	set_country_node_color(old_cid, color_transparent, color_transparent)

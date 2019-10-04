@@ -7,6 +7,8 @@
 
 namespace onep
 {
+  class CountriesMap;
+
   class CountryPresenter : public osg::Group
   {
   public:
@@ -19,7 +21,8 @@ namespace onep
     using Ptr = osg::ref_ptr<CountryPresenter>;
     using Map = std::map<int, Ptr>;
 
-    CountryPresenter(const LuaConfig::Ptr& configManager, const osg::Vec2f& centerLatLong, const osg::Vec2f& size);
+    CountryPresenter(const LuaConfig::Ptr& configManager, const std::shared_ptr<CountriesMap>& countriesMap,
+                     const osg::Vec2f& centerLatLong, const osg::Vec2f& size);
 
     osg::Vec2f getCenterLatLong() const;
     osg::Vec2f getSize() const;
@@ -29,6 +32,7 @@ namespace onep
     void luaAddNode(osg::Node* node);
     void luaAddNodeToBin(osg::Node* node, const std::string& nodeBin);
     void luaAddNodeToBinAt(osg::Node* node, const std::string& nodeBin, const osg::Vec2f& relPosition);
+    void luaScatterNodesToBin(osg::Node* node, const std::string& nodeBin, float density);
     void luaRemoveNodeBin(const std::string& nodeBin);
     void luaClearNodes();
 
@@ -42,8 +46,9 @@ private:
     float      m_cameraZoom;
 
     std::map<std::string, MatrixTransformPtrList> m_transformBins;
+    std::shared_ptr<CountriesMap>                 m_countriesMap;
 
+    float              getSurfaceArea() const;
     MatrixTransformPtr addTransformFromNode(osg::Node* node, const osg::Vec2f& relPosition);
-
   };
 }
