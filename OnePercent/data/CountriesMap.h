@@ -1,27 +1,27 @@
 #pragma once
 
-#include <osg/ref_ptr>
-#include <osg/Referenced>
 #include <osg/Vec2i>
+
+#include <memory>
+#include <vector>
 
 namespace onep
 {
-	class CountriesMap : public osg::Referenced
+	class CountriesMap
 	{
 	public:
-    typedef osg::ref_ptr<CountriesMap> Ptr;
+    using Ptr = std::shared_ptr<CountriesMap>;
 
 		CountriesMap(int width, int height, unsigned char* data);
-		~CountriesMap();
 
-		osg::Vec2i getSize();
+		osg::Vec2i getSize() const;
 
-		unsigned char getDataAt(int x, int y);
+		unsigned char getDataAt(int x, int y) const;
 
-	private:
-		int _width;
-		int _height;
+  private:
+    int                        m_width;
+    int                        m_height;
+    std::vector<unsigned char> m_data;
 
-		unsigned char* _data;
-	};
+  };
 }

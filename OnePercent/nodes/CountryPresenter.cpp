@@ -13,6 +13,7 @@ namespace onep
       .beginClass<CountryPresenter>("CountryPresenter")
       .addFunction("add_node", &CountryPresenter::luaAddNode)
       .addFunction("add_node_to_bin", &CountryPresenter::luaAddNodeToBin)
+      .addFunction("add_node_to_bin_at", &CountryPresenter::luaAddNodeToBinAt)
       .addFunction("remove_node_bin", &CountryPresenter::luaRemoveNodeBin)
       .addFunction("clear_nodes", &CountryPresenter::luaClearNodes)
       .endClass();
@@ -56,12 +57,17 @@ namespace onep
 
   void CountryPresenter::luaAddNode(osg::Node* node)
   {
-      addTransformFromNode(node);
+    luaAddNodeToBin(node, "");
   }
 
   void CountryPresenter::luaAddNodeToBin(osg::Node* node, const std::string& nodeBin)
   {
-      m_transformBins[nodeBin].push_back(addTransformFromNode(node));
+    luaAddNodeToBinAt(node, nodeBin, osg::Vec2f(0.5f, 0.5f));
+  }
+
+  void CountryPresenter::luaAddNodeToBinAt(osg::Node* node, const std::string& nodeBin, const osg::Vec2f& relPosition)
+  {
+    m_transformBins[nodeBin].push_back(addTransformFromNode(node, relPosition));
   }
 
   void CountryPresenter::luaRemoveNodeBin(const std::string& nodeBin)
@@ -91,10 +97,13 @@ namespace onep
     }
   }
 
-  CountryPresenter::MatrixTransformPtr CountryPresenter::addTransformFromNode(osg::Node* node)
+  CountryPresenter::MatrixTransformPtr CountryPresenter::addTransformFromNode(osg::Node* node, const osg::Vec2f& relPosition)
   {
-    auto matRot = osg::Matrix::rotate(
-            osgGaming::getQuatFromEuler(-m_centerLatLong.x(), 0.0f, fmodf(m_centerLatLong.y() + C_PI, C_PI * 2.0f)));
+    auto offsetLat  = m_size.x() * (relPosition.x() - 0.5f) * 2.0f * C_PI;
+    auto offsetLong = m_size.y() * (relPosition.y() - 0.5f) * C_PI;
+
+    auto matRot = osg::Matrix::rotate(osgGaming::getQuatFromEuler(
+            -m_centerLatLong.x() + offsetLong, 0.0f, fmodf(m_centerLatLong.y() + C_PI + offsetLat, C_PI * 2.0f)));
 
     auto matMove = osg::Matrix::translate(osg::Vec3f(0.0f, -m_earthRadius, 0.0f));
 

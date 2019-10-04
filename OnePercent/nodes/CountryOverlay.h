@@ -42,8 +42,8 @@ namespace onep
     const CountryNode::Map&      getCountryNodes() const;
     const CountryPresenter::Map& getCountryPresenters() const;
 
-    CountriesMap::Ptr       getCountriesMap() const;
-    const NeighbourMap&     getNeighbourships() const;
+    CountriesMap::Ptr   getCountriesMap() const;
+    const NeighbourMap& getNeighbourships() const;
 
     CountryNode::Ptr      getSelectedCountryNode() const;
     CountryNode::Ptr      getCountryNode(int id) const;

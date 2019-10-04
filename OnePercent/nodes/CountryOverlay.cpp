@@ -286,7 +286,8 @@ namespace onep
     auto mapWidth  = stream.read<int>();
     auto mapHeight = stream.read<int>();
 
-    m->countriesMap = new CountriesMap(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
+    m->countriesMap = std::make_shared<CountriesMap>(mapWidth, mapHeight,
+                                                     reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
   }
 
   void CountryOverlay::setHoveredCountryId(int id)

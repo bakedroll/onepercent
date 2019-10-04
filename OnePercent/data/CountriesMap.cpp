@@ -1,33 +1,22 @@
 #include "CountriesMap.h"
 
-#include <string>
-#include <cstring>
-
-using namespace osg;
-using namespace std;
-using namespace onep;
-
-CountriesMap::CountriesMap(int width, int height, unsigned char* data)
-	: Referenced(),
-	  _width(width),
-	  _height(height)
+namespace onep
 {
-	_data = new unsigned char[_width * _height];
+  CountriesMap::CountriesMap(int width, int height, unsigned char* data)
+	  : m_width(width)
+	  , m_height(height)
+  {
+    m_data.resize(m_width * m_height);
+	  std::memcpy(m_data.data(), data, m_width * m_height);
+  }
 
-	std::memcpy(&_data[0], data, _width * _height);
-}
+  osg::Vec2i CountriesMap::getSize() const
+  {
+	  return osg::Vec2i(m_width, m_height);
+  }
 
-CountriesMap::~CountriesMap()
-{
-	delete[] _data;
-}
-
-Vec2i CountriesMap::getSize()
-{
-	return Vec2i(_width, _height);
-}
-
-unsigned char CountriesMap::getDataAt(int x, int y)
-{
-	return _data[y * _width + x];
+  unsigned char CountriesMap::getDataAt(int x, int y) const
+  {
+	  return m_data[y * m_width + x];
+  }
 }

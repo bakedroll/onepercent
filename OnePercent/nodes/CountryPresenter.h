@@ -28,6 +28,7 @@ namespace onep
 
     void luaAddNode(osg::Node* node);
     void luaAddNodeToBin(osg::Node* node, const std::string& nodeBin);
+    void luaAddNodeToBinAt(osg::Node* node, const std::string& nodeBin, const osg::Vec2f& relPosition);
     void luaRemoveNodeBin(const std::string& nodeBin);
     void luaClearNodes();
 
@@ -42,7 +43,7 @@ private:
 
     std::map<std::string, MatrixTransformPtrList> m_transformBins;
 
-    MatrixTransformPtr addTransformFromNode(osg::Node* node);
+    MatrixTransformPtr addTransformFromNode(osg::Node* node, const osg::Vec2f& relPosition);
 
   };
 }
