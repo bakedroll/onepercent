@@ -97,6 +97,12 @@ Vec2f osgGaming::getTextSize(ref_ptr<Text> text)
 	Text::TextureGlyphQuadMap glyphs = text->getTextureGlyphQuadMap();
 	for (Text::TextureGlyphQuadMap::iterator it = glyphs.begin(); it != glyphs.end(); ++it)
 	{
+#if OSG_MIN_VERSION_REQUIRED(3, 6, 4)
+
+   // not needed anymore...
+
+#else
+
 		Text::GlyphQuads::Coords2 quads = it->second.getCoords();
 #if OSG_MIN_VERSION_REQUIRED(3, 4, 0)
 		for (int i=0; i<quads->size(); i++)
@@ -106,6 +112,7 @@ Vec2f osgGaming::getTextSize(ref_ptr<Text> text)
 		{
 			bb.expandBy(qit->x(), qit->y(), 0.0f);
 		}
+#endif
 #endif
 	}
 

@@ -36,7 +36,7 @@ control:on_event(defines.callback.on_country_changed, function(old_cid, cid)
 	end
 
 	if cid > 0 then
-		local node = visuals:get_model_prototype("prototype_chicken")
+		local node = visuals:get_model_prototype("prototype_sphere")
 		countries:get_country_presenter(cid):scatter_nodes_to_bin(node, "marker", 1.0)
 	end
 

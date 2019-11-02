@@ -65,6 +65,9 @@ find_package(OpenSceneGraph COMPONENTS
 adjust_cached_path_if_exists(OSG_INCLUDE_DIR "Path to a file." "${OSG_INCLUDE_DIR}" MESSAGES ERROR_MESSAGES)
 adjust_cached_path_if_exists(OSG_LIBRARY "Path to a library." "${OSG_LIBRARY}" MESSAGES ERROR_MESSAGES)
 
+SET(OSG_VERSION_PREFIX "" CACHE STRING "The osg version prefix")
+SET(OPENTHREADS_VERSION_PREFIX "" CACHE STRING "The OpenThreads version prefix")
+
 if (NOT EXISTS ${OSG_LIBRARY_DEBUG})
   set(OSG_LIBRARY_DEBUG ${OSG_LIBRARY})
 endif()
@@ -245,9 +248,9 @@ endif()
 # copy shared dlls
 if (WIN32)
   if (EXISTS ${OSG_BINARY})
-    copy_dlls(${OSG_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osg100-" ""
+    copy_dlls(${OSG_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "${OSG_VERSION_PREFIX}" ""
       "osg osgDB osgGA osgText osgUtil osgViewer")
-    copy_dlls(${OSG_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "ot20-" ""
+    copy_dlls(${OSG_BINARY} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "${OPENTHREADS_VERSION_PREFIX}" ""
       "OpenThreads")
     
     if (EXISTS ${OSG_PLUGINS})
@@ -256,9 +259,9 @@ if (WIN32)
     endif()
     
     if (OSG_LIBRARIES_DEBUG_SUFFIX AND EXISTS ${OSG_BINARY_DEBUG})
-      copy_dlls(${OSG_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osg100-" ${OSG_LIBRARY_SUFFIX}
+      copy_dlls(${OSG_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "${OSG_VERSION_PREFIX}" ${OSG_LIBRARY_SUFFIX}
         "osg osgDB osgGA osgText osgUtil osgViewer")
-      copy_dlls(${OSG_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "ot20-" ${OSG_LIBRARY_SUFFIX}
+      copy_dlls(${OSG_BINARY_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "${OPENTHREADS_VERSION_PREFIX}" ${OSG_LIBRARY_SUFFIX}
         "OpenThreads")
       
       if (EXISTS ${OSG_PLUGINS_DEBUG})
