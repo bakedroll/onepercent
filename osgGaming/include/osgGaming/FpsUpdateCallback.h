@@ -1,17 +1,17 @@
 #pragma once
 
-#include <osg/NodeCallback>
+#include <osg/Callback>
 #include <functional>
 
 namespace osgGaming
 {
-	class FpsUpdateCallback : public osg::NodeCallback
+	class FpsUpdateCallback : public osg::Callback
 	{
 	public:
 		FpsUpdateCallback();
 
     void setUpdateFunc(std::function<void(int)> func);
-    virtual void operator()(osg::Node *node, osg::NodeVisitor *nv) override;
+    bool run(osg::Object* node, osg::Object* data) override;
 
 	private:
 		int m_framesCount;

@@ -399,7 +399,7 @@ namespace osgGaming
   {
     m->initialize(getCamera());
     //osgViewer::View::setSceneData(m->hudGroup);
-    osgViewer::View::setSceneData(m->ppGroup);
+    setSceneData(m->ppGroup);
   }
 
   View::~View()
@@ -440,7 +440,7 @@ namespace osgGaming
     }
   }
 
-  void View::setSceneData(osg::Node* node)
+  void View::setRootNode(osg::Node* node)
   {
     if (node == m->ppSceneData.get())
       return;

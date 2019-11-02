@@ -62,7 +62,7 @@ namespace osgGaming
     GameApplication();
     ~GameApplication();
 
-    virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override;
+    void action(osg::Object* object, osg::Object* data, double simTime, double timeDiff) override;
 
     osg::ref_ptr<World> getDefaultWorld();
     osg::ref_ptr<Hud> getDefaultHud();

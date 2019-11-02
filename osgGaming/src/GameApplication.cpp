@@ -110,7 +110,7 @@ namespace osgGaming
         osg::ref_ptr<TransformableCameraManipulator> manipulator = state->getWorld(view)->getCameraManipulator();
         manipulator->setCamera(view->getSceneCamera());
 
-        view->setSceneData(state->getWorld(view)->getRootNode());
+        view->setRootNode(state->getWorld(view)->getRootNode());
         view->setHud(state->getHud(view));
         view->setCameraManipulator(state->getWorld(view)->getCameraManipulator());
 
@@ -152,7 +152,7 @@ namespace osgGaming
   {
   }
 
-  void GameApplication::action(Node* node, NodeVisitor* nv, double simTime, double timeDiff)
+  void GameApplication::action(osg::Object* object, osg::Object* data, double simTime, double timeDiff)
   {
     if (m->gameEnded)
     {
@@ -309,7 +309,7 @@ namespace osgGaming
       m->gameEnded = true;
     }
 
-    traverse(node, nv);
+    traverse(object, data);
   }
 
   ref_ptr<World> GameApplication::getDefaultWorld()
@@ -390,7 +390,7 @@ namespace osgGaming
       deinitialize();
 
       // shutdown/free all pointers
-      m->view->setSceneData(nullptr);
+      m->view->setRootNode(nullptr);
 
       m->gameStateStack.clear();
       m->viewer.release();

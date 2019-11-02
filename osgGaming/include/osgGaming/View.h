@@ -21,7 +21,7 @@ namespace osgGaming
 
     void updateResolution(osg::Vec2f resolution);
     void updateWindowPosition(osg::Vec2f position);
-    virtual void setSceneData(osg::Node* node) override;
+    void setRootNode(osg::Node* node);
 
     void setClampColorEnabled(bool enabled);
 

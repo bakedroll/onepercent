@@ -255,7 +255,7 @@ if (WIN32)
     
     if (EXISTS ${OSG_PLUGINS})
       copy_dlls(${OSG_PLUGINS} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osgdb_" ""
-        "freetype png 3ds")
+        "freetype png 3ds obj")
     endif()
     
     if (OSG_LIBRARIES_DEBUG_SUFFIX AND EXISTS ${OSG_BINARY_DEBUG})
@@ -266,7 +266,7 @@ if (WIN32)
       
       if (EXISTS ${OSG_PLUGINS_DEBUG})
         copy_dlls(${OSG_PLUGINS_DEBUG} ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR} "osgdb_" ${OSG_LIBRARY_SUFFIX}
-          "freetype png 3ds")
+          "freetype png 3ds obj")
       endif()
     endif()
   endif()

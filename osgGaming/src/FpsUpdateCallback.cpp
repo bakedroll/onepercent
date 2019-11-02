@@ -6,7 +6,7 @@ namespace osgGaming
 {
 
   FpsUpdateCallback::FpsUpdateCallback()
-    : osg::NodeCallback(),
+    : osg::Callback(),
     m_framesCount(0),
     m_lastSimulationTime(0.0)
   {
@@ -18,10 +18,16 @@ namespace osgGaming
     m_updateFunc = func;
   }
 
-  void FpsUpdateCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
+  bool FpsUpdateCallback::run(osg::Object* node, osg::Object* data)
   {
     if (m_updateFunc)
     {
+      auto nv = dynamic_cast<osg::NodeVisitor*>(data);
+      if (!nv)
+      {
+        return false;
+      }
+
       double time = nv->getFrameStamp()->getSimulationTime();
 
       if (m_lastSimulationTime != 0.0)
@@ -43,7 +49,7 @@ namespace osgGaming
       }
     }
 
-    traverse(node, nv);
+    traverse(node, data);
   }
 
 }

@@ -1,21 +1,21 @@
 #pragma once
 
-#include <osg/NodeCallback>
-#include <osg/NodeVisitor>
+#include <osg/Drawable>
+#include <osg/Callback>
 
 namespace osgGaming
 {
-	class SimulationCallback : public osg::NodeCallback
+	class SimulationCallback : public osg::Callback
 	{
 	public:
 	  SimulationCallback();
     virtual ~SimulationCallback();
 
-		virtual void operator()(osg::Node* node, osg::NodeVisitor* nv) override final;
+    bool run(osg::Object* node, osg::Object* data) override;
 		void resetTimeDiff();
 
 	protected:
-		virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) = 0;
+		virtual void action(osg::Object* object, osg::Object* data, double simTime, double timeDiff) = 0;
 
 	private:
 		double _lastSimulationTime;

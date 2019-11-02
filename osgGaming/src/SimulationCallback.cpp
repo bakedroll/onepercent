@@ -4,7 +4,7 @@ using namespace osg;
 using namespace osgGaming;
 
 SimulationCallback::SimulationCallback()
-	: NodeCallback(),
+	: osg::Callback(),
 	  _lastSimulationTime(0.0),
 	  _resetTimeDiff(false)
 {
@@ -15,8 +15,14 @@ SimulationCallback::~SimulationCallback()
 {
 }
 
-void SimulationCallback::operator()(Node* node, NodeVisitor* nv)
+bool SimulationCallback::run(osg::Object* node, osg::Object* data)
 {
+  const auto nv = dynamic_cast<osg::NodeVisitor*>(data);
+  if (!nv)
+  {
+    return false;
+  }
+
 	double time = nv->getFrameStamp()->getSimulationTime();
 	double time_diff = 0.0;
 
@@ -31,7 +37,9 @@ void SimulationCallback::operator()(Node* node, NodeVisitor* nv)
 
 	_lastSimulationTime = time;
 
-	action(node, nv, time, time_diff);
+	action(node, data, time, time_diff);
+
+  return true;
 }
 
 void SimulationCallback::resetTimeDiff()

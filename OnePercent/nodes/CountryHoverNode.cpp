@@ -30,7 +30,7 @@ namespace onep
     }
 
   protected:
-    virtual void action(osg::Node* node, osg::NodeVisitor* nv, double simTime, double timeDiff) override
+    void action(osg::Object* object, osg::Object* data, double simTime, double timeDiff) override
     {
       if (!bEnabled)
         return;
