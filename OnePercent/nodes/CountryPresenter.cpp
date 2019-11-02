@@ -1,9 +1,12 @@
 #include "nodes/CountryPresenter.h"
+#include "data/CountriesMap.h"
 #include "core/Macros.h"
 
 #include <osg/MatrixTransform>
 
 #include <osgGaming/Helper.h>
+#include <osg/ShapeDrawable>
+#include <osg/PositionAttitudeTransform>
 
 namespace onep
 {
@@ -31,10 +34,11 @@ namespace onep
             .endClass();
   }
 
-  CountryPresenter::CountryPresenter(const LuaConfig::Ptr&                configManager,
+  CountryPresenter::CountryPresenter(int id, const LuaConfig::Ptr& configManager,
                                      const std::shared_ptr<CountriesMap>& countriesMap, const osg::Vec2f& centerLatLong,
                                      const osg::Vec2f& size)
-    : m_centerLatLong(centerLatLong),
+    : m_id(id),
+      m_centerLatLong(centerLatLong),
       m_size(size),
       m_earthRadius(configManager->getNumber<float>("earth.radius")),
       m_cameraZoom(configManager->getNumber<float>("camera.country_zoom")),
@@ -81,16 +85,43 @@ namespace onep
 
   void CountryPresenter::luaAddNodeToBinAt(osg::Node* node, const std::string& nodeBin, const osg::Vec2f& relPosition)
   {
-    m_transformBins[nodeBin].push_back(addTransformFromNode(node, relPosition));
+    addTransformFromNodeToCenter(node, nodeBin, relPosition);
   }
 
   void CountryPresenter::luaScatterNodesToBin(osg::Node* node, const std::string& nodeBin, float density)
   {
-    auto count = static_cast<int>(getSurfaceArea() * density);
-    for (auto i=0; i<count; i++)
+    const auto pi2              = C_PI * 2.0f;
+    const auto halfPi           = C_PI / 2.0f;
+    const auto latCoverage      = m_size.y() * C_PI;
+    const auto halfLatCoverage  = latCoverage * 0.5f;
+    const auto halfLongCoverage = m_size.x() * C_PI;
+    const auto longCoverage     = halfLongCoverage * 2.0f;
+    const auto latMin           = m_centerLatLong.x() - halfLatCoverage;
+    const auto latMax           = m_centerLatLong.x() + halfLongCoverage;
+    const auto n                = static_cast<int>(latCoverage * longCoverage * 1000.0f * density);
+
+    auto maxLongRange = 1.0f;
+    if (latMin >= 0.0f || latMax <= 0.0f)
     {
-      osg::Vec2f relPosition(rand01(), rand01());
-      luaAddNodeToBinAt(node, nodeBin, relPosition);
+      maxLongRange = std::max(cos(latMin), cos(latMax));
+    }
+
+    for (auto i = 0; i < n; i++)
+    {
+      const auto latitude = latMin + rand01() * latCoverage;
+      const auto longRange = cos(latitude);
+
+      const auto longitude = m_centerLatLong.y() + (rand01() - 0.5f) * longCoverage * (maxLongRange / longRange);
+
+      osg::Vec2f coords(osg::clampBetween(fmodf(longitude / pi2 + 0.5f, 1.0f), 0.0f, 1.0f),
+                        1.0f - osg::clampBetween((latitude + halfPi) / C_PI, 0.0f, 1.0f));
+
+      if (static_cast<int>(m_countriesMap->getDataAt(coords)) != m_id)
+      {
+        continue;
+      }
+
+      addTransformFromNodeToCoords(node, nodeBin, osg::Vec2f(-latitude, fmodf(longitude + C_PI, pi2)));
     }
   }
 
@@ -146,14 +177,10 @@ namespace onep
            m_size.x();
   }
 
-  CountryPresenter::MatrixTransformPtr CountryPresenter::addTransformFromNode(osg::Node* node, const osg::Vec2f& relPosition)
+  void CountryPresenter::addTransformFromNodeToCoords(osg::Node* node, const std::string& nodeBin,
+                                                      const osg::Vec2f& latLong)
   {
-    auto offsetLat  = m_size.x() * (relPosition.x() - 0.5f) * 2.0f * C_PI;
-    auto offsetLong = m_size.y() * (relPosition.y() - 0.5f) * C_PI;
-
-    auto matRot = osg::Matrix::rotate(osgGaming::getQuatFromEuler(
-            offsetLong - m_centerLatLong.x(), 0.0f, fmodf(m_centerLatLong.y() + C_PI + offsetLat, C_PI * 2.0f)));
-
+    auto matRot  = osg::Matrix::rotate(osgGaming::getQuatFromEuler(latLong.x(), 0.0f, latLong.y()));
     auto matMove = osg::Matrix::translate(osg::Vec3f(0.0f, -m_earthRadius, 0.0f));
 
     osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
@@ -162,6 +189,17 @@ namespace onep
     transform->addChild(node);
     addChild(transform);
 
-    return transform;
+    m_transformBins[nodeBin].push_back(transform);
+  }
+
+  void CountryPresenter::addTransformFromNodeToCenter(osg::Node* node, const std::string& nodeBin,
+                                                      const osg::Vec2f& relPosition)
+  {
+    auto offsetLong = m_size.x() * (relPosition.x() - 0.5f) * 2.0f * C_PI;
+    auto offsetLat  = m_size.y() * (relPosition.y() - 0.5f) * C_PI;
+
+    addTransformFromNodeToCoords(
+            node, nodeBin,
+            osg::Vec2f(offsetLat - m_centerLatLong.x(), fmodf(m_centerLatLong.y() + C_PI + offsetLong, C_PI * 2.0f)));
   }
 }

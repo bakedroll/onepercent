@@ -1,6 +1,6 @@
 #pragma once
 
-#include <osg/Vec2i>
+#include <osg/Vec2f>
 
 #include <memory>
 #include <vector>
@@ -12,11 +12,10 @@ namespace onep
 	public:
     using Ptr = std::shared_ptr<CountriesMap>;
 
-		CountriesMap(int width, int height, unsigned char* data);
+		CountriesMap();
 
-		osg::Vec2i getSize() const;
-
-		unsigned char getDataAt(int x, int y) const;
+    void initialize(int width, int height, unsigned char* data);
+		unsigned char getDataAt(const osg::Vec2f& coord) const;
 
   private:
     int                        m_width;

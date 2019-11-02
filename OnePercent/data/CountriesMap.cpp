@@ -2,21 +2,27 @@
 
 namespace onep
 {
-  CountriesMap::CountriesMap(int width, int height, unsigned char* data)
-	  : m_width(width)
-	  , m_height(height)
+  CountriesMap::CountriesMap()
+	  : m_width(0)
+	  , m_height(0)
   {
+    
+  }
+
+  void CountriesMap::initialize(int width, int height, unsigned char* data)
+  {
+    m_width  = width;
+    m_height = height;
+
     m_data.resize(m_width * m_height);
 	  std::memcpy(m_data.data(), data, m_width * m_height);
   }
 
-  osg::Vec2i CountriesMap::getSize() const
+  unsigned char CountriesMap::getDataAt(const osg::Vec2f& coord) const
   {
-	  return osg::Vec2i(m_width, m_height);
-  }
+    auto ix = static_cast<int>(coord.x() * m_width);
+    auto iy = static_cast<int>(coord.y() * m_height);
 
-  unsigned char CountriesMap::getDataAt(int x, int y) const
-  {
-	  return m_data[y * m_width + x];
+	  return m_data[iy * m_width + ix];
   }
 }

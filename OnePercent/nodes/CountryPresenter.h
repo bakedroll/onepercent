@@ -21,7 +21,7 @@ namespace onep
     using Ptr = osg::ref_ptr<CountryPresenter>;
     using Map = std::map<int, Ptr>;
 
-    CountryPresenter(const LuaConfig::Ptr& configManager, const std::shared_ptr<CountriesMap>& countriesMap,
+    CountryPresenter(int id, const LuaConfig::Ptr& configManager, const std::shared_ptr<CountriesMap>& countriesMap,
                      const osg::Vec2f& centerLatLong, const osg::Vec2f& size);
 
     osg::Vec2f getCenterLatLong() const;
@@ -40,6 +40,7 @@ private:
     using MatrixTransformPtr     = osg::ref_ptr<osg::MatrixTransform>;
     using MatrixTransformPtrList = std::vector<MatrixTransformPtr>;
 
+    int        m_id;
     osg::Vec2f m_centerLatLong;
     osg::Vec2f m_size;
     float      m_earthRadius;
@@ -48,7 +49,9 @@ private:
     std::map<std::string, MatrixTransformPtrList> m_transformBins;
     std::shared_ptr<CountriesMap>                 m_countriesMap;
 
-    float              getSurfaceArea() const;
-    MatrixTransformPtr addTransformFromNode(osg::Node* node, const osg::Vec2f& relPosition);
+    float getSurfaceArea() const;
+
+    void addTransformFromNodeToCoords(osg::Node* node, const std::string& nodeBin, const osg::Vec2f& latLong);
+    void addTransformFromNodeToCenter(osg::Node* node, const std::string& nodeBin, const osg::Vec2f& relPosition);
   };
 }

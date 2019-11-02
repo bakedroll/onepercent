@@ -61,6 +61,7 @@ namespace onep
         configManager(injector.inject<LuaConfig>()),
         lua(injector.inject<LuaStateManager>()),
         modelContainer(injector.inject<ModelContainer>()),
+        countriesMap(std::make_shared<CountriesMap>()),
         oSelectedCountryId(new osgGaming::Observable<int>(0)),
         oCurrentOverlayBranchId(new osgGaming::Observable<std::string>("")),
         hoveredCountryId(0)
@@ -117,7 +118,7 @@ namespace onep
               true);
 
       switchCountryHoverNodes->addChild(id, new CountryHoverNode(vertices, texcoords1, triangles), false);
-      switchCountryPresenters->addChild(id, new CountryPresenter(configManager, countriesMap, centerLatLong, size),
+      switchCountryPresenters->addChild(id, new CountryPresenter(id, configManager, countriesMap, centerLatLong, size),
                                         true);
     }
 
@@ -287,8 +288,7 @@ namespace onep
     auto mapWidth  = stream.read<int>();
     auto mapHeight = stream.read<int>();
 
-    m->countriesMap = std::make_shared<CountriesMap>(mapWidth, mapHeight,
-                                                     reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
+    m->countriesMap->initialize(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
   }
 
   void CountryOverlay::setHoveredCountryId(int id)
@@ -362,12 +362,7 @@ namespace onep
 
   int CountryOverlay::getCountryId(const osg::Vec2f& coord) const
   {
-    auto mapSize = m->countriesMap->getSize();
-
-    auto ix = static_cast<int>(coord.x() * mapSize.x());
-    auto iy = static_cast<int>(coord.y() * mapSize.y());
-
-    return m->countriesMap->getDataAt(ix, iy);
+    return m->countriesMap->getDataAt(coord);
   }
 
   void CountryOverlay::setSelectedCountry(int countryId)
