@@ -15,3 +15,12 @@ lua.visuals:register_model_prototype("prototype_chicken", {
     position = { 0.0, 0.0, 0.0 }
 
 })
+
+lua.visuals:register_model_prototype("prototype_sphere", {
+
+    filename = "./GameData/models/sphere.3ds",
+    scale    = { 0.0005, 0.0005, 0.0005 },
+    rotation = { 0.0, 0.0, 0.0 },
+    position = { 0.0, 0.0, 0.0 }
+
+})
