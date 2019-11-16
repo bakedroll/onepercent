@@ -57,7 +57,7 @@ namespace onep
         {
           const auto name = QString::fromStdString(skill->getName());
 
-          auto skillButton = new QPushButton(QString("%1 (%2)").arg(name).arg(cost));
+          auto skillButton = new QPushButton(QString("%1\n(%2)").arg(name).arg(cost));
           skillButton->setObjectName("ButtonSkill");
           skillButton->setCheckable(true);
 

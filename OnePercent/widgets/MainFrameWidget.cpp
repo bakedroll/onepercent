@@ -51,6 +51,7 @@ namespace onep
         widget->setVisible(true);
 
       widgetEnabled = widget;
+      Q_EMIT base->toggledWidgetEnabled(widgetEnabled != nullptr);
 
       layoutMain->setStretch(1, widgetEnabled ? 0 : 1);
     }

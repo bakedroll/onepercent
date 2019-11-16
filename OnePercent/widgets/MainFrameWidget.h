@@ -18,8 +18,9 @@ namespace onep
     struct Impl;
     std::unique_ptr<Impl> m;
 
-  signals:
+  Q_SIGNALS:
     void clickedButtonDebug();
+    void toggledWidgetEnabled(bool enabled);
 
   };
 }

@@ -23,6 +23,8 @@
 
 namespace onep
 {
+  const auto CountryNone = 0;
+
   struct GlobeInteractionState::Impl
   {
     Impl(osgGaming::Injector& injector, GlobeInteractionState* b)
@@ -34,6 +36,7 @@ namespace onep
     , countryOverlay(injector.inject<CountryOverlay>())
     , modelContainer(injector.inject<ModelContainer>())
     , bReady(false)
+    , isInteractionEnabled(true)
     , selectedCountry(0)
     , hoveredCountry(0)
     , countryMenuWidget(new CountryMenuWidget(injector))
@@ -70,6 +73,7 @@ namespace onep
     float paramCameraRotationSpeed;
 
     bool bReady;
+    bool isInteractionEnabled;
 
     int selectedCountry;
     int hoveredCountry;
@@ -290,6 +294,15 @@ namespace onep
     m->setCameraDistanceAndAngle(m->paramCameraMaxDistance, getSimulationTime());
 
     setupUi();
+
+    QObject::connect(m->mainFrameWidget, &MainFrameWidget::toggledWidgetEnabled, [this](bool enabled)
+    {
+      m->isInteractionEnabled = !enabled;
+      if (!m->isInteractionEnabled)
+      {
+        m->countryOverlay->setSelectedCountry(CountryNone);
+      }
+    });
   }
 
   osgGaming::AbstractGameState::StateEvent* GlobeInteractionState::update()
@@ -299,7 +312,7 @@ namespace onep
     if (m->selectedCountry > 0 && m->countryMenuWidget->isVisible())
       m->updateCountryMenuWidgetPosition(m->selectedCountry);
 
-    int id = m->pickCountryIdAt(m->mousePos);
+    int id = m->isInteractionEnabled ? m->pickCountryIdAt(m->mousePos) : CountryNone;
     if (id != m->hoveredCountry)
     {
       m->hoveredCountry = id;
@@ -313,7 +326,7 @@ namespace onep
 
   void GlobeInteractionState::onMousePressedEvent(int button, float x, float y)
   {
-    if (!m->ready())
+    if (!m->ready() || !m->isInteractionEnabled)
     {
       return;
     }
@@ -351,7 +364,7 @@ namespace onep
 
   void GlobeInteractionState::onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion)
   {
-    if (!m->ready())
+    if (!m->ready() || !m->isInteractionEnabled)
     {
       return;
     }
@@ -379,6 +392,11 @@ namespace onep
 
   void GlobeInteractionState::onDragBeginEvent(int button, osg::Vec2f position)
   {
+    if (!m->isInteractionEnabled)
+    {
+      return;
+    }
+
     if (button == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
     {
       m->bDraggingMidMouse = true;
@@ -389,7 +407,7 @@ namespace onep
 
   void GlobeInteractionState::onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change)
   {
-    if (!m->ready())
+    if (!m->ready() || !m->isInteractionEnabled)
       return;
 
     osg::Vec2f latLong = getCameraLatLong();
