@@ -421,6 +421,8 @@ namespace onep
     void setupUi()
     {
       auto generateLuaDocButton = new QPushButton("Generate LuaDoc");
+      generateLuaDocButton->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+
 #ifdef LUADOC_ENABLED
       connect(generateLuaDocButton, &QPushButton::clicked, [this]()
       {
@@ -584,6 +586,8 @@ namespace onep
       }
 
       luaConsoleEdit = new ConsoleEdit();
+      luaConsoleEdit->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
+
       buttonStartStop = new QPushButton();
       buttonStartStop->setFixedWidth(100);
       buttonStartStop->setFocusPolicy(Qt::NoFocus);

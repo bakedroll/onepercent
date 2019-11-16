@@ -21,9 +21,18 @@ onep--MainFrameWidget QPushButton#ButtonDebug
   min-width: 120px;
 }
 
-onep--MainFrameWidget QLabel#LabelDays
+onep--MainFrameWidget QLabel
 {
   color: #fff;
+}
+
+onep--MainFrameWidget QLabel#LabelSkillPoints
+{
+  font-size: 18pt;
+}
+
+onep--MainFrameWidget QLabel#LabelDays
+{
   font-size: 18pt;
   margin-left: 5px;
   margin-bottom: 5px;
@@ -31,7 +40,6 @@ onep--MainFrameWidget QLabel#LabelDays
 
 onep--MainFrameWidget QLabel#LabelFps
 {
-  color: #fff;
   min-width: 35px;
   text-align: right;
 }

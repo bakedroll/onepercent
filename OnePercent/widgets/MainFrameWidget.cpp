@@ -24,6 +24,7 @@ namespace onep
       , skillsWidget(new SkillsWidget(injector))
       , widgetEnabled(nullptr)
       , oDay(injector.inject<ODay>())
+      , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , globeModel(injector.inject<GlobeModel>())
       , simulation(injector.inject<Simulation>())
     {}
@@ -35,11 +36,13 @@ namespace onep
     SkillsWidget* skillsWidget;
     QWidget*      widgetEnabled;
 
-    ODay::Ptr       oDay;
-    GlobeModel::Ptr globeModel;
-    Simulation::Ptr simulation;
+    ODay::Ptr            oDay;
+    ONumSkillPoints::Ptr oNumSkillPoints;
+    GlobeModel::Ptr      globeModel;
+    Simulation::Ptr      simulation;
 
     osgGaming::Observer<int>::Ptr               observerDay;
+    osgGaming::Observer<int>::Ptr               observerSkillPoints;
     osgGaming::Observer<Simulation::State>::Ptr observerRunning;
 
     void setCenterWidgetEnabled(QWidget* widget)
@@ -60,6 +63,9 @@ namespace onep
     {
       auto buttonSkills = new QPushButton(tr("Skills"));
       buttonSkills->setObjectName("ButtonSkills");
+
+      auto labelSkillPoints = new QLabel();
+      labelSkillPoints->setObjectName("LabelSkillPoints");
 
       auto buttonDebug = new QPushButton(tr("Debug Window"));
       buttonDebug->setObjectName("ButtonDebug");
@@ -99,6 +105,7 @@ namespace onep
       auto layoutTopBar = new QHBoxLayout();
       layoutTopBar->setContentsMargins(0, 0, 0, 0);
       layoutTopBar->addWidget(buttonSkills);
+      layoutTopBar->addWidget(labelSkillPoints);
       layoutTopBar->addStretch(1);
       layoutTopBar->addWidget(buttonDebug);
       layoutTopBar->addWidget(labelFps);
@@ -193,9 +200,14 @@ namespace onep
         setCenterWidgetEnabled(skillsWidget);
       });
 
-      observerDay = oDay->connectAndNotify(osgGaming::Func<int>([this, labelDays, buttonAutoPause](int day)
+      observerDay = oDay->connectAndNotify(osgGaming::Func<int>([labelDays](int day)
       {
         labelDays->setText(tr("Day %1").arg(day));
+      }));
+
+      observerSkillPoints = oNumSkillPoints->connectAndNotify(osgGaming::Func<int>([labelSkillPoints](int points)
+      {
+        labelSkillPoints->setText(tr("Skillpoints: %1").arg(points));
       }));
 
       osg::ref_ptr<osgGaming::FpsUpdateCallback> fpsCallback = new osgGaming::FpsUpdateCallback();
