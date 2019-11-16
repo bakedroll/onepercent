@@ -632,6 +632,7 @@ namespace onep
         for (const auto& skill : skills)
         {
           QCheckBox* checkBox = new QCheckBox(QString::fromStdString(skill.second->getDisplayName()));
+          checkBox->setChecked(skill.second->getIsActivated());
           rightLayout->addWidget(checkBox);
 
           auto skillPtr = skill.second;
