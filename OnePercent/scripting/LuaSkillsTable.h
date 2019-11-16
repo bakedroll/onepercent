@@ -19,8 +19,6 @@ namespace onep
 
     void addSkill(LuaStateManager::Ptr lua, const std::string& name, luabridge::LuaRef& ref);
 
-    LuaSkill::Map& getSkillsMap();
-
   private:
     LuaSkill::Map m_skills;
 

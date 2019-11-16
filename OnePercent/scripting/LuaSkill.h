@@ -35,10 +35,13 @@ namespace onep
 		const std::string& getName() const;
     const std::string& getBranchName() const;
     const std::string& getDisplayName() const;
+    int                getCost() const;
 
     bool getIsActivated() const;
     void setIsActivated(bool activated);
     osgGaming::Observable<bool>::Ptr getObActivated() const;
+
+    const std::vector<std::string>& getDependencies() const;
 	  
   private:
     struct Impl;

@@ -23,11 +23,12 @@ namespace onep
       , obActivated(new osgGaming::Observable<bool>(false))
     {}
 
-    std::string name;
-    std::string branch;
-    std::string displayName;
-    std::string type;
-    int cost;
+    std::string              name;
+    std::string              branch;
+    std::string              displayName;
+    std::string              type;
+    int                      cost;
+    std::vector<std::string> dependencies;
 
     osgGaming::Observable<bool>::Ptr obActivated;
   };
@@ -50,6 +51,18 @@ namespace onep
     luabridge::LuaRef displayNameRef  = object["display_name"];
     luabridge::LuaRef typeRef         = object["type"];
     luabridge::LuaRef costRef         = object["cost"];
+    luabridge::LuaRef dependencies    = object["dependencies"];
+
+    if (!dependencies.isNil() && checkForConsistency("dependencies", LUA_TTABLE))
+    {
+      for (luabridge::Iterator it(dependencies); !it.isNil(); ++it)
+      {
+        if (it.value().isString())
+        {
+          m->dependencies.push_back(it.value());
+        }
+      }
+    }
 
     auto bActivared = false;
     object["activated"] = bActivared;
@@ -86,6 +99,11 @@ namespace onep
     return m->displayName;
   }
 
+  int LuaSkill::getCost() const
+  {
+    return m->cost;
+  }
+
   bool LuaSkill::getIsActivated() const
   {
     return m->obActivated->get();
@@ -99,5 +117,10 @@ namespace onep
   osgGaming::Observable<bool>::Ptr LuaSkill::getObActivated() const
   {
     return m->obActivated;
+  }
+
+  const std::vector<std::string>& LuaSkill::getDependencies() const
+  {
+    return m->dependencies;
   }
 }

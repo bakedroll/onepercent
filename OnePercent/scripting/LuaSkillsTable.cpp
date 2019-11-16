@@ -28,9 +28,4 @@ namespace onep
       m_skills[name] = skill;
     }
   }
-
-  LuaSkill::Map& LuaSkillsTable::getSkillsMap()
-  {
-    return m_skills;
-  }
 }

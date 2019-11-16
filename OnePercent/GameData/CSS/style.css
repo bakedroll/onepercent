@@ -5,6 +5,7 @@ onep--OsgWidget QRadioButton
   padding: 0px;
   border: 10px solid transparent;
   border-image: url(./GameData/ui/button_normal.png) 10px stretch;
+  color: #000;
 }
 
 onep--OsgWidget QPushButton:hover,

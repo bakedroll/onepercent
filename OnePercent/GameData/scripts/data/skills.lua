@@ -19,6 +19,15 @@ lua.control:create_skills({
     dependencies = { "found_party" }
   },
   {
+    name = "canvassing2",
+    display_name = "Canvassing2",
+    description = "Canvass 2 for your party in rural areas",
+    type = "passive",
+    branch = "politics",
+    cost = 10,
+    dependencies = { "canvassing" }
+  },
+  {
     name = "campaign_pledges",
     display_name = "Campaign pledges",
     description = "Campaign pledges can divide your population",
@@ -34,8 +43,7 @@ lua.control:create_skills({
     display_name = "propagation banks",
     type = "passive",
     branch = "banks",
-    cost = 10,
-    dependencies = { "canvassing" }
+    cost = 10
   },
   {
     name = "propagation_control",

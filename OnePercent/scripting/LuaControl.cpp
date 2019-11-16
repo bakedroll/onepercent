@@ -102,7 +102,7 @@ namespace onep
         }
 
         auto skills = branch->getSkillsTable();
-        for (auto& skill : skills->getSkillsMap())
+        for (auto& skill : skills->getSkills())
         {
           auto skillName = skill.second->getName();
           if (!skill.second->getIsActivated())
