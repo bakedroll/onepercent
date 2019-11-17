@@ -10,11 +10,11 @@ namespace osgGamingTest
     MockedGameApplication();
     ~MockedGameApplication();
 
-    virtual int run(osgGaming::AbstractGameState::AbstractGameStateRefList initialStates) override;
+    int run(osgGaming::AbstractGameState::AbstractGameStateRefList initialStates) override;
 
   protected:
-    virtual int mainloop() override;
-    virtual osg::ref_ptr<osgGaming::InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) override;
+    int mainloop() override;
+    osg::ref_ptr<osgGaming::InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) override;
 
   };
 }

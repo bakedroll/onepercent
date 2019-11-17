@@ -164,18 +164,18 @@ namespace osgGaming
 
     if (!m->gameStateStack.isEmpty())
     {
-      bool attach = m->gameStateStack.attachRequired();
+      auto attach = m->gameStateStack.attachRequired();
 
-      m->gameStateStack.begin(AbstractGameState::ALL, false);
+      m->gameStateStack.begin(AbstractGameState::StateBehavior::ALL, false);
       while (m->gameStateStack.next())
       {
         ref_ptr<AbstractGameState> state = m->gameStateStack.get();
-        bool bIsTop = m->gameStateStack.isTop();
+        auto bIsTop = m->gameStateStack.isTop();
 
         state->setSimulationTime(simTime);
         state->setFrameTime(timeDiff);
 
-        bool initialized = state->isInitialized();
+        auto initialized = state->isInitialized();
 
         if (!initialized)
         {
@@ -236,7 +236,7 @@ namespace osgGaming
         // update state
         GameState::StateEvent* se;
 
-        if (m->gameStateStack.hasBehavior(state, AbstractGameState::UPDATE))
+        if (m->gameStateStack.hasBehavior(state, AbstractGameState::StateBehavior::UPDATE))
         {
           se = state->update();
         }
@@ -262,7 +262,7 @@ namespace osgGaming
               throw e;
             }
 
-            ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
+            auto loadingState = dynamic_cast<GameLoadingState*>(state.get());
 
             AbstractGameState::AbstractGameStateList nextStates;
             loadingState->getNextStates(*m_injector, nextStates);
@@ -282,16 +282,16 @@ namespace osgGaming
 
           switch (se->type)
           {
-          case GameState::POP:
+		      case AbstractGameState::StateEventType::POP:
             m->gameStateStack.popState();
             break;
-          case GameState::PUSH:
+          case AbstractGameState::StateEventType::PUSH:
             m->gameStateStack.pushStates(nextStatesRef);
             break;
-          case GameState::REPLACE:
+          case AbstractGameState::StateEventType::REPLACE:
             m->gameStateStack.replaceState(nextStatesRef);
             break;
-          case GameState::END_GAME:
+          case AbstractGameState::StateEventType::END_GAME:
             m->gameEnded = true;
             break;
           }

@@ -13,7 +13,7 @@ namespace onep
 		GlobeOverviewState(osgGaming::Injector& injector);
     ~GlobeOverviewState();
 
-		virtual unsigned char getProperties() override;
+		virtual unsigned char getProperties() const override;
 
 		virtual StateEvent* update() override;
 

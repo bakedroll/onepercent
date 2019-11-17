@@ -15,18 +15,18 @@ namespace onep
     QtGameApplication(int& argc, char** argv);
     ~QtGameApplication();
 
-    virtual bool notify(QObject *receiver, QEvent *event) override;
+    bool notify(QObject *receiver, QEvent *event) override;
 
   protected:
-    virtual void deinitialize() override;
+    void deinitialize() override;
 
-    virtual void newStateEvent(osg::ref_ptr<osgGaming::AbstractGameState> state) override;
-    virtual void stateAttachedEvent(osg::ref_ptr<osgGaming::AbstractGameState> state) override;
+    void newStateEvent(osg::ref_ptr<osgGaming::AbstractGameState> state) override;
+    void stateAttachedEvent(osg::ref_ptr<osgGaming::AbstractGameState> state) override;
 
-    virtual int mainloop() override;
-    virtual osg::ref_ptr<osgGaming::InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) override;
+    int mainloop() override;
+    osg::ref_ptr<osgGaming::InputManager> createInputManager(osg::ref_ptr<osgGaming::View> view) override;
 
-    virtual void onException(const std::string& message) override;
+    void onException(const std::string& message) override;
 
   private:
     struct Impl;

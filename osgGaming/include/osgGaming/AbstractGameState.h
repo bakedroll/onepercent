@@ -21,55 +21,55 @@ namespace osgGaming
 	class AbstractGameState : public osg::Referenced
 	{
 	public:
-		typedef enum _stateEventType
+		enum class StateEventType
 		{
 			PUSH,
 			POP,
 			REPLACE,
 			END_GAME
-		} StateEventType;
+		};
 
-		typedef enum _stateProperties
-		{
-			PROP_UPDATE_TOP = 1,
-			PROP_UPDATE_ALWAYS = 2,
-			PROP_GUIEVENTS_TOP = 4,
-			PROP_GUIEVENTS_ALWAYS = 8
-		} StateProperties;
+    enum class StateProperties
+    {
+      PROP_UPDATE_TOP       = 1,
+      PROP_UPDATE_ALWAYS    = 2,
+      PROP_GUIEVENTS_TOP    = 4,
+      PROP_GUIEVENTS_ALWAYS = 8
+    };
 
-		typedef enum _stateBahavior
+    enum class StateBehavior
 		{
 			UPDATE,
 			GUIEVENT,
 			ALL
-		} StateBehavior;
+		};
 
-		typedef std::vector<osg::ref_ptr<AbstractGameState>> AbstractGameStateList;
-    typedef std::vector<std::reference_wrapper<osg::ref_ptr<AbstractGameState>>> AbstractGameStateRefList;
+    using AbstractGameStateList    = std::vector<osg::ref_ptr<AbstractGameState>>;
+    using AbstractGameStateRefList = std::vector<std::reference_wrapper<osg::ref_ptr<AbstractGameState>>>;
 
-		typedef struct _stateEvent
-		{
-			StateEventType type;
-			AbstractGameStateList referencedStates;
-		} StateEvent;
+    struct StateEvent
+    {
+      StateEventType        type;
+      AbstractGameStateList referencedStates;
+    };
 
-		AbstractGameState();
+    AbstractGameState();
 	  virtual ~AbstractGameState();
 
-		bool isInitialized();
-		bool isWorldAndHudPrepared();
+		bool isInitialized() const;
+		bool isWorldAndHudPrepared() const;
     void setWorldAndHudPrepared();
-		bool isFirstUpdate();
+		bool isFirstUpdate() const;
 		void setInitialized();
 
 		void setDirty(StateBehavior behavior);
-		bool isDirty(StateBehavior behavior);
+		bool isDirty(StateBehavior behavior) const;
 
 		virtual void initialize();
 		virtual StateEvent* update();
 
-		virtual bool isLoadingState() = 0;
-		virtual unsigned char getProperties();
+		virtual bool isLoadingState() const = 0;
+		virtual unsigned char getProperties() const;
 
 		virtual void onKeyPressedEvent(int key);
 		virtual void onKeyReleasedEvent(int key);
@@ -81,28 +81,28 @@ namespace osgGaming
 
 		virtual void onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion);
 
-		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change);
-		virtual void onDragBeginEvent(int button, osg::Vec2f origin);
-		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position);
+		virtual void onDragEvent(int button, const osg::Vec2f& origin, const osg::Vec2f& position, const osg::Vec2f& change);
+		virtual void onDragBeginEvent(int button, const osg::Vec2f& origin);
+		virtual void onDragEndEvent(int button, const osg::Vec2f& origin, const osg::Vec2f& position);
 
 		virtual void onResizeEvent(float width, float height);
 
-    void prepareWorldAndHud(osgGaming::Injector& injector, osg::ref_ptr<View> view);
+    void prepareWorldAndHud(Injector& injector, const osg::ref_ptr<View>& view);
 
-		double getSimulationTime();
-		double getFrameTime();
-    osg::ref_ptr<World> getWorld(osg::ref_ptr<View> view);
-    osg::ref_ptr<Hud> getHud(osg::ref_ptr<View> view);
-    osg::ref_ptr<osgGaming::Viewer> getViewer();
-    osg::ref_ptr<osgGaming::View> getView(int i);
-		osg::ref_ptr<GameSettings> getGameSettings();
+		double getSimulationTime() const;
+		double getFrameTime() const;
+    osg::ref_ptr<World> getWorld(const osg::ref_ptr<View>& view) const;
+    osg::ref_ptr<Hud> getHud(const osg::ref_ptr<View>& view) const;
+    osg::ref_ptr<Viewer> getViewer() const;
+    osg::ref_ptr<View> getView(int i) const;
+		osg::ref_ptr<GameSettings> getGameSettings() const;
 
 		void setSimulationTime(double simulationTime);
 		void setFrameTime(double frameTime);
-		void setWorld(osg::ref_ptr<View> view, osg::ref_ptr<World> world);
-    void setHud(osg::ref_ptr<View> view, osg::ref_ptr<Hud> hud);
-    void setViewer(osg::ref_ptr<osgGaming::Viewer> viewer);
-		void setGameSettings(osg::ref_ptr<GameSettings> settings);
+		void setWorld(const osg::ref_ptr<View>& view, const osg::ref_ptr<World>& world);
+    void setHud(const osg::ref_ptr<View>& view, const osg::ref_ptr<Hud>& hud);
+    void setViewer(const osg::ref_ptr<Viewer>& viewer);
+		void setGameSettings(const osg::ref_ptr<GameSettings>& settings);
 
 		StateEvent* stateEvent_default();
 
@@ -114,8 +114,8 @@ namespace osgGaming
     template<typename TState>
     osg::ref_ptr<AbstractGameState> injectState()
     {
-      osg::ref_ptr<TState> s = m_injector->inject<TState>();
-      osg::ref_ptr<AbstractGameState> state = osg::ref_ptr<AbstractGameState>(dynamic_cast<AbstractGameState*>(s.get()));
+      auto s     = m_injector->inject<TState>();
+      auto state = osg::ref_ptr<AbstractGameState>(dynamic_cast<AbstractGameState*>(s.get()));
       if (!state.valid())
       {
         assert(false && "State could not be injected.");
@@ -126,12 +126,12 @@ namespace osgGaming
       return state;
     }
 
-    virtual StateEvent* stateEvent_push(osg::ref_ptr<AbstractGameState> state);
-    virtual StateEvent* stateEvent_replace(osg::ref_ptr<AbstractGameState> state);
+    virtual StateEvent* stateEvent_push(const osg::ref_ptr<AbstractGameState>& state);
+    virtual StateEvent* stateEvent_replace(const osg::ref_ptr<AbstractGameState>& state);
 
 	protected:
-		virtual osg::ref_ptr<World> injectWorld(osgGaming::Injector& injector, osg::ref_ptr<View> view);
-    virtual osg::ref_ptr<Hud> injectHud(osgGaming::Injector& injector, osg::ref_ptr<View> view);
+		virtual osg::ref_ptr<World> injectWorld(Injector& injector, const osg::ref_ptr<View>& view);
+    virtual osg::ref_ptr<Hud> injectHud(Injector& injector, const osg::ref_ptr<View>& view);
 
     template<typename TState>
     StateEvent* stateEvent_push()
@@ -145,10 +145,7 @@ namespace osgGaming
       return stateEvent_replace(injectState<TState>());
     }
 
-
-		//StateEvent* stateEvent_push(AbstractGameStateList states);
 	  virtual StateEvent* stateEvent_pop();
-		//StateEvent* stateEvent_replace(AbstractGameStateList states);
 	  virtual StateEvent* stateEvent_endGame();
 
 	private:

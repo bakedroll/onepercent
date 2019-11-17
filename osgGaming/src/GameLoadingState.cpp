@@ -6,29 +6,29 @@
 
 namespace osgGaming
 {
-
   GameLoadingState::GameLoadingState(Injector& container)
     : AbstractGameState()
     , m_bStatesInjected(false)
   {
   }
 
-  void GameLoadingState::loading_thread(osg::ref_ptr<World> world, osg::ref_ptr<Hud> hud, osg::ref_ptr<GameSettings> settings)
+  void GameLoadingState::loading_thread(osg::ref_ptr<World> world, osg::ref_ptr<Hud> hud,
+                                        osg::ref_ptr<GameSettings> settings)
   {
     load(world, hud, settings);
   }
 
-  bool GameLoadingState::isLoadingState()
+  bool GameLoadingState::isLoadingState() const
   {
     return true;
   }
 
-  osg::ref_ptr<World> GameLoadingState::injectWorld(osgGaming::Injector& injector, osg::ref_ptr<View> view)
+  osg::ref_ptr<World> GameLoadingState::injectWorld(osgGaming::Injector& injector, const osg::ref_ptr<View>& view)
   {
     return injector.inject<World>();
   }
 
-  osg::ref_ptr<Hud> GameLoadingState::injectHud(osgGaming::Injector& injector, osg::ref_ptr<View> view)
+  osg::ref_ptr<Hud> GameLoadingState::injectHud(osgGaming::Injector& injector, const osg::ref_ptr<View>& view)
   {
     return injector.inject<Hud>();
   }

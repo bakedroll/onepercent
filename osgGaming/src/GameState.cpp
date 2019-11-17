@@ -1,14 +1,17 @@
 #include <osgGaming/GameState.h>
 
-using namespace osgGaming;
-
-GameState::GameState()
-	: AbstractGameState()
+namespace osgGaming
 {
 
+  GameState::GameState()
+	  : AbstractGameState()
+  {
+
+  }
+
+  bool GameState::isLoadingState() const
+  {
+	  return false;
 }
 
-bool GameState::isLoadingState()
-{
-	return false;
 }

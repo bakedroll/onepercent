@@ -1,6 +1,6 @@
 #pragma once
 
-#include <math.h>
+#include <cmath>
 
 #include <osg/Referenced>
 #include <osg/Vec2f>
@@ -9,7 +9,7 @@
 
 namespace osgGaming
 {
-	typedef enum _animationEase
+	enum class AnimationEase
 	{
 		CIRCLE_IN,
 		CIRCLE_OUT,
@@ -17,76 +17,74 @@ namespace osgGaming
 		LINEAR,
 		SMOOTH,
 		SMOOTHER
-	} AnimationEase;
+	};
 
 	template <typename T>
 	class Animation : public osg::Referenced
 	{
 	public:
 		Animation()
-			: osg::Referenced(),
-			  _animationStarted(false)
-		{
-
-		}
+      : Animation(T(), 0.0, AnimationEase::SMOOTH)
+    {
+    }
 
 		Animation(T value, double duration, AnimationEase ease)
-			: osg::Referenced(),
-			  _value(value),
-			  _fromValue(value),
-			  _duration(duration),
-			  _ease(ease),
-			  _animationStarted(false)
-		{
-
-		}
+      : osg::Referenced()
+      , m_value(value)
+      , m_fromValue(value)
+      , m_duration(duration)
+      , m_timeBegin(0.0)
+      , m_animationStarted(false)
+      , m_ease(ease)
+    {
+    }
 
 		void beginAnimation(T fromValue, T toValue, double timeBegin)
 		{
-			_fromValue = fromValue;
-			_value = fromValue;
-			_toValue = toValue;
-			_timeBegin = timeBegin;
+      m_fromValue = fromValue;
+      m_value     = fromValue;
+      m_toValue   = toValue;
+      m_timeBegin = timeBegin;
 
-			_animationStarted = true;
+      m_animationStarted = true;
 		}
 
 		void setValue(T value)
 		{
-			_value = value;
-			_animationStarted = false;
+			m_value = value;
+			m_animationStarted = false;
 		}
 
 		void beginAnimation(T toValue, double timeBegin)
 		{
-			beginAnimation(_value, toValue, timeBegin);
+			beginAnimation(m_value, toValue, timeBegin);
 		}
 
-		bool running()
+		bool running() const
 		{
-			return _animationStarted;
+			return m_animationStarted;
 		}
 
 		T getValue(double time)
 		{
-			if (_animationStarted)
+			if (m_animationStarted)
 			{
-				double elapsed = (time - _timeBegin) / _duration;
+				double elapsed = (time - m_timeBegin) / m_duration;
 				if (elapsed < 1.0)
 				{
-					switch (_ease)
+					switch (m_ease)
 					{
-					case CIRCLE_OUT:
+					case AnimationEase::CIRCLE_OUT:
 
 						elapsed = sqrt(1.0 - (elapsed * elapsed - 2 * elapsed + 1));
 						break;
 
-					case CIRCLE_IN:
+					case AnimationEase::CIRCLE_IN:
 
 						elapsed = 1.0 - sqrt(1.0 - elapsed * elapsed);
 						break;
 
-					case CIRCLE_IN_OUT:
+					case AnimationEase::CIRCLE_IN_OUT:
 
 						if (elapsed < 0.5)
 						{
@@ -98,44 +96,45 @@ namespace osgGaming
 						}
 						break;
 
-					case SMOOTH:
+					case AnimationEase::SMOOTH:
 
 						elapsed = elapsed * elapsed * (3.0 - 2.0 * elapsed);
 						break;
 
-					case SMOOTHER:
+					case AnimationEase::SMOOTHER:
 
 						elapsed = elapsed * elapsed * elapsed * (elapsed * (elapsed * 6.0 - 15.0) + 10.0);
 						break;
+          default:
+					  break;
+          }
 
-					}
-
-					_value = relocate(_fromValue, _toValue, elapsed);
+					m_value = relocate(m_fromValue, m_toValue, elapsed);
 				}
 				else
 				{
-					_value = _toValue;
-					_animationStarted = false;
+					m_value = m_toValue;
+					m_animationStarted = false;
 				}
 			}
 
-			return _value;
+			return m_value;
 		}
 
 		void setDuration(double duration)
 		{
-			_duration = duration;
+			m_duration = duration;
 		}
 
 		void setFromValue(T fromValue)
 		{
-			_fromValue = fromValue;
-			_value = fromValue;
+			m_fromValue = fromValue;
+			m_value = fromValue;
 		}
 
 		void setEase(AnimationEase ease)
 		{
-			_ease = ease;
+			m_ease = ease;
 		}
 
 	protected:
@@ -145,16 +144,16 @@ namespace osgGaming
 		}
 
 	private:
-		T _value;
-		T _fromValue;
-		T _toValue;
+		T m_value;
+		T m_fromValue;
+		T m_toValue;
 
-		double _duration;
-		double _timeBegin;
+		double m_duration;
+		double m_timeBegin;
 
-		bool _animationStarted;
+		bool m_animationStarted;
 
-		AnimationEase _ease;
+		AnimationEase m_ease;
 	};
 
 	template <typename T>
@@ -179,11 +178,10 @@ namespace osgGaming
 
 	protected:
 		float relocateValue(float from, float to, const float min, const float max, const float elapsed)
-		{
-			float result;
-			float l = max - min;
+    {
+      auto l = max - min;
 
-			while (from < min)
+      while (from < min)
 				from += l;
 			while (to < min)
 				to += l;
@@ -192,31 +190,29 @@ namespace osgGaming
 			while (to > max)
 				to -= l;
 
-			float ab = to - from;
-			float ababs = std::abs(ab);
+      auto ab    = to - from;
+      auto ababs = std::abs(ab);
 
-			if (ababs <= l / 2.0f)
+      if (ababs <= l / 2.0f)
 			{
-				result = from + ab * elapsed;
+				return from + ab * elapsed;
 			}
-			else
-			{
-				result = from - ab * elapsed * ((l - ababs) / ababs);
 
-				if (result < max)
-				{
-					result += l;
-				}
-				else if (result > max)
-				{
-					result -= l;
-				}
+			auto result = from - (ab * elapsed * ((l - ababs) / ababs));
+
+			if (result < max)
+			{
+				result += l;
+			}
+			else if (result > max)
+			{
+				result -= l;
 			}
 
 			return result;
-		}
+    }
 
-		T _min;
+    T _min;
 		T _max;
 	};
 
@@ -236,7 +232,7 @@ namespace osgGaming
 		}
 
 	protected:
-		virtual float relocate(const float& from, const float& to, float elapsed) override
+		float relocate(const float& from, const float& to, float elapsed) override
 		{
 			return relocateValue(from, to, _min, _max, elapsed);
 		}
@@ -263,7 +259,7 @@ namespace osgGaming
 		{
 			T result;
 
-			for (int i = 0; i < T::num_components; i++)
+			for (auto i = 0; i < T::num_components; i++)
 			{
 				result._v[i] = RepeatedSpaceAnimation<T>::relocateValue(from._v[i], to._v[i], RepeatedSpaceAnimation <T>::_min._v[i], RepeatedSpaceAnimation <T>::_max._v[i], elapsed);
 			}
@@ -272,7 +268,7 @@ namespace osgGaming
 		}
 	};
 
-	typedef RepeatedVectorfAnimation<osg::Vec2f> RepeatedVec2fAnimation;
-	typedef RepeatedVectorfAnimation<osg::Vec3f> RepeatedVec3fAnimation;
-	typedef RepeatedVectorfAnimation<osg::Vec4f> RepeatedVec4fAnimation;
+  using RepeatedVec2fAnimation = RepeatedVectorfAnimation<osg::Vec2f>;
+  using RepeatedVec3fAnimation = RepeatedVectorfAnimation<osg::Vec3f>;
+  using RepeatedVec4fAnimation = RepeatedVectorfAnimation<osg::Vec4f>;
 }

@@ -18,8 +18,7 @@ namespace osgGaming
 		virtual void action(osg::Object* object, osg::Object* data, double simTime, double timeDiff) = 0;
 
 	private:
-		double _lastSimulationTime;
-		bool _resetTimeDiff;
-
-	};
+      double m_lastSimulationTime;
+      bool   m_resetTimeDiff;
+  };
 }

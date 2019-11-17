@@ -2,7 +2,6 @@
 
 #include "core/Macros.h"
 #include "nodes/CountryNameOverlay.h"
-#include "nodes/GlobeModel.h"
 
 #include <osgViewer/ViewerEventHandlers>
 
@@ -11,6 +10,7 @@
 #include <osgGaming/HighDynamicRangeEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>
+#include <osgGaming/Helper.h>
 
 #include <QString>
 
@@ -40,13 +40,11 @@ namespace onep
   {
   }
 
-  GlobeOverviewState::~GlobeOverviewState()
-  {
-  }
+  GlobeOverviewState::~GlobeOverviewState() = default;
 
-  unsigned char GlobeOverviewState::getProperties()
+  unsigned char GlobeOverviewState::getProperties() const
   {
-    return GameState::PROP_UPDATE_ALWAYS | PROP_GUIEVENTS_ALWAYS;
+    return underlying(StateProperties::PROP_UPDATE_ALWAYS) | underlying(StateProperties::PROP_GUIEVENTS_ALWAYS);
   }
 
   osgGaming::GameState::StateEvent* GlobeOverviewState::update()

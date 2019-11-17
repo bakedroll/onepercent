@@ -13,7 +13,11 @@ Namespace;Class;Name;Short description;Description;State
 ;CountryOverlay;get_country_presenter;;;UNFINISHED
 ;CountryOverlay;set_current_overlay_branch_name;;;UNFINISHED
 ;CountryPresenter;add_node;;;UNFINISHED
+;CountryPresenter;add_node_to_bin;;;UNFINISHED
+;CountryPresenter;add_node_to_bin_at;;;UNFINISHED
 ;CountryPresenter;clear_nodes;;;UNFINISHED
+;CountryPresenter;remove_node_bin;;;UNFINISHED
+;CountryPresenter;scatter_nodes_to_bin;;;UNFINISHED
 ;LuaLogger;debug;;;UNFINISHED
 ;LuaLogger;fatal;;;UNFINISHED
 ;LuaLogger;info;;;UNFINISHED

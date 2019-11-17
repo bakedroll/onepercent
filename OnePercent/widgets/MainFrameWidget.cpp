@@ -1,6 +1,5 @@
 #include "MainFrameWidget.h"
 
-#include "core/Macros.h"
 #include "core/Observables.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "widgets/SkillsWidget.h"
@@ -13,6 +12,8 @@
 #include <QLabel>
 #include <QRadioButton>
 #include <QButtonGroup>
+
+#include <osgGaming/Helper.h>
 
 namespace onep
 {
@@ -97,9 +98,9 @@ namespace onep
       buttonFastForward->setEnabled(false);
 
       auto simulationButtonsGroup = new QButtonGroup(base);
-      simulationButtonsGroup->addButton(buttonPause, underlying(Simulation::State::Paused));
-      simulationButtonsGroup->addButton(buttonPlay, underlying(Simulation::State::NormalSpeed));
-      simulationButtonsGroup->addButton(buttonFastForward, underlying(Simulation::State::FastForward));
+      simulationButtonsGroup->addButton(buttonPause, osgGaming::underlying(Simulation::State::Paused));
+      simulationButtonsGroup->addButton(buttonPlay, osgGaming::underlying(Simulation::State::NormalSpeed));
+      simulationButtonsGroup->addButton(buttonFastForward, osgGaming::underlying(Simulation::State::FastForward));
 
       // Top Bar
       auto layoutTopBar = new QHBoxLayout();

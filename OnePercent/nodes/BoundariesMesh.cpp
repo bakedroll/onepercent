@@ -177,6 +177,7 @@ namespace onep
     : osg::Group()
     , m(new Impl(injector))
   {
+
   }
 
   BoundariesMesh::~BoundariesMesh()

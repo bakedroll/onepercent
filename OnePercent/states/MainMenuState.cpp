@@ -61,9 +61,10 @@ namespace onep
     }
   }
 
-  osg::ref_ptr<osgGaming::Hud> MainMenuState::injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view)
+  osg::ref_ptr<osgGaming::Hud> MainMenuState::injectHud(osgGaming::Injector&                 injector,
+                                                        const osg::ref_ptr<osgGaming::View>& view)
   {
-	  return injector.inject<osgGaming::Hud>();
+    return injector.inject<osgGaming::Hud>();
   }
 
   void MainMenuState::setupUi()

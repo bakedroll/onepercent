@@ -19,7 +19,8 @@ namespace onep
     void        onKeyPressedEvent(int key) override;
 
   protected:
-		osg::ref_ptr<osgGaming::Hud> injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view) override;
+    osg::ref_ptr<osgGaming::Hud> injectHud(osgGaming::Injector&                 injector,
+                                           const osg::ref_ptr<osgGaming::View>& view) override;
 
     void setupUi();
 

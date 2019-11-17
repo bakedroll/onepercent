@@ -5,15 +5,13 @@ using namespace osgGaming;
 
 SimulationCallback::SimulationCallback()
 	: osg::Callback(),
-	  _lastSimulationTime(0.0),
-	  _resetTimeDiff(false)
+	  m_lastSimulationTime(0.0),
+	  m_resetTimeDiff(false)
 {
 
 }
 
-SimulationCallback::~SimulationCallback()
-{
-}
+SimulationCallback::~SimulationCallback() = default;
 
 bool SimulationCallback::run(osg::Object* node, osg::Object* data)
 {
@@ -23,19 +21,19 @@ bool SimulationCallback::run(osg::Object* node, osg::Object* data)
     return false;
   }
 
-	double time = nv->getFrameStamp()->getSimulationTime();
-	double time_diff = 0.0;
+	auto time = nv->getFrameStamp()->getSimulationTime();
+	auto time_diff = 0.0;
 
-	if (_resetTimeDiff == true)
+	if (m_resetTimeDiff)
 	{
-		_resetTimeDiff = false;
+		m_resetTimeDiff = false;
 	}
-	else if (_lastSimulationTime > 0.0)
+	else if (m_lastSimulationTime > 0.0)
 	{
-		time_diff = time - _lastSimulationTime;
+		time_diff = time - m_lastSimulationTime;
 	}
 
-	_lastSimulationTime = time;
+	m_lastSimulationTime = time;
 
 	action(node, data, time, time_diff);
 
@@ -44,5 +42,5 @@ bool SimulationCallback::run(osg::Object* node, osg::Object* data)
 
 void SimulationCallback::resetTimeDiff()
 {
-	_resetTimeDiff = true;
+	m_resetTimeDiff = true;
 }

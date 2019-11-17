@@ -16,6 +16,8 @@
 
 #include <QTimer>
 
+#include <osgGaming/Helper.h>
+
 namespace onep
 {
   const int autoPauseTicks = 50;
@@ -85,7 +87,7 @@ namespace onep
     m->oNumSkillPoints->set(50);
 
     m->timer.setSingleShot(false);
-    m->timer.setInterval(underlying(State::NormalSpeed));
+    m->timer.setInterval(osgGaming::underlying(State::NormalSpeed));
 
     m->thread.onTick([this]()
     {
@@ -247,7 +249,7 @@ namespace onep
       return;
     }
 
-    setUpdateTimerInterval(underlying(state));
+    setUpdateTimerInterval(osgGaming::underlying(state));
     m->justStarted = true;
     m->timer.start();
 

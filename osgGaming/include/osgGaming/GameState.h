@@ -9,6 +9,6 @@ namespace osgGaming
 		public:
 			GameState();
 
-			virtual bool isLoadingState() override final;
+			bool isLoadingState() const override final;
 	};
 }

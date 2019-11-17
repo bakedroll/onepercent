@@ -15,9 +15,9 @@ namespace osgGamingTest
   };
 
   MockedState::MockedState(
-    std::function<StateEvent*(MockedState*, double)> func,
+    const std::function<StateEvent*(MockedState*, double)>& func,
     unsigned char properties,
-    osg::ref_ptr<osgGaming::World> overrideWorld)
+    const osg::ref_ptr<osgGaming::World>& overrideWorld)
     : osgGaming::AbstractGameState()
     , m(new Impl())
   {
@@ -32,29 +32,29 @@ namespace osgGamingTest
 
   bool MockedState::deliveredTick(double tick)
   {
-    return m->deliveredTicks.count(tick) > 0;
+    return (m->deliveredTicks.count(tick) > 0);
   }
 
-  bool MockedState::isLoadingState()
+  bool MockedState::isLoadingState() const
   {
     return false;
   }
 
   osgGaming::AbstractGameState::StateEvent* MockedState::update()
   {
-    double tick = getSimulationTime();
+    auto tick = getSimulationTime();
 
     m->deliveredTicks.insert(tick);
 
     return m->func(this, tick);
   }
 
-  unsigned char MockedState::getProperties()
+  unsigned char MockedState::getProperties() const
   {
     return m->properties;
   }
 
-  osg::ref_ptr<osgGaming::World> MockedState::injectWorld(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view)
+  osg::ref_ptr<osgGaming::World> MockedState::injectWorld(osgGaming::Injector& injector, const osg::ref_ptr<osgGaming::View>& view)
   {
     return m->overrideWorld;
   }

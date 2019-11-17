@@ -1,6 +1,7 @@
 #pragma once
 
 #include <osgGaming/AbstractGameState.h>
+#include <osgGaming/Helper.h>
 
 namespace osgGamingTest
 {
@@ -8,20 +9,21 @@ namespace osgGamingTest
   {
   public:
     MockedState(
-      std::function<StateEvent*(MockedState*, double)> func,
-      unsigned char properties = PROP_GUIEVENTS_TOP | PROP_UPDATE_TOP,
-      osg::ref_ptr<osgGaming::World> overrideWorld = nullptr);
+      const std::function<StateEvent*(MockedState*, double)>& func,
+      unsigned char properties = underlying(StateProperties::PROP_GUIEVENTS_TOP) |
+		                             underlying(StateProperties::PROP_UPDATE_TOP),
+      const osg::ref_ptr<osgGaming::World>& overrideWorld = nullptr);
 
     ~MockedState();
 
     bool deliveredTick(double tick);
 
-    virtual bool isLoadingState() override;
+    bool isLoadingState() const override;
 
-    virtual StateEvent* update() override;
-    virtual unsigned char getProperties() override;
+    StateEvent* update() override;
+    unsigned char getProperties() const override;
 
-    virtual osg::ref_ptr<osgGaming::World> injectWorld(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view) override;
+    osg::ref_ptr<osgGaming::World> injectWorld(osgGaming::Injector& injector, const osg::ref_ptr<osgGaming::View>& view) override;
 
     template<typename TState>
     StateEvent* stateEvent_push()
@@ -35,11 +37,12 @@ namespace osgGamingTest
       return osgGaming::AbstractGameState::stateEvent_replace<TState>();
     }
 
-    virtual StateEvent* stateEvent_pop() override;
-    virtual StateEvent* stateEvent_endGame() override;
+    StateEvent* stateEvent_pop() override;
+    StateEvent* stateEvent_endGame() override;
 
   private:
     struct Impl;
     std::unique_ptr<Impl> m;
+
   };
 }

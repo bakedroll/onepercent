@@ -12,11 +12,11 @@ namespace osgGaming
 		GameStateStack();
 
 		bool attachRequired();
-		bool isEmpty();
+		bool isEmpty() const;
 
 		void begin(AbstractGameState::StateBehavior behavior, bool onlyInitialized = true);
 		bool next();
-		bool isTop();
+		bool isTop() const;
 		
 		bool hasBehavior(osg::ref_ptr<AbstractGameState> state, AbstractGameState::StateBehavior behavior);
 
@@ -32,13 +32,13 @@ namespace osgGaming
 	private:
     AbstractGameState::AbstractGameStateList _stateStack;
 
-		bool _attachRequired;
+		bool m_attachRequired;
 
-		bool _itOnlyInitialized;
-		AbstractGameState::StateBehavior _itBehavior;
+		bool m_itOnlyInitialized;
+		AbstractGameState::StateBehavior m_itBehavior;
     AbstractGameState::AbstractGameStateList::iterator _itCurrent;
-    AbstractGameState::AbstractGameStateList::iterator _itNext;
-		AbstractGameState* _itTop;
+    AbstractGameState::AbstractGameStateList::iterator m_itNext;
+		AbstractGameState* m_itTop;
 
 	};
 }

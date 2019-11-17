@@ -16,24 +16,25 @@ namespace onep
 		GlobeInteractionState(osgGaming::Injector& injector);
 		~GlobeInteractionState();
 
-		virtual void initialize() override;
+		void initialize() override;
 
-    virtual StateEvent* update() override;
+    StateEvent* update() override;
 
-		virtual void onMousePressedEvent(int button, float x, float y) override;
-		virtual void onKeyPressedEvent(int key) override;
-    virtual void onMouseMoveEvent(float x, float y) override;
+		void onMousePressedEvent(int button, float x, float y) override;
+		void onKeyPressedEvent(int key) override;
+    void onMouseMoveEvent(float x, float y) override;
 
-		virtual void onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion) override;
+		void onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion) override;
 
-    virtual void onDragBeginEvent(int button, osg::Vec2f position) override;
-		virtual void onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change) override;
-		virtual void onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position) override;
+    void onDragBeginEvent(int button, const osg::Vec2f& position) override;
+    void onDragEvent(int button, const osg::Vec2f& origin, const osg::Vec2f& position,
+                     const osg::Vec2f& change) override;
+    void onDragEndEvent(int button, const osg::Vec2f& origin, const osg::Vec2f& position) override;
 
-    virtual void onResizeEvent(float width, float height) override;
+    void onResizeEvent(float width, float height) override;
 
 	protected:
-    virtual osg::ref_ptr<osgGaming::Hud> injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view) override;
+    osg::ref_ptr<osgGaming::Hud> injectHud(osgGaming::Injector& injector, const osg::ref_ptr<osgGaming::View>& view) override;
     void setupUi();
 
 	private:

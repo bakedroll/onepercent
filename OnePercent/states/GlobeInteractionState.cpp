@@ -2,7 +2,6 @@
 
 #include "core/Macros.h"
 #include "nodes/GlobeOverviewWorld.h"
-#include "nodes/GlobeModel.h"
 #include "nodes/CountryOverlay.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaCountry.h"
@@ -28,27 +27,36 @@ namespace onep
   struct GlobeInteractionState::Impl
   {
     Impl(osgGaming::Injector& injector, GlobeInteractionState* b)
-    : base(b)
-    , pInjector(&injector)
-    , configManager(injector.inject<LuaConfig>())
-    , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
-    , simulation(injector.inject<Simulation>())
-    , countryOverlay(injector.inject<CountryOverlay>())
-    , modelContainer(injector.inject<ModelContainer>())
-    , bReady(false)
-    , isInteractionEnabled(true)
-    , selectedCountry(0)
-    , hoveredCountry(0)
-    , countryMenuWidget(new CountryMenuWidget(injector))
-    , mainFrameWidget(nullptr)
-    , debugWindow(nullptr)
-    , countryMenuWidgetFadeInAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN))
-    , countryMenuWidgetFadeOutAnimation(new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_OUT))
-    , bFadingOutCountryMenu(false)
-    , bDraggingMidMouse(false)
-    , bFastAnimation(false)
+      : base(b),
+        pInjector(&injector),
+        configManager(injector.inject<LuaConfig>()),
+        globeOverviewWorld(injector.inject<GlobeOverviewWorld>()),
+        simulation(injector.inject<Simulation>()),
+        countryOverlay(injector.inject<CountryOverlay>()),
+        modelContainer(injector.inject<ModelContainer>()),
+        paramEarthRadius(0.0f),
+        paramCameraMinDistance(0.0f),
+        paramCameraMaxDistance(0.0f),
+        paramCameraMaxLatitude(0.0f),
+        paramCameraZoomSpeed(0.0f),
+        paramCameraZoomSpeedFactor(0.0f),
+        paramCameraScrollSpeed(0.0f),
+        paramCameraRotationSpeed(0.0f),
+        bReady(false),
+        isInteractionEnabled(true),
+        selectedCountry(0),
+        hoveredCountry(0),
+        countryMenuWidget(new CountryMenuWidget(injector)),
+        mainFrameWidget(nullptr),
+        debugWindow(nullptr),
+        countryMenuWidgetFadeInAnimation(
+          new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_IN)),
+        countryMenuWidgetFadeOutAnimation(
+          new osgGaming::Animation<float>(0.0f, 0.4f, osgGaming::AnimationEase::CIRCLE_OUT)),
+        bFadingOutCountryMenu(false),
+        bDraggingMidMouse(false),
+        bFastAnimation(false)
     {
-
     }
 
     GlobeInteractionState* base;
@@ -390,7 +398,7 @@ namespace onep
     m->setCameraDistanceAndAngle(distance, getSimulationTime());
   }
 
-  void GlobeInteractionState::onDragBeginEvent(int button, osg::Vec2f position)
+  void GlobeInteractionState::onDragBeginEvent(int button, const osg::Vec2f& position)
   {
     if (!m->isInteractionEnabled)
     {
@@ -405,49 +413,52 @@ namespace onep
     }
   }
 
-  void GlobeInteractionState::onDragEvent(int button, osg::Vec2f origin, osg::Vec2f position, osg::Vec2f change)
+  void GlobeInteractionState::onDragEvent(int button, const osg::Vec2f& origin, const osg::Vec2f& position, const osg::Vec2f& change)
   {
     if (!m->ready() || !m->isInteractionEnabled)
+	  {
       return;
+	  }
 
-    osg::Vec2f latLong = getCameraLatLong();
-    float distance = getCameraDistance();
-    osg::Vec2f viewAngle = getCameraViewAngle();
+    auto latLong   = getCameraLatLong();
+    auto distance  = getCameraDistance();
+    auto viewAngle = getCameraViewAngle();
 
     if (button != osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
     {
       if (m->selectedCountry > 0 && !m->bFadingOutCountryMenu)
       {
-        double time = getSimulationTime();
+        auto time = getSimulationTime();
         m->bFadingOutCountryMenu = true;
         m->countryMenuWidgetFadeOutAnimation->beginAnimation(m->countryMenuWidgetFadeInAnimation->getValue(time), 0.0f, time);
       }
     }
 
+    auto trimmedChange = change;
     if (button == osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON)
     {
-      change *= ((distance - m->paramEarthRadius) / (m->paramCameraMaxDistance - m->paramEarthRadius)) * m->paramCameraZoomSpeedFactor;
+      trimmedChange *= ((distance - m->paramEarthRadius) / (m->paramCameraMaxDistance - m->paramEarthRadius)) * m->paramCameraZoomSpeedFactor;
 
       latLong.set(
-        osg::clampBetween<float>(latLong.x() - change.y() * m->paramCameraScrollSpeed, -m->paramCameraMaxLatitude, m->paramCameraMaxLatitude),
-        latLong.y() - change.x() * m->paramCameraScrollSpeed);
+        osg::clampBetween<float>(latLong.x() - trimmedChange.y() * m->paramCameraScrollSpeed, -m->paramCameraMaxLatitude, m->paramCameraMaxLatitude),
+        latLong.y() - trimmedChange.x() * m->paramCameraScrollSpeed);
 
       m->setFastCameraMotion();
       setCameraLatLong(latLong, getSimulationTime());
     }
     else if (button == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
     {
-      float clamp_to = std::max<float>(m->getViewAngleForDistance(distance) * 1.3f, atan(m->paramEarthRadius * 1.3 / distance));
+      auto clamp_to = std::max<float>(m->getViewAngleForDistance(distance) * 1.3f, atan(m->paramEarthRadius * 1.3 / distance));
 
       viewAngle.set(
-        viewAngle.x() + change.x() * m->paramCameraRotationSpeed,
-        osg::clampBetween<float>(viewAngle.y() + change.y() * m->paramCameraRotationSpeed, 0.0f, clamp_to));
+        viewAngle.x() + trimmedChange.x() * m->paramCameraRotationSpeed,
+        osg::clampBetween<float>(viewAngle.y() + trimmedChange.y() * m->paramCameraRotationSpeed, 0.0f, clamp_to));
 
       setCameraViewAngle(viewAngle, getSimulationTime());
     }
   }
 
-  void GlobeInteractionState::onDragEndEvent(int button, osg::Vec2f origin, osg::Vec2f position)
+  void GlobeInteractionState::onDragEndEvent(int button, const osg::Vec2f& origin, const osg::Vec2f& position)
   {
     if (button == osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON)
     {
@@ -468,14 +479,15 @@ namespace onep
     m->mainFrameWidget->setGeometry(0, 0, int(width), int(height));
   }
 
-  osg::ref_ptr<osgGaming::Hud> GlobeInteractionState::injectHud(osgGaming::Injector& injector, osg::ref_ptr<osgGaming::View> view)
+  osg::ref_ptr<osgGaming::Hud> GlobeInteractionState::injectHud(osgGaming::Injector&                 injector,
+                                                                const osg::ref_ptr<osgGaming::View>& view)
   {
     return injector.inject<osgGaming::Hud>();
   }
 
   void GlobeInteractionState::setupUi()
   {
-    osg::Vec2f resolution = getView(0)->getResolution();
+    auto resolution = getView(0)->getResolution();
 
     m->mainFrameWidget = new MainFrameWidget(*m->pInjector);
     m->mainFrameWidget->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
@@ -489,7 +501,7 @@ namespace onep
        
       if (!m->debugWindow->isVisible())
       {
-        QRect geo = m->debugWindow->geometry();
+        auto geo = m->debugWindow->geometry();
         m->debugWindow->setGeometry(20, 100, geo.width(), geo.height());
         m->debugWindow->show();
       }

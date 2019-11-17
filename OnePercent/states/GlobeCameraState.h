@@ -13,25 +13,25 @@ namespace onep
 	  GlobeCameraState(osgGaming::Injector& injector);
     virtual ~GlobeCameraState();
 
-		virtual void initialize() override;
+		void initialize() override;
 
-		virtual osgGaming::GameState::StateEvent* update() override;
+		StateEvent* update() override;
 
 	protected:
-		osg::Vec2f getCameraLatLong();
-		float getCameraDistance();
-		osg::Vec2f getCameraViewAngle();
+		const osg::Vec2f& getCameraLatLong() const;
+		float getCameraDistance() const;
+		const osg::Vec2f& getCameraViewAngle() const;
 
-		void setCameraLatLong(osg::Vec2f latLong, double time = -1.0);
+		void setCameraLatLong(const osg::Vec2f& latLong, double time = -1.0);
 		void setCameraDistance(float distance, double time = -1.0);
-		void setCameraViewAngle(osg::Vec2f viewAngle, double time = -1.0);
+		void setCameraViewAngle(const osg::Vec2f& viewAngle, double time = -1.0);
 
 		void setCameraMotionDuration(double time);
 		void setCameraMotionEase(osgGaming::AnimationEase ease);
 
     void stopMotion(double time);
 
-		bool isCameraInMotion();
+		bool isCameraInMotion() const;
 
 	private:
     struct Impl;
