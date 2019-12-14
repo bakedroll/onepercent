@@ -96,7 +96,7 @@ namespace osgGaming
 
     InputToUniform ituBypass;
     ituBypass.name = "tex0";
-    ituBypass.type = PostProcessingEffect::UnitType::ONGOING_COLOR;
+    ituBypass.type = PostProcessingEffect::UnitType::OngoingColor;
     ituBypass.unit = m->unitFxaa;
 
     list.push_back(ituBypass);

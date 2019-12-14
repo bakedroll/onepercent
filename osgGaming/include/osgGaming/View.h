@@ -1,7 +1,7 @@
 #pragma once
 
-#include "PostProcessingEffect.h"
-#include "Hud.h"
+#include "osgGaming/PostProcessingEffect.h"
+#include "osgGaming/Hud.h"
 
 #include <osgViewer/ViewerBase>
 #include <osgViewer/View>
@@ -25,13 +25,13 @@ namespace osgGaming
 
     void setClampColorEnabled(bool enabled);
 
-    osg::ref_ptr<osg::Group> getRootGroup();
-    osg::ref_ptr<Hud> getHud();
-    osg::ref_ptr<osg::Camera> getSceneCamera();
-    osg::ref_ptr<osg::Camera> getHudCamera();
+    osg::ref_ptr<osg::Group> getRootGroup() const;
+    osg::ref_ptr<Hud> getHud() const;
+    osg::ref_ptr<osg::Camera> getSceneCamera() const;
+    osg::ref_ptr<osg::Camera> getHudCamera() const;
 
     // TODO: REFACTOR
-    osg::ref_ptr<osg::Geode> getCanvasGeode();
+    osg::ref_ptr<osg::Geode> getCanvasGeode() const;
 
     void setHud(const osg::ref_ptr<Hud>& hud);
 
@@ -43,13 +43,13 @@ namespace osgGaming
     void setWindowedResolution(const osg::Vec2f& resolution, const osgViewer::ViewerBase::Windows& windows);
     void setScreenNum(int screenNum);
 
-    osg::ref_ptr<PostProcessingEffect> getPostProcessingEffect(const std::string& ppeName);
-    bool                               getFullscreenEnabled();
-    osg::Vec2f                         getResolution();
-    int                                getScreenNum();
+    osg::ref_ptr<PostProcessingEffect> getPostProcessingEffect(const std::string& ppeName) const;
+    bool                               getFullscreenEnabled() const;
+    osg::Vec2f                         getResolution() const;
+    int                                getScreenNum() const;
 
-    bool getPostProcessingEffectEnabled(const std::string& ppeName);
-    bool hasPostProcessingEffect(const std::string& ppeName);
+    bool getPostProcessingEffectEnabled(const std::string& ppeName) const;
+    bool hasPostProcessingEffect(const std::string& ppeName) const;
 
     void setupResolution();
 

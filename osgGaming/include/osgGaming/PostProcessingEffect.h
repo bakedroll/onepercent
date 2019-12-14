@@ -15,9 +15,9 @@ namespace osgGaming
 	public:
 		enum class UnitType
 		{
-			BYPASS_COLOR,
-			BYPASS_DEPTH,
-			ONGOING_COLOR
+			BypassColor,
+			BypassDepth,
+			OngoingColor
 		};
 
 		struct InitialUnit
@@ -39,7 +39,7 @@ namespace osgGaming
     PostProcessingEffect();
 
 		void initialize();
-		bool isInitialized();
+		bool isInitialized() const;
 
     virtual std::string                getName()         = 0;
     virtual InitialUnitList            getInitialUnits() = 0;
@@ -50,6 +50,7 @@ namespace osgGaming
 		virtual void initializeUnits() = 0;
 
 	private:
-		bool _initialized;
+		bool m_isInitialized;
+
 	};
 }

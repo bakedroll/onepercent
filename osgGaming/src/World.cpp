@@ -7,7 +7,7 @@ namespace osgGaming
   {
     Impl()
     {
-      rootNode = new osg::Group();
+      rootNode          = new osg::Group();
       cameraManipulator = new TransformableCameraManipulator();
 
       initializeStateSet();
@@ -15,8 +15,7 @@ namespace osgGaming
 
     void initializeStateSet()
     {
-      globalStateSet = new osg::StateSet();
-
+      globalStateSet   = new osg::StateSet();
       globalLightModel = new osg::LightModel();
 
       globalStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
@@ -24,22 +23,20 @@ namespace osgGaming
       globalStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
       globalStateSet->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 
-      for (int i = 0; i < OSGGAMING_MAX_LIGHTS; i++)
+      for (auto i = 0; i < numMaxLights; i++)
       {
         globalStateSet->setMode(GL_LIGHT0 + i, osg::StateAttribute::OFF);
       }
 
       globalStateSet->setAttributeAndModes(globalLightModel, osg::StateAttribute::ON);
-
       rootNode->setStateSet(globalStateSet);
     }
 
-    osg::ref_ptr<osg::Group> rootNode;
-    osg::ref_ptr<osg::StateSet> globalStateSet;
+    osg::ref_ptr<osg::Group>      rootNode;
+    osg::ref_ptr<osg::StateSet>   globalStateSet;
     osg::ref_ptr<osg::LightModel> globalLightModel;
 
-    LightSourceDictionary lightSources;
-
+    LightSourceDictionary                        lightSources;
     osg::ref_ptr<TransformableCameraManipulator> cameraManipulator;
   };
 
@@ -49,26 +46,24 @@ namespace osgGaming
   {
   }
 
-  World::~World()
-  {
-  }
+  World::~World() = default;
 
-  osg::ref_ptr<osg::Group> World::getRootNode()
+  osg::ref_ptr<osg::Group> World::getRootNode() const
   {
     return m->rootNode;
   }
 
-  osg::ref_ptr<osg::StateSet> World::getGlobalStateSet()
+  osg::ref_ptr<osg::StateSet> World::getGlobalStateSet() const
   {
     return m->globalStateSet;
   }
 
-  osg::ref_ptr<osg::LightModel> World::getGlobalLightModel()
+  osg::ref_ptr<osg::LightModel> World::getGlobalLightModel() const
   {
     return m->globalLightModel;
   }
 
-  osg::ref_ptr<TransformableCameraManipulator> World::getCameraManipulator()
+  osg::ref_ptr<TransformableCameraManipulator> World::getCameraManipulator() const
   {
     return m->cameraManipulator;
   }
@@ -80,22 +75,19 @@ namespace osgGaming
     getLight(lightNum);
   }
 
-  osg::ref_ptr<osg::Light> World::getLight(int lightNum)
+  osg::ref_ptr<osg::Light> World::getLight(int lightNum) const
   {
-    LightSourceDictionary::iterator it = m->lightSources.find(lightNum);
-
+    const auto it = m->lightSources.find(lightNum);
     if (it == m->lightSources.end())
     {
-      osg::ref_ptr<osg::Light> light = new osg::Light();
-      osg::ref_ptr<osg::LightSource> ls = new osg::LightSource();
+      auto light       = new osg::Light();
+      auto lightSource = new osg::LightSource();
 
       light->setLightNum(lightNum);
+      lightSource->setLight(light);
 
-      ls->setLight(light);
-
-      m->rootNode->addChild(ls);
-
-      m->lightSources.insert(LightSourceDictPair(lightNum, ls));
+      m->rootNode->addChild(lightSource);
+      m->lightSources[lightNum] = lightSource;
 
       return light;
     }

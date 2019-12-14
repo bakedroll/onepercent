@@ -3,28 +3,27 @@
 using namespace osgGaming;
 
 PostProcessingEffect::PostProcessingEffect()
-	: Referenced(),
-	  _initialized(false)
+	: Referenced()
+	, m_isInitialized(false)
 {
 
 }
 
 void PostProcessingEffect::initialize()
 {
-	if (!_initialized)
+	if (!m_isInitialized)
 	{
 		initializeUnits();
-		_initialized = true;
+		m_isInitialized = true;
 	}
 }
 
-bool PostProcessingEffect::isInitialized()
+bool PostProcessingEffect::isInitialized() const
 {
-	return _initialized;
+	return m_isInitialized;
 }
 
 PostProcessingEffect::InputToUniformList PostProcessingEffect::getInputToUniform()
 {
-	InputToUniformList list;
-	return list;
+	return InputToUniformList();
 }

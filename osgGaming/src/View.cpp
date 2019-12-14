@@ -342,11 +342,11 @@ namespace osgGaming
     {
       switch (type)
       {
-	    case PostProcessingEffect::UnitType::BYPASS_COLOR:
+	    case PostProcessingEffect::UnitType::BypassColor:
         return getBypassUnit(osg::Camera::COLOR_BUFFER);
-      case PostProcessingEffect::UnitType::BYPASS_DEPTH:
+      case PostProcessingEffect::UnitType::BypassDepth:
         return getBypassUnit(osg::Camera::DEPTH_BUFFER);
-      case PostProcessingEffect::UnitType::ONGOING_COLOR:
+      case PostProcessingEffect::UnitType::OngoingColor:
         return getLastUnit();
 	    default:
         break;
@@ -452,27 +452,27 @@ namespace osgGaming
     m->ppGroup->getOrCreateStateSet()->setAttribute(m->clampColor, enabled ? osg::StateAttribute::ON : osg::StateAttribute::OFF);
   }
 
-  osg::ref_ptr<osg::Group> View::getRootGroup()
+  osg::ref_ptr<osg::Group> View::getRootGroup() const
   {
     return m->ppGroup;
   }
 
-  osg::ref_ptr<Hud> View::getHud()
+  osg::ref_ptr<Hud> View::getHud() const
   {
     return m->hud;
   }
 
-  osg::ref_ptr<osg::Camera> View::getSceneCamera()
+  osg::ref_ptr<osg::Camera> View::getSceneCamera() const
   {
     return m->sceneCamera;
   }
 
-  osg::ref_ptr<osg::Camera> View::getHudCamera()
+  osg::ref_ptr<osg::Camera> View::getHudCamera() const
   {
     return m->hudCamera;
   }
 
-  osg::ref_ptr<osg::Geode> View::getCanvasGeode()
+  osg::ref_ptr<osg::Geode> View::getCanvasGeode() const
   {
     return m->canvasGeode;
   }
@@ -566,7 +566,7 @@ namespace osgGaming
     m->screenNum = screenNum;
   }
 
-  osg::ref_ptr<PostProcessingEffect> View::getPostProcessingEffect(const std::string& ppeName)
+  osg::ref_ptr<PostProcessingEffect> View::getPostProcessingEffect(const std::string& ppeName) const
   {
     if (m->ppeDictionary.count(ppeName) == 0)
     {
@@ -576,28 +576,28 @@ namespace osgGaming
     return m->ppeDictionary[ppeName].effect;
   }
 
-  bool View::getFullscreenEnabled()
+  bool View::getFullscreenEnabled() const
   {
     return m->fullscreenEnabled;
   }
 
-  osg::Vec2f View::getResolution()
+  osg::Vec2f View::getResolution() const
   {
     assert(m->resolutionInitialized);
     return m->resolution;
   }
 
-  int View::getScreenNum()
+  int View::getScreenNum() const
   {
     return m->screenNum;
   }
 
-  bool View::getPostProcessingEffectEnabled(const std::string& ppeName)
+  bool View::getPostProcessingEffectEnabled(const std::string& ppeName) const
   {
     return (m->ppeDictionary.count(ppeName) > 0) ? m->ppeDictionary[ppeName].enabled : false;
   }
 
-  bool View::hasPostProcessingEffect(const std::string& ppeName)
+  bool View::hasPostProcessingEffect(const std::string& ppeName) const
   {
     return (m->ppeDictionary.count(ppeName) > 0);
   }

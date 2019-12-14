@@ -18,10 +18,10 @@ namespace osgGaming
 		Hud(Injector& injector);
 		~Hud();
 
-		osg::ref_ptr<osg::Projection> getProjection();
-		osg::ref_ptr<osg::MatrixTransform> getModelViewTransform();
+		osg::ref_ptr<osg::Projection> getProjection() const;
+		osg::ref_ptr<osg::MatrixTransform> getModelViewTransform() const;
 
-		void updateResolution(osg::Vec2f resolution);
+		void updateResolution(const osg::Vec2f& resolution);
 
 	private:
 		struct Impl;

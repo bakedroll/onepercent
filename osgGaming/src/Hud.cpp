@@ -8,12 +8,9 @@ namespace osgGaming
 
   struct Hud::Impl
   {
-    Impl(Injector& injector)
-      : resourceManager(injector.inject<ResourceManager>())
-    {}
+    Impl() = default;
 
-    osg::ref_ptr<ResourceManager> resourceManager;
-    osg::ref_ptr<osg::Projection> projection;
+    osg::ref_ptr<osg::Projection>      projection;
     osg::ref_ptr<osg::MatrixTransform> modelViewTransform;
 
     osg::Vec2f resolution;
@@ -21,7 +18,7 @@ namespace osgGaming
 
   Hud::Hud(Injector& injector)
     : Referenced()
-    , m(new Impl(injector))
+    , m(new Impl())
   {
     osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
     stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
@@ -39,23 +36,23 @@ namespace osgGaming
     m->projection->setStateSet(stateSet);
   }
 
-  Hud::~Hud()
-  {
-  }
+  Hud::~Hud() = default;
 
-  osg::ref_ptr<osg::Projection> Hud::getProjection()
+  osg::ref_ptr<osg::Projection> Hud::getProjection() const
   {
     return m->projection;
   }
 
-  osg::ref_ptr<osg::MatrixTransform> Hud::getModelViewTransform()
+  osg::ref_ptr<osg::MatrixTransform> Hud::getModelViewTransform() const
   {
     return m->modelViewTransform;
   }
 
-  void Hud::updateResolution(osg::Vec2f resolution)
+  void Hud::updateResolution(const osg::Vec2f& resolution)
   {
     m->resolution = resolution;
-    m->projection->setMatrix(osg::Matrix::ortho2D(0.0, double(m->resolution.x()) - 1.0, double(m->resolution.y()) - 1.0, 0.0));
+    m->projection->setMatrix(osg::Matrix::ortho2D(0.0, static_cast<double>(m->resolution.x()) - 1.0,
+                                                  static_cast<double>(m->resolution.y()) - 1.0, 0.0));
   }
-}
+
+  }  // namespace osgGaming
