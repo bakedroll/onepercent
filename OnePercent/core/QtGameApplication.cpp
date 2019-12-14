@@ -150,7 +150,7 @@ void QtGameApplication::newStateEvent(osg::ref_ptr<osgGaming::AbstractGameState>
 
 void QtGameApplication::stateAttachedEvent(osg::ref_ptr<osgGaming::AbstractGameState> state)
 {
-  osg::ref_ptr<osgGaming::View> view = getViewer()->getView(0);
+  osg::ref_ptr<osgGaming::View> view = getViewer()->getGamingView(0);
   osg::ref_ptr<osgGaming::Hud> hud = state->getHud(view);
 
   if (m->overlayCompositor->getContainer()->getNumParents() > 0)

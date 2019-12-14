@@ -6,8 +6,8 @@
 #include <osgGaming/GameStateStack.h>
 #include <osgGaming/Hud.h>
 
-#include "Viewer.h"
-#include "TimerFactory.h"
+#include <osgGaming/Viewer.h>
+#include <osgGaming/TimerFactory.h>
 
 namespace osgGaming
 {
@@ -21,19 +21,12 @@ namespace osgGaming
 
   class GameApplication : public SimulationCallback
 	{
-  protected:
-    virtual void initialize(Injector& injector);
-    virtual void deinitialize();
-
-    virtual int run(osg::ref_ptr<AbstractGameState>& initialState);
-    virtual int run(AbstractGameState::AbstractGameStateRefList initialStates);
-
-    virtual void onException(const std::string& message);
-    int safeExecute(std::function<int()> func);
-
   public:
+    GameApplication();
+    ~GameApplication() override;
+
     template<typename TState>
-    int run()
+    int runGame()
     {
       registerComponents(m_container);
       Injector injector(m_container);
@@ -56,16 +49,13 @@ namespace osgGaming
       }
 
       state->setInjector(*m_injector);
-      return run(state);
+      return runGame(state);
     }
-
-    GameApplication();
-    ~GameApplication();
 
     void action(osg::Object* object, osg::Object* data, double simTime, double timeDiff) override;
 
-    osg::ref_ptr<World> getDefaultWorld();
-    osg::ref_ptr<Hud> getDefaultHud();
+    osg::ref_ptr<World>        getDefaultWorld();
+    osg::ref_ptr<Hud>          getDefaultHud();
     osg::ref_ptr<GameSettings> getDefaultGameSettings();
 
     void setDefaultWorld(osg::ref_ptr<World> world);
@@ -76,6 +66,15 @@ namespace osgGaming
     osg::ref_ptr<osgGaming::Viewer> getViewer();
 
   protected:
+    virtual void initialize(Injector& injector);
+    virtual void deinitialize();
+
+    virtual int runGame(osg::ref_ptr<AbstractGameState>& initialState);
+    virtual int runGame(AbstractGameState::AbstractGameStateRefList initialStates);
+
+    virtual void onException(const std::string& message);
+    int safeExecute(std::function<int()> func);
+
     virtual void registerComponents(InjectionContainer& container);
     void registerEssentialComponents();
 

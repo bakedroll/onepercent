@@ -13,22 +13,24 @@ namespace osgGaming
   {
 #ifdef _DEBUG
   private:
-    int m_depth;
+    int                          m_depth;
     std::vector<std::type_index> m_creationOrder;
 
     template<typename T>
     void traceInstance()
     {
-      std::type_index ti = typeid(T);
+      const std::type_index tid = typeid(T);
 
-      for (std::vector<std::type_index>::iterator it = m_creationOrder.begin(); it != m_creationOrder.end(); ++it)
+      for (const auto& it : m_creationOrder)
       {
-        if (*it == ti)
+        if (it == tid)
+		    {
           OSGG_LOG_WARN("Circular dependency detected!");
+		    }
       }
 
       char buffer[256];
-      sprintf_s(buffer, "%*s%s%s", (m_depth)* 2, "", "Injecting ", ti.name());
+      sprintf_s(buffer, "%*s%s%s", (m_depth)* 2, "", "Injecting ", tid.name());
 
       OSGG_LOG_INFO(std::string(buffer));
     }
@@ -38,11 +40,11 @@ namespace osgGaming
     {
       traceInstance<T>();
 
-      std::type_index ti = typeid(T);
-      m_creationOrder.push_back(ti);
+      const std::type_index tid = typeid(T);
+      m_creationOrder.push_back(tid);
 
       m_depth++;
-      osg::ref_ptr<T> instance = new T(*this);
+      auto instance = new T(*this);
       m_depth--;
 
       m_creationOrder.pop_back();
@@ -57,12 +59,12 @@ namespace osgGaming
     template<typename T>
     osg::ref_ptr<T> inject()
     {
-      std::type_index ti = typeid(T);
+      const std::type_index tid = typeid(T);
 
-      InjectionContainer::Singletons& singletons = m_container->singletons();
-      if (singletons.count(ti) > 0)
+      auto& singletons = m_container->singletons();
+      if (singletons.count(tid) > 0)
       {
-        osg::ref_ptr<osg::Referenced> ptr = singletons[ti];
+        const auto& ptr = singletons[tid];
         if (ptr.valid())
         {
 #ifdef _DEBUG
@@ -76,12 +78,12 @@ namespace osgGaming
 #else
         osg::ref_ptr<T> tptr = new T(*this);
 #endif
-        singletons[ti] = tptr;
+        singletons[tid] = tptr;
         return tptr;
       }
       
-      InjectionContainer::Classes& classes = m_container->classes();
-      if (classes.count(ti) > 0)
+      const auto& classes = m_container->classes();
+      if (classes.count(tid) > 0)
       {
 #ifdef _DEBUG
         return createInstance<T>();

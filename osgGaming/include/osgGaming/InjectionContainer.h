@@ -3,7 +3,7 @@
 #include <typeindex>
 #include <set>
 #include <map>
-#include <assert.h>
+#include <cassert>
 
 #include <osg/Referenced>
 #include <osg/ref_ptr>
@@ -13,37 +13,37 @@ namespace osgGaming
   class InjectionContainer
   {
   public:
-    typedef std::set<std::type_index> Classes;
-    typedef std::map<std::type_index, osg::ref_ptr<osg::Referenced>> Singletons;
+    using Classes    = std::set<std::type_index>;
+    using Singletons = std::map<std::type_index, osg::ref_ptr<osg::Referenced>>;
 
     InjectionContainer();
 
     template<typename T>
     void registerType()
     {
-      std::type_index ti = typeid(T);
-      assert(m_registeredClasses.count(ti) == 0);
+      std::type_index tid = typeid(T);
+      assert(m_registeredClasses.count(tid) == 0);
 
-      m_registeredClasses.insert(ti);
+      m_registeredClasses.insert(tid);
     }
 
     template<typename T>
     void registerSingletonType()
     {
-      std::type_index ti = typeid(T);
-      assert(m_registeredSingletons.count(ti) == 0);
+      std::type_index tid = typeid(T);
+      assert(m_registeredSingletons.count(tid) == 0);
 
-      m_registeredSingletons[ti] = osg::ref_ptr<osg::Referenced>();
+      m_registeredSingletons[tid] = osg::ref_ptr<osg::Referenced>();
     }
 
-    Classes& classes();
+    Classes&    classes();
     Singletons& singletons();
 
     void clear();
 
   private:
-    std::set<std::type_index> m_registeredClasses;
-    std::map<std::type_index, osg::ref_ptr<osg::Referenced>> m_registeredSingletons;
+    Classes    m_registeredClasses;
+    Singletons m_registeredSingletons;
 
   };
 }

@@ -9,7 +9,7 @@ namespace osgGaming
 	{
 	public:
 	  SimulationCallback();
-    virtual ~SimulationCallback();
+    ~SimulationCallback() override;
 
     bool run(osg::Object* node, osg::Object* data) override;
 		void resetTimeDiff();

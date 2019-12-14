@@ -50,7 +50,7 @@ namespace osgGaming
         int nviews = viewer->getNumViews();
         for (int i = 0; i < nviews; i++)
         {
-          View::Ptr view = viewer->getView(i);
+          View::Ptr view = viewer->getGamingView(i);
           if (!view)
           {
             assert(false);
@@ -89,7 +89,7 @@ namespace osgGaming
       int nviews = viewer->getNumViews();
       for (int i = 0; i < nviews; i++)
       {
-        View::Ptr view = viewer->getView(i);
+        View::Ptr view = viewer->getGamingView(i);
         if (!view)
         {
           assert(false);
@@ -145,12 +145,11 @@ namespace osgGaming
   GameApplication::GameApplication()
     : SimulationCallback()
     , m(new Impl(this))
+    , m_injector(nullptr)
   {
   }
 
-  GameApplication::~GameApplication()
-  {
-  }
+  GameApplication::~GameApplication() = default;
 
   void GameApplication::action(osg::Object* object, osg::Object* data, double simTime, double timeDiff)
   {
@@ -166,7 +165,7 @@ namespace osgGaming
     {
       auto attach = m->gameStateStack.attachRequired();
 
-      m->gameStateStack.begin(AbstractGameState::StateBehavior::ALL, false);
+      m->gameStateStack.begin(AbstractGameState::StateBehavior::All, false);
       while (m->gameStateStack.next())
       {
         ref_ptr<AbstractGameState> state = m->gameStateStack.get();
@@ -211,7 +210,7 @@ namespace osgGaming
 
             ref_ptr<AbstractGameState> nextState = *nextStates.begin();
 
-            View::Ptr view = m->viewer->getView(0);
+            View::Ptr view = m->viewer->getGamingView(0);
             if (!view)
               assert(false);
            
@@ -236,7 +235,7 @@ namespace osgGaming
         // update state
         GameState::StateEvent* se;
 
-        if (m->gameStateStack.hasBehavior(state, AbstractGameState::StateBehavior::UPDATE))
+        if (m->gameStateStack.hasBehavior(state, AbstractGameState::StateBehavior::Update))
         {
           se = state->update();
         }
@@ -282,16 +281,16 @@ namespace osgGaming
 
           switch (se->type)
           {
-		      case AbstractGameState::StateEventType::POP:
+		      case AbstractGameState::StateEventType::Pop:
             m->gameStateStack.popState();
             break;
-          case AbstractGameState::StateEventType::PUSH:
+          case AbstractGameState::StateEventType::Push:
             m->gameStateStack.pushStates(nextStatesRef);
             break;
-          case AbstractGameState::StateEventType::REPLACE:
+          case AbstractGameState::StateEventType::Replace:
             m->gameStateStack.replaceState(nextStatesRef);
             break;
-          case AbstractGameState::StateEventType::END_GAME:
+          case AbstractGameState::StateEventType::EndGame:
             m->gameEnded = true;
             break;
           }
@@ -359,21 +358,21 @@ namespace osgGaming
     m->defaultGameSettings = settings;
   }
 
-  int GameApplication::run(ref_ptr<AbstractGameState>& initialState)
+  int GameApplication::runGame(ref_ptr<AbstractGameState>& initialState)
   {
     m->timerFactory = m_injector->inject<TimerFactory>();
 
     AbstractGameState::AbstractGameStateRefList states;
     states.push_back(initialState);
 
-    return run(states);
+    return runGame(states);
   }
 
-  int GameApplication::run(AbstractGameState::AbstractGameStateRefList initialStates)
+  int GameApplication::runGame(AbstractGameState::AbstractGameStateRefList initialStates)
   {
     return safeExecute([&]()
     {
-      m->view = m->viewer->getView(0);
+      m->view = m->viewer->getGamingView(0);
       assert(m->view.valid());
 
       m->gameStateStack.pushStates(initialStates);

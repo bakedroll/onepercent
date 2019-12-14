@@ -12,8 +12,8 @@ namespace osgGaming
     Viewer();
 
     void setFullscreenEnabled(int viewId, bool enabled);
-    void setWindowedResolution(int viewId, osg::Vec2f resolution);
+    void setWindowedResolution(int viewId, const osg::Vec2f& resolution);
 
-    osg::ref_ptr<View> getView(unsigned int i);
+    osg::ref_ptr<osgGaming::View> getGamingView(unsigned int i);
   };
 }

@@ -111,7 +111,7 @@ namespace osgGaming
 
   unsigned char AbstractGameState::getProperties() const
   {
-    return (underlying(StateProperties::PROP_GUIEVENTS_TOP) | underlying(StateProperties::PROP_UPDATE_TOP));
+    return (underlying(StateProperties::GuiEventsTop) | underlying(StateProperties::UpdateTop));
   }
 
   void AbstractGameState::onKeyPressedEvent(int key)
@@ -227,7 +227,7 @@ namespace osgGaming
 
   osg::ref_ptr<osgGaming::View> AbstractGameState::getView(int i) const
   {
-    return m->viewer->getView(i);
+    return m->viewer->getGamingView(i);
   }
 
   osg::ref_ptr<GameSettings> AbstractGameState::getGameSettings() const
@@ -301,7 +301,7 @@ namespace osgGaming
     }
 
     m->stateEvent = new StateEvent();
-    m->stateEvent->type = StateEventType::PUSH;
+    m->stateEvent->type = StateEventType::Push;
     m->stateEvent->referencedStates.push_back(state);
 
     return m->stateEvent;
@@ -315,7 +315,7 @@ namespace osgGaming
     }
 
     m->stateEvent = new StateEvent();
-    m->stateEvent->type = StateEventType::POP;
+    m->stateEvent->type = StateEventType::Pop;
 
     return m->stateEvent;
   }
@@ -328,7 +328,7 @@ namespace osgGaming
     }
 
     m->stateEvent       = new StateEvent();
-    m->stateEvent->type = StateEventType::REPLACE;
+    m->stateEvent->type = StateEventType::Replace;
     m->stateEvent->referencedStates.push_back(state);
 
     return m->stateEvent;
@@ -342,7 +342,7 @@ namespace osgGaming
     }
 
     m->stateEvent = new StateEvent();
-    m->stateEvent->type = StateEventType::END_GAME;
+    m->stateEvent->type = StateEventType::EndGame;
 
     return m->stateEvent;
   }

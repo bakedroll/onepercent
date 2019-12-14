@@ -101,7 +101,7 @@ namespace onep
 
   int OnePercentApplication::run()
   {
-    return QtGameApplication::run<LoadingGlobeOverviewState>();
+    return QtGameApplication::runGame<LoadingGlobeOverviewState>();
   }
 
   void OnePercentApplication::registerComponents(osgGaming::InjectionContainer& container)

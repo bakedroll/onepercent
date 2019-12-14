@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Viewer.h"
+#include "osgGaming/Viewer.h"
 
 #include <vector>
 #include <memory>
@@ -23,25 +23,25 @@ namespace osgGaming
 	public:
 		enum class StateEventType
 		{
-			PUSH,
-			POP,
-			REPLACE,
-			END_GAME
+			Push,
+			Pop,
+			Replace,
+			EndGame
 		};
 
     enum class StateProperties
     {
-      PROP_UPDATE_TOP       = 1,
-      PROP_UPDATE_ALWAYS    = 2,
-      PROP_GUIEVENTS_TOP    = 4,
-      PROP_GUIEVENTS_ALWAYS = 8
+      UpdateTop       = 1,
+      UpdateAlways    = 2,
+      GuiEventsTop    = 4,
+      GuiEventsAlways = 8
     };
 
     enum class StateBehavior
 		{
-			UPDATE,
-			GUIEVENT,
-			ALL
+			Update,
+			GuiEvent,
+			All
 		};
 
     using AbstractGameStateList    = std::vector<osg::ref_ptr<AbstractGameState>>;
@@ -89,15 +89,15 @@ namespace osgGaming
 
     void prepareWorldAndHud(Injector& injector, const osg::ref_ptr<View>& view);
 
-		double getSimulationTime() const;
-		double getFrameTime() const;
-    osg::ref_ptr<World> getWorld(const osg::ref_ptr<View>& view) const;
-    osg::ref_ptr<Hud> getHud(const osg::ref_ptr<View>& view) const;
-    osg::ref_ptr<Viewer> getViewer() const;
-    osg::ref_ptr<View> getView(int i) const;
-		osg::ref_ptr<GameSettings> getGameSettings() const;
+    double                     getSimulationTime() const;
+    double                     getFrameTime() const;
+    osg::ref_ptr<World>        getWorld(const osg::ref_ptr<View>& view) const;
+    osg::ref_ptr<Hud>          getHud(const osg::ref_ptr<View>& view) const;
+    osg::ref_ptr<Viewer>       getViewer() const;
+    osg::ref_ptr<View>         getView(int i) const;
+    osg::ref_ptr<GameSettings> getGameSettings() const;
 
-		void setSimulationTime(double simulationTime);
+    void setSimulationTime(double simulationTime);
 		void setFrameTime(double frameTime);
 		void setWorld(const osg::ref_ptr<View>& view, const osg::ref_ptr<World>& world);
     void setHud(const osg::ref_ptr<View>& view, const osg::ref_ptr<Hud>& hud);
@@ -130,8 +130,8 @@ namespace osgGaming
     virtual StateEvent* stateEvent_replace(const osg::ref_ptr<AbstractGameState>& state);
 
 	protected:
-		virtual osg::ref_ptr<World> injectWorld(Injector& injector, const osg::ref_ptr<View>& view);
-    virtual osg::ref_ptr<Hud> injectHud(Injector& injector, const osg::ref_ptr<View>& view);
+    virtual osg::ref_ptr<World> injectWorld(Injector& injector, const osg::ref_ptr<View>& view);
+    virtual osg::ref_ptr<Hud>   injectHud(Injector& injector, const osg::ref_ptr<View>& view);
 
     template<typename TState>
     StateEvent* stateEvent_push()

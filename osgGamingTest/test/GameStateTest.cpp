@@ -21,7 +21,7 @@ TEST(GameStateTest, UpdateProperties)
       return state->stateEvent_pop();
 
     return static_cast<osgGaming::AbstractGameState::StateEvent*>(nullptr);
-  }, osgGaming::AbstractGameState::PROP_UPDATE_ALWAYS));
+  }, osgGaming::AbstractGameState::UpdateAlways));
 
   states.push_back(new osgGamingTest::MockedState([](osgGamingTest::MockedState* state, double tick)
   {
@@ -36,7 +36,7 @@ TEST(GameStateTest, UpdateProperties)
     return static_cast<osgGaming::AbstractGameState::StateEvent*>(nullptr);
   }));
 
-  app->run(states);
+  app->runGame(states);
 
   osg::ref_ptr<osgGamingTest::MockedState> state0 = dynamic_cast<osgGamingTest::MockedState*>(states[0].get());
   osg::ref_ptr<osgGamingTest::MockedState> state1 = dynamic_cast<osgGamingTest::MockedState*>(states[1].get());
@@ -82,34 +82,34 @@ TEST(GameStateTest, OverrideWorld)
   states.push_back(new osgGamingTest::MockedState([](osgGamingTest::MockedState* state, double tick)
   {
     return static_cast<osgGaming::AbstractGameState::StateEvent*>(nullptr);
-  }, osgGaming::AbstractGameState::PROP_UPDATE_ALWAYS, nullptr));
+  }, osgGaming::AbstractGameState::UpdateAlways, nullptr));
 
   states.push_back(new osgGamingTest::MockedState([](osgGamingTest::MockedState* state, double tick)
   {
     return static_cast<osgGaming::AbstractGameState::StateEvent*>(nullptr);
-  }, osgGaming::AbstractGameState::PROP_UPDATE_ALWAYS, world2));
+  }, osgGaming::AbstractGameState::UpdateAlways, world2));
 
   states.push_back(new osgGamingTest::MockedState([](osgGamingTest::MockedState* state, double tick)
   {
     return static_cast<osgGaming::AbstractGameState::StateEvent*>(nullptr);
-  }, osgGaming::AbstractGameState::PROP_UPDATE_ALWAYS, nullptr));
+  }, osgGaming::AbstractGameState::UpdateAlways, nullptr));
 
   states.push_back(new osgGamingTest::MockedState([](osgGamingTest::MockedState* state, double tick)
   {
     return state->stateEvent_endGame();
-  }, osgGaming::AbstractGameState::PROP_UPDATE_ALWAYS, world3));
+  }, osgGaming::AbstractGameState::UpdateAlways, world3));
 
-  app->run(states);
+  app->runGame(states);
 
   osg::ref_ptr<osgGamingTest::MockedState> state0 = dynamic_cast<osgGamingTest::MockedState*>(states[0].get());
   osg::ref_ptr<osgGamingTest::MockedState> state1 = dynamic_cast<osgGamingTest::MockedState*>(states[1].get());
   osg::ref_ptr<osgGamingTest::MockedState> state2 = dynamic_cast<osgGamingTest::MockedState*>(states[2].get());
   osg::ref_ptr<osgGamingTest::MockedState> state3 = dynamic_cast<osgGamingTest::MockedState*>(states[3].get());
 
-  //ASSERT_EQ(state0->getWorld(app->getViewer()->getView(0)), world1);
-  //ASSERT_EQ(state1->getWorld(app->getViewer()->getView(0)), world2);
-  //ASSERT_EQ(state2->getWorld(app->getViewer()->getView(0)), world2);
-  //ASSERT_EQ(state3->getWorld(app->getViewer()->getView(0)), world3);
+  //ASSERT_EQ(state0->getWorld(app->getViewer()->getGamingView(0)), world1);
+  //ASSERT_EQ(state1->getWorld(app->getViewer()->getGamingView(0)), world2);
+  //ASSERT_EQ(state2->getWorld(app->getViewer()->getGamingView(0)), world2);
+  //ASSERT_EQ(state3->getWorld(app->getViewer()->getGamingView(0)), world3);
 }
 
 */

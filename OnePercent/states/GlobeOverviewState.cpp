@@ -44,7 +44,7 @@ namespace onep
 
   unsigned char GlobeOverviewState::getProperties() const
   {
-    return underlying(StateProperties::PROP_UPDATE_ALWAYS) | underlying(StateProperties::PROP_GUIEVENTS_ALWAYS);
+    return underlying(StateProperties::UpdateAlways) | underlying(StateProperties::GuiEventsAlways);
   }
 
   osgGaming::GameState::StateEvent* GlobeOverviewState::update()

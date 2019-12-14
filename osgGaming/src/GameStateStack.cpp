@@ -68,28 +68,28 @@ bool GameStateStack::hasBehavior(osg::ref_ptr<AbstractGameState> state, Abstract
 	auto props = state->getProperties();
 	auto isTop = (state == m_itTop);
 
-	if (behavior == AbstractGameState::StateBehavior::UPDATE)
+	if (behavior == AbstractGameState::StateBehavior::Update)
 	{
-    if ((props & underlying(AbstractGameState::StateProperties::PROP_UPDATE_ALWAYS)) ||
-        (isTop && (props & underlying(AbstractGameState::StateProperties::PROP_UPDATE_TOP))))
+    if ((props & underlying(AbstractGameState::StateProperties::UpdateAlways)) ||
+        (isTop && (props & underlying(AbstractGameState::StateProperties::UpdateTop))))
     {
       return true;
     }
   }
-	else if (behavior == AbstractGameState::StateBehavior::GUIEVENT)
+	else if (behavior == AbstractGameState::StateBehavior::GuiEvent)
   {
-    if ((props & underlying(AbstractGameState::StateProperties::PROP_GUIEVENTS_ALWAYS)) ||
-        (isTop && (props & underlying(AbstractGameState::StateProperties::PROP_GUIEVENTS_TOP))))
+    if ((props & underlying(AbstractGameState::StateProperties::GuiEventsAlways)) ||
+        (isTop && (props & underlying(AbstractGameState::StateProperties::GuiEventsTop))))
     {
       return true;
     }
   }
-  else if (behavior == AbstractGameState::StateBehavior::ALL)
+  else if (behavior == AbstractGameState::StateBehavior::All)
 	{
-    if (((props & underlying(AbstractGameState::StateProperties::PROP_UPDATE_ALWAYS)) ||
-         (isTop && (props & underlying(AbstractGameState::StateProperties::PROP_UPDATE_TOP)))) ||
-        ((props & underlying(AbstractGameState::StateProperties::PROP_GUIEVENTS_ALWAYS)) ||
-         (isTop && (props & underlying(AbstractGameState::StateProperties::PROP_GUIEVENTS_TOP)))))
+    if (((props & underlying(AbstractGameState::StateProperties::UpdateAlways)) ||
+         (isTop && (props & underlying(AbstractGameState::StateProperties::UpdateTop)))) ||
+        ((props & underlying(AbstractGameState::StateProperties::GuiEventsAlways)) ||
+         (isTop && (props & underlying(AbstractGameState::StateProperties::GuiEventsTop)))))
     {
       return true;
     }

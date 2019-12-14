@@ -33,12 +33,12 @@ struct InputManager::Impl
     typedef std::unordered_set<Hud*> HudSet;
     HudSet hudSet;
 
-    gameStateStack->begin(AbstractGameState::StateBehavior::ALL);
+    gameStateStack->begin(AbstractGameState::StateBehavior::All);
     while (gameStateStack->next())
     {
       osg::ref_ptr<AbstractGameState> state = gameStateStack->get();
 
-      if (!onlyDirty || state->isDirty(AbstractGameState::StateBehavior::ALL))
+      if (!onlyDirty || state->isDirty(AbstractGameState::StateBehavior::All))
       {
         osg::ref_ptr<Hud> hud = state->getHud(view);
 
@@ -125,7 +125,7 @@ bool InputManager::isInitialized()
 
 bool InputManager::onKeyPressEvent(const osgGA::GUIEventAdapter& ea)
 {
-  m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+  m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
   while (m->gameStateStack->next())
   {
     m->gameStateStack->get()->onKeyPressedEvent(ea.getKey());
@@ -136,7 +136,7 @@ bool InputManager::onKeyPressEvent(const osgGA::GUIEventAdapter& ea)
 
 bool InputManager::onKeyReleaseEvent(const osgGA::GUIEventAdapter& ea)
 {
-  m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+  m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
   while (m->gameStateStack->next())
   {
     m->gameStateStack->get()->onKeyReleasedEvent(ea.getKey());
@@ -154,7 +154,7 @@ bool InputManager::onMouseClickEvent(const osgGA::GUIEventAdapter& ea)
 	{
 		m->mousePressed[mb] = true;
 
-		m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+		m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
 		while (m->gameStateStack->next())
 		{
 			m->gameStateStack->get()->onMousePressedEvent(ea.getButton(), ea.getX(), ea.getY());
@@ -174,7 +174,7 @@ bool InputManager::onMouseReleaseEvent(const osgGA::GUIEventAdapter& ea)
 
   if (m->mouseDragging == ea.getButton())
   {
-    m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+    m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
     while (m->gameStateStack->next())
     {
       m->gameStateStack->get()->onDragEndEvent(m->mouseDragging, m->dragOrigin, osg::Vec2f(ea.getX(), ea.getY()));
@@ -183,7 +183,7 @@ bool InputManager::onMouseReleaseEvent(const osgGA::GUIEventAdapter& ea)
     m->mouseDragging = 0;
   }
 
-  m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+  m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
   while (m->gameStateStack->next())
   {
     m->gameStateStack->get()->onMouseReleasedEvent(ea.getButton(), ea.getX(), ea.getY());
@@ -196,7 +196,7 @@ bool InputManager::onMouseMoveEvent(const osgGA::GUIEventAdapter& ea)
 {
   m->mousePosition = osg::Vec2f(ea.getX(), ea.getY());
 
-  m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+  m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
   while (m->gameStateStack->next())
   {
     m->gameStateStack->get()->onMouseMoveEvent(m->mousePosition.x(), m->mousePosition.y());
@@ -212,7 +212,7 @@ bool InputManager::onMouseMoveEvent(const osgGA::GUIEventAdapter& ea)
       m->dragOrigin = m->mousePosition;
       m->lastDragPosition = m->dragOrigin;
 
-      m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+      m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
       while (m->gameStateStack->next())
       {
         m->gameStateStack->get()->onDragBeginEvent(m->mouseDragging, m->dragOrigin);
@@ -222,7 +222,7 @@ bool InputManager::onMouseMoveEvent(const osgGA::GUIEventAdapter& ea)
 
   if (m->mouseDragging != 0)
   {
-    m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+    m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
     while (m->gameStateStack->next())
     {
       m->gameStateStack->get()->onDragEvent(m->mouseDragging, m->dragOrigin, m->mousePosition, m->mousePosition - m->lastDragPosition);
@@ -236,7 +236,7 @@ bool InputManager::onMouseMoveEvent(const osgGA::GUIEventAdapter& ea)
 
 bool InputManager::onMouseScrollEvent(const osgGA::GUIEventAdapter& ea)
 {
-  m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+  m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
   while (m->gameStateStack->next())
   {
     m->gameStateStack->get()->onScrollEvent(ea.getScrollingMotion());
@@ -261,7 +261,7 @@ bool InputManager::onResizeEvent(const osgGA::GUIEventAdapter& ea)
   {
     m->updateResolution(osg::Vec2f(float(newWidth), float(newHeight)));
 
-    m->gameStateStack->begin(AbstractGameState::StateBehavior::GUIEVENT);
+    m->gameStateStack->begin(AbstractGameState::StateBehavior::GuiEvent);
     while (m->gameStateStack->next())
     {
       m->gameStateStack->get()->onResizeEvent(newWidth, newHeight);

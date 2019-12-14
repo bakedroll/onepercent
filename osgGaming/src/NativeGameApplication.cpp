@@ -27,7 +27,7 @@ namespace osgGaming
       getViewer()->setFullscreenEnabled(i, settings->getFullscreenEnabled());
       getViewer()->setWindowedResolution(i, settings->getWindowedResolution());
 
-      View* view = getViewer()->getView(i);
+      View* view = getViewer()->getGamingView(i);
 
       if (!view)
       {

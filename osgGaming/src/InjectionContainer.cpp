@@ -3,9 +3,7 @@
 
 namespace osgGaming
 {
-  InjectionContainer::InjectionContainer()
-  {
-  }
+  InjectionContainer::InjectionContainer() = default;
 
   InjectionContainer::Classes& InjectionContainer::classes()
   {
@@ -20,13 +18,13 @@ namespace osgGaming
   void InjectionContainer::clear()
   {
 #ifdef _DEBUG
-    for (Singletons::iterator it = m_registeredSingletons.begin(); it != m_registeredSingletons.end(); ++it)
+    for (const auto& it : m_registeredSingletons)
     {
-      int refcount = it->second->referenceCount();
+      auto refcount = it.second->referenceCount();
       if (refcount > 1)
       {
         char buffer[256];
-        sprintf_s(buffer, "%s has %d references left", it->first.name(), refcount - 1);
+        sprintf_s(buffer, "%s has %d references left", it.first.name(), refcount - 1);
 
         OSGG_LOG_WARN(std::string(buffer));
       }
@@ -35,7 +33,5 @@ namespace osgGaming
 
     m_registeredClasses.clear();
     m_registeredSingletons.clear();
-
-
   }
 }

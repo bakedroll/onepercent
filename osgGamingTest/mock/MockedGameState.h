@@ -10,8 +10,8 @@ namespace osgGamingTest
   public:
     MockedState(
       const std::function<StateEvent*(MockedState*, double)>& func,
-      unsigned char properties = underlying(StateProperties::PROP_GUIEVENTS_TOP) |
-		                             underlying(StateProperties::PROP_UPDATE_TOP),
+      unsigned char properties = underlying(StateProperties::GuiEventsTop) |
+		                             underlying(StateProperties::UpdateTop),
       const osg::ref_ptr<osgGaming::World>& overrideWorld = nullptr);
 
     ~MockedState();

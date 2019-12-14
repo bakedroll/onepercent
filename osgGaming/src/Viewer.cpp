@@ -1,7 +1,7 @@
 #include "osgGaming/Viewer.h"
 #include <osgGaming/View.h>
 
-#include <assert.h>
+#include <cassert>
 
 namespace osgGaming
 {
@@ -13,41 +13,33 @@ namespace osgGaming
 
   void Viewer::setFullscreenEnabled(int viewId, bool enabled)
   {
-    Windows windows;
-    getWindows(windows);
-
-    osgViewer::View* view = getView(viewId);
-    View* gview = dynamic_cast<View*>(view);
-
-    if (!gview)
+    auto view = getGamingView(viewId);
+    if (!view.valid())
     {
-      assert(false && "Should be a osgGaming::View*");
       return;
     }
 
-    gview->setFullscreenEnabled(enabled, windows);
-  }
-
-  void Viewer::setWindowedResolution(int viewId, osg::Vec2f resolution)
-  {
     Windows windows;
     getWindows(windows);
+    view->setFullscreenEnabled(enabled, windows);
+  }
 
-    osgViewer::View* view = getView(viewId);
-    View* gview = dynamic_cast<View*>(view);
-
-    if (!gview)
+  void Viewer::setWindowedResolution(int viewId, const osg::Vec2f& resolution)
+  {
+    auto view = getGamingView(viewId);
+    if (!view.valid())
     {
-      assert(false && "Should be a osgGaming::View*");
       return;
     }
 
-    gview->setWindowedResolution(resolution, windows);
+    Windows windows;
+    getWindows(windows);
+    view->setWindowedResolution(resolution, windows);
   }
 
-  osg::ref_ptr<View> Viewer::getView(unsigned i)
+  osg::ref_ptr<osgGaming::View> Viewer::getGamingView(unsigned int i)
   {
-    View::Ptr view = dynamic_cast<View*>(osgViewer::CompositeViewer::getView(i));
+    auto view = dynamic_cast<osgGaming::View*>(osgViewer::CompositeViewer::getView(i));
     assert(view);
     return view;
   }
