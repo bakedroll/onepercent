@@ -2,6 +2,10 @@
 #include "data/CountriesMap.h"
 #include "core/Macros.h"
 
+#include <cmath>
+
+#include <QString>
+
 #include <osg/MatrixTransform>
 
 #include <osgGaming/Helper.h>
@@ -162,7 +166,7 @@ namespace onep
     auto r1 = m_earthRadius * cos(a1);
     auto r2 = m_earthRadius * cos(a2);
 
-    if (signbit(a1) == signbit(a2))
+    if (std::signbit(a1) == std::signbit(a2))
     {
       if (r1 < r2)
       {

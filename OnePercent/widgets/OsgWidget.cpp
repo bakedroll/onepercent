@@ -282,7 +282,11 @@ void OsgWidget::resizeGL(int width, int height)
   m->graphicsWindow->resized(x(), y(), width, height);
 
   // dirty workaround to fit the render quad
-  auto factor = static_cast<float>(width) / height;  // float(width) / float(height) * (3.0f / 4.0f);
+#ifdef WIN32
+  auto factor = static_cast<float>(width) / height;
+#else
+  auto factor = float(width) / float(height) * (3.0f / 4.0f);
+#endif
 
   osg::ref_ptr<osg::Geode> geode = m->view->getCanvasGeode();
   geode->removeDrawable(geode->getDrawable(0));

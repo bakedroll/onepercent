@@ -2,6 +2,7 @@
 
 #include "scripting/LuaBridgeDefinition.h"
 
+#include <osgGaming/Macros.h>
 #include <osgGaming/Injector.h>
 
 #include <functional>

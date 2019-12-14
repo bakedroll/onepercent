@@ -49,7 +49,7 @@ namespace osgGaming
       }
     }
 
-    traverse(node, data);
+    return traverse(node, data);
   }
 
 }

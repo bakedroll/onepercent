@@ -1,5 +1,7 @@
 #include "CountriesMap.h"
 
+#include <cstring>
+
 namespace onep
 {
   CountriesMap::CountriesMap()
