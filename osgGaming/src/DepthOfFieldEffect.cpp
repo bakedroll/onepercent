@@ -59,11 +59,11 @@ namespace osgGaming
     PostProcessingEffect::InitialUnitList list;
 
     PostProcessingEffect::InitialUnit unitResampleLight;
-    unitResampleLight.type = PostProcessingEffect::ONGOING_COLOR;
+    unitResampleLight.type = PostProcessingEffect::UnitType::ONGOING_COLOR;
     unitResampleLight.unit = m->unitResampleLight;
 
     PostProcessingEffect::InitialUnit unitResampleStrong;
-    unitResampleStrong.type = PostProcessingEffect::ONGOING_COLOR;
+    unitResampleStrong.type = PostProcessingEffect::UnitType::ONGOING_COLOR;
     unitResampleStrong.unit = m->unitResampleStrong;
 
     list.push_back(unitResampleLight);
@@ -83,12 +83,12 @@ namespace osgGaming
 
     InputToUniform ituBypass;
     ituBypass.name = "texColorMap";
-    ituBypass.type = PostProcessingEffect::ONGOING_COLOR;
+    ituBypass.type = PostProcessingEffect::UnitType::ONGOING_COLOR;
     ituBypass.unit = m->unitDof;
 
     InputToUniform ituDepthBypass;
     ituDepthBypass.name = "texDepthMap";
-    ituDepthBypass.type = PostProcessingEffect::BYPASS_DEPTH;
+    ituDepthBypass.type = PostProcessingEffect::UnitType::BYPASS_DEPTH;
     ituDepthBypass.unit = m->unitDof;
 
     list.push_back(ituBypass);

@@ -91,7 +91,7 @@ namespace osgGaming
     PostProcessingEffect::InitialUnitList list;
 
     PostProcessingEffect::InitialUnit unitResample;
-    unitResample.type = PostProcessingEffect::ONGOING_COLOR;
+    unitResample.type = PostProcessingEffect::UnitType::ONGOING_COLOR;
     unitResample.unit = m->unitResample;
 
     list.push_back(unitResample);
@@ -110,7 +110,7 @@ namespace osgGaming
 
     InputToUniform ituBypass;
     ituBypass.name = "hdrInput";
-    ituBypass.type = PostProcessingEffect::ONGOING_COLOR;
+    ituBypass.type = PostProcessingEffect::UnitType::ONGOING_COLOR;
     ituBypass.unit = m->unitHdr;
 
     list.push_back(ituBypass);

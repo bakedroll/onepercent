@@ -199,7 +199,7 @@ namespace osgGaming
               m->isLoading = true;
             }
 
-            ref_ptr<GameLoadingState> loadingState = static_cast<GameLoadingState*>(state.get());
+            ref_ptr<GameLoadingState> loadingState = dynamic_cast<GameLoadingState*>(state.get());
 
             AbstractGameState::AbstractGameStateList nextStates;
             loadingState->getNextStates(*m_injector, nextStates);

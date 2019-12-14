@@ -1,6 +1,6 @@
 #pragma once
 
-#include "QtGameApplication.h"
+#include "core/QtGameApplication.h"
 
 namespace onep
 {

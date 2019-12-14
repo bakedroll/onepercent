@@ -13,40 +13,40 @@ namespace osgGaming
 	class PostProcessingEffect : public osg::Referenced
 	{
 	public:
-		typedef enum _unitType
+		enum class UnitType
 		{
 			BYPASS_COLOR,
 			BYPASS_DEPTH,
 			ONGOING_COLOR
-		} UnitType;
+		};
 
-		typedef struct _initialUnit
+		struct InitialUnit
 		{
-			osg::ref_ptr<osgPPU::Unit> unit;
-			UnitType type;
-		} InitialUnit;
+      osg::ref_ptr<osgPPU::Unit> unit;
+      UnitType                   type;
+    };
 
-		typedef struct _inputToUniform
+		struct InputToUniform
 		{
-			osg::ref_ptr<osgPPU::Unit> unit;
-			std::string name;
-			UnitType type;
-		} InputToUniform;
+      osg::ref_ptr<osgPPU::Unit> unit;
+      std::string                name;
+      UnitType                   type;
+    };
 
-		typedef std::vector<InitialUnit> InitialUnitList;
-		typedef std::vector<InputToUniform> InputToUniformList;
+    using InitialUnitList    = std::vector<InitialUnit>;
+    using InputToUniformList = std::vector<InputToUniform>;
 
-		PostProcessingEffect();
+    PostProcessingEffect();
 
 		void initialize();
 		bool isInitialized();
 
-		virtual std::string getName() = 0;
-		virtual InitialUnitList getInitialUnits() = 0;
-		virtual osg::ref_ptr<osgPPU::Unit> getResultUnit() = 0;
-		virtual InputToUniformList getInputToUniform();
+    virtual std::string                getName()         = 0;
+    virtual InitialUnitList            getInitialUnits() = 0;
+    virtual osg::ref_ptr<osgPPU::Unit> getResultUnit()   = 0;
+    virtual InputToUniformList         getInputToUniform();
 
-	protected:
+  protected:
 		virtual void initializeUnits() = 0;
 
 	private:

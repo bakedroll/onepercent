@@ -1,4 +1,6 @@
 #include "osgGaming/View.h"
+#include "osgGaming/LogManager.h"
+#include "osgGaming/Macros.h"
 
 #include <osg/ClampColor>
 #include <osg/MatrixTransform>
@@ -12,7 +14,7 @@
 #include <osgPPU/UnitBypass.h>
 #include <osgPPU/UnitDepthbufferBypass.h>
 
-#include <assert.h>
+#include <cassert>
 
 namespace osgGaming
 {
@@ -26,48 +28,55 @@ namespace osgGaming
     {
     }
 
-    typedef struct _renderTexture
+    //! Determines if the render texture should be recreated
+    enum class UpdateTextureMode
+    {
+      Recreate, //!< recreate
+      Keep      //!< do not recreate
+    };
+
+    struct RenderTexture
     {
       osg::ref_ptr<osg::Texture2D> texture;
-      osg::ref_ptr<osgPPU::Unit> bypassUnit;
-    } RenderTexture;
+      osg::ref_ptr<osgPPU::Unit>   bypassUnit;
+    };
 
-    typedef struct _postProcessingState
+    struct PostProcessingState
     {
       osg::ref_ptr<PostProcessingEffect> effect;
-      bool enabled;
-    } PostProcessingState;
+      bool                               enabled;
+    };
 
-    typedef std::map<int, RenderTexture> RenderTextureDictionary;
-    typedef std::map<std::string, PostProcessingState> PostProcessingStateDictionary;
+    using RenderTextureDictionary       = std::map<int, RenderTexture>;
+    using PostProcessingStateDictionary = std::map<std::string, PostProcessingState>;
 
     osg::Vec2f resolution;
     osg::Vec4f windowRect;
-    bool fullscreenEnabled;
-    bool resolutionInitialized;
-    int screenNum;
+    bool       fullscreenEnabled;
+    bool       resolutionInitialized;
+    int        screenNum;
 
-    osg::ref_ptr<osg::Node> ppSceneData;
+    osg::ref_ptr<osg::Node>     ppSceneData;
     osg::ref_ptr<osg::StateSet> hudStateSet;
-    osg::ref_ptr<osg::Camera> sceneCamera;
-    osg::ref_ptr<osg::Camera> hudCamera;
-    osg::ref_ptr<osg::Switch> hudSwitch;
-    osg::ref_ptr<Hud> hud;
+    osg::ref_ptr<osg::Camera>   sceneCamera;
+    osg::ref_ptr<osg::Camera>   hudCamera;
+    osg::ref_ptr<osg::Switch>   hudSwitch;
+    osg::ref_ptr<Hud>           hud;
 
     osg::ref_ptr<osg::Geode> canvasGeode;
 
     osg::ref_ptr<osgPPU::Processor> processor;
-    osg::ref_ptr<osg::Group> ppGroup;
-    osg::ref_ptr<osg::ClampColor> clampColor;
+    osg::ref_ptr<osg::Group>        ppGroup;
+    osg::ref_ptr<osg::ClampColor>   clampColor;
 
-    osg::ref_ptr<osgPPU::Unit> lastUnit;
+    osg::ref_ptr<osgPPU::Unit>      lastUnit;
     osg::ref_ptr<osgPPU::UnitInOut> unitOutput;
 
-    bool ppuInitialized;
-    RenderTextureDictionary renderTextures;
+    bool                          ppuInitialized;
+    RenderTextureDictionary       renderTextures;
     PostProcessingStateDictionary ppeDictionary;
 
-    void initialize(osg::ref_ptr<osg::Camera> camera)
+    void initialize(const osg::ref_ptr<osg::Camera>& camera)
     {
       sceneCamera = camera;
       sceneCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::FRAME_BUFFER);
@@ -85,25 +94,20 @@ namespace osgGaming
       ppGroup = new osg::Group();
 
       // implicitly attaches texture to camera
-      osg::ref_ptr<osg::Texture2D> texture = renderTexture(osg::Camera::COLOR_BUFFER).texture;
+      osg::ref_ptr<osg::Texture2D> texture = getRenderTexture(osg::Camera::COLOR_BUFFER).texture;
 
       canvasGeode = new osg::Geode();
-      canvasGeode->addDrawable(osg::createTexturedQuadGeometry(osg::Vec3f(-1.0f, -1.0f, 0.0f), osg::Vec3f(2.0f, 0.0f, 0.0f), osg::Vec3f(0.0f, 2.0f, 0.0f)));
+      canvasGeode->addDrawable(osg::createTexturedQuadGeometry(
+              osg::Vec3f(-1.0f, -1.0f, 0.0f), osg::Vec3f(2.0f, 0.0f, 0.0f), osg::Vec3f(0.0f, 2.0f, 0.0f)));
 
       hudStateSet = canvasGeode->getOrCreateStateSet();
       hudStateSet->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
       hudStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
-
-
-
       osg::ref_ptr<osg::MatrixTransform> geodeTransform = new osg::MatrixTransform();
       geodeTransform->setMatrix(osg::Matrix::identity());
       geodeTransform->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
       geodeTransform->addChild(canvasGeode);
-
-      osg::ref_ptr<osg::Projection> geodeProjection = new osg::Projection();
-      geodeProjection->setMatrix(osg::Matrix::ortho2D(0.0, double(1024.0) - 1.0, 1.0, double(768.0) - 1.0));
 
       hudCamera->addChild(canvasGeode);
 
@@ -111,7 +115,6 @@ namespace osgGaming
       hudCamera->addChild(hudSwitch);
 
       ppGroup->addChild(hudCamera);
-
     }
 
     void resetPostProcessingEffects()
@@ -120,25 +123,25 @@ namespace osgGaming
 
       lastUnit = getLastUnit(true);
 
-      for (PostProcessingStateDictionary::iterator it = ppeDictionary.begin(); it != ppeDictionary.end(); ++it)
+      for (const auto& it : ppeDictionary)
       {
-        if (!it->second.enabled)
+        if (!it.second.enabled)
         {
           continue;
         }
 
-        osg::ref_ptr<PostProcessingEffect> ppe = it->second.effect;
+        auto& ppe = it.second.effect;
 
-        PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
-        for (PostProcessingEffect::InitialUnitList::iterator iit = initialUnits.begin(); iit != initialUnits.end(); ++iit)
+        auto initialUnits = ppe->getInitialUnits();
+        for (const auto& unit : initialUnits)
         {
-          unitForType(iit->type)->removeChild(iit->unit);
+          unitForType(unit.type)->removeChild(unit.unit);
         }
 
-        PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
-        for (PostProcessingEffect::InputToUniformList::iterator iit = inputToUniformList.begin(); iit != inputToUniformList.end(); ++iit)
+        auto inputToUniformList = ppe->getInputToUniform();
+        for (const auto& itou : inputToUniformList)
         {
-          unitForType(iit->type)->removeChild(iit->unit);
+          unitForType(itou.type)->removeChild(itou.unit);
         }
 
         lastUnit = ppe->getResultUnit();
@@ -158,25 +161,27 @@ namespace osgGaming
     {
       lastUnit = getLastUnit(true);
 
-      for (PostProcessingStateDictionary::iterator it = ppeDictionary.begin(); it != ppeDictionary.end(); ++it)
+      for (const auto& it : ppeDictionary)
       {
-        if (!it->second.enabled)
+        if (!it.second.enabled)
+		    {
           continue;
+		    }
 
-        osg::ref_ptr<PostProcessingEffect> ppe = it->second.effect;
+        const auto& ppe = it.second.effect;
 
         ppe->initialize();
 
-        PostProcessingEffect::InitialUnitList initialUnits = ppe->getInitialUnits();
-        for (PostProcessingEffect::InitialUnitList::iterator uit = initialUnits.begin(); uit != initialUnits.end(); ++uit)
+        auto initialUnits = ppe->getInitialUnits();
+        for (const auto& unit : initialUnits)
         {
-          unitForType(uit->type)->addChild(uit->unit);
+          unitForType(unit.type)->addChild(unit.unit);
         }
 
-        PostProcessingEffect::InputToUniformList inputToUniformList = ppe->getInputToUniform();
-        for (PostProcessingEffect::InputToUniformList::iterator iit = inputToUniformList.begin(); iit != inputToUniformList.end(); ++iit)
+        auto inputToUniformList = ppe->getInputToUniform();
+        for (const auto& itou : inputToUniformList)
         {
-          iit->unit->setInputToUniform(unitForType(iit->type), iit->name, true);
+          itou.unit->setInputToUniform(unitForType(itou.type), itou.name, true);
         }
 
         lastUnit = ppe->getResultUnit();
@@ -190,85 +195,83 @@ namespace osgGaming
 
     void updateWindowRect(const osgViewer::ViewerBase::Windows& windows)
     {
-      if (resolutionInitialized)
+      if (!resolutionInitialized)
       {
-        osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow = *windows.begin();
+        return;
+	    }
 
-        if (graphicsWindow.valid())
-        {
-          if (fullscreenEnabled)
-          {
-            unsigned int screenWidth, screenHeight;
-            osg::GraphicsContext::getWindowingSystemInterface()->getScreenResolution(osg::GraphicsContext::ScreenIdentifier(screenNum), screenWidth, screenHeight);
+      osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow = *windows.begin();
 
-            graphicsWindow->setWindowDecoration(false);
-            graphicsWindow->setWindowRectangle(0, 0, screenWidth, screenHeight);
-          }
-          else
-          {
-            graphicsWindow->setWindowDecoration(true);
-            graphicsWindow->setWindowRectangle(
-              int(windowRect.x()),
-              int(windowRect.y()),
-              int(windowRect.z()),
-              int(windowRect.w()));
-          }
+      if (!graphicsWindow.valid())
+      {
+        return;
+	    }
 
-          // graphicsWindow->grabFocusIfPointerInWindow();
-        }
+      if (fullscreenEnabled)
+      {
+        unsigned int screenWidth, screenHeight;
+        osg::GraphicsContext::getWindowingSystemInterface()->getScreenResolution(osg::GraphicsContext::ScreenIdentifier(screenNum), screenWidth, screenHeight);
+
+        graphicsWindow->setWindowDecoration(false);
+        graphicsWindow->setWindowRectangle(0, 0, screenWidth, screenHeight);
+      }
+      else
+      {
+        graphicsWindow->setWindowDecoration(true);
+        graphicsWindow->setWindowRectangle(
+          int(windowRect.x()),
+          int(windowRect.y()),
+          int(windowRect.z()),
+          int(windowRect.w()));
       }
     }
 
-    void updateCameraRenderTextures(bool recreate = false)
+    void updateCameraRenderTextures(UpdateTextureMode mode = UpdateTextureMode::Keep)
     {
-      for (RenderTextureDictionary::iterator it = renderTextures.begin(); it != renderTextures.end(); ++it)
+      for (const auto& it : renderTextures)
       {
-        osg::ref_ptr<osg::Texture2D> tex = renderTexture(osg::Camera::BufferComponent(it->first), recreate).texture;
-        if (it->first == osg::Camera::COLOR_BUFFER && !processor.valid())
+        auto tex = getRenderTexture(static_cast<osg::Camera::BufferComponent>(it.first), mode).texture;
+        if ((it.first == osg::Camera::COLOR_BUFFER) && !processor.valid())
         {
           hudStateSet->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
         }
       }
 
-      osgViewer::Renderer* renderer = static_cast<osgViewer::Renderer*>(sceneCamera->getRenderer());
+      auto renderer = dynamic_cast<osgViewer::Renderer*>(sceneCamera->getRenderer());
       renderer->getSceneView(0)->getRenderStage()->setCameraRequiresSetUp(true);
-      renderer->getSceneView(0)->getRenderStage()->setFrameBufferObject(NULL);
+      renderer->getSceneView(0)->getRenderStage()->setFrameBufferObject(nullptr);
     }
 
-    RenderTexture renderTexture(osg::Camera::BufferComponent bufferComponent, bool recreate = false)
+    RenderTexture getRenderTexture(osg::Camera::BufferComponent bufferComponent,
+                                   UpdateTextureMode            mode = UpdateTextureMode::Keep)
     {
-      RenderTextureDictionary::iterator it = renderTextures.find(bufferComponent);
+      auto it = renderTextures.find(bufferComponent);
       if (it != renderTextures.end())
       {
-        if (recreate)
+        auto& renderTexture = it->second;
+
+        if (mode == UpdateTextureMode::Recreate)
         {
-          RenderTexture rt = it->second;
-
           sceneCamera->detach(bufferComponent);
-          rt.texture = createRenderTexture(bufferComponent);
-
-          renderTextures[bufferComponent] = rt;
-
-          return rt;
+          renderTexture.texture = createRenderTexture(bufferComponent);
         }
 
-        return it->second;
+        return renderTexture;
       }
 
       RenderTexture rt;
-
       rt.texture = createRenderTexture(bufferComponent);
 
-      renderTextures.insert(RenderTextureDictionary::value_type(bufferComponent, rt));
+      renderTextures[bufferComponent] = rt;
 
       return rt;
     }
 
     osg::ref_ptr<osg::Texture2D> createRenderTexture(osg::Camera::BufferComponent bufferComponent)
     {
-      osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D();
+      auto texture = new osg::Texture2D();
 
-      texture->setTextureSize(int(resolution.x()), int(resolution.y()));
+      texture->setTextureSize(static_cast<int>(resolution.x()), static_cast<int>(resolution.y()));
       texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
       texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
       texture->setResizeNonPowerOfTwoHint(false);
@@ -282,16 +285,13 @@ namespace osgGaming
         texture->setInternalFormat(GL_RGBA16F_ARB);
         texture->setSourceFormat(GL_RGBA);
         texture->setSourceType(GL_FLOAT);
-        //texture->setInternalFormat(GL_RGB16F_ARB);
-        //texture->setSourceFormat(GL_RGB);
-        //texture->setSourceType(GL_HALF_FLOAT);
-
-
         break;
 
       case osg::Camera::DEPTH_BUFFER:
         texture->setInternalFormat(GL_DEPTH_COMPONENT);
+        break;
 
+      default:
         break;
       }
 
@@ -300,86 +300,67 @@ namespace osgGaming
       return texture;
     }
 
-    osg::ref_ptr<osgPPU::Unit> bypassUnit(osg::Camera::BufferComponent bufferComponent)
+    osg::ref_ptr<osgPPU::Unit> getBypassUnit(osg::Camera::BufferComponent bufferComponent)
     {
-      RenderTexture rt = renderTexture(bufferComponent);
+      auto renderTexture = getRenderTexture(bufferComponent);
 
-      if (!rt.bypassUnit.valid())
+      if (!renderTexture.bypassUnit.valid())
       {
         switch (bufferComponent)
         {
         case osg::Camera::COLOR_BUFFER:
-          rt.bypassUnit = new osgPPU::UnitBypass();
-          processor->addChild(rt.bypassUnit);
-
+          renderTexture.bypassUnit = new osgPPU::UnitBypass();
+          processor->addChild(renderTexture.bypassUnit);
           break;
 
         case osg::Camera::DEPTH_BUFFER:
-          rt.bypassUnit = new osgPPU::UnitDepthbufferBypass();
-          processor->addChild(rt.bypassUnit);
-
+          renderTexture.bypassUnit = new osgPPU::UnitDepthbufferBypass();
+          processor->addChild(renderTexture.bypassUnit);
           break;
+
+        default:
+          break;;
         }
 
-        renderTextures[bufferComponent] = rt;
+        renderTextures[bufferComponent] = renderTexture;
       }
 
-      return rt.bypassUnit;
+      return renderTexture.bypassUnit;
     }
 
     osg::ref_ptr<osgPPU::Unit> getLastUnit(bool reset = false)
     {
       if (!lastUnit.valid() || reset)
-        lastUnit = bypassUnit(osg::Camera::COLOR_BUFFER);
+	    {
+        lastUnit = getBypassUnit(osg::Camera::COLOR_BUFFER);
+	    }
 
       return lastUnit;
     }
 
     osg::ref_ptr<osgPPU::Unit> unitForType(PostProcessingEffect::UnitType type)
     {
-      osg::ref_ptr<osgPPU::Unit> unit;
-
       switch (type)
       {
-      case PostProcessingEffect::BYPASS_COLOR:
-
-        unit = bypassUnit(osg::Camera::COLOR_BUFFER);
+	    case PostProcessingEffect::UnitType::BYPASS_COLOR:
+        return getBypassUnit(osg::Camera::COLOR_BUFFER);
+      case PostProcessingEffect::UnitType::BYPASS_DEPTH:
+        return getBypassUnit(osg::Camera::DEPTH_BUFFER);
+      case PostProcessingEffect::UnitType::ONGOING_COLOR:
+        return getLastUnit();
+	    default:
         break;
-
-      case PostProcessingEffect::BYPASS_DEPTH:
-
-        unit = bypassUnit(osg::Camera::DEPTH_BUFFER);
-        break;
-
-      case PostProcessingEffect::ONGOING_COLOR:
-
-        unit = getLastUnit();
-        break;
-
       }
 
-      return unit;
-    }
-
-    std::string postProcessingEffectName(unsigned int index)
-    {
-      unsigned int c = 0;
-
-      for (PostProcessingStateDictionary::iterator it = ppeDictionary.begin(); it != ppeDictionary.end(); ++it)
-      {
-        if (c == index)
-          return it->first;
-
-        c++;
-      }
-
-      return "";
+      return nullptr;
     }
 
     void initializePPU()
     {
       if (ppuInitialized)
+	    {
         return;
+	    }
 
       processor = new osgPPU::Processor();
       processor->setCamera(sceneCamera);
@@ -398,17 +379,14 @@ namespace osgGaming
     , m(new Impl())
   {
     m->initialize(getCamera());
-    //osgViewer::View::setSceneData(m->hudGroup);
     setSceneData(m->ppGroup);
   }
 
-  View::~View()
-  {
-  }
+  View::~View() = default;
 
-  void View::updateResolution(osg::Vec2f resolution)
+  void View::updateResolution(const osg::Vec2f& resolution)
   {
-    m->resolution = resolution;
+    m->resolution            = resolution;
     m->resolutionInitialized = true;
 
     if (!m->fullscreenEnabled)
@@ -417,21 +395,22 @@ namespace osgGaming
       m->windowRect.w() = m->resolution.y();
     }
 
-    osg::ref_ptr<osg::Viewport> vp = new osg::Viewport(0, 0, int(m->resolution.x()), int(m->resolution.y()));
+    auto viewport = new osg::Viewport(0, 0, static_cast<int>(m->resolution.x()), static_cast<int>(m->resolution.y()));
 
     if (m->processor.valid())
     {
-      osgPPU::Camera::resizeViewport(0, 0, int(m->resolution.x()), int(m->resolution.y()), m->sceneCamera);
+      osgPPU::Camera::resizeViewport(0, 0, static_cast<int>(m->resolution.x()), static_cast<int>(m->resolution.y()),
+                                     m->sceneCamera);
       m->processor->onViewportChange();
     }
 
-    m->sceneCamera->setViewport(vp);
-    m->hudCamera->setViewport(vp);
+    m->sceneCamera->setViewport(viewport);
+    m->hudCamera->setViewport(viewport);
 
-    m->updateCameraRenderTextures(true);
+    m->updateCameraRenderTextures(Impl::UpdateTextureMode::Recreate);
   }
 
-  void View::updateWindowPosition(osg::Vec2f position)
+  void View::updateWindowPosition(const osg::Vec2f& position)
   {
     if (!m->fullscreenEnabled)
     {
@@ -440,18 +419,24 @@ namespace osgGaming
     }
   }
 
-  void View::setRootNode(osg::Node* node)
+  void View::setRootNode(const osg::ref_ptr<osg::Node>& node)
   {
-    if (node == m->ppSceneData.get())
+    if (node == m->ppSceneData)
+	  {
       return;
+	  }
 
     if (m->ppSceneData.valid())
+	  {
       m->ppGroup->removeChild(m->ppSceneData);
+	  }
 
     m->ppSceneData = node;
 
     if (m->ppSceneData.valid())
+	  {
       m->ppGroup->addChild(m->ppSceneData);
+	  }
   }
 
   void View::setClampColorEnabled(bool enabled)
@@ -493,83 +478,75 @@ namespace osgGaming
   }
 
   // TODO: refactor
-  void View::setHud(osg::ref_ptr<Hud> hud)
+  void View::setHud(const osg::ref_ptr<Hud>& hud)
   {
     if (m->hud == hud)
+	  {
       return;
+	  }
 
     if (m->hud.valid())
     {
-      //hudSwitch->setChildValue(hud->getProjection(), false);
       m->hudSwitch->removeChild(m->hud->getProjection());
     }
 
     m->hud = hud;
-
-    /*if (!hudSwitch->containsNode(hud->getProjection()))
-    {
-    hudSwitch->addChild(hud->getProjection() , true);
-    }
-    else
-    {
-    hudSwitch->setChildValue(hud->getProjection(), true);
-    }*/
-
     m->hudSwitch->addChild(m->hud->getProjection(), true);
   }
 
-  void View::addPostProcessingEffect(osg::ref_ptr<PostProcessingEffect> ppe, bool enabled, std::string name)
+  void View::addPostProcessingEffect(const osg::ref_ptr<PostProcessingEffect>& ppe, bool enabled,
+                                     const std::string& name)
   {
     if (enabled)
+	  {
       m->resetPostProcessingEffects();
-
-    // ppe->initialize();
+	  }
 
     Impl::PostProcessingState pps;
-    pps.effect = ppe;
+    pps.effect  = ppe;
     pps.enabled = enabled;
 
-    if (name.empty())
-      name = ppe->getName();
-
-    m->ppeDictionary.insert(Impl::PostProcessingStateDictionary::value_type(name, pps));
+    m->ppeDictionary[name.empty() ? ppe->getName() : name] = pps;
 
     if (enabled)
+	  {
       m->setupPostProcessingEffects();
+	  }
   }
 
-  void View::setPostProcessingEffectEnabled(std::string ppeName, bool enabled)
+  void View::setPostProcessingEffectEnabled(const std::string& ppeName, bool enabled)
   {
-    Impl::PostProcessingStateDictionary::iterator it = m->ppeDictionary.find(ppeName);
+    if (m->ppeDictionary.count(ppeName) == 0)
+    {
+      OSGG_LOG_WARN("Post processing effect '" + ppeName + "' not found");
+      assert_return(false);
+    }
 
-    if (it->second.enabled == enabled)
+    auto& ppe = m->ppeDictionary[ppeName];
+    if (ppe.enabled == enabled)
+	  {
       return;
+	  }
 
-    printf("Post processing effect '%s': %s\n", ppeName.c_str(), enabled ? "enabled" : "disabled");
+    OSGG_LOG_DEBUG("Post processing effect '" + ppeName + "': " + (enabled ? "enabled" : "disabled"));
 
     m->resetPostProcessingEffects();
-
-    it->second.enabled = enabled;
-
+    ppe.enabled = enabled;
     m->setupPostProcessingEffects();
-  }
-
-  void View::setPostProcessingEffectEnabled(unsigned int index, bool enabled)
-  {
-    setPostProcessingEffectEnabled(m->postProcessingEffectName(index), enabled);
   }
 
   void View::setFullscreenEnabled(bool enabled, const osgViewer::ViewerBase::Windows& windows)
   {
     if (m->fullscreenEnabled == enabled)
+	  {
       return;
+	  }
 
     m->fullscreenEnabled = enabled;
-
     m->updateWindowRect(windows);
   }
 
-  void View::setWindowedResolution(osg::Vec2f resolution, const osgViewer::ViewerBase::Windows& windows)
+  void View::setWindowedResolution(const osg::Vec2f& resolution, const osgViewer::ViewerBase::Windows& windows)
   {
     m->windowRect.z() = resolution.x();
     m->windowRect.w() = resolution.y();
@@ -579,22 +556,24 @@ namespace osgGaming
 
   void View::setScreenNum(int screenNum)
   {
-    int numScreens = int(osg::GraphicsContext::getWindowingSystemInterface()->getNumScreens());
+    auto numScreens = static_cast<int>(osg::GraphicsContext::getWindowingSystemInterface()->getNumScreens());
 
     if (screenNum >= numScreens)
+	  {
       screenNum = numScreens - 1;
+	  }
 
     m->screenNum = screenNum;
   }
 
-  osg::ref_ptr<PostProcessingEffect> View::getPostProcessingEffect(std::string ppeName)
+  osg::ref_ptr<PostProcessingEffect> View::getPostProcessingEffect(const std::string& ppeName)
   {
-    return m->ppeDictionary.find(ppeName)->second.effect;
-  }
+    if (m->ppeDictionary.count(ppeName) == 0)
+    {
+      return nullptr;
+    }
 
-  osg::ref_ptr<PostProcessingEffect> View::getPostProcessingEffect(unsigned int index)
-  {
-    return getPostProcessingEffect(m->postProcessingEffectName(index));
+    return m->ppeDictionary[ppeName].effect;
   }
 
   bool View::getFullscreenEnabled()
@@ -613,21 +592,14 @@ namespace osgGaming
     return m->screenNum;
   }
 
-  bool View::getPostProcessingEffectEnabled(std::string ppeName)
+  bool View::getPostProcessingEffectEnabled(const std::string& ppeName)
   {
-    Impl::PostProcessingStateDictionary::iterator it = m->ppeDictionary.find(ppeName);
-
-    return it->second.enabled;
+    return (m->ppeDictionary.count(ppeName) > 0) ? m->ppeDictionary[ppeName].enabled : false;
   }
 
-  bool View::getPostProcessingEffectEnabled(unsigned int index)
+  bool View::hasPostProcessingEffect(const std::string& ppeName)
   {
-    return getPostProcessingEffectEnabled(m->postProcessingEffectName(index));
-  }
-
-  bool View::hasPostProcessingEffect(std::string ppeName)
-  {
-    return m->ppeDictionary.find(ppeName) != m->ppeDictionary.end();
+    return (m->ppeDictionary.count(ppeName) > 0);
   }
 
   void View::setupResolution()
@@ -635,23 +607,19 @@ namespace osgGaming
     unsigned int screenWidth, screenHeight;
     osg::GraphicsContext::getWindowingSystemInterface()->getScreenResolution(osg::GraphicsContext::ScreenIdentifier(m->screenNum), screenWidth, screenHeight);
 
-    m->windowRect.x() = float(screenWidth) / 2.0f - m->windowRect.z() / 2.0f;
-    m->windowRect.y() = float(screenHeight) / 2.0f - m->windowRect.w() / 2.0f;
+    m->windowRect.x() = (static_cast<float>(screenWidth) / 2.0f) - (m->windowRect.z() / 2.0f);
+    m->windowRect.y() = (static_cast<float>(screenHeight) / 2.0f) - (m->windowRect.w() / 2.0f);
 
     if (!m->fullscreenEnabled)
     {
-      setUpViewInWindow(
-        int(m->windowRect.x()),
-        int(m->windowRect.y()),
-        int(m->windowRect.z()),
-        int(m->windowRect.w()),
-        m->screenNum);
+      setUpViewInWindow(static_cast<int>(m->windowRect.x()), static_cast<int>(m->windowRect.y()),
+                        static_cast<int>(m->windowRect.z()), static_cast<int>(m->windowRect.w()), m->screenNum);
 
       m->resolution = osg::Vec2f(m->windowRect.z(), m->windowRect.w());
     }
     else
     {
-      m->resolution = osg::Vec2f(float(screenWidth), float(screenHeight));
+      m->resolution = osg::Vec2f(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
     }
 
     m->resolutionInitialized = true;

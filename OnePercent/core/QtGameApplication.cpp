@@ -110,9 +110,7 @@ QtGameApplication::QtGameApplication(int& argc, char** argv)
   }));
 }
 
-QtGameApplication::~QtGameApplication()
-{
-}
+QtGameApplication::~QtGameApplication() = default;
 
 bool QtGameApplication::notify(QObject* receiver, QEvent* event)
 {
