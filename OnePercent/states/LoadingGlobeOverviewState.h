@@ -16,15 +16,15 @@ namespace onep
     LoadingGlobeOverviewState(osgGaming::Injector& injector);
 		~LoadingGlobeOverviewState();
 
-		virtual void initialize() override;
-		virtual osgGaming::GameState::StateEvent* update() override;
+		void initialize() override;
+		osgGaming::GameState::StateEvent* update() override;
 
-		virtual void load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings) override;
+		void load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings) override;
 
-    virtual void onResizeEvent(float width, float height) override;
+    void onResizeEvent(float width, float height) override;
 
   protected:
-    virtual void injectNextStates(osgGaming::Injector& injector, AbstractGameStateList& states) override;
+    void injectNextStates(osgGaming::Injector& injector, AbstractGameStateList& states) override;
 
 	private:
 		struct Impl;

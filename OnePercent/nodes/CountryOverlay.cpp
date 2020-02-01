@@ -62,6 +62,7 @@ namespace onep
         configManager(injector.inject<LuaConfig>()),
         lua(injector.inject<LuaStateManager>()),
         boundariesData(injector.inject<BoundariesData>()),
+        boundariesMesh(injector.inject<BoundariesMesh>()),
         modelContainer(injector.inject<ModelContainer>()),
         countriesMap(std::make_shared<CountriesMap>()),
         oSelectedCountryId(new osgGaming::Observable<int>(0)),
@@ -73,7 +74,7 @@ namespace onep
       initializeNodeSwitch(switchBoundariesMesh,    NodeSwitchType::Transparent, 2);
       initializeNodeSwitch(switchCountryPresenters, NodeSwitchType::Opaque     , 20);
 
-      switchBoundariesMesh->addChild(0, injector.inject<BoundariesMesh>());
+      switchBoundariesMesh->addChild(0, boundariesMesh);
     }
 
     template <typename TNode>
@@ -132,6 +133,7 @@ namespace onep
     osg::ref_ptr<LuaConfig>                  configManager;
     osg::ref_ptr<LuaStateManager>            lua;
     osg::ref_ptr<BoundariesData>             boundariesData;
+    osg::ref_ptr<BoundariesMesh>             boundariesMesh;
 
     ModelContainer::Ptr modelContainer;
 
@@ -292,6 +294,7 @@ namespace onep
     auto mapHeight = stream.read<int>();
 
     m->countriesMap->initialize(mapWidth, mapHeight, reinterpret_cast<unsigned char*>(&bytes[stream.getPos()]));
+    m->boundariesMesh->makeOverallBoundaries(0.005f);
   }
 
   void CountryOverlay::setHoveredCountryId(int id)

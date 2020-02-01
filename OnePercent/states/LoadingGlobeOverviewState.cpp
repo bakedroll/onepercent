@@ -4,7 +4,6 @@
 #include "nodes/GlobeModel.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/BackgroundModel.h"
-#include "nodes/BoundariesMesh.h"
 #include "nodes/CountryNameOverlay.h"
 #include "nodes/CountryOverlay.h"
 #include "states/GlobeOverviewState.h"
@@ -41,9 +40,8 @@ namespace onep
       , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
       , backgroundModel(injector.inject<BackgroundModel>())
       , globeModel(injector.inject<GlobeModel>())
-      , countryNameOverlay(injector.inject<CountryNameOverlay>()),
-        boundariesData(injector.inject<BoundariesData>())
-      , boundariesMesh(injector.inject<BoundariesMesh>())
+      , countryNameOverlay(injector.inject<CountryNameOverlay>())
+      , boundariesData(injector.inject<BoundariesData>())
       , countryOverlay(injector.inject<CountryOverlay>())
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
       , simulation(injector.inject<Simulation>())
@@ -65,7 +63,6 @@ namespace onep
     osg::ref_ptr<GlobeModel>         globeModel;
     osg::ref_ptr<CountryNameOverlay> countryNameOverlay;
     osg::ref_ptr<BoundariesData>     boundariesData;
-    osg::ref_ptr<BoundariesMesh>     boundariesMesh;
     osg::ref_ptr<CountryOverlay>     countryOverlay;
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
@@ -164,8 +161,6 @@ namespace onep
     world->getCameraManipulator()->addCameraAlignedQuad(m->globeModel->getScatteringQuad());
 
     m->boundariesData->loadBoundaries("./GameData/data/boundaries.dat");
-    m->boundariesMesh->makeOverallBoundaries(0.005f);
-
     m->countryOverlay->loadCountries("./GameData/data/countries.dat", "./GameData/textures/earth/distance.png",
                                      m->boundariesData->getCountryVertices(), m->boundariesData->getCountryTexcoords());
 
