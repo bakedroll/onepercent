@@ -3,7 +3,7 @@
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/ByteStream.h>
 
-#include <assert.h>
+#include <cassert>
 
 namespace onep
 {
@@ -15,18 +15,18 @@ namespace onep
 
   struct Quad
   {
-    typedef std::vector<Quad> List;
-    int idx[4];
+    using List = std::vector<Quad>;
+    int idx[4] = {-1, -1, -1, -1};
   };
 
-  typedef std::map<int, Quad::List> IdQuadListMap;
+  using IdQuadListMap = std::map<int, Quad::List>;
 
   struct Point
   {
-    typedef std::map<int, Point> Map;
+    using Map = std::map<int, Point>;
 
-    Point() {}
-    Point(osg::Vec3f c, osg::Vec2f t, int o)
+    Point() : originId(-1) {}
+    Point(const osg::Vec3f& c, const osg::Vec2f& t, int o)
       : coords(c)
       , texcoord(t)
       , originId(o)
@@ -34,39 +34,38 @@ namespace onep
 
     osg::Vec3f coords;
     osg::Vec2f texcoord;
-    int originId;
+    int        originId;
   };
 
-  typedef std::vector<int> IdList;
+  using IdList = std::vector<int>;
 
   struct Border
   {
-    int countryId;
-    int neighborId;
-    int boundarySegmentId;
-    bool bIsCycle;
+    int    countryId         = -1;
+    int    neighborId        = -1;
+    int    boundarySegmentId = -1;
+    bool   bIsCycle          = false;
     IdList nextBorderIds;
   };
 
   struct QuadSegment
   {
-    typedef std::vector<QuadSegment> List;
+    using List = std::vector<QuadSegment>;
 
     Edge e1;
     Edge e2;
   };
 
-  typedef std::map<int, int> IdMap;
-  typedef std::map<std::pair<int, int>, Quad::List> NodalsMap;
-  typedef std::map<int, Border> BordersMap;
+  using IdMap = std::map<int, int>;
+  using NodalsMap = std::map<std::pair<int, int>, Quad::List>;
+  using BordersMap = std::map<int, Border>;
 
   struct QuadSegments
   {
     QuadSegments() : verts(new osg::Vec3Array()) {}
 
-    QuadSegment::List segments;
-    IdMap ids;
-    
+    QuadSegment::List            segments;
+    IdMap                        ids;
     osg::ref_ptr<osg::Vec3Array> verts;
   };
 
@@ -83,23 +82,23 @@ namespace onep
       const osg::Vec3f& color,
       int& idCounter,
       IdMap& idMap,
-      osg::ref_ptr<osg::Vec3Array> verts,
-      osg::ref_ptr<osg::Vec4Array> colors,
-      osg::ref_ptr<osg::DrawElementsUInt> unit,
+      osg::Vec3Array* verts,
+      osg::Vec4Array* colors,
+      osg::DrawElementsUInt* unit,
       bool bWireframe = false)
     {
-      int lastId = -1, currentId = -1, firstId = -1;
+      auto lastId = -1, currentId = -1, firstId = -1;
 
-      for (Quad::List::iterator it = quads.begin(); it != quads.end(); ++it)
+      for (const auto& quad : quads)
       {
-        for (int i = 0; i < 4; i++)
+        for (auto i = 0; i < 4; i++)
         {
-          int index = it->idx[i];
+          auto index = quad.idx[i];
 
-          IdMap::iterator iit = idMap.find(index);
+          auto iit = idMap.find(index);
           if (iit == idMap.end())
           {
-            Point::Map::iterator pit = pointsMap.find(index);
+            auto pit = pointsMap.find(index);
             if (pit == pointsMap.end())
             {
               assert(false);
@@ -117,7 +116,7 @@ namespace onep
               colors->push_back(osg::Vec4f(color, 1.0f));
             }
 
-            int id = idCounter++;
+            const auto id = idCounter++;
             idMap[index] = id;
             if (bWireframe)
               currentId = id;
@@ -159,12 +158,12 @@ namespace onep
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
 
-    Point::Map pointsMap;
+    Point::Map    pointsMap;
     IdQuadListMap boundariesMap;
 
     Quad::List nodalsFull;
     BordersMap borders;
-    NodalsMap nodals;
+    NodalsMap  nodals;
 
     osg::ref_ptr<osg::Vec3Array> vertices;
     osg::ref_ptr<osg::Vec2Array> texcoords;
@@ -180,9 +179,7 @@ namespace onep
 
   }
 
-  BoundariesMesh::~BoundariesMesh()
-  {
-  }
+  BoundariesMesh::~BoundariesMesh() = default;
 
   void BoundariesMesh::loadBoundaries(const std::string& filename)
   {
@@ -193,35 +190,35 @@ namespace onep
     m->nodalsFull.clear();
     m->vertices.release();
 
-    char* bytes = m->resourceManager->loadBinary(filename);
+    const auto bytes = m->resourceManager->loadBinary(filename);
     osgGaming::ByteStream stream(bytes);
 
-    int nverts = stream.read<int>();
-    for (int i = 0; i < nverts; i++)
+    const auto nverts = stream.read<int>();
+    for (auto i = 0; i < nverts; i++)
     {
-      float x = stream.read<float>();
-      float y = stream.read<float>();
-      float z = stream.read<float>();
-      int originId = stream.read<int>();
+      const auto x        = stream.read<float>();
+      const auto y        = stream.read<float>();
+      const auto z        = stream.read<float>();
+      const auto originId = stream.read<int>();
 
-      float u = stream.read<float>();
-      float v = stream.read<float>();
+      const auto u = stream.read<float>();
+      const auto v = stream.read<float>();
 
       m->pointsMap[i] = Point(osg::Vec3f(x, y, z), osg::Vec2f(u, 1.0f - v), originId);
     }
 
-    int nsegments = stream.read<int>();
-    for (int i = 0; i < nsegments; i++)
+    const auto nsegments = stream.read<int>();
+    for (auto i = 0; i < nsegments; i++)
     {
       Quad::List segmentQuads;
 
-      int id = stream.read<int>();
-      int nquads = stream.read<int>();
-      for (int j = 0; j < nquads; j++)
+      const auto id     = stream.read<int>();
+      const auto nquads = stream.read<int>();
+      for (auto j = 0; j < nquads; j++)
       {
         Quad quad;
-        for (int k = 0; k < 4; k++)
-          quad.idx[k] = stream.read<int>();
+        for (int& k : quad.idx)
+          k = stream.read<int>();
 
         segmentQuads.push_back(quad);
       }
@@ -229,53 +226,53 @@ namespace onep
       m->boundariesMap[id] = segmentQuads;
     }
 
-    int nfullnodals = stream.read<int>();
-    for (int i = 0; i < nfullnodals; i++)
+    const auto nfullnodals = stream.read<int>();
+    for (auto i = 0; i < nfullnodals; i++)
     {
-      int nquads = stream.read<int>();
-      for (int j = 0; j < nquads; j++)
+      const auto nquads = stream.read<int>();
+      for (auto j = 0; j < nquads; j++)
       {
         Quad quad;
-        for (int k = 0; k < 4; k++)
-          quad.idx[k] = stream.read<int>();
+        for (int& k : quad.idx)
+          k = stream.read<int>();
 
         m->nodalsFull.push_back(quad);
       }
     }
 
-    int nborders = stream.read<int>();
-    for (int i = 0; i < nborders; i++)
+    const auto nborders = stream.read<int>();
+    for (auto i = 0; i < nborders; i++)
     {
       Border border;
 
-      int id = stream.read<int>();
-      border.countryId = stream.read<int>();
-      border.neighborId = stream.read<int>();
+      const auto id            = stream.read<int>();
+      border.countryId         = stream.read<int>();
+      border.neighborId        = stream.read<int>();
       border.boundarySegmentId = stream.read<int>();
-      border.bIsCycle = stream.read<bool>();
+      border.bIsCycle          = stream.read<bool>();
 
-      int nNextBorders = stream.read<int>();
-      for (int j = 0; j < nNextBorders; j++)
+      const auto nNextBorders = stream.read<int>();
+      for (auto j = 0; j < nNextBorders; j++)
         border.nextBorderIds.push_back(stream.read<int>());
 
       m->borders[id] = border;
     }
 
-    int nnodals = stream.read<int>();
-    for (int i = 0; i < nnodals; i++)
+    const auto nnodals = stream.read<int>();
+    for (auto i = 0; i < nnodals; i++)
     {
       std::pair<int, int> fromTo;
-      fromTo.first = stream.read<int>();
+      fromTo.first  = stream.read<int>();
       fromTo.second = stream.read<int>();
 
       Quad::List quads;
 
-      int nquads = stream.read<int>();
-      for (int j = 0; j < nquads; j++)
+      const auto nquads = stream.read<int>();
+      for (auto j = 0; j < nquads; j++)
       {
         Quad quad;
-        for (int k = 0; k < 4; k++)
-          quad.idx[k] = stream.read<int>();
+        for (int& k : quad.idx)
+          k = stream.read<int>();
 
         quads.push_back(quad);
       }
@@ -284,16 +281,16 @@ namespace onep
     }
   }
 
-  osg::ref_ptr<osg::Vec3Array> BoundariesMesh::getCountryVertices()
+  osg::ref_ptr<osg::Vec3Array> BoundariesMesh::getCountryVertices() const
   {
     if (!m->vertices.valid())
     {
       m->vertices = new osg::Vec3Array();
 
-      for (Point::Map::iterator it = m->pointsMap.begin(); it != m->pointsMap.end(); ++it)
+      for (const auto& point : m->pointsMap)
       {
-        if (it->second.originId == -1)
-          m->vertices->push_back(it->second.coords);
+        if (point.second.originId == -1)
+          m->vertices->push_back(point.second.coords);
         else
           break;
       }
@@ -302,16 +299,16 @@ namespace onep
     return m->vertices;
   }
 
-  osg::ref_ptr<osg::Vec2Array> BoundariesMesh::getCountryTexcoords()
+  osg::ref_ptr<osg::Vec2Array> BoundariesMesh::getCountryTexcoords() const
   {
     if (!m->texcoords.valid())
     {
       m->texcoords = new osg::Vec2Array();
 
-      for (Point::Map::iterator it = m->pointsMap.begin(); it != m->pointsMap.end(); ++it)
+      for (const auto& point : m->pointsMap)
       {
-        if (it->second.originId == -1)
-          m->texcoords->push_back(it->second.texcoord);
+        if (point.second.originId == -1)
+          m->texcoords->push_back(point.second.texcoord);
         else
           break;
       }
@@ -325,27 +322,26 @@ namespace onep
     if (m->overallBoundsGeode.valid())
       return;
 
-    osg::Vec3f color(1.0f, 1.0f, 1.0f);
+    const osg::Vec3f color(1.0f, 1.0f, 1.0f);
 
     QuadSegments segments;
 
     m->overallBoundsGeode = new osg::Geode();
 
-    osg::ref_ptr<osg::Vec3Array> verts = new osg::Vec3Array();
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+    const auto verts  = new osg::Vec3Array();
+    const auto colors = new osg::Vec4Array();
 
-    osg::ref_ptr<osg::DrawElementsUInt> quads = new osg::DrawElementsUInt(GL_QUADS, 0);
+    const auto quads = new osg::DrawElementsUInt(GL_QUADS, 0);
 
-
-    int idCounter = 0;
+    auto idCounter = 0;
     IdMap idMap;
-    for (IdQuadListMap::iterator it = m->boundariesMap.begin(); it != m->boundariesMap.end(); ++it)
-      m->addQuads(it->second, thickness, segments, color, idCounter, idMap, verts, colors, quads);
+    for (auto& bound : m->boundariesMap)
+      m->addQuads(bound.second, thickness, segments, color, idCounter, idMap, verts, colors, quads);
 
     m->addQuads(m->nodalsFull, thickness, segments, color, idCounter, idMap, verts, colors, quads);
 
 
-    osg::ref_ptr<osg::Geometry> geo_quads = new osg::Geometry();
+    const auto geo_quads = new osg::Geometry();
     geo_quads->setVertexArray(verts);
     geo_quads->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
     geo_quads->addPrimitiveSet(quads);
@@ -368,47 +364,47 @@ namespace onep
 
     m->countriesBoundsGeode = new osg::Geode();
 
-    osg::ref_ptr<osg::Vec3Array> verts = new osg::Vec3Array();
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
+    const auto verts  = new osg::Vec3Array();
+    const auto colors = new osg::Vec4Array();
 
-    osg::ref_ptr<osg::DrawElementsUInt> unit = new osg::DrawElementsUInt(bWireframe ? GL_LINES : GL_QUADS, 0);
+    const auto unit = new osg::DrawElementsUInt(bWireframe ? GL_LINES : GL_QUADS, 0);
 
-    int idCounter = 0;
+    auto  idCounter = 0;
     IdMap idMap;
 
     QuadSegments segments;
 
     std::set<int> visited;
 
-    for (CountryNode::Map::const_iterator it = countries.begin(); it != countries.end(); ++it)
+    for (const auto& country : countries)
     {
-      CountryNode::Ptr cmesh = it->second;
+      auto& cmesh = country.second;
 
       std::vector<int> startIds;
 
       if (cmesh->getNeighborBorders().count(-1) > 0)
       {
-        const std::vector<int>& neighbors = cmesh->getNeighborBorderIds(-1);
-        for (std::vector<int>::const_iterator nit = neighbors.begin(); nit != neighbors.end(); ++nit)
+        const auto& neighbors = cmesh->getNeighborBorderIds(-1);
+        for (const auto& neighbor : neighbors)
         {
-          if (visited.count(*nit) == 0)
-            startIds.push_back(*nit);
+          if (visited.count(neighbor) == 0)
+            startIds.push_back(neighbor);
         }
       }
       else
       {
-        const CountryNode::BorderIdMap& nborders = cmesh->getNeighborBorders();
-        for (CountryNode::BorderIdMap::const_iterator nit = nborders.begin(); nit != nborders.end(); ++nit)
+        const auto& nborders = cmesh->getNeighborBorders();
+        for (const auto& nborder : nborders)
         {
           // neighbor not included, start at this border
-          if (countries.count(nit->first) == 0)
+          if (countries.count(nborder.first) == 0)
           {
-            bool found = false;
-            for (std::vector<int>::const_iterator nnit = nit->second.begin(); nnit != nit->second.end(); ++nnit)
+            auto found = false;
+            for (const auto& id : nborder.second)
             {
-              if (visited.count(*nnit) == 0)
+              if (visited.count(id) == 0)
               {
-                startIds.push_back(*nnit);
+                startIds.push_back(id);
                 found = true;
                 break;
               }
@@ -420,16 +416,16 @@ namespace onep
         }
       }
 
-      for (IdList::iterator iit = startIds.begin(); iit != startIds.end(); ++iit)
+      for (const auto& id : startIds)
       {
-        int startBorderId = *iit;
+        auto startBorderId = id;
         if (startBorderId == -1 || visited.count(startBorderId) > 0)
           continue;
 
-        int currentBorderId = startBorderId;
+        auto currentBorderId = startBorderId;
         do
         {
-          Border& border = m->borders[currentBorderId];
+          auto& border = m->borders[currentBorderId];
 
           m->addQuads(m->boundariesMap[border.boundarySegmentId], thickness, segments, color, idCounter, idMap, verts, colors, unit, bWireframe);
           visited.insert(currentBorderId);
@@ -437,13 +433,14 @@ namespace onep
           if (border.bIsCycle)
             break;
 
-          for (IdList::iterator bit = border.nextBorderIds.begin(); bit != border.nextBorderIds.end(); ++bit)
+          for (const auto& nborderId : border.nextBorderIds)
           {
-            Border& nextBorder = m->borders[*bit];
+            auto& nextBorder = m->borders[nborderId];
             if (border.countryId == nextBorder.countryId || countries.count(nextBorder.countryId) > 0)
             {
-              m->addQuads(m->nodals[std::pair<int, int>(currentBorderId, *bit)], thickness, segments, color, idCounter, idMap, verts, colors, unit, bWireframe);
-              currentBorderId = *bit;
+              m->addQuads(m->nodals[std::pair<int, int>(currentBorderId, nborderId)], thickness, segments, color,
+                          idCounter, idMap, verts, colors, unit, bWireframe);
+              currentBorderId = nborderId;
               break;
             }
           }
@@ -452,7 +449,7 @@ namespace onep
       }
     }
 
-    osg::ref_ptr<osg::Geometry> geo_quads = new osg::Geometry();
+    auto geo_quads = new osg::Geometry();
     geo_quads->setVertexArray(verts);
     geo_quads->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
     geo_quads->addPrimitiveSet(unit);
