@@ -1,5 +1,6 @@
 #include "LoadingGlobeOverviewState.h"
 
+#include "data/BoundariesData.h"
 #include "nodes/GlobeModel.h"
 #include "nodes/GlobeOverviewWorld.h"
 #include "nodes/BackgroundModel.h"
@@ -9,7 +10,6 @@
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
 #include "scripting/LuaStateManager.h"
-#include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaControl.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
@@ -41,7 +41,8 @@ namespace onep
       , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
       , backgroundModel(injector.inject<BackgroundModel>())
       , globeModel(injector.inject<GlobeModel>())
-      , countryNameOverlay(injector.inject<CountryNameOverlay>())
+      , countryNameOverlay(injector.inject<CountryNameOverlay>()),
+        boundariesData(injector.inject<BoundariesData>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , countryOverlay(injector.inject<CountryOverlay>())
       , resourceManager(injector.inject<osgGaming::ResourceManager>())
@@ -56,21 +57,22 @@ namespace onep
     }
 
     osg::ref_ptr<osgGaming::FastApproximateAntiAliasingEffect> fxaa;
-    osg::ref_ptr<osgGaming::HighDynamicRangeEffect> hdr;
-    osg::ref_ptr<osgGaming::DepthOfFieldEffect> dof;
+    osg::ref_ptr<osgGaming::HighDynamicRangeEffect>            hdr;
+    osg::ref_ptr<osgGaming::DepthOfFieldEffect>                dof;
 
     osg::ref_ptr<GlobeOverviewWorld> globeOverviewWorld;
-    osg::ref_ptr<BackgroundModel> backgroundModel;
-    osg::ref_ptr<GlobeModel> globeModel;
+    osg::ref_ptr<BackgroundModel>    backgroundModel;
+    osg::ref_ptr<GlobeModel>         globeModel;
     osg::ref_ptr<CountryNameOverlay> countryNameOverlay;
-    osg::ref_ptr<BoundariesMesh> boundariesMesh;
-    osg::ref_ptr<CountryOverlay> countryOverlay;
+    osg::ref_ptr<BoundariesData>     boundariesData;
+    osg::ref_ptr<BoundariesMesh>     boundariesMesh;
+    osg::ref_ptr<CountryOverlay>     countryOverlay;
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
-    osg::ref_ptr<Simulation> simulation;
-    osg::ref_ptr<LuaStateManager> lua;
-    osg::ref_ptr<ModelContainer> model;
-    osg::ref_ptr<LuaControl> luaControl;
+    osg::ref_ptr<Simulation>                 simulation;
+    osg::ref_ptr<LuaStateManager>            lua;
+    osg::ref_ptr<ModelContainer>             model;
+    osg::ref_ptr<LuaControl>                 luaControl;
 
     QLabel* labelLoadingText;
     VirtualOverlay* overlay;
@@ -161,14 +163,11 @@ namespace onep
     m->globeModel->makeGlobeModel();
     world->getCameraManipulator()->addCameraAlignedQuad(m->globeModel->getScatteringQuad());
 
-    m->boundariesMesh->loadBoundaries("./GameData/data/boundaries.dat");
+    m->boundariesData->loadBoundaries("./GameData/data/boundaries.dat");
     m->boundariesMesh->makeOverallBoundaries(0.005f);
 
-    m->countryOverlay->loadCountries(
-      "./GameData/data/countries.dat",
-      "./GameData/textures/earth/distance.png",
-      m->boundariesMesh->getCountryVertices(),
-      m->boundariesMesh->getCountryTexcoords());
+    m->countryOverlay->loadCountries("./GameData/data/countries.dat", "./GameData/textures/earth/distance.png",
+                                     m->boundariesData->getCountryVertices(), m->boundariesData->getCountryTexcoords());
 
     m->countryNameOverlay->setEnabled(false);
     m->countryNameOverlay->initialize(m->countryOverlay->getCountryPresenters());

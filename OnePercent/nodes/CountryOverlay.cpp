@@ -1,6 +1,7 @@
 #include "CountryOverlay.h"
 
 #include "core/Multithreading.h"
+#include "data/BoundariesData.h"
 #include "nodes/BoundariesMesh.h"
 #include "nodes/CountryHoverNode.h"
 #include "nodes/CountryPresenter.h"
@@ -60,6 +61,7 @@ namespace onep
         shaderFactory(injector.inject<osgGaming::ShaderFactory>()),
         configManager(injector.inject<LuaConfig>()),
         lua(injector.inject<LuaStateManager>()),
+        boundariesData(injector.inject<BoundariesData>()),
         modelContainer(injector.inject<ModelContainer>()),
         countriesMap(std::make_shared<CountriesMap>()),
         oSelectedCountryId(new osgGaming::Observable<int>(0)),
@@ -118,7 +120,7 @@ namespace onep
               true);
 
       switchCountryHoverNodes->addChild(id, new CountryHoverNode(vertices, texcoords1, triangles), false);
-      switchCountryPresenters->addChild(id, new CountryPresenter(id, configManager, countriesMap, centerLatLong, size),
+      switchCountryPresenters->addChild(id, new CountryPresenter(id, configManager, countriesMap, boundariesData, centerLatLong, size),
                                         true);
     }
 
@@ -129,6 +131,7 @@ namespace onep
     osg::ref_ptr<osgGaming::ShaderFactory>   shaderFactory;
     osg::ref_ptr<LuaConfig>                  configManager;
     osg::ref_ptr<LuaStateManager>            lua;
+    osg::ref_ptr<BoundariesData>             boundariesData;
 
     ModelContainer::Ptr modelContainer;
 

@@ -5,10 +5,11 @@
 #include "nodes/CountryNode.h"
 
 #include <osg/Group>
-#include <memory>
 
 namespace onep
 {
+  class BoundariesData;
+
   class BoundariesMesh : public osg::Group
   {
   public:
@@ -16,11 +17,6 @@ namespace onep
 
     BoundariesMesh(osgGaming::Injector& injector);
     ~BoundariesMesh();
-
-    void loadBoundaries(const std::string& filename);
-
-    osg::ref_ptr<osg::Vec3Array> getCountryVertices() const;
-    osg::ref_ptr<osg::Vec2Array> getCountryTexcoords() const;
 
     void makeOverallBoundaries(float thickness = 0.005f);
     void makeCountryBoundaries(
@@ -30,8 +26,8 @@ namespace onep
       bool bWireframe = false);
 
   private:
-    struct Impl;
-    std::unique_ptr<Impl> m;
-
+    osg::ref_ptr<osg::Geode>     m_overallBoundsGeode;
+    osg::ref_ptr<osg::Geode>     m_countriesBoundsGeode;
+    osg::ref_ptr<BoundariesData> m_boundariesData;
   };
 }

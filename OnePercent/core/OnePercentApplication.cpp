@@ -4,6 +4,7 @@
 
 #include "core/Macros.h"
 #include "core/Observables.h"
+#include "data/BoundariesData.h"
 #include "nodes/CountryNameOverlay.h"
 #include "nodes/CountryOverlay.h"
 #include "nodes/BackgroundModel.h"
@@ -113,6 +114,9 @@ namespace onep
     container.registerType<GlobeOverviewState>();
     container.registerType<MainMenuState>();
     container.registerType<GlobeInteractionState>();
+
+    // data
+    container.registerSingletonType<BoundariesData>();
 
     // osg nodes
     container.registerSingletonType<GlobeOverviewWorld>();

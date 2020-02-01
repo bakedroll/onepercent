@@ -8,6 +8,7 @@
 namespace onep
 {
   class CountriesMap;
+  class BoundariesData;
 
   class CountryPresenter : public osg::Group
   {
@@ -22,7 +23,10 @@ namespace onep
     using Map = std::map<int, Ptr>;
 
     CountryPresenter(int id, const LuaConfig::Ptr& configManager, const std::shared_ptr<CountriesMap>& countriesMap,
-                     const osg::Vec2f& centerLatLong, const osg::Vec2f& size);
+                     const osg::ref_ptr<BoundariesData>& boundariesMesh, const osg::Vec2f& centerLatLong,
+                     const osg::Vec2f& size);
+
+    ~CountryPresenter();
 
     osg::Vec2f getCenterLatLong() const;
     osg::Vec2f getSize() const;
@@ -48,6 +52,7 @@ private:
 
     std::map<std::string, MatrixTransformPtrList> m_transformBins;
     std::shared_ptr<CountriesMap>                 m_countriesMap;
+    osg::ref_ptr<BoundariesData>                  m_boundariesMesh;
 
     float getSurfaceArea() const;
 

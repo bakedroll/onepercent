@@ -1,4 +1,5 @@
 #include "nodes/CountryPresenter.h"
+#include "data/BoundariesData.h"
 #include "data/CountriesMap.h"
 #include "core/Macros.h"
 
@@ -16,8 +17,8 @@ namespace onep
 {
   float calcSegmentArea(float radius, float r1, float r2)
   {
-      auto radius2 = radius * radius;
-      return 2.0f * C_PI * radius * (sqrt(radius2 - (r2 * r2)) - sqrt(radius2 - (r1 * r1)));
+    const auto radius2 = radius * radius;
+    return 2.0f * C_PI * radius * (sqrt(radius2 - (r2 * r2)) - sqrt(radius2 - (r1 * r1)));
   }
 
   float rand01()
@@ -39,15 +40,23 @@ namespace onep
   }
 
   CountryPresenter::CountryPresenter(int id, const LuaConfig::Ptr& configManager,
-                                     const std::shared_ptr<CountriesMap>& countriesMap, const osg::Vec2f& centerLatLong,
-                                     const osg::Vec2f& size)
+                                     const std::shared_ptr<CountriesMap>& countriesMap,
+                                     const osg::ref_ptr<BoundariesData>&  boundariesMesh,
+                                     const osg::Vec2f& centerLatLong, const osg::Vec2f& size)
     : m_id(id),
       m_centerLatLong(centerLatLong),
       m_size(size),
       m_earthRadius(configManager->getNumber<float>("earth.radius")),
       m_cameraZoom(configManager->getNumber<float>("camera.country_zoom")),
-      m_countriesMap(countriesMap)
+      m_countriesMap(countriesMap),
+      m_boundariesMesh(boundariesMesh)
   {
+  }
+
+  CountryPresenter::~CountryPresenter()
+  {
+    m_countriesMap.reset();
+    m_boundariesMesh.release();
   }
 
   osg::Vec2f CountryPresenter::getCenterLatLong() const
@@ -69,10 +78,10 @@ namespace onep
 
   float CountryPresenter::getOptimalCameraDistance(float angle, float ratio) const
   {
-    osg::Vec2f surfaceSize = getSurfaceSize();
+    const auto surfaceSize = getSurfaceSize();
 
-    float hdistance = surfaceSize.x() * m_cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f));
-    float vdistance = surfaceSize.y() * m_cameraZoom / (2.0f * tan(angle * C_PI / 360.0f));
+    const auto hdistance = surfaceSize.x() * m_cameraZoom / (2.0f * tan(angle * ratio * C_PI / 360.0f));
+    const auto vdistance = surfaceSize.y() * m_cameraZoom / (2.0f * tan(angle * C_PI / 360.0f));
 
     return std::max(hdistance, vdistance);
   }
@@ -158,13 +167,13 @@ namespace onep
 
   float CountryPresenter::getSurfaceArea() const
   {
-    auto alpha  = m_centerLatLong.x();
-    auto height = m_size.y() * C_PI * 0.5f;
+    const auto alpha  = m_centerLatLong.x();
+    const auto height = m_size.y() * C_PI * 0.5f;
 
-    auto a1 = alpha + height;
-    auto a2 = alpha - height;
-    auto r1 = m_earthRadius * cos(a1);
-    auto r2 = m_earthRadius * cos(a2);
+    const auto a1 = alpha + height;
+    const auto a2 = alpha - height;
+    auto       r1 = m_earthRadius * cos(a1);
+    auto       r2 = m_earthRadius * cos(a2);
 
     if (std::signbit(a1) == std::signbit(a2))
     {
@@ -184,8 +193,8 @@ namespace onep
   void CountryPresenter::addTransformFromNodeToCoords(osg::Node* node, const std::string& nodeBin,
                                                       const osg::Vec2f& latLong)
   {
-    auto matRot  = osg::Matrix::rotate(osgGaming::getQuatFromEuler(latLong.x(), 0.0f, latLong.y()));
-    auto matMove = osg::Matrix::translate(osg::Vec3f(0.0f, -m_earthRadius, 0.0f));
+    const auto matRot  = osg::Matrix::rotate(osgGaming::getQuatFromEuler(latLong.x(), 0.0f, latLong.y()));
+    const auto matMove = osg::Matrix::translate(osg::Vec3f(0.0f, -m_earthRadius, 0.0f));
 
     osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();
     transform->setMatrix(matMove * matRot);
@@ -199,8 +208,8 @@ namespace onep
   void CountryPresenter::addTransformFromNodeToCenter(osg::Node* node, const std::string& nodeBin,
                                                       const osg::Vec2f& relPosition)
   {
-    auto offsetLong = m_size.x() * (relPosition.x() - 0.5f) * 2.0f * C_PI;
-    auto offsetLat  = m_size.y() * (relPosition.y() - 0.5f) * C_PI;
+    const auto offsetLong = m_size.x() * (relPosition.x() - 0.5f) * 2.0f * C_PI;
+    const auto offsetLat  = m_size.y() * (relPosition.y() - 0.5f) * C_PI;
 
     addTransformFromNodeToCoords(
             node, nodeBin,
