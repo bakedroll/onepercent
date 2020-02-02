@@ -20,8 +20,6 @@ namespace onep
       void registerDefinition(lua_State* state) override;
     };
 
-    typedef std::map<int, std::vector<int>> BorderIdMap;
-
     using Ptr  = osg::ref_ptr<CountryNode>;
     using Map  = std::map<int, Ptr>;
     using List = std::vector<Ptr>;
@@ -32,18 +30,13 @@ namespace onep
       const osg::ref_ptr<osg::Vec3Array>& vertices,
       const osg::ref_ptr<osg::Vec2Array>& texcoords1,
       const osg::ref_ptr<osg::Vec3Array>& texcoords2,
-      const osg::ref_ptr<osg::DrawElementsUInt>& triangles,
-      BorderIdMap& neighbourBorders);
+      const osg::ref_ptr<osg::DrawElementsUInt>& triangles);
 
     ~CountryNode() override;
 
     void addNeighbor(const osg::ref_ptr<CountryNode>& mesh);
     List& getNeighborCountryNodes() const;
 
-    const BorderIdMap& getNeighborBorders() const;
-    const std::vector<int>& getNeighborBorderIds(int neighborId) const;
-
-    bool getIsOnOcean() const;
     std::string getCountryName() const;
 
     luabridge::LuaRef luaGetNeighbours() const;

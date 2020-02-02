@@ -6,7 +6,6 @@
 #include <osg/Geometry>
 #include <osgGaming/Helper.h>
 
-#include <algorithm>
 #include <cassert>
 
 namespace onep
@@ -28,9 +27,8 @@ namespace onep
 
     std::string name;
 
-    List        neighbors;
-    BorderIdMap neighbourBorders;
-    LuaRefPtr   refNeighbours;
+    List      neighbors;
+    LuaRefPtr refNeighbours;
   };
 
   CountryNode::CountryNode(
@@ -39,14 +37,11 @@ namespace onep
     const osg::ref_ptr<osg::Vec3Array>& vertices,
     const osg::ref_ptr<osg::Vec2Array>& texcoords1,
     const osg::ref_ptr<osg::Vec3Array>& texcoords2,
-    const osg::ref_ptr<osg::DrawElementsUInt>& triangles,
-    BorderIdMap& neighbourBorders)
+    const osg::ref_ptr<osg::DrawElementsUInt>& triangles)
     : LuaVisualOsgNode<osg::Geode>()
     , m(new Impl())
   {
     m->name = countryName;
-
-    m->neighbourBorders = neighbourBorders;
 
     osg::ref_ptr<CountryGeometry> geo = new CountryGeometry(vertices, texcoords1, texcoords2, triangles);
     addDrawable(geo);
@@ -68,28 +63,6 @@ namespace onep
   CountryNode::List& CountryNode::getNeighborCountryNodes() const
   {
     return m->neighbors;
-  }
-
-  const CountryNode::BorderIdMap& CountryNode::getNeighborBorders() const
-  {
-    return m->neighbourBorders;
-  }
-
-  const std::vector<int>& CountryNode::getNeighborBorderIds(int neighborId) const
-  {
-    auto it = m->neighbourBorders.find(neighborId);
-    if (it == m->neighbourBorders.end())
-    {
-      assert(false);
-      return m->neighbourBorders[neighborId];
-    }
-
-    return it->second;
-  }
-
-  bool CountryNode::getIsOnOcean() const
-  {
-    return m->neighbourBorders.find(-1) != m->neighbourBorders.end();
   }
 
   std::string CountryNode::getCountryName() const

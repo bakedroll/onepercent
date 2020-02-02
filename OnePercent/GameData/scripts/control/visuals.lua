@@ -14,6 +14,8 @@ local colors_overlay = {
 	["politics"] = Vec4f(0.69,  0.247, 0.624, 0.3)
 }
 
+local color_selected_border = Vec3f(1.0, 0.53, 0.067)
+
 local function set_country_node_color(cid, color, neighbourcolor)
 
 	if cid == 0 then return end
@@ -29,19 +31,36 @@ local function set_country_node_color(cid, color, neighbourcolor)
 
 end
 
+control:on_event(defines.callback.on_initialize, function()
+
+	local presenters = countries:get_country_presenters()
+	for _, presenter in pairs(presenters) do
+		presenter:make_boundaries(color_selected_border, 0.015)
+		presenter:set_boundaries_enabled(false)
+	end
+
+end)
+
 control:on_event(defines.callback.on_country_changed, function(old_cid, cid)
 
 	if old_cid > 0 then
-		--countries:get_country_presenter(old_cid):remove_node_bin("marker")
+		local presenter = countries:get_country_presenter(old_cid)
+		presenter:set_boundaries_enabled(false)
+		-- presenter:remove_node_bin("marker")
 	end
 
 	if cid > 0 then
-		--local node = visuals:get_model_prototype("prototype_chicken")
-		--countries:get_country_presenter(cid):scatter_nodes_to_bin(node, "marker", 1.0)
+		local presenter = countries:get_country_presenter(cid)
+		-- local node = visuals:get_model_prototype("prototype_sphere")
+
+		presenter:set_boundaries_enabled(true)
+		-- presenter:scatter_nodes_to_bin(node, "marker", 1.0)
 	end
 
 	set_country_node_color(old_cid, color_transparent, color_transparent)
 	set_country_node_color(cid,	    color_selected,    color_neighbour)
+
+
 
 end)
 

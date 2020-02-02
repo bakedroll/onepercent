@@ -1,7 +1,5 @@
 #include "nodes/BoundariesMesh.h"
 
-#include "data/BoundariesData.h"
-
 namespace onep
 {
 BoundariesMesh::BoundariesMesh(osgGaming::Injector& injector)
@@ -24,8 +22,8 @@ void BoundariesMesh::makeOverallBoundaries(float thickness)
   addChild(m_overallBoundsGeode);
 }
 
-void BoundariesMesh::makeCountryBoundaries(const CountryNode::Map& countries, const osg::Vec3f& color, float thickness,
-                                           bool bWireframe)
+void BoundariesMesh::makeCountryBoundaries(const BoundariesData::CountryBorders& countryBorders,
+                                           const osg::Vec3f& color, float thickness, bool bWireframe)
 {
   if (m_countriesBoundsGeode.valid())
   {
@@ -34,7 +32,8 @@ void BoundariesMesh::makeCountryBoundaries(const CountryNode::Map& countries, co
   }
 
   m_countriesBoundsGeode = new osg::Geode();
-  m_countriesBoundsGeode->addDrawable(m_boundariesData->createCountryBoundariesGeometry(countries, color, thickness, bWireframe));
+  m_countriesBoundsGeode->addDrawable(
+          m_boundariesData->createCountryBoundariesGeometry(countryBorders, color, thickness, bWireframe));
 
   addChild(m_countriesBoundsGeode);
 }

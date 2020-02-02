@@ -2,6 +2,7 @@
 
 #include <osgGaming/ByteStream.h>
 #include <osgGaming/ResourceManager.h>
+#include "osgGaming/Macros.h"
 
 namespace onep
 {
@@ -147,6 +148,17 @@ struct BoundariesData::Impl
         }
       }
     }
+  }
+
+  const std::vector<int>& getNeighborBorderIds(const BorderIdMap& borders, int neighborId) const
+  {
+    auto it = borders.find(neighborId);
+    if (it == borders.end())
+    {
+      assert_return(false, std::vector<int>());
+    }
+
+    return it->second;
   }
 
   osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
@@ -331,13 +343,13 @@ osg::ref_ptr<osg::Geometry> BoundariesData::createOverallBoundariesGeometry(floa
   return geo_quads;
 }
 
-osg::ref_ptr<osg::Geometry> BoundariesData::createCountryBoundariesGeometry(const CountryNode::Map& countries,
+osg::ref_ptr<osg::Geometry> BoundariesData::createCountryBoundariesGeometry(const CountryBorders& countryBorders,
                                                                             const osg::Vec3f& color, float thickness,
                                                                             bool bWireframe) const
 {
   auto geo_quads = new osg::Geometry();
 
-  if (countries.empty())
+  if (countryBorders.empty())
     return geo_quads;
 
   const auto verts  = new osg::Vec3Array();
@@ -352,15 +364,14 @@ osg::ref_ptr<osg::Geometry> BoundariesData::createCountryBoundariesGeometry(cons
 
   std::set<int> visited;
 
-  for (const auto& country : countries)
+  for (const auto& borderIdMap : countryBorders)
   {
-    auto& cmesh = country.second;
-
     std::vector<int> startIds;
 
-    if (cmesh->getNeighborBorders().count(-1) > 0)
+    const auto& nborders = borderIdMap.second;
+    if (nborders.count(-1) > 0)
     {
-      const auto& neighbors = cmesh->getNeighborBorderIds(-1);
+      const auto& neighbors = m->getNeighborBorderIds(nborders, -1);
       for (const auto& neighbor : neighbors)
       {
         if (visited.count(neighbor) == 0)
@@ -369,11 +380,10 @@ osg::ref_ptr<osg::Geometry> BoundariesData::createCountryBoundariesGeometry(cons
     }
     else
     {
-      const auto& nborders = cmesh->getNeighborBorders();
       for (const auto& nborder : nborders)
       {
         // neighbor not included, start at this border
-        if (countries.count(nborder.first) == 0)
+        if (countryBorders.count(nborder.first) == 0)
         {
           auto found = false;
           for (const auto& id : nborder.second)
@@ -413,7 +423,7 @@ osg::ref_ptr<osg::Geometry> BoundariesData::createCountryBoundariesGeometry(cons
         for (const auto& nborderId : border.nextBorderIds)
         {
           auto& nextBorder = m->borders[nborderId];
-          if (border.countryId == nextBorder.countryId || countries.count(nextBorder.countryId) > 0)
+          if (border.countryId == nextBorder.countryId || countryBorders.count(nextBorder.countryId) > 0)
           {
             m->addQuads(m->nodals[std::pair<int, int>(currentBorderId, nborderId)], thickness, segments, color,
                         idCounter, idMap, verts, colors, unit, bWireframe);

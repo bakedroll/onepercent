@@ -2,6 +2,7 @@
 
 #include <osgGaming/Injector.h>
 
+#include "data/BoundariesData.h"
 #include "nodes/CountryNode.h"
 
 #include <osg/Group>
@@ -19,11 +20,9 @@ namespace onep
     ~BoundariesMesh();
 
     void makeOverallBoundaries(float thickness = 0.005f);
-    void makeCountryBoundaries(
-      const CountryNode::Map& countries,
-      const osg::Vec3f& color = osg::Vec3f(1.0f, 1.0f, 1.0f),
-      float thickness = 0.005f,
-      bool bWireframe = false);
+    void makeCountryBoundaries(const BoundariesData::CountryBorders& countryBorders,
+                               const osg::Vec3f& color = osg::Vec3f(1.0f, 1.0f, 1.0f), float thickness = 0.005f,
+                               bool bWireframe = false);
 
   private:
     osg::ref_ptr<osg::Geode>     m_overallBoundsGeode;

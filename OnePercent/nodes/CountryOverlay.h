@@ -61,6 +61,7 @@ namespace onep
 
     CountryNode*      luaGetCountryNode(int id) const;
     CountryPresenter* luaGetCountryPresenter(int id) const;
+    luabridge::LuaRef luaGetCountryPresenters() const;
 
 private:
     struct Impl;

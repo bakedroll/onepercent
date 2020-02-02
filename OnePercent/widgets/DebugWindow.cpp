@@ -121,8 +121,8 @@ namespace onep
     ODay::Ptr oDay;
     ONumSkillPoints::Ptr oNumSkillPoints;
 
-    QPushButton* toggleCountryButton;
-    CountryNode::Map selectedCountries;
+    QPushButton*                   toggleCountryButton;
+    BoundariesData::CountryBorders selectedCountries;
 
     osgGaming::Observer<int>::Ptr               notifySelectedCountry;
     osgGaming::Observer<int>::Ptr               notifyDay;
@@ -183,12 +183,11 @@ namespace onep
       if (id == 0)
         return;
 
-      CountryNode::Ptr node = countryOverlay->getSelectedCountryNode();
-      assert_return(node.valid());
+      auto& borders = countryOverlay->getCountryPresenter(id)->getNeighborBorders();
 
-      CountryNode::Map::iterator it = selectedCountries.find(id);
+      const auto it = selectedCountries.find(id);
       if (it == selectedCountries.end())
-        selectedCountries[id] = node;
+        selectedCountries[id] = borders;
       else
         selectedCountries.erase(it);
 
