@@ -71,7 +71,7 @@ namespace onep
 
     using VisualBindingsMap = std::map<std::string, std::string>;
     using BranchBindingsMap = std::map<std::string, VisualBindingsMap>;
-    using PrototypeMap      = std::map<std::string, osg::ref_ptr<osg::Node>>;
+    using PrototypeMap      = std::map<std::string, osg::ref_ptr<PrototypeNode>>;
 
     ModelContainer::Ptr  modelContainer;
     CountryOverlay::Ptr  countryOverlay;
@@ -204,7 +204,7 @@ namespace onep
     auto rotation = prototype->getRotationDeg();
     auto degToRad = 180.0f / C_PI;
 
-    osg::ref_ptr<osg::PositionAttitudeTransform> transform = new osg::PositionAttitudeTransform();
+    osg::ref_ptr<PrototypeNode> transform = new PrototypeNode();
     transform->setScale(prototype->getScale());
     transform->setAttitude(osgGaming::getQuatFromEuler(rotation.x() / degToRad, rotation.y() / degToRad, rotation.z() / degToRad));
     transform->setPosition(prototype->getPosition());
@@ -214,7 +214,7 @@ namespace onep
     m->prototypes[prototypeName] = transform;
   }
 
-  osg::Node* LuaVisuals::luaGetModelPrototype(const std::string& prototypeName) const
+  LuaVisuals::PrototypeNode* LuaVisuals::luaGetModelPrototype(const std::string& prototypeName) const
   {
     if (m->prototypes.count(prototypeName) == 0)
     {

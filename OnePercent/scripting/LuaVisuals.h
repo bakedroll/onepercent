@@ -3,7 +3,7 @@
 #include "nodes/TextNode.h"
 #include "scripting/LuaStateManager.h"
 
-#include <osg/Node>
+#include <osg/PositionAttitudeTransform>
 
 namespace onep
 {
@@ -16,7 +16,8 @@ namespace onep
       void registerDefinition(lua_State* state) override;
     };
 
-    using Ptr = osg::ref_ptr<LuaVisuals>;
+    using Ptr           = osg::ref_ptr<LuaVisuals>;
+    using PrototypeNode = LuaVisualOsgNode<osg::PositionAttitudeTransform>;
 
     LuaVisuals(osgGaming::Injector& injector);
     ~LuaVisuals();
@@ -30,7 +31,7 @@ namespace onep
     void luaUnbindBranchValue(const std::string& branchName, const std::string& branchValue);
 
     void luaRegisterModelPrototype(const std::string& prototypeName, luabridge::LuaRef table);
-    osg::Node* luaGetModelPrototype(const std::string& prototypeName) const;
+    PrototypeNode* luaGetModelPrototype(const std::string& prototypeName) const;
 
     TextNode* luaCreateTextNode(const std::string& text) const;
 

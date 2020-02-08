@@ -44,6 +44,8 @@ namespace onep
     lua->registerDefinition<LuaCallbackRegistry::Definition>();
     lua->registerDefinition<LuaVisualOsgNode<osg::Group>::Definition>();
     lua->registerDefinition<LuaVisualOsgNode<osg::Geode>::Definition>();
+    lua->registerDefinition<LuaVisualOsgNode<osg::MatrixTransform>::Definition>();
+    lua->registerDefinition<LuaVisualOsgNode<osg::PositionAttitudeTransform>::Definition>();
 
     lua->registerDefinition<LuaSkill::Definition>();
     lua->registerDefinition<CountryOverlay::Definition>();

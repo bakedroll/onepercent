@@ -50,6 +50,7 @@ void CountryOverlay::Definition::registerDefinition(lua_State* state)
           .addFunction("set_current_overlay_branch_name", &CountryOverlay::setCurrentOverlayBranchName)
           .addFunction("get_country_presenter", &CountryOverlay::luaGetCountryPresenter)
           .addFunction("get_country_presenters", &CountryOverlay::luaGetCountryPresenters)
+          .addFunction("get_current_country_id", &CountryOverlay::getSelectedCountryId)
           .endClass();
 }
 

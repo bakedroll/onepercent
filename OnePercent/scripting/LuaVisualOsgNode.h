@@ -4,7 +4,14 @@
 
 #include <osg/Node>
 
+#include <osgGaming/Macros.h>
+
 #include <QString>
+
+extern "C"
+{
+#include <lua.h>
+}
 
 namespace onep
 {
@@ -27,7 +34,7 @@ namespace onep
         std::string luaClassName = "VisualOsg" + osgClassName;
 
         getGlobalNamespace(state)
-          .beginClass<LuaVisualOsgNode<NodeType>>(luaClassName.c_str())
+          .deriveClass<LuaVisualOsgNode<NodeType>, osg::Node>(luaClassName.c_str())
           .addFunction("set_uniform_float",  &LuaVisualOsgNode<NodeType>::template luaSetUniform<float>)
           .addFunction("set_uniform_double", &LuaVisualOsgNode<NodeType>::template luaSetUniform<double>)
           .addFunction("set_uniform_vec2f",  &LuaVisualOsgNode<NodeType>::template luaSetUniform<const osg::Vec2f&>)

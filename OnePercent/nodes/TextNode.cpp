@@ -2,13 +2,15 @@
 
 #include <osg/Billboard>
 
+#include <osgDB/ReadFile>
+
 namespace onep
 {
 
 void TextNode::Definition::registerDefinition(lua_State* state)
 {
   getGlobalNamespace(state)
-          .deriveClass<TextNode, osg::Node>("TextNode")
+          .deriveClass<TextNode, LuaVisualOsgNode<osg::MatrixTransform>>("TextNode")
           .addFunction("set_text", &TextNode::luaSetText)
           .endClass();
 }
@@ -20,13 +22,16 @@ TextNode::TextNode()
 }
 
 TextNode::TextNode(const std::string& text)
-  : osg::MatrixTransform()
+  : LuaVisualOsgNode<osg::MatrixTransform>()
 {
+  getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
   osg::ref_ptr<osg::Billboard> billboard = new osg::Billboard();
   billboard->setMode(osg::Billboard::Mode::POINT_ROT_EYE);
 
   m_textNode = new osgText::Text();
 
+  m_textNode->setFont(getDefaultFont());
   m_textNode->setCharacterSize(10);
   m_textNode->setText(text);
   m_textNode->setAlignment(osgText::Text::AlignmentType::CENTER_CENTER);
@@ -40,6 +45,7 @@ TextNode::TextNode(const std::string& text)
 
   auto matrix = osg::Matrix::identity();
   matrix *= osg::Matrix::scale(osg::Vec3f(0.01f, 0.01f, 0.01f));
+  matrix *= osg::Matrix::translate(osg::Vec3f(0.0f, -0.3f, 0.0f));
 
   setMatrix(matrix);
 }
@@ -50,5 +56,17 @@ void TextNode::luaSetText(const std::string& text)
 {
   m_textNode->setText(text);
 }
+
+osg::ref_ptr<osgText::Font> TextNode::getDefaultFont()
+{
+  if (!s_font.valid())
+  {
+    s_font = osgDB::readFile<osgText::Font>("./GameData/fonts/coolvetica rg.ttf");
+  }
+
+  return s_font;
+}
+
+osg::ref_ptr<osgText::Font> TextNode::s_font;
 
 }

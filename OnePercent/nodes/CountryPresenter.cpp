@@ -208,13 +208,8 @@ void CountryPresenter::luaClearNodes()
 {
   m_transformBins.clear();
 
-  const auto& nodes = getOrCreateNodesGroup();
-
-  const auto numChilds = nodes->getNumChildren();
-  for (auto i = 0U; i < numChilds; i++)
-  {
-    nodes->removeChild(nodes->getChild(i));
-  }
+  const auto& nodesGroup = getOrCreateNodesGroup();
+  nodesGroup->removeChildren(0, nodesGroup->getNumChildren());
 }
 
 osg::ref_ptr<osg::Group>& CountryPresenter::getOrCreateNodesGroup()
