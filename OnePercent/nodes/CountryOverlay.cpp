@@ -23,8 +23,6 @@
 #include <osg/BlendFunc>
 #include <osg/Texture2D>
 
-#include <osg/ShapeDrawable>
-
 namespace onep
 {
 enum class NodeSwitchType
@@ -174,7 +172,7 @@ CountryOverlay::~CountryOverlay()
 
 void CountryOverlay::loadCountries(const std::string& countriesFilename, const std::string& distanceMapFilename,
                                    const osg::ref_ptr<osg::Vec3Array>& vertices,
-                                   const osg::ref_ptr<osg::Vec2Array>& texcoords)
+                                   const osg::ref_ptr<osg::Vec2Array>& texcoords_polar)
 {
   // Load shaders
   osg::ref_ptr<osg::Program> cnProgram(new osg::Program());
@@ -217,10 +215,10 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
 
   // Calculate 2nd texcoord layer
   auto                         radius = m->configManager->getNumber<float>("earth.radius");
-  osg::ref_ptr<osg::Vec3Array> texcoords2(new osg::Vec3Array());
+  osg::ref_ptr<osg::Vec3Array> texcoords_cartesian(new osg::Vec3Array());
   for (const auto& vertex : *vertices)
   {
-    texcoords2->push_back((vertex / radius + osg::Vec3f(1.0f, 1.0f, 1.0f)) / 2.0f);
+    texcoords_cartesian->push_back((vertex / radius + osg::Vec3f(1.0f, 1.0f, 1.0f)) / 2.0f);
   }
 
   auto bytes = m->resourceManager->loadBinary(countriesFilename);
@@ -265,7 +263,12 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
 
       neighborBorderMap[nid] = borders;
     }
-
+    /*
+    auto mat = osg::Matrix::identity();
+    mat *= osg::Matrix::translate(osg::Vec3f(0.0f, radius, 0.0f));
+    mat *= osg::Matrix::rotate(osgGaming::getQuatFromEuler(centerLatLong.x(), 0.0f, centerLatLong.y()));
+    mat = osg::Matrix::inverse(mat);
+    */
     osg::ref_ptr<osg::DrawElementsUInt> triangles(new osg::DrawElementsUInt(GL_TRIANGLES, 0));
     auto                                triangles_count = stream.read<int>();
     for (auto j = 0; j < triangles_count; j++)
@@ -279,7 +282,7 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
       triangles->push_back(v1);
     }
 
-    m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords, texcoords2);
+    m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords_polar, texcoords_cartesian);
   }
 
   for (const auto& countryNode : m->switchCountryNodes->getNodes())
