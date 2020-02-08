@@ -10,7 +10,7 @@ namespace onep
   class UpdateHoverIntensityCallback : public osgGaming::SimulationCallback
   {
   public:
-    UpdateHoverIntensityCallback(osg::ref_ptr<osg::Uniform> u)
+    UpdateHoverIntensityCallback(const osg::ref_ptr<osg::Uniform>& u)
       : osgGaming::SimulationCallback()
       , uniform(u)
       , animationHover(new osgGaming::Animation<float>(0.0f, 0.2f, osgGaming::AnimationEase::CIRCLE_OUT))
@@ -53,8 +53,8 @@ namespace onep
 
   struct CountryHoverNode::Impl
   {
-    Impl() {}
-    ~Impl() {}
+    Impl() = default;
+    ~Impl() = default;
 
     osg::ref_ptr<osg::Uniform> uniformAlpha;
     osg::ref_ptr<osg::Uniform> uniformHoverIntensity;
@@ -65,14 +65,14 @@ namespace onep
   };
 
   CountryHoverNode::CountryHoverNode(
-    osg::ref_ptr<osg::Vec3Array> vertices,
-    osg::ref_ptr<osg::Vec2Array> texcoords,
-    osg::ref_ptr<osg::DrawElementsUInt> triangles)
+    const osg::ref_ptr<osg::Vec3Array>& vertices,
+      const osg::ref_ptr<osg::Vec2Array>& texcoords,
+      const osg::ref_ptr<osg::DrawElementsUInt>& triangles)
     : osg::Geode()
     , m(new Impl())
   {
-    osg::ref_ptr<CountryGeometry> geo = new CountryGeometry(vertices, texcoords, nullptr, triangles);
-    addDrawable(geo);
+    const auto geo = new CountryGeometry(vertices, triangles, { texcoords });
+    Geode::addDrawable(geo);
 
     m->uniformAlpha = new osg::Uniform("alpha", 0.0f);
     m->uniformHoverIntensity = new osg::Uniform("hoverIntensity", 0.0f);
@@ -85,9 +85,7 @@ namespace onep
     addUpdateCallback(m->callback);
   }
 
-  CountryHoverNode::~CountryHoverNode()
-  {
-  }
+  CountryHoverNode::~CountryHoverNode() = default;
 
   void CountryHoverNode::setHoverEnabled(bool bEnabled)
   {

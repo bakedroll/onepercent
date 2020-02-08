@@ -21,9 +21,7 @@ namespace onep
 
   struct CountryNode::Impl
   {
-    Impl()
-    {
-    }
+    Impl() = default;
 
     std::string name;
 
@@ -35,16 +33,17 @@ namespace onep
     const LuaStateManager::Ptr& lua,
     const std::string& countryName,
     const osg::ref_ptr<osg::Vec3Array>& vertices,
-    const osg::ref_ptr<osg::Vec2Array>& texcoords1,
-    const osg::ref_ptr<osg::Vec3Array>& texcoords2,
+    const osg::ref_ptr<osg::Vec2Array>& texcoordsPolar,
+    const osg::ref_ptr<osg::Vec3Array>& texcoordsCartesian,
+    const osg::ref_ptr<osg::Vec2Array>& texcoordsProjected,
     const osg::ref_ptr<osg::DrawElementsUInt>& triangles)
     : LuaVisualOsgNode<osg::Geode>()
     , m(new Impl())
   {
     m->name = countryName;
 
-    osg::ref_ptr<CountryGeometry> geo = new CountryGeometry(vertices, texcoords1, texcoords2, triangles);
-    addDrawable(geo);
+    const auto geo = new CountryGeometry(vertices, triangles, { texcoordsPolar, texcoordsCartesian, texcoordsProjected });
+    Geode::addDrawable(geo);
 
     addStateSetUniform(new osg::Uniform("overlayColor", osg::Vec4f(0.3f, 0.3f, 0.3f, 0.0f)));
     addStateSetUniform(new osg::Uniform("takeover", 0.0f));

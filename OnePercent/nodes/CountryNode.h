@@ -28,8 +28,9 @@ namespace onep
       const osg::ref_ptr<LuaStateManager>& lua,
       const std::string& countryName,
       const osg::ref_ptr<osg::Vec3Array>& vertices,
-      const osg::ref_ptr<osg::Vec2Array>& texcoords1,
-      const osg::ref_ptr<osg::Vec3Array>& texcoords2,
+      const osg::ref_ptr<osg::Vec2Array>& texcoordsPolar,
+      const osg::ref_ptr<osg::Vec3Array>& texcoordsCartesian,
+      const osg::ref_ptr<osg::Vec2Array>& texcoordsProjected,
       const osg::ref_ptr<osg::DrawElementsUInt>& triangles);
 
     ~CountryNode() override;

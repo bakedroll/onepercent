@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <functional>
 
+#include <osgGaming/Helper.h>
+
+#include <osg/Matrix>
+
 namespace helper
 {
   typedef std::vector<std::string> StringList;
@@ -494,14 +498,6 @@ namespace helper
       return;
     }
 
-    /*IdMap ids;
-    auto i = 0;
-    for (const auto& point : graph.points)
-    {
-      ids.insert(IdMap::value_type(point.first, i));
-      i++;
-    }*/
-
     auto&      countries = world.countries;
     auto&      vertices  = world.boundariesMeshData.points;
     const auto sx        = shift / graph.boundary.width();
@@ -514,10 +510,20 @@ namespace helper
       BoundingBox<float> bb = country.boundingbox;
       bb.shift(sx, 0.0f);
 
+      const auto centerX = bb.center().x;
+      const auto centerY = bb.center().y;
+
+      osg::Vec2f centerLatLong((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI);
+
+      auto mat = osg::Matrix::identity();
+      mat *= osg::Matrix::translate(osg::Vec3f(0.0f, earthRadius, 0.0f));
+      mat *= osg::Matrix::rotate(osgGaming::getQuatFromEuler(centerLatLong.x(), 0.0f, centerLatLong.y()));
+      mat = osg::Matrix::inverse(mat);
+
       // Country meta data
       writeFile<int>(file, country.data.id);
-      writeFile<float>(file, bb.center().x);
-      writeFile<float>(file, bb.center().y);
+      writeFile<float>(file, centerX);
+      writeFile<float>(file, centerY);
       writeFile<float>(file, bb.width(false));
       writeFile<float>(file, bb.height(false));
 
@@ -551,16 +557,29 @@ namespace helper
       }
 
       // build vertex array
-      IdMap                vertMap;
-      std::vector<Point3D> countryVerts;
+      IdMap                   vertMap;
+      std::vector<Point3D>    countryVerts;
+      std::vector<osg::Vec3f> projVerts;
+      osg::BoundingBox        bbProj;
+
       countryVerts.reserve(vertIds.size());
+      projVerts.reserve(vertIds.size());
 
       // Preprocessing
       for (const auto& id : vertIds)
       {
         const auto& p3d = vertices[id];
         countryVerts.push_back(p3d);
+
+        osg::Vec3f vertProj(p3d.value[0], p3d.value[1], p3d.value[2]);
+        vertProj = vertProj * mat;
+        projVerts.push_back(vertProj);
+
+        bbProj.expandBy(vertProj);
       }
+
+      const auto width  = bbProj.xMax() - bbProj.xMin();
+      const auto height = bbProj.zMax() - bbProj.zMin();
 
       // write vertex data
       writeFile<int>(file, static_cast<int>(vertIds.size()));
@@ -590,6 +609,13 @@ namespace helper
         writeFile<float>(file, uvwCartesian.x());
         writeFile<float>(file, uvwCartesian.y());
         writeFile<float>(file, uvwCartesian.z());
+
+        // UV Projected
+        auto projVert = projVerts[index];
+        osg::Vec2f projUv((projVert.x() - bbProj.xMin()) / width, (projVert.z() - bbProj.zMin()) / height);
+
+        writeFile<float>(file, projUv.x());
+        writeFile<float>(file, projUv.y());
 
         index++;
       }

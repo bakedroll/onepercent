@@ -9,9 +9,8 @@ namespace onep
   public:
     CountryGeometry(
       const osg::ref_ptr<osg::Vec3Array>& vertices,
-      const osg::ref_ptr<osg::Vec2Array>& texcoords1,
-      const osg::ref_ptr<osg::Vec3Array>& texcoords2,
-      const osg::ref_ptr<osg::DrawElementsUInt>& triangles);
+      const osg::ref_ptr<osg::DrawElementsUInt>& triangles,
+      const std::vector<osg::ref_ptr<osg::Array>>& texcoords = {});
 
     ~CountryGeometry();
 
