@@ -149,84 +149,90 @@ namespace helper
   {
     printf("Write to boundary file: %s\n", filename);
 
-    FILE * file;
-    file = fopen(filename, "w+b");
+    const auto file = fopen(filename, "w+b");
     if (!file)
+    {
       return;
+    }
 
     IdMap ids;
-    ids[-1] = -1;
-    int i = 0;
-    int psize = int(meshdata.points.size());
+    ids[-1]          = -1;
+    int        i     = 0;
+    const auto psize = static_cast<int>(meshdata.points.size());
     writeFile<int>(file, psize);
-    for (IdPoint3DMap::iterator it = meshdata.points.begin(); it != meshdata.points.end(); ++it)
-    {
-      writeFile<float>(file, it->second.value[0]);
-      writeFile<float>(file, it->second.value[1]);
-      writeFile<float>(file, it->second.value[2]);
-      writeFile<int>(file, ids.find(it->second.originId)->second);
 
-      const auto texCoords = getUvCoords(graph, it->first);
+    for (const auto& point : meshdata.points)
+    {
+      writeFile<float>(file, point.second.value[0]);
+      writeFile<float>(file, point.second.value[1]);
+      writeFile<float>(file, point.second.value[2]);
+      writeFile<int>(file, ids.find(point.second.originId)->second);
+
+      const auto texCoords = getUvCoords(graph, point.first);
 
       writeFile<float>(file, texCoords.x);
       writeFile<float>(file, texCoords.y);
 
-      ids.insert(IdMap::value_type(it->first, i));
+      ids.insert(IdMap::value_type(point.first, i));
       i++;
     }
 
-    writeFile<int>(file, int(meshdata.boundarySegments.size()));
-    for (IdQuadListMap::iterator it = meshdata.boundarySegments.begin(); it != meshdata.boundarySegments.end(); ++it)
+    writeFile<int>(file, static_cast<int>(meshdata.boundarySegments.size()));
+    for (const auto& segment : meshdata.boundarySegments)
     {
-      writeFile<int>(file, it->first);
-      writeFile<int>(file, int(it->second.size()));
-      for (QuadList::iterator qit = it->second.begin(); qit != it->second.end(); ++qit)
+      writeFile<int>(file, segment.first);
+      writeFile<int>(file, static_cast<int>(segment.second.size()));
+      for (const auto& quad : segment.second)
       {
-        writeFile<int>(file, ids.find(qit->idx[0])->second);
-        writeFile<int>(file, ids.find(qit->idx[1])->second);
-        writeFile<int>(file, ids.find(qit->idx[2])->second);
-        writeFile<int>(file, ids.find(qit->idx[3])->second);
+        writeFile<int>(file, ids.find(quad.idx[0])->second);
+        writeFile<int>(file, ids.find(quad.idx[1])->second);
+        writeFile<int>(file, ids.find(quad.idx[2])->second);
+        writeFile<int>(file, ids.find(quad.idx[3])->second);
       }
     }
 
-    writeFile<int>(file, int(meshdata.boundaryNodalsFull.size()));
-    for (IdQuadListMap::iterator it = meshdata.boundaryNodalsFull.begin(); it != meshdata.boundaryNodalsFull.end(); ++it)
+    writeFile<int>(file, static_cast<int>(meshdata.boundaryNodalsFull.size()));
+    for (const auto& nodalFull : meshdata.boundaryNodalsFull)
     {
-      writeFile<int>(file, int(it->second.size()));
-      for (QuadList::iterator qit = it->second.begin(); qit != it->second.end(); ++qit)
+      writeFile<int>(file, static_cast<int>(nodalFull.second.size()));
+      for (const auto& quad : nodalFull.second)
       {
-        writeFile<int>(file, ids.find(qit->idx[0])->second);
-        writeFile<int>(file, ids.find(qit->idx[1])->second);
-        writeFile<int>(file, ids.find(qit->idx[2])->second);
-        writeFile<int>(file, ids.find(qit->idx[3])->second);
+        writeFile<int>(file, ids.find(quad.idx[0])->second);
+        writeFile<int>(file, ids.find(quad.idx[1])->second);
+        writeFile<int>(file, ids.find(quad.idx[2])->second);
+        writeFile<int>(file, ids.find(quad.idx[3])->second);
       }
     }
 
-    writeFile<int>(file, int(meshdata.borders.size()));
-    for (IdBorderMap::iterator it = meshdata.borders.begin(); it != meshdata.borders.end(); ++it)
+    writeFile<int>(file, static_cast<int>(meshdata.borders.size()));
+    for (const auto& border : meshdata.borders)
     {
-      writeFile<int>(file, it->first); // ID
-      writeFile<int>(file, it->second.countryId);
-      writeFile<int>(file, it->second.neighbourId);
-      writeFile<int>(file, it->second.boundarySegmentId);
-      writeFile<bool>(file, it->second.bIsCycle);
+      writeFile<int>(file, border.first); // ID
+      writeFile<int>(file, border.second.countryId);
+      writeFile<int>(file, border.second.neighbourId);
+      writeFile<int>(file, border.second.boundarySegmentId);
+      writeFile<bool>(file, border.second.bIsCycle);
 
-      writeFile<int>(file, int(it->second.nextBorderIds.size()));
-      for (IdList::iterator iit = it->second.nextBorderIds.begin(); iit != it->second.nextBorderIds.end(); ++iit)
-        writeFile<int>(file, *iit);
+      writeFile<int>(file, static_cast<int>(border.second.nextBorderIds.size()));
+      for (const auto& id : border.second.nextBorderIds)
+      {
+        writeFile<int>(file, id);
+      }
     }
 
-    writeFile<int>(file, int(meshdata.boundaryNodals.size()));
-    for (BoundaryNodalMap::iterator it = meshdata.boundaryNodals.begin(); it != meshdata.boundaryNodals.end(); ++it)
+    writeFile<int>(file, static_cast<int>(meshdata.boundaryNodals.size()));
+    for (const auto& nodal : meshdata.boundaryNodals)
     {
-      writeFile<int>(file, it->first.first); // fromBorder
-      writeFile<int>(file, it->first.second); // toBorder
+      writeFile<int>(file, nodal.first.first); // fromBorder
+      writeFile<int>(file, nodal.first.second); // toBorder
 
-      writeFile<int>(file, int(it->second.size()));
-      for (QuadList::iterator qit = it->second.begin(); qit != it->second.end(); ++qit)
+      writeFile<int>(file, static_cast<int>(nodal.second.size()));
+      for (const auto& quad : nodal.second)
       {
         for (int j = 0; j < 4; j++)
-          writeFile<int>(file, ids.find(qit->idx[j])->second);
+        {
+          writeFile<int>(file, ids.find(quad.idx[j])->second);
+        }
       }
     }
 
