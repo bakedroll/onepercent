@@ -43,6 +43,7 @@ namespace onep
       .addFunction("update_bindings", &LuaVisuals::updateBindings)
       .addFunction("register_model_prototype", &LuaVisuals::luaRegisterModelPrototype)
       .addFunction("get_model_prototype", &LuaVisuals::luaGetModelPrototype)
+      .addFunction("create_text_node", &LuaVisuals::luaCreateTextNode)
       .endClass();
   }
 
@@ -222,5 +223,10 @@ namespace onep
     }
 
     return m->prototypes.find(prototypeName)->second;
+  }
+
+  TextNode* LuaVisuals::luaCreateTextNode(const std::string& text) const
+  {
+    return new TextNode(text);
   }
 }

@@ -24,6 +24,8 @@ namespace onep
     Type getType() const;
     float getInit() const;
 
+    bool getIsVisible() const;
+
   private:
     struct Impl;
     std::unique_ptr<Impl> m;

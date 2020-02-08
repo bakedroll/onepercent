@@ -55,6 +55,8 @@ control:on_event(defines.callback.on_country_changed, function(old_cid, cid)
 
 		presenter:set_boundaries_enabled(true)
 		-- presenter:scatter_nodes_to_bin(node, "marker", 1.0)
+
+		-- presenter:add_node(visuals:create_text_node("bla blub"))
 	end
 
 	set_country_node_color(old_cid, color_transparent, color_transparent)

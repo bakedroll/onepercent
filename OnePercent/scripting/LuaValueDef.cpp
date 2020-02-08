@@ -9,11 +9,13 @@ namespace onep
     Impl()
       : type(Type::Default)
       , init(0.0)
+      , isVisible(false)
     {}
 
     std::string name;
     Type        type;
     float       init;
+    bool        isVisible;
   };
 
   LuaValueDef::LuaValueDef(const luabridge::LuaRef& object, lua_State* luaState)
@@ -29,11 +31,17 @@ namespace onep
     luabridge::LuaRef nameRef = object["name"];
     luabridge::LuaRef typeRef = object["type"];
     luabridge::LuaRef initRef = object["init"];
+    luabridge::LuaRef visible = object["visible"];
 
-    auto typeStr = typeRef.tostring();
+    const auto typeStr = typeRef.tostring();
 
     m->name = nameRef.tostring();
     m->init = initRef;
+
+    if (!visible.isNil() && checkForConsistency("visible", LUA_TBOOLEAN))
+    {
+        m->isVisible = static_cast<bool>(visible);
+    }
 
     if (typeStr == "default")
     {
@@ -65,5 +73,10 @@ namespace onep
   float LuaValueDef::getInit() const
   {
     return m->init;
+  }
+
+  bool LuaValueDef::getIsVisible() const
+  {
+    return m->isVisible;
   }
 }

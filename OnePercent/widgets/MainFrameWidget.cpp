@@ -2,16 +2,24 @@
 
 #include "core/Observables.h"
 #include "nodes/GlobeOverviewWorld.h"
+#include "nodes/CountryOverlay.h"
 #include "widgets/SkillsWidget.h"
+#include "scripting/LuaModel.h"
+#include "scripting/LuaSimulationStateTable.h"
+#include "scripting/LuaValuesDefTable.h"
+#include "scripting/LuaValueDef.h"
 #include "simulation/Simulation.h"
+#include "simulation/ModelContainer.h"
 
 #include <osgGaming/FpsUpdateCallback.h>
 
+#include <QPointer>
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
 #include <QRadioButton>
 #include <QButtonGroup>
+#include <QFormLayout>
 
 #include <osgGaming/Helper.h>
 
@@ -22,18 +30,22 @@ namespace onep
     Impl(osgGaming::Injector& injector, MainFrameWidget* b)
       : base(b)
       , layoutMain(nullptr)
+      , frameLeftMenu(nullptr)
       , skillsWidget(new SkillsWidget(injector))
       , widgetEnabled(nullptr)
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , globeModel(injector.inject<GlobeModel>())
       , simulation(injector.inject<Simulation>())
+      , countryOverlay(injector.inject<CountryOverlay>())
+      , modelContainer(injector.inject<ModelContainer>())
     {}
 
     MainFrameWidget* base;
 
     QVBoxLayout* layoutMain;
 
+    QFrame*       frameLeftMenu;
     SkillsWidget* skillsWidget;
     QWidget*      widgetEnabled;
 
@@ -41,10 +53,15 @@ namespace onep
     ONumSkillPoints::Ptr oNumSkillPoints;
     GlobeModel::Ptr      globeModel;
     Simulation::Ptr      simulation;
+    CountryOverlay::Ptr  countryOverlay;
+    ModelContainer::Ptr  modelContainer;
 
     osgGaming::Observer<int>::Ptr               observerDay;
     osgGaming::Observer<int>::Ptr               observerSkillPoints;
+    osgGaming::Observer<int>::Ptr               observerCurrentCountry;
     osgGaming::Observer<Simulation::State>::Ptr observerRunning;
+
+    std::map<std::string, QPointer<QLabel>> valueLabelMap;
 
     void setCenterWidgetEnabled(QWidget* widget)
     {
@@ -102,6 +119,51 @@ namespace onep
       simulationButtonsGroup->addButton(buttonPlay, osgGaming::underlying(Simulation::State::NormalSpeed));
       simulationButtonsGroup->addButton(buttonFastForward, osgGaming::underlying(Simulation::State::FastForward));
 
+      // Values Form
+      auto layoutValues = new QFormLayout();
+      layoutValues->setContentsMargins(0, 0, 0, 0);
+
+      modelContainer->accessModel([=](const LuaModel::Ptr& model)
+      {
+        auto values = model->getValuesDefTable();
+        values->foreachMappedElementDo<LuaValueDef>([=](LuaValueDef::Ptr& def)
+        {
+          if (!def->getIsVisible())
+          {
+            return;
+          }
+
+          const auto name = QString::fromStdString(def->getName());
+          if (def->getType() == LuaValueDef::Type::Branch)
+          {
+            OSGG_QLOG_WARN(QString("Displaying branch values ('%1') currently not supported").arg(name));
+            assert_return(false);
+          }
+
+          auto labelName = new QLabel(name);
+          labelName->setObjectName("LabelValue");
+
+          auto labelValue = new QLabel("");
+          labelValue->setObjectName("LabelValue");
+          labelValue->setAlignment(Qt::AlignRight);
+          labelValue->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+
+          layoutValues->addRow(labelName, labelValue);
+
+          valueLabelMap[def->getName()] = labelValue;
+        });
+      });
+
+      // Left Menu
+      auto layoutLeftMenu = new QVBoxLayout();
+      layoutLeftMenu->setContentsMargins(0, 0, 0, 0);
+      layoutLeftMenu->addLayout(layoutValues);
+
+      frameLeftMenu = new QFrame();
+      frameLeftMenu->setContentsMargins(0, 0, 0, 0);
+      frameLeftMenu->setObjectName("FrameLeftMenu");
+      frameLeftMenu->setLayout(layoutLeftMenu);
+
       // Top Bar
       auto layoutTopBar = new QHBoxLayout();
       layoutTopBar->setContentsMargins(0, 0, 0, 0);
@@ -133,12 +195,18 @@ namespace onep
       frameBottomBar->setObjectName("FrameBottomBar");
       frameBottomBar->setLayout(layoutBottomBar);
 
+      // Central Layout
+      auto layoutCentral = new QHBoxLayout();
+      layoutCentral->setContentsMargins(0, 0, 0, 0);
+      layoutCentral->addWidget(frameLeftMenu);
+      layoutCentral->addWidget(skillsWidget, 1);
+      layoutCentral->addStretch(1);
+
       // Main Layout
       layoutMain = new QVBoxLayout();
       layoutMain->setContentsMargins(0, 0, 0, 0);
       layoutMain->addWidget(frameTopBar);
-      layoutMain->addStretch(1);
-      layoutMain->addWidget(skillsWidget, 1);
+      layoutMain->addLayout(layoutCentral, 1);
       layoutMain->addWidget(frameBottomBar);
 
       skillsWidget->setVisible(false);
@@ -149,7 +217,7 @@ namespace onep
       connect(buttonDebug,&QPushButton::clicked, base, &MainFrameWidget::clickedButtonDebug);
 
       observerRunning = simulation->getOState()->connect(
-        osgGaming::Func<Simulation::State>([this, buttonAutoPause, buttonPause, buttonPlay, buttonFastForward, simulationButtonsGroup](Simulation::State state)
+        osgGaming::Func<Simulation::State>([buttonAutoPause, buttonPause, buttonPlay, buttonFastForward, simulationButtonsGroup](Simulation::State state)
         {
           QSignalBlocker blocker(simulationButtonsGroup);
 
@@ -201,14 +269,37 @@ namespace onep
         setCenterWidgetEnabled(skillsWidget);
       });
 
-      observerDay = oDay->connectAndNotify(osgGaming::Func<int>([labelDays](int day)
+      observerDay = oDay->connectAndNotify(osgGaming::Func<int>([this, labelDays](int day)
       {
         labelDays->setText(tr("Day %1").arg(day));
+
+        const auto selectedCountryId = countryOverlay->getSelectedCountryId();
+        if (selectedCountryId == 0)
+        {
+          return;
+        }
+
+        modelContainer->accessModel([this, selectedCountryId](const LuaModel::Ptr& model)
+        {
+          const auto& valuesMap = model->getSimulationStateTable()->getCountryState(selectedCountryId)->getValuesMap();
+          for (const auto& label : valueLabelMap)
+          {
+            const auto it = valuesMap.find(label.first);
+            assert_continue(it != valuesMap.end())
+
+            label.second->setText(QString::number(it->second));
+          }
+        });
       }));
 
       observerSkillPoints = oNumSkillPoints->connectAndNotify(osgGaming::Func<int>([labelSkillPoints](int points)
       {
         labelSkillPoints->setText(tr("Skillpoints: %1").arg(points));
+      }));
+
+      observerCurrentCountry = countryOverlay->getOSelectedCountryId()->connectAndNotify(osgGaming::Func<int>([this](int id)
+      {
+        frameLeftMenu->setVisible(id > 0);
       }));
 
       osg::ref_ptr<osgGaming::FpsUpdateCallback> fpsCallback = new osgGaming::FpsUpdateCallback();

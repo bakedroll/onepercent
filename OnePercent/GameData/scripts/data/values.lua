@@ -20,7 +20,8 @@ lua.control:create_values({
   {
     name = "ideology",
     type = "default",
-    init = 0.0
+    init = 0.0,
+    visible = true
   },
   {
     name = "divisiveness",
@@ -42,7 +43,8 @@ lua.control:create_values({
   {
     name = "dept",
     type = "default",
-    init = 0.0
+    init = 0.0,
+    visible = true
   },
   {
     name = "dept_p",

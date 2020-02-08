@@ -1,5 +1,6 @@
 #pragma once
 
+#include "nodes/TextNode.h"
 #include "scripting/LuaStateManager.h"
 
 #include <osg/Node>
@@ -30,6 +31,8 @@ namespace onep
 
     void luaRegisterModelPrototype(const std::string& prototypeName, luabridge::LuaRef table);
     osg::Node* luaGetModelPrototype(const std::string& prototypeName) const;
+
+    TextNode* luaCreateTextNode(const std::string& text) const;
 
   private:
     struct Impl;
