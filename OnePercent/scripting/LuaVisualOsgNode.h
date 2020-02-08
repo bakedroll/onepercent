@@ -1,17 +1,13 @@
 #pragma once
 
 #include "core/Macros.h"
+#include "scripting/LuaBridgeDefinition.h"
 
 #include <osg/Node>
 
 #include <osgGaming/Macros.h>
 
 #include <QString>
-
-extern "C"
-{
-#include <lua.h>
-}
 
 namespace onep
 {
