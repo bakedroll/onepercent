@@ -168,11 +168,6 @@ namespace helper
       writeFile<float>(file, point.second.value[2]);
       writeFile<int>(file, ids.find(point.second.originId)->second);
 
-      const auto texCoords = getUvCoords(graph, point.first);
-
-      writeFile<float>(file, texCoords.x);
-      writeFile<float>(file, texCoords.y);
-
       ids.insert(IdMap::value_type(point.first, i));
       i++;
     }

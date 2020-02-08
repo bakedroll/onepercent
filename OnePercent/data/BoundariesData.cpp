@@ -2,7 +2,6 @@
 
 #include <osgGaming/ByteStream.h>
 #include <osgGaming/ResourceManager.h>
-#include "osgGaming/Macros.h"
 
 namespace onep
 {
@@ -28,12 +27,11 @@ struct Point
   Point() : originId(-1)
   {
   }
-  Point(const osg::Vec3f& c, const osg::Vec2f& t, int o) : coords(c), texcoord(t), originId(o)
+  Point(const osg::Vec3f& c, int o) : coords(c), originId(o)
   {
   }
 
   osg::Vec3f coords;
-  osg::Vec2f texcoord;
   int        originId;
 };
 
@@ -160,7 +158,6 @@ struct BoundariesData::Impl
   NodalsMap  nodals;
 
   osg::ref_ptr<osg::Vec3Array> vertices;
-  osg::ref_ptr<osg::Vec2Array> texcoords;
 };
 
 BoundariesData::BoundariesData(osgGaming::Injector& injector) : osg::Referenced(), m(new Impl(injector))
@@ -189,10 +186,7 @@ void BoundariesData::loadBoundaries(const std::string& filename)
     const auto z        = stream.read<float>();
     const auto originId = stream.read<int>();
 
-    const auto u = stream.read<float>();
-    const auto v = stream.read<float>();
-
-    m->pointsMap[i] = Point(osg::Vec3f(x, y, z), osg::Vec2f(u, 1.0f - v), originId);
+    m->pointsMap[i] = Point(osg::Vec3f(x, y, z), originId);
   }
 
   const auto nsegments = stream.read<int>();
