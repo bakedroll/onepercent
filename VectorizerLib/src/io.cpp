@@ -442,70 +442,80 @@ namespace helper
     }
   }
 
-  void writeCountriesFile(const char* filename, Graph& graph, CountriesMap& countries, cv::Mat& countriesMap, float shift)
+  void writeCountriesFile(const char* filename, Graph& graph, WorldData& world, cv::Mat& countriesMap, float shift)
   {
     printf("Write to countries file: %s\n", filename);
 
-    FILE * file;
-    file = fopen(filename, "w+b");
+    const auto file = fopen(filename, "w+b");
     if (!file)
+    {
       return;
+    }
 
     IdMap ids;
-    int i = 0;
-    for (IdPointMap::iterator it = graph.points.begin(); it != graph.points.end(); ++it)
+    auto i = 0;
+    for (const auto& point : graph.points)
     {
-      ids.insert(IdMap::value_type(it->first, i));
+      ids.insert(IdMap::value_type(point.first, i));
       i++;
     }
 
-    float sx = shift / graph.boundary.width();
+    auto&      countries = world.countries;
+    const auto sx        = shift / graph.boundary.width();
 
     writeFile<int>(file, int(countries.size()));
-    for (CountriesMap::iterator it = countries.begin(); it != countries.end(); ++it)
+    for (const auto& it : countries)
     {
-      BoundingBox<float> bb = it->second.boundingbox;
+      const auto& country = it.second;
+
+      BoundingBox<float> bb = country.boundingbox;
       bb.shift(sx, 0.0f);
-      writeFile<int>(file, it->second.data.id);
+      writeFile<int>(file, country.data.id);
       writeFile<float>(file, bb.center().x);
       writeFile<float>(file, bb.center().y);
       writeFile<float>(file, bb.width(false));
       writeFile<float>(file, bb.height(false));
 
-      writeFile<int>(file, int(it->second.neighbours.size()));
-      for (IdSet::iterator iit = it->second.neighbours.begin(); iit != it->second.neighbours.end(); ++iit)
-        writeFile<int>(file, *iit);
-
-      writeFile<int>(file, int(it->second.borders.size()));
-      for (IdBorderIdListMap::iterator nit = it->second.borders.begin(); nit != it->second.borders.end(); ++nit)
+      writeFile<int>(file, int(country.neighbours.size()));
+      for (const auto& neighbour : country.neighbours)
       {
-        writeFile<int>(file, nit->first);
-        writeFile<int>(file, int(nit->second.size()));
-        for (IdList::iterator bit = nit->second.begin(); bit != nit->second.end(); ++bit)
-          writeFile<int>(file, *bit);
+        writeFile<int>(file, neighbour);
       }
 
-      writeFile<int>(file, int(it->second.triangles.size()));
-      for (TriangleMap::iterator tit = it->second.triangles.begin(); tit != it->second.triangles.end(); ++tit)
+      writeFile<int>(file, int(country.borders.size()));
+      for (const auto& border : country.borders)
       {
-        writeFile<int>(file, ids.find(tit->second.idx[0])->second);
-        writeFile<int>(file, ids.find(tit->second.idx[1])->second);
-        writeFile<int>(file, ids.find(tit->second.idx[2])->second);
+        writeFile<int>(file, border.first);
+        writeFile<int>(file, static_cast<int>(border.second.size()));
+        for (const auto& id : border.second)
+        {
+          writeFile<int>(file, id);
+        }
+      }
+
+      writeFile<int>(file, int(country.triangles.size()));
+      for (const auto& triangle : country.triangles)
+      {
+        writeFile<int>(file, ids.find(triangle.second.idx[0])->second);
+        writeFile<int>(file, ids.find(triangle.second.idx[1])->second);
+        writeFile<int>(file, ids.find(triangle.second.idx[2])->second);
       }
     }
 
     writeFile<int>(file, countriesMap.cols);
     writeFile<int>(file, countriesMap.rows);
 
-    int xms = int(float(countriesMap.cols) * shift / graph.boundary.width());
+    const auto xms = static_cast<int>(float(countriesMap.cols) * shift / graph.boundary.width());
 
-    for (int y = 0; y < countriesMap.rows; y++)
+    for (auto y = 0; y < countriesMap.rows; y++)
     {
-      for (int x = 0; x < countriesMap.cols; x++)
+      for (auto x = 0; x < countriesMap.cols; x++)
       {
-        int px = x - xms;
+        auto px = x - xms;
         while (px < 0)
+        {
           px += countriesMap.cols;
+        }
 
         writeFile<uchar>(file, countriesMap.at<uchar>(cv::Point(px % countriesMap.cols, y)));
       }

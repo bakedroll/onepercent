@@ -252,7 +252,7 @@ int detectLines(int argc, char** argv)
   world.countries = countries;
 
   helper::makeBoundaries(triGraph, world.countries, world.boundariesMeshData, shift);
-  helper::writeCountriesFile(countriesFilename.c_str(), triGraph, world.countries, countriesMap, shift);
+  helper::writeCountriesFile(countriesFilename.c_str(), triGraph, world, countriesMap, shift);
   helper::writeBoundariesFile(triGraph, world.boundariesMeshData, outputFilename.c_str());
 
   if (!dbgimage.empty())
