@@ -145,6 +145,14 @@ namespace helper
     fs.close();
   }
 
+  void addToRelevantVerts(IdSet& relevantIds, const Quad& quad)
+  {
+    for (auto i=0; i<4; i++)
+    {
+      relevantIds.insert(quad.idx[i]);
+    }
+  }
+
   void writeBoundariesFile(Graph& graph, BoundariesMeshData& meshdata, const char* filename)
   {
     printf("Write to boundary file: %s\n", filename);
@@ -155,23 +163,51 @@ namespace helper
       return;
     }
 
-    IdMap ids;
-    ids[-1]          = -1;
-    int        i     = 0;
-    const auto psize = static_cast<int>(meshdata.points.size());
-    writeFile<int>(file, psize);
-
-    for (const auto& point : meshdata.points)
+    // Collect relevant vertices
+    IdSet relevantVerts;
+    for (const auto& segment : meshdata.boundarySegments)
     {
-      writeFile<float>(file, point.second.value[0]);
-      writeFile<float>(file, point.second.value[1]);
-      writeFile<float>(file, point.second.value[2]);
-      writeFile<int>(file, ids.find(point.second.originId)->second);
+      for (const auto& quad : segment.second)
+      {
+        addToRelevantVerts(relevantVerts, quad);
+      }
+    }
 
-      ids.insert(IdMap::value_type(point.first, i));
+    for (const auto& nodalFull : meshdata.boundaryNodalsFull)
+    {
+      for (const auto& quad : nodalFull.second)
+      {
+        addToRelevantVerts(relevantVerts, quad);
+      }
+    }
+
+    for (const auto& nodal : meshdata.boundaryNodals)
+    {
+      for (const auto& quad : nodal.second)
+      {
+        addToRelevantVerts(relevantVerts, quad);
+      }
+    }
+
+    // Write relevant vertices to file
+    IdMap ids;
+    ids[-1] = -1;
+    auto i  = 0;
+
+    writeFile<int>(file, static_cast<int>(relevantVerts.size()));
+    for (const auto& vert : relevantVerts)
+    {
+      const auto& point = meshdata.points[vert];
+      writeFile<float>(file, point.value[0]);
+      writeFile<float>(file, point.value[1]);
+      writeFile<float>(file, point.value[2]);
+      writeFile<int>(file, ids.find(point.originId)->second);
+
+      ids[vert] = i;
       i++;
     }
 
+    // Write segments
     writeFile<int>(file, static_cast<int>(meshdata.boundarySegments.size()));
     for (const auto& segment : meshdata.boundarySegments)
     {
@@ -186,6 +222,7 @@ namespace helper
       }
     }
 
+    // Write full nodals
     writeFile<int>(file, static_cast<int>(meshdata.boundaryNodalsFull.size()));
     for (const auto& nodalFull : meshdata.boundaryNodalsFull)
     {
@@ -199,6 +236,7 @@ namespace helper
       }
     }
 
+    // Write bordern
     writeFile<int>(file, static_cast<int>(meshdata.borders.size()));
     for (const auto& border : meshdata.borders)
     {
@@ -215,6 +253,7 @@ namespace helper
       }
     }
 
+    // Write nodals
     writeFile<int>(file, static_cast<int>(meshdata.boundaryNodals.size()));
     for (const auto& nodal : meshdata.boundaryNodals)
     {
