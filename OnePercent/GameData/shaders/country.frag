@@ -18,7 +18,7 @@ void main(void)
   float takeover_invers_noise = (1.0 - takeover) * (1.0 + takeoverEdgeWidthNoise * 2.0) - takeoverEdgeWidthNoise;
 
   float noiseVal = clamp((snoise(gl_TexCoord[1].xyz * takeoverScale) + 1.0) / 2.0, 0.0, 1.0);
-  float val      = smoothstep(
+  float valNoise = smoothstep(
     takeover_invers_noise - takeoverEdgeWidthNoise,
     takeover_invers_noise + takeoverEdgeWidthNoise,
     noiseVal);
@@ -26,13 +26,13 @@ void main(void)
   // fill takeover
   float takeover_invers_fill = (1.0 - takeover) * (1.0 + takeoverEdgeWidthFill * 2.0) - takeoverEdgeWidthFill;
 
-  val = smoothstep(
+  float valFill = smoothstep(
     takeover_invers_fill - takeoverEdgeWidthFill,
     takeover_invers_fill + takeoverEdgeWidthFill,
     1.0 - gl_TexCoord[2].t);
 
   // Final color
-  vec4 takeoverLayerColor = vec4(takeoverColor.rgb, takeoverColor.a * val);
+  vec4 takeoverLayerColor = vec4(takeoverColor.rgb, takeoverColor.a * valFill);
 
   takeoverLayerColor.rgb *= takeoverLayerColor.a;
   backgroundColor.rgb    *= backgroundColor.a;
