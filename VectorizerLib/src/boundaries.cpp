@@ -358,7 +358,7 @@ namespace helper
     DirectionPointMap directions;
     BoundaryMap boundaryMap;
 
-    makeCartesianPoints(graph, boundaries.points, 6.371f, shift);
+    makeCartesianPoints(graph, boundaries.points, earthRadius, shift);
 
     // get current id
     int id = -1;

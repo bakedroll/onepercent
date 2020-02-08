@@ -31,11 +31,7 @@ namespace onep
     CountryOverlay(osgGaming::Injector& injector);
     ~CountryOverlay();
 
-    void loadCountries(
-      const std::string& countriesFilename,
-      const std::string& distanceMapFilename,
-      const osg::ref_ptr<osg::Vec3Array>& vertices,
-      const osg::ref_ptr<osg::Vec2Array>& texcoords_polar);
+    void loadCountries(const std::string& countriesFilename, const std::string& distanceMapFilename);
 
     void setHoveredCountryId(int id);
 

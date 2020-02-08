@@ -324,6 +324,7 @@ set(TEMPLATE_PATH_GAMEDATA_SRC "${CMAKE_SOURCE_DIR}/OnePercent/GameData")
 set(TEMPLATE_PATH_GAMEDATA_DST "${CMAKE_BINARY_DIR}/OnePercent/GameData")
 
 configure_file("CMake/templates/generate_boundaries_and_countries.py.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/generate_boundaries_and_countries.py")
+configure_file("CMake/templates/generate_boundaries_and_countries_no_distance.py.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/generate_boundaries_and_countries_no_distance.py")
 configure_file("CMake/templates/generate_colormap.py.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/generate_colormap.py")
 configure_file("CMake/templates/generate_merged_textures.py.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/generate_merged_textures.py")
 

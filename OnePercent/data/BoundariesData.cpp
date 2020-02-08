@@ -150,17 +150,6 @@ struct BoundariesData::Impl
     }
   }
 
-  const std::vector<int>& getNeighborBorderIds(const BorderIdMap& borders, int neighborId) const
-  {
-    auto it = borders.find(neighborId);
-    if (it == borders.end())
-    {
-      assert_return(false, std::vector<int>());
-    }
-
-    return it->second;
-  }
-
   osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
 
   Point::Map    pointsMap;
@@ -280,42 +269,6 @@ void BoundariesData::loadBoundaries(const std::string& filename)
   }
 }
 
-osg::ref_ptr<osg::Vec3Array> BoundariesData::getCountryVertices() const
-{
-  if (!m->vertices.valid())
-  {
-    m->vertices = new osg::Vec3Array();
-
-    for (const auto& point : m->pointsMap)
-    {
-      if (point.second.originId == -1)
-        m->vertices->push_back(point.second.coords);
-      else
-        break;
-    }
-  }
-
-  return m->vertices;
-}
-
-osg::ref_ptr<osg::Vec2Array> BoundariesData::getCountryTexcoords() const
-{
-  if (!m->texcoords.valid())
-  {
-    m->texcoords = new osg::Vec2Array();
-
-    for (const auto& point : m->pointsMap)
-    {
-      if (point.second.originId == -1)
-        m->texcoords->push_back(point.second.texcoord);
-      else
-        break;
-    }
-  }
-
-  return m->texcoords;
-}
-
 osg::ref_ptr<osg::Geometry> BoundariesData::createOverallBoundariesGeometry(float thickness) const
 {
   const osg::Vec3f color(1.0f, 1.0f, 1.0f);
@@ -371,7 +324,7 @@ osg::ref_ptr<osg::Geometry> BoundariesData::createCountryBoundariesGeometry(cons
     const auto& nborders = borderIdMap.second;
     if (nborders.count(-1) > 0)
     {
-      const auto& neighbors = m->getNeighborBorderIds(nborders, -1);
+      const auto& neighbors = nborders.find(-1)->second;
       for (const auto& neighbor : neighbors)
       {
         if (visited.count(neighbor) == 0)

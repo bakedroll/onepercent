@@ -161,8 +161,7 @@ namespace onep
     world->getCameraManipulator()->addCameraAlignedQuad(m->globeModel->getScatteringQuad());
 
     m->boundariesData->loadBoundaries("./GameData/data/boundaries.dat");
-    m->countryOverlay->loadCountries("./GameData/data/countries.dat", "./GameData/textures/earth/distance.png",
-                                     m->boundariesData->getCountryVertices(), m->boundariesData->getCountryTexcoords());
+    m->countryOverlay->loadCountries("./GameData/data/countries.dat", "./GameData/textures/earth/distance.png");
 
     m->countryNameOverlay->setEnabled(false);
     m->countryNameOverlay->initialize(m->countryOverlay->getCountryPresenters());

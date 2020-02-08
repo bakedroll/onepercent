@@ -170,9 +170,7 @@ CountryOverlay::~CountryOverlay()
   }
 }
 
-void CountryOverlay::loadCountries(const std::string& countriesFilename, const std::string& distanceMapFilename,
-                                   const osg::ref_ptr<osg::Vec3Array>& vertices,
-                                   const osg::ref_ptr<osg::Vec2Array>& texcoords_polar)
+void CountryOverlay::loadCountries(const std::string& countriesFilename, const std::string& distanceMapFilename)
 {
   // Load shaders
   osg::ref_ptr<osg::Program> cnProgram(new osg::Program());
@@ -214,14 +212,8 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
   m->neighbourMap.clear();
 
   // Calculate 2nd texcoord layer
-  auto                         radius = m->configManager->getNumber<float>("earth.radius");
-  osg::ref_ptr<osg::Vec3Array> texcoords_cartesian(new osg::Vec3Array());
-  for (const auto& vertex : *vertices)
-  {
-    texcoords_cartesian->push_back((vertex / radius + osg::Vec3f(1.0f, 1.0f, 1.0f)) / 2.0f);
-  }
-
-  auto bytes = m->resourceManager->loadBinary(countriesFilename);
+  auto radius = m->configManager->getNumber<float>("earth.radius");
+  auto bytes  = m->resourceManager->loadBinary(countriesFilename);
 
   osgGaming::ByteStream stream(bytes);
 
@@ -269,20 +261,51 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
     mat *= osg::Matrix::rotate(osgGaming::getQuatFromEuler(centerLatLong.x(), 0.0f, centerLatLong.y()));
     mat = osg::Matrix::inverse(mat);
     */
-    osg::ref_ptr<osg::DrawElementsUInt> triangles(new osg::DrawElementsUInt(GL_TRIANGLES, 0));
-    auto                                triangles_count = stream.read<int>();
-    for (auto j = 0; j < triangles_count; j++)
+
+    const auto numVerts = stream.read<int>();
+
+    auto vertices           = new osg::Vec3Array();
+    auto texcoordsPolar     = new osg::Vec2Array();
+    auto texcoordsCartesian = new osg::Vec3Array();
+
+    vertices->reserve(numVerts);
+    texcoordsPolar->reserve(numVerts);
+    texcoordsCartesian->reserve(numVerts);
+
+    for (auto j=0; j<numVerts; j++)
     {
-      auto v0 = stream.read<int>();
-      auto v1 = stream.read<int>();
-      auto v2 = stream.read<int>();
+      const auto x = stream.read<float>();
+      const auto y = stream.read<float>();
+      const auto z = stream.read<float>();
+
+      const auto u = stream.read<float>();
+      const auto v = stream.read<float>();
+
+      const auto cu = stream.read<float>();
+      const auto cv = stream.read<float>();
+      const auto cw = stream.read<float>();
+
+      osg::Vec3f vertex(x, y, z);
+
+      vertices->push_back(vertex);
+      texcoordsPolar->push_back(osg::Vec2f(u, v));
+      texcoordsCartesian->push_back(osg::Vec3f(cu, cv, cw));
+    }
+
+    osg::ref_ptr<osg::DrawElementsUInt> triangles(new osg::DrawElementsUInt(GL_TRIANGLES, 0));
+    const auto                          numTriangles = stream.read<int>();
+    for (auto j = 0; j < numTriangles; j++)
+    {
+      const auto v0 = stream.read<int>();
+      const auto v1 = stream.read<int>();
+      const auto v2 = stream.read<int>();
 
       triangles->push_back(v0);
       triangles->push_back(v2);
       triangles->push_back(v1);
     }
 
-    m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoords_polar, texcoords_cartesian);
+    m->addCountry(id, centerLatLong, size, triangles, neighborBorderMap, vertices, texcoordsPolar, texcoordsCartesian);
   }
 
   for (const auto& countryNode : m->switchCountryNodes->getNodes())

@@ -8,6 +8,20 @@ namespace helper
 {
   typedef std::vector<std::string> StringList;
 
+  cv::Point2f getUvCoords(Graph& graph, int id)
+  {
+    cv::Point2f result(0.0f, 0.0f);
+    if (graph.points.count(id) > 0)
+    {
+        const auto& point = graph.points[id];
+
+        result.x = point.x / graph.boundary.width();
+        result.y = 1.0f - (point.y / graph.boundary.height());
+    }
+
+    return result;
+  }
+
   ProgressPrinter::ProgressPrinter(std::string name)
     : m_name(name)
     , m_percent(0)
@@ -140,9 +154,6 @@ namespace helper
     if (!file)
       return;
 
-    float width = graph.boundary.width();
-    float height = graph.boundary.height();
-
     IdMap ids;
     ids[-1] = -1;
     int i = 0;
@@ -155,19 +166,10 @@ namespace helper
       writeFile<float>(file, it->second.value[2]);
       writeFile<int>(file, ids.find(it->second.originId)->second);
 
-      // texcoord
-      float u = 0.0f;
-      float v = 0.0f;
-      if (graph.points.count(it->first) > 0)
-      {
-        cv::Point2f& point = graph.points[it->first];
+      const auto texCoords = getUvCoords(graph, it->first);
 
-        u = point.x / width;
-        v = point.y / height;
-      }
-
-      writeFile<float>(file, u);
-      writeFile<float>(file, v);
+      writeFile<float>(file, texCoords.x);
+      writeFile<float>(file, texCoords.y);
 
       ids.insert(IdMap::value_type(it->first, i));
       i++;
@@ -452,15 +454,16 @@ namespace helper
       return;
     }
 
-    IdMap ids;
+    /*IdMap ids;
     auto i = 0;
     for (const auto& point : graph.points)
     {
       ids.insert(IdMap::value_type(point.first, i));
       i++;
-    }
+    }*/
 
     auto&      countries = world.countries;
+    auto&      vertices  = world.boundariesMeshData.points;
     const auto sx        = shift / graph.boundary.width();
 
     writeFile<int>(file, int(countries.size()));
@@ -470,18 +473,22 @@ namespace helper
 
       BoundingBox<float> bb = country.boundingbox;
       bb.shift(sx, 0.0f);
+
+      // Country meta data
       writeFile<int>(file, country.data.id);
       writeFile<float>(file, bb.center().x);
       writeFile<float>(file, bb.center().y);
       writeFile<float>(file, bb.width(false));
       writeFile<float>(file, bb.height(false));
 
+      // Neighbors
       writeFile<int>(file, int(country.neighbours.size()));
       for (const auto& neighbour : country.neighbours)
       {
         writeFile<int>(file, neighbour);
       }
 
+      // Borders
       writeFile<int>(file, int(country.borders.size()));
       for (const auto& border : country.borders)
       {
@@ -493,15 +500,72 @@ namespace helper
         }
       }
 
-      writeFile<int>(file, int(country.triangles.size()));
+      // Collect relevant vertex ids
+      IdSet vertIds;
       for (const auto& triangle : country.triangles)
       {
-        writeFile<int>(file, ids.find(triangle.second.idx[0])->second);
-        writeFile<int>(file, ids.find(triangle.second.idx[1])->second);
-        writeFile<int>(file, ids.find(triangle.second.idx[2])->second);
+        for (auto v=0; v<3; v++)
+        {
+          vertIds.insert(triangle.second.idx[v]);
+        }
+      }
+
+      // build vertex array
+      IdMap                vertMap;
+      std::vector<Point3D> countryVerts;
+      countryVerts.reserve(vertIds.size());
+
+      // Preprocessing
+      for (const auto& id : vertIds)
+      {
+        const auto& p3d = vertices[id];
+        countryVerts.push_back(p3d);
+      }
+
+      // write vertex data
+      writeFile<int>(file, static_cast<int>(vertIds.size()));
+
+      auto index=0;
+      for (const auto& id : vertIds)
+      {
+        vertMap[id] = index;
+
+        const auto& p3d = countryVerts[index];
+        const auto  uv  = getUvCoords(graph, id);
+
+        // Vertex
+        for (auto v=0; v<3; v++)
+        {
+          writeFile<float>(file, p3d.value[v]);
+        }
+
+        // UV Polar
+        writeFile<float>(file, uv.x);
+        writeFile<float>(file, uv.y);
+
+        // UVW Cartesian
+        osg::Vec3f uvwCartesian(p3d.value[0], p3d.value[1], p3d.value[2]);
+        uvwCartesian = ((uvwCartesian / earthRadius) + osg::Vec3f(1.0f, 1.0f, 1.0f)) / 2.0f;
+
+        writeFile<float>(file, uvwCartesian.x());
+        writeFile<float>(file, uvwCartesian.y());
+        writeFile<float>(file, uvwCartesian.z());
+
+        index++;
+      }
+
+      // Triangles
+      writeFile<int>(file, static_cast<int>(country.triangles.size()));
+      for (const auto& triangle : country.triangles)
+      {
+        for (auto v=0; v<3; v++)
+        {
+          writeFile<int>(file, vertMap[triangle.second.idx[v]]);
+        }
       }
     }
 
+    // Countries Map
     writeFile<int>(file, countriesMap.cols);
     writeFile<int>(file, countriesMap.rows);
 

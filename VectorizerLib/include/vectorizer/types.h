@@ -10,6 +10,8 @@
 
 namespace helper
 {
+  const float earthRadius = 6.371f;
+
   template<typename T>
   class Matrix
   {
