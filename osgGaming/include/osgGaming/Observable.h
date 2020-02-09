@@ -17,26 +17,28 @@ namespace osgGaming
   class Observer : public osg::Referenced
   {
   public:
-    using Ptr = osg::ref_ptr<Observer<T>>;
+    using Ptr  = osg::ref_ptr<Observer<T>>;
+    using Func = std::function<void(T)>;
 
-    Observer(const std::function<void(T)>& func)
+    Observer(const Func& func)
       : m_func(func)
     {}
 
-    std::function<void(T)> m_func;
+    Func m_func;
   };
 
   template<>
   class Observer<void> : public osg::Referenced
   {
   public:
-    using Ptr = osg::ref_ptr<Observer>;
+    using Ptr  = osg::ref_ptr<Observer>;
+    using Func = std::function<void()>;
 
-    Observer(const std::function<void()>& func)
+    Observer(const Func& func)
       : m_func(func)
     {}
 
-    std::function<void()> m_func;
+    Func m_func;
   };
 
   namespace __ObservableInternals
@@ -57,7 +59,8 @@ namespace osgGaming
        * Registers a callback function
        * @param func callback function
        */
-      typename Observer<T>::Ptr connect(const std::function<void(T)>& func)
+      typename Observer<T>::Ptr connect(
+        const typename Observer<T>::Func& func)
       {
         auto observer = new Observer<T>(func);
         observers().push_back(observer);
@@ -69,7 +72,8 @@ namespace osgGaming
        * Registers and notifies a callback function
        * @param func callback function
        */
-      typename Observer<T>::Ptr connectAndNotify(const std::function<void(T)>& func)
+      typename Observer<T>::Ptr connectAndNotify(
+        const typename Observer<T>::Func& func)
       {
         auto observer = connect(func);
         notify(observer);
