@@ -123,7 +123,7 @@ namespace onep
       osg::ref_ptr<osg::Program> pgm = new osg::Program();
 
       osg::ref_ptr<osg::Shader> vertShader = resourceManager->loadShader("./GameData/shaders/atmosphere.vert", osg::Shader::VERTEX);
-      osg::ref_ptr<osg::Shader> fragShader = resourceManager->loadShader("./GameData/shaders/atmosphere.frag", osg::Shader::FRAGMENT);
+      osg::ref_ptr<osg::Shader> fragShader = resourceManager->loadShader("./GameData/shaders/atmosphere_float.frag", osg::Shader::FRAGMENT);
 
       pgm->addShader(vertShader);
       pgm->addShader(fragShader);

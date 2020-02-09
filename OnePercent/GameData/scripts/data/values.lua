@@ -10,6 +10,12 @@ lua.control:create_values({
     type = "default",
     init = 0.0
   },
+  {
+    name = "trust",
+    type = "default",
+    init = 0.0,
+    visible = true
+  },
 
   -- Politics
   {
