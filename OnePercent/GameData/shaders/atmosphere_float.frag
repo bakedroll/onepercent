@@ -72,15 +72,15 @@ bool _star_colide(vec3 _p0,vec3 _dp,float _r)
     dp=vec3(_dp);
     r =vec3(_r );
     // quadratic equation a.l.l+b.l+c=0; l0,l1=?;
-    a=(dp.x*dp.x*r)
-     +(dp.y*dp.y*r)
-     +(dp.z*dp.z*r);
-    b=(p0.x*dp.x*r)
-     +(p0.y*dp.y*r)
-     +(p0.z*dp.z*r); b*=2.0;
-    c=(p0.x*p0.x*r)
-     +(p0.y*p0.y*r)
-     +(p0.z*p0.z*r)-1.0;
+    a=(dp.x*dp.x*_r)
+     +(dp.y*dp.y*_r)
+     +(dp.z*dp.z*_r);
+    b=(p0.x*dp.x*_r)
+     +(p0.y*dp.y*_r)
+     +(p0.z*dp.z*_r); b*=2.0;
+    c=(p0.x*p0.x*_r)
+     +(p0.y*p0.y*_r)
+     +(p0.z*p0.z*_r)-1.0;
     // discriminant d=sqrt(b.b-4.a.c)
     d=((b*b)-(4.0*a*c));
     if (d<0.0) return false;
