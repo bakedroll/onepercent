@@ -93,12 +93,12 @@ QtGameApplication::QtGameApplication(int& argc, char** argv)
   m->overlayCompositor->setRootWidget(m->mainWindow->getViewWidget());
   m->mainWindow->getViewWidget()->setOverlayCompositor(m->overlayCompositor);
 
-  m->endGameObserver = onEndGameSignal().connect(osgGaming::Func<void>([this]()
+  m->endGameObserver = onEndGameSignal().connect([this]()
   {
     m->mainWindow->shutdown();
-  }));
+  });
 
-  m->fullscreenEnabledObserver = m->oFullscreenEnabled->connect(osgGaming::Func<bool>([this](bool enabled)
+  m->fullscreenEnabledObserver = m->oFullscreenEnabled->connect([this](bool enabled)
   {
     if (m->mainWindow->isFullScreen() == enabled)
       return;
@@ -107,7 +107,7 @@ QtGameApplication::QtGameApplication(int& argc, char** argv)
       m->mainWindow->showFullScreen();
     else
       m->mainWindow->showNormal();
-  }));
+  });
 }
 
 QtGameApplication::~QtGameApplication() = default;

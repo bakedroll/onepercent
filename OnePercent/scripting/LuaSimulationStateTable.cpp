@@ -58,7 +58,7 @@ namespace onep
       for (const auto& it : state.second->getBranchesActivatedTable()->getBranchActivatedMap())
       {
         auto branchName = it.first;
-        m->countryBranchObservers.push_back(it.second->connect(osgGaming::Func<bool>([this, branchName, cid](bool activated)
+        m->countryBranchObservers.push_back(it.second->connect([this, branchName, cid](bool activated)
         {
           if (!activated)
           {
@@ -67,7 +67,7 @@ namespace onep
 
           QMutexLocker locker(&m->cbActivatedMutex);
           m->oCountryBranchActivated->set({ cid, branchName });
-        })));
+        }));
       }
     }
   }

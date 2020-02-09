@@ -378,7 +378,7 @@ namespace onep
             }
           }
 
-          notifyRunningValues = simulation->getOState()->connectAndNotify(osgGaming::Func<Simulation::State>([this](Simulation::State state)
+          notifyRunningValues = simulation->getOState()->connectAndNotify([this](Simulation::State state)
           {
             auto paused = (state == Simulation::State::Paused);
 
@@ -388,7 +388,7 @@ namespace onep
             for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
               for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
                 vit->second.edit->setEnabled(paused);
-          }));
+          });
         }
 
         labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getName().c_str())).arg(country->getId()));
@@ -524,7 +524,7 @@ namespace onep
         });
 
         currentOverlayBranchNameObservers.push_back(countryOverlay->getOCurrentOverlayBranchName()->connectAndNotify(
-          osgGaming::Func<std::string>([=](std::string currentName)
+          [=](std::string currentName)
         {
           if (currentName.empty())
           {
@@ -538,10 +538,10 @@ namespace onep
             QSignalBlocker blocker(radioButton);
             radioButton->setChecked(true);
           }
-        })));
+        }));
 
         selectedCountryIdObservers.push_back(countryOverlay->getOSelectedCountryId()->connectAndNotify(
-          osgGaming::Func<int>([=](int selected)
+          [=](int selected)
         {
           QSignalBlocker blocker(checkBox);
 
@@ -559,7 +559,7 @@ namespace onep
           }
 
           checkBox->setEnabled(selected > 0);
-        })));
+        }));
 
         modelContainer->accessModel([this, name, checkBox](const LuaModel::Ptr& model)
         {
@@ -567,7 +567,7 @@ namespace onep
           {
             int cid = it.first;
 
-            skillBranchActivatedObservers.push_back(it.second->getBranchesActivatedTable()->getOBranchActivated(name)->connect(osgGaming::Func<bool>([=](bool activated)
+            skillBranchActivatedObservers.push_back(it.second->getBranchesActivatedTable()->getOBranchActivated(name)->connect([=](bool activated)
             {
               Multithreading::executeInUiAsync([=]()
               {
@@ -577,7 +577,7 @@ namespace onep
                   checkBox->setChecked(activated);
                 }
               });
-            })));
+            }));
           }
         });
 
@@ -601,13 +601,13 @@ namespace onep
           simulation->start();
       });
 
-      notifyRunningButton = simulation->getOState()->connectAndNotify(osgGaming::Func<Simulation::State>([&](Simulation::State state)
+      notifyRunningButton = simulation->getOState()->connectAndNotify([&](Simulation::State state)
       {
         if (state != Simulation::State::Paused)
           buttonStartStop->setText("Stop simulation");
         else
           buttonStartStop->setText("Start simulation");
-      }));
+      });
 
       widgetStats = new QWidget();
       labelSkillpoints = new QLabel(QString());
@@ -648,11 +648,11 @@ namespace onep
             });
           });
 
-          skillActivatedObservers.push_back(skillPtr->getObActivated()->connect(osgGaming::Func<bool>([=](bool activated)
+          skillActivatedObservers.push_back(skillPtr->getObActivated()->connect([=](bool activated)
           {
             QSignalBlocker blocker(checkBox);
             checkBox->setChecked(activated);
-          })));
+          }));
         }
       }
 
@@ -755,22 +755,22 @@ namespace onep
 
     m->setupUi();
 
-    m->notifyDay = m->oDay->connect(osgGaming::Func<int>([this](int day)
+    m->notifyDay = m->oDay->connect([this](int day)
     {
       m->updateCountryInfo();
-    }));
+    });
 
-    m->notifySkillpoints = m->oNumSkillPoints->connectAndNotify(osgGaming::Func<int>([this](int skillPoints)
+    m->notifySkillpoints = m->oNumSkillPoints->connectAndNotify([this](int skillPoints)
     {
       m->labelSkillpoints->setText(QString("Skill Points: %1").arg(skillPoints));
-    }));
+    });
 
-    m->notifySelectedCountry = m->countryOverlay->getOSelectedCountryId()->connectAndNotify(osgGaming::Func<int>([this](int selected)
+    m->notifySelectedCountry = m->countryOverlay->getOSelectedCountryId()->connectAndNotify([this](int selected)
     {
       m->updateCountryInfo(selected);
 
       m->toggleCountryButton->setEnabled(selected > 0);
-    }));
+    });
   }
 
   DebugWindow::~DebugWindow()

@@ -220,7 +220,7 @@ namespace onep
       maxDistance = std::max<float>(dist, maxDistance);
     }
 
-    m->selectedCountryObserver = m->countryOverlay->getOSelectedCountryId()->connect(osgGaming::Func<int>([this, minDistance, maxDistance](int id)
+    m->selectedCountryObserver = m->countryOverlay->getOSelectedCountryId()->connect([this, minDistance, maxDistance](int id)
     {
       if (id > 0)
       {
@@ -294,7 +294,7 @@ namespace onep
       }
 
       m->selectedCountry = id;
-    }));
+    });
 
     setCameraMotionDuration(2.0);
     setCameraMotionEase(osgGaming::AnimationEase::SMOOTHER);

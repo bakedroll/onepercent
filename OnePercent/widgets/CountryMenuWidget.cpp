@@ -71,7 +71,7 @@ namespace onep
           const auto& name = branch.second->getName();
 
           notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name)->connectAndNotify(
-            osgGaming::Func<bool>([this, index, branch, name](bool activated)
+            [this, index, branch, name](bool activated)
           {
             Multithreading::executeInUiAsync([this, index, branch, name, activated]()
             {
@@ -88,7 +88,7 @@ namespace onep
                 buttons[index]->setEnabled(oNumSkillPoints->get() >= costs);
               }
             });
-          })));
+          }));
 
           index++;
         }
@@ -143,10 +143,10 @@ namespace onep
       index++;
     }
 
-    m->notifySkillPoints = m->oNumSkillPoints->connect(osgGaming::Func<int>([this](int skillPoints)
+    m->notifySkillPoints = m->oNumSkillPoints->connect([this](int skillPoints)
     {
       m->updateUi();
-    }));
+    });
 	}
 
 	CountryMenuWidget::~CountryMenuWidget() = default;

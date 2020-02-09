@@ -217,7 +217,7 @@ namespace onep
       connect(buttonDebug,&QPushButton::clicked, base, &MainFrameWidget::clickedButtonDebug);
 
       observerRunning = simulation->getOState()->connect(
-        osgGaming::Func<Simulation::State>([buttonAutoPause, buttonPause, buttonPlay, buttonFastForward, simulationButtonsGroup](Simulation::State state)
+        [buttonAutoPause, buttonPause, buttonPlay, buttonFastForward, simulationButtonsGroup](Simulation::State state)
         {
           QSignalBlocker blocker(simulationButtonsGroup);
 
@@ -241,7 +241,7 @@ namespace onep
           {
             buttonPause->setChecked(true);
           }
-        }));
+        });
 
       connect(simulationButtonsGroup, QOverload<int, bool>::of(&QButtonGroup::buttonToggled), [this](int id, bool checked)
       {
@@ -269,7 +269,7 @@ namespace onep
         setCenterWidgetEnabled(skillsWidget);
       });
 
-      observerDay = oDay->connectAndNotify(osgGaming::Func<int>([this, labelDays](int day)
+      observerDay = oDay->connectAndNotify([this, labelDays](int day)
       {
         labelDays->setText(tr("Day %1").arg(day));
 
@@ -290,17 +290,17 @@ namespace onep
             label.second->setText(QString::number(it->second));
           }
         });
-      }));
+      });
 
-      observerSkillPoints = oNumSkillPoints->connectAndNotify(osgGaming::Func<int>([labelSkillPoints](int points)
+      observerSkillPoints = oNumSkillPoints->connectAndNotify([labelSkillPoints](int points)
       {
         labelSkillPoints->setText(tr("Skillpoints: %1").arg(points));
-      }));
+      });
 
-      observerCurrentCountry = countryOverlay->getOSelectedCountryId()->connectAndNotify(osgGaming::Func<int>([this](int id)
+      observerCurrentCountry = countryOverlay->getOSelectedCountryId()->connectAndNotify([this](int id)
       {
         frameLeftMenu->setVisible(id > 0);
-      }));
+      });
 
       osg::ref_ptr<osgGaming::FpsUpdateCallback> fpsCallback = new osgGaming::FpsUpdateCallback();
       fpsCallback->setUpdateFunc([labelFps](int fps)

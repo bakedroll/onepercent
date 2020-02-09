@@ -73,14 +73,14 @@ namespace onep
     const auto simState = m->modelContainer->getModel()->getSimulationStateTable();
 
     m->branchActivatedObserver = simState->getOCountryBranchActivated()->connect(
-      osgGaming::Func<LuaSimulationStateTable::CountryBranch>([this](const LuaSimulationStateTable::CountryBranch& cb)
+      [this](const LuaSimulationStateTable::CountryBranch& cb)
     {
       m->modelContainer->accessModel([this, &cb](const LuaModel::Ptr& model)
       {
         auto cstate = model->getSimulationStateTable()->getCountryState(cb.countryId);
         triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_ACTIVATED, cb.branchName, cstate->luaref());
       });
-    }));
+    });
   }
 
   void LuaControl::doSkillsUpdate(const LuaModel::Ptr& model)

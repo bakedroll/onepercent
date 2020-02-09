@@ -145,7 +145,7 @@ namespace onep
   {
     m->setupUi();
 
-    m->skillPointsObserver = injector.inject<ONumSkillPoints>()->connectAndNotify(osgGaming::Func<int>([this](int points)
+    m->skillPointsObserver = injector.inject<ONumSkillPoints>()->connectAndNotify([this](int points)
     {
       for (const auto& token : m->skillTokens)
       {
@@ -164,7 +164,7 @@ namespace onep
 
         token.second.button->setEnabled(enabled);
       }
-    }));
+    });
   }
 
   SkillsWidget::~SkillsWidget() = default;

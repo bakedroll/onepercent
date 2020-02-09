@@ -9,43 +9,6 @@
 namespace osgGaming
 {
   /**
-   * Wraps std::function<void(T)> for any type T and
-   * std::function<void()>.
-   * Some compilers seem to have a problem with
-   * std::function<void(T)> for T = void.
-   */
-  template<typename T>
-  class Func
-  {
-  public:
-    Func(const std::function<void(T)>& func)
-      : m_func(func)
-    {
-    }
-
-    void exec(T arg) { m_func(arg); }
-
-  private:
-    std::function<void(T)> m_func;
-  };
-
-  template<>
-  class Func<void>
-  {
-  public:
-    Func(const std::function<void()>& func)
-      : m_func(func)
-    {
-    }
-
-    void exec() { m_func(); }
-
-  private:
-    std::function<void()> m_func;
-  };
-
-
-  /**
    * An Observer<T> is returned when Observable<T> registers a new callback function.
    * It holds the callback function, thus it gets automatically unregistered
    * when Observer<T> dies.
@@ -54,22 +17,26 @@ namespace osgGaming
   class Observer : public osg::Referenced
   {
   public:
-    typedef osg::ref_ptr<Observer<T>> Ptr;
+    using Ptr = osg::ref_ptr<Observer<T>>;
 
-    Observer(const Func<T>& func) : func(func) { }
+    Observer(const std::function<void(T)>& func)
+      : m_func(func)
+    {}
 
-    Func<T> func;
+    std::function<void(T)> m_func;
   };
 
   template<>
   class Observer<void> : public osg::Referenced
   {
   public:
-    typedef osg::ref_ptr<Observer> Ptr;
+    using Ptr = osg::ref_ptr<Observer>;
 
-    Observer(const Func<void>& func) : func(func) { }
+    Observer(const std::function<void()>& func)
+      : m_func(func)
+    {}
 
-    Func<void> func;
+    std::function<void()> m_func;
   };
 
   namespace __ObservableInternals
@@ -82,15 +49,17 @@ namespace osgGaming
     class ObservableBase : public osg::Referenced
     {
     public:
-      ObservableBase() : osg::Referenced() {}
+      ObservableBase()
+        : osg::Referenced()
+      {}
 
       /**
        * Registers a callback function
        * @param func callback function
        */
-      typename Observer<T>::Ptr connect(const Func<T>& func)
+      typename Observer<T>::Ptr connect(const std::function<void(T)>& func)
       {
-        typename Observer<T>::Ptr observer = new Observer<T>(func);
+        auto observer = new Observer<T>(func);
         observers().push_back(observer);
 
         return observer;
@@ -100,16 +69,16 @@ namespace osgGaming
        * Registers and notifies a callback function
        * @param func callback function
        */
-      typename Observer<T>::Ptr connectAndNotify(const Func<T>& func)
+      typename Observer<T>::Ptr connectAndNotify(const std::function<void(T)>& func)
       {
-        typename Observer<T>::Ptr observer = connect(func);
+        auto observer = connect(func);
         notify(observer);
 
         return observer;
       }
 
     protected:
-      typedef std::vector<osg::observer_ptr<Observer<T>>> ObserverList;
+      using ObserverList = std::vector<osg::observer_ptr<Observer<T>>>;
 
       /**
        * The Observers are stored as weak pointers.
@@ -117,14 +86,18 @@ namespace osgGaming
        */
       ObserverList& observers()
       {
-        typename ObserverList::iterator it = m_observers.begin();
+        auto it = m_observers.begin();
         while (it != m_observers.end())
         {
           typename Observer<T>::Ptr obs;
           if (!it->lock(obs))
+          {
             it = m_observers.erase(it);
+          }
           else
+          {
             ++it;
+          }
         }
 
         return m_observers;
@@ -133,16 +106,18 @@ namespace osgGaming
       /**
        * Notify a specific observer. Must be implemented by inheriting classes.
        */
-      virtual void notify(typename Observer<T>::Ptr obs) = 0;
+      virtual void notify(const typename Observer<T>::Ptr& obs) = 0;
 
       /**
        * Notifes all the observers.
        */
       void notifyAll()
       {
-        ObserverList& obs = observers();
-        for (typename ObserverList::iterator it = obs.begin(); it != obs.end(); ++it)
-          notify(*it);
+        const ObserverList& obs = observers();
+        for (const auto& o : obs)
+        {
+          notify(o.get());
+        }
       }
 
       ObserverList m_observers;
@@ -159,7 +134,7 @@ namespace osgGaming
   class Observable : public __ObservableInternals::ObservableBase<T>
   {
   public:
-	virtual ~Observable() {}
+	  virtual ~Observable() = default;
 
     typedef osg::ref_ptr<Observable<T>> Ptr;
 
@@ -180,16 +155,15 @@ namespace osgGaming
       __ObservableInternals::ObservableBase<T>::notifyAll();
     }
 
-    T get()
+    T get() const
     {
       return m_value;
     }
 
   protected:
-
-    virtual void notify(typename Observer<T>::Ptr obs) override
+    void notify(const typename Observer<T>::Ptr& obs) override
     {
-      obs->func.exec(m_value);
+      obs->m_func(m_value);
     }
 
   private:
@@ -215,9 +189,9 @@ namespace osgGaming
     }
 
   protected:
-    virtual void notify(Observer<void>::Ptr obs) override
+    void notify(const Observer<void>::Ptr& obs) override
     {
-      obs->func.exec();
+      obs->m_func();
     }
 
   };
