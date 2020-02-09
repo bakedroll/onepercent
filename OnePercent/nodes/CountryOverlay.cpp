@@ -179,28 +179,29 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
   osg::ref_ptr<osg::Program> cnProgram(new osg::Program());
   osg::ref_ptr<osg::Program> chnProgram(new osg::Program());
 
-  auto frag_shader = m->shaderFactory->make()
-                             ->type(osg::Shader::FRAGMENT)
-                             ->module(m->resourceManager->loadText(
-                                     QString("./GameData/shaders/modules/%1.glsl").arg("noise3D").toStdString()))
-                             ->module(m->resourceManager->loadText("./GameData/shaders/country.frag"))
-                             ->build();
+  const auto fragShader = m->shaderFactory->make()
+                                  ->type(osg::Shader::FRAGMENT)
+                                  ->module(m->resourceManager->loadText(
+                                          QString("./GameData/shaders/modules/%1.glsl").arg("noise3D").toStdString()))
+                                  ->module(m->resourceManager->loadText("./GameData/shaders/country.frag"))
+                                  ->build();
 
-  auto frag_shader_hover = m->shaderFactory->make()
-                                   ->type(osg::Shader::FRAGMENT)
-                                   ->module(m->resourceManager->loadText("./GameData/shaders/countryHover.frag"))
-                                   ->build();
+  const auto fragShaderHover = m->shaderFactory->make()
+                                       ->type(osg::Shader::FRAGMENT)
+                                       ->module(m->resourceManager->loadText("./GameData/shaders/countryHover.frag"))
+                                       ->build();
 
-  auto vert_shader = m->resourceManager->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
+  const auto vertShader = m->resourceManager->loadShader("./GameData/shaders/country.vert", osg::Shader::VERTEX);
 
-  cnProgram->addShader(frag_shader);
-  cnProgram->addShader(vert_shader);
+  cnProgram->addShader(fragShader);
+  cnProgram->addShader(vertShader);
 
-  chnProgram->addShader(frag_shader_hover);
-  chnProgram->addShader(vert_shader);
+  chnProgram->addShader(fragShaderHover);
+  chnProgram->addShader(vertShader);
 
   // Load distance texture
-  auto distanceTexture = m->textureFactory->make()->image(m->resourceManager->loadImage(distanceMapFilename))->build();
+  const auto distanceTexture =
+          m->textureFactory->make()->image(m->resourceManager->loadImage(distanceMapFilename))->build();
 
   // Create statesets
   auto csStateSet = m->switchCountryNodes->getOrCreateStateSet();
@@ -214,8 +215,6 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
 
   m->neighbourMap.clear();
 
-  // Calculate 2nd texcoord layer
-  auto       radius = m->configManager->getNumber<float>("earth.radius");
   const auto bytes  = m->resourceManager->loadBinary(countriesFilename);
 
   osgGaming::ByteStream stream(bytes);
@@ -223,18 +222,18 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
   const auto ncountries = stream.read<int>();
   for (auto i = 0; i < ncountries; i++)
   {
-    auto id      = stream.read<int>();
-    auto centerX = stream.read<float>();
-    auto centerY = stream.read<float>();
-    auto width   = stream.read<float>();
-    auto height  = stream.read<float>();
+    auto       id      = stream.read<int>();
+    const auto centerX = stream.read<float>();
+    const auto centerY = stream.read<float>();
+    const auto width   = stream.read<float>();
+    const auto height  = stream.read<float>();
 
     osg::Vec2f centerLatLong((0.5f - centerY) * C_PI, fmodf(centerX + 0.5f, 1.0f) * 2.0f * C_PI);
     osg::Vec2f size(width, height);
 
     NeighborList neighborList;
 
-    auto neighborsCount = stream.read<int>();
+    const auto neighborsCount = stream.read<int>();
     for (auto j = 0; j < neighborsCount; j++)
     {
       auto neighbourId = stream.read<int>();
@@ -244,13 +243,15 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
     m->neighbourMap.insert(NeighbourMap::value_type(id, neighborList));
 
     BoundariesData::BorderIdMap neighborBorderMap;
-    auto                        neighborBorderCount = stream.read<int>();
+    const auto                  neighborBorderCount = stream.read<int>();
     for (auto j = 0; j < neighborBorderCount; j++)
     {
-      std::vector<int> borders;
+      auto       nid    = stream.read<int>();
+      const auto bcount = stream.read<int>();
 
-      auto nid    = stream.read<int>();
-      auto bcount = stream.read<int>();
+      std::vector<int> borders;
+      borders.reserve(bcount);
+
       for (auto k = 0; k < bcount; k++)
       {
         borders.push_back(stream.read<int>());
@@ -381,7 +382,7 @@ CountryNode::Ptr CountryOverlay::getCountryNode(int id) const
 
 CountryNode::Ptr CountryOverlay::getCountryNode(const osg::Vec2f& coord) const
 {
-  auto id = getCountryId(coord);
+  const auto id = getCountryId(coord);
 
   if (id == 0)
   {
