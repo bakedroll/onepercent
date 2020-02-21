@@ -61,6 +61,15 @@ namespace onep
     }
 
     template <typename LuaObject,
+        typename = typename std::enable_if<std::is_base_of<LuaObjectMapper, LuaObject>::value>::type>
+        std::shared_ptr<LuaObject> appendMappedElement(luabridge::LuaRef& ref)
+    {
+        (*m_ref).append(ref);
+        auto size = (*m_ref).length();
+        return makeSharedAndAddElement<LuaObject, int>(ref, size);
+    }
+
+    template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaObjectMapper, LuaObject>::value>::type,
               typename KeyType,
               typename... Args>

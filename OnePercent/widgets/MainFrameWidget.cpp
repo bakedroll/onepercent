@@ -6,8 +6,8 @@
 #include "widgets/SkillsWidget.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
-#include "scripting/LuaValuesDefTable.h"
 #include "scripting/LuaValueDef.h"
+#include "scripting/LuaArrayTable.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 

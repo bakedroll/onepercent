@@ -4,7 +4,6 @@
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaBranchesTable.h"
-#include "scripting/LuaValuesDefTable.h"
 #include "scripting/LuaValueDef.h"
 #include "scripting/LuaModelPrototype.h"
 #include "simulation/ModelContainer.h"
@@ -54,17 +53,6 @@ namespace onep
     {
     }
 
-    bool isValueExisting(const std::string& name) const
-    {
-      auto valuesTable = modelContainer->getModel()->getValuesDefTable();
-      return valuesTable->containsMappedElement(name);
-    }
-
-    bool isBranchExisting(const std::string& name) const
-    {
-      return modelContainer->getModel()->getBranchesTable()->containsMappedElement(name);
-    }
-
     using VisualBindingsMap = std::map<std::string, std::string>;
     using PrototypeMap      = std::map<std::string, osg::ref_ptr<PrototypeNode>>;
 
@@ -107,12 +95,6 @@ namespace onep
 
   void LuaVisuals::luaBindValueToVisuals(const std::string& value, const std::string& visual)
   {
-    if (!m->isValueExisting(value))
-    {
-      OSGG_QLOG_WARN(QString("Visuals binding: Value '%1' does not exist.").arg(value.c_str()));
-      assert_return(false);
-    }
-
     m->valueBindings[value] = visual;
 
     OSGG_QLOG_DEBUG(QString("Value visuals binding added: %1 -> %2")

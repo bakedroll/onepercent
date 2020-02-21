@@ -6,9 +6,9 @@
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSkillsTable.h"
 #include "scripting/LuaCountriesTable.h"
-#include "scripting/LuaValuesDefTable.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaObservableCallback.h"
+#include "scripting/LuaValueDef.h"
 #include "simulation/ModelContainer.h"
 
 #include <QString>
@@ -34,15 +34,6 @@ namespace onep
       : lua(injector.inject<LuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
     {
-    }
-
-    void callLuaFunctions(LuaArrayTable::Ptr& table)
-    {
-      table->foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
-      {
-        assert_return(lua->checkIsType(value, LUA_TFUNCTION));
-        value();
-      });
     }
 
     LuaStateManager::Ptr lua;
@@ -222,10 +213,7 @@ namespace onep
         auto valueRef = it.value();
         assert_continue(m->lua->checkIsType(valueRef, LUA_TTABLE));
 
-        auto nameRef = valueRef["name"];
-        assert_continue(m->lua->checkIsType(nameRef, LUA_TSTRING));
-
-        model->getValuesDefTable()->addValue(nameRef, valueRef);
+        model->getValuesDefTable()->addEement(valueRef);
       }
     });
   }

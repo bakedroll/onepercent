@@ -4,9 +4,9 @@
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaSimulationStateTable.h"
-#include "scripting/LuaValuesDefTable.h"
 #include "scripting/LuaValueDef.h"
 #include "scripting/LuaCountry.h"
+#include "scripting/LuaArrayTable.h"
 
 #include <QMutex>
 
