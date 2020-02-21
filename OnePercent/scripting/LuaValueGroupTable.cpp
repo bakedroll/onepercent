@@ -48,4 +48,9 @@ namespace onep
     m_groups[name] = group;
     return group;
   }
+
+  const LuaValueGroupTable::GroupsMap& LuaValueGroupTable::getAllGroups() const
+  {
+    return m_groups;
+  }
 }

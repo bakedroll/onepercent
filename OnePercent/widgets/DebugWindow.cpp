@@ -298,6 +298,39 @@ namespace onep
       updateCountryInfo(countryOverlay->getSelectedCountryId());
     }
 
+    void addValueWidget(const LuaValueGroupTable::Ptr& values, const std::string& prefix = "")
+    {
+      for (const auto& value : values->getMap())
+      {
+        const auto name = value.first;
+        const auto displayName = prefix + name;
+        ValueWidget widget = createValueWidgets(QString("%1").arg(displayName.c_str()), [=](float value, LuaCountryState::Ptr cstate)
+        {
+          values->setValue(name, value);
+        });
+
+        valueWidgets[displayName] = widget;
+      }
+    }
+
+    void initValueWidget(const LuaValueGroupTable::Ptr& values, const std::string& prefix = "")
+    {
+      for (const auto& value : values->getMap())
+      {
+        const auto name        = value.first;
+        const auto displayName = prefix + name;
+        auto&      widget      = valueWidgets[displayName];
+
+        widget.edit->setText(QString::number(value.second));
+        widget.progressBar->setValue(osg::clampBetween<int>(int(value.second * 100.0f), 0, 100));
+
+        if (checkBoxEnableGraph->isChecked())
+        {
+          updateValueGraph(widget, value.second);
+        }
+      }
+    }
+
     void updateCountryInfo(int selectedId)
     {
       // cancel update if DebugWindow is not shown
@@ -321,7 +354,8 @@ namespace onep
 
         auto countryState = countryStates[selectedId];
 
-        auto values = countryState->getValuesTable()->getMap();
+        auto        values = countryState->getValuesTable();
+        const auto& groups = countryState->getValuesTable()->getAllGroups();
 
         if (layoutStats == nullptr)
         {
@@ -336,14 +370,11 @@ namespace onep
 
           layoutStats->addWidget(labelCountry);
 
-          for (auto it = values.begin(); it != values.end(); ++it)
+          addValueWidget(values);
+
+          for (const auto& group : groups)
           {
-            std::string name = it->first;
-            ValueWidget widget = createValueWidgets(QString("%1").arg(it->first.c_str()), [=](float value, LuaCountryState::Ptr cstate)
-            {
-              cstate->getValuesTable()->setValue(name, value);
-            });
-            valueWidgets[it->first] = widget;
+              addValueWidget(group.second, group.first + ".");
           }
 
           notifyRunningValues = simulation->getOState()->connectAndNotify([this](Simulation::State state)
@@ -357,13 +388,12 @@ namespace onep
 
         labelCountry->setText(QString("%1 (%2)").arg(QString::fromLocal8Bit(country->getName().c_str())).arg(country->getId()));
 
-        for (auto it = values.begin(); it != values.end(); ++it)
-        {
-          valueWidgets[it->first].edit->setText(QString::number(it->second));
-          valueWidgets[it->first].progressBar->setValue(osg::clampBetween<int>(int(it->second * 100.0f), 0, 100));
 
-          if (checkBoxEnableGraph->isChecked())
-            updateValueGraph(valueWidgets[it->first], it->second);
+        initValueWidget(values);
+
+        for (const auto& group : groups)
+        {
+          initValueWidget(group.second, group.first + ".");
         }
       });
     }
