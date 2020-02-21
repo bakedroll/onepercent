@@ -65,16 +65,25 @@ namespace onep
 
         branchesTable->foreachMappedElementDo<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
         {
-          auto name = branch->getName();
+          const auto name = branch->getName();
           state->getBranchesActivatedTable()->addBranchActivated(name);
         });
 
         valuesTable->foreachMappedElementDo<LuaValueDef>([&](LuaValueDef::Ptr& def)
         {
-          auto name = def->getName();
-          auto init = country->getInitValue(name, def->getInit());
+          const auto name   = def->getName();
+          const auto group  = def->getGroup();
+          const auto init   = country->getInitValue(name, def->getInit());
+          auto values       = state->getValuesTable();
 
-          state->getValuesTable()->setValue(name, init);
+          if (group.empty())
+          {
+            values->setValue(name, init);
+          }
+          else
+          {
+            values->getGroup(group)->setValue(name, init);
+          }
         });
       });
 

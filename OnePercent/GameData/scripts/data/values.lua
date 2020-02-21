@@ -1,4 +1,6 @@
-lua.control:create_values({
+local control = lua.control
+
+control:create_values({
   -- Individual values per country
   {
     name = "population",
@@ -94,3 +96,18 @@ lua.control:create_values({
     init = 0.0
   }
 })
+
+for _, branch in pairs(model.branches) do
+  control:create_values({
+    {
+      name = "propagation",
+      init = 0.0,
+      group = branch.name
+    },
+    {
+      name = "propagated",
+      init = 0.0,
+      group = branch.name
+    }
+  })
+end

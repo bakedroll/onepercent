@@ -276,7 +276,7 @@ namespace onep
 
         modelContainer->accessModel([this, selectedCountryId](const LuaModel::Ptr& model)
         {
-          const auto& valuesMap = model->getSimulationStateTable()->getCountryState(selectedCountryId)->getValuesMap();
+          const auto& valuesMap = model->getSimulationStateTable()->getCountryState(selectedCountryId)->getValuesTable()->getMap();
           for (const auto& label : valueLabelMap)
           {
             const auto it = valuesMap.find(label.first);

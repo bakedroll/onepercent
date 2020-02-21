@@ -321,7 +321,7 @@ namespace onep
 
         auto countryState = countryStates[selectedId];
 
-        auto values = countryState->getValuesMap();
+        auto values = countryState->getValuesTable()->getMap();
 
         if (layoutStats == nullptr)
         {

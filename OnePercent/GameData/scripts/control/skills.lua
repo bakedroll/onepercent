@@ -75,6 +75,8 @@ lua.control:on_event(defines.callback.on_branch_update, function(branch_name, co
     country_state.branches_activated[branch_name] = true
   end
 
+  print(helper.dump_object(country_state.values))
+
 end)
 
 lua.control:on_event(defines.callback.on_branch_activated, function(branch_name, country_state)

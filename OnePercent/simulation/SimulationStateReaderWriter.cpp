@@ -44,7 +44,7 @@ namespace onep
       {
         stream << cstate.first;
 
-        auto values  = cstate.second->getValuesMap();
+        auto values  = cstate.second->getValuesTable()->getMap();
 
         stream << static_cast<int>(values.size());
         for (const auto& value : values)
@@ -140,7 +140,7 @@ namespace onep
           }
 
           auto& cstate = cstates[cid];
-          auto  values = cstate->getValuesMap();
+          auto  values = cstate->getValuesTable()->getMap();
 
           stream >> numValues;
           for (auto j = 0; j < numValues; j++)

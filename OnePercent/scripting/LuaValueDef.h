@@ -15,6 +15,7 @@ namespace onep
     ~LuaValueDef();
 
     std::string getName() const;
+    std::string getGroup() const;
     float       getInit() const;
     bool        getIsVisible() const;
 
