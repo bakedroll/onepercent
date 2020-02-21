@@ -91,11 +91,11 @@ control:on_event(defines.callback.on_overlay_changed, function(old_branch, branc
 		(branch == '') and color_transparent or colors_overlay[branch])
 
 	if old_branch ~= '' then
-		visuals:unbind_value("propagated_" .. old_branch)
+		visuals:unbind_group_value(old_branch, "propagated")
 	end
 
  	if branch ~= '' then
-		visuals:bind_value_to_visuals("propagated_" .. branch, "takeover")
+		visuals:bind_group_value_to_visuals(branch, "propagated", "takeover")
 	end
 
 	visuals:update_bindings()

@@ -27,6 +27,9 @@ namespace onep
     void luaBindValueToVisuals(const std::string& value, const std::string& visual);
     void luaUnbindValue(const std::string& value);
 
+    void luaBindGroupValueToVisuals(const std::string& group, const std::string& value, const std::string& visual);
+    void luaUnbindGroupValue(const std::string& group, const std::string& value);
+
     void luaRegisterModelPrototype(const std::string& prototypeName, luabridge::LuaRef table);
     PrototypeNode* luaGetModelPrototype(const std::string& prototypeName) const;
 

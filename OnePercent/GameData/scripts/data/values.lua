@@ -54,46 +54,6 @@ control:create_values({
   {
     name = "anger",
     init = 0.0
-  },
-  {
-    name = "propagated_banks",
-    init = 0.0
-  },
-  {
-    name = "propagation_banks",
-    init = 0.0
-  },
-  {
-    name = "propagated_politics",
-    init = 0.0
-  },
-  {
-    name = "propagation_politics",
-    init = 0.0
-  },
-  {
-    name = "propagated_concerns",
-    init = 0.0
-  },
-  {
-    name = "propagation_concerns",
-    init = 0.0
-  },
-  {
-    name = "propagated_media",
-    init = 0.0
-  },
-  {
-    name = "propagation_media",
-    init = 0.0
-  },
-  {
-    name = "propagated_control",
-    init = 0.0
-  },
-  {
-    name = "propagation_control",
-    init = 0.0
   }
 })
 

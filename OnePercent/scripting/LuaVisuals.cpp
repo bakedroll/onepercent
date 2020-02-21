@@ -4,7 +4,6 @@
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaBranchesTable.h"
-#include "scripting/LuaValueDef.h"
 #include "scripting/LuaModelPrototype.h"
 #include "simulation/ModelContainer.h"
 #include "nodes/CountryOverlay.h"
@@ -37,6 +36,8 @@ namespace onep
       .beginClass<LuaVisuals>("Visuals")
       .addFunction("bind_value_to_visuals", &LuaVisuals::luaBindValueToVisuals)
       .addFunction("unbind_value", &LuaVisuals::luaUnbindValue)
+      .addFunction("bind_group_value_to_visuals", &LuaVisuals::luaBindGroupValueToVisuals)
+      .addFunction("unbind_group_value", &LuaVisuals::luaUnbindGroupValue)
       .addFunction("update_bindings", &LuaVisuals::updateBindings)
       .addFunction("register_model_prototype", &LuaVisuals::luaRegisterModelPrototype)
       .addFunction("get_model_prototype", &LuaVisuals::luaGetModelPrototype)
@@ -53,13 +54,15 @@ namespace onep
     {
     }
 
-    using VisualBindingsMap = std::map<std::string, std::string>;
-    using PrototypeMap      = std::map<std::string, osg::ref_ptr<PrototypeNode>>;
+    using VisualBindingsMap      = std::map<std::string, std::string>;
+    using VisualGroupBindingsMap = std::map<std::string, VisualBindingsMap>;
+    using PrototypeMap           = std::map<std::string, osg::ref_ptr<PrototypeNode>>;
 
-    ModelContainer::Ptr  modelContainer;
-    CountryOverlay::Ptr  countryOverlay;
-    VisualBindingsMap    valueBindings;
-    LuaStateManager::Ptr lua;
+    ModelContainer::Ptr    modelContainer;
+    CountryOverlay::Ptr    countryOverlay;
+    VisualBindingsMap      valueBindings;
+    VisualGroupBindingsMap groupValueBindings;
+    LuaStateManager::Ptr   lua;
 
     PrototypeMap prototypes;
   };
@@ -88,6 +91,17 @@ namespace onep
           {
             setUniform(node, visual.second, valuesTable->getValue(visual.first));
           }
+
+          for (const auto& group : m->groupValueBindings)
+          {
+            const auto valueGroup = valuesTable->getGroup(group.first);
+            assert_continue(valueGroup);
+
+            for (const auto& visual : group.second)
+            {
+              setUniform(node, visual.second, valueGroup->getValue(visual.first));
+            }
+          }
         }
       });
     });
@@ -112,6 +126,42 @@ namespace onep
     }
 
     m->valueBindings.erase(it);
+  }
+
+  void LuaVisuals::luaBindGroupValueToVisuals(const std::string& group, const std::string& value,
+    const std::string& visual)
+  {
+      m->groupValueBindings[group][value] = visual;
+
+      OSGG_QLOG_DEBUG(QString("Group value visuals binding added: %1.%2 -> %3")
+          .arg(group.c_str())
+          .arg(value.c_str())
+          .arg(visual.c_str()));
+  }
+
+  void LuaVisuals::luaUnbindGroupValue(const std::string& group, const std::string& value)
+  {
+      auto groupIt = m->groupValueBindings.find(group);
+      if (groupIt == m->groupValueBindings.end())
+      {
+        OSGG_QLOG_WARN(QString("Visuals unbinding: Binding for group '%1' does not exist").arg(group.c_str()));
+        assert_return(false);
+      }
+
+      auto it = groupIt->second.find(value);
+      if (it == groupIt->second.end())
+      {
+        OSGG_QLOG_WARN(QString("Visuals unbinding: Binding for group value '%1.%2' does not exist")
+                               .arg(group.c_str())
+                               .arg(value.c_str()));
+        assert_return(false);
+      }
+
+      groupIt->second.erase(it);
+      if (groupIt->second.empty())
+      {
+        m->groupValueBindings.erase(groupIt);
+      }
   }
 
   void LuaVisuals::luaRegisterModelPrototype(const std::string& prototypeName, luabridge::LuaRef table)
