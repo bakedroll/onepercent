@@ -2,17 +2,14 @@ lua.control:create_values({
   -- Individual values per country
   {
     name = "population",
-    type = "default",
     init = 0.0
   },
   {
     name = "wealth",
-    type = "default",
     init = 0.0
   },
   {
     name = "trust",
-    type = "default",
     init = 0.0,
     visible = true
   },
@@ -20,58 +17,80 @@ lua.control:create_values({
   -- Politics
   {
     name = "political_influence",
-    type = "default",
     init = 0.0
   },
   {
     name = "ideology",
-    type = "default",
     init = 0.0,
     visible = true
   },
   {
     name = "divisiveness",
-    type = "default",
     init = 0.0
   },
   {
     name = "education",
-    type = "default",
     init = 0.0
   },
   {
     name = "satisfaction",
-    type = "default",
     init = 0.0
   },
 
   -- banks
   {
     name = "dept",
-    type = "default",
     init = 0.0,
     visible = true
   },
   {
     name = "dept_p",
-    type = "default",
     init = 0.0
   },
 
 
   {
     name = "anger",
-    type = "default",
     init = 0.0
   },
   {
-    name = "propagated",
-    type = "branch",
+    name = "propagated_banks",
     init = 0.0
   },
   {
-    name = "propagation",
-    type = "branch",
+    name = "propagation_banks",
+    init = 0.0
+  },
+  {
+    name = "propagated_politics",
+    init = 0.0
+  },
+  {
+    name = "propagation_politics",
+    init = 0.0
+  },
+  {
+    name = "propagated_concerns",
+    init = 0.0
+  },
+  {
+    name = "propagation_concerns",
+    init = 0.0
+  },
+  {
+    name = "propagated_media",
+    init = 0.0
+  },
+  {
+    name = "propagation_media",
+    init = 0.0
+  },
+  {
+    name = "propagated_control",
+    init = 0.0
+  },
+  {
+    name = "propagation_control",
     init = 0.0
   }
 })

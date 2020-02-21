@@ -134,11 +134,6 @@ namespace onep
           }
 
           const auto name = QString::fromStdString(def->getName());
-          if (def->getType() == LuaValueDef::Type::Branch)
-          {
-            OSGG_QLOG_WARN(QString("Displaying branch values ('%1') currently not supported").arg(name));
-            assert_return(false);
-          }
 
           auto labelName = new QLabel(name);
           labelName->setObjectName("LabelValue");

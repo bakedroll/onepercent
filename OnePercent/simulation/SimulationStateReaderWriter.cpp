@@ -44,8 +44,7 @@ namespace onep
       {
         stream << cstate.first;
 
-        auto values       = cstate.second->getValuesMap();
-        auto branchValues = cstate.second->getBranchValuesMap();
+        auto values  = cstate.second->getValuesMap();
 
         stream << static_cast<int>(values.size());
         for (const auto& value : values)
@@ -54,22 +53,6 @@ namespace onep
           stream.writeRawData(value.first.c_str(), static_cast<int>(value.first.length()));
 
           stream << static_cast<float>(value.second);
-        }
-
-        stream << static_cast<int>(branchValues.size());
-        for (const auto& branchValue : branchValues)
-        {
-          stream << static_cast<int>(branchValue.first.length());
-          stream.writeRawData(branchValue.first.c_str(), static_cast<int>(branchValue.first.length()));
-
-          stream << static_cast<int>(branchValue.second.size());
-          for (const auto& vit : branchValue.second)
-          {
-            stream << static_cast<int>(vit.first.length());
-            stream.writeRawData(vit.first.c_str(), static_cast<int>(vit.first.length()));
-
-            stream << float(vit.second);
-          }
         }
 
         stream << numBranches;
@@ -156,9 +139,8 @@ namespace onep
             return;
           }
 
-          auto& cstate       = cstates[cid];
-          auto  values       = cstate->getValuesMap();
-          auto  branchValues = cstate->getBranchValuesMap();
+          auto& cstate = cstates[cid];
+          auto  values = cstate->getValuesMap();
 
           stream >> numValues;
           for (auto j = 0; j < numValues; j++)
@@ -177,47 +159,6 @@ namespace onep
             }
 
             cstate->getValuesTable()->setValue(valueName, value);
-          }
-
-          stream >> numBranches;
-          for (auto j = 0; j < numBranches; j++)
-          {
-            stream >> len;
-            stream.readRawData(buffer, len);
-            buffer[len] = '\0';
-            std::string branchName(buffer);
-
-            stream >> numValues;
-            for (auto k = 0; k < numValues; k++)
-            {
-              stream >> len;
-              stream.readRawData(buffer, len);
-              buffer[len] = '\0';
-              std::string valueName(buffer);
-
-              stream >> value;
-
-              if (branchValues.count(branchName) == 0)
-              {
-                OSGG_QLOG_WARN(QString("Branch %1 not found").arg(branchName.c_str()));
-                continue;
-              }
-
-              if (branchValues[branchName].count(valueName) == 0)
-              {
-                OSGG_QLOG_WARN(QString("Value %1 not found").arg(valueName.c_str()));
-                continue;
-              }
-
-              auto branch = cstate->getBranchValuesTable()->getBranch(branchName);
-              if (!branch)
-              {
-                OSGG_QLOG_WARN(QString("Branch %1 not found").arg(branchName.c_str()));
-                continue;
-              }
-
-              branch->setValue(valueName, value);
-            }
           }
 
           stream >> numBranches;

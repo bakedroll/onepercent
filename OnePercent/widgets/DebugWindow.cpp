@@ -158,10 +158,8 @@ namespace onep
     };
 
     typedef std::map<std::string, ValueWidget> ValueWidgets;
-    typedef std::map<std::string, ValueWidgets> BranchValueWidgets;
 
     ValueWidgets valueWidgets;
-    BranchValueWidgets branchValueWidgets;
 
     bool bWireframe;
     float borderThickness;
@@ -264,16 +262,6 @@ namespace onep
         it->second.pixGraph.fill(QColor(255, 255, 255));
         it->second.labelGraph->setPixmap(it->second.pixGraph);
       }
-
-      for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
-      {
-        for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-        {
-          vit->second.latestValues.clear();
-          vit->second.pixGraph.fill(QColor(255, 255, 255));
-          vit->second.labelGraph->setPixmap(vit->second.pixGraph);
-        }
-      }
     }
 
     void updateValueGraph(ValueWidget& widget, float value)
@@ -334,7 +322,6 @@ namespace onep
         auto countryState = countryStates[selectedId];
 
         auto values = countryState->getValuesMap();
-        auto branchValues = countryState->getBranchValuesMap();
 
         if (layoutStats == nullptr)
         {
@@ -359,35 +346,12 @@ namespace onep
             valueWidgets[it->first] = widget;
           }
 
-          for (auto it = branchValues.begin(); it != branchValues.end(); ++it)
-          {
-            for (auto vit = it->second.begin(); vit != it->second.end(); ++vit)
-            {
-              std::string branchName = it->first;
-              std::string name = vit->first;
-              ValueWidget widget = createValueWidgets(QString("%1 %2\n").arg(vit->first.c_str()).arg(it->first.c_str()), [=](float value, LuaCountryState::Ptr cstate)
-              {
-                auto branch = cstate->getBranchValuesTable()->getBranch(branchName);
-
-                if (branch)
-                {
-                  branch->setValue(name, value);
-                }
-              });
-              branchValueWidgets[it->first][vit->first] = widget;
-            }
-          }
-
           notifyRunningValues = simulation->getOState()->connectAndNotify([this](Simulation::State state)
           {
             auto paused = (state == Simulation::State::Paused);
 
             for (ValueWidgets::iterator it = valueWidgets.begin(); it != valueWidgets.end(); ++it)
               it->second.edit->setEnabled(paused);
-
-            for (BranchValueWidgets::iterator it = branchValueWidgets.begin(); it != branchValueWidgets.end(); ++it)
-              for (ValueWidgets::iterator vit = it->second.begin(); vit != it->second.end(); ++vit)
-                vit->second.edit->setEnabled(paused);
           });
         }
 
@@ -401,19 +365,6 @@ namespace onep
           if (checkBoxEnableGraph->isChecked())
             updateValueGraph(valueWidgets[it->first], it->second);
         }
-
-        for (auto it = branchValues.begin(); it != branchValues.end(); ++it)
-        {
-          for (auto vit = it->second.begin(); vit != it->second.end(); ++vit)
-          {
-            branchValueWidgets[it->first][vit->first].edit->setText(QString::number(vit->second));
-            branchValueWidgets[it->first][vit->first].progressBar->setValue(osg::clampBetween<int>(int(vit->second * 100.0f), 0, 100));
-
-            if (checkBoxEnableGraph->isChecked())
-              updateValueGraph(branchValueWidgets[it->first][vit->first], vit->second);
-          }
-        }
-
       });
     }
 

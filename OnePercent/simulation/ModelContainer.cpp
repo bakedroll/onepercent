@@ -67,7 +67,6 @@ namespace onep
         {
           auto name = branch->getName();
           state->getBranchesActivatedTable()->addBranchActivated(name);
-          state->getBranchValuesTable()->addBranch(name);
         });
 
         valuesTable->foreachMappedElementDo<LuaValueDef>([&](LuaValueDef::Ptr& def)
@@ -75,27 +74,7 @@ namespace onep
           auto name = def->getName();
           auto init = country->getInitValue(name, def->getInit());
 
-          switch (def->getType())
-          {
-            case LuaValueDef::Type::Default:
-            {
-              state->getValuesTable()->setValue(name, init);
-              break;
-            }
-            case LuaValueDef::Type::Branch:
-            {
-              branchesTable->foreachMappedElementDo<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
-              {
-                state->getBranchValuesTable()->getBranch(branch->getName())->setValue(name, init);
-              });
-              break;
-            }
-            default:
-            {
-              assert(false);
-              break;
-            }
-          }
+          state->getValuesTable()->setValue(name, init);
         });
       });
 

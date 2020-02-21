@@ -32,31 +32,31 @@ end)
 
 lua.control:skill("propagation_banks"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
-  country_state.branch_values[branch_name]["propagation"] = 1.0
+  country_state.values["propagation_" .. branch_name] = 1.0
 
 end)
 
 lua.control:skill("propagation_control"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
-  country_state.branch_values[branch_name]["propagation"] = 1.0
+  country_state.values["propagation_" .. branch_name] = 1.0
 
 end)
 
 lua.control:skill("propagation_media"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
-  country_state.branch_values[branch_name]["propagation"] = 1.0
+  country_state.values["propagation_" .. branch_name] = 1.0
 
 end)
 
 lua.control:skill("propagation_concerns"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
-  country_state.branch_values[branch_name]["propagation"] = 1.0
+  country_state.values["propagation_" .. branch_name] = 1.0
 
 end)
 
 lua.control:skill("propagation_politics"):on_event(defines.callback.on_skill_update, function(branch_name, country_state)
 
-  country_state.branch_values[branch_name]["propagation"] = 1.0
+  country_state.values["propagation_" .. branch_name] = 1.0
 
 end)
 
@@ -64,12 +64,12 @@ lua.control:on_event(defines.callback.on_branch_update, function(branch_name, co
 
   if (country_state.branches_activated[branch_name] == true) then return end
 
-  local propagated = country_state.branch_values[branch_name]["propagated"]
+  local propagated = country_state.values["propagated_" .. branch_name]
   for _, neighbour_state in pairs(country_state.neighbour_states) do
-    propagated = propagated + neighbour_state.branch_values[branch_name]["propagation"] * 0.005
+    propagated = propagated + neighbour_state.values["propagation_" .. branch_name] * 0.005
   end
 
-  country_state.branch_values[branch_name]["propagated"] = propagated
+  country_state.values["propagated_" .. branch_name] = propagated
 
   if (propagated >= 1.0) then
     country_state.branches_activated[branch_name] = true
@@ -87,13 +87,13 @@ end)
 
 lua.control:on_event(defines.callback.on_branch_purchased, function(branch_name, country_state)
 
-  country_state.branch_values[branch_name]["propagated"] = 1.0
+  country_state.values["propagated_" .. branch_name] = 1.0
   lua.countries:set_current_overlay_branch_name(branch_name)
 
 end)
 
 lua.control:on_event(defines.callback.on_branch_resigned, function(branch_name, country_state)
 
-  country_state.branch_values[branch_name]["propagated"] = 0.0
+  country_state.values[branch_name]["propagated_" .. branch_name] = 0.0
 
 end)
