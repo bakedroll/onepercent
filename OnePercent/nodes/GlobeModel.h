@@ -32,8 +32,10 @@ namespace onep
 
     /**
      * Creates all the meshes and loads textures and shaders
+     * \param state Pass the state to check for openGL extensions and load the
+     *              appropriate atmosphere shader. If null, use default shader
      */
-    void makeGlobeModel();
+    void makeGlobeModel(const osg::ref_ptr<osg::State>& state = nullptr);
 
     /**
      * Returns a camera-aligned-quad which covers the whole screen space

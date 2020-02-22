@@ -9,6 +9,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Texture2D>
 #include <osgDB/ReadFile>
+#include <osg/GL2Extensions>
 
 #include <osgGaming/Helper.h>
 #include <osgGaming/ResourceManager.h>
@@ -108,13 +109,13 @@ namespace onep
       base->addChild(cloudsTransform);
     }
 
-    void makeAtmosphericScattering()
+    void makeAtmosphericScattering(const osg::ref_ptr<osg::State>& state)
     {
-      float earthRadius = configManager->getNumber<float>("earth.radius");
-      float atmosphereHeight = configManager->getNumber<float>("earth.atmosphere_height");
-      float scatteringDepth = configManager->getNumber<float>("earth.scattering_depth");
-      float scatteringIntensity = configManager->getNumber<float>("earth.scattering_intensity");
-      osg::Vec4f atmosphereColor = configManager->getVector<osg::Vec4f>("earth.atmosphere_color");
+      const auto earthRadius         = configManager->getNumber<float>("earth.radius");
+      const auto atmosphereHeight    = configManager->getNumber<float>("earth.atmosphere_height");
+      const auto scatteringDepth     = configManager->getNumber<float>("earth.scattering_depth");
+      const auto scatteringIntensity = configManager->getNumber<float>("earth.scattering_intensity");
+      const auto atmosphereColor     = configManager->getVector<osg::Vec4f>("earth.atmosphere_color");
 
       // atmospheric scattering geometry
       scatteringQuad = new osgGaming::CameraAlignedQuad();
@@ -122,14 +123,24 @@ namespace onep
       // shader
       osg::ref_ptr<osg::Program> pgm = new osg::Program();
 
-      osg::ref_ptr<osg::Shader> vertShader = resourceManager->loadShader("./GameData/shaders/atmosphere.vert", osg::Shader::VERTEX);
-      osg::ref_ptr<osg::Shader> fragShader = resourceManager->loadShader("./GameData/shaders/atmosphere_float.frag", osg::Shader::FRAGMENT);
+      const auto isFp64Supported =
+              (state.valid() && osg::GL2Extensions::Get(state->getContextID(), true)->isGpuShaderFp64Supported);
+
+      OSGG_QLOG_DEBUG(QString("Check GPUShaderFp64Supported: %1 - using %2 shader")
+                              .arg(isFp64Supported)
+                              .arg(isFp64Supported ? "fp64" : "default"));
+
+      const auto vertShader = resourceManager->loadShader("./GameData/shaders/atmosphere.vert", osg::Shader::VERTEX);
+      const auto fragShader =
+              isFp64Supported
+                      ? resourceManager->loadShader("./GameData/shaders/atmosphere_fp64.frag", osg::Shader::FRAGMENT)
+                      : resourceManager->loadShader("./GameData/shaders/atmosphere.frag", osg::Shader::FRAGMENT);
 
       pgm->addShader(vertShader);
       pgm->addShader(fragShader);
 
-      double earthRad = pow(earthRadius * 0.9999, -2.0f);
-      double atmosRad = pow(earthRadius + atmosphereHeight, -2.0f);
+      const auto earthRad = pow(earthRadius * 0.9999, -2.0f);
+      const auto atmosRad = pow(earthRadius + atmosphereHeight, -2.0f);
 
       osg::ref_ptr<osg::Uniform> uniformLightCol = new osg::Uniform(osg::Uniform::FLOAT_VEC3, "light_col", 1);
       uniformLightCol->setElement(0, osg::Vec3f(0.0f, 0.0f, 0.0f));
@@ -396,7 +407,7 @@ namespace onep
   {
   }
 
-  void GlobeModel::makeGlobeModel()
+  void GlobeModel::makeGlobeModel(const osg::ref_ptr<osg::State>& state)
   {
     m->propSunDistance = m->configManager->getNumber<float>("sun.distance");
     m->propSunRadiusMp2 = m->configManager->getNumber<float>("sun.radius_pm2");
@@ -405,7 +416,7 @@ namespace onep
 
     m->makeEarthModel();
     m->makeCloudsModel();
-    m->makeAtmosphericScattering();
+    m->makeAtmosphericScattering(state);
   }
 
   osgGaming::CameraAlignedQuad::Ptr GlobeModel::getScatteringQuad()

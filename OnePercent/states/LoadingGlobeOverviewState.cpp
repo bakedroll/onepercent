@@ -157,7 +157,9 @@ namespace onep
     m->globeOverviewWorld->initialize();
     m->backgroundModel->loadStars("./GameData/data/stars.bin");
 
-    m->globeModel->makeGlobeModel();
+    const auto state = getView(0)->getSceneCamera()->getGraphicsContext()->getState();
+
+    m->globeModel->makeGlobeModel(state);
     world->getCameraManipulator()->addCameraAlignedQuad(m->globeModel->getScatteringQuad());
 
     m->boundariesData->loadBoundaries("./GameData/data/boundaries.dat");

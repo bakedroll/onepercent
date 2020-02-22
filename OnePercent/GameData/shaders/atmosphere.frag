@@ -1,22 +1,3 @@
-#extension GL_ARB_gpu_shader_fp64 : enable
-#extension GL_ARB_shader_precision : enable
-// TODO: https://stackoverflow.com/questions/18038224/glsl-check-if-an-extension-is-supported
-
-double abs(double x)
-{
-	if (x<0.0)
-	{
-		x=-x;
-	}
-
-	return x;
-}
-/*
-double sqrt(double x)
-{
-	return double(sqrt(float(x)));
-}
-*/
 varying vec3 pixel_nor;
 varying vec4 pixel_pos;
 varying vec4 pixel_scr;
@@ -34,20 +15,20 @@ uniform vec3 light_col[_lights];
 uniform vec4 light_posr[_lights];
 uniform vec4 B0;
 
-double view_depth_l0=-1.0,
+float view_depth_l0=-1.0,
        view_depth_l1=-1.0;
 bool  _view_depth_l0=false;
 bool  _view_depth_l1=false;
 bool _view_depth(vec3 _p0,vec3 _dp,vec3 _r)
 {
-    dvec3 p0,dp,r;
-    double a,b,c,d,l0,l1;
+    vec3 p0,dp,r;
+    float a,b,c,d,l0,l1;
     view_depth_l0=-1.0; _view_depth_l0=false;
     view_depth_l1=-1.0; _view_depth_l1=false;
-    // conversion to double
-    p0=dvec3(_p0);
-    dp=dvec3(_dp);
-    r =dvec3(_r );
+    // conversion to float
+    p0=vec3(_p0);
+    dp=vec3(_dp);
+    r =vec3(_r );
     // quadratic equation a.l.l+b.l+c=0; l0,l1=?;
     a=(dp.x*dp.x*r.x)
      +(dp.y*dp.y*r.y)
@@ -84,22 +65,22 @@ bool _view_depth(vec3 _p0,vec3 _dp,vec3 _r)
 // where r is (sphere radius)^-2
 bool _star_colide(vec3 _p0,vec3 _dp,float _r)
 {
-    dvec3 p0,dp,r;
-    double a,b,c,d,l0,l1;
-    // conversion to double
-    p0=dvec3(_p0);
-    dp=dvec3(_dp);
-    r =dvec3(_r );
+    vec3 p0,dp,r;
+    float a,b,c,d,l0,l1;
+    // conversion to float
+    p0=vec3(_p0);
+    dp=vec3(_dp);
+    r =vec3(_r );
     // quadratic equation a.l.l+b.l+c=0; l0,l1=?;
-    a=(dp.x*dp.x*r)
-     +(dp.y*dp.y*r)
-     +(dp.z*dp.z*r);
-    b=(p0.x*dp.x*r)
-     +(p0.y*dp.y*r)
-     +(p0.z*dp.z*r); b*=2.0;
-    c=(p0.x*p0.x*r)
-     +(p0.y*p0.y*r)
-     +(p0.z*p0.z*r)-1.0;
+    a=(dp.x*dp.x*_r)
+     +(dp.y*dp.y*_r)
+     +(dp.z*dp.z*_r);
+    b=(p0.x*dp.x*_r)
+     +(p0.y*dp.y*_r)
+     +(p0.z*dp.z*_r); b*=2.0;
+    c=(p0.x*p0.x*_r)
+     +(p0.y*p0.y*_r)
+     +(p0.z*p0.z*_r)-1.0;
     // discriminant d=sqrt(b.b-4.a.c)
     d=((b*b)-(4.0*a*c));
     if (d<0.0) return false;
@@ -132,7 +113,7 @@ vec4 atmosphere()
     vec4 c;     // c - color of pixel from start to end
 
     float h,dl,ll;
-    double l0,l1,l2;
+    float l0,l1,l2;
     bool   e0,e1,e2;
     c=vec4(0.0,0.0,0.0,0.0);    // a=0.0 full background color, a=1.0 no background color (ignore star)
     b1=_view_depth(pixel_pos.xyz,pixel_nor,planet_R);
@@ -155,7 +136,7 @@ vec4 atmosphere()
         }
         else
 		{                                   // throu atmosphere from boundary to boundary
-            p0=vec3(dvec3(p0)+(dvec3(dp)*l1));
+            p0=vec3(vec3(p0)+(vec3(dp)*l1));
             l0=l2-l1;
         }
         // if a light source is in visible path then start color is light source color
@@ -172,7 +153,7 @@ vec4 atmosphere()
 	{                                       // into surface
         if (l1<l0)                              // from atmosphere boundary to surface
         {
-            p0=vec3(dvec3(p0)+(dvec3(dp)*l1));
+            p0=vec3(vec3(p0)+(vec3(dp)*l1));
             l0=l0-l1;
         }
         else
@@ -181,7 +162,7 @@ vec4 atmosphere()
         }
     }
     // set p1 to end of view depth, dp to intergral step
-    p1=vec3(dvec3(p0)+(dvec3(dp)*l0));
+    p1=vec3(vec3(p0)+(vec3(dp)*l0));
 	dp=p1-p0;
     dp*=_n;
 
