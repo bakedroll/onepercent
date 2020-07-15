@@ -15,6 +15,7 @@ extern "C"
 {
 #include <lauxlib.h>
 #include <lualib.h>
+#include <lua.h>
 }
 
 namespace onep
@@ -26,18 +27,8 @@ namespace onep
     {}
 
     osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+    std::map<QString, LuaRefPtr>             objectCache;
 
-    luabridge::LuaRef& getLuaFunction(std::string name, LuaRefPtr& cache)
-    {
-      if (!cache)
-      {
-        
-      }
-
-      return *cache.get();
-    }
-
-    std::map<QString, LuaRefPtr> objectCache;
   };
 
   LuaStateManager::LuaStateManager(osgGaming::Injector& injector)
@@ -128,25 +119,20 @@ namespace onep
 
   bool LuaStateManager::executeCode(const std::string& code)
   {
-    auto success = false;
+    auto success = true;
     safeExecute([this, &success, &code]()
     {
-      if (luaL_dostring(m_state, code.c_str()))
+      if (luaL_dostring(m_state, code.c_str()) != LUA_OK)
       {
-        std::string msg = lua_tostring(m_state, -1);
-
-        std::replace(msg.begin(), msg.end(), '\r', '\n');
-        OSGG_LOG_FATAL("Lua Error: " + msg);
-
-        lua_pop(m_state, 1);
-        success = true;
+        logErrorsFromStack();
+        success = false;
       }
     });
 
     return success;
   }
 
-  bool LuaStateManager::loadScript(const std::string& filename)
+  bool LuaStateManager::loadScript(const std::string& filename, LoadingScriptMode mode)
   {
     std::string script;
 
@@ -163,35 +149,29 @@ namespace onep
       script = file.readAll().toStdString();
       file.close();
     }
-    else
+    else if (mode == LoadingScriptMode::LoadFromResourceOrPackage)
     {
       script = m->resourceManager->loadText(filename);
+      return executeCode(script);
     }
 
-    return executeCode(script);
+    return executeScript(filename);
   }
 
   std::string LuaStateManager::getStackTrace() const
   {
-    std::stringstream ss;
-    lua_Debug info;
-    int level = 0;
-    while (lua_getstack(m_state, level, &info))
-    {
-      if (level > 0)
-        ss << std::endl;
+    QString result;
+    auto    lines = 0;
 
-      lua_getinfo(m_state, "nSl", &info);
-      QString current = QString("  [%1] %2:%3 -- [%4]")
-        .arg(level)
-        .arg(info.short_src)
-        .arg(info.currentline)
-        .arg((info.name ? info.name : "<unknown>"));
-      ss << current.toStdString();
-      ++level;
+    luaL_traceback(m_state, m_state, nullptr, 0);
+    while (lua_gettop(m_state) > 0)
+    {
+      result.append(QString("%1\n").arg(lua_tostring(m_state, -1)));
+      lua_pop(m_state, 1);
+      lines++;
     }
 
-    return ss.str();
+    return (lines > 1 ? result.toStdString() : "");
   }
 
   bool LuaStateManager::checkIsType(const luabridge::LuaRef& ref, int luaType)
@@ -217,8 +197,45 @@ namespace onep
     }
     catch (luabridge::LuaException& e)
     {
-      OSGG_QLOG_FATAL(QString("Lua Exception: %1").arg(e.what()));
+      logLuaError(e.what());
     }
   }
 
+  bool LuaStateManager::executeScript(const std::string& filename)
+  {
+    auto success = true;
+    safeExecute([this, &success, &filename]()
+    {
+      if (luaL_dofile(m_state, filename.c_str()) != LUA_OK)
+      {
+        logErrorsFromStack();
+        success = false;
+      }
+    });
+
+    return success;
+  }
+
+  void LuaStateManager::logErrorsFromStack() const
+  {
+    std::string msg = lua_tostring(m_state, -1);
+
+    std::replace(msg.begin(), msg.end(), '\r', '\n');
+    lua_pop(m_state, 1);
+
+    logLuaError(msg);
+  }
+
+  void LuaStateManager::logLuaError(const std::string& message) const
+  {
+    auto log = QString("Lua Error: %1").arg(message.c_str());
+
+    /*const auto stacktrace = getStackTrace();
+    if (!stacktrace.empty() && (stacktrace != "stack traceback:"))
+    {
+      log.append(QString("\n%1").arg(stacktrace.c_str()));
+    }*/
+
+    OSGG_QLOG_FATAL(log);
+  }
 }

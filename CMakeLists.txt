@@ -320,8 +320,10 @@ endif()
 
 # configure scripts
 set(TEMPLATE_PATH_RESOURCES "${CMAKE_SOURCE_DIR}/Resources")
-set(TEMPLATE_PATH_GAMEDATA_SRC "${CMAKE_SOURCE_DIR}/OnePercent/GameData")
-set(TEMPLATE_PATH_GAMEDATA_DST "${CMAKE_BINARY_DIR}/OnePercent/GameData")
+set(TEMPLATE_PATH_ONEPERCENT_SRC "${CMAKE_SOURCE_DIR}/OnePercent")
+set(TEMPLATE_PATH_ONEPERCENT_DST "${CMAKE_BINARY_DIR}/OnePercent")
+set(TEMPLATE_PATH_GAMEDATA_SRC "${TEMPLATE_PATH_ONEPERCENT_SRC}/GameData")
+set(TEMPLATE_PATH_GAMEDATA_DST "${TEMPLATE_PATH_ONEPERCENT_DST}/GameData")
 
 configure_file("CMake/templates/generate_boundaries_and_countries.py.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/generate_boundaries_and_countries.py")
 configure_file("CMake/templates/generate_boundaries_and_countries_no_distance.py.in" "${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/generate_boundaries_and_countries_no_distance.py")
@@ -332,9 +334,9 @@ set(COPY_DIR_SOURCE "${TEMPLATE_PATH_GAMEDATA_SRC}/scripts")
 set(COPY_DIR_TARGET "${TEMPLATE_PATH_GAMEDATA_DST}/scripts")
 configure_file("CMake/templates/copydir.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/updateScripts.py)
 
-set(COPY_DIR_SOURCE "${TEMPLATE_PATH_GAMEDATA_SRC}/CSS")
-set(COPY_DIR_TARGET "${TEMPLATE_PATH_GAMEDATA_DST}/CSS")
-configure_file("CMake/templates/copydir.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/updateCSS.py)
+set(COPY_DIR_SOURCE "${TEMPLATE_PATH_ONEPERCENT_SRC}/Mods")
+set(COPY_DIR_TARGET "${TEMPLATE_PATH_ONEPERCENT_DST}/Mods")
+configure_file("CMake/templates/copydir.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/updateMods.py)
 
 set(COPY_DIR_SOURCE "${TEMPLATE_PATH_GAMEDATA_SRC}/shaders")
 set(COPY_DIR_TARGET "${TEMPLATE_PATH_GAMEDATA_DST}/shaders")

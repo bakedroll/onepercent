@@ -25,8 +25,14 @@ typedef std::shared_ptr<luabridge::LuaRef> LuaRefPtr;
 
 class LuaStateManager : public osg::Referenced
 {
-  public:
+public:
   using Ptr = osg::ref_ptr<LuaStateManager>;
+
+  enum class LoadingScriptMode
+  {
+    LoadDirectlyIfPossible,
+    LoadFromResourceOrPackage
+  };
 
   explicit LuaStateManager(osgGaming::Injector& injector);
   ~LuaStateManager();
@@ -41,7 +47,7 @@ class LuaStateManager : public osg::Referenced
   void setGlobal(const char* name, const luabridge::LuaRef& ref);
 
   bool executeCode(const std::string& code);
-  bool loadScript(const std::string& filename);
+  bool loadScript(const std::string& filename, LoadingScriptMode mode = LoadingScriptMode::LoadDirectlyIfPossible);
 
   std::string getStackTrace() const;
   bool        checkIsType(const luabridge::LuaRef& ref, int luaType);
@@ -92,11 +98,18 @@ class LuaStateManager : public osg::Referenced
     DefinitionType(args...).registerDefinition(m_state);
   }
 
-  private:
+private:
   struct Impl;
   std::unique_ptr<Impl> m;
 
   mutable QMutex m_luaLock;
   lua_State*     m_state;
+
+  bool executeScript(const std::string& filename);
+  void logErrorsFromStack() const;
+
+  void logLuaError(const std::string& message) const;
+
 };
+
 }  // namespace onep

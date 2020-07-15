@@ -1,0 +1,10 @@
+require("corelib.core")
+require("corelib.gameplay")
+require("corelib.defines")
+require("corelib.helper")
+
+require("data.config")
+require("data.branches")
+require("data.skills")
+require("data.countries")
+require("data.values")

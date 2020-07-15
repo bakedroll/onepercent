@@ -1,5 +1,7 @@
 #include "LoadingGlobeOverviewState.h"
 
+
+#include "core/ModManager.h"
 #include "data/BoundariesData.h"
 #include "nodes/GlobeModel.h"
 #include "nodes/GlobeOverviewWorld.h"
@@ -48,6 +50,7 @@ namespace onep
       , lua(injector.inject<LuaStateManager>())
       , model(injector.inject<ModelContainer>())
       , luaControl(injector.inject<LuaControl>())
+      , modManager(injector.inject<ModManager>())
       , labelLoadingText(nullptr)
       , overlay(nullptr)
     {
@@ -70,6 +73,8 @@ namespace onep
     osg::ref_ptr<LuaStateManager>            lua;
     osg::ref_ptr<ModelContainer>             model;
     osg::ref_ptr<LuaControl>                 luaControl;
+
+    osg::ref_ptr<ModManager> modManager;
 
     QLabel* labelLoadingText;
     VirtualOverlay* overlay;
@@ -134,22 +139,8 @@ namespace onep
 
   void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
-    // Loading scripts
-    m->lua->loadScript("./GameData/scripts/corelib/core.lua");
-    m->lua->loadScript("./GameData/scripts/corelib/gameplay.lua");
-    m->lua->loadScript("./GameData/scripts/corelib/helper.lua");
-    m->lua->loadScript("./GameData/scripts/corelib/defines.lua");
-
-    m->lua->loadScript("./GameData/scripts/data/config.lua");
-
-    m->lua->loadScript("./GameData/scripts/data/branches.lua");
-    m->lua->loadScript("./GameData/scripts/data/skills.lua");
-    m->lua->loadScript("./GameData/scripts/data/countries.lua");
-    m->lua->loadScript("./GameData/scripts/data/values.lua");
-
-    m->lua->loadScript("./GameData/scripts/control/skills.lua");
-    m->lua->loadScript("./GameData/scripts/control/visuals.lua");
-    m->lua->loadScript("./GameData/scripts/control/prototypes.lua");
+    m->modManager->loadModFromDirectory("./GameData/scripts");
+    m->modManager->scanDirectoryForMods("./Mods");
 
     m->model->initializeState();
 

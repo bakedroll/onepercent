@@ -3,6 +3,7 @@
 #include "scripting/LuaStateManager.h"
 
 #include "core/Macros.h"
+#include "core/ModManager.h"
 #include "core/Observables.h"
 #include "data/BoundariesData.h"
 #include "nodes/CountryNameOverlay.h"
@@ -145,6 +146,9 @@ namespace onep
   void OnePercentApplication::registerComponents(osgGaming::InjectionContainer& container)
   {
     registerEssentialComponents();
+
+    // Core
+    container.registerSingletonType<ModManager>();
 
     // States
     container.registerType<LoadingGlobeOverviewState>();
