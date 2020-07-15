@@ -34,13 +34,13 @@ namespace osgGaming
 		osg::ref_ptr<osgText::Font> loadFont(std::string resourceKey);
 		osg::ref_ptr<osg::Shader> loadShader(std::string resourceKey, osg::Shader::Type type);
 
-		osg::ref_ptr<osgText::Font> loadDefaultFont();
-
-		void setDefaultFontResourceKey(std::string resourceKey);
 		void setResourceLoader(osg::ref_ptr<ResourceLoader> loader);
 
 		void clearCacheResource(std::string resourceKey);
 		void clearCache();
+
+		static void setDefaultFont(const osg::ref_ptr<osgText::Font>& font);
+		static osg::ref_ptr<osgText::Font> getDefaultFont();
 
 	private:
 		typedef std::map<std::string, osg::ref_ptr<osg::Object>> ResourceDictionary;
@@ -55,9 +55,10 @@ namespace osgGaming
 		void storeCacheItem(std::string key, osg::ref_ptr<osg::Object> obj);
 
 		ResourceDictionary _cache;
-		std::string _defaultFontResourceKey;
 
 		osg::ref_ptr<ResourceLoader> _resourceLoader;
+
+	  static osg::ref_ptr<osgText::Font> m_defaultFont;
 
 		// std::locale _utf8Locale;
 	};

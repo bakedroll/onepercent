@@ -4,6 +4,8 @@
 
 #include <osgDB/ReadFile>
 
+#include <osgGaming/ResourceManager.h>
+
 namespace onep
 {
 
@@ -31,7 +33,12 @@ TextNode::TextNode(const std::string& text)
 
   m_textNode = new osgText::Text();
 
-  m_textNode->setFont(getDefaultFont());
+  auto font = osgGaming::ResourceManager::getDefaultFont();
+  if (font)
+  {
+    m_textNode->setFont(font);
+  }
+
   m_textNode->setCharacterSize(10);
   m_textNode->setText(text);
   m_textNode->setAlignment(osgText::Text::AlignmentType::CENTER_CENTER);
@@ -56,17 +63,5 @@ void TextNode::luaSetText(const std::string& text)
 {
   m_textNode->setText(text);
 }
-
-osg::ref_ptr<osgText::Font> TextNode::getDefaultFont()
-{
-  if (!s_font.valid())
-  {
-    s_font = osgDB::readFile<osgText::Font>("./GameData/fonts/coolvetica rg.ttf");
-  }
-
-  return s_font;
-}
-
-osg::ref_ptr<osgText::Font> TextNode::s_font;
 
 }

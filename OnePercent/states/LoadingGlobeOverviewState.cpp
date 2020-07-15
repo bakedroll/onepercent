@@ -135,10 +135,10 @@ namespace onep
   void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
   {
     // Loading scripts
-    m->lua->loadScript(":/Resources/scripts/core.lua");
-    m->lua->loadScript(":/Resources/scripts/gameplay.lua");
-    m->lua->loadScript(":/Resources/scripts/helper.lua");
-    m->lua->loadScript(":/Resources/scripts/defines.lua");
+    m->lua->loadScript("./GameData/scripts/corelib/core.lua");
+    m->lua->loadScript("./GameData/scripts/corelib/gameplay.lua");
+    m->lua->loadScript("./GameData/scripts/corelib/helper.lua");
+    m->lua->loadScript("./GameData/scripts/corelib/defines.lua");
 
     m->lua->loadScript("./GameData/scripts/data/config.lua");
 

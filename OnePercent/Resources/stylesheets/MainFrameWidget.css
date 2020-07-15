@@ -1,0 +1,87 @@
+onep--MainFrameWidget QFrame#FrameTopBar
+{
+  margin: 0px;
+  padding: 5px 5px 0px 5px;
+  background-color: rgba(20, 20, 20, 50%);
+}
+
+onep--MainFrameWidget QFrame#FrameBottomBar
+{
+  margin: 0px;
+  background-color: rgba(20, 20, 20, 50%);
+}
+
+onep--MainFrameWidget QFrame#FrameLeftMenu
+{
+  margin: 0px;
+  padding: 5px;
+  min-width:250px;
+  max-width:250px;
+  background-color: rgba(20, 20, 20, 50%);
+}
+
+onep--MainFrameWidget QPushButton#ButtonSkills
+{
+  min-width: 120px;
+}
+
+onep--MainFrameWidget QPushButton#ButtonDebug
+{
+  min-width: 120px;
+}
+
+onep--MainFrameWidget QLabel
+{
+  color: #fff;
+}
+
+onep--MainFrameWidget QLabel#LabelSkillPoints
+{
+  font-size: 18pt;
+}
+
+onep--MainFrameWidget QLabel#LabelDays
+{
+  font-size: 18pt;
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+
+onep--MainFrameWidget QLabel#LabelFps
+{
+  min-width: 35px;
+  text-align: right;
+}
+
+onep--MainFrameWidget QLabel#LabelValue
+{
+  font-size:14pt;
+}
+
+onep--MainFrameWidget QPushButton
+{
+  min-height: 26px;
+  min-width: 100px;
+}
+
+onep--MainFrameWidget QPushButton
+{
+  min-height: 26px;
+  min-width: 100px;
+}
+
+onep--MainFrameWidget QRadioButton#ButtonAutoPause,
+onep--MainFrameWidget QRadioButton#ButtonPause,
+onep--MainFrameWidget QRadioButton#ButtonPlay,
+onep--MainFrameWidget QRadioButton#ButtonFastForward
+{
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+}
+
+onep--MainFrameWidget QRadioButton#ButtonAutoPause
+{
+  margin-right: 4px;
+}

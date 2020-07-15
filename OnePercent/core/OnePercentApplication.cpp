@@ -26,6 +26,9 @@
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 
+#include <osgDB/ReadFile>
+#include <osgDB/FileNameUtils>
+
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/FastApproximateAntiAliasingEffect.h>
 #include <osgGaming/DepthOfFieldEffect.h>
@@ -60,6 +63,36 @@ namespace onep
     lua->registerDefinition<LuaLogger::Definition>();
 
     lua->registerDefinition<LuaPropertyDefinitions>(injector);
+  }
+
+  osg::ref_ptr<osgText::Font> loadFontFile(const std::string& filename)
+  {
+    QFile fontFile(QString::fromStdString(filename));
+    if (!fontFile.open(QIODevice::ReadOnly))
+    {
+      return nullptr;
+    }
+
+    const auto size = fontFile.size();
+    auto fontData = fontFile.readAll();
+
+    const auto byteArray = new char[size];
+    memcpy(byteArray, fontData.data(), size);
+
+    const std::string str(byteArray, size);
+
+    std::stringstream stream;
+    stream << str;
+
+    fontFile.close();
+
+    const auto extension = osgDB::getLowerCaseFileExtension(filename);
+    const osg::ref_ptr<osgDB::ReaderWriter> rw = osgDB::Registry::instance()->getReaderWriterForExtension(extension);
+    auto obj = rw->readObject(stream);
+
+    delete [] byteArray;
+
+    return dynamic_cast<osgText::Font*>(obj.getObject());
   }
 
   struct OnePercentApplication::Impl
@@ -154,8 +187,16 @@ namespace onep
 
   void OnePercentApplication::initialize(osgGaming::Injector& injector)
   {
-    OSGG_LOG_INFO("Loading fonts");
-    injector.inject<osgGaming::ResourceManager>()->setDefaultFontResourceKey("./GameData/fonts/coolvetica rg.ttf");
+    std::string fontFilename = ":/Resources/fonts/coolvetica rg.ttf";
+    auto font = loadFontFile(fontFilename);
+    if (font)
+    {
+      osgGaming::ResourceManager::setDefaultFont(font);
+    }
+    else
+    {
+      OSGG_QLOG_WARN(QString("Could not load font file '%1'").arg(fontFilename.c_str()));
+    }
 
     registerLuaClasses(injector);
 
@@ -164,7 +205,7 @@ namespace onep
     setDefaultWorld(injector.inject<GlobeOverviewWorld>());
 
     OSGG_LOG_INFO("Loading stylesheets");
-    m->loadStylesheets("./GameData/CSS/");
+    m->loadStylesheets(":/Resources/stylesheets/");
   }
 
   void OnePercentApplication::deinitialize()

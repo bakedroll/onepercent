@@ -11,7 +11,6 @@ namespace osgGaming
 {
 
   ResourceManager::ResourceManager(Injector& injector)
-    : _defaultFontResourceKey("")
   {
     // _utf8Locale = locale(locale(), new codecvt_utf8<char>);
   }
@@ -45,21 +44,6 @@ namespace osgGaming
     return static_cast<osg::Shader*>(loadObject(resourceKey, SHADER, type).get());
   }
 
-  osg::ref_ptr<osgText::Font> ResourceManager::loadDefaultFont()
-  {
-    if (_defaultFontResourceKey == "")
-    {
-      return nullptr;
-    }
-
-    return loadFont(_defaultFontResourceKey);
-  }
-
-  void ResourceManager::setDefaultFontResourceKey(std::string resourceKey)
-  {
-    _defaultFontResourceKey = resourceKey;
-  }
-
   void ResourceManager::setResourceLoader(osg::ref_ptr<ResourceLoader> loader)
   {
     _resourceLoader = loader;
@@ -79,6 +63,16 @@ namespace osgGaming
   void ResourceManager::clearCache()
   {
     _cache.clear();
+  }
+
+  void ResourceManager::setDefaultFont(const osg::ref_ptr<osgText::Font>& font)
+  {
+      m_defaultFont = font;
+  }
+
+  osg::ref_ptr<osgText::Font> ResourceManager::getDefaultFont()
+  {
+      return m_defaultFont;
   }
 
   osg::ref_ptr<ResourceLoader> ResourceManager::resourceLoader()
@@ -182,5 +176,7 @@ namespace osgGaming
 
     _cache.insert(ResourceDictionary::value_type(lower_key, obj));
   }
+
+  osg::ref_ptr<osgText::Font> ResourceManager::m_defaultFont;
 
 }

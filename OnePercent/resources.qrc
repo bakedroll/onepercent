@@ -1,8 +1,9 @@
 <RCC>
     <qresource>
-        <file>Resources/scripts/core.lua</file>
-        <file>Resources/scripts/defines.lua</file>
-        <file>Resources/scripts/gameplay.lua</file>
-        <file>Resources/scripts/helper.lua</file>
+        <file>Resources/fonts/coolvetica rg.ttf</file>
+        <file>Resources/stylesheets/DebugWindow.css</file>
+        <file>Resources/stylesheets/MainFrameWidget.css</file>
+        <file>Resources/stylesheets/SkillsWidget.css</file>
+        <file>Resources/stylesheets/style.css</file>
     </qresource>
 </RCC>

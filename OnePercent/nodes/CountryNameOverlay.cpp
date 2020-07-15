@@ -16,8 +16,7 @@ namespace onep
   struct CountryNameOverlay::Impl
   {
     Impl(osgGaming::Injector& injector)
-      : resourceManager(injector.inject<osgGaming::ResourceManager>())
-      , configManager(injector.inject<LuaConfig>())
+      : configManager(injector.inject<LuaConfig>())
       , modelContainer(injector.inject<ModelContainer>())
       , enabled(true)
     {
@@ -27,7 +26,6 @@ namespace onep
       switchNode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     }
 
-    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
     osg::ref_ptr<LuaConfig> configManager;
 
     ModelContainer::Ptr modelContainer;
@@ -56,7 +54,7 @@ namespace onep
 
   void CountryNameOverlay::initialize(const CountryPresenter::Map& countryPresenters)
   {
-    osg::ref_ptr<osgText::Font> font = m->resourceManager->loadFont("./GameData/fonts/coolvetica rg.ttf");
+    auto font = osgGaming::ResourceManager::getDefaultFont();
 
     float earthRadius = m->configManager->getNumber<float>("earth.radius");
 
@@ -86,7 +84,12 @@ namespace onep
       osg::ref_ptr<osgText::Text> text = new osgText::Text();
 
       text->setCharacterSize(10);
-      text->setFont(font);
+
+      if (font)
+      {
+        text->setFont(font);
+      }
+
       text->setText(name);
       text->setAlignment(osgText::Text::AlignmentType::CENTER_CENTER);
       text->setAxisAlignment(osgText::Text::AxisAlignment::XZ_PLANE);

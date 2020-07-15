@@ -26,9 +26,6 @@ namespace onep
 
   private:
     osg::ref_ptr<osgText::Text> m_textNode;
-
-    static osg::ref_ptr<osgText::Font> getDefaultFont();
-    static osg::ref_ptr<osgText::Font> s_font;
     
   };
 }  // namespace onep
