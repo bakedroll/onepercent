@@ -106,7 +106,7 @@ namespace onep
 
         for (auto nid : nids)
         {
-          luabridge::LuaRef stateRef = statesTable->getCountryState(nid)->luaref();
+          luabridge::LuaRef stateRef = statesTable->getCountryState(nid)->luaRef();
           statesTable->getCountryState(cid)->addNeighbourState(nid, stateRef);
         }
       }

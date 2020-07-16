@@ -10,21 +10,15 @@ namespace onep
   }
 
   LuaObjectMapper::LuaObjectMapper(const luabridge::LuaRef& object, lua_State* luaState)
-    : m_ref(make_unique<luabridge::LuaRef>(object))
-    , m_luaState(luaState)
+    : LuaTable(object, luaState)
   {
   }
 
   LuaObjectMapper::~LuaObjectMapper() = default;
 
-  luabridge::LuaRef& LuaObjectMapper::luaref() const
+  void LuaObjectMapper::foreachElementDo(const std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func)
   {
-    return *m_ref;
-  }
-
-  void LuaObjectMapper::foreachElementDo(const std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func) const
-  {
-    for (luabridge::Iterator it(*m_ref); !it.isNil(); ++it)
+    for (luabridge::Iterator it(luaRef()); !it.isNil(); ++it)
     {
       luabridge::LuaRef value = it.value();
       luabridge::LuaRef key   = it.key();
@@ -35,7 +29,7 @@ namespace onep
 
   int LuaObjectMapper::getNumElements() const
   {
-    return int(m_elements.size());
+    return static_cast<int>(m_elements.size());
   }
 
   bool LuaObjectMapper::hasAnyInconsistency() const
@@ -59,7 +53,7 @@ namespace onep
 
   bool LuaObjectMapper::checkForConsistency(const std::string& key, int luaType)
   {
-    luabridge::LuaRef ref            = (*m_ref)[key];
+    luabridge::LuaRef ref            = (luaRef())[key];
     auto              elementMissing = ref.isNil();
 
     if (elementMissing || (ref.type() != luaType))

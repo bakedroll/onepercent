@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/Macros.h"
+#include "scripting/LuaTable.h"
 
 #include <memory>
 #include <map>
@@ -20,17 +21,15 @@ extern "C"
 
 namespace onep
 {
-  class LuaObjectMapper
+  class LuaObjectMapper : public LuaTable
   {
   public:
     using Ptr = std::shared_ptr<LuaObjectMapper>;
 
     explicit LuaObjectMapper(const luabridge::LuaRef& object, lua_State* luaState);
-    virtual ~LuaObjectMapper();
+    ~LuaObjectMapper() override;
 
-    luabridge::LuaRef& luaref() const;
-
-    void foreachElementDo(std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func) const;
+    void foreachElementDo(std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func);
 
     template <typename KeyType>
     bool containsMappedElement(const KeyType& key)
@@ -56,7 +55,7 @@ namespace onep
               typename KeyType>
     std::shared_ptr<LuaObject> addMappedElement(KeyType key, luabridge::LuaRef& ref)
     {
-      (*m_ref)[key] = ref;
+      luaRef()[key] = ref;
       return makeSharedAndAddElement<LuaObject, KeyType>(ref, key);
     }
 
@@ -64,8 +63,8 @@ namespace onep
         typename = typename std::enable_if<std::is_base_of<LuaObjectMapper, LuaObject>::value>::type>
         std::shared_ptr<LuaObject> appendMappedElement(luabridge::LuaRef& ref)
     {
-        (*m_ref).append(ref);
-        auto size = (*m_ref).length();
+        luaRef().append(ref);
+        auto size = luaRef().length();
         return makeSharedAndAddElement<LuaObject, int>(ref, size);
     }
 
@@ -78,7 +77,7 @@ namespace onep
       auto element = makeSharedAndAddElement<LuaObject, KeyType>(ref, key, args...);
       if (element)
       {
-        (*m_ref)[key] = element.get();
+          luaRef()[key] = element.get();
       }
 
       return element;
@@ -89,7 +88,7 @@ namespace onep
               typename KeyType>
     std::shared_ptr<LuaObject> newMappedElement(KeyType key)
     {
-      luabridge::LuaRef ref = luabridge::newTable(m_luaState);
+      luabridge::LuaRef ref = luabridge::newTable(luaState());
       return addMappedElement<LuaObject, KeyType>(key, ref);
     }
 
@@ -98,7 +97,7 @@ namespace onep
               typename KeyType>
     std::shared_ptr<LuaObject> makeMappedElement(KeyType key)
     {
-      luabridge::LuaRef ref = (*m_ref)[key];
+      luabridge::LuaRef ref = luaRef()[key];
       return makeSharedAndAddElement<LuaObject, KeyType>(ref, key);
     }
 
@@ -174,9 +173,7 @@ namespace onep
 
     using InconsistencyList = std::vector<Inconsistency>;
 
-    std::unique_ptr<luabridge::LuaRef> m_ref;
     ElementsMap                        m_elements;
-    lua_State*                         m_luaState;
     InconsistencyList                  m_inconsistencies;
 
     static std::string strKey(const std::string& key) { return key; }
@@ -202,7 +199,7 @@ namespace onep
               typename... Args>
     std::shared_ptr<LuaObject> makeSharedAndAddElement(luabridge::LuaRef& ref, KeyType key, Args... args)
     {
-      std::shared_ptr<LuaObject> elem = std::make_shared<LuaObject>(ref, m_luaState, args...);
+      std::shared_ptr<LuaObject> elem = std::make_shared<LuaObject>(ref, luaState(), args...);
       if (elem->hasAnyInconsistency())
       {
         elem->logInconsistencies(strKey(key));

@@ -25,7 +25,7 @@ namespace onep
   void LuaBranchesActivatedTable::addBranchActivated(const std::string& name)
   {
     auto init                   = false;
-    luaref()[name]              = init;
+    luaRef()[name]              = init;
     m->oActivatedBranches[name] = new osgGaming::Observable<bool>(init);
   }
 
@@ -38,7 +38,7 @@ namespace onep
   void LuaBranchesActivatedTable::setBranchActivated(const std::string& name, bool activated)
   {
     QMutexLocker lock(&m->mutexActivated);
-    luaref()[name] = activated;
+    luaRef()[name] = activated;
     getOBranchActivated(name)->set(activated);
   }
 
@@ -46,7 +46,7 @@ namespace onep
   {
     QMutexLocker lock(&m->mutexActivated);
 
-    auto table = luaref();
+    auto table = luaRef();
     for (const auto& oActivated : m->oActivatedBranches)
     {
       auto activated = static_cast<bool>(table[oActivated.first]);

@@ -225,7 +225,7 @@ namespace onep
           cstate->getBranchesActivatedTable()->setBranchActivated(name, activated);
           m->luaControl->triggerLuaCallback(activated ? LuaDefines::Callback::ON_BRANCH_PURCHASED
                                                       : LuaDefines::Callback::ON_BRANCH_RESIGNED,
-                                            name, cstate->luaref());
+                                            name, cstate->luaRef());
         });
       });
     });

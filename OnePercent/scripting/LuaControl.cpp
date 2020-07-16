@@ -69,7 +69,7 @@ namespace onep
       m->modelContainer->accessModel([this, &cb](const LuaModel::Ptr& model)
       {
         auto cstate = model->getSimulationStateTable()->getCountryState(cb.countryId);
-        triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_ACTIVATED, cb.branchName, cstate->luaref());
+        triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_ACTIVATED, cb.branchName, cstate->luaRef());
       });
     });
   }
@@ -82,7 +82,7 @@ namespace onep
     states->foreachMappedElementDo<LuaCountryState>([this, &branches](LuaCountryState::Ptr& state)
     {
       auto branchesActivated = state->getBranchesActivatedTable();
-      auto countryState      = state->luaref();
+      auto countryState      = state->luaRef();
 
       branches->foreachMappedElementDo<LuaSkillBranch>([this, &branchesActivated, &countryState](LuaSkillBranch::Ptr& branch)
       {
@@ -114,7 +114,7 @@ namespace onep
 
     states->foreachMappedElementDo<LuaCountryState>([this, &branches](LuaCountryState::Ptr& state)
     {
-      auto countryState = state->luaref();
+      auto countryState = state->luaRef();
 
       branches->foreachMappedElementDo<LuaSkillBranch>([this, &countryState](LuaSkillBranch::Ptr& branch)
       {

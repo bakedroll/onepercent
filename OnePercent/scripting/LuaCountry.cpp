@@ -48,7 +48,7 @@ namespace onep
 
   float LuaCountry::getInitValue(const std::string& valueName, float defaultValue) const
   {
-    luabridge::LuaRef initValuesRef = luaref()["init_values"];
+    luabridge::LuaRef initValuesRef = luaRef()["init_values"];
     luabridge::LuaRef initValueRef  = initValuesRef[valueName];
 
     if (initValueRef.isNil())

@@ -15,19 +15,19 @@ namespace onep
     template<typename KeyType>
     bool contains(const KeyType& key) const
     {
-      return !luaref()[key].isNil();
+      return !luaRef()[key].isNil();
     }
 
     template<typename KeyType>
     void insert(const KeyType& key, const luabridge::LuaRef& elem)
     {
-      luaref()[key] = elem;
+      luaRef()[key] = elem;
     }
 
     template<typename KeyType>
     luabridge::LuaRef getElement(const KeyType& key) const
     {
-      return luaref()[key];
+      return luaRef()[key];
     }
   
   };

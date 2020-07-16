@@ -29,12 +29,12 @@ namespace onep
 
   float LuaValueGroupTable::getValue(const std::string& name) const
   {
-    return float(luaref()[name]);
+    return float(luaRef()[name]);
   }
 
   void LuaValueGroupTable::setValue(const std::string& name, float value)
   {
-    luaref()[name] = value;
+    luaRef()[name] = value;
   }
 
   std::shared_ptr<LuaValueGroupTable> LuaValueGroupTable::getGroup(const std::string& name)
