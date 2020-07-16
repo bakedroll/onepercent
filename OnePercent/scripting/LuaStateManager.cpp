@@ -235,11 +235,11 @@ namespace onep
   {
     auto log = QString("Lua Error: %1").arg(message.c_str());
 
-    /*const auto stacktrace = getStackTrace();
-    if (!stacktrace.empty() && (stacktrace != "stack traceback:"))
+    const auto stacktrace = getStackTrace();
+    if (!stacktrace.empty())
     {
       log.append(QString("\n%1").arg(stacktrace.c_str()));
-    }*/
+    }
 
     OSGG_QLOG_FATAL(log);
   }

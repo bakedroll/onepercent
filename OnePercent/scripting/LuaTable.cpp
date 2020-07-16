@@ -66,7 +66,7 @@ luabridge::LuaRef LuaTable::getValueRef(const std::string& key) const
   luabridge::LuaRef value = luaRef()[key];
   if (value.isNil())
   {
-    throw LuaInvalidDataException(QString("Expected key %1").arg(key.c_str()));
+    throw LuaInvalidDataException(QString("Expected key '%1'").arg(key.c_str()));
   }
 
   return value;
@@ -77,7 +77,7 @@ const luabridge::LuaRef& LuaTable::checkType(const luabridge::LuaRef& ref, int t
   if (ref.type() != type)
   {
     throw LuaInvalidDataException(key.empty() ? "Value in array has wrong type"
-                                              : QString("Value %1 has wrong type.").arg(key.c_str()));
+                                              : QString("Value '%1' has wrong type.").arg(key.c_str()));
   }
 
   return ref;
