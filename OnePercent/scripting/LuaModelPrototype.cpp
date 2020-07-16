@@ -4,11 +4,7 @@
 onep::LuaModelPrototype::LuaModelPrototype(const luabridge::LuaRef& object, lua_State* luaState)
   : LuaObjectMapper(object, luaState), m_scale(1.0f, 1.0f, 1.0f)
 {
-  checkForConsistency("filename", LUA_TSTRING);
-
-  assert_return(!hasAnyInconsistency());
-
-  m_filename = object["filename"].tostring();
+  m_filename = getString("filename");
 
   luabridge::LuaRef refScale = object["scale"];
   if (!refScale.isNil())

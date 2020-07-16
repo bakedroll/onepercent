@@ -1,6 +1,7 @@
 #include "LuaStateManager.h"
 
 #include "core/Macros.h"
+#include "scripting/LuaInvalidDataException.h"
 
 #include <osgGaming/ResourceManager.h>
 #include <osgGaming/Macros.h>
@@ -196,6 +197,10 @@ namespace onep
       func();
     }
     catch (luabridge::LuaException& e)
+    {
+      logLuaError(e.what());
+    }
+    catch (LuaInvalidDataException& e)
     {
       logLuaError(e.what());
     }

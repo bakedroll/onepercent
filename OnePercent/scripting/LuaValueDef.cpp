@@ -21,27 +21,20 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    checkForConsistency("name", LUA_TSTRING);
-    checkForConsistency("init", LUA_TNUMBER);
+    m->name = getString("name");
+    m->init = getNumber<float>("init");
 
-    assert_return(!hasAnyInconsistency());
-
-    luabridge::LuaRef nameRef = object["name"];
-    luabridge::LuaRef initRef = object["init"];
     luabridge::LuaRef visible = object["visible"];
     luabridge::LuaRef group   = object["group"];
 
-    m->name = nameRef.tostring();
-    m->init = initRef;
-
-    if (!visible.isNil() && checkForConsistency("visible", LUA_TBOOLEAN))
+    if (hasValue("visible"))
     {
-        m->isVisible = static_cast<bool>(visible);
+      m->isVisible = getBoolean("visible");
     }
 
-    if (!group.isNil() && checkForConsistency("group", LUA_TSTRING))
+    if (hasValue("group"))
     {
-        m->group = group.tostring();
+      m->group = getString("group");
     }
   }
 

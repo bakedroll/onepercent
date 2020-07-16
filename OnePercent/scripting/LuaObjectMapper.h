@@ -150,12 +150,6 @@ namespace onep
       assert_return(false, std::shared_ptr<LuaObject>()); // key must be number or string
     }
 
-    bool hasAnyInconsistency() const;
-
-  protected:
-    bool checkForConsistency(const std::string& key, int luaType);
-    void logInconsistencies(const std::string& ownKey) const;
-
   private:
     using ElementsMap = std::map<std::string, Ptr>;
 
@@ -173,8 +167,7 @@ namespace onep
 
     using InconsistencyList = std::vector<Inconsistency>;
 
-    ElementsMap                        m_elements;
-    InconsistencyList                  m_inconsistencies;
+    ElementsMap m_elements;
 
     static std::string strKey(const std::string& key) { return key; }
     static std::string strKey(int key) { return std::to_string(key); }
@@ -200,12 +193,6 @@ namespace onep
     std::shared_ptr<LuaObject> makeSharedAndAddElement(luabridge::LuaRef& ref, KeyType key, Args... args)
     {
       std::shared_ptr<LuaObject> elem = std::make_shared<LuaObject>(ref, luaState(), args...);
-      if (elem->hasAnyInconsistency())
-      {
-        elem->logInconsistencies(strKey(key));
-        assert(false);
-        return nullptr;
-      }
 
       addToElementsMap<LuaObject>(key, elem);
       return elem;

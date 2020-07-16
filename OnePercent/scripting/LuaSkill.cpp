@@ -1,8 +1,6 @@
 #include "scripting/LuaSkill.h"
 #include "core/Multithreading.h"
 
-#include <osgGaming/Macros.h>
-
 namespace onep
 {
   void LuaSkill::Definition::registerDefinition(lua_State* state)
@@ -38,40 +36,24 @@ namespace onep
     , LuaObjectMapper(object, lua)
     , m(new Impl())
   {
-    checkForConsistency("name", LUA_TSTRING);
-    checkForConsistency("branch", LUA_TSTRING);
-    checkForConsistency("display_name", LUA_TSTRING);
-    checkForConsistency("type", LUA_TSTRING);
-    checkForConsistency("cost", LUA_TNUMBER);
+    m->name        = getString("name");
+    m->branch      = getString("branch");
+    m->displayName = getString("display_name");
+    m->type        = getString("type");
+    m->cost        = getNumber<int>("cost");
 
-    assert_return(!hasAnyInconsistency());
-
-    luabridge::LuaRef nameRef         = object["name"];
-    luabridge::LuaRef branchRef       = object["branch"];
-    luabridge::LuaRef displayNameRef  = object["display_name"];
-    luabridge::LuaRef typeRef         = object["type"];
-    luabridge::LuaRef costRef         = object["cost"];
-    luabridge::LuaRef dependencies    = object["dependencies"];
-
-    if (!dependencies.isNil() && checkForConsistency("dependencies", LUA_TTABLE))
+    if (hasValue("dependencies"))
     {
-      for (luabridge::Iterator it(dependencies); !it.isNil(); ++it)
+      const auto depTable = getTable("dependencies");
+      depTable->iterateValues(LUA_TSTRING, [this](luabridge::LuaRef value)
       {
-        if (it.value().isString())
-        {
-          m->dependencies.push_back(it.value());
-        }
-      }
+        m->dependencies.push_back(value);
+      });
     }
 
     auto bActivared = false;
     object["activated"] = bActivared;
 
-    m->name         = nameRef.tostring();
-    m->branch       = branchRef.tostring();
-    m->displayName  = displayNameRef.tostring();
-    m->type         = typeRef.tostring();
-    m->cost         = costRef;
     m->obActivated->set(bActivared);
 
     registerLuaCallback(LuaDefines::Callback::ON_SKILL_UPDATE);

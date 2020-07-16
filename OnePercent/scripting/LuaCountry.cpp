@@ -17,21 +17,13 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    checkForConsistency("id", LUA_TNUMBER);
-    checkForConsistency("name", LUA_TSTRING);
-
-    assert_return(!hasAnyInconsistency());
-
-    luabridge::LuaRef idRef   = object["id"];
-    luabridge::LuaRef nameRef = object["name"];
+    m->id   = getNumber<int>("id");
+    m->name = getString("name");
 
     if (object["init_values"].isNil())
     {
       object["init_values"] = luabridge::newTable(luaState);
     }
-
-    m->id   = idRef;
-    m->name = nameRef.tostring();
   }
 
   LuaCountry::~LuaCountry() = default;

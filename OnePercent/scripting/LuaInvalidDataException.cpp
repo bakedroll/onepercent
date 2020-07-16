@@ -9,7 +9,7 @@ LuaInvalidDataException::LuaInvalidDataException(const QString& message)
 }
 
 LuaInvalidDataException::LuaInvalidDataException(const LuaInvalidDataException& rhs)
-  : LuaInvalidDataException(QString::fromStdString(rhs.what()))
+  : std::runtime_error(rhs.what())
 {
 }
 

@@ -1,8 +1,6 @@
 #include "scripting/LuaSkillBranch.h"
 #include "scripting/LuaSkillsTable.h"
 
-#include <osgGaming/Macros.h>
-
 namespace onep
 {
   struct LuaSkillBranch::Impl
@@ -21,16 +19,8 @@ namespace onep
     : LuaObjectMapper(object, luaState)
     , m(new Impl())
   {
-    checkForConsistency("name", LUA_TSTRING);
-    checkForConsistency("cost", LUA_TNUMBER);
-
-    assert_return(!hasAnyInconsistency());
-
-    luabridge::LuaRef nameRef = object["name"];
-    luabridge::LuaRef costRef = object["cost"];
-
-    m->name = nameRef.tostring();
-    m->cost = costRef;
+    m->name = getString("name");
+    m->cost = getNumber<int>("cost");
 
     m->skillsTable = newMappedElement<LuaSkillsTable>("skills");
   }
