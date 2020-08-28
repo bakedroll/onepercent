@@ -153,6 +153,7 @@ endif()
 set(GTEST_ROOT ${QT5_ROOT_DIRECTORY})
 
 find_package(GTest)
+find_package(OpenGL)
 
 # print errors
 if (NOT "${ERROR_MESSAGES}" STREQUAL "")
@@ -217,6 +218,8 @@ endif()
 
 # add subdirectories
 add_subdirectory(osgGaming)
+add_subdirectory(QtOsgBridge)
+add_subdirectory(QtOsgBridgeApplication)
 
 if (LUADOC_ENABLE)
   add_subdirectory(luadoc)

@@ -1,16 +1,17 @@
-add_source_directory(OSG_GAMING_SOURCE src)
-add_source_directory(OSG_GAMING_SOURCE include)
+set(PROJECT_NAME osgGaming)
+
+add_source_directory(OSGGAMING_SOURCE src)
+add_source_directory(OSGGAMING_SOURCE include)
 
 set(OSGGAMING_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# add library osgGaming
-add_library(osgGaming ${OSG_GAMING_SOURCE})
+add_library(${PROJECT_NAME} ${OSGGAMING_SOURCE})
 
-set_target_properties(osgGaming PROPERTIES DEBUG_POSTFIX "d")
-target_compile_options(osgGaming PRIVATE "-fpermissive")
+set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
+target_compile_options(${PROJECT_NAME} PRIVATE "-fpermissive")
 
 # set include directories
-target_include_directories(osgGaming PUBLIC
+target_include_directories(${PROJECT_NAME} PUBLIC
   ${OSGGAMING_INCLUDE_DIR}
   ${OSG_INCLUDE_DIR}
   ${OSGPPU_INCLUDE_DIR})
