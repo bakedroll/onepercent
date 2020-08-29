@@ -21,7 +21,7 @@ source_group(GeneratedFiles FILES
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_autogen/moc_compilation.cpp)
 
 # specify needed osg libraries
-set(OSG_LIBRARIES_TMP "osg osgViewer osgDB OpenThreads")
+set(OSG_LIBRARIES_TMP "osg osgViewer osgDB osgGA OpenThreads")
 
 get_libraries(OSG_LIBRARIES ${OSG_LIBRARY} "" ${OSG_LIBRARIES_TMP})
 get_libraries(OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${OSG_LIBRARIES_TMP})
