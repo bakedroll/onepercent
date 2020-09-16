@@ -218,6 +218,7 @@ endif()
 
 # add subdirectories
 add_subdirectory(osgGaming)
+add_subdirectory(osgHelper)
 add_subdirectory(QtOsgBridge)
 add_subdirectory(QtOsgBridgeApplication)
 

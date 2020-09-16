@@ -21,7 +21,7 @@ source_group(GeneratedFiles FILES
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_autogen/moc_compilation.cpp)
 
 # specify needed osg libraries
-set(OSG_LIBRARIES_TMP "osg osgViewer osgDB osgGA OpenThreads")
+set(OSG_LIBRARIES_TMP "osg osgViewer osgDB osgGA osgUtil osgText OpenThreads")
 
 get_libraries(OSG_LIBRARIES ${OSG_LIBRARY} "" ${OSG_LIBRARIES_TMP})
 get_libraries(OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${OSG_LIBRARIES_TMP})
@@ -31,14 +31,21 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${QTOSGBRIDGE_INCLUDE_DIR}
   ${OSG_INCLUDE_DIR}
-  ${OSGPPU_INCLUDE_DIR})
+  ${OSGPPU_INCLUDE_DIR}
+  ${OSGHELPER_INCLUDE_DIR})
 
 foreach(module ${QT5_MODULES})
   target_include_directories(${PROJECT_NAME} PUBLIC ${Qt5${module}_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} Qt5::${module})
 endforeach()
 
-target_link_libraries(${PROJECT_NAME} QtOsgBridge ${OPENGL_gl_LIBRARY})
+target_link_libraries(${PROJECT_NAME} osgHelper QtOsgBridge ${OPENGL_gl_LIBRARY})
+
+target_link_libraries(${PROJECT_NAME}
+  optimized ${OSGPPU_LIBRARY_RELEASE} ${LUA_LIBRARY})
+  
+target_link_libraries(${PROJECT_NAME}
+  debug ${OSGPPU_LIBRARY_DEBUG} ${LUA_LIB_DEBUG})
 
 if (MSVC)
   foreach(lib ${OSG_LIBRARIES})

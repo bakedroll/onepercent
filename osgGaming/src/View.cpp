@@ -104,10 +104,10 @@ namespace osgGaming
       hudStateSet->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
       hudStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
-      osg::ref_ptr<osg::MatrixTransform> geodeTransform = new osg::MatrixTransform();
+      /*osg::ref_ptr<osg::MatrixTransform> geodeTransform = new osg::MatrixTransform();
       geodeTransform->setMatrix(osg::Matrix::identity());
       geodeTransform->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-      geodeTransform->addChild(canvasGeode);
+      geodeTransform->addChild(canvasGeode);*/
 
       hudCamera->addChild(canvasGeode);
 

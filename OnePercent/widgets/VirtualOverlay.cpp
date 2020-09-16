@@ -1,8 +1,8 @@
 #include "VirtualOverlay.h"
 
 #include <osg/Geode>
-#include <osg/Switch>
 #include <osg/Material>
+#include <osg/Switch>
 
 #include <osgGaming/Helper.h>
 
