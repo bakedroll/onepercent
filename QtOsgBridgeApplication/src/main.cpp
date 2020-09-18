@@ -21,7 +21,7 @@ void createWindow(const osg::ref_ptr<osg::Geode>& geode, QtOsgBridge::QtOsgWidge
   sceneCamera->setClearColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
 
   screenCamera->setPosition(osg::Vec3f(1, -12, 0));
-  sceneView->setClampColorEnabled(true);
+  //sceneView->setClampColorEnabled(true);
   sceneView->getRootGroup()->addChild(geode);
 
   auto screenGeode = new osg::Geode();
