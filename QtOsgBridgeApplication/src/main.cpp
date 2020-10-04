@@ -16,23 +16,23 @@
 
 #include <QtOsgBridge/QtOsgWidget.h>
 
-template <typename T>
-osg::ref_ptr<T> setupPostProcessingEffect(osgHelper::ioc::InjectionContainer& container,
+template <typename TEffect>
+osg::ref_ptr<TEffect> setupPostProcessingEffect(osgHelper::ioc::InjectionContainer& container,
                                           osgHelper::ioc::Injector& injector, const osgHelper::View::Ptr& view,
                                           QLayout* buttonsLayout, bool enable = true)
 {
-  container.registerType<T>();
-  auto effect = injector.inject<T>();
+  container.registerType<TEffect>();
+  auto effect = injector.inject<TEffect>();
   view->addPostProcessingEffect(effect, enable);
 
-  auto button = new QPushButton(QString("Toggle %1").arg(QString::fromStdString(T::Name)));
+  auto button = new QPushButton(QString("Toggle %1").arg(QString::fromStdString(TEffect::Name)));
   QObject::connect(button, &QPushButton::clicked, [view]()
   {
-      const auto enabled = view->getPostProcessingEffectEnabled(T::Name);
-      view->setPostProcessingEffectEnabled(T::Name, !enabled);
+      const auto enabled = view->getPostProcessingEffectEnabled(TEffect::Name);
+      view->setPostProcessingEffectEnabled(TEffect::Name, !enabled);
 
       const auto message = QString("Toggled %1: %2\n")
-                                   .arg(QString::fromStdString(T::Name))
+                                   .arg(QString::fromStdString(TEffect::Name))
                                    .arg(enabled ? "off" : "on")
                                    .toStdString();
       printf(message.c_str());
@@ -121,8 +121,8 @@ int main(int argc, char** argv)
 
 
   QSurfaceFormat format;
-  //format.setVersion(2, 1);
-  //format.setProfile( QSurfaceFormat::CompatibilityProfile );
+  format.setVersion(2, 1);
+  format.setProfile(QSurfaceFormat::CompatibilityProfile);
 
   format.setRedBufferSize(16);
   format.setGreenBufferSize(16);
