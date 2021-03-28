@@ -70,22 +70,23 @@ void createWindow(osgHelper::ioc::InjectionContainer& container, osgHelper::ioc:
   qtOsgWidget->setUpdateMode(mode);
 
   auto sceneView  = qtOsgWidget->getView(QtOsgBridge::QtOsgWidget::ViewType::Scene);
-  auto screenView = qtOsgWidget->getView(QtOsgBridge::QtOsgWidget::ViewType::Screen);
+  //auto screenView = qtOsgWidget->getView(QtOsgBridge::QtOsgWidget::ViewType::Screen);
 
   auto sceneCamera  = qtOsgWidget->getCamera(QtOsgBridge::QtOsgWidget::ViewType::Scene);
-  auto screenCamera = qtOsgWidget->getCamera(QtOsgBridge::QtOsgWidget::ViewType::Screen);
+  //auto screenCamera = qtOsgWidget->getCamera(QtOsgBridge::QtOsgWidget::ViewType::Screen);
 
   sceneCamera->setPosition(osg::Vec3f(0, -5, 0));
   sceneCamera->setClearColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
 
-  screenCamera->setPosition(osg::Vec3f(1, -12, 0));
+  //screenCamera->setPosition(osg::Vec3f(1, -12, 0));
+  sceneView->setClampColorEnabled(true);
   sceneView->getRootGroup()->addChild(group);
 
   auto screenGeode = new osg::Geode();
   screenGeode->addDrawable(osg::createTexturedQuadGeometry(osg::Vec3(100.0, 100.0, 0.0), osg::Vec3(200.0, 0.0, 0.0),
                                                            osg::Vec3(0.0, 100.0, 0.0)));
 
-  screenView->getRootGroup()->addChild(screenGeode);
+  //screenView->getRootGroup()->addChild(screenGeode);
 
   auto buttonsLayout = new QHBoxLayout();
   auto fxaa          = setupPostProcessingEffect<osgHelper::ppu::FXAA>(container, injector, sceneView, buttonsLayout, false);
@@ -118,20 +119,6 @@ int main(int argc, char** argv)
   osgHelper::ioc::Injector           injector(container);
 
   container.registerSingletonType<osgHelper::ShaderFactory>();
-
-
-  QSurfaceFormat format;
-  format.setVersion(2, 1);
-  format.setProfile(QSurfaceFormat::CompatibilityProfile);
-
-  format.setRedBufferSize(16);
-  format.setGreenBufferSize(16);
-  format.setBlueBufferSize(16);
-  format.setAlphaBufferSize(16);
-  format.setSwapBehavior(QSurfaceFormat::SwapBehavior::DoubleBuffer);
-
-  QSurfaceFormat::setDefaultFormat(format);
-
 
   QApplication app(argc, argv);
 
