@@ -69,11 +69,9 @@ void createWindow(osgHelper::ioc::InjectionContainer& container, osgHelper::ioc:
   auto qtOsgWidget = new QtOsgBridge::QtOsgWidget();
   qtOsgWidget->setUpdateMode(mode);
 
-  auto sceneView  = qtOsgWidget->getView(QtOsgBridge::QtOsgWidget::ViewType::Scene);
-  //auto screenView = qtOsgWidget->getView(QtOsgBridge::QtOsgWidget::ViewType::Screen);
+  auto sceneView  = qtOsgWidget->getView();
 
-  auto sceneCamera  = qtOsgWidget->getCamera(QtOsgBridge::QtOsgWidget::ViewType::Scene);
-  //auto screenCamera = qtOsgWidget->getCamera(QtOsgBridge::QtOsgWidget::ViewType::Screen);
+  auto sceneCamera = sceneView->getCamera(osgHelper::View::CameraType::Scene);
 
   sceneCamera->setPosition(osg::Vec3f(0, -5, 0));
   sceneCamera->setClearColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
