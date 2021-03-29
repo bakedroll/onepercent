@@ -7,6 +7,6 @@ namespace osgGaming
 	class FileResourceLoader : public ResourceLoader
 	{
 	public:
-		virtual void getResourceStream(std::string resourceKey, std::ifstream& stream, long long& length) override;
+		void getResourceStream(std::string resourceKey, std::ifstream& stream, long long& length) override;
 	};
 }
