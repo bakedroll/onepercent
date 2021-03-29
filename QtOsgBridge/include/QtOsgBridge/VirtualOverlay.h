@@ -3,11 +3,10 @@
 #include <QWidget>
 
 #include <osg/MatrixTransform>
-#include <osg/Texture2D>
 
 #include <memory>
 
-namespace onep
+namespace QtOsgBridge
 {
   class VirtualOverlay : public QWidget
   {
@@ -17,20 +16,21 @@ namespace onep
     VirtualOverlay();
     ~VirtualOverlay();
 
-    osg::ref_ptr<osg::Node> getOsgNode();
+    osg::ref_ptr<osg::Node> getRootNode() const;
 
     void renderToTexture();
 
     void setGeometry(const QRect& geometry);
     void setGeometry(int x, int y, int w, int h);
 
-    virtual void setVisible(bool visible) override;
-    bool shouldBeVisible();
+    void setVisible(bool visible) override;
+    bool shouldBeVisible() const;
 
     void setColor(osg::Vec4f color);
 
   private:
     struct Impl;
     std::unique_ptr<Impl> m;
+
   };
 }

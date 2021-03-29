@@ -16,6 +16,8 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <QtOsgBridge/QtOsgWidget.h>
+#include <QtOsgBridge/VirtualOverlay.h>
+#include <QtOsgBridge/OverlayCompositor.h>
 
 float rotation;
 double position;
@@ -177,6 +179,24 @@ void createWindow(osgHelper::ioc::InjectionContainer& container, osgHelper::ioc:
   mainWindow->show();
 
   qtOsgWidget->installEventFilter(new EventHandler(mainWindow));
+
+  auto button1 = new QPushButton("Button 1");
+  auto button2 = new QPushButton("Button 2");
+
+  auto overlayLayout = new QVBoxLayout();
+  overlayLayout->addWidget(button1);
+  overlayLayout->addWidget(button2);
+  overlayLayout->addStretch(1);
+
+  auto overlay = new QtOsgBridge::VirtualOverlay();
+  overlay->setLayout(overlayLayout);
+  overlay->setGeometry(100, 100, 300, 300);
+  overlay->setStyleSheet("background-color: rgba(100, 100, 220, 50%);");
+
+  qtOsgWidget->getOverlayCompositor()->addVirtualOverlay(overlay);
+
+  overlay->show();
+
 }
 
 int main(int argc, char** argv)
