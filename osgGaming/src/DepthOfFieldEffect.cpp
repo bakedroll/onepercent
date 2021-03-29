@@ -45,9 +45,7 @@ namespace osgGaming
 
   }
 
-  DepthOfFieldEffect::~DepthOfFieldEffect()
-  {
-  }
+  DepthOfFieldEffect::~DepthOfFieldEffect() = default;
 
   std::string DepthOfFieldEffect::getName()
   {
