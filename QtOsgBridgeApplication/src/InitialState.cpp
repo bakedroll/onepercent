@@ -12,6 +12,8 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 
+#include <QMouseEvent>
+
 float rotation;
 double position;
 
@@ -36,6 +38,39 @@ void setupPostProcessingEffect(const osg::ref_ptr<TEffect>& effect, const osgHel
 
   buttonsLayout->addWidget(button);
 }
+
+class EventHandler : public QObject
+{
+public:
+  EventHandler(QMainWindow* mainWindow)
+    : QObject()
+    , m_mainWindow(mainWindow)
+  {}
+
+  bool eventFilter(QObject* object, QEvent* event) override
+  {
+    if (event->type() == QEvent::Type::MouseButtonDblClick)
+    {
+      const auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
+      if (mouseEvent && mouseEvent->button() == Qt::MouseButton::LeftButton)
+      {
+        if (m_mainWindow->isFullScreen())
+        {
+          m_mainWindow->showNormal();
+          return true;
+
+        }
+        m_mainWindow->showFullScreen();
+      }
+    }
+
+    return QObject::eventFilter(object, event);
+  }
+
+private:
+  QMainWindow* m_mainWindow;
+
+};
 
 InitialState::InitialState(osgHelper::ioc::Injector& injector)
   : QtOsgBridge::AbstractEventState(injector)
@@ -137,6 +172,7 @@ void InitialState::initialize(QtOsgBridge::MainWindow* mainWindow)
   overlay->setStyleSheet("background-color: rgba(100, 100, 220, 50%);");
 
   mainWindow->getViewWidget()->getOverlayCompositor()->addVirtualOverlay(overlay);
+  mainWindow->installEventFilter(new EventHandler(mainWindow));
 
   overlay->show();
 }
