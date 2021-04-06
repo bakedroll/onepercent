@@ -130,7 +130,7 @@ namespace onep
     m->cameraViewAngle = viewAngle;
     m->cameraDistance = distance;
 
-    // update camera position
+    // update camera m_position
     osg::Vec3f position = osgGaming::getVec3FromEuler(latLong.x(), 0.0, latLong.y()) * m->cameraDistance;
 
     getCameraManipulator()->setPosition(position);

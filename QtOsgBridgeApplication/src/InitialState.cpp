@@ -14,9 +14,6 @@
 
 #include <QMouseEvent>
 
-float rotation;
-double position;
-
 template <typename TEffect>
 void setupPostProcessingEffect(const osg::ref_ptr<TEffect>& effect, const osgHelper::View::Ptr& view,
                                                 QLayout* buttonsLayout, bool enable = true)
@@ -39,51 +36,138 @@ void setupPostProcessingEffect(const osg::ref_ptr<TEffect>& effect, const osgHel
   buttonsLayout->addWidget(button);
 }
 
-class EventHandler : public QObject
-{
-public:
-  EventHandler(QMainWindow* mainWindow)
-    : QObject()
-    , m_mainWindow(mainWindow)
-  {}
-
-  bool eventFilter(QObject* object, QEvent* event) override
-  {
-    if (event->type() == QEvent::Type::MouseButtonDblClick)
-    {
-      const auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
-      if (mouseEvent && mouseEvent->button() == Qt::MouseButton::LeftButton)
-      {
-        if (m_mainWindow->isFullScreen())
-        {
-          m_mainWindow->showNormal();
-          return true;
-
-        }
-        m_mainWindow->showFullScreen();
-      }
-    }
-
-    return QObject::eventFilter(object, event);
-  }
-
-private:
-  QMainWindow* m_mainWindow;
-
-};
-
-InitialState::InitialState(osgHelper::ioc::Injector& injector)
-  : QtOsgBridge::AbstractEventState(injector)
-  , m_fxaa(injector.inject<osgHelper::ppu::FXAA>())
-  , m_dof(injector.inject<osgHelper::ppu::DOF>())
-  , m_hdr(injector.inject<osgHelper::ppu::HDR>())
+State1::State1(osgHelper::ioc::Injector& injector)
+  : QtOsgBridge::EventProcessingState(injector)
 {
 }
 
-void InitialState::initialize(QtOsgBridge::MainWindow* mainWindow)
+State1::~State1()
 {
-  rotation = 0.0f;
-  position = 0.0;
+  OSGG_LOG_DEBUG("~destruct State1");
+}
+
+void State1::onInitialize(QtOsgBridge::MainWindow* mainWindow)
+{
+  OSGG_LOG_DEBUG("onInitialize() State1");
+
+  const auto b1 = new QPushButton("State 2");
+  const auto b2 = new QPushButton("State 2 Exit");
+  const auto b3 = new QPushButton("Close");
+
+  connect(b1, &QPushButton::clicked, [this]()
+  {
+    requestNewEventState<State2>(NewEventStateMode::ContinueCurrent);
+  });
+
+  connect(b2, &QPushButton::clicked, [this]()
+  {
+    requestNewEventState<State2>(NewEventStateMode::ExitCurrent);
+  });
+
+  connect(b3, &QPushButton::clicked, [this]()
+  {
+    requestExitEventState(ExitEventStateMode::ExitCurrent);
+  });
+
+  const auto layout = new QVBoxLayout();
+  layout->addWidget(b1);
+  layout->addWidget(b2);
+  layout->addWidget(b3);
+  layout->addStretch(1);
+
+  m_overlay = new QtOsgBridge::VirtualOverlay();
+  m_overlay->setLayout(layout);
+  m_overlay->setGeometry(rand() % 700, rand() % 400, 300, 300);
+  m_overlay->setStyleSheet("background-color: rgba(220, 100, 100, 50%);");
+
+  m_overlayCompositor = mainWindow->getViewWidget()->getOverlayCompositor();
+  m_overlayCompositor->addVirtualOverlay(m_overlay);
+
+  m_overlay->show();
+}
+
+void State1::onExit()
+{
+  OSGG_LOG_DEBUG("onExit() State1");
+
+  m_overlayCompositor->removeVirtualOverlay(m_overlay);
+}
+
+State2::State2(osgHelper::ioc::Injector& injector)
+  : QtOsgBridge::EventProcessingState(injector)
+{
+}
+
+State2::~State2()
+{
+  OSGG_LOG_DEBUG("~destruct State2");
+}
+
+void State2::onInitialize(QtOsgBridge::MainWindow* mainWindow)
+{
+  OSGG_LOG_DEBUG("onInitialize() State2");
+
+  const auto b1 = new QPushButton("State 1");
+  const auto b2 = new QPushButton("State 1 Exit");
+  const auto b3 = new QPushButton("Close");
+
+  connect(b1, &QPushButton::clicked, [this]()
+  {
+    requestNewEventState<State1>(NewEventStateMode::ContinueCurrent);
+  });
+
+  connect(b2, &QPushButton::clicked, [this]()
+  {
+    requestNewEventState<State1>(NewEventStateMode::ExitCurrent);
+  });
+
+  connect(b3, &QPushButton::clicked, [this]()
+  {
+    requestExitEventState(ExitEventStateMode::ExitCurrent);
+  });
+
+  const auto layout = new QVBoxLayout();
+  layout->addWidget(b1);
+  layout->addWidget(b2);
+  layout->addWidget(b3);
+  layout->addStretch(1);
+
+  m_overlay = new QtOsgBridge::VirtualOverlay();
+  m_overlay->setLayout(layout);
+  m_overlay->setGeometry(rand() % 700, rand() % 400, 300, 300);
+  m_overlay->setStyleSheet("background-color: rgba(100, 220, 100, 50%);");
+
+  m_overlayCompositor = mainWindow->getViewWidget()->getOverlayCompositor();
+  m_overlayCompositor->addVirtualOverlay(m_overlay);
+
+  m_overlay->show();
+}
+
+void State2::onExit()
+{
+  OSGG_LOG_DEBUG("onExit() State2");
+
+  m_overlayCompositor->removeVirtualOverlay(m_overlay);
+}
+
+InitialState::InitialState(osgHelper::ioc::Injector& injector)
+  : QtOsgBridge::EventProcessingState(injector)
+  , m_fxaa(injector.inject<osgHelper::ppu::FXAA>())
+  , m_dof(injector.inject<osgHelper::ppu::DOF>())
+  , m_hdr(injector.inject<osgHelper::ppu::HDR>())
+  , m_rotation(0.0f)
+  , m_position(0.0)
+{
+}
+
+InitialState::~InitialState()
+{
+  OSGG_LOG_DEBUG("~destruct InitialState");
+}
+
+void InitialState::onInitialize(QtOsgBridge::MainWindow* mainWindow)
+{
+  OSGG_LOG_DEBUG("onInitialize() InitialState");
 
   auto geodeBox = new osg::Geode();
   geodeBox->addDrawable(new osg::ShapeDrawable(new osg::Box()));
@@ -98,10 +182,10 @@ void InitialState::initialize(QtOsgBridge::MainWindow* mainWindow)
   auto transformBox = new osg::PositionAttitudeTransform();
   transformBox->addChild(geodeBox);
   
-  auto updateTransformation = [transformBox]()
+  auto updateTransformation = [this, transformBox]()
   {
-    transformBox->setAttitude(osgHelper::getQuatFromEuler(0.3, 0.0, rotation));
-    transformBox->setPosition(osg::Vec3d(0.0, 3.0 - 5.0 * cos(position), 0.0));
+    transformBox->setAttitude(osgHelper::getQuatFromEuler(0.3, 0.0, m_rotation));
+    transformBox->setPosition(osg::Vec3d(0.0, 3.0 - 5.0 * cos(m_position), 0.0));
   };
 
   updateTransformation();
@@ -117,19 +201,19 @@ void InitialState::initialize(QtOsgBridge::MainWindow* mainWindow)
   auto timer = new QTimer();
   timer->setInterval(16);
   timer->setSingleShot(false);
-  QObject::connect(timer, &QTimer::timeout, [updateTransformation]()
+  QObject::connect(timer, &QTimer::timeout, [this, updateTransformation]()
   {
-    rotation += 0.05f;
-    position += 0.02;
+    m_rotation += 0.05f;
+    m_position += 0.02;
 
-    if (rotation >= 2.0f * C_PI)
+    if (m_rotation >= 2.0f * C_PI)
     {
-      rotation = 0.0f;
+      m_rotation = 0.0f;
     }
 
-    if (position >= 2.0 * C_PI)
+    if (m_position >= 2.0 * C_PI)
     {
-      position = 0.0;
+      m_position = 0.0;
     }
 
     updateTransformation();
@@ -157,6 +241,33 @@ void InitialState::initialize(QtOsgBridge::MainWindow* mainWindow)
   setupPostProcessingEffect<osgHelper::ppu::HDR>(m_hdr, sceneView, buttonsLayout, false);
   setupPostProcessingEffect<osgHelper::ppu::DOF>(m_dof, sceneView, buttonsLayout, false);
 
+  const auto buttonState1 = new QPushButton("State 1");
+  const auto buttonState2 = new QPushButton("State 2");
+  const auto buttonExit = new QPushButton("Exit");
+
+  connect(buttonState1, &QPushButton::clicked, [this]()
+  {
+    requestNewEventState<State1>(NewEventStateMode::ContinueCurrent);
+  });
+
+  connect(buttonState2, &QPushButton::clicked, [this]()
+  {
+    requestNewEventState<State2>(NewEventStateMode::ContinueCurrent);
+  });
+
+  connect(buttonExit, &QPushButton::clicked, [this]()
+  {
+    requestExitEventState(ExitEventStateMode::ExitAll);
+  });
+
+  const auto navLayout = new QHBoxLayout();
+  navLayout->addWidget(buttonState1);
+  navLayout->addWidget(buttonState2);
+  navLayout->addWidget(buttonExit);
+
+  const auto removeOverlayButton = new QPushButton("test");
+  buttonsLayout->addWidget(removeOverlayButton);
+
   m_dof->setZNear(1.0f);
   m_dof->setZFar(1000.0f);
   m_dof->setFocalRange(3.0f);
@@ -164,6 +275,7 @@ void InitialState::initialize(QtOsgBridge::MainWindow* mainWindow)
 
   auto overlayLayout = new QVBoxLayout();
   overlayLayout->addLayout(buttonsLayout);
+  overlayLayout->addLayout(navLayout);
   overlayLayout->addStretch(1);
 
   auto overlay = new QtOsgBridge::VirtualOverlay();
@@ -172,12 +284,47 @@ void InitialState::initialize(QtOsgBridge::MainWindow* mainWindow)
   overlay->setStyleSheet("background-color: rgba(100, 100, 220, 50%);");
 
   mainWindow->getViewWidget()->getOverlayCompositor()->addVirtualOverlay(overlay);
-  mainWindow->installEventFilter(new EventHandler(mainWindow));
+
+  m_mainWindow = mainWindow;
+  m_overlay = overlay;
+
+  connect(removeOverlayButton, &QPushButton::clicked, [this]()
+  {
+    m_mainWindow->getViewWidget()->getOverlayCompositor()->removeVirtualOverlay(m_overlay);
+  });
 
   overlay->show();
 }
 
-bool InitialState::isLoadingState() const
+void InitialState::onExit()
 {
-	return false;
+  OSGG_LOG_DEBUG("onExit() InitialState");
+  m_mainWindow->getViewWidget()->getOverlayCompositor()->removeVirtualOverlay(m_overlay);
+}
+
+bool InitialState::onMouseEvent(QMouseEvent* event)
+{
+  if ((event->type() == QEvent::Type::MouseButtonDblClick) && (event->button() == Qt::MouseButton::LeftButton))
+  {
+    if (m_mainWindow->isFullScreen())
+    {
+      m_mainWindow->showNormal();
+      return true;
+    }
+    m_mainWindow->showFullScreen();
+    return true;
+  }
+
+  return false;
+}
+
+bool InitialState::onKeyEvent(QKeyEvent* event)
+{
+  if ((event->type() == QEvent::Type::KeyPress) && (event->key() == Qt::Key::Key_Escape))
+  {
+    m_mainWindow->close();
+    return true;
+  }
+
+  return false;
 }
