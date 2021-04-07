@@ -217,7 +217,6 @@ if (WIN32)
 endif()
 
 # add subdirectories
-add_subdirectory(osgGaming)
 add_subdirectory(osgHelper)
 add_subdirectory(QtOsgBridge)
 add_subdirectory(QtOsgBridgeApplication)
@@ -240,13 +239,13 @@ else()
 endif()
 
 if (GTEST_FOUND)
-  add_subdirectory(osgGamingTest)
+  add_subdirectory(osgHelperTest)
   
   if (OPENCV_FOUND)
     add_subdirectory(VectorizerLibTest)
   endif()
 else()
-  message(WARNING "GTest not found: ignoring project osgGamingTest")
+  message(WARNING "GTest not found: ignoring project osgHelperTest")
 endif()
 
 # copy shared dlls
