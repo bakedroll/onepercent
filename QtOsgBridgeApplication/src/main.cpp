@@ -1,8 +1,8 @@
 #include "QtOsgBridgeApplication.h"
-#include "InitialState.h"
+#include "LoadingInitialState.h"
 
 int main(int argc, char** argv)
 {
   QtOsgBridgeApplication app(argc, argv);
-  return app.runGame<InitialState>();
+  return app.runGame<LoadingInitialState>();
 }

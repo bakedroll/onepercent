@@ -46,7 +46,7 @@ State1::~State1()
   OSGG_LOG_DEBUG("~destruct State1");
 }
 
-void State1::onInitialize(QtOsgBridge::MainWindow* mainWindow)
+void State1::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
 {
   OSGG_LOG_DEBUG("onInitialize() State1");
 
@@ -103,7 +103,7 @@ State2::~State2()
   OSGG_LOG_DEBUG("~destruct State2");
 }
 
-void State2::onInitialize(QtOsgBridge::MainWindow* mainWindow)
+void State2::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
 {
   OSGG_LOG_DEBUG("onInitialize() State2");
 
@@ -165,7 +165,7 @@ InitialState::~InitialState()
   OSGG_LOG_DEBUG("~destruct InitialState");
 }
 
-void InitialState::onInitialize(QtOsgBridge::MainWindow* mainWindow)
+void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
 {
   OSGG_LOG_DEBUG("onInitialize() InitialState");
 
@@ -179,47 +179,18 @@ void InitialState::onInitialize(QtOsgBridge::MainWindow* mainWindow)
   transformSphere->addChild(geodeSphere);
   transformSphere->setPosition(osg::Vec3d(2.0, 0.0, 0.0));
 
-  auto transformBox = new osg::PositionAttitudeTransform();
-  transformBox->addChild(geodeBox);
-  
-  auto updateTransformation = [this, transformBox]()
-  {
-    transformBox->setAttitude(osgHelper::getQuatFromEuler(0.3, 0.0, m_rotation));
-    transformBox->setPosition(osg::Vec3d(0.0, 3.0 - 5.0 * cos(m_position), 0.0));
-  };
+  m_boxTransform = new osg::PositionAttitudeTransform();
+  m_boxTransform->addChild(geodeBox);
 
   updateTransformation();
 
   auto group = new osg::Group();
 
-  group->addChild(transformBox);
+  group->addChild(m_boxTransform);
   group->addChild(transformSphere);
 
   group->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::OFF);
   group->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
-
-  auto timer = new QTimer();
-  timer->setInterval(16);
-  timer->setSingleShot(false);
-  QObject::connect(timer, &QTimer::timeout, [this, updateTransformation]()
-  {
-    m_rotation += 0.05f;
-    m_position += 0.02;
-
-    if (m_rotation >= 2.0f * C_PI)
-    {
-      m_rotation = 0.0f;
-    }
-
-    if (m_position >= 2.0 * C_PI)
-    {
-      m_position = 0.0;
-    }
-
-    updateTransformation();
-  });
-
-  timer->start();
 
   auto screenGeode = new osg::Geode();
   screenGeode->addDrawable(osg::createTexturedQuadGeometry(osg::Vec3(100.0, 100.0, 0.0), osg::Vec3(200.0, 0.0, 0.0),
@@ -302,6 +273,24 @@ void InitialState::onExit()
   m_mainWindow->getViewWidget()->getOverlayCompositor()->removeVirtualOverlay(m_overlay);
 }
 
+void InitialState::onUpdate(const SimulationData& data)
+{
+  m_rotation += 0.05f;
+  m_position += 0.02;
+
+  if (m_rotation >= 2.0f * C_PI)
+  {
+    m_rotation = 0.0f;
+  }
+
+  if (m_position >= 2.0 * C_PI)
+  {
+    m_position = 0.0;
+  }
+
+  updateTransformation();
+}
+
 bool InitialState::onMouseEvent(QMouseEvent* event)
 {
   if ((event->type() == QEvent::Type::MouseButtonDblClick) && (event->button() == Qt::MouseButton::LeftButton))
@@ -327,4 +316,10 @@ bool InitialState::onKeyEvent(QKeyEvent* event)
   }
 
   return false;
+}
+
+void InitialState::updateTransformation()
+{
+  m_boxTransform->setAttitude(osgHelper::getQuatFromEuler(0.3, 0.0, m_rotation));
+  m_boxTransform->setPosition(osg::Vec3d(0.0, 3.0 - 5.0 * cos(m_position), 0.0));
 }

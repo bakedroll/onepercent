@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+//#include <gtest/gtest.h>
 
 #include <osgGaming/InjectionContainer.h>
 #include <osgGaming/Injector.h>

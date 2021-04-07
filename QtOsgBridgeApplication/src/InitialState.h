@@ -15,7 +15,7 @@ public:
   State1(osgHelper::ioc::Injector& injector);
   ~State1() override;
 
-  void onInitialize(QtOsgBridge::MainWindow* mainWindow) override;
+  void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
   void onExit() override;
 
 private:
@@ -30,7 +30,7 @@ public:
   State2(osgHelper::ioc::Injector& injector);
   ~State2() override;
 
-  void onInitialize(QtOsgBridge::MainWindow* mainWindow) override;
+  void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
   void onExit() override;
 
 private:
@@ -47,8 +47,9 @@ public:
   InitialState(osgHelper::ioc::Injector& injector);
   ~InitialState() override;
 
-  void onInitialize(QtOsgBridge::MainWindow* mainWindow) override;
+  void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
   void onExit() override;
+  void onUpdate(const SimulationData& data) override;
 
 protected:
   bool onMouseEvent(QMouseEvent* event) override;
@@ -64,5 +65,9 @@ private:
 
   QPointer<QtOsgBridge::MainWindow>     m_mainWindow;
   QPointer<QtOsgBridge::VirtualOverlay> m_overlay;
+
+  osg::ref_ptr<osg::PositionAttitudeTransform> m_boxTransform;
+
+  void updateTransformation();
 
 };
