@@ -21,8 +21,8 @@ namespace onep
   bool SimulationStateReaderWriter::saveState(
     const std::string& filename,
     const osg::ref_ptr<ModelContainer>& modelContainer,
-    const osgGaming::Observable<int>::Ptr& oDay,
-    const osgGaming::Observable<int>::Ptr& oNumSkillPoints)
+    const osgHelper::Observable<int>::Ptr& oDay,
+    const osgHelper::Observable<int>::Ptr& oNumSkillPoints)
   {
     QFile file(QString::fromStdString(filename));
     if (!file.open(QIODevice::WriteOnly))
@@ -102,8 +102,8 @@ namespace onep
   bool SimulationStateReaderWriter::loadState(
     const std::string& filename,
     const osg::ref_ptr<ModelContainer>& modelContainer,
-    const osgGaming::Observable<int>::Ptr& oDay,
-    const osgGaming::Observable<int>::Ptr& oNumSkillPoints,
+    const osgHelper::Observable<int>::Ptr& oDay,
+    const osgHelper::Observable<int>::Ptr& oNumSkillPoints,
     UpdateThread* thread)
   {
     QFile file(QString::fromStdString(filename));

@@ -1,6 +1,8 @@
 #include "scripting/LuaBranchesActivatedTable.h"
 
-#include "core/Multithreading.h"
+
+#include "osgHelper/Macros.h"
+#include "QtOsgBridge/Multithreading.h"
 
 #include <QMutex>
 
@@ -26,7 +28,7 @@ namespace onep
   {
     auto init                   = false;
     luaRef()[name]              = init;
-    m->oActivatedBranches[name] = new osgGaming::Observable<bool>(init);
+    m->oActivatedBranches[name] = new osgHelper::Observable<bool>(init);
   }
 
   bool LuaBranchesActivatedTable::getBranchActivated(const std::string& name) const
@@ -58,9 +60,9 @@ namespace onep
     }
   }
 
-  osgGaming::Observable<bool>::Ptr LuaBranchesActivatedTable::getOBranchActivated(const std::string& name) const
+  osgHelper::Observable<bool>::Ptr LuaBranchesActivatedTable::getOBranchActivated(const std::string& name) const
   {
-    assert_return(m->oActivatedBranches.count(name) > 0, osgGaming::Observable<bool>::Ptr());
+    assert_return(m->oActivatedBranches.count(name) > 0, osgHelper::Observable<bool>::Ptr());
     return m->oActivatedBranches.find(name)->second;
   }
 

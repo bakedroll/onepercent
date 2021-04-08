@@ -1,10 +1,9 @@
 #pragma once
 
 #include <osg/Referenced>
-#include <osg/Array>
 #include <osg/Geometry>
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 namespace onep
 {
@@ -15,7 +14,7 @@ public:
   using BorderIdMap    = std::map<int, std::vector<int>>;
   using CountryBorders = std::map<int, BorderIdMap>;
 
-  explicit BoundariesData(osgGaming::Injector& injector);
+  explicit BoundariesData(osgHelper::ioc::Injector& injector);
   ~BoundariesData();
 
   void loadBoundaries(const std::string& filename);

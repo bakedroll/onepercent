@@ -1,7 +1,7 @@
 #include "data/BoundariesData.h"
 
-#include <osgGaming/ByteStream.h>
-#include <osgGaming/ResourceManager.h>
+#include <osgHelper/ByteStream.h>
+#include <osgHelper/ResourceManager.h>
 
 namespace onep
 {
@@ -71,7 +71,7 @@ struct QuadSegments
 
 struct BoundariesData::Impl
 {
-  Impl(osgGaming::Injector& injector) : resourceManager(injector.inject<osgGaming::ResourceManager>())
+  Impl(osgHelper::ioc::Injector& injector) : resourceManager(injector.inject<osgHelper::ResourceManager>())
   {
   }
 
@@ -148,7 +148,7 @@ struct BoundariesData::Impl
     }
   }
 
-  osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+  osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
 
   Point::Map    pointsMap;
   IdQuadListMap boundariesMap;
@@ -160,7 +160,7 @@ struct BoundariesData::Impl
   osg::ref_ptr<osg::Vec3Array> vertices;
 };
 
-BoundariesData::BoundariesData(osgGaming::Injector& injector) : osg::Referenced(), m(new Impl(injector))
+BoundariesData::BoundariesData(osgHelper::ioc::Injector& injector) : osg::Referenced(), m(new Impl(injector))
 {
 }
 
@@ -176,7 +176,7 @@ void BoundariesData::loadBoundaries(const std::string& filename)
   m->vertices.release();
 
   const auto            bytes = m->resourceManager->loadBinary(filename);
-  osgGaming::ByteStream stream(bytes);
+  osgHelper::ByteStream stream(bytes);
 
   const auto nverts = stream.read<int>();
   for (auto i = 0; i < nverts; i++)

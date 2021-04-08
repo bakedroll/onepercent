@@ -2,18 +2,18 @@
 
 #include "nodes/CountryGeometry.h"
 
-#include <osgGaming/SimulationCallback.h>
-#include <osgGaming/Animation.h>
+#include <osgHelper/SimulationCallback.h>
+#include <osgHelper/Animation.h>
 
 namespace onep
 {
-  class UpdateHoverIntensityCallback : public osgGaming::SimulationCallback
+  class UpdateHoverIntensityCallback : public osgHelper::SimulationCallback
   {
   public:
     UpdateHoverIntensityCallback(const osg::ref_ptr<osg::Uniform>& u)
-      : osgGaming::SimulationCallback()
+      : osgHelper::SimulationCallback()
       , uniform(u)
-      , animationHover(new osgGaming::Animation<float>(0.0f, 0.2f, osgGaming::AnimationEase::CIRCLE_OUT))
+      , animationHover(new osgHelper::Animation<float>(0.0f, 0.2f, osgHelper::AnimationEase::CIRCLE_OUT))
       , bEnabled(false)
       , bStarted(false)
     {}
@@ -30,7 +30,7 @@ namespace onep
     }
 
   protected:
-    void action(osg::Object* object, osg::Object* data, double simTime, double timeDiff) override
+    void action(const SimulationData& data) override
     {
       if (!bEnabled)
         return;
@@ -38,15 +38,15 @@ namespace onep
       if (bStarted)
       {
         bStarted = false;
-        animationHover->beginAnimation(0.0f, 1.0f, simTime);
+        animationHover->beginAnimation(0.0f, 1.0f, data.time);
       }
 
-      uniform->set(animationHover->getValue(simTime));
+      uniform->set(animationHover->getValue(data.time));
     }
 
   private:
     osg::ref_ptr<osg::Uniform> uniform;
-    osg::ref_ptr<osgGaming::Animation<float>> animationHover;
+    osg::ref_ptr<osgHelper::Animation<float>> animationHover;
     bool bEnabled;
     bool bStarted;
   };

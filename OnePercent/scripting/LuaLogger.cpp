@@ -1,6 +1,6 @@
 #include "LuaLogger.h"
 
-#include <osgGaming/LogManager.h>
+#include <osgHelper/LogManager.h>
 
 namespace onep
 {
@@ -15,7 +15,7 @@ namespace onep
       .endClass();
   }
 
-  LuaLogger::LuaLogger(osgGaming::Injector& injector)
+  LuaLogger::LuaLogger(osgHelper::ioc::Injector& injector)
     : osg::Referenced()
   {
   }

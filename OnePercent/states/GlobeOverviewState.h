@@ -1,23 +1,24 @@
 #pragma once
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
+
+#include <QtOsgBridge/EventProcessingState.h>
 
 #include "nodes/GlobeOverviewWorld.h"
-#include "states/QtGameState.h"
 
 namespace onep
 {
-	class GlobeOverviewState : public QtGameState
+	class GlobeOverviewState : public QtOsgBridge::EventProcessingState
 	{
 	public:
-		GlobeOverviewState(osgGaming::Injector& injector);
-    ~GlobeOverviewState();
+		GlobeOverviewState(osgHelper::ioc::Injector& injector);
+    ~GlobeOverviewState() override;
 
-		virtual unsigned char getProperties() const override;
+		void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
+		void onUpdate(const SimulationData& data) override;
 
-		virtual StateEvent* update() override;
-
-		virtual void onKeyPressedEvent(int key) override;
+	protected:
+		bool onKeyEvent(QKeyEvent* event) override;
 
 	private:
     struct Impl;

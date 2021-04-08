@@ -8,14 +8,14 @@
 #include <osg/Billboard>
 #include <osg/Switch>
 
-#include <osgGaming/Helper.h>
-#include <osgGaming/ResourceManager.h>
+#include <osgHelper/Helper.h>
+#include <osgHelper/ResourceManager.h>
 
 namespace onep
 {
   struct CountryNameOverlay::Impl
   {
-    Impl(osgGaming::Injector& injector)
+    Impl(osgHelper::ioc::Injector& injector)
       : configManager(injector.inject<LuaConfig>())
       , modelContainer(injector.inject<ModelContainer>())
       , enabled(true)
@@ -35,7 +35,7 @@ namespace onep
     bool enabled;
   };
 
-  CountryNameOverlay::CountryNameOverlay(osgGaming::Injector& injector)
+  CountryNameOverlay::CountryNameOverlay(osgHelper::ioc::Injector& injector)
     : PositionAttitudeTransform()
     , m(new Impl(injector))
   {
@@ -54,7 +54,7 @@ namespace onep
 
   void CountryNameOverlay::initialize(const CountryPresenter::Map& countryPresenters)
   {
-    auto font = osgGaming::ResourceManager::getDefaultFont();
+    auto font = osgHelper::ResourceManager::getDefaultFont();
 
     float earthRadius = m->configManager->getNumber<float>("earth.radius");
 
@@ -64,13 +64,13 @@ namespace onep
     int i = 0;
     for (const auto& presenter : countryPresenters)
     {
-      osg::Vec3f pos = osgGaming::getCartesianFromPolar(presenter.second->getCenterLatLong());
+      osg::Vec3f pos = osgHelper::getCartesianFromPolar(presenter.second->getCenterLatLong());
       LuaCountry::Ptr country = m->modelContainer->getModel()->getCountriesTable()->getCountryById(presenter.first);
 
       if (!pos.valid() || !country)
         continue;
 
-      std::string name = osgGaming::utf8ToLatin1(country->getName().c_str());
+      std::string name = osgHelper::utf8ToLatin1(country->getName().c_str());
       /*std::string name = osgGaming::utf8ToLatin1(it->second->getCountryName().c_str()) + "\n";
       CountryData::Neighbors neighbors = it->second->getNeighborCountries();
 

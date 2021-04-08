@@ -1,14 +1,14 @@
 #pragma once
 
-#include <osgGaming/Injector.h>
-#include <osgGaming/Observable.h>
+#include <osgHelper/ioc/Injector.h>
+#include <osgHelper/Observable.h>
 
 #define DEF_OBSERVABLE(name, type, init) \
-  class name : public osgGaming::InitializedObservable<type, init> \
+  class name : public osgHelper::InitializedObservable<type, init> \
     { \
   public: \
-    name(osgGaming::Injector& injector) \
-      : osgGaming::InitializedObservable<type, init>() \
+    name(osgHelper::ioc::Injector& injector) \
+      : osgHelper::InitializedObservable<type, init>() \
         {} \
     };
 

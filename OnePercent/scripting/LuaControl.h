@@ -1,5 +1,7 @@
 #pragma once
 
+#include <osgHelper/ioc/Injector.h>
+
 #include "scripting/LuaStateManager.h"
 #include "scripting/LuaCallbackRegistry.h"
 
@@ -19,7 +21,7 @@ namespace onep
 
     using Ptr = osg::ref_ptr<LuaControl>;
 
-    LuaControl(osgGaming::Injector& injector);
+    LuaControl(osgHelper::ioc::Injector& injector);
 
     void doSkillsUpdate(const std::shared_ptr<LuaModel>& model);
     void doBranchesUpdate(const std::shared_ptr<LuaModel>& model);

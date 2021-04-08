@@ -1,18 +1,19 @@
 #pragma once
 
 #include "scripting/LuaCountry.h"
-#include "widgets/VirtualOverlay.h"
 
 #include <memory>
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
+
+#include <QtOsgBridge/VirtualOverlay.h>
 
 namespace onep
 {
-	class CountryMenuWidget : public VirtualOverlay
+	class CountryMenuWidget : public QtOsgBridge::VirtualOverlay
 	{
 	public:
-		CountryMenuWidget(osgGaming::Injector& injector);
+		CountryMenuWidget(osgHelper::ioc::Injector& injector);
 		~CountryMenuWidget();
 
 		void setCenterPosition(int x, int y);

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <functional>
 
-#include <osgGaming/Helper.h>
+#include <osgHelper/Helper.h>
 
 #include <osg/Matrix>
 
@@ -517,7 +517,7 @@ namespace helper
 
       auto mat = osg::Matrix::identity();
       mat *= osg::Matrix::translate(osg::Vec3f(0.0f, earthRadius, 0.0f));
-      mat *= osg::Matrix::rotate(osgGaming::getQuatFromEuler(centerLatLong.x(), 0.0f, centerLatLong.y()));
+      mat *= osg::Matrix::rotate(osgHelper::getQuatFromEuler(centerLatLong.x(), 0.0f, centerLatLong.y()));
       mat = osg::Matrix::inverse(mat);
 
       // Country meta data

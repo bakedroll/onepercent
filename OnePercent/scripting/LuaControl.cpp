@@ -30,7 +30,7 @@ namespace onep
 
   struct LuaControl::Impl
   {
-    Impl(osgGaming::Injector& injector)
+    Impl(osgHelper::ioc::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
     {
@@ -39,10 +39,10 @@ namespace onep
     LuaStateManager::Ptr lua;
     ModelContainer::Ptr modelContainer;
 
-    osgGaming::Observer<LuaSimulationStateTable::CountryBranch>::Ptr branchActivatedObserver;
+    osgHelper::Observer<LuaSimulationStateTable::CountryBranch>::Ptr branchActivatedObserver;
   };
 
-  LuaControl::LuaControl(osgGaming::Injector& injector)
+  LuaControl::LuaControl(osgHelper::ioc::Injector& injector)
     : LuaCallbackRegistry(injector.inject<LuaStateManager>())
     , m(new Impl(injector))
   {

@@ -2,11 +2,11 @@
 
 #include "scripting/LuaBridgeDefinition.h"
 
-#include <osgGaming/Macros.h>
+#include <osgHelper/Macros.h>
 
 #include <osg/Referenced>
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 #include <functional>
 
@@ -32,7 +32,7 @@ namespace onep
       void registerDefinition(lua_State* state) override;
     };
 
-    explicit LuaConfig(osgGaming::Injector& injector);
+    explicit LuaConfig(osgHelper::ioc::Injector& injector);
     ~LuaConfig();
 
     template<typename T>

@@ -12,7 +12,7 @@ set_target_properties(VectorizerLib PROPERTIES DEBUG_POSTFIX "d")
 target_include_directories(VectorizerLib PUBLIC
   ${OPENCV_INCLUDE_DIR}
   ${OSG_INCLUDE_DIR}
-  ${OSGGAMING_INCLUDE_DIR}
+  ${OSGHELPER_INCLUDE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/include)
   
 # make variable globally accessable

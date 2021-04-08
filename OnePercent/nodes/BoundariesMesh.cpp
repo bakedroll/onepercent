@@ -2,7 +2,7 @@
 
 namespace onep
 {
-BoundariesMesh::BoundariesMesh(osgGaming::Injector& injector)
+BoundariesMesh::BoundariesMesh(osgHelper::ioc::Injector& injector)
   : osg::Group()
   , m_boundariesData(injector.inject<BoundariesData>())
 {

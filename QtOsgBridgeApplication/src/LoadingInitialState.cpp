@@ -38,6 +38,9 @@ void LoadingInitialState::onExitLoading()
 void LoadingInitialState::onLoading()
 {
   QThread::msleep(1000);
+}
 
+void LoadingInitialState::onRequestNewStates()
+{
   requestNewEventState<InitialState>(NewEventStateMode::ExitCurrent);
 }

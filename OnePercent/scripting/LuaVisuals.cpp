@@ -1,6 +1,5 @@
 #include "scripting/LuaVisuals.h"
 
-#include "core/Multithreading.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaBranchesTable.h"
@@ -8,7 +7,9 @@
 #include "simulation/ModelContainer.h"
 #include "nodes/CountryOverlay.h"
 
-#include <osgGaming/Helper.h>
+#include <osgHelper/Helper.h>
+
+#include <QtOsgBridge/Multithreading.h>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -47,7 +48,7 @@ namespace onep
 
   struct LuaVisuals::Impl
   {
-    explicit Impl(osgGaming::Injector& injector)
+    explicit Impl(osgHelper::ioc::Injector& injector)
       : modelContainer(injector.inject<ModelContainer>())
       , countryOverlay(injector.inject<CountryOverlay>())
       , lua(injector.inject<LuaStateManager>())
@@ -67,7 +68,7 @@ namespace onep
     PrototypeMap prototypes;
   };
 
-  LuaVisuals::LuaVisuals(osgGaming::Injector& injector)
+  LuaVisuals::LuaVisuals(osgHelper::ioc::Injector& injector)
     : osg::Referenced()
     , m(new Impl(injector))
   {
@@ -77,7 +78,7 @@ namespace onep
 
   void LuaVisuals::updateBindings()
   {
-    Multithreading::executeInUiAsync([this]()
+    QtOsgBridge::Multithreading::executeInUiAsync([this]()
     {
       m->modelContainer->accessModel([this](const LuaModel::Ptr& model)
       {
@@ -180,7 +181,7 @@ namespace onep
 
     osg::ref_ptr<PrototypeNode> transform = new PrototypeNode();
     transform->setScale(prototype->getScale());
-    transform->setAttitude(osgGaming::getQuatFromEuler(rotation.x() / degToRad, rotation.y() / degToRad, rotation.z() / degToRad));
+    transform->setAttitude(osgHelper::ioc::getQuatFromEuler(rotation.x() / degToRad, rotation.y() / degToRad, rotation.z() / degToRad));
     transform->setPosition(prototype->getPosition());
 
     transform->addChild(node);

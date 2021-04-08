@@ -1,7 +1,7 @@
 #pragma once
 
-#include <osgGaming/Injector.h>
-#include <osgGaming/Observable.h>
+#include <osgHelper/ioc/Injector.h>
+#include <osgHelper/Observable.h>
 
 #include "scripting/LuaDefines.h"
 
@@ -29,7 +29,7 @@ namespace onep
 
     typedef osg::ref_ptr<Simulation> Ptr;
 
-		Simulation(osgGaming::Injector& injector);
+		Simulation(osgHelper::ioc::Injector& injector);
     virtual ~Simulation();
 
     void prepare();
@@ -50,7 +50,7 @@ namespace onep
     bool isRunning() const;
     bool isAutoPauseEnabled() const;
 
-    osgGaming::Observable<State>::Ptr getOState() const;
+    osgHelper::Observable<State>::Ptr getOState() const;
 
     void setUpdateTimerInterval(int msecs);
     void setProfilingLogsEnabled(bool enabled);

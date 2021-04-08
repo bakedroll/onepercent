@@ -2,7 +2,7 @@
 
 #include "scripting/LuaCallback.h"
 
-#include <osgGaming/Observable.h>
+#include <osgHelper/Observable.h>
 
 namespace onep
 {
@@ -10,7 +10,7 @@ namespace onep
   class LuaObservableCallback : public LuaCallback
   {
   public:
-    LuaObservableCallback(const LuaStateManager::Ptr& lua, const typename osgGaming::Observable<T>::Ptr& observable)
+    LuaObservableCallback(const LuaStateManager::Ptr& lua, const typename osgHelper::Observable<T>::Ptr& observable)
       : m_oldValue(observable->get())
     {
       m_observer = observable->connect([this, &lua](T value)
@@ -21,7 +21,7 @@ namespace onep
     }
 
   private:
-    typename osgGaming::Observer<T>::Ptr m_observer;
+    typename osgHelper::Observer<T>::Ptr m_observer;
     T                                    m_oldValue;
 
   };

@@ -1,17 +1,17 @@
 #pragma once
 
-#include "widgets/VirtualOverlay.h"
+#include <osgHelper/ioc/Injector.h>
 
-#include <osgGaming/Injector.h>
+#include <QtOsgBridge/VirtualOverlay.h>
 
 namespace onep
 {
-  class SkillsWidget : public VirtualOverlay
+  class SkillsWidget : public QtOsgBridge::VirtualOverlay
   {
     Q_OBJECT
 
   public:
-    SkillsWidget(osgGaming::Injector& injector);
+    SkillsWidget(osgHelper::ioc::Injector& injector);
     ~SkillsWidget();
 
   private:

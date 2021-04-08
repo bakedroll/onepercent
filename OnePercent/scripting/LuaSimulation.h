@@ -4,7 +4,7 @@
 #include "scripting/LuaBridgeDefinition.h"
 
 #include <osg/Referenced>
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 extern "C"
 {
@@ -26,7 +26,7 @@ namespace onep
       void registerDefinition(lua_State* state) override;
     };
 
-    LuaSimulation(osgGaming::Injector& injector);
+    LuaSimulation(osgHelper::ioc::Injector& injector);
     ~LuaSimulation();
 
     void lua_start(lua_State* state);

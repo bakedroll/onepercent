@@ -5,7 +5,7 @@
 
 #include <osg/Node>
 
-#include <osgGaming/Macros.h>
+#include <osgHelper/Macros.h>
 
 #include <QString>
 

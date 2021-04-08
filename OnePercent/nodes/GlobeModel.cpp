@@ -9,11 +9,10 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Texture2D>
 #include <osgDB/ReadFile>
-#include <osg/GL2Extensions>
 
-#include <osgGaming/Helper.h>
-#include <osgGaming/ResourceManager.h>
-#include <osgGaming/TextureFactory.h>
+#include <osgHelper/Helper.h>
+#include <osgHelper/ResourceManager.h>
+#include <osgHelper/TextureFactory.h>
 
 #include <QString>
 
@@ -21,11 +20,11 @@ namespace onep
 {
   struct GlobeModel::Impl
   {
-    Impl(osgGaming::Injector& injector, GlobeModel* b)
+    Impl(osgHelper::ioc::Injector& injector, GlobeModel* b)
       : base(b)
       , configManager(injector.inject<LuaConfig>())
-      , resourceManager(injector.inject<osgGaming::ResourceManager>())
-      , textureFactory(injector.inject<osgGaming::TextureFactory>())
+      , resourceManager(injector.inject<osgHelper::ResourceManager>())
+      , textureFactory(injector.inject<osgHelper::TextureFactory>())
       , countryOverlay(injector.inject<CountryOverlay>())
     {
       base->addChild(countryOverlay);
@@ -35,7 +34,7 @@ namespace onep
     {
       // planet geometry
       osg::ref_ptr<Node> earth = createPlanetGeode(0);
-      osgGaming::generateTangentAndBinormal(earth);
+      osgHelper::generateTangentAndBinormal(earth);
 
       // material
       osg::ref_ptr<osg::Material> material = new osg::Material();
@@ -109,7 +108,7 @@ namespace onep
       base->addChild(cloudsTransform);
     }
 
-    void makeAtmosphericScattering(const osg::ref_ptr<osg::State>& state)
+    void makeAtmosphericScattering(bool isFp64Supported)
     {
       const auto earthRadius         = configManager->getNumber<float>("earth.radius");
       const auto atmosphereHeight    = configManager->getNumber<float>("earth.atmosphere_height");
@@ -118,13 +117,10 @@ namespace onep
       const auto atmosphereColor     = configManager->getVector<osg::Vec4f>("earth.atmosphere_color");
 
       // atmospheric scattering geometry
-      scatteringQuad = new osgGaming::CameraAlignedQuad();
+      scatteringQuad = new osgHelper::CameraAlignedQuad();
 
       // shader
       osg::ref_ptr<osg::Program> pgm = new osg::Program();
-
-      const auto isFp64Supported =
-              (state.valid() && osg::GL2Extensions::Get(state->getContextID(), true)->isGpuShaderFp64Supported);
 
       OSGG_QLOG_DEBUG(QString("Check GPUShaderFp64Supported: %1 - using %2 shader")
                               .arg(isFp64Supported)
@@ -316,7 +312,7 @@ namespace onep
       {
         for (int stack = bottomStack; stack <= topStack + 1; stack++)
         {
-          osg::Vec3 point = osgGaming::getVec3FromEuler(double(stack) * (C_PI / double(stacks)), 0.0, double(slice) * (2.0 * C_PI / double(slices)), osg::Vec3(0.0, 0.0, 1.0));
+          osg::Vec3 point = osgHelper::getVec3FromEuler(double(stack) * (C_PI / double(stacks)), 0.0, double(slice) * (2.0 * C_PI / double(slices)), osg::Vec3(0.0, 0.0, 1.0));
 
           vertices->push_back(point * radius);
           normals->push_back(point);
@@ -378,8 +374,8 @@ namespace onep
     GlobeModel* base;
 
     osg::ref_ptr<LuaConfig> configManager;
-    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
-    osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
+    osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
+    osg::ref_ptr<osgHelper::TextureFactory> textureFactory;
 
     float propSunDistance;
     float propSunRadiusMp2;
@@ -394,10 +390,10 @@ namespace onep
 
     osg::ref_ptr<CountryOverlay> countryOverlay;
 
-    osg::ref_ptr<osgGaming::CameraAlignedQuad> scatteringQuad;
+    osg::ref_ptr<osgHelper::CameraAlignedQuad> scatteringQuad;
   };
 
-  GlobeModel::GlobeModel(osgGaming::Injector& injector)
+  GlobeModel::GlobeModel(osgHelper::ioc::Injector& injector)
     : osg::Group()
     , m(new Impl(injector, this))
   {
@@ -407,7 +403,7 @@ namespace onep
   {
   }
 
-  void GlobeModel::makeGlobeModel(const osg::ref_ptr<osg::State>& state)
+  void GlobeModel::makeGlobeModel(bool isFp64Supported)
   {
     m->propSunDistance = m->configManager->getNumber<float>("sun.distance");
     m->propSunRadiusMp2 = m->configManager->getNumber<float>("sun.radius_pm2");
@@ -416,10 +412,10 @@ namespace onep
 
     m->makeEarthModel();
     m->makeCloudsModel();
-    m->makeAtmosphericScattering(state);
+    m->makeAtmosphericScattering(isFp64Supported);
   }
 
-  osgGaming::CameraAlignedQuad::Ptr GlobeModel::getScatteringQuad()
+  osgHelper::CameraAlignedQuad::Ptr GlobeModel::getScatteringQuad()
   {
     return m->scatteringQuad;
   }
@@ -434,7 +430,7 @@ namespace onep
 
   void GlobeModel::updateClouds(float time)
   {
-    osg::Quat quat = osgGaming::getQuatFromEuler(0.0, 0.0, fmodf(time * m->propEarthCloudsSpeed, C_2PI));
+    osg::Quat quat = osgHelper::getQuatFromEuler(0.0, 0.0, fmodf(time * m->propEarthCloudsSpeed, C_2PI));
     m->cloudsTransform->setAttitude(quat);
 
     m->uniformTime->set(time * m->propEarthCloudsMorphSpeed);

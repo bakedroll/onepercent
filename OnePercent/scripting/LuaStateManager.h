@@ -2,8 +2,8 @@
 
 #include "scripting/LuaBridgeDefinition.h"
 
-#include <osgGaming/Macros.h>
-#include <osgGaming/Injector.h>
+#include <osgHelper/Macros.h>
+#include <osgHelper/ioc/Injector.h>
 
 #include <functional>
 #include <memory>
@@ -34,7 +34,7 @@ public:
     LoadFromResourceOrPackage
   };
 
-  explicit LuaStateManager(osgGaming::Injector& injector);
+  explicit LuaStateManager(osgHelper::ioc::Injector& injector);
   ~LuaStateManager();
 
   luabridge::LuaRef getGlobal(const char* name) const;

@@ -14,6 +14,7 @@ protected:
   void onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
   void onExitLoading() override;
   void onLoading()  override;
+  void onRequestNewStates() override;
 
 private:
   QPointer<QtOsgBridge::VirtualOverlay>        m_overlay;

@@ -1,7 +1,6 @@
 #include "DebugWindow.h"
 
 #include "core/Macros.h"
-#include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "scripting/LuaCountry.h"
 #include "scripting/LuaSimulationStateTable.h"
@@ -15,7 +14,7 @@
 #include "simulation/UpdateThread.h"
 #include "simulation/ModelContainer.h"
 
-#include <osgGaming/Macros.h>
+#include <osgHelper/Macros.h>
 
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -29,6 +28,8 @@
 #include <QProgressBar>
 #include <QScrollArea>
 #include <QPainter>
+
+#include <QtOsgBridge/Multithreading.h>
 
 #include <chrono>
 #include <nodes/CountryOverlay.h>
@@ -85,7 +86,7 @@ namespace onep
 
   struct DebugWindow::Impl
   {
-    Impl(osgGaming::Injector& injector, DebugWindow* b)
+    Impl(osgHelper::ioc::Injector& injector, DebugWindow* b)
       : base(b)
       , lua(injector.inject<LuaStateManager>())
       , countryOverlay(injector.inject<CountryOverlay>())
@@ -124,11 +125,11 @@ namespace onep
     QPushButton*                   toggleCountryButton;
     BoundariesData::CountryBorders selectedCountries;
 
-    osgGaming::Observer<int>::Ptr               notifySelectedCountry;
-    osgGaming::Observer<int>::Ptr               notifyDay;
-    osgGaming::Observer<int>::Ptr               notifySkillpoints;
-    osgGaming::Observer<Simulation::State>::Ptr notifyRunningValues;
-    osgGaming::Observer<Simulation::State>::Ptr notifyRunningButton;
+    osgHelper::Observer<int>::Ptr               notifySelectedCountry;
+    osgHelper::Observer<int>::Ptr               notifyDay;
+    osgHelper::Observer<int>::Ptr               notifySkillpoints;
+    osgHelper::Observer<Simulation::State>::Ptr notifyRunningValues;
+    osgHelper::Observer<Simulation::State>::Ptr notifyRunningButton;
 
     QScrollArea* scrollAreaStats;
     QWidget* widgetStats;
@@ -140,10 +141,10 @@ namespace onep
     QPushButton* buttonStartStop;
     QCheckBox* checkBoxEnableGraph;
 
-    std::vector<osgGaming::Observer<int>::Ptr>         selectedCountryIdObservers;
-    std::vector<osgGaming::Observer<bool>::Ptr>        skillBranchActivatedObservers;
-    std::vector<osgGaming::Observer<bool>::Ptr>        skillActivatedObservers;
-    std::vector<osgGaming::Observer<std::string>::Ptr> currentOverlayBranchNameObservers;
+    std::vector<osgHelper::Observer<int>::Ptr>         selectedCountryIdObservers;
+    std::vector<osgHelper::Observer<bool>::Ptr>        skillBranchActivatedObservers;
+    std::vector<osgHelper::Observer<bool>::Ptr>        skillActivatedObservers;
+    std::vector<osgHelper::Observer<std::string>::Ptr> currentOverlayBranchNameObservers;
 
     struct ValueWidget
     {
@@ -550,7 +551,7 @@ namespace onep
 
             skillBranchActivatedObservers.push_back(it.second->getBranchesActivatedTable()->getOBranchActivated(name)->connect([=](bool activated)
             {
-              Multithreading::executeInUiAsync([=]()
+              QtOsgBridge::Multithreading::executeInUiAsync([=]()
               {
                 if (cid == countryOverlay->getSelectedCountryId())
                 {
@@ -726,7 +727,7 @@ namespace onep
   };
 
   DebugWindow::DebugWindow(
-    osgGaming::Injector& injector,
+    osgHelper::ioc::Injector& injector,
     QWidget* parent)
     : QDialog(parent)
     , m(new Impl(injector, this))

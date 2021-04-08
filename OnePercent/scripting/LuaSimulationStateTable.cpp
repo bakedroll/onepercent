@@ -1,7 +1,7 @@
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaCountryState.h"
 
-#include <osgGaming/Macros.h>
+#include <osgHelper/Macros.h>
 
 #include <QMutex>
 
@@ -16,7 +16,7 @@ namespace onep
     LuaCountryState::Map        countryStates;
     OCountryBranchAcivated::Ptr oCountryBranchActivated;
 
-    std::vector<osgGaming::Observer<bool>::Ptr> countryBranchObservers;
+    std::vector<osgHelper::Observer<bool>::Ptr> countryBranchObservers;
 
     QMutex cbActivatedMutex;
   };
@@ -39,7 +39,7 @@ namespace onep
     return getMappedElement<LuaCountryState>(cid);
   }
 
-  osgGaming::Observable<LuaSimulationStateTable::CountryBranch>::Ptr LuaSimulationStateTable::
+  osgHelper::Observable<LuaSimulationStateTable::CountryBranch>::Ptr LuaSimulationStateTable::
   getOCountryBranchActivated() const
   {
       return m->oCountryBranchActivated;

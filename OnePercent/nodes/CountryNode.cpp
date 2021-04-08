@@ -4,7 +4,7 @@
 #include "scripting/LuaStateManager.h"
 
 #include <osg/Geometry>
-#include <osgGaming/Helper.h>
+#include <osgHelper/Helper.h>
 
 #include <cassert>
 

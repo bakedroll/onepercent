@@ -1,5 +1,6 @@
 #include "scripting/LuaSkill.h"
-#include "core/Multithreading.h"
+
+#include <QtOsgBridge/Multithreading.h>
 
 namespace onep
 {
@@ -18,7 +19,7 @@ namespace onep
   {
     Impl()
       : cost(0)
-      , obActivated(new osgGaming::Observable<bool>(false))
+      , obActivated(new osgHelper::Observable<bool>(false))
     {}
 
     std::string              name;
@@ -28,7 +29,7 @@ namespace onep
     int                      cost;
     std::vector<std::string> dependencies;
 
-    osgGaming::Observable<bool>::Ptr obActivated;
+    osgHelper::Observable<bool>::Ptr obActivated;
   };
 
   LuaSkill::LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const LuaStateManager::Ptr& luaStateManager)
@@ -93,10 +94,10 @@ namespace onep
 
   void LuaSkill::setIsActivated(bool activated)
   {
-    Multithreading::executeInUiAsync([=](){ m->obActivated->set(activated); });
+    QtOsgBridge::Multithreading::executeInUiAsync([=](){ m->obActivated->set(activated); });
   }
 
-  osgGaming::Observable<bool>::Ptr LuaSkill::getObActivated() const
+  osgHelper::Observable<bool>::Ptr LuaSkill::getObActivated() const
   {
     return m->obActivated;
   }

@@ -1,6 +1,6 @@
 #include "scripting/LuaCountry.h"
 
-#include <osgGaming/Macros.h>
+#include <osgHelper/Macros.h>
 
 namespace onep
 {

@@ -14,7 +14,7 @@ include_directories(
   ${LUA_INCLUDE_PREFIX}/include
   ${LUA_INCLUDE_DIR}
   ${LUABRIDGE_INCLUDE_DIR}
-  ${OSGGAMING_INCLUDE_DIR})
+  ${OSGHELPER_INCLUDE_DIR})
 
 target_link_libraries(${PROJECT_NAME}
   luadoc

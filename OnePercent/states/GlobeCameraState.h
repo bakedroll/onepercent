@@ -1,21 +1,18 @@
 #pragma once
 
-#include "nodes/GlobeOverviewWorld.h"
-#include "states/QtGameState.h"
-
-#include <osgGaming/Animation.h>
+#include <QtOsgBridge/EventProcessingState.h>
+#include <osgHelper/Animation.h>
 
 namespace onep
 {
-	class GlobeCameraState : public QtGameState
+	class GlobeCameraState : public QtOsgBridge::EventProcessingState
 	{
 	public:
-	  GlobeCameraState(osgGaming::Injector& injector);
+	  GlobeCameraState(osgHelper::ioc::Injector& injector);
     virtual ~GlobeCameraState();
 
-		void initialize() override;
-
-		StateEvent* update() override;
+		void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
+		void onUpdate(const SimulationData& data) override;
 
 	protected:
 		const osg::Vec2f& getCameraLatLong() const;
@@ -27,7 +24,7 @@ namespace onep
 		void setCameraViewAngle(const osg::Vec2f& viewAngle, double time = -1.0);
 
 		void setCameraMotionDuration(double time);
-		void setCameraMotionEase(osgGaming::AnimationEase ease);
+		void setCameraMotionEase(osgHelper::AnimationEase ease);
 
     void stopMotion(double time);
 

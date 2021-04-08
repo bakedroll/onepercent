@@ -5,7 +5,7 @@
 #include "scripting/LuaStateManager.h"
 #include "scripting/LuaObjectMapper.h"
 
-#include <osgGaming/Observable.h>
+#include <osgHelper/Observable.h>
 
 #include <LuaBridge/LuaBridge.h>
 
@@ -39,7 +39,7 @@ namespace onep
 
     bool getIsActivated() const;
     void setIsActivated(bool activated);
-    osgGaming::Observable<bool>::Ptr getObActivated() const;
+    osgHelper::Observable<bool>::Ptr getObActivated() const;
 
     const std::vector<std::string>& getDependencies() const;
 	  

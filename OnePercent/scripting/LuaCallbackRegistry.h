@@ -5,7 +5,7 @@
 #include "scripting/LuaBridgeDefinition.h"
 #include "scripting/LuaStateManager.h"
 
-#include <osgGaming/Macros.h>
+#include <osgHelper/Macros.h>
 #include <osg/Referenced>
 
 extern "C"

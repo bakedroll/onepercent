@@ -1,6 +1,6 @@
 #pragma once
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 #include "data/BoundariesData.h"
 #include "nodes/CountryNode.h"
@@ -16,7 +16,7 @@ namespace onep
   public:
     typedef osg::ref_ptr<BoundariesMesh> Ptr;
 
-    BoundariesMesh(osgGaming::Injector& injector);
+    BoundariesMesh(osgHelper::ioc::Injector& injector);
     ~BoundariesMesh();
 
     void makeOverallBoundaries(float thickness = 0.005f);

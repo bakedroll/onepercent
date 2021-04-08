@@ -8,7 +8,7 @@
 
 #include <functional>
 
-#include <osgGaming/Macros.h>
+#include <osgHelper/Macros.h>
 
 extern "C"
 {

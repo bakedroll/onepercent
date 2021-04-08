@@ -20,13 +20,13 @@ get_libraries(OPENCV_LIBRARIES_DEBUG ${OPENCV_LIB_DIR_DBG} "${OPENCV_VERSION_SUF
 target_include_directories(Vectorizer PUBLIC
   ${OPENCV_INCLUDE_DIR}
   ${OSG_INCLUDE_DIR}
-  ${OSGGAMING_INCLUDE_DIR}
+  ${OSGHELPER_INCLUDE_DIR}
   ${VECTORIZER_LIB_INCLUDE_DIR})
   
 # set debug and release libs
 target_link_libraries(Vectorizer
   VectorizerLib
-  osgGaming)
+  osgHelper)
 
 set(ALL_LIBRARIES ${OSG_LIBRARIES} ${OPENCV_LIBRARIES})
 set(ALL_LIBRARIES_DEBUG ${OSG_LIBRARIES_DEBUG} ${OPENCV_LIBRARIES_DEBUG})

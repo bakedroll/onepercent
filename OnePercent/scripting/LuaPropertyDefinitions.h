@@ -3,20 +3,20 @@
 #include "scripting/LuaBridgeDefinition.h"
 #include "scripting/LuaStaticProperty.h"
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 namespace onep
 {
     class LuaPropertyDefinitions : public LuaBridgeDefinition
     {
     public:
-      explicit LuaPropertyDefinitions(osgGaming::Injector& injector);
+      explicit LuaPropertyDefinitions(osgHelper::ioc::Injector& injector);
       virtual ~LuaPropertyDefinitions();
 
       void registerDefinition(lua_State* state) override;
 
     private:
-      osgGaming::Injector& m_injector;
+      osgHelper::ioc::Injector& m_injector;
 
       template <typename T>
       void addProperty(lua_State* state, const char* name)

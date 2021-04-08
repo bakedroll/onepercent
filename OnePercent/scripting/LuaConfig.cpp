@@ -18,7 +18,7 @@ namespace onep
 
   struct LuaConfig::Impl
   {
-    Impl(osgGaming::Injector& injector)
+    Impl(osgHelper::ioc::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
     {
       lua->createGlobalTable(CONFIG_DATA_TABLE_NAME);
@@ -31,7 +31,7 @@ namespace onep
 
   };
 
-  LuaConfig::LuaConfig(osgGaming::Injector& injector)
+  LuaConfig::LuaConfig(osgHelper::ioc::Injector& injector)
     : m(new Impl(injector))
   {
   }

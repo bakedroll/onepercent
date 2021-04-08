@@ -47,7 +47,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${OSGPPU_INCLUDE_DIR}
   ${LUA_INCLUDE_PREFIX}/include
   ${LUA_INCLUDE_DIR}
-  ${LUABRIDGE_INCLUDE_DIR})
+  ${LUABRIDGE_INCLUDE_DIR}
+  ${OSGHELPER_INCLUDE_DIR}
+  ${QTOSGBRIDGE_INCLUDE_DIR})
 
 foreach(module ${QT5_MODULES})
   target_include_directories(${PROJECT_NAME} PUBLIC ${Qt5${module}_INCLUDE_DIRS})
@@ -64,7 +66,7 @@ if (LUADOC_ENABLE)
   target_link_libraries(${PROJECT_NAME} luadoc)
 endif()
 
-target_link_libraries(${PROJECT_NAME} osgGaming)
+target_link_libraries(${PROJECT_NAME} osgHelper QtOsgBridge)
 
 target_link_libraries(${PROJECT_NAME}
   optimized ${OSGPPU_LIBRARY_RELEASE} ${LUA_LIBRARY})

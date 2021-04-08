@@ -2,7 +2,7 @@
 
 #include "scripting/LuaObjectMapper.h"
 
-#include <osgGaming/Observable.h>
+#include <osgHelper/Observable.h>
 
 namespace onep
 {
@@ -11,7 +11,7 @@ namespace onep
   class LuaBranchesActivatedTable : public LuaObjectMapper
   {
   public:
-    typedef std::map<std::string, osgGaming::Observable<bool>::Ptr> BranchActivatedMap;
+    typedef std::map<std::string, osgHelper::Observable<bool>::Ptr> BranchActivatedMap;
 
     explicit LuaBranchesActivatedTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaBranchesActivatedTable();
@@ -23,7 +23,7 @@ namespace onep
 
     void updateObservables();
 
-    osgGaming::Observable<bool>::Ptr getOBranchActivated(const std::string& name) const;
+    osgHelper::Observable<bool>::Ptr getOBranchActivated(const std::string& name) const;
     const BranchActivatedMap& getBranchActivatedMap() const;
 
   private:

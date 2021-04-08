@@ -1,7 +1,7 @@
 #include "core/OnePercentApplication.h"
 
 #ifdef WIN32
-#include "core/CrashDumpWriter.h"
+#include <QtOsgBridge/CrashDumpWriter.h>
 #endif
 
 int main(int argc, char** argv)
@@ -10,6 +10,6 @@ int main(int argc, char** argv)
   SetUnhandledExceptionFilter(onep::unhandled_handler);
 #endif
 
-  osg::ref_ptr<onep::OnePercentApplication> app = new onep::OnePercentApplication(argc, argv);
-  return app->run();
+  onep::OnePercentApplication app(argc, argv);
+  return app.run();
 }

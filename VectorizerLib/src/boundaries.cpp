@@ -1,7 +1,7 @@
 #include "vectorizer/boundaries.h"
 #include "vectorizer/io.h"
 
-#include <osgGaming/Helper.h>
+#include <osgHelper/Helper.h>
 
 namespace helper
 {

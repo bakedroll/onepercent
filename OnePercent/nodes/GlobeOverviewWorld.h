@@ -2,27 +2,29 @@
 
 #include "GlobeModel.h"
 
-#include <osgGaming/World.h>
+#include <osgHelper/LightingNode.h>
+#include <osgHelper/Camera.h>
 
 namespace onep
 {
-	class GlobeOverviewWorld : public osgGaming::World
+	class GlobeOverviewWorld : public osgHelper::LightingNode
 	{
 	public:
-		GlobeOverviewWorld(osgGaming::Injector& injector);
+		GlobeOverviewWorld(osgHelper::ioc::Injector& injector);
     ~GlobeOverviewWorld();
 
     void initialize();
 		
-		void setDay(float day);
+		void setDay(const osgHelper::Camera::Ptr& camera, float day);
 
 		osg::Vec2f getCameraLatLong();
 		osg::Vec2f getCameraViewAngle();
 		float getCameraDistance();
 
-		void updateCameraPosition(osg::Vec2f latLong, osg::Vec2f viewAngle, float distance);
+    void updateCameraPosition(const osgHelper::Camera::Ptr& camera, osg::Vec2f latLong, osg::Vec2f viewAngle,
+                              float distance);
 
-	private:
+  private:
     struct Impl;
     std::unique_ptr<Impl> m;
 

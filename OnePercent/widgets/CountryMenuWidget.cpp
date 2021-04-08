@@ -1,6 +1,5 @@
 #include "CountryMenuWidget.h"
 
-#include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "nodes/CountryOverlay.h"
 #include "simulation/Simulation.h"
@@ -12,7 +11,9 @@
 #include "scripting/LuaControl.h"
 #include "simulation/UpdateThread.h"
 
-#include <osgGaming/Helper.h>
+#include <osgHelper/Helper.h>
+
+#include <QtOsgBridge/Multithreading.h>
 
 #include <QPushButton>
 
@@ -20,7 +21,7 @@ namespace onep
 {
 	struct CountryMenuWidget::Impl
 	{
-    Impl(osgGaming::Injector& injector)
+    Impl(osgHelper::ioc::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
       , luaControl(injector.inject<LuaControl>())
       , simulation(injector.inject<Simulation>())
@@ -41,8 +42,8 @@ namespace onep
 
     ONumSkillPoints::Ptr oNumSkillPoints;
 
-    osgGaming::Observer<int>::Ptr               notifySkillPoints;
-    std::vector<osgGaming::Observer<bool>::Ptr> notifiesActivated;
+    osgHelper::Observer<int>::Ptr               notifySkillPoints;
+    std::vector<osgHelper::Observer<bool>::Ptr> notifiesActivated;
 
     void updateUi()
     {
@@ -73,7 +74,7 @@ namespace onep
           notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name)->connectAndNotify(
             [this, index, branch, name](bool activated)
           {
-            Multithreading::executeInUiAsync([this, index, branch, name, activated]()
+            QtOsgBridge::Multithreading::executeInUiAsync([this, index, branch, name, activated]()
             {
               if (activated)
               {
@@ -97,7 +98,7 @@ namespace onep
     }
 	};
 
-  CountryMenuWidget::CountryMenuWidget(osgGaming::Injector& injector)
+  CountryMenuWidget::CountryMenuWidget(osgHelper::ioc::Injector& injector)
 		: VirtualOverlay()
 		, m(new Impl(injector))
 	{

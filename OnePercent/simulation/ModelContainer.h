@@ -1,7 +1,7 @@
 #pragma once
 
 #include <osg/Referenced>
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 #include <functional>
 #include <vector>
@@ -15,7 +15,7 @@ namespace onep
   public:
     using Ptr = osg::ref_ptr<ModelContainer>;
 
-    ModelContainer(osgGaming::Injector& injector);
+    ModelContainer(osgHelper::ioc::Injector& injector);
     ~ModelContainer();
 
     std::shared_ptr<LuaModel> getModel() const;

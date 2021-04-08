@@ -2,6 +2,9 @@
 #include "core/Macros.h"
 #include "data/CountriesMap.h"
 
+#include <osgHelper/Macros.h>
+
+
 #include <cmath>
 
 #include <QString>
@@ -10,7 +13,9 @@
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/ShapeDrawable>
-#include <osgGaming/Helper.h>
+
+#include <osgHelper/Helper.h>
+#include <osgHelper/Macros.h>
 
 namespace onep
 {
@@ -252,7 +257,7 @@ float CountryPresenter::getSurfaceArea() const
 void CountryPresenter::addTransformFromNodeToCoords(osg::Node* node, const std::string& nodeBin,
                                                     const osg::Vec2f& latLong)
 {
-  const auto matRot  = osg::Matrix::rotate(osgGaming::getQuatFromEuler(latLong.x(), 0.0f, latLong.y()));
+  const auto matRot  = osg::Matrix::rotate(osgHelper::getQuatFromEuler(latLong.x(), 0.0f, latLong.y()));
   const auto matMove = osg::Matrix::translate(osg::Vec3f(0.0f, -m_earthRadius, 0.0f));
 
   osg::ref_ptr<osg::MatrixTransform> transform = new osg::MatrixTransform();

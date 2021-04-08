@@ -1,6 +1,7 @@
 #include "scripting/LuaCountryState.h"
 #include "scripting/LuaMapTable.h"
-#include "core/Multithreading.h"
+
+#include "QtOsgBridge/Multithreading.h"
 
 namespace onep
 {

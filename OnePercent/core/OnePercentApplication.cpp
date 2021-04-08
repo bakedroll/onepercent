@@ -30,16 +30,16 @@
 #include <osgDB/ReadFile>
 #include <osgDB/FileNameUtils>
 
-#include <osgGaming/ResourceManager.h>
-#include <osgGaming/FastApproximateAntiAliasingEffect.h>
-#include <osgGaming/DepthOfFieldEffect.h>
-#include <osgGaming/HighDynamicRangeEffect.h>
+#include <osgHelper/ResourceManager.h>
+#include <osgHelper/ppu/FXAA.h>
+#include <osgHelper/ppu/DOF.h>
+#include <osgHelper/ppu/HDR.h>
 
 #include <QDir>
 
 namespace onep
 {
-  void registerLuaClasses(osgGaming::Injector& injector)
+  void registerLuaClasses(osgHelper::ioc::Injector& injector)
   {
     osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
 
@@ -140,10 +140,10 @@ namespace onep
 
   int OnePercentApplication::run()
   {
-    return QtGameApplication::runGame<LoadingGlobeOverviewState>();
+    return runGame<LoadingGlobeOverviewState>();
   }
 
-  void OnePercentApplication::registerComponents(osgGaming::InjectionContainer& container)
+  void OnePercentApplication::registerComponents(osgHelper::ioc::InjectionContainer& container)
   {
     registerEssentialComponents();
 
@@ -180,33 +180,31 @@ namespace onep
     container.registerSingletonType<LuaSimulation>();
 
     // effects
-    container.registerType<osgGaming::FastApproximateAntiAliasingEffect>();
-    container.registerType<osgGaming::HighDynamicRangeEffect>();
-    container.registerType<osgGaming::DepthOfFieldEffect>();
+    container.registerType<osgHelper::ppu::FXAA>();
+    container.registerType<osgHelper::ppu::HDR>();
+    container.registerType<osgHelper::ppu::DOF>();
 
     // Observables
     container.registerSingletonType<ONumSkillPoints>();
     container.registerSingletonType<ODay>();
   }
 
-  void OnePercentApplication::initialize(osgGaming::Injector& injector)
+  void OnePercentApplication::initialize(osgHelper::ioc::Injector& injector)
   {
-    std::string fontFilename = ":/Resources/fonts/coolvetica rg.ttf";
-    auto font = loadFontFile(fontFilename);
+    const auto fontFilename = ":/Resources/fonts/coolvetica rg.ttf";
+    const auto font = loadFontFile(fontFilename);
     if (font)
     {
-      osgGaming::ResourceManager::setDefaultFont(font);
+      osgHelper::ResourceManager::setDefaultFont(font);
     }
     else
     {
-      OSGG_QLOG_WARN(QString("Could not load font file '%1'").arg(fontFilename.c_str()));
+      OSGG_QLOG_WARN(QString("Could not load font file '%1'").arg(fontFilename));
     }
 
     registerLuaClasses(injector);
 
     m->simulation = injector.inject<Simulation>();
-
-    setDefaultWorld(injector.inject<GlobeOverviewWorld>());
 
     OSGG_LOG_INFO("Loading stylesheets");
     m->loadStylesheets(":/Resources/stylesheets/");

@@ -2,7 +2,7 @@
 
 #include "nodes/CountryPresenter.h"
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -11,7 +11,7 @@ namespace onep
 	class CountryNameOverlay : public osg::PositionAttitudeTransform
 	{
 	public:
-		CountryNameOverlay(osgGaming::Injector& injector);
+		CountryNameOverlay(osgHelper::ioc::Injector& injector);
     ~CountryNameOverlay();
 
 		bool getEnabled();

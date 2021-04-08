@@ -19,11 +19,11 @@ get_libraries(VTEST_OPENCV_LIBRARIES_DEBUG ${OPENCV_LIB_DIR_DBG} "${OPENCV_VERSI
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${GTEST_INCLUDE_DIRS}
-  ${OSGGAMING_INCLUDE_DIR}
+  ${OSGHELPER_INCLUDE_DIR}
   ${VECTORIZER_LIB_INCLUDE_DIR})
 
 target_link_libraries(VectorizerLibTest
-  osgGaming
+  osgHelper
   VectorizerLib
   ${GTEST_BOTH_LIBRARIES})
 

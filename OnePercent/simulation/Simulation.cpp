@@ -1,7 +1,6 @@
 #include "Simulation.h"
 
 #include "core/Helper.h"
-#include "core/Multithreading.h"
 #include "core/Observables.h"
 #include "core/Macros.h"
 #include "simulation/ModelContainer.h"
@@ -14,9 +13,11 @@
 #include "scripting/LuaVisuals.h"
 #include "simulation/UpdateThread.h"
 
+#include <QtOsgBridge/Multithreading.h>
+
 #include <QTimer>
 
-#include <osgGaming/Helper.h>
+#include <osgHelper/Helper.h>
 
 namespace onep
 {
@@ -24,14 +25,14 @@ namespace onep
 
   struct Simulation::Impl
   {
-    Impl(osgGaming::Injector& injector)
+    Impl(osgHelper::ioc::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
       , visuals(injector.inject<LuaVisuals>())
       , oDay(injector.inject<ODay>())
       , oNumSkillPoints(injector.inject<ONumSkillPoints>())
       , luaControl(injector.inject<LuaControl>())
-      , oState(new osgGaming::Observable<State>(State::Paused))
+      , oState(new osgHelper::Observable<State>(State::Paused))
       , tickUpdateMode(LuaDefines::TickUpdateMode::CPP)
       , profilingLogsEnabled(false)
       , autoPauseEnabled(false)
@@ -54,7 +55,7 @@ namespace onep
 
     osg::ref_ptr<LuaControl> luaControl;
 
-    osgGaming::Observable<State>::Ptr oState;
+    osgHelper::Observable<State>::Ptr oState;
 
     LuaDefines::TickUpdateMode tickUpdateMode;
     UpdateThread               thread;
@@ -78,7 +79,7 @@ namespace onep
     }
   };
 
-  Simulation::Simulation(osgGaming::Injector& injector)
+  Simulation::Simulation(osgHelper::ioc::Injector& injector)
     : osg::Referenced()
     , m(new Impl(injector))
 
@@ -87,7 +88,7 @@ namespace onep
     m->oNumSkillPoints->set(50);
 
     m->timer.setSingleShot(false);
-    m->timer.setInterval(osgGaming::underlying(State::NormalSpeed));
+    m->timer.setInterval(osgHelper::underlying(State::NormalSpeed));
 
     m->thread.onTick([this]()
     {
@@ -120,7 +121,7 @@ namespace onep
             syncElapsed    = Helper::measureMsecs([&model](){ model->getSimulationStateTable()->updateObservables(); });
             visualsElapsed = Helper::measureMsecs([this](){  m->visuals->updateBindings(); });
 
-            Multithreading::executeInUiAsync([this]()
+            QtOsgBridge::Multithreading::executeInUiAsync([this]()
             {
               m->oDay->set(m->oDay->get() + 1);
             });
@@ -249,7 +250,7 @@ namespace onep
       return;
     }
 
-    setUpdateTimerInterval(osgGaming::underlying(state));
+    setUpdateTimerInterval(osgHelper::underlying(state));
     m->justStarted = true;
     m->timer.start();
 
@@ -281,7 +282,7 @@ namespace onep
     return m->autoPauseEnabled;
   }
 
-  osgGaming::Observable<Simulation::State>::Ptr Simulation::getOState() const
+  osgHelper::Observable<Simulation::State>::Ptr Simulation::getOState() const
   {
     return m->oState;
   }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <osgGaming/Macros.h>
+#include <osgHelper/Macros.h>
 
 #include <QDir>
 #include <QString>

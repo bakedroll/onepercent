@@ -6,7 +6,7 @@
 namespace onep
 {
 
-ModManager::ModManager(osgGaming::Injector& injector)
+ModManager::ModManager(osgHelper::ioc::Injector& injector)
   : osg::Referenced()
   , m_lua(injector.inject<LuaStateManager>())
 {

@@ -4,8 +4,8 @@
 
 #include <osg/Geometry>
 
-#include <osgGaming/CameraAlignedQuad.h>
-#include <osgGaming/Injector.h>
+#include <osgHelper/CameraAlignedQuad.h>
+#include <osgHelper/ioc/Injector.h>
 
 namespace onep
 {
@@ -23,7 +23,7 @@ namespace onep
      * The constructor
      * @param injector to inject all dependencies
      */
-		GlobeModel(osgGaming::Injector& injector);
+		GlobeModel(osgHelper::ioc::Injector& injector);
 
     /**
      * The destructor
@@ -32,17 +32,17 @@ namespace onep
 
     /**
      * Creates all the meshes and loads textures and shaders
-     * \param state Pass the state to check for openGL extensions and load the
-     *              appropriate atmosphere shader. If null, use default shader
+     * \param isFp64Supported Determines if the OpenGL implementation supports
+     *                        64-bit floating point arithmetic
      */
-    void makeGlobeModel(const osg::ref_ptr<osg::State>& state = nullptr);
+    void makeGlobeModel(bool isFp64Supported);
 
     /**
      * Returns a camera-aligned-quad which covers the whole screen space
      * and uses a shader to render an atmospheric scattering effect.
      * @return a osgGaming::CameraAlignedQuad::Ptr
      */
-    osgGaming::CameraAlignedQuad::Ptr getScatteringQuad();
+    osgHelper::CameraAlignedQuad::Ptr getScatteringQuad();
 
     /**
      * Updates the light direction for the scattering shader

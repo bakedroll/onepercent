@@ -14,38 +14,41 @@
 #include "scripting/LuaControl.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
-#include "widgets/OverlayCompositor.h"
-#include "widgets/VirtualOverlay.h"
 
-#include <osgDB/ReadFile>
+#include "QtOsgBridge/OverlayCompositor.h"
+#include "QtOsgBridge/VirtualOverlay.h">
 
-#include <osgGaming/Injector.h>
-#include <osgGaming/View.h>
+#include <osgHelper/ioc/Injector.h>
+#include <osgHelper/View.h>
 
-#include <osgGaming/HighDynamicRangeEffect.h>
-#include <osgGaming/DepthOfFieldEffect.h>
-#include <osgGaming/FastApproximateAntiAliasingEffect.h>
+#include <osgHelper/ppu/HDR.h>
+#include <osgHelper/ppu/DOF.h>
+#include <osgHelper/ppu/FXAA.h>
+
+#include <osg/GL2Extensions>
 
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QPointer>
+#include <QResizeEvent>
 
-#include <osgGaming/ResourceManager.h>
+#include <osgHelper/ResourceManager.h>
 
 namespace onep
 {
   struct LoadingGlobeOverviewState::Impl
   {
-    Impl(osgGaming::Injector& injector)
-      : fxaa(injector.inject<osgGaming::FastApproximateAntiAliasingEffect>())
-      , hdr(injector.inject<osgGaming::HighDynamicRangeEffect>())
-      , dof(injector.inject<osgGaming::DepthOfFieldEffect>())
+    Impl(osgHelper::ioc::Injector& injector)
+      : fxaa(injector.inject<osgHelper::ppu::FXAA>())
+      , hdr(injector.inject<osgHelper::ppu::HDR>())
+      , dof(injector.inject<osgHelper::ppu::DOF>())
       , globeOverviewWorld(injector.inject<GlobeOverviewWorld>())
       , backgroundModel(injector.inject<BackgroundModel>())
       , globeModel(injector.inject<GlobeModel>())
       , countryNameOverlay(injector.inject<CountryNameOverlay>())
       , boundariesData(injector.inject<BoundariesData>())
       , countryOverlay(injector.inject<CountryOverlay>())
-      , resourceManager(injector.inject<osgGaming::ResourceManager>())
+      , resourceManager(injector.inject<osgHelper::ResourceManager>())
       , simulation(injector.inject<Simulation>())
       , lua(injector.inject<LuaStateManager>())
       , model(injector.inject<ModelContainer>())
@@ -53,13 +56,14 @@ namespace onep
       , modManager(injector.inject<ModManager>())
       , labelLoadingText(nullptr)
       , overlay(nullptr)
+      , isFp64Supported(false)
     {
 
     }
 
-    osg::ref_ptr<osgGaming::FastApproximateAntiAliasingEffect> fxaa;
-    osg::ref_ptr<osgGaming::HighDynamicRangeEffect>            hdr;
-    osg::ref_ptr<osgGaming::DepthOfFieldEffect>                dof;
+    osg::ref_ptr<osgHelper::ppu::FXAA> fxaa;
+    osg::ref_ptr<osgHelper::ppu::HDR>  hdr;
+    osg::ref_ptr<osgHelper::ppu::DOF>  dof;
 
     osg::ref_ptr<GlobeOverviewWorld> globeOverviewWorld;
     osg::ref_ptr<BackgroundModel>    backgroundModel;
@@ -67,8 +71,10 @@ namespace onep
     osg::ref_ptr<CountryNameOverlay> countryNameOverlay;
     osg::ref_ptr<BoundariesData>     boundariesData;
     osg::ref_ptr<CountryOverlay>     countryOverlay;
+    osg::ref_ptr<osgHelper::Camera>  camera;
+    osg::ref_ptr<osgHelper::View>    view;
 
-    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+    osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
     osg::ref_ptr<Simulation>                 simulation;
     osg::ref_ptr<LuaStateManager>            lua;
     osg::ref_ptr<ModelContainer>             model;
@@ -77,41 +83,48 @@ namespace onep
     osg::ref_ptr<ModManager> modManager;
 
     QLabel* labelLoadingText;
-    VirtualOverlay* overlay;
+    QtOsgBridge::VirtualOverlay* overlay;
+
+    bool isFp64Supported;
+
   };
 
-  LoadingGlobeOverviewState::LoadingGlobeOverviewState(osgGaming::Injector& injector)
-    : QtGameLoadingState(injector)
+  LoadingGlobeOverviewState::LoadingGlobeOverviewState(osgHelper::ioc::Injector& injector)
+    : LoadingState(injector)
     , m(new Impl(injector))
   {
   }
 
-  LoadingGlobeOverviewState::~LoadingGlobeOverviewState()
+  LoadingGlobeOverviewState::~LoadingGlobeOverviewState() = default;
+
+  void LoadingGlobeOverviewState::onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow)
   {
-  }
+    m->view   = mainWindow->getViewWidget()->getView();
+    m->camera = m->view->getCamera(osgHelper::View::CameraType::Scene);
 
-  void LoadingGlobeOverviewState::initialize()
-  {
-    float projNear = float(getWorld(getView(0))->getCameraManipulator()->getProjectionNear());
-    float projFar = float(getWorld(getView(0))->getCameraManipulator()->getProjectionFar());
+    const auto state = m->camera->getGraphicsContext()->getState();
 
-    getView(0)->setClampColorEnabled(true);
+    m->isFp64Supported = (state && osg::GL2Extensions::Get(state->getContextID(), true)->isGpuShaderFp64Supported);
 
-    m->fxaa->setResolution(getView(0)->getResolution());
+    const auto projNear   = static_cast<float>(m->camera->getProjectionNear());
+    const auto projFar    = static_cast<float>(m->camera->getProjectionFar());
+    const auto resolution = m->view->getResolution();
+
+    m->view->setClampColorEnabled(true);
+
+    m->fxaa->setResolution(m->view->getResolution());
     m->dof->setZNear(projNear);
     m->dof->setZFar(projFar);
 
-    getView(0)->addPostProcessingEffect(m->fxaa);
-    getView(0)->addPostProcessingEffect(m->hdr);
-    getView(0)->addPostProcessingEffect(m->dof, false);
-
-    osg::Vec2f resolution = getView(0)->getResolution();
+    m->view->addPostProcessingEffect(m->fxaa);
+    m->view->addPostProcessingEffect(m->hdr);
+    m->view->addPostProcessingEffect(m->dof, false);
 
     // initialize ui
     m->labelLoadingText = new QLabel(QString());
     m->labelLoadingText->setObjectName("LabelLoadingText");
 
-    m->overlay = new VirtualOverlay();
+    m->overlay = new QtOsgBridge::VirtualOverlay();
 
     m->overlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
 
@@ -121,23 +134,21 @@ namespace onep
 
     m->overlay->setLayout(layout);
 
-    getOverlayCompositor()->addVirtualOverlay(m->overlay);
+    mainWindow->getViewWidget()->getOverlayCompositor()->addVirtualOverlay(m->overlay);
   }
 
-  osgGaming::GameState::StateEvent* LoadingGlobeOverviewState::update()
+  void LoadingGlobeOverviewState::onUpdate(const SimulationData& data)
   {
-    int dotCount = int(getSimulationTime() * 10.0) % 4;
-    QString loadingTextString = QObject::tr("Loading");
+    const auto dotCount = static_cast<int>(data.time * 10.0) % 4;
+    auto loadingTextString = QObject::tr("Loading");
 
     for (int i = 0; i < dotCount; i++)
       loadingTextString += ".";
 
     m->labelLoadingText->setText(loadingTextString);
-
-    return stateEvent_default();
   }
 
-  void LoadingGlobeOverviewState::load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings)
+  void LoadingGlobeOverviewState::onLoading()
   {
     m->modManager->loadModFromDirectory("./GameData/scripts");
     m->modManager->scanDirectoryForMods("./Mods");
@@ -148,10 +159,7 @@ namespace onep
     m->globeOverviewWorld->initialize();
     m->backgroundModel->loadStars("./GameData/data/stars.bin");
 
-    const auto state = getView(0)->getSceneCamera()->getGraphicsContext()->getState();
-
-    m->globeModel->makeGlobeModel(state);
-    world->getCameraManipulator()->addCameraAlignedQuad(m->globeModel->getScatteringQuad());
+    m->globeModel->makeGlobeModel(m->isFp64Supported);
 
     m->boundariesData->loadBoundaries("./GameData/data/boundaries.dat");
     m->countryOverlay->loadCountries("./GameData/data/countries.dat", "./GameData/textures/earth/distance.png");
@@ -205,14 +213,20 @@ namespace onep
     */
   }
 
-  void LoadingGlobeOverviewState::onResizeEvent(float width, float height)
+  void LoadingGlobeOverviewState::onExitLoading()
   {
-    m->overlay->setGeometry(0, 0, int(width), int(height));
+    m->camera->addCameraAlignedQuad(m->globeModel->getScatteringQuad());
+    m->view->getRootGroup()->addChild(m->globeOverviewWorld);
   }
 
-  void LoadingGlobeOverviewState::injectNextStates(osgGaming::Injector& injector, AbstractGameStateList& states)
+  void LoadingGlobeOverviewState::onRequestNewStates()
   {
-    states.push_back(injector.inject<GlobeOverviewState>());
-    states.push_back(injector.inject<MainMenuState>());
+    requestNewEventState<GlobeOverviewState>();
+    requestNewEventState<MainMenuState>(NewEventStateMode::ExitCurrent);
+  }
+
+  void LoadingGlobeOverviewState::onResizeEvent(QResizeEvent* event)
+  {
+    m->overlay->setGeometry(0, 0, static_cast<int>(event->size().width()), static_cast<int>(event->size().height()));
   }
 }

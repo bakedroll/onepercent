@@ -1,6 +1,6 @@
 #include "vectorizer/types.h"
 
-#include <osgGaming/Helper.h>
+#include <osgHelper/Helper.h>
 
 #define PI_2 C_PI * 2.0f
 
@@ -211,7 +211,7 @@ namespace helper
     float x = (p.x + shift) / width;
     float y = p.y / height;
 
-    p3d = osgGaming::getCartesianFromPolar(osg::Vec2f((0.5f - y) * C_PI, x * PI_2 - C_PI)) * radius;
+    p3d = osgHelper::getCartesianFromPolar(osg::Vec2f((0.5f - y) * C_PI, x * PI_2 - C_PI)) * radius;
   }
 
 
@@ -225,7 +225,7 @@ namespace helper
       float x = (it->second.x + shift) / width;
       float y = it->second.y / height;
 
-      osg::Vec3f vec = osgGaming::getCartesianFromPolar(osg::Vec2f((0.5f - y) * C_PI, x * PI_2 - C_PI)) * radius;
+      osg::Vec3f vec = osgHelper::getCartesianFromPolar(osg::Vec2f((0.5f - y) * C_PI, x * PI_2 - C_PI)) * radius;
       points.insert(IdPoint3DMap::value_type(it->first, Point3D(vec.x(), vec.y(), vec.z())));
     }
   }
@@ -246,7 +246,7 @@ namespace helper
         p = porigin + (p * 0.1f);
       }
 
-      osg::Vec2f result = osgGaming::getPolarFromCartesian(p);
+      osg::Vec2f result = osgHelper::getPolarFromCartesian(p);
 
       float x = result.x() * width - shift;
       float y = result.y() * height;

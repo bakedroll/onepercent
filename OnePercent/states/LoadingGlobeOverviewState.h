@@ -1,30 +1,28 @@
 #pragma once
 
-#include "states/QtGameLoadingState.h"
+#include <osgHelper/ioc/Injector.h>
 
-#include <osgGaming/GameSettings.h>
-#include <osgGaming/GameState.h>
-#include <osgGaming/World.h>
+#include <QtOsgBridge/LoadingState.h>
 
 #include <memory>
 
 namespace onep
 {
-	class LoadingGlobeOverviewState : public QtGameLoadingState
+	class LoadingGlobeOverviewState : public QtOsgBridge::LoadingState
 	{
 	public:
-    LoadingGlobeOverviewState(osgGaming::Injector& injector);
+    LoadingGlobeOverviewState(osgHelper::ioc::Injector& injector);
 		~LoadingGlobeOverviewState();
 
-		void initialize() override;
-		osgGaming::GameState::StateEvent* update() override;
+		void onUpdate(const SimulationData& data) override;
 
-		void load(osg::ref_ptr<osgGaming::World> world, osg::ref_ptr<osgGaming::Hud> hud, osg::ref_ptr<osgGaming::GameSettings> settings) override;
+	protected:
+		void onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
+		void onLoading() override;
+		void onExitLoading() override;
+		void onRequestNewStates() override;
 
-    void onResizeEvent(float width, float height) override;
-
-  protected:
-    void injectNextStates(osgGaming::Injector& injector, AbstractGameStateList& states) override;
+		void onResizeEvent(QResizeEvent* event) override;
 
 	private:
 		struct Impl;

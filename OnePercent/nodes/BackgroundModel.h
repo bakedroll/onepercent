@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 #include <osg/PositionAttitudeTransform>
 #include <osgGA/GUIEventHandler>
@@ -12,7 +12,7 @@ namespace onep
 	class BackgroundModel : public osgGA::GUIEventHandler
 	{
 	public:
-		BackgroundModel(osgGaming::Injector& injector);
+		BackgroundModel(osgHelper::ioc::Injector& injector);
     ~BackgroundModel();
 
     void loadStars(std::string filename);

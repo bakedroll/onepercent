@@ -5,9 +5,7 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 
-#include <osgGaming/Injector.h>
-
-#include <QString>
+#include <osgHelper/ioc/Injector.h>
 
 namespace onep
 {
@@ -17,7 +15,7 @@ namespace onep
   public:
     using Ptr = osg::ref_ptr<ModManager>;
 
-    explicit ModManager(osgGaming::Injector& injector);
+    explicit ModManager(osgHelper::ioc::Injector& injector);
     virtual ~ModManager();
 
     void loadModFromDirectory(const QString& path);

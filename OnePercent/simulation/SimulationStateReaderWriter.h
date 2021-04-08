@@ -4,7 +4,7 @@
 
 #include <osg/ref_ptr>
 
-#include <osgGaming/Observable.h>
+#include <osgHelper/Observable.h>
 
 namespace onep
 {
@@ -20,14 +20,14 @@ namespace onep
     bool saveState(
       const std::string& filename,
       const osg::ref_ptr<ModelContainer>& modelContainer,
-      const osgGaming::Observable<int>::Ptr& oDay,
-      const osgGaming::Observable<int>::Ptr& oNumSkillPoints);
+      const osgHelper::Observable<int>::Ptr& oDay,
+      const osgHelper::Observable<int>::Ptr& oNumSkillPoints);
 
     bool loadState(
       const std::string& filename,
       const osg::ref_ptr<ModelContainer>& modelContainer,
-      const osgGaming::Observable<int>::Ptr& oDay,
-      const osgGaming::Observable<int>::Ptr& oNumSkillPoints,
+      const osgHelper::Observable<int>::Ptr& oDay,
+      const osgHelper::Observable<int>::Ptr& oNumSkillPoints,
       UpdateThread* thread);
 
   };

@@ -11,7 +11,7 @@
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 
-#include <osgGaming/FpsUpdateCallback.h>
+#include <osgHelper/FpsUpdateCallback.h>
 
 #include <QPointer>
 #include <QVBoxLayout>
@@ -21,13 +21,13 @@
 #include <QButtonGroup>
 #include <QFormLayout>
 
-#include <osgGaming/Helper.h>
+#include <osgHelper/Helper.h>
 
 namespace onep
 {
   struct MainFrameWidget::Impl
   {
-    Impl(osgGaming::Injector& injector, MainFrameWidget* b)
+    Impl(osgHelper::ioc::Injector& injector, MainFrameWidget* b)
       : base(b)
       , layoutMain(nullptr)
       , frameLeftMenu(nullptr)
@@ -56,10 +56,10 @@ namespace onep
     CountryOverlay::Ptr  countryOverlay;
     ModelContainer::Ptr  modelContainer;
 
-    osgGaming::Observer<int>::Ptr               observerDay;
-    osgGaming::Observer<int>::Ptr               observerSkillPoints;
-    osgGaming::Observer<int>::Ptr               observerCurrentCountry;
-    osgGaming::Observer<Simulation::State>::Ptr observerRunning;
+    osgHelper::Observer<int>::Ptr               observerDay;
+    osgHelper::Observer<int>::Ptr               observerSkillPoints;
+    osgHelper::Observer<int>::Ptr               observerCurrentCountry;
+    osgHelper::Observer<Simulation::State>::Ptr observerRunning;
 
     std::map<std::string, QPointer<QLabel>> valueLabelMap;
 
@@ -115,9 +115,9 @@ namespace onep
       buttonFastForward->setEnabled(false);
 
       auto simulationButtonsGroup = new QButtonGroup(base);
-      simulationButtonsGroup->addButton(buttonPause, osgGaming::underlying(Simulation::State::Paused));
-      simulationButtonsGroup->addButton(buttonPlay, osgGaming::underlying(Simulation::State::NormalSpeed));
-      simulationButtonsGroup->addButton(buttonFastForward, osgGaming::underlying(Simulation::State::FastForward));
+      simulationButtonsGroup->addButton(buttonPause, osgHelper::underlying(Simulation::State::Paused));
+      simulationButtonsGroup->addButton(buttonPlay, osgHelper::underlying(Simulation::State::NormalSpeed));
+      simulationButtonsGroup->addButton(buttonFastForward, osgHelper::underlying(Simulation::State::FastForward));
 
       // Values Form
       auto layoutValues = new QFormLayout();
@@ -297,7 +297,7 @@ namespace onep
         frameLeftMenu->setVisible(id > 0);
       });
 
-      osg::ref_ptr<osgGaming::FpsUpdateCallback> fpsCallback = new osgGaming::FpsUpdateCallback();
+      osg::ref_ptr<osgHelper::FpsUpdateCallback> fpsCallback = new osgHelper::FpsUpdateCallback();
       fpsCallback->setUpdateFunc([labelFps](int fps)
       {
         labelFps->setText(QString::number(fps));
@@ -307,7 +307,7 @@ namespace onep
     }
   };
 
-  MainFrameWidget::MainFrameWidget(osgGaming::Injector& injector)
+  MainFrameWidget::MainFrameWidget(osgHelper::ioc::Injector& injector)
     : VirtualOverlay()
     , m(new Impl(injector, this))
   {

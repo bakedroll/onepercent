@@ -1,5 +1,7 @@
 #pragma once
 
+#include <osgHelper/ioc/Injector.h>
+
 #include "scripting/LuaStateManager.h"
 
 namespace onep
@@ -15,7 +17,7 @@ namespace onep
       void registerDefinition(lua_State* state) override;
     };
 
-    explicit LuaLogger(osgGaming::Injector& injector);
+    explicit LuaLogger(osgHelper::ioc::Injector& injector);
     ~LuaLogger();
 
     void lua_debug(std::string message);

@@ -4,7 +4,7 @@
 
 #include <osgDB/ReadFile>
 
-#include <osgGaming/ResourceManager.h>
+#include <osgHelper/ResourceManager.h>
 
 namespace onep
 {
@@ -33,7 +33,7 @@ TextNode::TextNode(const std::string& text)
 
   m_textNode = new osgText::Text();
 
-  auto font = osgGaming::ResourceManager::getDefaultFont();
+  auto font = osgHelper::ResourceManager::getDefaultFont();
   if (font)
   {
     m_textNode->setFont(font);

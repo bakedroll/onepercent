@@ -28,7 +28,7 @@ namespace onep
 
   struct SkillsWidget::Impl
   {
-    Impl(osgGaming::Injector& injector, SkillsWidget* b)
+    Impl(osgHelper::ioc::Injector& injector, SkillsWidget* b)
       : base(b)
       , frameContent(nullptr)
       , modelContainer(injector.inject<ModelContainer>())
@@ -40,7 +40,7 @@ namespace onep
     QFrame*                           frameContent;
     ModelContainer::Ptr               modelContainer;
     std::map<std::string, SkillToken> skillTokens;
-    osgGaming::Observer<int>::Ptr     skillPointsObserver;
+    osgHelper::Observer<int>::Ptr     skillPointsObserver;
     Simulation::Ptr                   simulation;
 
     GridPosition insertSubBranch(QGridLayout* layout, const LuaSkill::Map& skills, GridPosition current,
@@ -139,7 +139,7 @@ namespace onep
     }
   };
 
-  SkillsWidget::SkillsWidget(osgGaming::Injector& injector)
+  SkillsWidget::SkillsWidget(osgHelper::ioc::Injector& injector)
     : VirtualOverlay()
     , m(new Impl(injector, this))
   {

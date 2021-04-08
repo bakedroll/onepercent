@@ -1,15 +1,18 @@
 #include "GlobeCameraState.h"
+#include "nodes/GlobeOverviewWorld.h"
 
 #include "nodes/BackgroundModel.h"
 
-#include <osgGaming/Helper.h>
-#include <osgGaming/View.h>
+#include <osgHelper/Helper.h>
+#include <osgHelper/View.h>
+
+#include <QPointer>
 
 namespace onep
 {
   struct GlobeCameraState::Impl
   {
-    explicit Impl(osgGaming::Injector& injector)
+    explicit Impl(osgHelper::ioc::Injector& injector)
       : globeWorld(injector.inject<GlobeOverviewWorld>())
       , backgroundModel(injector.inject<BackgroundModel>())
       , cameraDistance(0.0f)
@@ -17,49 +20,49 @@ namespace onep
 
     osg::ref_ptr<GlobeOverviewWorld> globeWorld;
     osg::ref_ptr<BackgroundModel>    backgroundModel;
+    osg::ref_ptr<osgHelper::View>    view;
 
     osg::Vec2f cameraLatLong;
     float      cameraDistance;
     osg::Vec2f cameraViewAngle;
 
-    osg::ref_ptr<osgGaming::RepeatedVec2fAnimation> cameraLatLongAnimation;
-    osg::ref_ptr<osgGaming::Animation<float>>       cameraDistanceAnimation;
-    osg::ref_ptr<osgGaming::Animation<osg::Vec2f>>  cameraViewAngleAnimation;
+    osg::ref_ptr<osgHelper::RepeatedVec2fAnimation> cameraLatLongAnimation;
+    osg::ref_ptr<osgHelper::Animation<float>>       cameraDistanceAnimation;
+    osg::ref_ptr<osgHelper::Animation<osg::Vec2f>>  cameraViewAngleAnimation;
   };
 
-  GlobeCameraState::GlobeCameraState(osgGaming::Injector& injector)
-    : QtGameState()
+  GlobeCameraState::GlobeCameraState(osgHelper::ioc::Injector& injector)
+    : EventProcessingState(injector)
     , m(new Impl(injector))
   {
   }
 
   GlobeCameraState::~GlobeCameraState() = default;
 
-  void GlobeCameraState::initialize()
+  void GlobeCameraState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
   {
+    m->view = mainWindow->getViewWidget()->getView();
+
     m->cameraLatLong   = m->globeWorld->getCameraLatLong();
     m->cameraDistance  = m->globeWorld->getCameraDistance();
     m->cameraViewAngle = m->globeWorld->getCameraViewAngle();
 
     m->cameraLatLongAnimation =
-            new osgGaming::RepeatedVec2fAnimation(osg::Vec2f(-C_PI / 2.0f, 0.0f), osg::Vec2f(C_PI / 2.0f, 2.0f * C_PI),
-                                                  m->cameraLatLong, 0.5, osgGaming::AnimationEase::CIRCLE_OUT);
+            new osgHelper::RepeatedVec2fAnimation(osg::Vec2f(-C_PI / 2.0f, 0.0f), osg::Vec2f(C_PI / 2.0f, 2.0f * C_PI),
+                                                  m->cameraLatLong, 0.5, osgHelper::AnimationEase::CIRCLE_OUT);
     m->cameraDistanceAnimation =
-            new osgGaming::Animation<float>(m->cameraDistance, 0.5, osgGaming::AnimationEase::CIRCLE_OUT);
+            new osgHelper::Animation<float>(m->cameraDistance, 0.5, osgHelper::AnimationEase::CIRCLE_OUT);
     m->cameraViewAngleAnimation =
-            new osgGaming::Animation<osg::Vec2f>(m->cameraViewAngle, 0.5, osgGaming::AnimationEase::CIRCLE_OUT);
+            new osgHelper::Animation<osg::Vec2f>(m->cameraViewAngle, 0.5, osgHelper::AnimationEase::CIRCLE_OUT);
 
-    m->backgroundModel->updateResolutionHeight(getView(0)->getResolution().y());
+    m->backgroundModel->updateResolutionHeight(m->view->getResolution().y());
   }
 
-  osgGaming::GameState::StateEvent* GlobeCameraState::update()
+  void GlobeCameraState::onUpdate(const SimulationData& data)
   {
     m->globeWorld->updateCameraPosition(
-      m->cameraLatLongAnimation->getValue(getSimulationTime()),
-      m->cameraViewAngleAnimation->getValue(getSimulationTime()),
-      m->cameraDistanceAnimation->getValue(getSimulationTime()));
-
-    return stateEvent_default();
+            m->view->getCamera(osgHelper::View::CameraType::Scene), m->cameraLatLongAnimation->getValue(data.time),
+            m->cameraViewAngleAnimation->getValue(data.time), m->cameraDistanceAnimation->getValue(data.time));
   }
 
   const osg::Vec2f& GlobeCameraState::getCameraLatLong() const
@@ -112,7 +115,7 @@ namespace onep
     m->cameraViewAngleAnimation->setDuration(time);
   }
 
-  void GlobeCameraState::setCameraMotionEase(osgGaming::AnimationEase ease)
+  void GlobeCameraState::setCameraMotionEase(osgHelper::AnimationEase ease)
   {
     m->cameraDistanceAnimation->setEase(ease);
     m->cameraLatLongAnimation->setEase(ease);

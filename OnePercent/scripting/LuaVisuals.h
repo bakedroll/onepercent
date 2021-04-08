@@ -19,7 +19,7 @@ namespace onep
     using Ptr           = osg::ref_ptr<LuaVisuals>;
     using PrototypeNode = LuaVisualOsgNode<osg::PositionAttitudeTransform>;
 
-    LuaVisuals(osgGaming::Injector& injector);
+    LuaVisuals(osgHelper::ioc::Injector& injector);
     ~LuaVisuals();
 
     void updateBindings();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 #include <QDialog>
 #include <QLineEdit>
@@ -33,7 +33,7 @@ namespace onep
 
   public:
     DebugWindow(
-      osgGaming::Injector& injector, 
+      osgHelper::ioc::Injector& injector, 
       QWidget* parent = nullptr);
     ~DebugWindow();
 

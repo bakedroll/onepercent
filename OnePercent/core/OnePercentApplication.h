@@ -1,10 +1,10 @@
 #pragma once
 
-#include "core/QtGameApplication.h"
+#include <QtOsgBridge/QtGameApplication.h>
 
 namespace onep
 {
-  class OnePercentApplication : public QtGameApplication
+  class OnePercentApplication : public QtOsgBridge::QtGameApplication
   {
   public:
     OnePercentApplication(int& argc, char** argv);
@@ -12,9 +12,9 @@ namespace onep
     int run();
 
   protected:
-    virtual void registerComponents(osgGaming::InjectionContainer& container) override;
-    virtual void initialize(osgGaming::Injector& injector) override;
-    virtual void deinitialize() override;
+    void registerComponents(osgHelper::ioc::InjectionContainer& container) override;
+    void initialize(osgHelper::ioc::Injector& injector) override;
+    void deinitialize() override;
 
   private:
     struct Impl;

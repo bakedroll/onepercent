@@ -23,7 +23,7 @@ namespace onep
     };
 
     using Ptr                    = std::shared_ptr<LuaSimulationStateTable>;
-    using OCountryBranchAcivated = osgGaming::Observable<CountryBranch>;
+    using OCountryBranchAcivated = osgHelper::Observable<CountryBranch>;
 
     explicit LuaSimulationStateTable(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaSimulationStateTable();

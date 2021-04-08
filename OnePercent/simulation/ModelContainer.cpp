@@ -14,7 +14,7 @@ namespace onep
 {
   struct ModelContainer::Impl
   {
-    Impl(osgGaming::Injector& injector)
+    Impl(osgHelper::ioc::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
       , mutexModel(QMutex::Recursive)
     {}
@@ -25,7 +25,7 @@ namespace onep
     QMutex mutexModel;
   };
 
-  ModelContainer::ModelContainer(osgGaming::Injector& injector)
+  ModelContainer::ModelContainer(osgHelper::ioc::Injector& injector)
     : osg::Referenced()
     , m(new Impl(injector))
   {

@@ -1,6 +1,5 @@
 #include "CountryOverlay.h"
 
-#include "core/Multithreading.h"
 #include "data/BoundariesData.h"
 #include "nodes/BoundariesMesh.h"
 #include "nodes/CountryHoverNode.h"
@@ -13,12 +12,15 @@
 #include "scripting/LuaModel.h"
 #include "simulation/ModelContainer.h"
 
-#include <osgGaming/ByteStream.h>
-#include <osgGaming/Helper.h>
-#include <osgGaming/Observable.h>
-#include <osgGaming/ResourceManager.h>
-#include <osgGaming/ShaderFactory.h>
-#include <osgGaming/TextureFactory.h>
+#include <osgHelper/ByteStream.h>
+#include <osgHelper/Helper.h>
+#include <osgHelper/Observable.h>
+#include <osgHelper/ResourceManager.h>
+#include <osgHelper/ShaderFactory.h>
+#include <osgHelper/TextureFactory.h>
+#include <osgHelper/Macros.h>
+
+#include <QtOsgBridge/Multithreading.h>
 
 #include <osg/BlendFunc>
 #include <osg/Texture2D>
@@ -54,19 +56,19 @@ void CountryOverlay::Definition::registerDefinition(lua_State* state)
 
 struct CountryOverlay::Impl
 {
-  Impl(osgGaming::Injector& injector, CountryOverlay* b)
+  Impl(osgHelper::ioc::Injector& injector, CountryOverlay* b)
     : base(b),
-      resourceManager(injector.inject<osgGaming::ResourceManager>()),
-      textureFactory(injector.inject<osgGaming::TextureFactory>()),
-      shaderFactory(injector.inject<osgGaming::ShaderFactory>()),
+      resourceManager(injector.inject<osgHelper::ResourceManager>()),
+      textureFactory(injector.inject<osgHelper::TextureFactory>()),
+      shaderFactory(injector.inject<osgHelper::ShaderFactory>()),
       configManager(injector.inject<LuaConfig>()),
       lua(injector.inject<LuaStateManager>()),
       boundariesData(injector.inject<BoundariesData>()),
       boundariesMesh(injector.inject<BoundariesMesh>()),
       modelContainer(injector.inject<ModelContainer>()),
       countriesMap(std::make_shared<CountriesMap>()),
-      oSelectedCountryId(new osgGaming::Observable<int>(0)),
-      oCurrentOverlayBranchId(new osgGaming::Observable<std::string>("")),
+      oSelectedCountryId(new osgHelper::Observable<int>(0)),
+      oCurrentOverlayBranchId(new osgHelper::Observable<std::string>("")),
       hoveredCountryId(0)
   {
     initializeNodeSwitch(switchCountryNodes, NodeSwitchType::Transparent, 0);
@@ -130,9 +132,9 @@ struct CountryOverlay::Impl
 
   CountryOverlay* base;
 
-  osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
-  osg::ref_ptr<osgGaming::TextureFactory>  textureFactory;
-  osg::ref_ptr<osgGaming::ShaderFactory>   shaderFactory;
+  osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
+  osg::ref_ptr<osgHelper::TextureFactory>  textureFactory;
+  osg::ref_ptr<osgHelper::ShaderFactory>   shaderFactory;
   osg::ref_ptr<LuaConfig>                  configManager;
   osg::ref_ptr<LuaStateManager>            lua;
   osg::ref_ptr<BoundariesData>             boundariesData;
@@ -158,7 +160,7 @@ struct CountryOverlay::Impl
   QMutex selectedCountryMutex;
 };
 
-CountryOverlay::CountryOverlay(osgGaming::Injector& injector)
+CountryOverlay::CountryOverlay(osgHelper::ioc::Injector& injector)
   : LuaVisualOsgNode<osg::Group>(), m(new Impl(injector, this))
 {
   addStateSetUniform(new osg::Uniform("takeoverColor", osg::Vec4f(0.0f, 0.0f, 0.0f, 0.0f)), m->switchCountryNodes);
@@ -217,7 +219,7 @@ void CountryOverlay::loadCountries(const std::string& countriesFilename, const s
 
   const auto bytes  = m->resourceManager->loadBinary(countriesFilename);
 
-  osgGaming::ByteStream stream(bytes);
+  osgHelper::ByteStream stream(bytes);
 
   const auto ncountries = stream.read<int>();
   for (auto i = 0; i < ncountries; i++)
@@ -404,7 +406,7 @@ int CountryOverlay::getCountryId(const osg::Vec2f& coord) const
 
 void CountryOverlay::setSelectedCountry(int countryId)
 {
-  Multithreading::executeInUiAsync([this, countryId]() {
+  QtOsgBridge::Multithreading::executeInUiAsync([this, countryId]() {
     QMutexLocker lock(&m->selectedCountryMutex);
     m->oSelectedCountryId->set(countryId);
   });
@@ -429,7 +431,7 @@ std::string CountryOverlay::getCurrentOverlayBranchName() const
 
 void CountryOverlay::setCurrentOverlayBranchName(const std::string& branchName)
 {
-  Multithreading::executeInUiAsync([this, branchName]() {
+  QtOsgBridge::Multithreading::executeInUiAsync([this, branchName]() {
     QMutexLocker lock(&m->currentBranchIdMutex);
     m->oCurrentOverlayBranchId->set(branchName);
   });

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <osgGaming/Injector.h>
-#include <osgGaming/Observable.h>
+#include <osgHelper/ioc/Injector.h>
+#include <osgHelper/Observable.h>
 
 #include "data/CountriesMap.h"
 #include "nodes/CountryNode.h"
@@ -20,15 +20,15 @@ namespace onep
       void registerDefinition(lua_State* state) override;
     };
 
-    using OSelectedCountryId        = osgGaming::Observable<int>;
-    using OCurrentOverlayBranchName = osgGaming::Observable<std::string>;
+    using OSelectedCountryId        = osgHelper::Observable<int>;
+    using OCurrentOverlayBranchName = osgHelper::Observable<std::string>;
 
     using Ptr = osg::ref_ptr<CountryOverlay>;
 
     using NeighborList = std::vector<int>;
     using NeighbourMap = std::map<int, NeighborList>;
 
-    CountryOverlay(osgGaming::Injector& injector);
+    CountryOverlay(osgHelper::ioc::Injector& injector);
     ~CountryOverlay();
 
     void loadCountries(const std::string& countriesFilename, const std::string& distanceMapFilename);

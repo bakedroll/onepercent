@@ -5,12 +5,12 @@
 
 #include <osgViewer/ViewerEventHandlers>
 
-#include <osgGaming/View.h>
+#include <osgHelper/View.h>
 
-#include <osgGaming/HighDynamicRangeEffect.h>
-#include <osgGaming/DepthOfFieldEffect.h>
-#include <osgGaming/FastApproximateAntiAliasingEffect.h>
-#include <osgGaming/Helper.h>
+#include <osgHelper/ppu/FXAA.h>
+#include <osgHelper/ppu/DOF.h>
+#include <osgHelper/ppu/HDR.h>
+#include <osgHelper/Helper.h>
 
 #include <QString>
 
@@ -18,7 +18,7 @@ namespace onep
 {
   struct GlobeOverviewState::Impl
   {
-    Impl(osgGaming::Injector& injector)
+    Impl(osgHelper::ioc::Injector& injector)
       : globeWorld(injector.inject<GlobeOverviewWorld>())
       , countryNameOverlay(injector.inject<CountryNameOverlay>())
       , timeSpeed(1.0f)
@@ -27,6 +27,8 @@ namespace onep
 
     osg::ref_ptr<GlobeOverviewWorld> globeWorld;
     osg::ref_ptr<CountryNameOverlay> countryNameOverlay;
+    osg::ref_ptr<osgHelper::Camera> camera;
+    osg::ref_ptr<osgHelper::View>   view;
 
     float timeSpeed;
     float day;
@@ -34,30 +36,29 @@ namespace onep
 
   const float NORMAL_TIME = 0.008f;
 
-  GlobeOverviewState::GlobeOverviewState(osgGaming::Injector& injector)
-    : QtGameState()
+  GlobeOverviewState::GlobeOverviewState(osgHelper::ioc::Injector& injector)
+    : EventProcessingState(injector)
     , m(new Impl(injector))
   {
   }
 
   GlobeOverviewState::~GlobeOverviewState() = default;
 
-  unsigned char GlobeOverviewState::getProperties() const
+  void GlobeOverviewState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
   {
-    return underlying(StateProperties::UpdateAlways) | underlying(StateProperties::GuiEventsAlways);
+    m->view   = mainWindow->getViewWidget()->getView();
+    m->camera = m->view->getCamera(osgHelper::View::CameraType::Scene);
   }
 
-  osgGaming::GameState::StateEvent* GlobeOverviewState::update()
+  void GlobeOverviewState::onUpdate(const SimulationData& data)
   {
     // update visual time of year and day
-    m->day += getFrameTime() * (NORMAL_TIME * m->timeSpeed);
+    m->day += data.time * (NORMAL_TIME * m->timeSpeed);
 
-    m->globeWorld->setDay(m->day);
-
-    return stateEvent_default();
+    m->globeWorld->setDay(m->camera, m->day);
   }
 
-  void GlobeOverviewState::onKeyPressedEvent(int key)
+  bool GlobeOverviewState::onKeyEvent(QKeyEvent* event)
   {
     if (key == osgGA::GUIEventAdapter::KEY_Escape)
     {

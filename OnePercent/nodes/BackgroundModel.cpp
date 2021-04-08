@@ -8,19 +8,19 @@
 #include <osg/BlendEquation>
 #include <osg/Billboard>
 
-#include <osgGaming/ResourceManager.h>
-#include <osgGaming/TextureFactory.h>
-#include <osgGaming/Helper.h>
-#include <osgGaming/ByteStream.h>
+#include <osgHelper/ResourceManager.h>
+#include <osgHelper/TextureFactory.h>
+#include <osgHelper/Helper.h>
+#include <osgHelper/ByteStream.h>
 
 namespace onep
 {
   struct BackgroundModel::Impl
   {
-    Impl(osgGaming::Injector& injector, BackgroundModel* b)
+    Impl(osgHelper::ioc::Injector& injector, BackgroundModel* b)
       : base(b)
-      , resourceManager(injector.inject<osgGaming::ResourceManager>())
-      , textureFactory(injector.inject<osgGaming::TextureFactory>())
+      , resourceManager(injector.inject<osgHelper::ResourceManager>())
+      , textureFactory(injector.inject<osgHelper::TextureFactory>())
     {}
 
     void makeStars(std::string filename)
@@ -35,7 +35,7 @@ namespace onep
       osg::ref_ptr<osg::Vec3Array> verts = new osg::Vec3Array();
       osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
 
-      osgGaming::ByteStream stream(bytes);
+      osgHelper::ByteStream stream(bytes);
 
       int nstars = stream.read<int>();
 
@@ -101,7 +101,7 @@ namespace onep
       sunBillboard->setMode(osg::Billboard::Mode::POINT_ROT_EYE);
       sunBillboard->setNormal(osg::Vec3(0.0f, -1.0f, 0.0f));
 
-      osg::ref_ptr<osg::Geometry> geo = osgGaming::createQuadGeometry(-1.0f, 1.0f, -1.0f, 1.0f);
+      osg::ref_ptr<osg::Geometry> geo = osgHelper::createQuadGeometry(-1.0f, 1.0f, -1.0f, 1.0f);
 
       osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
       colors->push_back(osg::Vec4f(1.0, 1.0, 1.0, 1.0));
@@ -136,8 +136,8 @@ namespace onep
 
     BackgroundModel* base;
 
-    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
-    osg::ref_ptr<osgGaming::TextureFactory> textureFactory;
+    osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
+    osg::ref_ptr<osgHelper::TextureFactory> textureFactory;
 
     osg::ref_ptr<osg::PositionAttitudeTransform> transform;
     osg::ref_ptr<osg::PositionAttitudeTransform> sunTransform;
@@ -145,7 +145,7 @@ namespace onep
     osg::ref_ptr<osg::Point> point;
   };
 
-  BackgroundModel::BackgroundModel(osgGaming::Injector& injector)
+  BackgroundModel::BackgroundModel(osgHelper::ioc::Injector& injector)
     : GUIEventHandler()
     , m(new Impl(injector, this))
   {
