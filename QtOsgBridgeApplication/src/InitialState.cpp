@@ -5,6 +5,7 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <osgHelper/Helper.h>
+#include <osgHelper/LightingNode.h>
 
 #include <QtOsgBridge/Helper.h>
 
@@ -177,13 +178,20 @@ void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
 
   updateTransformation();
 
-  auto group = new osg::Group();
+  auto lightingNode = new osgHelper::LightingNode();
 
-  group->addChild(m_boxTransform);
-  group->addChild(transformSphere);
+  lightingNode->addChild(m_boxTransform);
+  lightingNode->addChild(transformSphere);
 
-  group->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::OFF);
-  group->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+  lightingNode->getLightModel()->setAmbientIntensity(osg::Vec4(0.5f, 0.5f, 0.5f, 1.0f));
+
+  lightingNode->setLightEnabled(0, true);
+
+  const auto light = lightingNode->getOrCreateLight(0);
+
+  light->setDiffuse(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+  light->setSpecular(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+  light->setAmbient(osg::Vec4(0.0, 0.0, 0.0, 1.0));
 
   auto screenGeode = new osg::Geode();
   screenGeode->addDrawable(osg::createTexturedQuadGeometry(osg::Vec3(100.0, 100.0, 0.0), osg::Vec3(200.0, 0.0, 0.0),
@@ -193,7 +201,7 @@ void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
   auto sceneView = mainWindow->getViewWidget()->getView();
   auto sceneCamera = sceneView->getCamera(osgHelper::View::CameraType::Scene);
 
-  sceneView->getRootGroup()->addChild(group);
+  sceneView->getRootGroup()->addChild(lightingNode);
 
   sceneCamera->setPosition(osg::Vec3f(0, -5, 0));
   sceneCamera->setClearColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
