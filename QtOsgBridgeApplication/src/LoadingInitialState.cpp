@@ -37,7 +37,7 @@ void LoadingInitialState::onExitLoading()
 
 void LoadingInitialState::onLoading()
 {
-  QThread::msleep(1000);
+  //QThread::msleep(1000);
 }
 
 void LoadingInitialState::onRequestNewStates()
