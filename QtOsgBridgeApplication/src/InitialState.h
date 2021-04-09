@@ -1,13 +1,13 @@
 #pragma once
 
 #include <QtOsgBridge/EventProcessingState.h>
-#include <QtOsgBridge/VirtualOverlay.h>
 
 #include <osgHelper/ppu/HDR.h>
 #include <osgHelper/ppu/FXAA.h>
 #include <osgHelper/ppu/DOF.h>
 
 #include <QPointer>
+#include <QWidget>
 
 class State1 : public QtOsgBridge::EventProcessingState
 {
@@ -19,8 +19,7 @@ public:
   void onExit() override;
 
 private:
-  QPointer<QtOsgBridge::VirtualOverlay>        m_overlay;
-  osg::ref_ptr<QtOsgBridge::OverlayCompositor> m_overlayCompositor;
+  QPointer<QWidget> m_overlay;
 
 };
 
@@ -34,8 +33,7 @@ public:
   void onExit() override;
 
 private:
-  QPointer<QtOsgBridge::VirtualOverlay>        m_overlay;
-  osg::ref_ptr<QtOsgBridge::OverlayCompositor> m_overlayCompositor;
+  QPointer<QWidget> m_overlay;
 
 };
 
@@ -63,8 +61,8 @@ private:
   float  m_rotation;
   double m_position;
 
-  QPointer<QtOsgBridge::MainWindow>     m_mainWindow;
-  QPointer<QtOsgBridge::VirtualOverlay> m_overlay;
+  QPointer<QtOsgBridge::MainWindow> m_mainWindow;
+  QPointer<QWidget>                 m_overlay;
 
   osg::ref_ptr<osg::PositionAttitudeTransform> m_boxTransform;
 

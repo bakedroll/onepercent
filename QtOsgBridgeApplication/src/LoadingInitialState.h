@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QtOsgBridge/LoadingState.h>
-#include <QtOsgBridge/VirtualOverlay.h>
 
 #include <QPointer>
 
@@ -17,7 +16,7 @@ protected:
   void onRequestNewStates() override;
 
 private:
-  QPointer<QtOsgBridge::VirtualOverlay>        m_overlay;
-  osg::ref_ptr<QtOsgBridge::OverlayCompositor> m_compositor;
+  QPointer<QtOsgBridge::MainWindow> m_mainWindow;
+  QPointer<QWidget>                 m_overlay;
 
 };

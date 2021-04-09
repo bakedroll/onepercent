@@ -1,13 +1,12 @@
 #include "InitialState.h"
 
-#include <QtOsgBridge/VirtualOverlay.h>
-#include <QtOsgBridge/OverlayCompositor.h>
-
 #include <osg/ShapeDrawable>
 #include <osg/Shape>
 #include <osg/PositionAttitudeTransform>
 
 #include <osgHelper/Helper.h>
+
+#include <QtOsgBridge/Helper.h>
 
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -75,22 +74,19 @@ void State1::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
   layout->addWidget(b3);
   layout->addStretch(1);
 
-  m_overlay = new QtOsgBridge::VirtualOverlay();
+  m_overlay = new QWidget();
   m_overlay->setLayout(layout);
   m_overlay->setGeometry(rand() % 700, rand() % 400, 300, 300);
   m_overlay->setStyleSheet("background-color: rgba(220, 100, 100, 50%);");
 
-  m_overlayCompositor = mainWindow->getViewWidget()->getOverlayCompositor();
-  m_overlayCompositor->addVirtualOverlay(m_overlay);
-
-  m_overlay->show();
+  mainWindow->getViewWidget()->addOverlayWidget(m_overlay);
 }
 
 void State1::onExit()
 {
   OSGG_LOG_DEBUG("onExit() State1");
 
-  m_overlayCompositor->removeVirtualOverlay(m_overlay);
+  QtOsgBridge::Helper::deleteWidget(m_overlay);
 }
 
 State2::State2(osgHelper::ioc::Injector& injector)
@@ -132,22 +128,19 @@ void State2::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
   layout->addWidget(b3);
   layout->addStretch(1);
 
-  m_overlay = new QtOsgBridge::VirtualOverlay();
+  m_overlay = new QWidget();
   m_overlay->setLayout(layout);
   m_overlay->setGeometry(rand() % 700, rand() % 400, 300, 300);
   m_overlay->setStyleSheet("background-color: rgba(100, 220, 100, 50%);");
 
-  m_overlayCompositor = mainWindow->getViewWidget()->getOverlayCompositor();
-  m_overlayCompositor->addVirtualOverlay(m_overlay);
-
-  m_overlay->show();
+  mainWindow->getViewWidget()->addOverlayWidget(m_overlay);
 }
 
 void State2::onExit()
 {
   OSGG_LOG_DEBUG("onExit() State2");
 
-  m_overlayCompositor->removeVirtualOverlay(m_overlay);
+  QtOsgBridge::Helper::deleteWidget(m_overlay);
 }
 
 InitialState::InitialState(osgHelper::ioc::Injector& injector)
@@ -249,19 +242,19 @@ void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
   overlayLayout->addLayout(navLayout);
   overlayLayout->addStretch(1);
 
-  auto overlay = new QtOsgBridge::VirtualOverlay();
+  auto overlay = new QWidget();
   overlay->setLayout(overlayLayout);
   overlay->setGeometry(100, 100, 300, 300);
   overlay->setStyleSheet("background-color: rgba(100, 100, 220, 50%);");
 
-  mainWindow->getViewWidget()->getOverlayCompositor()->addVirtualOverlay(overlay);
+  mainWindow->getViewWidget()->addOverlayWidget(overlay);
 
   m_mainWindow = mainWindow;
-  m_overlay = overlay;
+  m_overlay    = overlay;
 
   connect(removeOverlayButton, &QPushButton::clicked, [this]()
   {
-    m_mainWindow->getViewWidget()->getOverlayCompositor()->removeVirtualOverlay(m_overlay);
+    QtOsgBridge::Helper::deleteWidget(m_overlay);
   });
 
   overlay->show();
@@ -270,7 +263,11 @@ void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
 void InitialState::onExit()
 {
   OSGG_LOG_DEBUG("onExit() InitialState");
-  m_mainWindow->getViewWidget()->getOverlayCompositor()->removeVirtualOverlay(m_overlay);
+
+  if (m_overlay)
+  {
+    QtOsgBridge::Helper::deleteWidget(m_overlay);
+  }
 }
 
 void InitialState::onUpdate(const SimulationData& data)
