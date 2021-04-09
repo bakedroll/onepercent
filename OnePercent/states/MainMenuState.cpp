@@ -1,28 +1,26 @@
 #include "MainMenuState.h"
 #include "GlobeInteractionState.h"
 
-#include "widgets/OverlayCompositor.h"
-#include "widgets/VirtualOverlay.h"
+#include <osgHelper/View.h>
 
-#include <osgGaming/Hud.h>
-#include <osgGaming/View.h>
+#include <QtOsgBridge/Helper.h>
 
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QResizeEvent>
 
 namespace onep
 {
 
   struct MainMenuState::Impl
   {
-    Impl() 
-      : overlay(nullptr)
+    Impl()
     {}
 
-    VirtualOverlay* overlay;
+    QPointer<QWidget> overlay;
   };
 
-  MainMenuState::MainMenuState(osgGaming::Injector& injector)
+  MainMenuState::MainMenuState(osgHelper::ioc::Injector& injector)
 	  : GlobeCameraState(injector)
     , m(new Impl())
   {
@@ -30,44 +28,46 @@ namespace onep
 
   MainMenuState::~MainMenuState() = default;
 
-  void MainMenuState::initialize()
+  void MainMenuState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data)
   {
-	  GlobeCameraState::initialize();
+    GlobeCameraState::onInitialize(mainWindow, data);
 
 	  setCameraDistance(9.5f);
 	  setCameraViewAngle(osg::Vec2f(-0.9f, 0.6f));
 	  setCameraLatLong(osg::Vec2f(0.5f, 1.2f));
 
-    setupUi();
+    setupUi(mainWindow);
   }
 
-  osgGaming::GameState::StateEvent* MainMenuState::update()
+  void MainMenuState::onUpdate(const SimulationData& data)
   {
-	  setCameraLatLong(getCameraLatLong() + osg::Vec2f(0.0f, -getFrameTime() * 0.02f));
+	  setCameraLatLong(getCameraLatLong() + osg::Vec2f(0.0f, -data.timeDelta * 0.02f));
 
-	  return GlobeCameraState::update();
+    return GlobeCameraState::onUpdate(data);
   }
 
-  void MainMenuState::onResizeEvent(float width, float height)
+  void MainMenuState::onExit()
   {
-    m->overlay->setGeometry(0, 0, width, height);
+    QtOsgBridge::Helper::deleteWidget(m->overlay);
   }
 
-  void MainMenuState::onKeyPressedEvent(int key)
+  void MainMenuState::onResizeEvent(QResizeEvent* event)
   {
-    if (key == 's')
+    m->overlay->setGeometry(0, 0, event->size().width(), event->size().height());
+  }
+
+  bool MainMenuState::onKeyEvent(QKeyEvent* event)
+  {
+    if ((event->type() == QKeyEvent::Type::KeyPress) && (event->key() == Qt::Key::Key_S))
     {
-      stateEvent_replace<GlobeInteractionState>();
+      requestNewEventState<GlobeInteractionState>(NewEventStateMode::ExitCurrent);
+      return true;
     }
+
+    return false;
   }
 
-  osg::ref_ptr<osgGaming::Hud> MainMenuState::injectHud(osgGaming::Injector&                 injector,
-                                                        const osg::ref_ptr<osgGaming::View>& view)
-  {
-    return injector.inject<osgGaming::Hud>();
-  }
-
-  void MainMenuState::setupUi()
+  void MainMenuState::setupUi(QPointer<QtOsgBridge::MainWindow> mainWindow)
   {
     QPushButton* buttonStart = new QPushButton(QObject::tr("Start Game"));
     QPushButton* buttonEnd = new QPushButton(QObject::tr("End Game"));
@@ -75,19 +75,19 @@ namespace onep
     buttonStart->setObjectName("ButtonMainMenu");
     buttonEnd->setObjectName("ButtonMainMenu");
 
-    QObject::connect(buttonStart, &QPushButton::clicked, [this]()
+    connect(buttonStart, &QPushButton::clicked, [this]()
     {
-      stateEvent_replace<GlobeInteractionState>();
+      requestNewEventState<GlobeInteractionState>(NewEventStateMode::ExitCurrent);
     });
 
-    QObject::connect(buttonEnd, &QPushButton::clicked, [this]()
+    connect(buttonEnd, &QPushButton::clicked, [this]()
     {
-      stateEvent_endGame();
+      requestExitEventState(ExitEventStateMode::ExitAll);
     });
 
-    auto resolution = getView(0)->getResolution();
+    auto resolution = mainWindow->getViewWidget()->getView()->getResolution();
 
-    m->overlay = new VirtualOverlay();
+    m->overlay = new QWidget();
     m->overlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
 
     auto layout = new QVBoxLayout();
@@ -100,7 +100,7 @@ namespace onep
 
     m->overlay->setLayout(layout);
 
-    getOverlayCompositor()->addVirtualOverlay(m->overlay);
+    mainWindow->getViewWidget()->addOverlayWidget(m->overlay);
   }
 
 }

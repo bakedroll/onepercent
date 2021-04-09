@@ -15,7 +15,7 @@ public:
   State1(osgHelper::ioc::Injector& injector);
   ~State1() override;
 
-  void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
+  void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data) override;
   void onExit() override;
 
 private:
@@ -29,7 +29,7 @@ public:
   State2(osgHelper::ioc::Injector& injector);
   ~State2() override;
 
-  void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
+  void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data) override;
   void onExit() override;
 
 private:
@@ -45,13 +45,18 @@ public:
   InitialState(osgHelper::ioc::Injector& injector);
   ~InitialState() override;
 
-  void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
+  void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data) override;
   void onExit() override;
   void onUpdate(const SimulationData& data) override;
 
 protected:
   bool onMouseEvent(QMouseEvent* event) override;
   bool onKeyEvent(QKeyEvent* event) override;
+
+  void onDragBegin(Qt::MouseButton button, const osg::Vec2f& origin) override;
+  void onDragMove(Qt::MouseButton button, const osg::Vec2f& origin, const osg::Vec2f& position,
+                  const osg::Vec2f& change) override;
+  void onDragEnd(Qt::MouseButton button, const osg::Vec2f& origin, const osg::Vec2f& position) override;
 
 private:
   osg::ref_ptr<osgHelper::ppu::FXAA> m_fxaa;

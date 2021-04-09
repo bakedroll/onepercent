@@ -308,7 +308,7 @@ namespace onep
   };
 
   MainFrameWidget::MainFrameWidget(osgHelper::ioc::Injector& injector)
-    : VirtualOverlay()
+    : QWidget()
     , m(new Impl(injector, this))
   {
     m->setupUi();

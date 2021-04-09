@@ -140,7 +140,7 @@ namespace onep
   };
 
   SkillsWidget::SkillsWidget(osgHelper::ioc::Injector& injector)
-    : VirtualOverlay()
+    : QWidget()
     , m(new Impl(injector, this))
   {
     m->setupUi();

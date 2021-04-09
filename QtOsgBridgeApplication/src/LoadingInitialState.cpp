@@ -12,7 +12,7 @@ LoadingInitialState::LoadingInitialState(osgHelper::ioc::Injector& injector)
 {
 }
 
-void LoadingInitialState::onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow)
+void LoadingInitialState::onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data)
 {
   m_mainWindow = mainWindow;
 

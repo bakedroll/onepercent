@@ -134,7 +134,7 @@ void CountryPresenter::luaSetBoundariesEnabled(bool enabled)
 {
   if (!m_boundsMesh.valid())
   {
-    OSGG_QLOG_WARN(QString("Country with id '%1' has no boundaries").arg(m_id));
+    OSGH_QLOG_WARN(QString("Country with id '%1' has no boundaries").arg(m_id));
     assert_return(false);
   }
 
@@ -197,7 +197,7 @@ void CountryPresenter::luaRemoveNodeBin(const std::string& nodeBin)
 {
   if (m_transformBins.count(nodeBin) == 0)
   {
-    OSGG_QLOG_WARN(QString("Node bin '%1' not found").arg(nodeBin.c_str()));
+    OSGH_QLOG_WARN(QString("Node bin '%1' not found").arg(nodeBin.c_str()));
     return;
   }
 

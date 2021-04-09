@@ -124,7 +124,7 @@ namespace onep
     return m->cameraDistance;
   }
 
-  void GlobeOverviewWorld::updateCameraPosition(const osgHelper::Camera::Ptr& camera, osg::Vec2f latLong, osg::Vec2f viewAngle, float distance)
+  void GlobeOverviewWorld::updateCamera(const osgHelper::Camera::Ptr& camera, osg::Vec2f latLong, osg::Vec2f viewAngle, float distance)
   {
     m->cameraLatLong = latLong;
     m->cameraViewAngle = viewAngle;

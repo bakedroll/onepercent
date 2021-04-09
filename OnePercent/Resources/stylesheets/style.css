@@ -1,5 +1,5 @@
-onep--OsgWidget QPushButton,
-onep--OsgWidget QRadioButton
+QtOsgBridge--QtOsgWidget QPushButton,
+QtOsgBridge--QtOsgWidget QRadioButton
 {
   margin: 0px;
   padding: 0px;
@@ -8,45 +8,45 @@ onep--OsgWidget QRadioButton
   color: #000;
 }
 
-onep--OsgWidget QPushButton:hover,
-onep--OsgWidget QRadioButton:hover
+QtOsgBridge--QtOsgWidget QPushButton:hover,
+QtOsgBridge--QtOsgWidget QRadioButton:hover
 {
   border-image: url(./GameData/ui/button_hover.png) 10px stretch;
 }
 
-onep--OsgWidget QPushButton:pressed,
-onep--OsgWidget QRadioButton:pressed
+QtOsgBridge--QtOsgWidget QPushButton:pressed,
+QtOsgBridge--QtOsgWidget QRadioButton:pressed
 {
   border-image: url(./GameData/ui/button_pressed.png) 10px stretch;
 }
 
-onep--OsgWidget QPushButton:checked,
-onep--OsgWidget QRadioButton:checked
+QtOsgBridge--QtOsgWidget QPushButton:checked,
+QtOsgBridge--QtOsgWidget QRadioButton:checked
 {
   border-image: url(./GameData/ui/button_pressed.png) 10px stretch;
 }
 
-onep--OsgWidget QPushButton:disabled,
-onep--OsgWidget QRadioButton:disabled
+QtOsgBridge--QtOsgWidget QPushButton:disabled,
+QtOsgBridge--QtOsgWidget QRadioButton:disabled
 {
   border-image: url(./GameData/ui/button_disabled.png) 10px stretch;
 }
 
-onep--OsgWidget QRadioButton::indicator
+QtOsgBridge--QtOsgWidget QRadioButton::indicator
 {
   image: none;
   width: 0px;
   height: 0px;
 }
 
-onep--OsgWidget QLabel#LabelLoadingText
+QtOsgBridge--QtOsgWidget QLabel#LabelLoadingText
 {
   color: #fff;
   font-size: 20pt;
   margin: 10px;
 }
 
-onep--OsgWidget QPushButton#ButtonMainMenu
+QtOsgBridge--QtOsgWidget QPushButton#ButtonMainMenu
 {
   min-width: 400px;
   min-height: 45px;

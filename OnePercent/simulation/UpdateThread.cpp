@@ -44,7 +44,7 @@ namespace onep
 
   void UpdateThread::run()
   {
-    OSGG_LOG_DEBUG("Starting up update thread");
+    OSGH_LOG_DEBUG("Starting up update thread");
 
     QEventLoop eventLoop;
     connect(this, &UpdateThread::nextStep, &eventLoop, &QEventLoop::quit);
@@ -59,7 +59,7 @@ namespace onep
       m->tickFunc();
     }
 
-    OSGG_LOG_DEBUG("Shutdown update thread");
+    OSGH_LOG_DEBUG("Shutdown update thread");
   }
 
   void UpdateThread::doNextStep()

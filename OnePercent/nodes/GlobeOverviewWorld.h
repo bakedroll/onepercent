@@ -21,8 +21,7 @@ namespace onep
 		osg::Vec2f getCameraViewAngle();
 		float getCameraDistance();
 
-    void updateCameraPosition(const osgHelper::Camera::Ptr& camera, osg::Vec2f latLong, osg::Vec2f viewAngle,
-                              float distance);
+    void updateCamera(const osgHelper::Camera::Ptr& camera, osg::Vec2f latLong, osg::Vec2f viewAngle, float distance);
 
   private:
     struct Impl;

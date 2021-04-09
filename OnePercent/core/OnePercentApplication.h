@@ -1,5 +1,7 @@
 #pragma once
 
+#include "simulation/Simulation.h"
+
 #include <QtOsgBridge/QtGameApplication.h>
 
 namespace onep
@@ -17,8 +19,9 @@ namespace onep
     void deinitialize() override;
 
   private:
-    struct Impl;
-    std::unique_ptr<Impl> m;
+    Simulation::Ptr m_simulation;
+
+    void loadStylesheets(const QString& path);
 
   };
 }

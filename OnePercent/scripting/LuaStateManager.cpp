@@ -3,11 +3,10 @@
 #include "core/Macros.h"
 #include "scripting/LuaInvalidDataException.h"
 
-#include <osgGaming/ResourceManager.h>
-#include <osgGaming/Macros.h>
+#include <osgHelper/ResourceManager.h>
+#include <osgHelper/Macros.h>
 
 #include <algorithm>
-#include <sstream>
 
 #include <QStringList>
 #include <QFile>
@@ -23,16 +22,16 @@ namespace onep
 {
   struct LuaStateManager::Impl
   {
-    Impl(osgGaming::Injector& injector)
-      : resourceManager(injector.inject<osgGaming::ResourceManager>())
+    Impl(osgHelper::ioc::Injector& injector)
+      : resourceManager(injector.inject<osgHelper::ResourceManager>())
     {}
 
-    osg::ref_ptr<osgGaming::ResourceManager> resourceManager;
+    osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
     std::map<QString, LuaRefPtr>             objectCache;
 
   };
 
-  LuaStateManager::LuaStateManager(osgGaming::Injector& injector)
+  LuaStateManager::LuaStateManager(osgHelper::ioc::Injector& injector)
     : osg::Referenced()
     , m(new Impl(injector))
     , m_luaLock(QMutex::Recursive)
@@ -143,7 +142,7 @@ namespace onep
       QFile file(qfilename);
       if (!file.open(QIODevice::ReadOnly))
       {
-        OSGG_QLOG_WARN(QString("Could not load resource file %1.").arg(qfilename));
+        OSGH_QLOG_WARN(QString("Could not load resource file %1.").arg(qfilename));
         return false;
       }
 
@@ -184,7 +183,7 @@ namespace onep
 
     std::string message = "Lua typecheck failed\n";
     message.append(getStackTrace());
-    OSGG_LOG_WARN(message);
+    OSGH_LOG_WARN(message);
 
     return false;
   }
@@ -241,6 +240,6 @@ namespace onep
       log.append(QString("\n%1").arg(stacktrace.c_str()));
     }
 
-    OSGG_QLOG_FATAL(log);
+    OSGH_QLOG_FATAL(log);
   }
 }

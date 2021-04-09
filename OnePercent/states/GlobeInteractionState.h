@@ -2,40 +2,31 @@
 
 #include "GlobeCameraState.h"
 
-#include <osgGA/GUIEventAdapter>
-
 #include <memory>
 
 namespace onep
 {
-  class VirtualOverlay;
-
 	class GlobeInteractionState : public GlobeCameraState
 	{
 	public:
-		GlobeInteractionState(osgGaming::Injector& injector);
+		GlobeInteractionState(osgHelper::ioc::Injector& injector);
 		~GlobeInteractionState();
 
-		void initialize() override;
-
-    StateEvent* update() override;
-
-		void onMousePressedEvent(int button, float x, float y) override;
-		void onKeyPressedEvent(int key) override;
-    void onMouseMoveEvent(float x, float y) override;
-
-		void onScrollEvent(osgGA::GUIEventAdapter::ScrollingMotion motion) override;
-
-    void onDragBeginEvent(int button, const osg::Vec2f& position) override;
-    void onDragEvent(int button, const osg::Vec2f& origin, const osg::Vec2f& position,
-                     const osg::Vec2f& change) override;
-    void onDragEndEvent(int button, const osg::Vec2f& origin, const osg::Vec2f& position) override;
-
-    void onResizeEvent(float width, float height) override;
+		void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data) override;
+		void onUpdate(const SimulationData& data) override;
 
 	protected:
-    osg::ref_ptr<osgGaming::Hud> injectHud(osgGaming::Injector& injector, const osg::ref_ptr<osgGaming::View>& view) override;
-    void setupUi();
+		bool onKeyEvent(QKeyEvent* event) override;
+		bool onMouseEvent(QMouseEvent* event) override;
+		bool onWheelEvent(QWheelEvent* event) override;
+
+    void onDragBegin(Qt::MouseButton button, const osg::Vec2f& origin) override;
+    void onDragMove(Qt::MouseButton button, const osg::Vec2f& origin,
+                    const osg::Vec2f& position, const osg::Vec2f& change) override;
+    void onDragEnd(Qt::MouseButton button, const osg::Vec2f& origin, const osg::Vec2f& position) override;
+    void onResizeEvent(QResizeEvent* event) override;
+
+    void setupUi(const QPointer<QtOsgBridge::MainWindow>& mainWindow);
 
 	private:
 		struct Impl;

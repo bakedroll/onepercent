@@ -96,45 +96,8 @@ namespace onep
     return dynamic_cast<osgText::Font*>(obj.getObject());
   }
 
-  struct OnePercentApplication::Impl
-  {
-    Impl(OnePercentApplication* b) : base(b) {}
-
-    OnePercentApplication* base;
-    Simulation::Ptr simulation;
-
-    void loadStylesheets(const QString& path)
-    {
-      QDir dir(path);
-      if (!dir.exists())
-      {
-        OSGG_QLOG_WARN(QString("Could not find stylesheet directory: %1").arg(path));
-        return;
-      }
-
-      QStringList cssFiles = dir.entryList(QDir::Files | QDir::NoSymLinks);
-
-      QString stylesheetStr;
-      for (QStringList::iterator it = cssFiles.begin(); it != cssFiles.end(); ++it)
-      {
-        QFile file(dir.filePath(*it));
-        if (!file.open(QIODevice::ReadOnly))
-        {
-          OSGG_QLOG_WARN(QString("Could not read stylesheet file: %1").arg(file.fileName()));
-          continue;
-        }
-
-        stylesheetStr.append(QString(file.readAll()) + "\n");
-        file.close();
-      }
-
-      base->setStyleSheet(stylesheetStr);
-    }
-  };
-
   OnePercentApplication::OnePercentApplication(int& argc, char** argv)
     : QtGameApplication(argc, argv)
-    , m(new Impl(this))
   {
   }
 
@@ -199,22 +162,50 @@ namespace onep
     }
     else
     {
-      OSGG_QLOG_WARN(QString("Could not load font file '%1'").arg(fontFilename));
+      OSGH_QLOG_WARN(QString("Could not load font file '%1'").arg(fontFilename));
     }
 
     registerLuaClasses(injector);
 
-    m->simulation = injector.inject<Simulation>();
+    m_simulation = injector.inject<Simulation>();
 
-    OSGG_LOG_INFO("Loading stylesheets");
-    m->loadStylesheets(":/Resources/stylesheets/");
+    OSGH_LOG_INFO("Loading stylesheets");
+    loadStylesheets(":/Resources/stylesheets/");
   }
 
   void OnePercentApplication::deinitialize()
   {
-    m->simulation->shutdownUpdateThread();
-    m->simulation.release();
+    m_simulation->shutdownUpdateThread();
+    m_simulation.release();
 
     QtGameApplication::deinitialize();
+  }
+
+  void OnePercentApplication::loadStylesheets(const QString& path)
+  {
+      QDir dir(path);
+      if (!dir.exists())
+      {
+        OSGH_QLOG_WARN(QString("Could not find stylesheet directory: %1").arg(path));
+        return;
+      }
+
+      QStringList cssFiles = dir.entryList(QDir::Files | QDir::NoSymLinks);
+
+      QString stylesheetStr;
+      for (QStringList::iterator it = cssFiles.begin(); it != cssFiles.end(); ++it)
+      {
+        QFile file(dir.filePath(*it));
+        if (!file.open(QIODevice::ReadOnly))
+        {
+          OSGH_QLOG_WARN(QString("Could not read stylesheet file: %1").arg(file.fileName()));
+          continue;
+        }
+
+        stylesheetStr.append(QString(file.readAll()) + "\n");
+        file.close();
+      }
+
+      setStyleSheet(stylesheetStr);
   }
 }

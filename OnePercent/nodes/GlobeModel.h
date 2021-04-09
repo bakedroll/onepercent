@@ -40,7 +40,7 @@ namespace onep
     /**
      * Returns a camera-aligned-quad which covers the whole screen space
      * and uses a shader to render an atmospheric scattering effect.
-     * @return a osgGaming::CameraAlignedQuad::Ptr
+     * @return a osgHelper::CameraAlignedQuad::Ptr
      */
     osgHelper::CameraAlignedQuad::Ptr getScatteringQuad();
 

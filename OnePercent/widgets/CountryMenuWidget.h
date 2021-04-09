@@ -6,11 +6,11 @@
 
 #include <osgHelper/ioc/Injector.h>
 
-#include <QtOsgBridge/VirtualOverlay.h>
+#include <QWidget>
 
 namespace onep
 {
-	class CountryMenuWidget : public QtOsgBridge::VirtualOverlay
+	class CountryMenuWidget : public QWidget
 	{
 	public:
 		CountryMenuWidget(osgHelper::ioc::Injector& injector);

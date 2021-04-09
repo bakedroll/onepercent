@@ -10,7 +10,7 @@ public:
   explicit LoadingInitialState(osgHelper::ioc::Injector& injector);
 
 protected:
-  void onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
+  void onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data) override;
   void onExitLoading() override;
   void onLoading()  override;
   void onRequestNewStates() override;

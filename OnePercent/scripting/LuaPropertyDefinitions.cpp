@@ -9,7 +9,7 @@
 
 namespace onep
 {
-  LuaPropertyDefinitions::LuaPropertyDefinitions(osgGaming::Injector& injector)
+  LuaPropertyDefinitions::LuaPropertyDefinitions(osgHelper::ioc::Injector& injector)
     : m_injector(injector)
   {
   }

@@ -43,12 +43,12 @@ State1::State1(osgHelper::ioc::Injector& injector)
 
 State1::~State1()
 {
-  OSGG_LOG_DEBUG("~destruct State1");
+  OSGH_LOG_DEBUG("~destruct State1");
 }
 
-void State1::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
+void State1::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data)
 {
-  OSGG_LOG_DEBUG("onInitialize() State1");
+  OSGH_LOG_DEBUG("onInitialize() State1");
 
   const auto b1 = new QPushButton("State 2");
   const auto b2 = new QPushButton("State 2 Exit");
@@ -85,7 +85,7 @@ void State1::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
 
 void State1::onExit()
 {
-  OSGG_LOG_DEBUG("onExit() State1");
+  OSGH_LOG_DEBUG("onExit() State1");
 
   QtOsgBridge::Helper::deleteWidget(m_overlay);
 }
@@ -97,12 +97,12 @@ State2::State2(osgHelper::ioc::Injector& injector)
 
 State2::~State2()
 {
-  OSGG_LOG_DEBUG("~destruct State2");
+  OSGH_LOG_DEBUG("~destruct State2");
 }
 
-void State2::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
+void State2::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data)
 {
-  OSGG_LOG_DEBUG("onInitialize() State2");
+  OSGH_LOG_DEBUG("onInitialize() State2");
 
   const auto b1 = new QPushButton("State 1");
   const auto b2 = new QPushButton("State 1 Exit");
@@ -139,7 +139,7 @@ void State2::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
 
 void State2::onExit()
 {
-  OSGG_LOG_DEBUG("onExit() State2");
+  OSGH_LOG_DEBUG("onExit() State2");
 
   QtOsgBridge::Helper::deleteWidget(m_overlay);
 }
@@ -156,12 +156,12 @@ InitialState::InitialState(osgHelper::ioc::Injector& injector)
 
 InitialState::~InitialState()
 {
-  OSGG_LOG_DEBUG("~destruct InitialState");
+  OSGH_LOG_DEBUG("~destruct InitialState");
 }
 
-void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
+void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data)
 {
-  OSGG_LOG_DEBUG("onInitialize() InitialState");
+  OSGH_LOG_DEBUG("onInitialize() InitialState");
 
   auto geodeBox = new osg::Geode();
   geodeBox->addDrawable(new osg::ShapeDrawable(new osg::Box()));
@@ -270,7 +270,7 @@ void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
 
 void InitialState::onExit()
 {
-  OSGG_LOG_DEBUG("onExit() InitialState");
+  OSGH_LOG_DEBUG("onExit() InitialState");
 
   if (m_overlay)
   {
@@ -321,6 +321,21 @@ bool InitialState::onKeyEvent(QKeyEvent* event)
   }
 
   return false;
+}
+
+void InitialState::onDragBegin(Qt::MouseButton button, const osg::Vec2f& origin)
+{
+  printf("DRAG BEGIN\n");
+}
+
+void InitialState::onDragMove(Qt::MouseButton button, const osg::Vec2f& origin, const osg::Vec2f& position, const osg::Vec2f& change)
+{
+  printf("DRAG MOVE\n");
+}
+
+void InitialState::onDragEnd(Qt::MouseButton button, const osg::Vec2f& origin, const osg::Vec2f& position)
+{
+  printf("DRAG END\n");
 }
 
 void InitialState::updateTransformation()

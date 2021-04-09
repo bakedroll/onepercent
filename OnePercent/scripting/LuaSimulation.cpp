@@ -51,25 +51,25 @@ namespace onep
 
   void LuaSimulation::lua_set_skill_points(int points)
   {
-    OSGG_QLOG_DEBUG(QString("Set skill points: %1").arg(points));
+    OSGH_QLOG_DEBUG(QString("Set skill points: %1").arg(points));
     QtOsgBridge::Multithreading::executeInUiAsync([=](){ m_oNumSkillPoints->set(points); });
   }
 
   void LuaSimulation::lua_add_skill_points(int points)
   {
-    OSGG_QLOG_DEBUG(QString("Add skill points: %1").arg(points));
+    OSGH_QLOG_DEBUG(QString("Add skill points: %1").arg(points));
     QtOsgBridge::Multithreading::executeInUiAsync([=]() { m_simulation->addSkillPoints(points); });
   }
 
   void LuaSimulation::lua_set_day(int day)
   {
-    OSGG_QLOG_DEBUG(QString("Set day: %1").arg(day));
+    OSGH_QLOG_DEBUG(QString("Set day: %1").arg(day));
     QtOsgBridge::Multithreading::executeInUiAsync([=](){ m_oDay->set(day); });
   }
 
   void LuaSimulation::lua_set_interval(int interval)
   {
-    OSGG_QLOG_DEBUG(QString("Set interval: %1").arg(interval));
+    OSGH_QLOG_DEBUG(QString("Set interval: %1").arg(interval));
     QtOsgBridge::Multithreading::executeInUiAsync([=](){ m_simulation->setUpdateTimerInterval(interval); });
   }
 

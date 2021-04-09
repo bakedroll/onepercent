@@ -72,7 +72,7 @@ namespace onep
 
       if (!ptr->isFunction())
       {
-        OSGG_QLOG_FATAL(QString("Could not load lua function '%1'").arg(path));
+        OSGH_QLOG_FATAL(QString("Could not load lua function '%1'").arg(path));
       }
 
       return ptr;
@@ -131,7 +131,7 @@ namespace onep
 
       if (m->profilingLogsEnabled)
       {
-        OSGG_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Visuals: %5ms Total: %6ms")
+        OSGH_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Visuals: %5ms Total: %6ms")
           .arg(tickElapsed)
           .arg(skillsElapsed)
           .arg(branchesElapsed)
@@ -246,7 +246,7 @@ namespace onep
     if (state == State::Paused)
     {
       m->timer.stop();
-      OSGG_LOG_DEBUG("Simulation stopped");
+      OSGH_LOG_DEBUG("Simulation stopped");
       return;
     }
 
@@ -254,7 +254,7 @@ namespace onep
     m->justStarted = true;
     m->timer.start();
 
-    OSGG_LOG_DEBUG("Simulation started");
+    OSGH_LOG_DEBUG("Simulation started");
   }
 
   void Simulation::setAutoPause(bool enabled)

@@ -1,6 +1,5 @@
 #include "LoadingGlobeOverviewState.h"
 
-
 #include "core/ModManager.h"
 #include "data/BoundariesData.h"
 #include "nodes/GlobeModel.h"
@@ -15,15 +14,13 @@
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 
-#include "QtOsgBridge/OverlayCompositor.h"
-#include "QtOsgBridge/VirtualOverlay.h">
-
 #include <osgHelper/ioc/Injector.h>
 #include <osgHelper/View.h>
-
 #include <osgHelper/ppu/HDR.h>
 #include <osgHelper/ppu/DOF.h>
 #include <osgHelper/ppu/FXAA.h>
+
+#include <QtOsgBridge/Helper.h>
 
 #include <osg/GL2Extensions>
 
@@ -82,8 +79,8 @@ namespace onep
 
     osg::ref_ptr<ModManager> modManager;
 
-    QLabel* labelLoadingText;
-    QtOsgBridge::VirtualOverlay* overlay;
+    QPointer<QLabel>  labelLoadingText;
+    QPointer<QWidget> overlay;
 
     bool isFp64Supported;
 
@@ -97,7 +94,7 @@ namespace onep
 
   LoadingGlobeOverviewState::~LoadingGlobeOverviewState() = default;
 
-  void LoadingGlobeOverviewState::onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow)
+  void LoadingGlobeOverviewState::onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data)
   {
     m->view   = mainWindow->getViewWidget()->getView();
     m->camera = m->view->getCamera(osgHelper::View::CameraType::Scene);
@@ -124,7 +121,7 @@ namespace onep
     m->labelLoadingText = new QLabel(QString());
     m->labelLoadingText->setObjectName("LabelLoadingText");
 
-    m->overlay = new QtOsgBridge::VirtualOverlay();
+    m->overlay = new QWidget();
 
     m->overlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
 
@@ -134,7 +131,7 @@ namespace onep
 
     m->overlay->setLayout(layout);
 
-    mainWindow->getViewWidget()->getOverlayCompositor()->addVirtualOverlay(m->overlay);
+    mainWindow->getViewWidget()->addOverlayWidget(m->overlay);
   }
 
   void LoadingGlobeOverviewState::onUpdate(const SimulationData& data)
@@ -215,6 +212,8 @@ namespace onep
 
   void LoadingGlobeOverviewState::onExitLoading()
   {
+    QtOsgBridge::Helper::deleteWidget(m->overlay);
+
     m->camera->addCameraAlignedQuad(m->globeModel->getScatteringQuad());
     m->view->getRootGroup()->addChild(m->globeOverviewWorld);
   }

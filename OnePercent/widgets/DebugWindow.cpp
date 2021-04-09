@@ -172,7 +172,7 @@ namespace onep
       auto duration = std::chrono::high_resolution_clock::now() - start_time;
       long d = std::chrono::duration_cast<std::chrono::milliseconds> (duration).count();
 
-      OSGG_QLOG_DEBUG(QString("Took %1 ms").arg(d));
+      OSGH_QLOG_DEBUG(QString("Took %1 ms").arg(d));
     }
 
     void toggleCountry()

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <osgHelper/ioc/Injector.h>
+#include <QWidget>
 
-#include <QtOsgBridge/VirtualOverlay.h>
+#include <osgHelper/ioc/Injector.h>
 
 namespace onep
 {
-  class MainFrameWidget : public QtOsgBridge::VirtualOverlay
+  class MainFrameWidget : public QWidget
   {
     Q_OBJECT
 

@@ -172,7 +172,7 @@ namespace onep
         auto branch = model->getBranchesTable()->getBranchByName(branchNameRef);
         if (!branch)
         {
-          OSGG_QLOG_WARN(QString("Cannot add skill '%1'. Branch '%2' not found")
+          OSGH_QLOG_WARN(QString("Cannot add skill '%1'. Branch '%2' not found")
             .arg(QString::fromStdString(skillNameRef))
             .arg(QString::fromStdString(branchNameRef)));
           continue;

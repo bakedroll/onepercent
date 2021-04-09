@@ -24,21 +24,21 @@ namespace onep
 
   void LuaLogger::lua_debug(std::string message)
   {
-    OSGG_LOG_DEBUG(message);
+    OSGH_LOG_DEBUG(message);
   }
 
   void LuaLogger::lua_info(std::string message)
   {
-    OSGG_LOG_INFO(message);
+    OSGH_LOG_INFO(message);
   }
 
   void LuaLogger::lua_warn(std::string message)
   {
-    OSGG_LOG_WARN(message);
+    OSGH_LOG_WARN(message);
   }
 
   void LuaLogger::lua_fatal(std::string message)
   {
-    OSGG_LOG_FATAL(message);
+    OSGH_LOG_FATAL(message);
   }
 }

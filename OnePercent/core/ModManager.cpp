@@ -16,7 +16,7 @@ ModManager::~ModManager() = default;
 
 void ModManager::loadModFromDirectory(const QString& path)
 {
-  OSGG_QLOG_INFO(QString("Loading scripts from directory %1").arg(path));
+  OSGH_QLOG_INFO(QString("Loading scripts from directory %1").arg(path));
 
   QDir    dir(path);
   QString dataLuaFilename    = "data.lua";
@@ -30,7 +30,7 @@ void ModManager::loadModFromDirectory(const QString& path)
 
   if (!dataScriptExists && !controlScriptExists)
   {
-    OSGG_QLOG_WARN(QString("Neither %1 nor %2 exist in the directory %3. No scripts were loaded")
+    OSGH_QLOG_WARN(QString("Neither %1 nor %2 exist in the directory %3. No scripts were loaded")
                            .arg(dataLuaFilename)
                            .arg(controlLuaFilename)
                            .arg(path));
@@ -69,7 +69,7 @@ void ModManager::addPathToLuaPackage(const QString& path)
 
     if (!packagePath.isString())
     {
-      OSGG_LOG_FATAL("Expected package.path to be a string");
+      OSGH_LOG_FATAL("Expected package.path to be a string");
       return;
     }
 

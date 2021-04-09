@@ -42,7 +42,7 @@ LuaSkillBranch::Ptr LuaBranchesTable::getBranchByName(const std::string& name) c
       }
     }
 
-    OSGG_QLOG_WARN(QString("Skill '%1' not found").arg(QString::fromStdString(name)));
+    OSGH_QLOG_WARN(QString("Skill '%1' not found").arg(QString::fromStdString(name)));
     return nullptr;
   }
 }

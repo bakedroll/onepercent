@@ -25,7 +25,7 @@ namespace onep
 
     if (!uniform)
     {
-      OSGG_QLOG_WARN(QString("Uniform %1 not found.").arg(visual.c_str()));
+      OSGH_QLOG_WARN(QString("Uniform %1 not found.").arg(visual.c_str()));
     }
 
     uniform->set(value);
@@ -112,7 +112,7 @@ namespace onep
   {
     m->valueBindings[value] = visual;
 
-    OSGG_QLOG_DEBUG(QString("Value visuals binding added: %1 -> %2")
+    OSGH_QLOG_DEBUG(QString("Value visuals binding added: %1 -> %2")
       .arg(value.c_str())
       .arg(visual.c_str()));
   }
@@ -122,7 +122,7 @@ namespace onep
     auto it = m->valueBindings.find(value);
     if (it == m->valueBindings.end())
     {
-      OSGG_QLOG_WARN(QString("Visuals unbinding: Binding for value '%1' does not exist").arg(value.c_str()));
+      OSGH_QLOG_WARN(QString("Visuals unbinding: Binding for value '%1' does not exist").arg(value.c_str()));
       assert_return(false);
     }
 
@@ -134,7 +134,7 @@ namespace onep
   {
       m->groupValueBindings[group][value] = visual;
 
-      OSGG_QLOG_DEBUG(QString("Group value visuals binding added: %1.%2 -> %3")
+      OSGH_QLOG_DEBUG(QString("Group value visuals binding added: %1.%2 -> %3")
           .arg(group.c_str())
           .arg(value.c_str())
           .arg(visual.c_str()));
@@ -145,14 +145,14 @@ namespace onep
       auto groupIt = m->groupValueBindings.find(group);
       if (groupIt == m->groupValueBindings.end())
       {
-        OSGG_QLOG_WARN(QString("Visuals unbinding: Binding for group '%1' does not exist").arg(group.c_str()));
+        OSGH_QLOG_WARN(QString("Visuals unbinding: Binding for group '%1' does not exist").arg(group.c_str()));
         assert_return(false);
       }
 
       auto it = groupIt->second.find(value);
       if (it == groupIt->second.end())
       {
-        OSGG_QLOG_WARN(QString("Visuals unbinding: Binding for group value '%1.%2' does not exist")
+        OSGH_QLOG_WARN(QString("Visuals unbinding: Binding for group value '%1.%2' does not exist")
                                .arg(group.c_str())
                                .arg(value.c_str()));
         assert_return(false);
@@ -181,7 +181,7 @@ namespace onep
 
     osg::ref_ptr<PrototypeNode> transform = new PrototypeNode();
     transform->setScale(prototype->getScale());
-    transform->setAttitude(osgHelper::ioc::getQuatFromEuler(rotation.x() / degToRad, rotation.y() / degToRad, rotation.z() / degToRad));
+    transform->setAttitude(osgHelper::getQuatFromEuler(rotation.x() / degToRad, rotation.y() / degToRad, rotation.z() / degToRad));
     transform->setPosition(prototype->getPosition());
 
     transform->addChild(node);
@@ -193,7 +193,7 @@ namespace onep
   {
     if (m->prototypes.count(prototypeName) == 0)
     {
-      OSGG_QLOG_WARN(QString("Model prototype '%1' not registered.").arg(QString::fromStdString(prototypeName)));
+      OSGH_QLOG_WARN(QString("Model prototype '%1' not registered.").arg(QString::fromStdString(prototypeName)));
       return nullptr;
     }
 

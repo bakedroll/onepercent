@@ -8,6 +8,8 @@
 
 #include <QPointer>
 
+#include <core/Macros.h>
+
 namespace onep
 {
   struct GlobeCameraState::Impl
@@ -39,7 +41,7 @@ namespace onep
 
   GlobeCameraState::~GlobeCameraState() = default;
 
-  void GlobeCameraState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
+  void GlobeCameraState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data)
   {
     m->view = mainWindow->getViewWidget()->getView();
 
@@ -60,7 +62,7 @@ namespace onep
 
   void GlobeCameraState::onUpdate(const SimulationData& data)
   {
-    m->globeWorld->updateCameraPosition(
+    m->globeWorld->updateCamera(
             m->view->getCamera(osgHelper::View::CameraType::Scene), m->cameraLatLongAnimation->getValue(data.time),
             m->cameraViewAngleAnimation->getValue(data.time), m->cameraDistanceAnimation->getValue(data.time));
   }

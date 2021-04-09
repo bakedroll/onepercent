@@ -2,27 +2,25 @@
 
 #include "GlobeCameraState.h"
 
-#include <osgGaming/Injector.h>
+#include <osgHelper/ioc/Injector.h>
 
 namespace onep
 {
 	class MainMenuState : public GlobeCameraState
 	{
 	public:
-		MainMenuState(osgGaming::Injector& injector);
+		MainMenuState(osgHelper::ioc::Injector& injector);
     virtual ~MainMenuState();
 
-		void initialize() override;
-
-    StateEvent* update() override;
-    void        onResizeEvent(float width, float height) override;
-    void        onKeyPressedEvent(int key) override;
+    void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data) override;
+    void onUpdate(const SimulationData& data) override;
+    void onExit() override;
 
   protected:
-    osg::ref_ptr<osgGaming::Hud> injectHud(osgGaming::Injector&                 injector,
-                                           const osg::ref_ptr<osgGaming::View>& view) override;
+    void onResizeEvent(QResizeEvent* event) override;
+    bool onKeyEvent(QKeyEvent* event) override;
 
-    void setupUi();
+    void setupUi(QPointer<QtOsgBridge::MainWindow> mainWindow);
 
   private:
     struct Impl;

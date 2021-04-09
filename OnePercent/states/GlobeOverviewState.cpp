@@ -13,6 +13,7 @@
 #include <osgHelper/Helper.h>
 
 #include <QString>
+#include <QKeyEvent>
 
 namespace onep
 {
@@ -27,8 +28,10 @@ namespace onep
 
     osg::ref_ptr<GlobeOverviewWorld> globeWorld;
     osg::ref_ptr<CountryNameOverlay> countryNameOverlay;
-    osg::ref_ptr<osgHelper::Camera> camera;
-    osg::ref_ptr<osgHelper::View>   view;
+    osg::ref_ptr<osgHelper::Camera>  camera;
+    osg::ref_ptr<osgHelper::View>    view;
+
+    QPointer<QtOsgBridge::MainWindow> mainWindow;
 
     float timeSpeed;
     float day;
@@ -44,8 +47,10 @@ namespace onep
 
   GlobeOverviewState::~GlobeOverviewState() = default;
 
-  void GlobeOverviewState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow)
+  void GlobeOverviewState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data)
   {
+    m->mainWindow = mainWindow;
+
     m->view   = mainWindow->getViewWidget()->getView();
     m->camera = m->view->getCamera(osgHelper::View::CameraType::Scene);
   }
@@ -53,71 +58,83 @@ namespace onep
   void GlobeOverviewState::onUpdate(const SimulationData& data)
   {
     // update visual time of year and day
-    m->day += data.time * (NORMAL_TIME * m->timeSpeed);
+    m->day += m->timeSpeed * NORMAL_TIME * data.timeDelta;
 
     m->globeWorld->setDay(m->camera, m->day);
   }
 
   bool GlobeOverviewState::onKeyEvent(QKeyEvent* event)
   {
-    if (key == osgGA::GUIEventAdapter::KEY_Escape)
+    if (event->type() != QKeyEvent::Type::KeyPress)
     {
-      stateEvent_endGame();
+      return false;
     }
-    else if (key == osgGA::GUIEventAdapter::KEY_Q)
+
+    switch (event->key())
     {
-      if (getView(0)->hasPostProcessingEffect(osgGaming::HighDynamicRangeEffect::NAME))
+    case Qt::Key_Escape:
+    {
+      requestExitEventState(ExitEventStateMode::ExitAll);
+      return true;
+    }
+    case Qt::Key_Q:
+    {
+      const auto enabled = !m->view->getPostProcessingEffectEnabled(osgHelper::ppu::HDR::Name);
+      m->view->setPostProcessingEffectEnabled(osgHelper::ppu::HDR::Name, enabled);
+      return true;
+    }
+    case Qt::Key_W:
+    {
+      const auto enabled = !m->view->getPostProcessingEffectEnabled(osgHelper::ppu::DOF::Name);
+      m->view->setPostProcessingEffectEnabled(osgHelper::ppu::DOF::Name, enabled);
+      return true;
+    }
+    case Qt::Key_E:
+    {
+      const auto enabled = !m->view->getPostProcessingEffectEnabled(osgHelper::ppu::FXAA::Name);
+
+      if (enabled)
       {
-        bool enabled = !getView(0)->getPostProcessingEffectEnabled(osgGaming::HighDynamicRangeEffect::NAME);
-
-        getView(0)->setPostProcessingEffectEnabled(osgGaming::HighDynamicRangeEffect::NAME, enabled);
+        m->view->getPostProcessingEffect(osgHelper::ppu::FXAA::Name)->onResizeViewport(m->view->getResolution());
       }
+
+      m->view->setPostProcessingEffectEnabled(osgHelper::ppu::FXAA::Name, enabled);
+      return true;
     }
-    else if (key == osgGA::GUIEventAdapter::KEY_W)
+    case Qt::Key_F:
     {
-      if (getView(0)->hasPostProcessingEffect(osgGaming::DepthOfFieldEffect::NAME))
+      if (m->mainWindow->isFullScreen())
       {
-        bool enabled = !getView(0)->getPostProcessingEffectEnabled(osgGaming::DepthOfFieldEffect::NAME);
-
-        getView(0)->setPostProcessingEffectEnabled(osgGaming::DepthOfFieldEffect::NAME, enabled);
+        m->mainWindow->showNormal();
       }
-    }
-    else if (key == osgGA::GUIEventAdapter::KEY_E)
-    {
-      if (getView(0)->hasPostProcessingEffect(osgGaming::FastApproximateAntiAliasingEffect::NAME))
+      else
       {
-        bool enabled = !getView(0)->getPostProcessingEffectEnabled(osgGaming::FastApproximateAntiAliasingEffect::NAME);
-
-        if (enabled)
-        {
-          static_cast<osgGaming::FastApproximateAntiAliasingEffect*>(getView(0)->getPostProcessingEffect(osgGaming::FastApproximateAntiAliasingEffect::NAME).get())->setResolution(getView(0)->getResolution());
-        }
-
-        getView(0)->setPostProcessingEffectEnabled(osgGaming::FastApproximateAntiAliasingEffect::NAME, enabled);
+        m->mainWindow->showFullScreen();
       }
+
+      return true;
     }
-    else if (key == osgGA::GUIEventAdapter::KEY_F)
-    {
-      bool bFullscreenEnabled = getFullscreenEnabledObs()->get();
-      getFullscreenEnabledObs()->set(!bFullscreenEnabled);
-    }
-    else if (key == osgGA::GUIEventAdapter::KEY_Minus)
+    case Qt::Key_Minus:
     {
       m->timeSpeed *= 0.75f;
-      OSGG_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
+      OSGH_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
+      return true;
     }
-    else if (key == osgGA::GUIEventAdapter::KEY_Plus)
+    case Qt::Key_Plus:
     {
       m->timeSpeed *= 1.25f;
-      OSGG_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
+      OSGH_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
+      return true;
     }
-    else if (key == osgGA::GUIEventAdapter::KEY_O)
+    case Qt::Key_O:
     {
       osg::ref_ptr<CountryNameOverlay> overlay = m->countryNameOverlay;
 
       overlay->setEnabled(!overlay->getEnabled());
+
+      return true;
     }
-    else if (key == osgGA::GUIEventAdapter::KEY_F4)
+    case Qt::Key_F4:
     {
       printf("Capturing screenshot\n");
 
@@ -129,8 +146,15 @@ namespace onep
         "png",
         osgViewer::ScreenCaptureHandler::WriteToFile::SEQUENTIAL_NUMBER));
 
-      screenCaptureHandler->captureNextFrame(*getViewer());
+      screenCaptureHandler->captureNextFrame(*m->mainWindow->getViewWidget()->getViewer());
+      return true;
     }
+    default:
+      break;
+    }
+
+    return false;
+
     /*else
     {
 

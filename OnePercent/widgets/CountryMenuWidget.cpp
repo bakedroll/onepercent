@@ -99,7 +99,7 @@ namespace onep
 	};
 
   CountryMenuWidget::CountryMenuWidget(osgHelper::ioc::Injector& injector)
-		: VirtualOverlay()
+		: QWidget()
 		, m(new Impl(injector))
 	{
     QSize size(400, 400);

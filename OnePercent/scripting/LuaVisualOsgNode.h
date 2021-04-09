@@ -73,7 +73,7 @@ namespace onep
 
       if (!uniform)
       {
-        OSGG_QLOG_WARN(QString("Uniform %1 not found.").arg(name.c_str()));
+        OSGH_QLOG_WARN(QString("Uniform %1 not found.").arg(name.c_str()));
       }
 
       uniform->set(value);

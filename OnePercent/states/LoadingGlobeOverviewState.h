@@ -17,7 +17,7 @@ namespace onep
 		void onUpdate(const SimulationData& data) override;
 
 	protected:
-		void onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
+		void onInitializeLoading(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data) override;
 		void onLoading() override;
 		void onExitLoading() override;
 		void onRequestNewStates() override;

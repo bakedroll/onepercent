@@ -11,7 +11,7 @@ namespace onep
 	  GlobeCameraState(osgHelper::ioc::Injector& injector);
     virtual ~GlobeCameraState();
 
-		void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow) override;
+		void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data) override;
 		void onUpdate(const SimulationData& data) override;
 
 	protected:
