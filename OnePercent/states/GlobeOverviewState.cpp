@@ -13,6 +13,7 @@
 #include <osgHelper/Helper.h>
 
 #include <QKeyEvent>
+#include <QDir>
 
 namespace onep
 {
