@@ -119,6 +119,11 @@ namespace onep
       simulationButtonsGroup->addButton(buttonPlay, osgHelper::underlying(Simulation::State::NormalSpeed));
       simulationButtonsGroup->addButton(buttonFastForward, osgHelper::underlying(Simulation::State::FastForward));
 
+      std::map<QAbstractButton*, int> buttonIdMap;
+      buttonIdMap[buttonPause]       = osgHelper::underlying(Simulation::State::Paused);
+      buttonIdMap[buttonPlay]        = osgHelper::underlying(Simulation::State::NormalSpeed);
+      buttonIdMap[buttonFastForward] = osgHelper::underlying(Simulation::State::FastForward);
+
       // Values Form
       auto layoutValues = new QFormLayout();
       layoutValues->setContentsMargins(0, 0, 0, 0);
@@ -238,14 +243,15 @@ namespace onep
           }
         });
 
-      connect(simulationButtonsGroup, QOverload<int, bool>::of(&QButtonGroup::buttonToggled), [this](int id, bool checked)
+      connect(simulationButtonsGroup, QOverload<QAbstractButton*, bool>::of(&QButtonGroup::buttonToggled),
+              [this, buttonIdMap](QAbstractButton* button, bool checked)
       {
         if (!checked)
         {
           return;
         }
 
-        simulation->setState(static_cast<Simulation::State>(id));
+        simulation->setState(static_cast<Simulation::State>(buttonIdMap.find(button)->second));
       });
 
       connect(buttonAutoPause, &QRadioButton::toggled, [this](bool checked)

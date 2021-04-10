@@ -34,7 +34,6 @@ namespace onep
   LuaStateManager::LuaStateManager(osgHelper::ioc::Injector& injector)
     : osg::Referenced()
     , m(new Impl(injector))
-    , m_luaLock(QMutex::Recursive)
   {
     QMutexLocker lock(&m_luaLock);
 

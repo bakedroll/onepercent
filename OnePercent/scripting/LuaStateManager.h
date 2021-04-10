@@ -102,8 +102,8 @@ private:
   struct Impl;
   std::unique_ptr<Impl> m;
 
-  mutable QMutex m_luaLock;
-  lua_State*     m_state;
+  mutable QRecursiveMutex m_luaLock;
+  lua_State*              m_state;
 
   bool executeScript(const std::string& filename);
   void logErrorsFromStack() const;

@@ -16,13 +16,12 @@ namespace onep
   {
     Impl(osgHelper::ioc::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
-      , mutexModel(QMutex::Recursive)
     {}
 
     LuaStateManager::Ptr lua;
     LuaModel::Ptr model;
 
-    QMutex mutexModel;
+    QRecursiveMutex mutexModel;
   };
 
   ModelContainer::ModelContainer(osgHelper::ioc::Injector& injector)

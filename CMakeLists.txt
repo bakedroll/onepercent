@@ -15,6 +15,10 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi" CACHE STRING "" FORCE)
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF" CACHE STRING "" FORCE)
   set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF" CACHE STRING "" FORCE)
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+else()
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 # update output directories, see http://stackoverflow.com/questions/7229571/cmake-visual-studio-debug-folder
@@ -37,25 +41,33 @@ option(BUILD_ENABLE_CONSOLE "Builds a console application (Windows only)" ON)
 option(OSG_LIBRARIES_DEBUG_SUFFIX "osg debug libraries suffix" ON)
 option(LUADOC_ENABLE "enable luadoc" OFF)
 
-# find Qt5
-set(QT5_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "Qt5 root directory")
-if (EXISTS ${QT5_ROOT_DIRECTORY})
-  adjust_cached_path(QT5_ROOT_DIRECTORY "Qt5 root directory" ${QT5_ROOT_DIRECTORY})
-  set(CMAKE_PREFIX_PATH ${QT5_ROOT_DIRECTORY})
+# find Qt
+set(QT_VERSION "6" CACHE STRING "Qt version")
+
+set(QT_ROOT_DIRECTORY "NOTFOUND" CACHE STRING "Qt root directory")
+if (EXISTS ${QT_ROOT_DIRECTORY})
+  adjust_cached_path(QT_ROOT_DIRECTORY "Qt root directory" ${QT_ROOT_DIRECTORY})
+  set(CMAKE_PREFIX_PATH ${QT_ROOT_DIRECTORY})
 endif()
 
-set(QT5_MODULES
+set(QT_MODULES
   Core
   Gui
   Widgets
   OpenGL)
 
-foreach(module ${QT5_MODULES})
-  find_package(Qt5${module} REQUIRED)
+if ("${QT_VERSION}" STREQUAL "6")
+  set(QT_MODULES
+    ${QT_MODULES}
+    OpenGLWidgets)
+endif()
+
+foreach(module ${QT_MODULES})
+  find_package(Qt${QT_VERSION}${module} REQUIRED)
 endforeach()
 
-if ("${Qt5Core_LIBRARIES}" STREQUAL "")
-  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify QT5_ROOT_DIRECTORY\n")
+if ("${Qt${QT_VERSION}Core_LIBRARIES}" STREQUAL "")
+  set(ERROR_MESSAGES ${ERROR_MESSAGES} "Please specify QT_ROOT_DIRECTORY\n")
 endif()
 
 #find OpenSceneGraph
@@ -150,7 +162,7 @@ if (EXISTS ${GTEST_ROOT_DIRECTORY})
   adjust_cached_path(GTEST_ROOT_DIRECTORY "gtest root directory" ${GTEST_ROOT_DIRECTORY})
 endif()
 
-set(GTEST_ROOT ${QT5_ROOT_DIRECTORY})
+set(GTEST_ROOT ${QT_ROOT_DIRECTORY})
 
 find_package(GTest)
 find_package(OpenGL)
@@ -303,8 +315,8 @@ if (WIN32)
 endif()
 
 if (WIN32)
-  foreach(module ${QT5_MODULES})
-    get_target_property(MODULE_LOCATION Qt5::${module} LOCATION)
+  foreach(module ${QT_MODULES})
+    get_target_property(MODULE_LOCATION Qt${QT_VERSION}::${module} LOCATION)
     get_filename_component(MODULE_DIR ${MODULE_LOCATION} DIRECTORY)
     get_filename_component(MODULE_FILENAME ${MODULE_LOCATION} NAME)
     get_filename_component(MODULE_EXT ${MODULE_LOCATION} EXT)

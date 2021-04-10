@@ -20,8 +20,8 @@ target_link_libraries(${PROJECT_NAME}
   luadoc
   ${GTEST_BOTH_LIBRARIES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${Qt5Core_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} Qt5::Core)
+target_include_directories(${PROJECT_NAME} PUBLIC ${Qt${QT_VERSION}Core_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION}::Core)
 
 target_link_libraries(${PROJECT_NAME} optimized ${LUA_LIBRARY})
 target_link_libraries(${PROJECT_NAME} debug ${LUA_LIB_DEBUG})

@@ -51,9 +51,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${OSGHELPER_INCLUDE_DIR}
   ${QTOSGBRIDGE_INCLUDE_DIR})
 
-foreach(module ${QT5_MODULES})
-  target_include_directories(${PROJECT_NAME} PUBLIC ${Qt5${module}_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} Qt5::${module})
+foreach(module ${QT_MODULES})
+  target_include_directories(${PROJECT_NAME} PUBLIC ${QtQt${QT_VERSION}${module}_INCLUDE_DIRS})
+  target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION}::${module})
 endforeach()
 
 # set debug and release libs
