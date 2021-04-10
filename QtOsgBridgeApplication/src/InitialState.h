@@ -65,9 +65,11 @@ private:
 
   float  m_rotation;
   double m_position;
+  float  m_overlayAlpha;
 
-  QPointer<QtOsgBridge::MainWindow> m_mainWindow;
-  QPointer<QWidget>                 m_overlay;
+  QPointer<QtOsgBridge::MainWindow>     m_mainWindow;
+  QPointer<QWidget>                     m_overlay;
+  QPointer<QtOsgBridge::VirtualOverlay> m_virtualOverlay;
 
   osg::ref_ptr<osg::PositionAttitudeTransform> m_boxTransform;
 

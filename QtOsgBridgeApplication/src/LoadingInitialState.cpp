@@ -25,9 +25,7 @@ void LoadingInitialState::onInitializeLoading(QPointer<QtOsgBridge::MainWindow> 
   m_overlay->setGeometry(0, 0, 300, 300);
   m_overlay->setStyleSheet("color: #fff; font-size: 36pt;");
 
-  m_overlay->setParent(m_mainWindow->getViewWidget());
-
-  m_overlay->show();
+  m_mainWindow->getViewWidget()->addOverlayWidget(m_overlay);
 }
 
 void LoadingInitialState::onExitLoading()
@@ -37,7 +35,6 @@ void LoadingInitialState::onExitLoading()
 
 void LoadingInitialState::onLoading()
 {
-  //QThread::msleep(1000);
 }
 
 void LoadingInitialState::onRequestNewStates()

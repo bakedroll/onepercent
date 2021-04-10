@@ -11,7 +11,7 @@
 
 #include <QVBoxLayout>
 #include <QPushButton>
-
+#include <QLabel>
 #include <QMouseEvent>
 
 template <typename TEffect>
@@ -151,6 +151,7 @@ InitialState::InitialState(osgHelper::ioc::Injector& injector)
   , m_hdr(injector.inject<osgHelper::ppu::HDR>())
   , m_rotation(0.0f)
   , m_position(0.0)
+  , m_overlayAlpha(1.0f)
 {
 }
 
@@ -213,9 +214,10 @@ void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, co
   setupPostProcessingEffect<osgHelper::ppu::HDR>(m_hdr, sceneView, buttonsLayout, false);
   setupPostProcessingEffect<osgHelper::ppu::DOF>(m_dof, sceneView, buttonsLayout, false);
 
-  const auto buttonState1 = new QPushButton("State 1");
-  const auto buttonState2 = new QPushButton("State 2");
-  const auto buttonExit = new QPushButton("Exit");
+  const auto buttonState1        = new QPushButton("State 1");
+  const auto buttonState2        = new QPushButton("State 2");
+  const auto buttonToggleOverlay = new QPushButton("Toggle virtual");
+  const auto buttonExit          = new QPushButton("Exit");
 
   connect(buttonState1, &QPushButton::clicked, [this]()
   {
@@ -235,6 +237,7 @@ void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, co
   const auto navLayout = new QHBoxLayout();
   navLayout->addWidget(buttonState1);
   navLayout->addWidget(buttonState2);
+  navLayout->addWidget(buttonToggleOverlay);
   navLayout->addWidget(buttonExit);
 
   const auto removeOverlayButton = new QPushButton("test");
@@ -255,7 +258,27 @@ void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, co
   overlay->setGeometry(100, 100, 300, 300);
   overlay->setStyleSheet("background-color: rgba(100, 100, 220, 50%);");
 
+  auto label = new QLabel("Virtual Overlay");
+  label->setStyleSheet("color: #aaf; font-size:36pt;");
+
+  QGridLayout* vLayout = new QGridLayout();
+  vLayout->addWidget(label, 0, 0);
+  vLayout->addWidget(new QPushButton("Testbutton"), 1, 0);
+
+  m_virtualOverlay = new QtOsgBridge::VirtualOverlay();
+  m_virtualOverlay->setGeometry(500, 100, 400, 200);
+  m_virtualOverlay->setLayout(vLayout);
+
+  connect(buttonToggleOverlay, &QPushButton::clicked, [this]()
+  {
+    const auto isVirtual = !m_virtualOverlay->isVirtual();
+
+    OSGH_LOG_DEBUG(std::string("Toggled virtual Overlay: ") + (isVirtual ? "on" : "off"));
+    m_virtualOverlay->setVirtual(isVirtual);
+  });
+
   mainWindow->getViewWidget()->addOverlayWidget(overlay);
+  mainWindow->getViewWidget()->addVirtualOverlayWidget(m_virtualOverlay);
 
   m_mainWindow = mainWindow;
   m_overlay    = overlay;
@@ -264,8 +287,6 @@ void InitialState::onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, co
   {
     QtOsgBridge::Helper::deleteWidget(m_overlay);
   });
-
-  overlay->show();
 }
 
 void InitialState::onExit()
@@ -276,12 +297,18 @@ void InitialState::onExit()
   {
     QtOsgBridge::Helper::deleteWidget(m_overlay);
   }
+
+  if (m_virtualOverlay)
+  {
+    QtOsgBridge::Helper::deleteWidget(m_virtualOverlay.data());
+  }
 }
 
 void InitialState::onUpdate(const SimulationData& data)
 {
   m_rotation += 0.05f;
   m_position += 0.02;
+  m_overlayAlpha += 0.1f;
 
   if (m_rotation >= 2.0f * C_PI)
   {
@@ -293,7 +320,17 @@ void InitialState::onUpdate(const SimulationData& data)
     m_position = 0.0;
   }
 
+  if (m_overlayAlpha >= 2.0 * C_PI)
+  {
+    m_overlayAlpha = 0.0;
+  }
+
   updateTransformation();
+
+  if (m_virtualOverlay->isVirtual())
+  {
+    m_virtualOverlay->setColor(osg::Vec4f(1.0f, 1.0f, 1.0f, (sin(m_overlayAlpha) + 1.0f) * 0.5f));
+  }
 }
 
 bool InitialState::onMouseEvent(QMouseEvent* event)
