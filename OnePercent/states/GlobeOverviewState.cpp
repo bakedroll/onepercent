@@ -12,7 +12,6 @@
 #include <osgHelper/ppu/HDR.h>
 #include <osgHelper/Helper.h>
 
-#include <QString>
 #include <QKeyEvent>
 
 namespace onep
@@ -136,10 +135,16 @@ namespace onep
     }
     case Qt::Key_F4:
     {
-      printf("Capturing screenshot\n");
+      OSGH_LOG_INFO("Capturing screenshot");
 
       osg::ref_ptr<osg::Image> capturedImage;
       osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler = new osgViewer::ScreenCaptureHandler();
+
+      QDir dir("./screenshots");
+      if (!dir.exists())
+      {
+        dir.mkdir(".");
+      }
 
       screenCaptureHandler->setCaptureOperation(new osgViewer::ScreenCaptureHandler::WriteToFile(
         "./screenshots/capture",
