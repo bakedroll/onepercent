@@ -21,7 +21,6 @@
 namespace onep
 {
   const auto CountryNone = 0;
-  const auto c_countryWidgetAlpha = 1.0f;
 
   struct GlobeInteractionState::Impl
   {
@@ -48,12 +47,6 @@ namespace onep
         countryMenuWidget(new CountryMenuWidget(injector)),
         mainFrameWidget(nullptr),
         debugWindow(nullptr),
-        countryMenuWidgetFadeInAnimation(
-          new osgHelper::Animation<float>(0.0f, 0.4f, osgHelper::AnimationEase::CIRCLE_IN)),
-        countryMenuWidgetFadeOutAnimation(
-          new osgHelper::Animation<float>(0.0f, 0.4f, osgHelper::AnimationEase::CIRCLE_OUT)),
-        bFadingOutCountryMenu(false),
-        bFadingInCountryMenu(false),
         bDraggingMidMouse(false),
         bFastAnimation(false),
         simData({0.0, 0.0})
@@ -94,11 +87,6 @@ namespace onep
     CountryMenuWidget* countryMenuWidget;
     MainFrameWidget*   mainFrameWidget;
     DebugWindow*       debugWindow;
-
-    osg::ref_ptr<osgHelper::Animation<float>> countryMenuWidgetFadeInAnimation;
-    osg::ref_ptr<osgHelper::Animation<float>> countryMenuWidgetFadeOutAnimation;
-    bool bFadingOutCountryMenu;
-    bool bFadingInCountryMenu;
 
     osg::Vec2f lastDragPosition;
 
@@ -165,7 +153,7 @@ namespace onep
       return bReady;
     }
 
-    void updateCountryMenuWidgetPositionAndAlpha(int id)
+    void updateCountryMenuWidgetPositionAndFade(int id)
     {
       osg::Vec2f latLong = countryOverlay->getCountryPresenter(id)->getCenterLatLong();
 
@@ -177,31 +165,10 @@ namespace onep
 
       osg::Vec3 screen = position * viewMat * projMat * win;
 
-      auto alpha = c_countryWidgetAlpha;
-      if (bFadingOutCountryMenu)
-      {
-        alpha = countryMenuWidgetFadeOutAnimation->getValue(simData.time);
-
-        if (alpha <= 0.0f)
-        {
-          bFadingOutCountryMenu = false;
-          countryMenuWidget->setVirtualVisible(false);
-        }
-      }
-      else if (bFadingInCountryMenu)
-      {
-        alpha = countryMenuWidgetFadeInAnimation->getValue(simData.time);
-
-        if (alpha >= c_countryWidgetAlpha)
-        {
-          bFadingInCountryMenu = false;
-          countryMenuWidget->setVirtual(false);
-        }
-      }
-
       countryMenuWidget->setCenterPosition(static_cast<int>(screen.x()),
                                            static_cast<int>(view->getResolution().y() - screen.y()));
-      countryMenuWidget->setColor(osg::Vec4f(1.0f, 1.0f, 1.0f, alpha));
+
+      countryMenuWidget->updateFade(simData.time);
     }
   };
 
@@ -295,41 +262,17 @@ namespace onep
         setCameraDistance(r + dist, time);
         setCameraViewAngle(osg::Vec2f(0.0f, a), time);
 
-        m->countryMenuWidget->setVirtual(true);
-        m->countryMenuWidget->setVirtualVisible(true);
-
         if (m->selectedCountry != id)
         {
-          m->countryMenuWidgetFadeInAnimation->beginAnimation(0.0f, c_countryWidgetAlpha, time);
+          m->countryMenuWidget->jumpTo(QtOsgBridge::FadeOverlay::FadeMode::Out);
+          m->countryMenuWidget->fadeTo(QtOsgBridge::FadeOverlay::FadeMode::In, time);
           m->countryMenuWidget->setCountry(country);
-          m->updateCountryMenuWidgetPositionAndAlpha(id);
+          m->updateCountryMenuWidgetPositionAndFade(id);
         }
-        else
-        {
-          auto valueBegin = c_countryWidgetAlpha;
-          if (m->bFadingInCountryMenu)
-          {
-            valueBegin = m->countryMenuWidgetFadeInAnimation->getValue(time);
-          }
-          else if (m->bFadingOutCountryMenu)
-          {
-            valueBegin = m->countryMenuWidgetFadeOutAnimation->getValue(time);
-          }
-
-          m->countryMenuWidgetFadeInAnimation->beginAnimation(valueBegin, c_countryWidgetAlpha, time);
-        }
-
-        m->bFadingOutCountryMenu = false;
-        m->bFadingInCountryMenu  = true;
-
       }
       else
       {
-        m->countryMenuWidget->setVirtualVisible(false);
-        m->countryMenuWidget->setVisible(false);
-
-        m->bFadingOutCountryMenu = false;
-        m->bFadingInCountryMenu  = false;
+        m->countryMenuWidget->jumpTo(QtOsgBridge::FadeOverlay::FadeMode::Out);
       }
 
       m->selectedCountry = id;
@@ -360,7 +303,7 @@ namespace onep
 
     if (m->selectedCountry > 0)
     {
-      m->updateCountryMenuWidgetPositionAndAlpha(m->selectedCountry);
+      m->updateCountryMenuWidgetPositionAndFade(m->selectedCountry);
     }
 
     const auto id = m->isInteractionEnabled ? m->pickCountryIdAt(m->mousePos) : CountryNone;
@@ -506,14 +449,9 @@ namespace onep
     auto distance  = getCameraDistance();
     auto viewAngle = getCameraViewAngle();
 
-    if (button != Qt::MouseButton::LeftButton)
+    if ((button != Qt::MouseButton::LeftButton) && (m->selectedCountry > 0))
     {
-      if (m->selectedCountry > 0 && !m->bFadingOutCountryMenu)
-      {
-        const auto time = m->simData.time;
-        m->bFadingOutCountryMenu = true;
-        m->countryMenuWidgetFadeOutAnimation->beginAnimation(m->countryMenuWidgetFadeInAnimation->getValue(time), 0.0f, time);
-      }
+      m->countryMenuWidget->fadeTo(QtOsgBridge::FadeOverlay::FadeMode::Out, m->simData.time);
     }
 
     auto trimmedChange = change;
@@ -589,8 +527,5 @@ namespace onep
 
     mainWindow->getViewWidget()->addOverlayWidget(m->mainFrameWidget);
     mainWindow->getViewWidget()->addVirtualOverlayWidget(m->countryMenuWidget);
-
-    m->countryMenuWidget->setVirtual(true);
-    m->countryMenuWidget->setVirtualVisible(false);
   }
 }

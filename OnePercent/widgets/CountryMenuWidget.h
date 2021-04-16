@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include <QtOsgBridge/VirtualOverlay.h>
+#include <QtOsgBridge/FadeOverlay.h>
 
 #include <osgHelper/ioc/Injector.h>
 
@@ -12,7 +12,7 @@
 
 namespace onep
 {
-	class CountryMenuWidget : public QtOsgBridge::VirtualOverlay
+	class CountryMenuWidget : public QtOsgBridge::FadeOverlay
 	{
 	public:
 		CountryMenuWidget(osgHelper::ioc::Injector& injector);
