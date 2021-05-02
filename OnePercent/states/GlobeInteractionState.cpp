@@ -6,6 +6,7 @@
 #include "scripting/LuaModel.h"
 #include "scripting/LuaCountry.h"
 #include "scripting/LuaCountriesTable.h"
+#include "scripting/LuaStateManager.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 #include "widgets/CountryMenuWidget.h"
@@ -31,6 +32,7 @@ namespace onep
         globeOverviewWorld(injector.inject<GlobeOverviewWorld>()),
         simulation(injector.inject<Simulation>()),
         countryOverlay(injector.inject<CountryOverlay>()),
+        lua(injector.inject<LuaStateManager>()),
         modelContainer(injector.inject<ModelContainer>()),
         paramEarthRadius(0.0f),
         paramCameraMinDistance(0.0f),
@@ -64,6 +66,7 @@ namespace onep
     osg::ref_ptr<CountryOverlay>     countryOverlay;
     osg::ref_ptr<osgHelper::View>    view;
     osg::ref_ptr<osgHelper::Camera>  camera;
+    osg::ref_ptr<LuaStateManager>    lua;
 
     osg::ref_ptr<ModelContainer> modelContainer;
 
@@ -369,7 +372,12 @@ namespace onep
         }
 
         int selected = m->pickCountryIdAt(m->mousePos);
-        m->countryOverlay->setSelectedCountry(selected);
+
+        m->lua->safeExecute([this, selected]()
+        { 
+          m->countryOverlay->setSelectedCountry(selected);
+        });
+
         return true;
       }
       default:

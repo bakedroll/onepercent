@@ -9,10 +9,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
 # specify needed osg libraries
 set(TEST_OSG_LIBRARIES_TMP "osg osgViewer osgUtil osgGA osgDB osgText OpenThreads")
 
-get_libraries(TEST_OSG_LIBRARIES ${OSG_LIBRARY} "" ${TEST_OSG_LIBRARIES_TMP})
+get_libraries(TEST_OSG_LIBRARIES ${OSG_LIBRARY_RELEASE} "" ${TEST_OSG_LIBRARIES_TMP})
 get_libraries(TEST_OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${TEST_OSG_LIBRARIES_TMP})
-
-message(STATUS ${OSGHELPER_INCLUDE_DIR})
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}

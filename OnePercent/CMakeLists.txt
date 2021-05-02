@@ -37,7 +37,7 @@ source_group(Resources FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources.qrc)
 # specify needed osg libraries
 set(OSG_LIBRARIES_TMP "osg osgViewer osgUtil osgGA osgDB osgText OpenThreads")
 
-get_libraries(OSG_LIBRARIES ${OSG_LIBRARY} "" ${OSG_LIBRARIES_TMP})
+get_libraries(OSG_LIBRARIES ${OSG_LIBRARY_RELEASE} "" ${OSG_LIBRARIES_TMP})
 get_libraries(OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${OSG_LIBRARIES_TMP})
 
 # set include directories

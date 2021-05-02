@@ -8,7 +8,7 @@ set_target_properties(Vectorizer PROPERTIES DEBUG_POSTFIX "d")
 # specify needed libraries
 set(OSG_LIBRARIES_TMP "osg osgUtil osgText OpenThreads")
 
-get_libraries(OSG_LIBRARIES ${OSG_LIBRARY} "" ${OSG_LIBRARIES_TMP})
+get_libraries(OSG_LIBRARIES ${OSG_LIBRARY_RELEASE} "" ${OSG_LIBRARIES_TMP})
 get_libraries(OSG_LIBRARIES_DEBUG ${OSG_LIBRARY_DEBUG} ${OSG_LIBRARY_SUFFIX} ${OSG_LIBRARIES_TMP})
 
 set(OPENCV_LIBRARIES_TMP "opencv_core opencv_highgui opencv_imgcodecs opencv_imgproc")
