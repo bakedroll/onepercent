@@ -101,7 +101,7 @@ namespace onep
 
     const auto state = m->camera->getGraphicsContext()->getState();
 
-    m->isFp64Supported = (state && osg::GL2Extensions::Get(state->getContextID(), true)->isGpuShaderFp64Supported);
+    m->isFp64Supported = (state && osg::GL2Extensions::Get(state->getContextID(), false)->isGpuShaderFp64Supported);
 
     const auto projNear   = static_cast<float>(m->camera->getProjectionNear());
     const auto projFar    = static_cast<float>(m->camera->getProjectionFar());

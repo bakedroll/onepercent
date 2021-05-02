@@ -53,11 +53,6 @@ protected:
   bool onMouseEvent(QMouseEvent* event) override;
   bool onKeyEvent(QKeyEvent* event) override;
 
-  void onDragBegin(Qt::MouseButton button, const osg::Vec2f& origin) override;
-  void onDragMove(Qt::MouseButton button, const osg::Vec2f& origin, const osg::Vec2f& position,
-                  const osg::Vec2f& change) override;
-  void onDragEnd(Qt::MouseButton button, const osg::Vec2f& origin, const osg::Vec2f& position) override;
-
 private:
   osg::ref_ptr<osgHelper::ppu::FXAA> m_fxaa;
   osg::ref_ptr<osgHelper::ppu::DOF>  m_dof;

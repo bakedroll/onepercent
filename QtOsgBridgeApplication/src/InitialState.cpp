@@ -25,12 +25,6 @@ void setupPostProcessingEffect(const osg::ref_ptr<TEffect>& effect, const osgHel
   {
       const auto enabled = view->getPostProcessingEffectEnabled(TEffect::Name);
       view->setPostProcessingEffectEnabled(TEffect::Name, !enabled);
-
-      const auto message = QString("Toggled %1: %2")
-                                   .arg(QString::fromStdString(TEffect::Name))
-                                   .arg(enabled ? "off" : "on")
-                                   .toStdString();
-      printf("%s\n", message.c_str());
   });
 
   buttonsLayout->addWidget(button);
@@ -358,21 +352,6 @@ bool InitialState::onKeyEvent(QKeyEvent* event)
   }
 
   return false;
-}
-
-void InitialState::onDragBegin(Qt::MouseButton button, const osg::Vec2f& origin)
-{
-  printf("DRAG BEGIN\n");
-}
-
-void InitialState::onDragMove(Qt::MouseButton button, const osg::Vec2f& origin, const osg::Vec2f& position, const osg::Vec2f& change)
-{
-  printf("DRAG MOVE\n");
-}
-
-void InitialState::onDragEnd(Qt::MouseButton button, const osg::Vec2f& origin, const osg::Vec2f& position)
-{
-  printf("DRAG END\n");
 }
 
 void InitialState::updateTransformation()

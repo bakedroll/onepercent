@@ -216,6 +216,13 @@ namespace onep
 
     m->selectedCountryObserver = m->countryOverlay->getOSelectedCountryId()->connect([this, minDistance, maxDistance](int id)
     {
+      const auto isFadingOut = (m->countryMenuWidget->getCurrentFadeMode() == QtOsgBridge::FadeOverlay::FadeMode::Out);
+
+      if ((id == 0) || (m->selectedCountry != id) && !isFadingOut)
+      {
+        m->countryMenuWidget->jumpTo(QtOsgBridge::FadeOverlay::FadeMode::Out);
+      }
+
       if (id > 0)
       {
         auto time = m->simData.time;
@@ -265,17 +272,12 @@ namespace onep
         setCameraDistance(r + dist, time);
         setCameraViewAngle(osg::Vec2f(0.0f, a), time);
 
-        if (m->selectedCountry != id)
+        if ((m->selectedCountry != id) || isFadingOut)
         {
-          m->countryMenuWidget->jumpTo(QtOsgBridge::FadeOverlay::FadeMode::Out);
           m->countryMenuWidget->fadeTo(QtOsgBridge::FadeOverlay::FadeMode::In, time);
           m->countryMenuWidget->setCountry(country);
           m->updateCountryMenuWidgetPositionAndFade(id);
         }
-      }
-      else
-      {
-        m->countryMenuWidget->jumpTo(QtOsgBridge::FadeOverlay::FadeMode::Out);
       }
 
       m->selectedCountry = id;
