@@ -1,7 +1,6 @@
 #include "GlobeInteractionState.h"
 
 #include "core/Macros.h"
-#include "nodes/GlobeOverviewWorld.h"
 #include "nodes/CountryOverlay.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaCountry.h"
@@ -19,6 +18,8 @@
 #include <osgHelper/Helper.h>
 #include <osgHelper/View.h>
 
+#include <QtOsgBridge/Helper.h>
+
 namespace onep
 {
   const auto CountryNone = 0;
@@ -29,7 +30,6 @@ namespace onep
       : base(b),
         pInjector(&injector),
         configManager(injector.inject<LuaConfig>()),
-        globeOverviewWorld(injector.inject<GlobeOverviewWorld>()),
         simulation(injector.inject<Simulation>()),
         countryOverlay(injector.inject<CountryOverlay>()),
         lua(injector.inject<LuaStateManager>()),
@@ -60,13 +60,12 @@ namespace onep
     // only for debug window
     osgHelper::ioc::Injector* pInjector;
 
-    osg::ref_ptr<LuaConfig>          configManager;
-    osg::ref_ptr<GlobeOverviewWorld> globeOverviewWorld;
-    osg::ref_ptr<Simulation>         simulation;
-    osg::ref_ptr<CountryOverlay>     countryOverlay;
-    osg::ref_ptr<osgHelper::View>    view;
-    osg::ref_ptr<osgHelper::Camera>  camera;
-    osg::ref_ptr<LuaStateManager>    lua;
+    osg::ref_ptr<LuaConfig>         configManager;
+    osg::ref_ptr<Simulation>        simulation;
+    osg::ref_ptr<CountryOverlay>    countryOverlay;
+    osg::ref_ptr<osgHelper::View>   view;
+    osg::ref_ptr<osgHelper::Camera> camera;
+    osg::ref_ptr<LuaStateManager>   lua;
 
     osg::ref_ptr<ModelContainer> modelContainer;
 
@@ -319,6 +318,12 @@ namespace onep
       if (!m->bDraggingMidMouse)
         m->countryOverlay->setHoveredCountryId(id);
     }
+  }
+
+  void GlobeInteractionState::onExit()
+  {
+    QtOsgBridge::Helper::deleteWidget(m->mainFrameWidget);
+    QtOsgBridge::Helper::deleteWidget(m->countryMenuWidget);
   }
 
   bool GlobeInteractionState::onKeyEvent(QKeyEvent* event)

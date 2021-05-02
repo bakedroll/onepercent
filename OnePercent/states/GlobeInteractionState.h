@@ -14,6 +14,7 @@ namespace onep
 
 		void onInitialize(QPointer<QtOsgBridge::MainWindow> mainWindow, const SimulationData& data) override;
 		void onUpdate(const SimulationData& data) override;
+		void onExit() override;
 
 	protected:
 		bool onKeyEvent(QKeyEvent* event) override;

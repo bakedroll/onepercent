@@ -61,6 +61,8 @@ namespace onep
     osgHelper::Observer<int>::Ptr               observerCurrentCountry;
     osgHelper::Observer<Simulation::State>::Ptr observerRunning;
 
+    osg::ref_ptr<osgHelper::FpsUpdateCallback> fpsCallback;
+
     std::map<std::string, QPointer<QLabel>> valueLabelMap;
 
     void setCenterWidgetEnabled(QWidget* widget)
@@ -303,7 +305,7 @@ namespace onep
         frameLeftMenu->setVisible(id > 0);
       });
 
-      osg::ref_ptr<osgHelper::FpsUpdateCallback> fpsCallback = new osgHelper::FpsUpdateCallback();
+      fpsCallback = new osgHelper::FpsUpdateCallback();
       fpsCallback->setUpdateFunc([labelFps](int fps)
       {
         labelFps->setText(QString::number(fps));
@@ -320,5 +322,8 @@ namespace onep
     m->setupUi();
   }
 
-  MainFrameWidget::~MainFrameWidget() = default;
+  MainFrameWidget::~MainFrameWidget()
+  {
+    m->globeModel->removeUpdateCallback(m->fpsCallback);
+  }
 }

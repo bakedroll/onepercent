@@ -76,7 +76,7 @@ namespace onep
 
     addChild(m->globeModel);
     addChild(m->countryNameOverlay);
-    addChild(m->backgroundModel->getTransform());
+    addChild(m->backgroundModel);
   }
 
   GlobeOverviewWorld::~GlobeOverviewWorld() = default;
@@ -102,7 +102,7 @@ namespace onep
     getOrCreateLight(0)->setPosition(osg::Vec4f(direction, 0.0f));
     m->globeModel->updateLightDir(direction);
 
-    m->backgroundModel->getTransform()->setAttitude(osg::Matrix::inverse(dayMat).getRotate());
+    m->backgroundModel->setAttitude(osg::Matrix::inverse(dayMat).getRotate());
     m->backgroundModel->getSunTransform()->setAttitude(osg::Matrix::inverse(yearMat).getRotate());
 
     m->globeModel->updateClouds(day);
@@ -135,7 +135,7 @@ namespace onep
 
     camera->setPosition(position);
 
-    m->backgroundModel->getTransform()->setPosition(position);
+    m->backgroundModel->setPosition(position);
 
     // update camera attitude
     osg::Matrix latLongMat = osg::Matrix::rotate(osgHelper::getQuatFromEuler(-latLong.x(), 0.0f, fmodf(latLong.y() + C_PI, C_PI * 2.0f)));
