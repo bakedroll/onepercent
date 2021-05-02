@@ -3,7 +3,7 @@ import os
 extensions = [ ".h", ".hpp", ".cpp", ".cxx", ".c", ".lua" ]
 
 basepath = r"${CMAKE_SOURCE_DIR}"
-projectdirs = [ "OnePercent", "osgGaming", "osgGamingTest", "Vectorizer", "VectorizerLib", "VectorizerLibTest" ]
+projectdirs = [ "luadoc", "luadocTest", "OnePercent", "osgHelper", "osgHelperTest", "QtOsgBridge", "QtOsgBridgeApplication", "Vectorizer", "VectorizerLib", "VectorizerLibTest" ]
 
 basepath = os.path.abspath(basepath)
 
