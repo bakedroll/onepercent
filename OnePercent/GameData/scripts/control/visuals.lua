@@ -29,7 +29,9 @@ local function set_country_node_color(cid, color, neighbourcolor)
 
 	local neighbours = node:get_neighbours()
 	for _, neighbour_node in ipairs(neighbours) do
-		neighbour_node:set_uniform_vec4f("overlayColor", neighbourcolor)
+		if neighbour_node then
+			neighbour_node:set_uniform_vec4f("overlayColor", neighbourcolor)
+		end
 	end
 
 end

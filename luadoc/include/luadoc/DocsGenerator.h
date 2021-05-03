@@ -118,7 +118,7 @@ namespace luadoc
     void addScopeFunction(const ScopeDefPtr& scope, const QString& name) const
     {
       assert_return(scope);
-      const auto& type = typeid(typename luabridge::FuncTraits<MemFn>::ReturnType);
+      const auto& type = typeid(typename luabridge::detail::FuncTraits<MemFn>::ReturnType);
       scope->functions[name] = std::make_shared<FunctionDefinition>(name, type);
     }
 
