@@ -1,19 +1,11 @@
-add_source_directory(VECTORIZER_LIB_SOURCE src)
-add_source_directory(VECTORIZER_LIB_SOURCE include/Vectorizer)
+begin_project(VectorizerLib LIBRARY OPTIONAL)
 
-set(VECTORIZER_LIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+require_library(OpenSceneGraph)
+require_library(OpenCV)
 
-# add library VectorizerLib
-add_library(VectorizerLib ${VECTORIZER_LIB_SOURCE})
+require_project(osgHelper PATH osgHelper)
 
-set_target_properties(VectorizerLib PROPERTIES DEBUG_POSTFIX "d")
+add_source_directory(src)
+add_source_directory(include/Vectorizer)
 
-# set include directories
-target_include_directories(VectorizerLib PUBLIC
-  ${OPENCV_INCLUDE_DIR}
-  ${OSG_INCLUDE_DIR}
-  ${OSGHELPER_INCLUDE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  
-# make variable globally accessable
-set(VECTORIZER_LIB_INCLUDE_DIR ${VECTORIZER_LIB_INCLUDE_DIR} PARENT_SCOPE)
+add_include_directory(include)

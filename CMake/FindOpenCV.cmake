@@ -1,5 +1,0 @@
-find_path(OPENCV_INCLUDE_DIR opencv/cv.h)
-find_path(OPENCV_LIB_DIR_OPT *.lib)
-find_path(OPENCV_LIB_DIR_DBG *.lib)
-find_path(OPENCV_BIN_DIR_OPT *.dll)
-find_path(OPENCV_BIN_DIR_DBG *.dll)

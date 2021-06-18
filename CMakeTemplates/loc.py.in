@@ -1,0 +1,29 @@
+import os
+
+extensions = [ ".h", ".hpp", ".cpp", ".cxx", ".c", ".lua" ]
+
+basepath = r"${PROJECTS_DIRECTORY}"
+projectdirs = [ "luadoc", "onepercent", "osgHelper", "QtOsgBridge" ]
+
+basepath = os.path.abspath(basepath)
+
+total_loc = 0
+for project in projectdirs:
+    path = os.path.join(basepath, project)
+
+    print("Project " + project)
+    loc = 0
+
+    for root, dirnames, filenames in os.walk(path):
+        for filename in filenames:
+            file = os.path.join(root, filename)
+            extension = os.path.splitext(filename)[-1]
+            if (extension.lower() in extensions):
+                loc += sum(1 for line in open(file))
+
+    print("Lines of code:", loc)
+    print("")
+
+    total_loc += loc
+
+print("Total lines of code:", total_loc)
