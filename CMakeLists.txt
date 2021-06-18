@@ -55,5 +55,3 @@ set(COPY_DIR_TARGET "${TEMPLATE_PATH_GAMEDATA_DST}/shaders")
 configure_file("CMakeTemplates/copydir.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/updateShaders.py)
 
 configure_file("CMakeTemplates/loc.py.in" ${CMAKE_BINARY_DIR}/${PROJECT_BIN_DIR}/loc.py)
-
-configure_file("CMakeTemplates/make_run.sh.in" "${CMAKE_BINARY_DIR}/make_run.sh")
