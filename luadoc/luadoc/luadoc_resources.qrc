@@ -1,0 +1,7 @@
+<RCC>
+    <qresource>
+        <file>templates/index.html</file>
+        <file>templates/content/template.html</file>
+        <file>templates/css/stylesheet.css</file>
+    </qresource>
+</RCC>
