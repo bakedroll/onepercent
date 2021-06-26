@@ -2,7 +2,6 @@
 
 #include "core/Helper.h"
 #include "core/Observables.h"
-#include "core/Macros.h"
 #include "simulation/ModelContainer.h"
 #include "simulation/SimulationStateReaderWriter.h"
 #include "scripting/LuaSkillBranch.h"
@@ -14,6 +13,7 @@
 #include "simulation/UpdateThread.h"
 
 #include <QtOsgBridge/Multithreading.h>
+#include <QtOsgBridge/Macros.h>
 
 #include <QTimer>
 

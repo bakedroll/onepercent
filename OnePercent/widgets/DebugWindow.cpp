@@ -1,6 +1,5 @@
 #include "DebugWindow.h"
 
-#include "core/Macros.h"
 #include "core/Observables.h"
 #include "scripting/LuaCountry.h"
 #include "scripting/LuaSimulationStateTable.h"
@@ -30,6 +29,7 @@
 #include <QPainter>
 
 #include <QtOsgBridge/Multithreading.h>
+#include <QtOsgBridge/Macros.h>
 
 #include <chrono>
 #include <nodes/CountryOverlay.h>

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/Macros.h"
 #include "scripting/LuaTable.h"
 
 #include <memory>
@@ -9,6 +8,8 @@
 #include <functional>
 
 #include <osgHelper/Macros.h>
+
+#include <QtOsgBridge/Macros.h>
 
 extern "C"
 {

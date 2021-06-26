@@ -1,6 +1,5 @@
 #include "SimulationStateReaderWriter.h"
 
-#include "core/Macros.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaSkillsTable.h"
 #include "scripting/LuaModel.h"
@@ -8,9 +7,10 @@
 #include "simulation/UpdateThread.h"
 #include "simulation/ModelContainer.h"
 
+#include <QtOsgBridge/Macros.h>
+
 #include <QFile>
 #include <QMessageBox>
-
 
 namespace onep
 {

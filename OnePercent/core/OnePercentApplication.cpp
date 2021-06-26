@@ -2,7 +2,6 @@
 
 #include "scripting/LuaStateManager.h"
 
-#include "core/Macros.h"
 #include "core/ModManager.h"
 #include "core/Observables.h"
 #include "data/BoundariesData.h"
@@ -34,6 +33,8 @@
 #include <osgHelper/ppu/FXAA.h>
 #include <osgHelper/ppu/DOF.h>
 #include <osgHelper/ppu/HDR.h>
+
+#include <QtOsgBridge/Macros.h>
 
 #include <QDir>
 

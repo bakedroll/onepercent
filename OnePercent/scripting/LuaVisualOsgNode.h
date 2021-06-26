@@ -1,11 +1,12 @@
 #pragma once
 
-#include "core/Macros.h"
 #include "scripting/LuaBridgeDefinition.h"
 
 #include <osg/Node>
 
 #include <osgHelper/Macros.h>
+
+#include <QtOsgBridge/Macros.h>
 
 #include <QString>
 

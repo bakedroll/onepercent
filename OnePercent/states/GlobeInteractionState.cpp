@@ -1,6 +1,5 @@
 #include "GlobeInteractionState.h"
 
-#include "core/Macros.h"
 #include "nodes/CountryOverlay.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaCountry.h"
@@ -19,6 +18,7 @@
 #include <osgHelper/View.h>
 
 #include <QtOsgBridge/Helper.h>
+#include <QtOsgBridge/Macros.h>
 
 namespace onep
 {

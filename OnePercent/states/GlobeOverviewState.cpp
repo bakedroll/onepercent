@@ -1,9 +1,10 @@
 #include "GlobeOverviewState.h"
 
-#include "core/Macros.h"
 #include "nodes/CountryNameOverlay.h"
 
 #include <osgViewer/ViewerEventHandlers>
+
+#include <QtOsgBridge/Macros.h>
 
 #include <osgHelper/View.h>
 

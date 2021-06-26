@@ -1,5 +1,4 @@
 #include "nodes/CountryPresenter.h"
-#include "core/Macros.h"
 #include "data/CountriesMap.h"
 
 #include <osgHelper/Macros.h>
@@ -16,6 +15,8 @@
 
 #include <osgHelper/Helper.h>
 #include <osgHelper/Macros.h>
+
+#include <QtOsgBridge/Macros.h>
 
 namespace onep
 {

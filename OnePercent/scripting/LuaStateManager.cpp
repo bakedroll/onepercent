@@ -1,12 +1,13 @@
 #include "LuaStateManager.h"
 
-#include "core/Macros.h"
 #include "scripting/LuaInvalidDataException.h"
 
 #include <osgHelper/ResourceManager.h>
 #include <osgHelper/Macros.h>
 
 #include <algorithm>
+
+#include <QtOsgBridge/Macros.h>
 
 #include <QStringList>
 #include <QFile>

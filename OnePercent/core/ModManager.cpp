@@ -1,5 +1,6 @@
 #include "core/ModManager.h"
-#include "core/Macros.h"
+
+#include <QtOsgBridge/Macros.h>
 
 #include <QDir>
 

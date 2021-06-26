@@ -1,7 +1,7 @@
 #include "UpdateThread.h"
 
-#include "core/Macros.h"
 #include <QtOsgBridge/Multithreading.h>
+#include <QtOsgBridge/Macros.h>
 
 #include <QMutex>
 

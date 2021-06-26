@@ -1,9 +1,9 @@
 #include "scripting/LuaSimulation.h"
 
-#include "core/Macros.h"
 #include "simulation/Simulation.h"
 
 #include <QtOsgBridge/Multithreading.h>
+#include <QtOsgBridge/Macros.h>
 
 extern "C"
 {
