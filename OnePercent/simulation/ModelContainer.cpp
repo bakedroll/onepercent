@@ -28,7 +28,10 @@ namespace onep
     : osg::Referenced()
     , m(new Impl(injector))
   {
-    m->model = m->lua->createElement<LuaModel>("model");
+    luabridge::LuaRef table = m->lua->newTable();
+    m->lua->setGlobal("model", table);
+
+    m->model = m->lua->createTableMappedObject<LuaModel>(table);
   }
 
   ModelContainer::~ModelContainer() = default;

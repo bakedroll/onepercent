@@ -167,7 +167,7 @@ namespace onep
 
   void LuaVisuals::luaRegisterModelPrototype(const std::string& prototypeName, luabridge::LuaRef table)
   {
-    auto prototype = m->lua->makeElementFromTable<LuaModelPrototype>(table);
+    auto prototype = m->lua->createTableMappedObject<LuaModelPrototype>(table);
     auto filename  = prototype->getFilename();
 
     if (filename.empty())

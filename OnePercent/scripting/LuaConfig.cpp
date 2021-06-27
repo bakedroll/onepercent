@@ -21,7 +21,8 @@ namespace onep
     Impl(osgHelper::ioc::Injector& injector)
       : lua(injector.inject<LuaStateManager>())
     {
-      lua->createGlobalTable(CONFIG_DATA_TABLE_NAME);
+      const luabridge::LuaRef table = lua->newTable();
+      lua->setGlobal(CONFIG_DATA_TABLE_NAME, table);
     }
 
     typedef std::unordered_map<std::string, std::shared_ptr<ValueTypeBase>> Cache;

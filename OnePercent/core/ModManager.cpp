@@ -47,7 +47,7 @@ void ModManager::loadModFromDirectory(const QString& path)
 
   if (controlScriptExists)
   {
-      m_lua->loadScript(controlLuaFilepath.toStdString());
+    m_lua->loadScript(controlLuaFilepath.toStdString());
   }
 }
 

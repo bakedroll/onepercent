@@ -90,28 +90,6 @@ namespace onep
     return luabridge::newTable(m_state);
   }
 
-  luabridge::LuaRef LuaStateManager::createGlobalTable(const std::string& name) const
-  {
-    luabridge::LuaRef table = newTable();
-    luabridge::setGlobal(m_state, table, name.c_str());
-    return table;
-  }
-
-  luabridge::LuaRef LuaStateManager::createTable(const std::string& name, const luabridge::LuaRef& parentTable)
-  {
-    luabridge::LuaRef table = newTable();
-    parentTable[name] = table;
-    return table;
-  }
-
-  luabridge::LuaRef LuaStateManager::copyTable(const luabridge::LuaRef& table) const
-  {
-    auto copyFunc = getGlobal("helper.deepcopy");
-    assert_return(copyFunc.isFunction(), luabridge::LuaRef(m_state));
-
-    return copyFunc(table);
-  }
-
   void LuaStateManager::setGlobal(const char* name, const luabridge::LuaRef& ref)
   {
     luabridge::setGlobal(m_state, ref, name);
