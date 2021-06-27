@@ -10,13 +10,13 @@ namespace onep
   {
   public:
     OnePercentApplication(int& argc, char** argv);
+    ~OnePercentApplication();
 
     int run();
 
   protected:
     void registerComponents(osgHelper::ioc::InjectionContainer& container) override;
     void initialize(osgHelper::ioc::Injector& injector) override;
-    void deinitialize() override;
 
   private:
     Simulation::Ptr m_simulation;

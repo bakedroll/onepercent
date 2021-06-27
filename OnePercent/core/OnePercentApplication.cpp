@@ -102,6 +102,12 @@ namespace onep
   {
   }
 
+  OnePercentApplication::~OnePercentApplication()
+  {
+    m_simulation->shutdownUpdateThread();
+    m_simulation.release();
+  }
+
   int OnePercentApplication::run()
   {
     return runGame<LoadingGlobeOverviewState>();
@@ -172,14 +178,6 @@ namespace onep
 
     OSGH_LOG_INFO("Loading stylesheets");
     loadStylesheets(":/Resources/stylesheets/");
-  }
-
-  void OnePercentApplication::deinitialize()
-  {
-    m_simulation->shutdownUpdateThread();
-    m_simulation.release();
-
-    QtGameApplication::deinitialize();
   }
 
   void OnePercentApplication::loadStylesheets(const QString& path)
