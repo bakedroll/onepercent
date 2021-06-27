@@ -7,7 +7,7 @@
 int main(int argc, char** argv)
 {
 #ifdef WIN32
-  SetUnhandledExceptionFilter(onep::unhandled_handler);
+  SetUnhandledExceptionFilter(QtOsgBridge::unhandled_handler);
 #endif
 
   onep::OnePercentApplication app(argc, argv);
