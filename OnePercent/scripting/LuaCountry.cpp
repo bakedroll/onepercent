@@ -14,7 +14,7 @@ namespace onep
   };
 
   LuaCountry::LuaCountry(const luabridge::LuaRef& object, lua_State* luaState)
-    : LuaObjectMapper(object, luaState)
+    : LuaTableMappedObject(object, luaState)
     , m(new Impl())
   {
     m->id   = getNumber<int>("id");

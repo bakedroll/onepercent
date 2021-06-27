@@ -3,7 +3,7 @@
 namespace onep
 {
   LuaValueGroupTable::LuaValueGroupTable(const luabridge::LuaRef& object, lua_State* luaState)
-    : LuaMapTable(object, luaState)
+    : LuaTableMappedObject(object, luaState)
   {
     assert_return(object.isTable());
   }

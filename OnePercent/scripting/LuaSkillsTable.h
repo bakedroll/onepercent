@@ -1,12 +1,12 @@
 #pragma once
 
-#include "scripting/LuaMapTable.h"
+#include "scripting/LuaTableMappedObject.h"
 #include "scripting/LuaSkill.h"
 #include "scripting/LuaStateManager.h"
 
 namespace onep
 {
-  class LuaSkillsTable : public LuaMapTable
+  class LuaSkillsTable : public LuaTableMappedObject
   {
   public:
     using Ptr = std::shared_ptr<LuaSkillsTable>;

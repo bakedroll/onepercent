@@ -1,12 +1,12 @@
 #pragma once
 
-#include "scripting/LuaObjectMapper.h"
+#include "scripting/LuaTableMappedObject.h"
 
 #include <map>
 
 namespace onep
 {
-  class LuaCountry : public LuaObjectMapper
+  class LuaCountry : public LuaTableMappedObject
   {
   public:
     typedef std::shared_ptr<LuaCountry> Ptr;

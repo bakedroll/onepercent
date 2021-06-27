@@ -4,7 +4,7 @@
 
 namespace onep
 {
-  class LuaSimulationStateTable : public LuaObjectMapper
+  class LuaSimulationStateTable : public LuaTableMappedObject
   {
   public:
     struct CountryBranch

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scripting/LuaObjectMapper.h"
+#include "scripting/LuaTableMappedObject.h"
 
 #include <memory>
 #include <vector>
@@ -10,7 +10,7 @@ namespace onep
   class LuaSkillsTable;
   class LuaSkill;
 
-  class LuaSkillBranch : public LuaObjectMapper
+  class LuaSkillBranch : public LuaTableMappedObject
   {
   public:
     typedef std::shared_ptr<LuaSkillBranch> Ptr;

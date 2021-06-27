@@ -3,7 +3,7 @@
 #include "scripting/LuaBridgeDefinition.h"
 #include "scripting/LuaCallbackRegistry.h"
 #include "scripting/LuaStateManager.h"
-#include "scripting/LuaObjectMapper.h"
+#include "scripting/LuaTableMappedObject.h"
 
 #include <osgHelper/Observable.h>
 
@@ -14,7 +14,7 @@
 
 namespace onep
 {
-	class LuaSkill : public LuaCallbackRegistry, public LuaObjectMapper
+	class LuaSkill : public LuaCallbackRegistry, public LuaTableMappedObject
 	{
 	public:
     class Definition : public LuaBridgeDefinition

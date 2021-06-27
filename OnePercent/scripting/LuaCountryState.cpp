@@ -1,5 +1,5 @@
 #include "scripting/LuaCountryState.h"
-#include "scripting/LuaMapTable.h"
+#include "scripting/LuaTableMappedObject.h"
 
 #include "QtOsgBridge/Multithreading.h"
 
@@ -14,13 +14,13 @@ namespace onep
   };
 
   LuaCountryState::LuaCountryState(const luabridge::LuaRef& object, lua_State* luaState)
-    : LuaObjectMapper(object, luaState)
+    : LuaTableMappedObject(object, luaState)
     , m(new Impl())
   {
     m->tValues            = newMappedElement<LuaValueGroupTable>("values");
     m->tBranchesActivated = newMappedElement<LuaBranchesActivatedTable>("branches_activated");
 
-    newMappedElement<LuaMapTable>("neighbour_states");
+    newMappedElement<LuaTableMappedObject>("neighbour_states");
   }
 
   LuaCountryState::~LuaCountryState() = default;
@@ -37,7 +37,7 @@ namespace onep
 
   void LuaCountryState::addNeighbourState(int cid, luabridge::LuaRef& state)
   {
-    auto table = getMappedElement<LuaMapTable>("neighbour_states");
+    auto table = getMappedElement<LuaTableMappedObject>("neighbour_states");
     table->insert(std::to_string(cid), state);
   }
 }

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "scripting/LuaObjectMapper.h"
+#include "scripting/LuaTableMappedObject.h"
 
 #include <osg/Vec3f>
 
 namespace onep
 {
-  class LuaModelPrototype : public LuaObjectMapper
+  class LuaModelPrototype : public LuaTableMappedObject
   {
   public:
     LuaModelPrototype(const luabridge::LuaRef& object, lua_State* luaState);

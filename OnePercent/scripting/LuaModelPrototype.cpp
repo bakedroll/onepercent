@@ -2,7 +2,7 @@
 #include "core/Helper.h"
 
 onep::LuaModelPrototype::LuaModelPrototype(const luabridge::LuaRef& object, lua_State* luaState)
-  : LuaObjectMapper(object, luaState), m_scale(1.0f, 1.0f, 1.0f)
+  : LuaTableMappedObject(object, luaState), m_scale(1.0f, 1.0f, 1.0f)
 {
   m_filename = getString("filename");
 

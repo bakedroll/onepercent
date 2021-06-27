@@ -5,7 +5,7 @@
 
 namespace onep
 {
-  class LuaCountryState : public LuaObjectMapper
+  class LuaCountryState : public LuaTableMappedObject
   {
   public:
     typedef std::shared_ptr<LuaCountryState> Ptr;

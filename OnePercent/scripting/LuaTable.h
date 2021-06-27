@@ -39,6 +39,18 @@ namespace onep
         return checkType(getValueRef(key), LUA_TNUMBER, key);
     }
 
+    template<typename KeyType>
+    bool contains(const KeyType& key) const
+    {
+      return !luaRef()[key].isNil();
+    }
+
+    template<typename KeyType>
+    void insert(const KeyType& key, const luabridge::LuaRef& elem)
+    {
+      luaRef()[key] = elem;
+    }
+
     void iterateValues(int type, IteratorFunc iterFunc) const;
 
   protected:

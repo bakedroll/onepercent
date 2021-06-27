@@ -1,19 +1,19 @@
 #pragma once
 
-#include "scripting/LuaObjectMapper.h"
+#include "scripting/LuaTableMappedObject.h"
 
 namespace onep
 {
 
   template <typename LuaObject,
-      typename = typename std::enable_if<std::is_base_of<LuaObjectMapper, LuaObject>::value>::type>
-  class LuaArrayTable : public LuaObjectMapper
+      typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
+  class LuaArrayTable : public LuaTableMappedObject
   {
   public:
     using Ptr = std::shared_ptr<LuaArrayTable<LuaObject>>;
 
     LuaArrayTable(const luabridge::LuaRef& object, lua_State* luaState)
-        : LuaObjectMapper(object, luaState)
+        : LuaTableMappedObject(object, luaState)
     {
       
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scripting/LuaObjectMapper.h"
+#include "scripting/LuaTableMappedObject.h"
 #include "scripting/LuaArrayTable.h"
 #include "scripting/LuaValueDef.h"
 
@@ -10,7 +10,7 @@ namespace onep
   class LuaBranchesTable;
   class LuaSimulationStateTable;
 
-  class LuaModel : public LuaObjectMapper
+  class LuaModel : public LuaTableMappedObject
   {
   public:
     using Ptr = std::shared_ptr<LuaModel>;

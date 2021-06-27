@@ -3,7 +3,7 @@
 namespace onep
 {
   LuaSkillsTable::LuaSkillsTable(const luabridge::LuaRef& object, lua_State* luaState)
-    : LuaMapTable(object, luaState)
+    : LuaTableMappedObject(object, luaState)
   {
   }
 

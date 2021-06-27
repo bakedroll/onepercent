@@ -34,7 +34,7 @@ namespace onep
 
   LuaSkill::LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const LuaStateManager::Ptr& luaStateManager)
     : LuaCallbackRegistry(luaStateManager)
-    , LuaObjectMapper(object, lua)
+    , LuaTableMappedObject(object, lua)
     , m(new Impl())
   {
     m->name        = getString("name");
