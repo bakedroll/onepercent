@@ -133,7 +133,7 @@ namespace onep
       modelContainer->accessModel([=](const LuaModel::Ptr& model)
       {
         auto values = model->getValuesDefTable();
-        values->foreachMappedElementDo<LuaValueDef>([=](LuaValueDef::Ptr& def)
+        values->iterateMappedObjects<LuaValueDef>([=](LuaValueDef::Ptr& def)
         {
           if (!def->getIsVisible())
           {

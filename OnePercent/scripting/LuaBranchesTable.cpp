@@ -36,7 +36,7 @@ LuaSkillBranch::Ptr LuaBranchesTable::getBranchByName(const std::string& name) c
     for (const auto& branch : m_branches)
     {
       auto skills = branch.second->getSkillsTable();
-      if (skills->contains(name))
+      if (skills->containsKey(name))
       {
         return skills->getSkillByName(name);
       }

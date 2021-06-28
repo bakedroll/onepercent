@@ -79,12 +79,12 @@ namespace onep
     auto states   = model->getSimulationStateTable();
     auto branches = model->getBranchesTable();
 
-    states->foreachMappedElementDo<LuaCountryState>([this, &branches](LuaCountryState::Ptr& state)
+    states->iterateMappedObjects<LuaCountryState>([this, &branches](LuaCountryState::Ptr& state)
     {
       auto branchesActivated = state->getBranchesActivatedTable();
       auto countryState      = state->luaRef();
 
-      branches->foreachMappedElementDo<LuaSkillBranch>([this, &branchesActivated, &countryState](LuaSkillBranch::Ptr& branch)
+      branches->iterateMappedObjects<LuaSkillBranch>([this, &branchesActivated, &countryState](LuaSkillBranch::Ptr& branch)
       {
         auto branchName = branch->getName();
         if (!branchesActivated->getBranchActivated(branchName))
@@ -112,11 +112,11 @@ namespace onep
     auto states   = model->getSimulationStateTable();
     auto branches = model->getBranchesTable();
 
-    states->foreachMappedElementDo<LuaCountryState>([this, &branches](LuaCountryState::Ptr& state)
+    states->iterateMappedObjects<LuaCountryState>([this, &branches](LuaCountryState::Ptr& state)
     {
       auto countryState = state->luaRef();
 
-      branches->foreachMappedElementDo<LuaSkillBranch>([this, &countryState](LuaSkillBranch::Ptr& branch)
+      branches->iterateMappedObjects<LuaSkillBranch>([this, &countryState](LuaSkillBranch::Ptr& branch)
       {
         luaUpdateBranch(branch->getName(), countryState);
       });

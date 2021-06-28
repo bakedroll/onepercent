@@ -33,16 +33,16 @@ namespace onep
     void foreachElementDo(std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func);
 
     template <typename KeyType>
-    bool containsMappedElement(const KeyType& key)
+    bool containsMappedObject(const KeyType& key)
     {
       return m_elements.count(key) > 0;
     }
 
-    int getNumElements() const;
+    int getNumMappedObjects() const;
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
-    void foreachMappedElementDo(std::function<void(std::shared_ptr<LuaObject>&)> func)
+    void iterateMappedObjects(std::function<void(std::shared_ptr<LuaObject>&)> func)
     {
       for (auto element : m_elements)
       {
@@ -73,9 +73,9 @@ namespace onep
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type,
               typename KeyType,
               typename... Args>
-    std::shared_ptr<LuaObject> addUserDataElement(KeyType key, luabridge::LuaRef& ref, Args... args)
+    std::shared_ptr<LuaObject> addUserDataElement(KeyType key, luabridge::LuaRef& ref, Args&&... args)
     {
-      auto element = makeSharedAndAddElement<LuaObject, KeyType>(ref, key, args...);
+      auto element = makeSharedAndAddElement<LuaObject, KeyType>(ref, key, std::forward<Args>(args)...);
       if (element)
       {
           luaRef()[key] = element.get();
@@ -191,9 +191,9 @@ namespace onep
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type,
               typename KeyType,
               typename... Args>
-    std::shared_ptr<LuaObject> makeSharedAndAddElement(luabridge::LuaRef& ref, KeyType key, Args... args)
+    std::shared_ptr<LuaObject> makeSharedAndAddElement(luabridge::LuaRef& ref, KeyType key, Args&&... args)
     {
-      std::shared_ptr<LuaObject> elem = std::make_shared<LuaObject>(ref, luaState(), args...);
+      std::shared_ptr<LuaObject> elem = std::make_shared<LuaObject>(ref, luaState(), std::forward<Args>(args)...);
 
       addToElementsMap<LuaObject>(key, elem);
       return elem;

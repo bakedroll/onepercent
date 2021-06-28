@@ -25,32 +25,32 @@ bool LuaTable::hasValue(const std::string& key) const
 
 bool LuaTable::getBoolean(const std::string& key) const
 {
-  return checkType(getValueRef(key), LUA_TBOOLEAN, key);
+  return checkType(getRefValue(key), LUA_TBOOLEAN, key);
 }
 
 std::string LuaTable::getString(const std::string& key) const
 {
-  return checkType(getValueRef(key), LUA_TSTRING, key).tostring();
+  return checkType(getRefValue(key), LUA_TSTRING, key).tostring();
 }
 
 std::shared_ptr<LuaTable> LuaTable::getTable(const std::string& key) const
 {
-  return std::make_shared<LuaTable>(checkType(getValueRef(key), LUA_TTABLE, key), m_luaState);
+  return std::make_shared<LuaTable>(checkType(getRefValue(key), LUA_TTABLE, key), m_luaState);
 }
 
 luabridge::LuaRef LuaTable::getFunction(const std::string& key) const
 {
-  return checkType(getValueRef(key), LUA_TFUNCTION, key);
+  return checkType(getRefValue(key), LUA_TFUNCTION, key);
 }
 
 luabridge::LuaRef LuaTable::getUserData(const std::string& key) const
 {
-  return checkType(getValueRef(key), LUA_TUSERDATA, key);
+  return checkType(getRefValue(key), LUA_TUSERDATA, key);
 }
 
 void LuaTable::iterateValues(int type, IteratorFunc iterFunc) const
 {
-  for (luabridge::Iterator it(luaRef()); !it.isNil(); ++it)
+  for (luabridge::Iterator it(*m_ref); !it.isNil(); ++it)
   {
     iterFunc(checkType(it.value(), type, ""));
   }
@@ -61,7 +61,7 @@ lua_State* LuaTable::luaState() const
   return m_luaState;
 }
 
-luabridge::LuaRef LuaTable::getValueRef(const std::string& key) const
+luabridge::LuaRef LuaTable::getRefValue(const std::string& key) const
 {
   luabridge::LuaRef value = luaRef()[key];
   if (value.isNil())

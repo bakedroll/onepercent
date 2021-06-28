@@ -58,20 +58,20 @@ namespace onep
       auto countriesTable = m->model->getCountriesTable();
       auto valuesTable = m->model->getValuesDefTable();
 
-      countriesTable->foreachMappedElementDo<LuaCountry>([&](LuaCountry::Ptr country)
+      countriesTable->iterateMappedObjects<LuaCountry>([&](LuaCountry::Ptr country)
       {
         auto cid = country->getId();
 
         stateTable->addCountryState(country->getId());
         auto state = stateTable->getCountryState(cid);
 
-        branchesTable->foreachMappedElementDo<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
+        branchesTable->iterateMappedObjects<LuaSkillBranch>([&](LuaSkillBranch::Ptr& branch)
         {
           const auto name = branch->getName();
           state->getBranchesActivatedTable()->addBranchActivated(name);
         });
 
-        valuesTable->foreachMappedElementDo<LuaValueDef>([&](LuaValueDef::Ptr& def)
+        valuesTable->iterateMappedObjects<LuaValueDef>([&](LuaValueDef::Ptr& def)
         {
           const auto name   = def->getName();
           const auto group  = def->getGroup();

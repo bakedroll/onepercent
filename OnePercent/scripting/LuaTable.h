@@ -36,17 +36,17 @@ namespace onep
     template<typename T>
     T getNumber(const std::string& key) const
     {
-        return checkType(getValueRef(key), LUA_TNUMBER, key);
+        return checkType(getRefValue(key), LUA_TNUMBER, key);
     }
 
     template<typename KeyType>
-    bool contains(const KeyType& key) const
+    bool containsKey(const KeyType& key) const
     {
       return !luaRef()[key].isNil();
     }
 
     template<typename KeyType>
-    void insert(const KeyType& key, const luabridge::LuaRef& elem)
+    void setValue(const KeyType& key, const luabridge::LuaRef& elem)
     {
       luaRef()[key] = elem;
     }
@@ -54,13 +54,13 @@ namespace onep
     void iterateValues(int type, IteratorFunc iterFunc) const;
 
   protected:
-    lua_State* luaState() const;
+    lua_State*        luaState() const;
+    luabridge::LuaRef getRefValue(const std::string& key) const;
 
   private: 
     std::unique_ptr<luabridge::LuaRef> m_ref;
     lua_State*                         m_luaState;
 
-    luabridge::LuaRef               getValueRef(const std::string& key) const;
     static const luabridge::LuaRef& checkType(const luabridge::LuaRef& ref, int type, const std::string& key);
   };
 

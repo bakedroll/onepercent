@@ -38,6 +38,6 @@ namespace onep
   void LuaCountryState::addNeighbourState(int cid, luabridge::LuaRef& state)
   {
     auto table = getMappedElement<LuaTableMappedObject>("neighbour_states");
-    table->insert(std::to_string(cid), state);
+    table->setValue(std::to_string(cid), state);
   }
 }

@@ -28,7 +28,7 @@ namespace onep
     }
   }
 
-  int LuaTableMappedObject::getNumElements() const
+  int LuaTableMappedObject::getNumMappedObjects() const
   {
     return static_cast<int>(m_elements.size());
   }
