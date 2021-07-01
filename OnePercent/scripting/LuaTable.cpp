@@ -48,11 +48,11 @@ luabridge::LuaRef LuaTable::getUserData(const std::string& key) const
   return checkType(getRefValue(key), LUA_TUSERDATA, key);
 }
 
-void LuaTable::iterateValues(int type, IteratorFunc iterFunc) const
+void LuaTable::iterateValues(const IteratorFunc& iterFunc) const
 {
   for (luabridge::Iterator it(*m_ref); !it.isNil(); ++it)
   {
-    iterFunc(checkType(it.value(), type, ""));
+    iterFunc(it);
   }
 }
 

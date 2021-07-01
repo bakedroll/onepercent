@@ -1,7 +1,6 @@
 #pragma once
 
 #include "scripting/LuaTableMappedObject.h"
-#include "scripting/LuaTableMappedObject.h"
 
 namespace onep
 {

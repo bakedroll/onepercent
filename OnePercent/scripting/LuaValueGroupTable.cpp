@@ -13,15 +13,15 @@ namespace onep
   LuaValueGroupTable::ValuesMap LuaValueGroupTable::getMap()
   {
     ValuesMap map;
-    foreachElementDo([&](luabridge::LuaRef& key, luabridge::LuaRef& value)
+    iterateValues([&](const luabridge::Iterator& it)
     {
-      assert_return(key.isString());
+      checkType(it.key(), LUA_TSTRING);
 
-      if (!value.isNumber())
+      if (!it.value().isNumber())
       {
         return;
       }
-      map[key.tostring()] = float(value);
+      map[it.key().tostring()] = static_cast<float>(it.value());
     });
 
     return map;

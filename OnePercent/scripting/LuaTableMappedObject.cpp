@@ -17,19 +17,8 @@ namespace onep
 
   LuaTableMappedObject::~LuaTableMappedObject() = default;
 
-  void LuaTableMappedObject::foreachElementDo(const std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func)
-  {
-    for (luabridge::Iterator it(luaRef()); !it.isNil(); ++it)
-    {
-      luabridge::LuaRef value = it.value();
-      luabridge::LuaRef key   = it.key();
-
-      func(key, value);
-    }
-  }
-
   int LuaTableMappedObject::getNumMappedObjects() const
   {
-    return static_cast<int>(m_elements.size());
+    return static_cast<int>(m_mappedObjects.size());
   }
 }

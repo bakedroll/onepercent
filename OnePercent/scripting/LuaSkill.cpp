@@ -46,9 +46,11 @@ namespace onep
     if (hasValue("dependencies"))
     {
       const auto depTable = getTable("dependencies");
-      depTable->iterateValues(LUA_TSTRING, [this](luabridge::LuaRef value)
+
+      depTable->iterateValues([this](const luabridge::Iterator& it)
       {
-        m->dependencies.push_back(value);
+        checkType(it.value(), LUA_TSTRING);
+        m->dependencies.push_back(it.value());
       });
     }
 

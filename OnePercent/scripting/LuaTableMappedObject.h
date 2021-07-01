@@ -30,12 +30,10 @@ namespace onep
     explicit LuaTableMappedObject(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaTableMappedObject() override;
 
-    void foreachElementDo(std::function<void(luabridge::LuaRef& key, luabridge::LuaRef& value)> func);
-
     template <typename KeyType>
     bool containsMappedObject(const KeyType& key)
     {
-      return m_elements.count(key) > 0;
+      return m_mappedObjects.count(key) > 0;
     }
 
     int getNumMappedObjects() const;
@@ -44,7 +42,7 @@ namespace onep
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
     void iterateMappedObjects(std::function<void(std::shared_ptr<LuaObject>&)> func)
     {
-      for (auto element : m_elements)
+      for (auto element : m_mappedObjects)
       {
         auto object = std::dynamic_pointer_cast<LuaObject>(element.second);
         func(object);
@@ -118,9 +116,9 @@ namespace onep
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
     void makeAllMappedElements()
     {
-      foreachElementDo([this](luabridge::LuaRef& key, luabridge::LuaRef& value)
+      iterateValues([this](const luabridge::Iterator& it)
       {
-        makeMappedElement<LuaObject>(key);
+        makeMappedElement<LuaObject>(it.key());
       });
     }
 
@@ -128,8 +126,8 @@ namespace onep
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
     std::shared_ptr<LuaObject> getMappedElement(const std::string& key) const
     {
-      assert_return(m_elements.count(key) > 0, std::shared_ptr<LuaObject>());
-      return std::dynamic_pointer_cast<LuaObject>(m_elements.find(key)->second);
+      assert_return(m_mappedObjects.count(key) > 0, std::shared_ptr<LuaObject>());
+      return std::dynamic_pointer_cast<LuaObject>(m_mappedObjects.find(key)->second);
     }
 
     template <typename LuaObject,
@@ -152,7 +150,7 @@ namespace onep
     }
 
   private:
-    using ElementsMap = std::map<std::string, Ptr>;
+    using LuaMappedObjectsMap = std::map<std::string, Ptr>;
 
     enum class InconsistencyType
     {
@@ -168,7 +166,7 @@ namespace onep
 
     using InconsistencyList = std::vector<Inconsistency>;
 
-    ElementsMap m_elements;
+    LuaMappedObjectsMap m_mappedObjects;
 
     static std::string strKey(const std::string& key) { return key; }
     static std::string strKey(int key) { return std::to_string(key); }
@@ -177,14 +175,14 @@ namespace onep
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
     void addToElementsMap(int key, std::shared_ptr<LuaObject>& elem)
     {
-      m_elements[std::to_string(key)] = elem;
+      m_mappedObjects[std::to_string(key)] = elem;
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
     void addToElementsMap(const std::string& key, std::shared_ptr<LuaObject>& elem)
     {
-      m_elements[key] = elem;
+      m_mappedObjects[key] = elem;
     }
 
     template <typename LuaObject,
