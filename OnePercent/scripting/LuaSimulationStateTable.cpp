@@ -36,7 +36,7 @@ namespace onep
 
   LuaCountryState::Ptr LuaSimulationStateTable::getCountryState(int cid) const
   {
-    return getMappedElement<LuaCountryState>(cid);
+    return getMappedObject<LuaCountryState>(cid);
   }
 
   osgHelper::Observable<LuaSimulationStateTable::CountryBranch>::Ptr LuaSimulationStateTable::
@@ -47,7 +47,7 @@ namespace onep
 
   void LuaSimulationStateTable::addCountryState(int id)
   {
-    m->countryStates[id] = newMappedElement<LuaCountryState>(id);
+    m->countryStates[id] = newMappedObject<LuaCountryState>(id);
   }
 
   void LuaSimulationStateTable::initializeCountryBranchActivated()

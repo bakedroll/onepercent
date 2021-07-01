@@ -12,11 +12,11 @@ namespace onep
 
   std::shared_ptr<LuaCountry> LuaCountriesTable::getCountryById(int id) const
   {
-    return getMappedElement<LuaCountry>(id);
+    return getMappedObject<LuaCountry>(id);
   }
 
   void LuaCountriesTable::addCountry(int id, luabridge::LuaRef& country)
   {
-    addMappedElement<LuaCountry>(id, country);
+    addMappedObject<LuaCountry>(id, country);
   }
 }

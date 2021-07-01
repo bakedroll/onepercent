@@ -42,9 +42,9 @@ namespace onep
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
     void iterateMappedObjects(std::function<void(std::shared_ptr<LuaObject>&)> func)
     {
-      for (auto element : m_mappedObjects)
+      for (auto obj : m_mappedObjects)
       {
-        auto object = std::dynamic_pointer_cast<LuaObject>(element.second);
+        auto object = std::dynamic_pointer_cast<LuaObject>(obj.second);
         func(object);
       }
     }
@@ -52,79 +52,79 @@ namespace onep
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type,
               typename KeyType>
-    std::shared_ptr<LuaObject> addMappedElement(KeyType key, luabridge::LuaRef& ref)
+    std::shared_ptr<LuaObject> addMappedObject(KeyType key, luabridge::LuaRef& ref)
     {
       luaRef()[key] = ref;
-      return makeSharedAndAddElement<LuaObject, KeyType>(ref, key);
+      return makeSharedAndAddMappedObject<LuaObject, KeyType>(ref, key);
     }
 
     template <typename LuaObject,
         typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
-        std::shared_ptr<LuaObject> appendMappedElement(luabridge::LuaRef& ref)
+        std::shared_ptr<LuaObject> appendMappedObject(luabridge::LuaRef& ref)
     {
         luaRef().append(ref);
-        auto size = luaRef().length();
-        return makeSharedAndAddElement<LuaObject, int>(ref, size);
+        const auto size = luaRef().length();
+        return makeSharedAndAddMappedObject<LuaObject, int>(ref, size);
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type,
               typename KeyType,
               typename... Args>
-    std::shared_ptr<LuaObject> addUserDataElement(KeyType key, luabridge::LuaRef& ref, Args&&... args)
+    std::shared_ptr<LuaObject> addUserDataObject(KeyType key, luabridge::LuaRef& ref, Args&&... args)
     {
-      auto element = makeSharedAndAddElement<LuaObject, KeyType>(ref, key, std::forward<Args>(args)...);
-      if (element)
+      auto obj = makeSharedAndAddMappedObject<LuaObject, KeyType>(ref, key, std::forward<Args>(args)...);
+      if (obj)
       {
-          luaRef()[key] = element.get();
+          luaRef()[key] = obj.get();
       }
 
-      return element;
+      return obj;
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type,
               typename KeyType>
-    std::shared_ptr<LuaObject> newMappedElement(KeyType key)
+    std::shared_ptr<LuaObject> newMappedObject(KeyType key)
     {
       luabridge::LuaRef ref = luabridge::newTable(luaState());
-      return addMappedElement<LuaObject, KeyType>(key, ref);
+      return addMappedObject<LuaObject, KeyType>(key, ref);
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type,
               typename KeyType>
-    std::shared_ptr<LuaObject> makeMappedElement(KeyType key)
+    std::shared_ptr<LuaObject> makeMappedObject(KeyType key)
     {
       luabridge::LuaRef ref = luaRef()[key];
-      return makeSharedAndAddElement<LuaObject, KeyType>(ref, key);
+      return makeSharedAndAddMappedObject<LuaObject, KeyType>(ref, key);
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
-    std::shared_ptr<LuaObject> makeMappedElement(luabridge::LuaRef& key)
+    std::shared_ptr<LuaObject> makeMappedObject(luabridge::LuaRef& key)
     {
       if (key.isNumber())
-        return makeMappedElement<LuaObject>(int(key));
+        return makeMappedObject<LuaObject>(static_cast<int>(key));
       if (key.isString())
-        return makeMappedElement<LuaObject>(key.tostring());
+        return makeMappedObject<LuaObject>(key.tostring());
 
       assert_return(false, std::shared_ptr<LuaObject>()); // key must be number or string
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
-    void makeAllMappedElements()
+    void makeAllMappedObjects()
     {
       iterateValues([this](const luabridge::Iterator& it)
       {
-        makeMappedElement<LuaObject>(it.key());
+        makeMappedObject<LuaObject>(it.key());
       });
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
-    std::shared_ptr<LuaObject> getMappedElement(const std::string& key) const
+    std::shared_ptr<LuaObject> getMappedObject(const std::string& key) const
     {
       assert_return(m_mappedObjects.count(key) > 0, std::shared_ptr<LuaObject>());
       return std::dynamic_pointer_cast<LuaObject>(m_mappedObjects.find(key)->second);
@@ -132,19 +132,23 @@ namespace onep
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
-    std::shared_ptr<LuaObject> getMappedElement(int key) const
+    std::shared_ptr<LuaObject> getMappedObject(int key) const
     {
-      return getMappedElement<LuaObject>(std::to_string(key));
+      return getMappedObject<LuaObject>(std::to_string(key));
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
-    std::shared_ptr<LuaObject> getMappedElement(luabridge::LuaRef& key) const
+    std::shared_ptr<LuaObject> getMappedObject(luabridge::LuaRef& key) const
     {
       if (key.isNumber())
-        return getMappedElement<LuaObject>(int(key));
+      {
+        return getMappedObject<LuaObject>(static_cast<int>(key));
+      }
       if (key.isString())
-        return getMappedElement<LuaObject>(key.tostring());
+      {
+        return getMappedObject<LuaObject>(key.tostring());
+      }
 
       assert_return(false, std::shared_ptr<LuaObject>()); // key must be number or string
     }
@@ -152,49 +156,32 @@ namespace onep
   private:
     using LuaMappedObjectsMap = std::map<std::string, Ptr>;
 
-    enum class InconsistencyType
-    {
-      ElementMissing,
-      WrongType
-    };
-
-    struct Inconsistency
-    {
-      std::string       key;
-      InconsistencyType type;
-    };
-
-    using InconsistencyList = std::vector<Inconsistency>;
-
     LuaMappedObjectsMap m_mappedObjects;
-
-    static std::string strKey(const std::string& key) { return key; }
-    static std::string strKey(int key) { return std::to_string(key); }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
-    void addToElementsMap(int key, std::shared_ptr<LuaObject>& elem)
+    void addToMappedObjectsMap(int key, std::shared_ptr<LuaObject>& obj)
     {
-      m_mappedObjects[std::to_string(key)] = elem;
+      m_mappedObjects[std::to_string(key)] = obj;
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type>
-    void addToElementsMap(const std::string& key, std::shared_ptr<LuaObject>& elem)
+    void addToMappedObjectsMap(const std::string& key, std::shared_ptr<LuaObject>& obj)
     {
-      m_mappedObjects[key] = elem;
+      m_mappedObjects[key] = obj;
     }
 
     template <typename LuaObject,
               typename = typename std::enable_if<std::is_base_of<LuaTableMappedObject, LuaObject>::value>::type,
               typename KeyType,
               typename... Args>
-    std::shared_ptr<LuaObject> makeSharedAndAddElement(luabridge::LuaRef& ref, KeyType key, Args&&... args)
+    std::shared_ptr<LuaObject> makeSharedAndAddMappedObject(luabridge::LuaRef& ref, KeyType key, Args&&... args)
     {
-      std::shared_ptr<LuaObject> elem = std::make_shared<LuaObject>(ref, luaState(), std::forward<Args>(args)...);
+      std::shared_ptr<LuaObject> obj = std::make_shared<LuaObject>(ref, luaState(), std::forward<Args>(args)...);
 
-      addToElementsMap<LuaObject>(key, elem);
-      return elem;
+      addToMappedObjectsMap<LuaObject>(key, obj);
+      return obj;
     }
   };
 

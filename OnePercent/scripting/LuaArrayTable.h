@@ -22,7 +22,7 @@ namespace onep
 
     void addEement(luabridge::LuaRef& ref)
     {
-      appendMappedElement<LuaObject>(ref);
+      appendMappedObject<LuaObject>(ref);
     }
 
   };

@@ -17,10 +17,10 @@ namespace onep
     : LuaTableMappedObject(object, luaState)
     , m(new Impl())
   {
-    m->tValues            = newMappedElement<LuaValueGroupTable>("values");
-    m->tBranchesActivated = newMappedElement<LuaBranchesActivatedTable>("branches_activated");
+    m->tValues            = newMappedObject<LuaValueGroupTable>("values");
+    m->tBranchesActivated = newMappedObject<LuaBranchesActivatedTable>("branches_activated");
 
-    newMappedElement<LuaTableMappedObject>("neighbour_states");
+    newMappedObject<LuaTableMappedObject>("neighbour_states");
   }
 
   LuaCountryState::~LuaCountryState() = default;
@@ -37,7 +37,7 @@ namespace onep
 
   void LuaCountryState::addNeighbourState(int cid, luabridge::LuaRef& state)
   {
-    auto table = getMappedElement<LuaTableMappedObject>("neighbour_states");
+    auto table = getMappedObject<LuaTableMappedObject>("neighbour_states");
     table->setValue(std::to_string(cid), state);
   }
 }

@@ -22,7 +22,7 @@ namespace onep
     m->name = getString("name");
     m->cost = getNumber<int>("cost");
 
-    m->skillsTable = newMappedElement<LuaSkillsTable>("skills");
+    m->skillsTable = newMappedObject<LuaSkillsTable>("skills");
   }
 
   LuaSkillBranch::~LuaSkillBranch() = default;

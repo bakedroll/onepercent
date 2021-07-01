@@ -44,7 +44,7 @@ namespace onep
       return m_groups[name];
     }
 
-    const auto group = newMappedElement<LuaValueGroupTable>(name);
+    const auto group = newMappedObject<LuaValueGroupTable>(name);
     m_groups[name] = group;
     return group;
   }

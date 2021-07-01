@@ -21,10 +21,10 @@ namespace onep
     : LuaTableMappedObject(object, luaState)
     , m(new Impl())
   {
-    m->countriesTable = newMappedElement<LuaCountriesTable>("countries");
-    m->branchesTable  = newMappedElement<LuaBranchesTable>("branches");
-    m->stateTable     = newMappedElement<LuaSimulationStateTable>("state");
-    m->valuesTable    = newMappedElement<LuaArrayTable<LuaValueDef>>("values");
+    m->countriesTable = newMappedObject<LuaCountriesTable>("countries");
+    m->branchesTable  = newMappedObject<LuaBranchesTable>("branches");
+    m->stateTable     = newMappedObject<LuaSimulationStateTable>("state");
+    m->valuesTable    = newMappedObject<LuaArrayTable<LuaValueDef>>("values");
   }
 
   LuaModel::~LuaModel() = default;

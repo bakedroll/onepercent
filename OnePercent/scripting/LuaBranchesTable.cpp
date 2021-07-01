@@ -19,12 +19,12 @@ const LuaSkillBranch::Map& LuaBranchesTable::getBranches() const
 
 LuaSkillBranch::Ptr LuaBranchesTable::getBranchByName(const std::string& name) const
   {
-    return getMappedElement<LuaSkillBranch>(name);
+    return getMappedObject<LuaSkillBranch>(name);
   }
 
   void LuaBranchesTable::addBranch(const std::string& name, luabridge::LuaRef& ref)
   {
-    auto branch = addMappedElement<LuaSkillBranch>(name, ref);
+    auto branch = addMappedObject<LuaSkillBranch>(name, ref);
     if (branch)
     {
       m_branches[name] = branch;

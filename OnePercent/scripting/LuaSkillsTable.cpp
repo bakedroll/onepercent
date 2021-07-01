@@ -22,7 +22,7 @@ namespace onep
 
   void LuaSkillsTable::addSkill(LuaStateManager::Ptr lua, const std::string& name, luabridge::LuaRef& ref)
   {
-    auto skill = addUserDataElement<LuaSkill>(name, ref, lua);
+    auto skill = addUserDataObject<LuaSkill>(name, ref, lua);
     if (skill)
     {
       m_skills[name] = skill;
