@@ -1,10 +1,10 @@
 #pragma once
 
-#include "scripting/LuaBridgeDefinition.h"
-
 #include <osg/Node>
 
 #include <osgHelper/Macros.h>
+
+#include <luaHelper/LuaBridgeDefinition.h>
 
 #include <QtOsgBridge/Macros.h>
 
@@ -20,7 +20,7 @@ namespace onep
   class LuaVisualOsgNode : public NodeType
   {
   public:
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override

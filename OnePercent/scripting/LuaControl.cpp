@@ -1,17 +1,21 @@
 #include "scripting/LuaControl.h"
 
 #include "nodes/CountryOverlay.h"
-#include "scripting/LuaArrayTable.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSkillsTable.h"
 #include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaSimulationStateTable.h"
-#include "scripting/LuaObservableCallback.h"
-#include "scripting/LuaValueDef.h"
+#include "scripting/LuaDefines.h"
 #include "simulation/ModelContainer.h"
 
+#include <luaHelper/LuaArrayTable.h>
+#include <luaHelper/LuaObservableCallback.h>
+#include <luaHelper/LuaValueDef.h>
+
 #include <QString>
+
+#include "osgHelper/Helper.h"
 
 namespace onep
 {
@@ -31,34 +35,34 @@ namespace onep
   struct LuaControl::Impl
   {
     Impl(osgHelper::ioc::Injector& injector)
-      : lua(injector.inject<LuaStateManager>())
+      : lua(injector.inject<luaHelper::LuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
     {
     }
 
-    LuaStateManager::Ptr lua;
-    ModelContainer::Ptr modelContainer;
+    luaHelper::LuaStateManager::Ptr lua;
+    ModelContainer::Ptr             modelContainer;
 
     osgHelper::Observer<LuaSimulationStateTable::CountryBranch>::Ptr branchActivatedObserver;
   };
 
   LuaControl::LuaControl(osgHelper::ioc::Injector& injector)
-    : LuaCallbackRegistry(injector.inject<LuaStateManager>())
+    : LuaCallbackRegistry(injector.inject<luaHelper::LuaStateManager>())
     , m(new Impl(injector))
   {
-    registerLuaCallback(LuaDefines::Callback::ON_INITIALIZE);
-    registerLuaCallback(LuaDefines::Callback::ON_TICK);
-    registerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE);
-    registerLuaCallback(LuaDefines::Callback::ON_BRANCH_PURCHASED);
-    registerLuaCallback(LuaDefines::Callback::ON_BRANCH_ACTIVATED);
-    registerLuaCallback(LuaDefines::Callback::ON_BRANCH_RESIGNED);
+    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_INITIALIZE));
+    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_TICK));
+    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_UPDATE));
+    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_PURCHASED));
+    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_ACTIVATED));
+    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_RESIGNED));
     
-    registerLuaCallback(LuaDefines::Callback::ON_COUNTRY_CHANGED,
-      std::make_shared<LuaObservableCallback<int>>(m->lua,
+    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_COUNTRY_CHANGED),
+      std::make_shared<luaHelper::LuaObservableCallback<int>>(m->lua,
       injector.inject<CountryOverlay>()->getOSelectedCountryId()));
 
-    registerLuaCallback(LuaDefines::Callback::ON_OVERLAY_CHANGED,
-      std::make_shared<LuaObservableCallback<std::string>>(m->lua,
+    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_OVERLAY_CHANGED),
+      std::make_shared<luaHelper::LuaObservableCallback<std::string>>(m->lua,
       injector.inject<CountryOverlay>()->getOCurrentOverlayBranchName()));
 
     const auto simState = m->modelContainer->getModel()->getSimulationStateTable();
@@ -69,7 +73,7 @@ namespace onep
       m->modelContainer->accessModel([this, &cb](const LuaModel::Ptr& model)
       {
         auto cstate = model->getSimulationStateTable()->getCountryState(cb.countryId);
-        triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_ACTIVATED, cb.branchName, cstate->luaRef());
+        triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_ACTIVATED), cb.branchName, cstate->luaRef());
       });
     });
   }
@@ -130,7 +134,7 @@ namespace onep
 
   void LuaControl::luaUpdateBranch(const std::string& name, luabridge::LuaRef countryState)
   {
-    triggerLuaCallback(LuaDefines::Callback::ON_BRANCH_UPDATE, name, countryState);
+    triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_UPDATE), name, countryState);
   }
 
   void LuaControl::luaCreateBranches(luabridge::LuaRef branches)

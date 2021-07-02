@@ -1,8 +1,5 @@
 #include "OnePercentApplication.h"
 
-#include "scripting/LuaStateManager.h"
-
-#include "core/ModManager.h"
 #include "core/Observables.h"
 #include "data/BoundariesData.h"
 #include "nodes/CountryNameOverlay.h"
@@ -17,7 +14,6 @@
 #include "states/GlobeInteractionState.h"
 #include "scripting/LuaExternalClassDefinitions.h"
 #include "scripting/LuaConfig.h"
-#include "scripting/LuaLogger.h"
 #include "scripting/LuaControl.h"
 #include "scripting/LuaVisuals.h"
 #include "scripting/LuaSimulation.h"
@@ -34,6 +30,11 @@
 #include <osgHelper/ppu/DOF.h>
 #include <osgHelper/ppu/HDR.h>
 
+#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/ModManager.h>
+#include <luaHelper/LuaLogger.h>
+#include <luaHelper/LuaCallbackRegistry.h>
+
 #include <QtOsgBridge/Macros.h>
 
 #include <QDir>
@@ -42,11 +43,11 @@ namespace onep
 {
   void registerLuaClasses(osgHelper::ioc::Injector& injector)
   {
-    osg::ref_ptr<LuaStateManager> lua = injector.inject<LuaStateManager>();
+    osg::ref_ptr<luaHelper::LuaStateManager> lua = injector.inject<luaHelper::LuaStateManager>();
 
     lua->registerDefinition<LuaExternalClassDefinitions>();
 
-    lua->registerDefinition<LuaCallbackRegistry::Definition>();
+    lua->registerDefinition<luaHelper::LuaCallbackRegistry::Definition>();
     lua->registerDefinition<LuaVisualOsgNode<osg::Group>::Definition>();
     lua->registerDefinition<LuaVisualOsgNode<osg::Geode>::Definition>();
     lua->registerDefinition<LuaVisualOsgNode<osg::MatrixTransform>::Definition>();
@@ -62,7 +63,7 @@ namespace onep
     lua->registerDefinition<LuaControl::Definition>();
     lua->registerDefinition<LuaSimulation::Definition>();
     lua->registerDefinition<LuaVisuals::Definition>();
-    lua->registerDefinition<LuaLogger::Definition>();
+    lua->registerDefinition<luaHelper::LuaLogger::Definition>();
 
     lua->registerDefinition<LuaPropertyDefinitions>(injector);
   }
@@ -118,7 +119,7 @@ namespace onep
     registerEssentialComponents();
 
     // Core
-    container.registerSingletonType<ModManager>();
+    container.registerSingletonType<luaHelper::ModManager>();
 
     // States
     container.registerType<LoadingGlobeOverviewState>();
@@ -144,8 +145,8 @@ namespace onep
     // scripting
     container.registerSingletonType<LuaControl>();
     container.registerSingletonType<LuaVisuals>();
-    container.registerSingletonType<LuaStateManager>();
-    container.registerSingletonType<LuaLogger>();
+    container.registerSingletonType<luaHelper::LuaStateManager>();
+    container.registerSingletonType<luaHelper::LuaLogger>();
     container.registerSingletonType<LuaConfig>();
     container.registerSingletonType<LuaSimulation>();
 

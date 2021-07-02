@@ -51,7 +51,7 @@ namespace onep
     explicit Impl(osgHelper::ioc::Injector& injector)
       : modelContainer(injector.inject<ModelContainer>())
       , countryOverlay(injector.inject<CountryOverlay>())
-      , lua(injector.inject<LuaStateManager>())
+      , lua(injector.inject<luaHelper::LuaStateManager>())
     {
     }
 
@@ -59,11 +59,11 @@ namespace onep
     using VisualGroupBindingsMap = std::map<std::string, VisualBindingsMap>;
     using PrototypeMap           = std::map<std::string, osg::ref_ptr<PrototypeNode>>;
 
-    ModelContainer::Ptr    modelContainer;
-    CountryOverlay::Ptr    countryOverlay;
-    VisualBindingsMap      valueBindings;
-    VisualGroupBindingsMap groupValueBindings;
-    LuaStateManager::Ptr   lua;
+    ModelContainer::Ptr             modelContainer;
+    CountryOverlay::Ptr             countryOverlay;
+    VisualBindingsMap               valueBindings;
+    VisualGroupBindingsMap          groupValueBindings;
+    luaHelper::LuaStateManager::Ptr lua;
 
     PrototypeMap prototypes;
   };

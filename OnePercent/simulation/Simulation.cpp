@@ -5,7 +5,6 @@
 #include "simulation/ModelContainer.h"
 #include "simulation/SimulationStateReaderWriter.h"
 #include "scripting/LuaSkillBranch.h"
-#include "scripting/LuaStateManager.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaControl.h"
@@ -19,6 +18,8 @@
 
 #include <osgHelper/Helper.h>
 
+#include <luaHelper/LuaStateManager.h>
+
 namespace onep
 {
   const int autoPauseTicks = 50;
@@ -26,7 +27,7 @@ namespace onep
   struct Simulation::Impl
   {
     Impl(osgHelper::ioc::Injector& injector)
-      : lua(injector.inject<LuaStateManager>())
+      : lua(injector.inject<luaHelper::LuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
       , visuals(injector.inject<LuaVisuals>())
       , oDay(injector.inject<ODay>())
@@ -40,7 +41,7 @@ namespace onep
       , tickNumber(0)
     {}
 
-    osg::ref_ptr<LuaStateManager> lua;
+    osg::ref_ptr<luaHelper::LuaStateManager> lua;
 
     ModelContainer::Ptr modelContainer;
     LuaVisuals::Ptr     visuals;
@@ -50,8 +51,8 @@ namespace onep
     ODay::Ptr            oDay;
     ONumSkillPoints::Ptr oNumSkillPoints;
 
-    LuaRefPtr refUpdate_skills_func;
-    LuaRefPtr refUpdate_branches_func;
+    luaHelper::LuaRefPtr refUpdate_skills_func;
+    luaHelper::LuaRefPtr refUpdate_branches_func;
 
     osg::ref_ptr<LuaControl> luaControl;
 
@@ -66,7 +67,7 @@ namespace onep
 
     int tickNumber;
 
-    LuaRefPtr getLuaFunction(const char* path) const
+    luaHelper::LuaRefPtr getLuaFunction(const char* path) const
     {
       auto ptr = MAKE_LUAREF_PTR(lua->getObject(path));
 
@@ -104,7 +105,10 @@ namespace onep
         {
           m->modelContainer->accessModel([&](const LuaModel::Ptr& model)
           {
-            tickElapsed = Helper::measureMsecs([this](){ m->luaControl->triggerLuaCallback(LuaDefines::Callback::ON_TICK); });
+            tickElapsed = Helper::measureMsecs([this]()
+            {
+              m->luaControl->triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_TICK));
+            });
 
             switch (m->tickUpdateMode)
             {
@@ -224,8 +228,8 @@ namespace onep
           }
 
           cstate->getBranchesActivatedTable()->setBranchActivated(name, activated);
-          m->luaControl->triggerLuaCallback(activated ? LuaDefines::Callback::ON_BRANCH_PURCHASED
-                                                      : LuaDefines::Callback::ON_BRANCH_RESIGNED,
+          m->luaControl->triggerLuaCallback(osgHelper::underlying(activated ? LuaDefines::Callback::ON_BRANCH_PURCHASED
+                                                                            : LuaDefines::Callback::ON_BRANCH_RESIGNED),
                                             name, cstate->luaRef());
         });
       });

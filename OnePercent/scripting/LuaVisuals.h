@@ -1,16 +1,17 @@
 #pragma once
 
 #include "nodes/TextNode.h"
-#include "scripting/LuaStateManager.h"
 
 #include <osg/PositionAttitudeTransform>
+
+#include <luaHelper/LuaStateManager.h>
 
 namespace onep
 {
   class LuaVisuals : public osg::Referenced
   {
   public:
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override;

@@ -1,6 +1,5 @@
 #include "LoadingGlobeOverviewState.h"
 
-#include "core/ModManager.h"
 #include "data/BoundariesData.h"
 #include "nodes/GlobeModel.h"
 #include "nodes/GlobeOverviewWorld.h"
@@ -9,7 +8,6 @@
 #include "nodes/CountryOverlay.h"
 #include "states/GlobeOverviewState.h"
 #include "states/MainMenuState.h"
-#include "scripting/LuaStateManager.h"
 #include "scripting/LuaControl.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
@@ -24,12 +22,16 @@
 
 #include <osg/GL2Extensions>
 
+#include <luaHelper/ModManager.h>
+#include <luaHelper/LuaStateManager.h>
+
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPointer>
 #include <QResizeEvent>
 
 #include <osgHelper/ResourceManager.h>
+#include <osgHelper/Helper.h>
 
 namespace onep
 {
@@ -47,10 +49,10 @@ namespace onep
       , countryOverlay(injector.inject<CountryOverlay>())
       , resourceManager(injector.inject<osgHelper::ResourceManager>())
       , simulation(injector.inject<Simulation>())
-      , lua(injector.inject<LuaStateManager>())
+      , lua(injector.inject<luaHelper::LuaStateManager>())
       , model(injector.inject<ModelContainer>())
       , luaControl(injector.inject<LuaControl>())
-      , modManager(injector.inject<ModManager>())
+      , modManager(injector.inject<luaHelper::ModManager>())
       , labelLoadingText(nullptr)
       , overlay(nullptr)
       , isFp64Supported(false)
@@ -73,11 +75,11 @@ namespace onep
 
     osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
     osg::ref_ptr<Simulation>                 simulation;
-    osg::ref_ptr<LuaStateManager>            lua;
+    osg::ref_ptr<luaHelper::LuaStateManager> lua;
     osg::ref_ptr<ModelContainer>             model;
     osg::ref_ptr<LuaControl>                 luaControl;
 
-    osg::ref_ptr<ModManager> modManager;
+    osg::ref_ptr<luaHelper::ModManager> modManager;
 
     QPointer<QLabel>  labelLoadingText;
     QPointer<QWidget> overlay;
@@ -167,7 +169,7 @@ namespace onep
     // update neighbours data
     m->model->initializeCountryNeighbours(m->countryOverlay->getNeighbourships());
 
-    m->luaControl->triggerLuaCallback(LuaDefines::Callback::ON_INITIALIZE);
+    m->luaControl->triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_INITIALIZE));
 
     // loading simulation
     m->simulation->prepare();

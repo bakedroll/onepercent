@@ -10,6 +10,7 @@ require_library(Lua)
 require_library(LuaBridge)
 
 require_project(osgHelper PATH osgHelper)
+require_project(luaHelper PATH luaHelper)
 require_project(QtOsgBridge PATH QtOsgBridge)
 
 if (LUADOC_ENABLE)
@@ -36,3 +37,4 @@ add_qrc_files(resources.qrc)
 
 # copy GameData
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/GameData DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Mods DESTINATION ${CMAKE_BINARY_DIR})

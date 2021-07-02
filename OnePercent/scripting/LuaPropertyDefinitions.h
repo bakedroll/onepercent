@@ -1,13 +1,13 @@
 #pragma once
 
-#include "scripting/LuaBridgeDefinition.h"
-#include "scripting/LuaStaticProperty.h"
+#include <luaHelper/LuaBridgeDefinition.h>
+#include <luaHelper/LuaStaticProperty.h>
 
 #include <osgHelper/ioc/Injector.h>
 
 namespace onep
 {
-    class LuaPropertyDefinitions : public LuaBridgeDefinition
+    class LuaPropertyDefinitions : public luaHelper::LuaBridgeDefinition
     {
     public:
       explicit LuaPropertyDefinitions(osgHelper::ioc::Injector& injector);
@@ -21,10 +21,10 @@ namespace onep
       template <typename T>
       void addProperty(lua_State* state, const char* name)
       {
-        LuaStaticProperty<T>::set(m_injector.inject<T>().get());
+        luaHelper::LuaStaticProperty<T>::set(m_injector.inject<T>().get());
         getGlobalNamespace(state)
           .beginNamespace("lua")
-          .addProperty(name, LuaStaticProperty<T>::get)
+          .addProperty(name, luaHelper::LuaStaticProperty<T>::get)
           .endNamespace();
       }
 

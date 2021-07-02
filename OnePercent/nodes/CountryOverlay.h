@@ -14,7 +14,7 @@ namespace onep
   class CountryOverlay : public LuaVisualOsgNode<osg::Group>
   {
   public:
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override;

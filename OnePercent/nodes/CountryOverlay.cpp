@@ -1,5 +1,7 @@
 #include "CountryOverlay.h"
 
+#include <QMutex>
+
 #include "data/BoundariesData.h"
 #include "nodes/BoundariesMesh.h"
 #include "nodes/CountryHoverNode.h"
@@ -62,7 +64,7 @@ struct CountryOverlay::Impl
       textureFactory(injector.inject<osgHelper::TextureFactory>()),
       shaderFactory(injector.inject<osgHelper::ShaderFactory>()),
       configManager(injector.inject<LuaConfig>()),
-      lua(injector.inject<LuaStateManager>()),
+      lua(injector.inject<luaHelper::LuaStateManager>()),
       boundariesData(injector.inject<BoundariesData>()),
       boundariesMesh(injector.inject<BoundariesMesh>()),
       modelContainer(injector.inject<ModelContainer>()),
@@ -136,7 +138,7 @@ struct CountryOverlay::Impl
   osg::ref_ptr<osgHelper::TextureFactory>  textureFactory;
   osg::ref_ptr<osgHelper::ShaderFactory>   shaderFactory;
   osg::ref_ptr<LuaConfig>                  configManager;
-  osg::ref_ptr<LuaStateManager>            lua;
+  osg::ref_ptr<luaHelper::LuaStateManager> lua;
   osg::ref_ptr<BoundariesData>             boundariesData;
   osg::ref_ptr<BoundariesMesh>             boundariesMesh;
 

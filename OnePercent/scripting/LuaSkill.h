@@ -1,11 +1,11 @@
 #pragma once
 
-#include "scripting/LuaBridgeDefinition.h"
-#include "scripting/LuaCallbackRegistry.h"
-#include "scripting/LuaStateManager.h"
-#include "scripting/LuaTableMappedObject.h"
-
 #include <osgHelper/Observable.h>
+
+#include <luaHelper/LuaBridgeDefinition.h>
+#include <luaHelper/LuaCallbackRegistry.h>
+#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/LuaTableMappedObject.h>
 
 #include <LuaBridge/LuaBridge.h>
 
@@ -14,10 +14,10 @@
 
 namespace onep
 {
-	class LuaSkill : public LuaCallbackRegistry, public LuaTableMappedObject
+	class LuaSkill : public luaHelper::LuaCallbackRegistry, public luaHelper::LuaTableMappedObject
 	{
 	public:
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override;
@@ -27,7 +27,7 @@ namespace onep
     typedef std::vector<Ptr> List;
     typedef std::map<std::string, Ptr> Map;
 
-    LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const LuaStateManager::Ptr& luaStateManager);
+    LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const luaHelper::LuaStateManager::Ptr& luaStateManager);
     ~LuaSkill();
 
     void update(const std::string& branchName, luabridge::LuaRef countryState);

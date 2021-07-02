@@ -1,12 +1,13 @@
 #include "simulation/ModelContainer.h"
 #include "scripting/LuaModel.h"
-#include "scripting/LuaStateManager.h"
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaCountriesTable.h"
 #include "scripting/LuaSimulationStateTable.h"
-#include "scripting/LuaValueDef.h"
 #include "scripting/LuaCountry.h"
-#include "scripting/LuaArrayTable.h"
+
+#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/LuaValueDef.h>
+#include <luaHelper/LuaArrayTable.h>
 
 #include <QMutex>
 
@@ -15,10 +16,10 @@ namespace onep
   struct ModelContainer::Impl
   {
     Impl(osgHelper::ioc::Injector& injector)
-      : lua(injector.inject<LuaStateManager>())
+      : lua(injector.inject<luaHelper::LuaStateManager>())
     {}
 
-    LuaStateManager::Ptr lua;
+    luaHelper::LuaStateManager::Ptr lua;
     LuaModel::Ptr model;
 
     QRecursiveMutex mutexModel;
@@ -71,7 +72,7 @@ namespace onep
           state->getBranchesActivatedTable()->addBranchActivated(name);
         });
 
-        valuesTable->iterateMappedObjects<LuaValueDef>([&](LuaValueDef::Ptr& def)
+        valuesTable->iterateMappedObjects<luaHelper::LuaValueDef>([&](luaHelper::LuaValueDef::Ptr& def)
         {
           const auto name   = def->getName();
           const auto group  = def->getGroup();

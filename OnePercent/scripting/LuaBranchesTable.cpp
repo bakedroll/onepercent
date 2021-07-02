@@ -3,6 +3,8 @@
 
 #include <QString>
 
+#include <QtOsgBridge/Macros.h>
+
 namespace onep
 {
   LuaBranchesTable::LuaBranchesTable(const luabridge::LuaRef& object, lua_State* luaState)

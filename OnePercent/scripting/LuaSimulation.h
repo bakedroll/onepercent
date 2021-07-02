@@ -1,10 +1,11 @@
 #pragma once
 
 #include "core/Observables.h"
-#include "scripting/LuaBridgeDefinition.h"
 
 #include <osg/Referenced>
 #include <osgHelper/ioc/Injector.h>
+
+#include <luaHelper/LuaBridgeDefinition.h>
 
 extern "C"
 {
@@ -20,7 +21,7 @@ namespace onep
   public:
     using Ptr = osg::ref_ptr<LuaSimulation>;
 
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override;

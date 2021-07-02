@@ -6,12 +6,13 @@
 #include "widgets/SkillsWidget.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaSimulationStateTable.h"
-#include "scripting/LuaValueDef.h"
-#include "scripting/LuaArrayTable.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 
 #include <osgHelper/FpsUpdateCallback.h>
+
+#include <luaHelper/LuaValueDef.h>
+#include <luaHelper/LuaArrayTable.h>
 
 #include <QPointer>
 #include <QVBoxLayout>
@@ -133,7 +134,7 @@ namespace onep
       modelContainer->accessModel([=](const LuaModel::Ptr& model)
       {
         auto values = model->getValuesDefTable();
-        values->iterateMappedObjects<LuaValueDef>([=](LuaValueDef::Ptr& def)
+        values->iterateMappedObjects<luaHelper::LuaValueDef>([=](luaHelper::LuaValueDef::Ptr& def)
         {
           if (!def->getIsVisible())
           {
@@ -180,7 +181,7 @@ namespace onep
       frameTopBar->setLayout(layoutTopBar);
 
       // Bottom Bar
-      auto labelDays = new QLabel();
+      QPointer<QLabel> labelDays = new QLabel();
       labelDays->setObjectName("LabelDays");
 
       auto layoutBottomBar = new QHBoxLayout();
@@ -274,6 +275,11 @@ namespace onep
 
       observerDay = oDay->connectAndNotify([this, labelDays](int day)
       {
+        if (!labelDays)
+        {
+          return;
+        }
+
         labelDays->setText(tr("Day %1").arg(day));
 
         const auto selectedCountryId = countryOverlay->getSelectedCountryId();

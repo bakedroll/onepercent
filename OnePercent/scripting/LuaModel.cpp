@@ -2,7 +2,8 @@
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaCountriesTable.h"
-#include "scripting/LuaArrayTable.h"
+
+#include <luaHelper/LuaArrayTable.h>
 
 namespace onep
 {
@@ -14,7 +15,8 @@ namespace onep
     LuaCountriesTable::Ptr          countriesTable;
     LuaBranchesTable::Ptr           branchesTable;
     LuaSimulationStateTable::Ptr    stateTable;
-    LuaArrayTable<LuaValueDef>::Ptr valuesTable;
+
+    luaHelper::LuaArrayTable<luaHelper::LuaValueDef>::Ptr valuesTable;
   };
 
   LuaModel::LuaModel(const luabridge::LuaRef& object, lua_State* luaState)
@@ -24,7 +26,7 @@ namespace onep
     m->countriesTable = newMappedObject<LuaCountriesTable>("countries");
     m->branchesTable  = newMappedObject<LuaBranchesTable>("branches");
     m->stateTable     = newMappedObject<LuaSimulationStateTable>("state");
-    m->valuesTable    = newMappedObject<LuaArrayTable<LuaValueDef>>("values");
+    m->valuesTable    = newMappedObject<luaHelper::LuaArrayTable<luaHelper::LuaValueDef>>("values");
   }
 
   LuaModel::~LuaModel() = default;
@@ -44,7 +46,7 @@ namespace onep
     return m->stateTable;
   }
 
-  std::shared_ptr<LuaArrayTable<LuaValueDef>> LuaModel::getValuesDefTable() const
+  std::shared_ptr<luaHelper::LuaArrayTable<luaHelper::LuaValueDef>> LuaModel::getValuesDefTable() const
   {
     return m->valuesTable;
   }

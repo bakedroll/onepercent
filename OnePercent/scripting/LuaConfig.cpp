@@ -1,6 +1,6 @@
 #include "LuaConfig.h"
 
-#include "scripting/LuaStateManager.h"
+#include <luaHelper/LuaStateManager.h>
 
 #include <unordered_map>
 
@@ -19,7 +19,7 @@ namespace onep
   struct LuaConfig::Impl
   {
     Impl(osgHelper::ioc::Injector& injector)
-      : lua(injector.inject<LuaStateManager>())
+      : lua(injector.inject<luaHelper::LuaStateManager>())
     {
       const luabridge::LuaRef table = lua->newTable();
       lua->setGlobal(CONFIG_DATA_TABLE_NAME, table);
@@ -27,7 +27,7 @@ namespace onep
 
     typedef std::unordered_map<std::string, std::shared_ptr<ValueTypeBase>> Cache;
 
-    osg::ref_ptr<LuaStateManager> lua;
+    osg::ref_ptr<luaHelper::LuaStateManager> lua;
     Cache cache;
 
   };

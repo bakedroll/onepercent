@@ -2,10 +2,11 @@
 
 #include "data/BoundariesData.h"
 
-#include "scripting/LuaBridgeDefinition.h"
 #include "scripting/LuaConfig.h"
 
 #include <osg/Switch>
+
+#include <luaHelper/LuaBridgeDefinition.h>
 
 namespace onep
 {
@@ -15,7 +16,7 @@ namespace onep
   class CountryPresenter : public osg::Switch
   {
   public:
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override;

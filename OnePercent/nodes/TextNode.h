@@ -1,18 +1,19 @@
 #pragma once
 
 #include "scripting/LuaVisualOsgNode.h"
-#include "scripting/LuaBridgeDefinition.h"
 
 #include <osg/MatrixTransform>
 #include <osgText/Text>
 #include <osgText/Font>
+
+#include <luaHelper/LuaBridgeDefinition.h>
 
 namespace onep
 {
   class TextNode : public LuaVisualOsgNode<osg::MatrixTransform>
   {
   public:
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override;

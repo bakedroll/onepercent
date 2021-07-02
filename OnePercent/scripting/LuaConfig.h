@@ -1,12 +1,12 @@
 #pragma once
 
-#include "scripting/LuaBridgeDefinition.h"
-
 #include <osgHelper/Macros.h>
 
 #include <osg/Referenced>
 
 #include <osgHelper/ioc/Injector.h>
+
+#include <luaHelper/LuaBridgeDefinition.h>
 
 #include <functional>
 
@@ -26,7 +26,7 @@ namespace onep
   public:
     using Ptr = osg::ref_ptr<LuaConfig>;
 
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override;

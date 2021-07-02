@@ -2,18 +2,18 @@
 
 #include <osgHelper/ioc/Injector.h>
 
-#include "scripting/LuaStateManager.h"
-#include "scripting/LuaCallbackRegistry.h"
+#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/LuaCallbackRegistry.h>
 
 namespace onep
 {
   class LuaModel;
   class LuaSkill;
 
-  class LuaControl : public LuaCallbackRegistry
+  class LuaControl : public luaHelper::LuaCallbackRegistry
   {
   public:
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override;

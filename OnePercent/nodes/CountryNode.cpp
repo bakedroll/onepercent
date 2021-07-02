@@ -1,7 +1,6 @@
 #include "CountryNode.h"
 
 #include "nodes/CountryGeometry.h"
-#include "scripting/LuaStateManager.h"
 
 #include <osg/Geometry>
 #include <osgHelper/Helper.h>
@@ -24,13 +23,13 @@ namespace onep
     Impl() = default;
 
     std::string name;
+    List        neighbors;
 
-    List      neighbors;
-    LuaRefPtr refNeighbours;
+    luaHelper::LuaRefPtr refNeighbours;
   };
 
   CountryNode::CountryNode(
-    const LuaStateManager::Ptr& lua,
+    const luaHelper::LuaStateManager::Ptr& lua,
     const std::string& countryName,
     const osg::ref_ptr<osg::Vec3Array>& vertices,
     const osg::ref_ptr<osg::Vec2Array>& texcoordsPolar,

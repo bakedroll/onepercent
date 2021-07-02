@@ -1,6 +1,9 @@
 #include "scripting/LuaSkill.h"
+#include "scripting/LuaDefines.h"
 
 #include <QtOsgBridge/Multithreading.h>
+
+#include "osgHelper/Helper.h"
 
 namespace onep
 {
@@ -32,7 +35,7 @@ namespace onep
     osgHelper::Observable<bool>::Ptr obActivated;
   };
 
-  LuaSkill::LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const LuaStateManager::Ptr& luaStateManager)
+  LuaSkill::LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const luaHelper::LuaStateManager::Ptr& luaStateManager)
     : LuaCallbackRegistry(luaStateManager)
     , LuaTableMappedObject(object, lua)
     , m(new Impl())
@@ -59,14 +62,14 @@ namespace onep
 
     m->obActivated->set(bActivared);
 
-    registerLuaCallback(LuaDefines::Callback::ON_SKILL_UPDATE);
+    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_SKILL_UPDATE));
   }
 
   LuaSkill::~LuaSkill() = default;
 
   void LuaSkill::update(const std::string& branchName, luabridge::LuaRef countryState)
   {
-    triggerLuaCallback(LuaDefines::Callback::ON_SKILL_UPDATE, branchName, countryState);
+    triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_SKILL_UPDATE), branchName, countryState);
   }
 
   const std::string& LuaSkill::getName() const

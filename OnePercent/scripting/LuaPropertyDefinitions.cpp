@@ -4,8 +4,9 @@
 #include "scripting/LuaControl.h"
 #include "scripting/LuaSimulation.h"
 #include "scripting/LuaVisuals.h"
-#include "scripting/LuaLogger.h"
 #include "nodes/CountryOverlay.h"
+
+#include <luaHelper/LuaLogger.h>
 
 namespace onep
 {
@@ -22,7 +23,7 @@ namespace onep
     addProperty<LuaControl>(state, "control");
     addProperty<LuaSimulation>(state, "simulation");
     addProperty<LuaVisuals>(state, "visuals");
-    addProperty<LuaLogger>(state, "log");
+    addProperty<luaHelper::LuaLogger>(state, "log");
     addProperty<CountryOverlay>(state, "countries");
   }
 }

@@ -6,7 +6,6 @@
 #include "scripting/LuaBranchesTable.h"
 #include "scripting/LuaSkillsTable.h"
 #include "scripting/LuaCountriesTable.h"
-#include "scripting/LuaStateManager.h"
 #include "scripting/LuaModel.h"
 #include "scripting/LuaControl.h"
 #include "simulation/Simulation.h"
@@ -14,6 +13,8 @@
 #include "simulation/ModelContainer.h"
 
 #include <osgHelper/Macros.h>
+
+#include <luaHelper/LuaStateManager.h>
 
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -88,7 +89,7 @@ namespace onep
   {
     Impl(osgHelper::ioc::Injector& injector, DebugWindow* b)
       : base(b)
-      , lua(injector.inject<LuaStateManager>())
+      , lua(injector.inject<luaHelper::LuaStateManager>())
       , countryOverlay(injector.inject<CountryOverlay>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , simulation(injector.inject<Simulation>())
@@ -112,7 +113,8 @@ namespace onep
 
     DebugWindow* base;
 
-    osg::ref_ptr<LuaStateManager> lua;
+    osg::ref_ptr<luaHelper::LuaStateManager> lua;
+
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;
     osg::ref_ptr<Simulation> simulation;
@@ -299,7 +301,7 @@ namespace onep
       updateCountryInfo(countryOverlay->getSelectedCountryId());
     }
 
-    void addValueWidget(const LuaValueGroupTable::Ptr& values, const std::string& prefix = "")
+    void addValueWidget(const luaHelper::LuaValueGroupTable::Ptr& values, const std::string& prefix = "")
     {
       for (const auto& value : values->getMap())
       {
@@ -314,7 +316,7 @@ namespace onep
       }
     }
 
-    void initValueWidget(const LuaValueGroupTable::Ptr& values, const std::string& prefix = "")
+    void initValueWidget(const luaHelper::LuaValueGroupTable::Ptr& values, const std::string& prefix = "")
     {
       for (const auto& value : values->getMap())
       {
@@ -778,6 +780,6 @@ namespace onep
   void DebugWindow::onCommandEntered(const QString& command)
   {
     std::string c = command.toStdString();
-    m->simulation->getUpdateThread()->executeLockedTick([this, c]() { m->lua->executeCode(c); });
+    m->simulation->getUpdateThread()->executeLockedTick([this, c]() { m->lua->executeCodeString(c); });
   }
 }

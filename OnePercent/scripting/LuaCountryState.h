@@ -1,11 +1,12 @@
 #pragma once
 
-#include "scripting/LuaValueGroupTable.h"
 #include "scripting/LuaBranchesActivatedTable.h"
+
+#include <luaHelper/LuaValueGroupTable.h>
 
 namespace onep
 {
-  class LuaCountryState : public LuaTableMappedObject
+  class LuaCountryState : public luaHelper::LuaTableMappedObject
   {
   public:
     typedef std::shared_ptr<LuaCountryState> Ptr;
@@ -14,8 +15,8 @@ namespace onep
     explicit LuaCountryState(const luabridge::LuaRef& object, lua_State* luaState);
     ~LuaCountryState();
 
-    std::shared_ptr<LuaValueGroupTable>        getValuesTable() const;
-    std::shared_ptr<LuaBranchesActivatedTable> getBranchesActivatedTable() const;
+    std::shared_ptr<luaHelper::LuaValueGroupTable> getValuesTable() const;
+    std::shared_ptr<LuaBranchesActivatedTable>     getBranchesActivatedTable() const;
 
     void addNeighbourState(int cid, luabridge::LuaRef& state);
 

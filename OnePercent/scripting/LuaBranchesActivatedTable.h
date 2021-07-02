@@ -1,14 +1,13 @@
 #pragma once
 
-#include "scripting/LuaTableMappedObject.h"
-
 #include <osgHelper/Observable.h>
+#include <luaHelper/LuaTableMappedObject.h>
 
 namespace onep
 {
   class SkillBranch;
 
-  class LuaBranchesActivatedTable : public LuaTableMappedObject
+  class LuaBranchesActivatedTable : public luaHelper::LuaTableMappedObject
   {
   public:
     typedef std::map<std::string, osgHelper::Observable<bool>::Ptr> BranchActivatedMap;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "scripting/LuaTableMappedObject.h"
-#include "scripting/LuaArrayTable.h"
-#include "scripting/LuaValueDef.h"
+#include <luaHelper/LuaTableMappedObject.h>
+#include <luaHelper/LuaArrayTable.h>
+#include <luaHelper/LuaValueDef.h>
 
 namespace onep
 {
@@ -10,7 +10,7 @@ namespace onep
   class LuaBranchesTable;
   class LuaSimulationStateTable;
 
-  class LuaModel : public LuaTableMappedObject
+  class LuaModel : public luaHelper::LuaTableMappedObject
   {
   public:
     using Ptr = std::shared_ptr<LuaModel>;
@@ -21,7 +21,8 @@ namespace onep
     std::shared_ptr<LuaCountriesTable>          getCountriesTable() const;
     std::shared_ptr<LuaBranchesTable>           getBranchesTable() const;
     std::shared_ptr<LuaSimulationStateTable>    getSimulationStateTable() const;
-    std::shared_ptr<LuaArrayTable<LuaValueDef>> getValuesDefTable() const;
+
+    std::shared_ptr<luaHelper::LuaArrayTable<luaHelper::LuaValueDef>> getValuesDefTable() const;
 
 private:
     struct Impl;

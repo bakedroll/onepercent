@@ -7,14 +7,14 @@
 
 #include <memory>
 
+#include <luaHelper/LuaStateManager.h>
+
 namespace onep
 {
-  class LuaStateManager;
-
   class CountryNode : public LuaVisualOsgNode<osg::Geode>
   {
   public:
-    class Definition : public LuaBridgeDefinition
+    class Definition : public luaHelper::LuaBridgeDefinition
     {
     public:
       void registerDefinition(lua_State* state) override;
@@ -25,7 +25,7 @@ namespace onep
     using List = std::vector<Ptr>;
 
     CountryNode(
-      const osg::ref_ptr<LuaStateManager>& lua,
+      const osg::ref_ptr<luaHelper::LuaStateManager>& lua,
       const std::string& countryName,
       const osg::ref_ptr<osg::Vec3Array>& vertices,
       const osg::ref_ptr<osg::Vec2Array>& texcoordsPolar,

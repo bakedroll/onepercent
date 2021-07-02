@@ -4,7 +4,6 @@
 #include "scripting/LuaModel.h"
 #include "scripting/LuaCountry.h"
 #include "scripting/LuaCountriesTable.h"
-#include "scripting/LuaStateManager.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 #include "widgets/CountryMenuWidget.h"
@@ -16,6 +15,8 @@
 #include <osgHelper/ioc/Injector.h>
 #include <osgHelper/Helper.h>
 #include <osgHelper/View.h>
+
+#include <luaHelper/LuaStateManager.h>
 
 #include <QtOsgBridge/Helper.h>
 #include <QtOsgBridge/Macros.h>
@@ -32,7 +33,7 @@ namespace onep
         configManager(injector.inject<LuaConfig>()),
         simulation(injector.inject<Simulation>()),
         countryOverlay(injector.inject<CountryOverlay>()),
-        lua(injector.inject<LuaStateManager>()),
+        lua(injector.inject<luaHelper::LuaStateManager>()),
         modelContainer(injector.inject<ModelContainer>()),
         paramEarthRadius(0.0f),
         paramCameraMinDistance(0.0f),
@@ -65,7 +66,8 @@ namespace onep
     osg::ref_ptr<CountryOverlay>    countryOverlay;
     osg::ref_ptr<osgHelper::View>   view;
     osg::ref_ptr<osgHelper::Camera> camera;
-    osg::ref_ptr<LuaStateManager>   lua;
+
+    osg::ref_ptr<luaHelper::LuaStateManager> lua;
 
     osg::ref_ptr<ModelContainer> modelContainer;
 

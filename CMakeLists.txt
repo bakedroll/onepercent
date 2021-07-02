@@ -20,6 +20,7 @@ add_subdirectory(OnePercent)
 
 add_project(QtOsgBridgeApplication PATH QtOsgBridge)
 add_project(osgHelperTest PATH osgHelper)
+add_project(luaHelperTest PATH luaHelper)
 
 make_projects()
 
