@@ -18,7 +18,7 @@
 #include "scripting/LuaVisuals.h"
 #include "scripting/LuaSimulation.h"
 #include "scripting/LuaSkill.h"
-#include "scripting/LuaPropertyDefinitions.h"
+#include "scripting/OnePercentPropertiesDefinition.h"
 #include "simulation/Simulation.h"
 #include "simulation/ModelContainer.h"
 
@@ -65,7 +65,7 @@ namespace onep
     lua->registerDefinition<LuaVisuals::Definition>();
     lua->registerDefinition<luaHelper::LuaLogger::Definition>();
 
-    lua->registerDefinition<LuaPropertyDefinitions>(injector);
+    lua->registerDefinition<OnePercentPropertiesDefinition>(injector);
   }
 
   osg::ref_ptr<osgText::Font> loadFontFile(const std::string& filename)
