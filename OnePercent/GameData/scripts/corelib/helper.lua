@@ -30,10 +30,12 @@ function helper.dump_object(o, d)
 
       s = s .. '{ '
       for k,v in pairs(o) do
-        if type(k) ~= 'number' then k = '"'..k..'"' end
-        s = s .. '\n'
-        for i=0,d do s = s .. '  ' end
-        s = s .. '['..k..'] = ' .. helper.dump_object(v, d + 1) .. ','
+        if type(k) == 'number' or type(k) == 'string' then
+          if type(k) ~= 'number' then k = '"'..k..'"' end
+          s = s .. '\n'
+          for i=0,d do s = s .. '  ' end
+          s = s .. '['..k..'] = ' .. helper.dump_object(v, d + 1) .. ','
+        end
       end
       s = s .. ' }'
     end
