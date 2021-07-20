@@ -28,7 +28,7 @@ if (MSVC)
   osg_copy_additional_binaries(zlib libpng16)
   osg_copy_plugins(osgdb_3ds osgdb_freetype osgdb_obj osgdb_png)
 
-  qt6_copy_plugins(platforms/qwindows styles/qwindowsvistastyle)
+  qt_copy_plugins(platforms/qwindows styles/qwindowsvistastyle)
 endif()
 
 # configure scripts
