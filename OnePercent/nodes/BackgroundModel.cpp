@@ -8,8 +8,8 @@
 #include <osg/BlendEquation>
 #include <osg/Billboard>
 
-#include <osgHelper/ResourceManager.h>
-#include <osgHelper/TextureFactory.h>
+#include <osgHelper/IResourceManager.h>
+#include <osgHelper/ITextureFactory.h>
 #include <osgHelper/Helper.h>
 #include <osgHelper/ByteStream.h>
 #include <osgHelper/ResizeEventCallback.h>
@@ -21,8 +21,8 @@ struct BackgroundModel::Impl
 {
   Impl(osgHelper::ioc::Injector& injector, BackgroundModel* b)
     : base(b)
-    , resourceManager(injector.inject<osgHelper::ResourceManager>())
-    , textureFactory(injector.inject<osgHelper::TextureFactory>())
+    , resourceManager(injector.inject<osgHelper::IResourceManager>())
+    , textureFactory(injector.inject<osgHelper::ITextureFactory>())
   {}
 
   void makeStars(std::string filename)
@@ -142,8 +142,8 @@ struct BackgroundModel::Impl
 
   BackgroundModel* base;
 
-  osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
-  osg::ref_ptr<osgHelper::TextureFactory>  textureFactory;
+  osg::ref_ptr<osgHelper::IResourceManager> resourceManager;
+  osg::ref_ptr<osgHelper::ITextureFactory> textureFactory;
 
   // osg::ref_ptr<osgHelper::ResizeEventHandler> resizeHandler;
 

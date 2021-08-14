@@ -30,7 +30,7 @@
 #include <QPointer>
 #include <QResizeEvent>
 
-#include <osgHelper/ResourceManager.h>
+#include <osgHelper/IResourceManager.h>
 #include <osgHelper/Helper.h>
 
 namespace onep
@@ -47,7 +47,7 @@ namespace onep
       , countryNameOverlay(injector.inject<CountryNameOverlay>())
       , boundariesData(injector.inject<BoundariesData>())
       , countryOverlay(injector.inject<CountryOverlay>())
-      , resourceManager(injector.inject<osgHelper::ResourceManager>())
+      , resourceManager(injector.inject<osgHelper::IResourceManager>())
       , simulation(injector.inject<Simulation>())
       , lua(injector.inject<luaHelper::LuaStateManager>())
       , model(injector.inject<ModelContainer>())
@@ -73,11 +73,11 @@ namespace onep
     osg::ref_ptr<osgHelper::Camera>  camera;
     osg::ref_ptr<osgHelper::View>    view;
 
-    osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
-    osg::ref_ptr<Simulation>                 simulation;
-    osg::ref_ptr<luaHelper::LuaStateManager> lua;
-    osg::ref_ptr<ModelContainer>             model;
-    osg::ref_ptr<LuaControl>                 luaControl;
+    osg::ref_ptr<osgHelper::IResourceManager> resourceManager;
+    osg::ref_ptr<Simulation>                  simulation;
+    osg::ref_ptr<luaHelper::LuaStateManager>  lua;
+    osg::ref_ptr<ModelContainer>              model;
+    osg::ref_ptr<LuaControl>                  luaControl;
 
     osg::ref_ptr<luaHelper::ModManager> modManager;
 

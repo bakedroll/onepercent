@@ -1,7 +1,7 @@
 #include "data/BoundariesData.h"
 
 #include <osgHelper/ByteStream.h>
-#include <osgHelper/ResourceManager.h>
+#include <osgHelper/IResourceManager.h>
 
 namespace onep
 {
@@ -71,7 +71,7 @@ struct QuadSegments
 
 struct BoundariesData::Impl
 {
-  Impl(osgHelper::ioc::Injector& injector) : resourceManager(injector.inject<osgHelper::ResourceManager>())
+  Impl(osgHelper::ioc::Injector& injector) : resourceManager(injector.inject<osgHelper::IResourceManager>())
   {
   }
 
@@ -148,7 +148,7 @@ struct BoundariesData::Impl
     }
   }
 
-  osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
+  osg::ref_ptr<osgHelper::IResourceManager> resourceManager;
 
   Point::Map    pointsMap;
   IdQuadListMap boundariesMap;

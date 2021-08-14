@@ -11,8 +11,8 @@
 #include <osgDB/ReadFile>
 
 #include <osgHelper/Helper.h>
-#include <osgHelper/ResourceManager.h>
-#include <osgHelper/TextureFactory.h>
+#include <osgHelper/IResourceManager.h>
+#include <osgHelper/ITextureFactory.h>
 
 #include <QString>
 
@@ -23,8 +23,8 @@ namespace onep
     Impl(osgHelper::ioc::Injector& injector, GlobeModel* b)
       : base(b)
       , configManager(injector.inject<LuaConfig>())
-      , resourceManager(injector.inject<osgHelper::ResourceManager>())
-      , textureFactory(injector.inject<osgHelper::TextureFactory>())
+      , resourceManager(injector.inject<osgHelper::IResourceManager>())
+      , textureFactory(injector.inject<osgHelper::ITextureFactory>())
       , countryOverlay(injector.inject<CountryOverlay>())
     {
       base->addChild(countryOverlay);
@@ -374,8 +374,8 @@ namespace onep
     GlobeModel* base;
 
     osg::ref_ptr<LuaConfig> configManager;
-    osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
-    osg::ref_ptr<osgHelper::TextureFactory> textureFactory;
+    osg::ref_ptr<osgHelper::IResourceManager> resourceManager;
+    osg::ref_ptr<osgHelper::ITextureFactory>  textureFactory;
 
     float propSunDistance;
     float propSunRadiusMp2;

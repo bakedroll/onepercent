@@ -17,9 +17,9 @@
 #include <osgHelper/ByteStream.h>
 #include <osgHelper/Helper.h>
 #include <osgHelper/Observable.h>
-#include <osgHelper/ResourceManager.h>
-#include <osgHelper/ShaderFactory.h>
-#include <osgHelper/TextureFactory.h>
+#include <osgHelper/IResourceManager.h>
+#include <osgHelper/IShaderFactory.h>
+#include <osgHelper/ITextureFactory.h>
 #include <osgHelper/Macros.h>
 
 #include <QtOsgBridge/Multithreading.h>
@@ -60,9 +60,9 @@ struct CountryOverlay::Impl
 {
   Impl(osgHelper::ioc::Injector& injector, CountryOverlay* b)
     : base(b),
-      resourceManager(injector.inject<osgHelper::ResourceManager>()),
-      textureFactory(injector.inject<osgHelper::TextureFactory>()),
-      shaderFactory(injector.inject<osgHelper::ShaderFactory>()),
+      resourceManager(injector.inject<osgHelper::IResourceManager>()),
+      textureFactory(injector.inject<osgHelper::ITextureFactory>()),
+      shaderFactory(injector.inject<osgHelper::IShaderFactory>()),
       configManager(injector.inject<LuaConfig>()),
       lua(injector.inject<luaHelper::LuaStateManager>()),
       boundariesData(injector.inject<BoundariesData>()),
@@ -134,13 +134,13 @@ struct CountryOverlay::Impl
 
   CountryOverlay* base;
 
-  osg::ref_ptr<osgHelper::ResourceManager> resourceManager;
-  osg::ref_ptr<osgHelper::TextureFactory>  textureFactory;
-  osg::ref_ptr<osgHelper::ShaderFactory>   shaderFactory;
-  osg::ref_ptr<LuaConfig>                  configManager;
-  osg::ref_ptr<luaHelper::LuaStateManager> lua;
-  osg::ref_ptr<BoundariesData>             boundariesData;
-  osg::ref_ptr<BoundariesMesh>             boundariesMesh;
+  osg::ref_ptr<osgHelper::IResourceManager> resourceManager;
+  osg::ref_ptr<osgHelper::ITextureFactory>  textureFactory;
+  osg::ref_ptr<osgHelper::IShaderFactory>   shaderFactory;
+  osg::ref_ptr<LuaConfig>                   configManager;
+  osg::ref_ptr<luaHelper::LuaStateManager>  lua;
+  osg::ref_ptr<BoundariesData>              boundariesData;
+  osg::ref_ptr<BoundariesMesh>              boundariesMesh;
 
   ModelContainer::Ptr modelContainer;
 
