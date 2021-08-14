@@ -2,7 +2,6 @@
 
 #include <osgHelper/ioc/Injector.h>
 
-#include <luaHelper/LuaStateManager.h>
 #include <luaHelper/LuaCallbackRegistry.h>
 
 namespace onep

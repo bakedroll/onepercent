@@ -4,7 +4,7 @@
 
 #include <luaHelper/LuaBridgeDefinition.h>
 #include <luaHelper/LuaCallbackRegistry.h>
-#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/ILuaStateManager.h>
 #include <luaHelper/LuaTableMappedObject.h>
 
 #include <LuaBridge/LuaBridge.h>
@@ -27,7 +27,7 @@ namespace onep
     typedef std::vector<Ptr> List;
     typedef std::map<std::string, Ptr> Map;
 
-    LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const luaHelper::LuaStateManager::Ptr& luaStateManager);
+    LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const luaHelper::ILuaStateManager::Ptr& luaStateManager);
     ~LuaSkill();
 
     void update(const std::string& branchName, luabridge::LuaRef countryState);

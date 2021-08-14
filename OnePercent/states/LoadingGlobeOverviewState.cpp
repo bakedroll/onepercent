@@ -22,8 +22,8 @@
 
 #include <osg/GL2Extensions>
 
-#include <luaHelper/ModManager.h>
-#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/IModManager.h>
+#include <luaHelper/ILuaStateManager.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -49,10 +49,10 @@ namespace onep
       , countryOverlay(injector.inject<CountryOverlay>())
       , resourceManager(injector.inject<osgHelper::IResourceManager>())
       , simulation(injector.inject<Simulation>())
-      , lua(injector.inject<luaHelper::LuaStateManager>())
+      , lua(injector.inject<luaHelper::ILuaStateManager>())
       , model(injector.inject<ModelContainer>())
       , luaControl(injector.inject<LuaControl>())
-      , modManager(injector.inject<luaHelper::ModManager>())
+      , modManager(injector.inject<luaHelper::IModManager>())
       , labelLoadingText(nullptr)
       , overlay(nullptr)
       , isFp64Supported(false)
@@ -75,11 +75,11 @@ namespace onep
 
     osg::ref_ptr<osgHelper::IResourceManager> resourceManager;
     osg::ref_ptr<Simulation>                  simulation;
-    osg::ref_ptr<luaHelper::LuaStateManager>  lua;
+    osg::ref_ptr<luaHelper::ILuaStateManager>  lua;
     osg::ref_ptr<ModelContainer>              model;
     osg::ref_ptr<LuaControl>                  luaControl;
 
-    osg::ref_ptr<luaHelper::ModManager> modManager;
+    osg::ref_ptr<luaHelper::IModManager> modManager;
 
     QPointer<QLabel>  labelLoadingText;
     QPointer<QWidget> overlay;

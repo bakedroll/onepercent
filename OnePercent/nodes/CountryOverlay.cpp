@@ -64,7 +64,7 @@ struct CountryOverlay::Impl
       textureFactory(injector.inject<osgHelper::ITextureFactory>()),
       shaderFactory(injector.inject<osgHelper::IShaderFactory>()),
       configManager(injector.inject<LuaConfig>()),
-      lua(injector.inject<luaHelper::LuaStateManager>()),
+      lua(injector.inject<luaHelper::ILuaStateManager>()),
       boundariesData(injector.inject<BoundariesData>()),
       boundariesMesh(injector.inject<BoundariesMesh>()),
       modelContainer(injector.inject<ModelContainer>()),
@@ -138,7 +138,7 @@ struct CountryOverlay::Impl
   osg::ref_ptr<osgHelper::ITextureFactory>  textureFactory;
   osg::ref_ptr<osgHelper::IShaderFactory>   shaderFactory;
   osg::ref_ptr<LuaConfig>                   configManager;
-  osg::ref_ptr<luaHelper::LuaStateManager>  lua;
+  osg::ref_ptr<luaHelper::ILuaStateManager> lua;
   osg::ref_ptr<BoundariesData>              boundariesData;
   osg::ref_ptr<BoundariesMesh>              boundariesMesh;
 

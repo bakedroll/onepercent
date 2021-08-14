@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/ILuaStateManager.h>
 
 namespace onep
 {
@@ -25,7 +25,7 @@ namespace onep
     using List = std::vector<Ptr>;
 
     CountryNode(
-      const osg::ref_ptr<luaHelper::LuaStateManager>& lua,
+      const osg::ref_ptr<luaHelper::ILuaStateManager>& lua,
       const std::string& countryName,
       const osg::ref_ptr<osg::Vec3Array>& vertices,
       const osg::ref_ptr<osg::Vec2Array>& texcoordsPolar,

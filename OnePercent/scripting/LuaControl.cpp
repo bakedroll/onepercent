@@ -9,9 +9,9 @@
 #include "scripting/LuaDefines.h"
 #include "simulation/ModelContainer.h"
 
+#include <luaHelper/ILuaStateManager.h>
 #include <luaHelper/LuaArrayTable.h>
 #include <luaHelper/LuaObservableCallback.h>
-#include <luaHelper/LuaValueDef.h>
 
 #include <QString>
 
@@ -35,19 +35,19 @@ namespace onep
   struct LuaControl::Impl
   {
     Impl(osgHelper::ioc::Injector& injector)
-      : lua(injector.inject<luaHelper::LuaStateManager>())
+      : lua(injector.inject<luaHelper::ILuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
     {
     }
 
-    luaHelper::LuaStateManager::Ptr lua;
+    luaHelper::ILuaStateManager::Ptr lua;
     ModelContainer::Ptr             modelContainer;
 
     osgHelper::Observer<LuaSimulationStateTable::CountryBranch>::Ptr branchActivatedObserver;
   };
 
   LuaControl::LuaControl(osgHelper::ioc::Injector& injector)
-    : LuaCallbackRegistry(injector.inject<luaHelper::LuaStateManager>())
+    : LuaCallbackRegistry(injector.inject<luaHelper::ILuaStateManager>())
     , m(new Impl(injector))
   {
     registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_INITIALIZE));

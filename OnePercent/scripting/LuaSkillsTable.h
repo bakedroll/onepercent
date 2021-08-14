@@ -3,7 +3,7 @@
 #include "scripting/LuaSkill.h"
 
 #include <luaHelper/LuaTableMappedObject.h>
-#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/ILuaStateManager.h>
 
 namespace onep
 {
@@ -18,7 +18,7 @@ namespace onep
     const LuaSkill::Map& getSkills() const;
     LuaSkill::Ptr        getSkillByName(const std::string& name) const;
 
-    void addSkill(luaHelper::LuaStateManager::Ptr lua, const std::string& name, luabridge::LuaRef& ref);
+    void addSkill(luaHelper::ILuaStateManager::Ptr lua, const std::string& name, luabridge::LuaRef& ref);
 
   private:
     LuaSkill::Map m_skills;

@@ -22,7 +22,7 @@ namespace onep
 	struct CountryMenuWidget::Impl
 	{
     Impl(osgHelper::ioc::Injector& injector)
-      : lua(injector.inject<luaHelper::LuaStateManager>())
+      : lua(injector.inject<luaHelper::ILuaStateManager>())
       , luaControl(injector.inject<LuaControl>())
       , simulation(injector.inject<Simulation>())
       , modelContainer(injector.inject<ModelContainer>())
@@ -32,7 +32,7 @@ namespace onep
 
     LuaCountry::Ptr country;
 
-    luaHelper::LuaStateManager::Ptr lua;
+    luaHelper::ILuaStateManager::Ptr lua;
 
     LuaControl::Ptr      luaControl;
     Simulation::Ptr      simulation;

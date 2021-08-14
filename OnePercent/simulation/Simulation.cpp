@@ -18,7 +18,7 @@
 
 #include <osgHelper/Helper.h>
 
-#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/ILuaStateManager.h>
 
 namespace onep
 {
@@ -27,7 +27,7 @@ namespace onep
   struct Simulation::Impl
   {
     Impl(osgHelper::ioc::Injector& injector)
-      : lua(injector.inject<luaHelper::LuaStateManager>())
+      : lua(injector.inject<luaHelper::ILuaStateManager>())
       , modelContainer(injector.inject<ModelContainer>())
       , visuals(injector.inject<LuaVisuals>())
       , oDay(injector.inject<ODay>())
@@ -41,7 +41,7 @@ namespace onep
       , tickNumber(0)
     {}
 
-    osg::ref_ptr<luaHelper::LuaStateManager> lua;
+    osg::ref_ptr<luaHelper::ILuaStateManager> lua;
 
     ModelContainer::Ptr modelContainer;
     LuaVisuals::Ptr     visuals;

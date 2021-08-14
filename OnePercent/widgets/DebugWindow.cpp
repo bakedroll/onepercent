@@ -14,7 +14,7 @@
 
 #include <osgHelper/Macros.h>
 
-#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/ILuaStateManager.h>
 
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -89,7 +89,7 @@ namespace onep
   {
     Impl(osgHelper::ioc::Injector& injector, DebugWindow* b)
       : base(b)
-      , lua(injector.inject<luaHelper::LuaStateManager>())
+      , lua(injector.inject<luaHelper::ILuaStateManager>())
       , countryOverlay(injector.inject<CountryOverlay>())
       , boundariesMesh(injector.inject<BoundariesMesh>())
       , simulation(injector.inject<Simulation>())
@@ -113,7 +113,7 @@ namespace onep
 
     DebugWindow* base;
 
-    osg::ref_ptr<luaHelper::LuaStateManager> lua;
+    osg::ref_ptr<luaHelper::ILuaStateManager> lua;
 
     osg::ref_ptr<CountryOverlay> countryOverlay;
     osg::ref_ptr<BoundariesMesh> boundariesMesh;

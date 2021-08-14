@@ -20,7 +20,7 @@ namespace onep
     return m_skills.find(name)->second;
   }
 
-  void LuaSkillsTable::addSkill(luaHelper::LuaStateManager::Ptr lua, const std::string& name, luabridge::LuaRef& ref)
+  void LuaSkillsTable::addSkill(luaHelper::ILuaStateManager::Ptr lua, const std::string& name, luabridge::LuaRef& ref)
   {
     auto skill = addUserDataObject<LuaSkill>(name, ref, lua);
     if (skill)

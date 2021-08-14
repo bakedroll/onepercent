@@ -16,7 +16,7 @@
 #include <osgHelper/Helper.h>
 #include <osgHelper/View.h>
 
-#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/ILuaStateManager.h>
 
 #include <QtOsgBridge/Helper.h>
 #include <QtOsgBridge/Macros.h>
@@ -33,7 +33,7 @@ namespace onep
         configManager(injector.inject<LuaConfig>()),
         simulation(injector.inject<Simulation>()),
         countryOverlay(injector.inject<CountryOverlay>()),
-        lua(injector.inject<luaHelper::LuaStateManager>()),
+        lua(injector.inject<luaHelper::ILuaStateManager>()),
         modelContainer(injector.inject<ModelContainer>()),
         paramEarthRadius(0.0f),
         paramCameraMinDistance(0.0f),
@@ -67,7 +67,7 @@ namespace onep
     osg::ref_ptr<osgHelper::View>   view;
     osg::ref_ptr<osgHelper::Camera> camera;
 
-    osg::ref_ptr<luaHelper::LuaStateManager> lua;
+    osg::ref_ptr<luaHelper::ILuaStateManager> lua;
 
     osg::ref_ptr<ModelContainer> modelContainer;
 

@@ -4,7 +4,9 @@
 
 #include <osg/PositionAttitudeTransform>
 
-#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/ILuaStateManager.h>
+
+#include <osgHelper/ioc/Injector.h>
 
 namespace onep
 {

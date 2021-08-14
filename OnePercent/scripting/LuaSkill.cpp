@@ -35,7 +35,7 @@ namespace onep
     osgHelper::Observable<bool>::Ptr obActivated;
   };
 
-  LuaSkill::LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const luaHelper::LuaStateManager::Ptr& luaStateManager)
+  LuaSkill::LuaSkill(const luabridge::LuaRef& object, lua_State* lua, const luaHelper::ILuaStateManager::Ptr& luaStateManager)
     : LuaCallbackRegistry(luaStateManager)
     , LuaTableMappedObject(object, lua)
     , m(new Impl())

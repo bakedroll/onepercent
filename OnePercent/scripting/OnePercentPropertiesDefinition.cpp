@@ -23,7 +23,7 @@ namespace onep
     addProperty<LuaControl>(state, "control");
     addProperty<LuaSimulation>(state, "simulation");
     addProperty<LuaVisuals>(state, "visuals");
-    addProperty<luaHelper::LuaLogger>(state, "log");
+    addProperty<luaHelper::ILuaLogger>(state, "log");
     addProperty<CountryOverlay>(state, "countries");
   }
 }

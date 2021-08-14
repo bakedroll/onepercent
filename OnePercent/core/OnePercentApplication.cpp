@@ -43,7 +43,7 @@ namespace onep
 {
   void registerLuaClasses(osgHelper::ioc::Injector& injector)
   {
-    osg::ref_ptr<luaHelper::LuaStateManager> lua = injector.inject<luaHelper::LuaStateManager>();
+    auto lua = injector.inject<luaHelper::ILuaStateManager>();
 
     lua->registerDefinition<LuaExternalClassDefinitions>();
 
@@ -63,7 +63,7 @@ namespace onep
     lua->registerDefinition<LuaControl::Definition>();
     lua->registerDefinition<LuaSimulation::Definition>();
     lua->registerDefinition<LuaVisuals::Definition>();
-    lua->registerDefinition<luaHelper::LuaLogger::Definition>();
+    lua->registerDefinition<luaHelper::ILuaLogger::Definition>();
 
     lua->registerDefinition<OnePercentPropertiesDefinition>(injector);
   }
@@ -119,7 +119,7 @@ namespace onep
     registerEssentialComponents();
 
     // Core
-    container.registerSingletonType<luaHelper::ModManager>();
+    container.registerSingletonInterfaceType<luaHelper::IModManager, luaHelper::ModManager>();
 
     // States
     container.registerType<LoadingGlobeOverviewState>();
@@ -145,8 +145,8 @@ namespace onep
     // scripting
     container.registerSingletonType<LuaControl>();
     container.registerSingletonType<LuaVisuals>();
-    container.registerSingletonType<luaHelper::LuaStateManager>();
-    container.registerSingletonType<luaHelper::LuaLogger>();
+    container.registerSingletonInterfaceType<luaHelper::ILuaStateManager, luaHelper::LuaStateManager>();
+    container.registerSingletonInterfaceType<luaHelper::ILuaLogger, luaHelper::LuaLogger>();
     container.registerSingletonType<LuaConfig>();
     container.registerSingletonType<LuaSimulation>();
 

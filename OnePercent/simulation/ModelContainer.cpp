@@ -5,7 +5,7 @@
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaCountry.h"
 
-#include <luaHelper/LuaStateManager.h>
+#include <luaHelper/ILuaStateManager.h>
 #include <luaHelper/LuaValueDef.h>
 #include <luaHelper/LuaArrayTable.h>
 
@@ -16,10 +16,10 @@ namespace onep
   struct ModelContainer::Impl
   {
     Impl(osgHelper::ioc::Injector& injector)
-      : lua(injector.inject<luaHelper::LuaStateManager>())
+      : lua(injector.inject<luaHelper::ILuaStateManager>())
     {}
 
-    luaHelper::LuaStateManager::Ptr lua;
+    luaHelper::ILuaStateManager::Ptr lua;
     LuaModel::Ptr model;
 
     QRecursiveMutex mutexModel;
