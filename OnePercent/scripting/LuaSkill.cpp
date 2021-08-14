@@ -46,7 +46,7 @@ namespace onep
     m->type        = getString("type");
     m->cost        = getNumber<int>("cost");
 
-    if (hasValue("dependencies"))
+    if (containsKey("dependencies"))
     {
       const auto depTable = getTable("dependencies");
 
