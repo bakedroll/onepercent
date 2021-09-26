@@ -1,8 +1,6 @@
 #include "scripting/LuaBranchesActivatedTable.h"
 
-
-#include "osgHelper/Macros.h"
-#include "QtOsgBridge/Multithreading.h"
+#include <utilsLib/Utils.h>
 
 #include <QMutex>
 

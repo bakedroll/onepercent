@@ -1,9 +1,11 @@
 #include "scripting/LuaSkill.h"
 #include "scripting/LuaDefines.h"
 
-#include <QtOsgBridge/Multithreading.h>
+#include <utilsLib/Utils.h>
 
-#include "osgHelper/Helper.h"
+#include <QtUtilsLib/MultithreadedApplication.h>
+
+#include <osgHelper/Helper.h>
 
 namespace onep
 {
@@ -62,14 +64,14 @@ namespace onep
 
     m->obActivated->set(bActivared);
 
-    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_SKILL_UPDATE));
+    registerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_SKILL_UPDATE));
   }
 
   LuaSkill::~LuaSkill() = default;
 
   void LuaSkill::update(const std::string& branchName, luabridge::LuaRef countryState)
   {
-    triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_SKILL_UPDATE), branchName, countryState);
+    triggerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_SKILL_UPDATE), branchName, countryState);
   }
 
   const std::string& LuaSkill::getName() const
@@ -99,7 +101,7 @@ namespace onep
 
   void LuaSkill::setIsActivated(bool activated)
   {
-    QtOsgBridge::Multithreading::executeInUiAsync([=](){ m->obActivated->set(activated); });
+    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=](){ m->obActivated->set(activated); });
   }
 
   osgHelper::Observable<bool>::Ptr LuaSkill::getObActivated() const

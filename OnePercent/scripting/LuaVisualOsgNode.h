@@ -2,7 +2,7 @@
 
 #include <osg/Node>
 
-#include <osgHelper/Macros.h>
+#include <utilsLib/Utils.h>
 
 #include <luaHelper/LuaBridgeDefinition.h>
 
@@ -74,7 +74,7 @@ namespace onep
 
       if (!uniform)
       {
-        OSGH_QLOG_WARN(QString("Uniform %1 not found.").arg(name.c_str()));
+        UTILS_QLOG_WARN(QString("Uniform %1 not found.").arg(name.c_str()));
       }
 
       uniform->set(value);

@@ -122,7 +122,7 @@ namespace onep
       // shader
       osg::ref_ptr<osg::Program> pgm = new osg::Program();
 
-      OSGH_QLOG_DEBUG(QString("Check GPUShaderFp64Supported: %1 - using %2 shader")
+      UTILS_QLOG_DEBUG(QString("Check GPUShaderFp64Supported: %1 - using %2 shader")
                               .arg(isFp64Supported)
                               .arg(isFp64Supported ? "fp64" : "default"));
 

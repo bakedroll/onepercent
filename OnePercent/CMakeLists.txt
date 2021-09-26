@@ -9,8 +9,10 @@ require_library(Qt6 MODULES Core Gui Widgets OpenGL OpenGLWidgets)
 require_library(Lua)
 require_library(LuaBridge)
 
+require_project(utilsLib PATH utilsLib)
 require_project(osgHelper PATH osgHelper)
 require_project(luaHelper PATH luaHelper)
+require_project(QtUtilsLib PATH QtUtilsLib)
 require_project(QtOsgBridge PATH QtOsgBridge)
 
 if (LUADOC_ENABLE)

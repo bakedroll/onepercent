@@ -234,7 +234,7 @@ namespace onep
 
         assert_return(country);
         
-        OSGH_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
+        UTILS_QLOG_INFO(QString("Selected country (%1): %2").arg(country->getId()).arg(QString::fromLocal8Bit(country->getName().c_str())));
 
         float viewDistance = countryPresenter->getOptimalCameraDistance(
           float(m->camera->getProjectionAngle()),
@@ -254,7 +254,7 @@ namespace onep
 
         osg::Vec2f latLong = countryPresenter->getCenterLatLong();
         /*
-        OSGH_QLOG_DEBUG(QString("Min: %1 Max: %2 ViewDistance: %3 x: %9 Angle: %4 Distance: %5 %10 %11 Shift: %6 Lat: %7 cosa: %8")
+        UTILS_QLOG_DEBUG(QString("Min: %1 Max: %2 ViewDistance: %3 x: %9 Angle: %4 Distance: %5 %10 %11 Shift: %6 Lat: %7 cosa: %8")
           .arg(minDistance)
           .arg(maxDistance)
           .arg(viewDistance)
@@ -342,13 +342,13 @@ namespace onep
         {
           m->simulation->stop();
 
-          OSGH_LOG_INFO("Simulation stopped");
+          UTILS_LOG_INFO("Simulation stopped");
         }
         else
         {
           m->simulation->start();
 
-          OSGH_LOG_INFO("Simulation started");
+          UTILS_LOG_INFO("Simulation started");
         }
         return true;
       }

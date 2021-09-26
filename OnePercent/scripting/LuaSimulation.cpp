@@ -2,7 +2,8 @@
 
 #include "simulation/Simulation.h"
 
-#include <QtOsgBridge/Multithreading.h>
+#include <QtUtilsLib/MultithreadedApplication.h>
+
 #include <QtOsgBridge/Macros.h>
 
 extern "C"
@@ -41,36 +42,36 @@ namespace onep
 
   void LuaSimulation::lua_start(lua_State* state)
   {
-    QtOsgBridge::Multithreading::executeInUiAsync([this](){ m_simulation->start(); });
+    QtUtilsLib::MultithreadedApplication::executeInUiAsync([this](){ m_simulation->start(); });
   }
 
   void LuaSimulation::lua_stop(lua_State* state)
   {
-    QtOsgBridge::Multithreading::executeInUiAsync([this](){ m_simulation->stop(); });
+    QtUtilsLib::MultithreadedApplication::executeInUiAsync([this](){ m_simulation->stop(); });
   }
 
   void LuaSimulation::lua_set_skill_points(int points)
   {
-    OSGH_QLOG_DEBUG(QString("Set skill points: %1").arg(points));
-    QtOsgBridge::Multithreading::executeInUiAsync([=](){ m_oNumSkillPoints->set(points); });
+    UTILS_QLOG_DEBUG(QString("Set skill points: %1").arg(points));
+    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=](){ m_oNumSkillPoints->set(points); });
   }
 
   void LuaSimulation::lua_add_skill_points(int points)
   {
-    OSGH_QLOG_DEBUG(QString("Add skill points: %1").arg(points));
-    QtOsgBridge::Multithreading::executeInUiAsync([=]() { m_simulation->addSkillPoints(points); });
+    UTILS_QLOG_DEBUG(QString("Add skill points: %1").arg(points));
+    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=]() { m_simulation->addSkillPoints(points); });
   }
 
   void LuaSimulation::lua_set_day(int day)
   {
-    OSGH_QLOG_DEBUG(QString("Set day: %1").arg(day));
-    QtOsgBridge::Multithreading::executeInUiAsync([=](){ m_oDay->set(day); });
+    UTILS_QLOG_DEBUG(QString("Set day: %1").arg(day));
+    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=](){ m_oDay->set(day); });
   }
 
   void LuaSimulation::lua_set_interval(int interval)
   {
-    OSGH_QLOG_DEBUG(QString("Set interval: %1").arg(interval));
-    QtOsgBridge::Multithreading::executeInUiAsync([=](){ m_simulation->setUpdateTimerInterval(interval); });
+    UTILS_QLOG_DEBUG(QString("Set interval: %1").arg(interval));
+    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=](){ m_simulation->setUpdateTimerInterval(interval); });
   }
 
   void LuaSimulation::lua_set_tick_update_mode(int mode)

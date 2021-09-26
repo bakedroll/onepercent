@@ -18,6 +18,8 @@
 #include <osgHelper/ppu/DOF.h>
 #include <osgHelper/ppu/FXAA.h>
 
+#include <utilsLib/Utils.h>
+
 #include <QtOsgBridge/Helper.h>
 
 #include <osg/GL2Extensions>
@@ -31,7 +33,6 @@
 #include <QResizeEvent>
 
 #include <osgHelper/IResourceManager.h>
-#include <osgHelper/Helper.h>
 
 namespace onep
 {
@@ -169,7 +170,7 @@ namespace onep
     // update neighbours data
     m->model->initializeCountryNeighbours(m->countryOverlay->getNeighbourships());
 
-    m->luaControl->triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_INITIALIZE));
+    m->luaControl->triggerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_INITIALIZE));
 
     // loading simulation
     m->simulation->prepare();

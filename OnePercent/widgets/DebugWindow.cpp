@@ -12,7 +12,7 @@
 #include "simulation/UpdateThread.h"
 #include "simulation/ModelContainer.h"
 
-#include <osgHelper/Macros.h>
+#include <utilsLib/Utils.h>
 
 #include <luaHelper/ILuaStateManager.h>
 
@@ -29,7 +29,8 @@
 #include <QScrollArea>
 #include <QPainter>
 
-#include <QtOsgBridge/Multithreading.h>
+#include <QtUtilsLib/MultithreadedApplication.h>
+
 #include <QtOsgBridge/Macros.h>
 
 #include <chrono>
@@ -174,7 +175,7 @@ namespace onep
       auto duration = std::chrono::high_resolution_clock::now() - start_time;
       long d = std::chrono::duration_cast<std::chrono::milliseconds> (duration).count();
 
-      OSGH_QLOG_DEBUG(QString("Took %1 ms").arg(d));
+      UTILS_QLOG_DEBUG(QString("Took %1 ms").arg(d));
     }
 
     void toggleCountry()
@@ -553,7 +554,7 @@ namespace onep
 
             skillBranchActivatedObservers.push_back(it.second->getBranchesActivatedTable()->getOBranchActivated(name)->connect([=](bool activated)
             {
-              QtOsgBridge::Multithreading::executeInUiAsync([=]()
+                QtUtilsLib::MultithreadedApplication::executeInUiAsync([=]()
               {
                 if (cid == countryOverlay->getSelectedCountryId())
                 {

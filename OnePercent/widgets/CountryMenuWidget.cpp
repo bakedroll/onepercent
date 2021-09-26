@@ -13,7 +13,7 @@
 
 #include <osgHelper/Helper.h>
 
-#include <QtOsgBridge/Multithreading.h>
+#include <QtUtilsLib/MultithreadedApplication.h>
 
 #include <QPushButton>
 
@@ -75,7 +75,7 @@ namespace onep
           notifiesActivated.push_back(cstate->getBranchesActivatedTable()->getOBranchActivated(name)->connectAndNotify(
             [this, index, branch, name](bool activated)
           {
-            QtOsgBridge::Multithreading::executeInUiAsync([this, index, branch, name, activated]()
+            QtUtilsLib::MultithreadedApplication::executeInUiAsync([this, index, branch, name, activated]()
             {
               if (activated)
               {

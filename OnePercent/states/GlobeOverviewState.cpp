@@ -118,13 +118,13 @@ namespace onep
     case Qt::Key_Minus:
     {
       m->timeSpeed *= 0.75f;
-      OSGH_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
+      UTILS_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
       return true;
     }
     case Qt::Key_Plus:
     {
       m->timeSpeed *= 1.25f;
-      OSGH_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
+      UTILS_QLOG_DEBUG(QString("Speed: x%1").arg(m->timeSpeed));
       return true;
     }
     case Qt::Key_O:
@@ -137,7 +137,7 @@ namespace onep
     }
     case Qt::Key_F4:
     {
-      OSGH_LOG_INFO("Capturing screenshot");
+      UTILS_LOG_INFO("Capturing screenshot");
 
       osg::ref_ptr<osg::Image> capturedImage;
       osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler = new osgViewer::ScreenCaptureHandler();

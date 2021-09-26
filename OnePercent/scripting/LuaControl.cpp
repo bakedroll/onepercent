@@ -9,13 +9,15 @@
 #include "scripting/LuaDefines.h"
 #include "simulation/ModelContainer.h"
 
+#include <utilsLib/Utils.h>
+
 #include <luaHelper/ILuaStateManager.h>
 #include <luaHelper/LuaArrayTable.h>
 #include <luaHelper/LuaObservableCallback.h>
 
 #include <QString>
 
-#include "osgHelper/Helper.h"
+#include <osgHelper/Helper.h>
 
 namespace onep
 {
@@ -50,18 +52,18 @@ namespace onep
     : LuaCallbackRegistry(injector.inject<luaHelper::ILuaStateManager>())
     , m(new Impl(injector))
   {
-    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_INITIALIZE));
-    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_TICK));
-    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_UPDATE));
-    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_PURCHASED));
-    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_ACTIVATED));
-    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_RESIGNED));
+    registerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_INITIALIZE));
+    registerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_TICK));
+    registerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_BRANCH_UPDATE));
+    registerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_BRANCH_PURCHASED));
+    registerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_BRANCH_ACTIVATED));
+    registerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_BRANCH_RESIGNED));
     
-    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_COUNTRY_CHANGED),
+    registerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_COUNTRY_CHANGED),
       std::make_shared<luaHelper::LuaObservableCallback<int>>(m->lua,
       injector.inject<CountryOverlay>()->getOSelectedCountryId()));
 
-    registerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_OVERLAY_CHANGED),
+    registerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_OVERLAY_CHANGED),
       std::make_shared<luaHelper::LuaObservableCallback<std::string>>(m->lua,
       injector.inject<CountryOverlay>()->getOCurrentOverlayBranchName()));
 
@@ -73,7 +75,7 @@ namespace onep
       m->modelContainer->accessModel([this, &cb](const LuaModel::Ptr& model)
       {
         auto cstate = model->getSimulationStateTable()->getCountryState(cb.countryId);
-        triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_ACTIVATED), cb.branchName, cstate->luaRef());
+        triggerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_BRANCH_ACTIVATED), cb.branchName, cstate->luaRef());
       });
     });
   }
@@ -134,7 +136,7 @@ namespace onep
 
   void LuaControl::luaUpdateBranch(const std::string& name, luabridge::LuaRef countryState)
   {
-    triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_BRANCH_UPDATE), name, countryState);
+    triggerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_BRANCH_UPDATE), name, countryState);
   }
 
   void LuaControl::luaCreateBranches(luabridge::LuaRef branches)
@@ -176,7 +178,7 @@ namespace onep
         auto branch = model->getBranchesTable()->getBranchByName(branchNameRef);
         if (!branch)
         {
-          OSGH_QLOG_WARN(QString("Cannot add skill '%1'. Branch '%2' not found")
+          UTILS_QLOG_WARN(QString("Cannot add skill '%1'. Branch '%2' not found")
             .arg(QString::fromStdString(skillNameRef))
             .arg(QString::fromStdString(branchNameRef)));
           continue;

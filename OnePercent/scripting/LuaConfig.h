@@ -1,8 +1,8 @@
 #pragma once
 
-#include <osgHelper/Macros.h>
-
 #include <osg/Referenced>
+
+#include <utilsLib/Utils.h>
 
 #include <osgHelper/ioc/Injector.h>
 

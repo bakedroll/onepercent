@@ -135,7 +135,7 @@ namespace onep
 
           if (cstates.count(cid) == 0)
           {
-            OSGH_QLOG_WARN(QString("No country with id %1").arg(cid));
+            UTILS_QLOG_WARN(QString("No country with id %1").arg(cid));
             return;
           }
 
@@ -154,7 +154,7 @@ namespace onep
 
             if (values.count(valueName) == 0)
             {
-              OSGH_QLOG_WARN(QString("Value %1 not found").arg(valueName.c_str()));
+              UTILS_QLOG_WARN(QString("Value %1 not found").arg(valueName.c_str()));
               continue;
             }
 
@@ -173,7 +173,7 @@ namespace onep
 
             if (branchesTable->getBranchByName(branchName) == nullptr)
             {
-              OSGH_QLOG_WARN(QString("Branch not found"));
+              UTILS_QLOG_WARN(QString("Branch not found"));
               continue;
             }
 
@@ -206,7 +206,7 @@ namespace onep
 
             if (!branch || !branch->getSkillsTable()->getSkillByName(skillName))
             {
-              OSGH_QLOG_WARN(QString("Skill %1 not found").arg(skillName.c_str()));
+              UTILS_QLOG_WARN(QString("Skill %1 not found").arg(skillName.c_str()));
               continue;
             }
 

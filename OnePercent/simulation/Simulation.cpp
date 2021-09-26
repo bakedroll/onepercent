@@ -11,7 +11,10 @@
 #include "scripting/LuaVisuals.h"
 #include "simulation/UpdateThread.h"
 
-#include <QtOsgBridge/Multithreading.h>
+#include <utilsLib/Utils.h>
+
+#include <QtUtilsLib/MultithreadedApplication.h>
+
 #include <QtOsgBridge/Macros.h>
 
 #include <QTimer>
@@ -73,7 +76,7 @@ namespace onep
 
       if (!ptr->isFunction())
       {
-        OSGH_QLOG_FATAL(QString("Could not load lua function '%1'").arg(path));
+        UTILS_QLOG_FATAL(QString("Could not load lua function '%1'").arg(path));
       }
 
       return ptr;
@@ -89,7 +92,7 @@ namespace onep
     m->oNumSkillPoints->set(50);
 
     m->timer.setSingleShot(false);
-    m->timer.setInterval(osgHelper::underlying(State::NormalSpeed));
+    m->timer.setInterval(utilsLib::underlying(State::NormalSpeed));
 
     m->thread.onTick([this]()
     {
@@ -107,7 +110,7 @@ namespace onep
           {
             tickElapsed = Helper::measureMsecs([this]()
             {
-              m->luaControl->triggerLuaCallback(osgHelper::underlying(LuaDefines::Callback::ON_TICK));
+              m->luaControl->triggerLuaCallback(utilsLib::underlying(LuaDefines::Callback::ON_TICK));
             });
 
             switch (m->tickUpdateMode)
@@ -125,7 +128,7 @@ namespace onep
             syncElapsed    = Helper::measureMsecs([&model](){ model->getSimulationStateTable()->updateObservables(); });
             visualsElapsed = Helper::measureMsecs([this](){  m->visuals->updateBindings(); });
 
-            QtOsgBridge::Multithreading::executeInUiAsync([this]()
+            QtUtilsLib::MultithreadedApplication::executeInUiAsync([this]()
             {
               m->oDay->set(m->oDay->get() + 1);
             });
@@ -135,7 +138,7 @@ namespace onep
 
       if (m->profilingLogsEnabled)
       {
-        OSGH_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Visuals: %5ms Total: %6ms")
+        UTILS_QLOG_INFO(QString("TickUpdate: %1ms SkillsUpdate: %2ms BranchesUpdate: %3ms Sync: %4ms Visuals: %5ms Total: %6ms")
           .arg(tickElapsed)
           .arg(skillsElapsed)
           .arg(branchesElapsed)
@@ -228,8 +231,8 @@ namespace onep
           }
 
           cstate->getBranchesActivatedTable()->setBranchActivated(name, activated);
-          m->luaControl->triggerLuaCallback(osgHelper::underlying(activated ? LuaDefines::Callback::ON_BRANCH_PURCHASED
-                                                                            : LuaDefines::Callback::ON_BRANCH_RESIGNED),
+          m->luaControl->triggerLuaCallback(utilsLib::underlying(activated ? LuaDefines::Callback::ON_BRANCH_PURCHASED
+                                                                           : LuaDefines::Callback::ON_BRANCH_RESIGNED),
                                             name, cstate->luaRef());
         });
       });
@@ -250,15 +253,15 @@ namespace onep
     if (state == State::Paused)
     {
       m->timer.stop();
-      OSGH_LOG_DEBUG("Simulation stopped");
+      UTILS_LOG_DEBUG("Simulation stopped");
       return;
     }
 
-    setUpdateTimerInterval(osgHelper::underlying(state));
+    setUpdateTimerInterval(utilsLib::underlying(state));
     m->justStarted = true;
     m->timer.start();
 
-    OSGH_LOG_DEBUG("Simulation started");
+    UTILS_LOG_DEBUG("Simulation started");
   }
 
   void Simulation::setAutoPause(bool enabled)

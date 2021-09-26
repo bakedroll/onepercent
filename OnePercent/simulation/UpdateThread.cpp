@@ -1,9 +1,9 @@
 #include "UpdateThread.h"
 
-#include <QtOsgBridge/Multithreading.h>
 #include <QtOsgBridge/Macros.h>
 
 #include <QMutex>
+#include <QEventLoop>
 
 namespace onep
 {
@@ -44,7 +44,7 @@ namespace onep
 
   void UpdateThread::run()
   {
-    OSGH_LOG_DEBUG("Starting up update thread");
+    UTILS_LOG_DEBUG("Starting up update thread");
 
     QEventLoop eventLoop;
     connect(this, &UpdateThread::nextStep, &eventLoop, &QEventLoop::quit);
@@ -59,7 +59,7 @@ namespace onep
       m->tickFunc();
     }
 
-    OSGH_LOG_DEBUG("Shutdown update thread");
+    UTILS_LOG_DEBUG("Shutdown update thread");
   }
 
   void UpdateThread::doNextStep()

@@ -1,8 +1,6 @@
 #include "scripting/LuaSimulationStateTable.h"
 #include "scripting/LuaCountryState.h"
 
-#include <osgHelper/Macros.h>
-
 #include <QMutex>
 
 namespace onep

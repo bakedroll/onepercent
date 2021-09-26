@@ -116,7 +116,7 @@ namespace onep
 
   void OnePercentApplication::registerComponents(osgHelper::ioc::InjectionContainer& container)
   {
-    registerEssentialComponents();
+    registerEssentialComponents(container);
 
     // Core
     container.registerSingletonInterfaceType<luaHelper::IModManager, luaHelper::ModManager>();
@@ -170,14 +170,14 @@ namespace onep
     }
     else
     {
-      OSGH_QLOG_WARN(QString("Could not load font file '%1'").arg(fontFilename));
+      UTILS_QLOG_WARN(QString("Could not load font file '%1'").arg(fontFilename));
     }
 
     registerLuaClasses(injector);
 
     m_simulation = injector.inject<Simulation>();
 
-    OSGH_LOG_INFO("Loading stylesheets");
+    UTILS_LOG_INFO("Loading stylesheets");
     loadStylesheets(":/Resources/stylesheets/");
   }
 
@@ -186,7 +186,7 @@ namespace onep
       QDir dir(path);
       if (!dir.exists())
       {
-        OSGH_QLOG_WARN(QString("Could not find stylesheet directory: %1").arg(path));
+        UTILS_QLOG_WARN(QString("Could not find stylesheet directory: %1").arg(path));
         return;
       }
 
@@ -198,7 +198,7 @@ namespace onep
         QFile file(dir.filePath(*it));
         if (!file.open(QIODevice::ReadOnly))
         {
-          OSGH_QLOG_WARN(QString("Could not read stylesheet file: %1").arg(file.fileName()));
+          UTILS_QLOG_WARN(QString("Could not read stylesheet file: %1").arg(file.fileName()));
           continue;
         }
 

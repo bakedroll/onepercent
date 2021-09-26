@@ -22,6 +22,8 @@
 #include <QButtonGroup>
 #include <QFormLayout>
 
+#include <utilsLib/Utils.h>
+
 #include <osgHelper/Helper.h>
 
 namespace onep
@@ -118,14 +120,14 @@ namespace onep
       buttonFastForward->setEnabled(false);
 
       auto simulationButtonsGroup = new QButtonGroup(base);
-      simulationButtonsGroup->addButton(buttonPause, osgHelper::underlying(Simulation::State::Paused));
-      simulationButtonsGroup->addButton(buttonPlay, osgHelper::underlying(Simulation::State::NormalSpeed));
-      simulationButtonsGroup->addButton(buttonFastForward, osgHelper::underlying(Simulation::State::FastForward));
+      simulationButtonsGroup->addButton(buttonPause, utilsLib::underlying(Simulation::State::Paused));
+      simulationButtonsGroup->addButton(buttonPlay, utilsLib::underlying(Simulation::State::NormalSpeed));
+      simulationButtonsGroup->addButton(buttonFastForward, utilsLib::underlying(Simulation::State::FastForward));
 
       std::map<QAbstractButton*, int> buttonIdMap;
-      buttonIdMap[buttonPause]       = osgHelper::underlying(Simulation::State::Paused);
-      buttonIdMap[buttonPlay]        = osgHelper::underlying(Simulation::State::NormalSpeed);
-      buttonIdMap[buttonFastForward] = osgHelper::underlying(Simulation::State::FastForward);
+      buttonIdMap[buttonPause]       = utilsLib::underlying(Simulation::State::Paused);
+      buttonIdMap[buttonPlay]        = utilsLib::underlying(Simulation::State::NormalSpeed);
+      buttonIdMap[buttonFastForward] = utilsLib::underlying(Simulation::State::FastForward);
 
       // Values Form
       auto layoutValues = new QFormLayout();

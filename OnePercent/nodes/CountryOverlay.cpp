@@ -14,15 +14,16 @@
 #include "scripting/LuaModel.h"
 #include "simulation/ModelContainer.h"
 
+#include <utilsLib/Utils.h>
+
+#include <QtUtilsLib/MultithreadedApplication.h>
+
 #include <osgHelper/ByteStream.h>
 #include <osgHelper/Helper.h>
 #include <osgHelper/Observable.h>
 #include <osgHelper/IResourceManager.h>
 #include <osgHelper/IShaderFactory.h>
 #include <osgHelper/ITextureFactory.h>
-#include <osgHelper/Macros.h>
-
-#include <QtOsgBridge/Multithreading.h>
 
 #include <osg/BlendFunc>
 #include <osg/Texture2D>
@@ -408,7 +409,7 @@ int CountryOverlay::getCountryId(const osg::Vec2f& coord) const
 
 void CountryOverlay::setSelectedCountry(int countryId)
 {
-  QtOsgBridge::Multithreading::executeInUiAsync([this, countryId]() {
+  QtUtilsLib::MultithreadedApplication::executeInUiAsync([this, countryId]() {
     QMutexLocker lock(&m->selectedCountryMutex);
     m->oSelectedCountryId->set(countryId);
   });
@@ -433,7 +434,7 @@ std::string CountryOverlay::getCurrentOverlayBranchName() const
 
 void CountryOverlay::setCurrentOverlayBranchName(const std::string& branchName)
 {
-  QtOsgBridge::Multithreading::executeInUiAsync([this, branchName]() {
+  QtUtilsLib::MultithreadedApplication::executeInUiAsync([this, branchName]() {
     QMutexLocker lock(&m->currentBranchIdMutex);
     m->oCurrentOverlayBranchId->set(branchName);
   });
