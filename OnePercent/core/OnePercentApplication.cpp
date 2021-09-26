@@ -35,7 +35,7 @@
 #include <luaHelper/LuaLogger.h>
 #include <luaHelper/LuaCallbackRegistry.h>
 
-#include <QtOsgBridge/Macros.h>
+#include <QtUtilsLib/Macros.h>
 
 #include <QDir>
 

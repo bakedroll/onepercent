@@ -8,7 +8,7 @@
 
 #include <QPointer>
 
-#include <QtOsgBridge/Macros.h>
+#include <QtUtilsLib/Macros.h>
 
 namespace onep
 {

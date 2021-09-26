@@ -6,7 +6,7 @@
 
 #include <luaHelper/LuaBridgeDefinition.h>
 
-#include <QtOsgBridge/Macros.h>
+#include <QtUtilsLib/Macros.h>
 
 #include <QString>
 

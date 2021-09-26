@@ -4,7 +4,7 @@
 
 #include <osgViewer/ViewerEventHandlers>
 
-#include <QtOsgBridge/Macros.h>
+#include <QtUtilsLib/Macros.h>
 
 #include <osgHelper/View.h>
 

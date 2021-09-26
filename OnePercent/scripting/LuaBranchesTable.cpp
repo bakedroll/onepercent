@@ -3,7 +3,7 @@
 
 #include <QString>
 
-#include <QtOsgBridge/Macros.h>
+#include <QtUtilsLib/Macros.h>
 
 namespace onep
 {

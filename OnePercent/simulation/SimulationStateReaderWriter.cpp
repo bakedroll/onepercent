@@ -7,7 +7,7 @@
 #include "simulation/UpdateThread.h"
 #include "simulation/ModelContainer.h"
 
-#include <QtOsgBridge/Macros.h>
+#include <QtUtilsLib/Macros.h>
 
 #include <QFile>
 #include <QMessageBox>

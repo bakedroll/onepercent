@@ -12,7 +12,7 @@
 
 #include <osgHelper/Helper.h>
 
-#include <QtOsgBridge/Macros.h>
+#include <QtUtilsLib/Macros.h>
 
 namespace onep
 {

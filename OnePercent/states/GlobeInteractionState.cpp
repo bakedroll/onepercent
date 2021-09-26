@@ -18,9 +18,9 @@
 
 #include <luaHelper/ILuaStateManager.h>
 
-#include <QtOsgBridge/Helper.h>
-#include <QtOsgBridge/Macros.h>
+#include <QtUtilsLib/Macros.h>
 
+#include <QtOsgBridge/Helper.h>
 namespace onep
 {
   const auto CountryNone = 0;
