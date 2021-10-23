@@ -108,16 +108,13 @@ namespace onep
       base->addChild(cloudsTransform);
     }
 
-    void makeAtmosphericScattering(bool isFp64Supported)
+    void makeAtmosphericScattering(bool isFp64Supported, const osg::ref_ptr<osg::Node>& screenQuadNode)
     {
       const auto earthRadius         = configManager->getNumber<float>("earth.radius");
       const auto atmosphereHeight    = configManager->getNumber<float>("earth.atmosphere_height");
       const auto scatteringDepth     = configManager->getNumber<float>("earth.scattering_depth");
       const auto scatteringIntensity = configManager->getNumber<float>("earth.scattering_intensity");
       const auto atmosphereColor     = configManager->getVector<osg::Vec4f>("earth.atmosphere_color");
-
-      // atmospheric scattering geometry
-      scatteringQuad = new osgHelper::CameraAlignedQuad();
 
       // shader
       osg::ref_ptr<osg::Program> pgm = new osg::Program();
@@ -145,7 +142,13 @@ namespace onep
       scatteringLightPosrUniform = new osg::Uniform(osg::Uniform::FLOAT_VEC4, "light_posr", 1);
 
       // stateset
-      osg::ref_ptr<osg::StateSet> stateSet = scatteringQuad->getOrCreateStateSet();
+      osg::ref_ptr<osg::StateSet> stateSet = screenQuadNode->getOrCreateStateSet();
+      stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+      stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+      stateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+      stateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+      stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+      stateSet->setRenderBinDetails(10, "RenderBin");
       stateSet->setAttributeAndModes(new osg::BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA), osg::StateAttribute::ON);
       stateSet->addUniform(new osg::Uniform("planet_r", osg::Vec3f(earthRad, earthRad, earthRad)));
       stateSet->addUniform(new osg::Uniform("planet_R", osg::Vec3f(atmosRad, atmosRad, atmosRad)));
@@ -158,7 +161,7 @@ namespace onep
       stateSet->addUniform(new osg::Uniform("B0", atmosphereColor * scatteringIntensity));
       stateSet->setAttribute(pgm, osg::StateAttribute::ON);
 
-      base->addChild(scatteringQuad);
+      base->addChild(screenQuadNode);
     }
 
     osg::ref_ptr<osg::Geode> createPlanetGeode(int textureDetailLevel)
@@ -389,8 +392,6 @@ namespace onep
     osg::ref_ptr<osg::Uniform> uniformTime;
 
     osg::ref_ptr<CountryOverlay> countryOverlay;
-
-    osg::ref_ptr<osgHelper::CameraAlignedQuad> scatteringQuad;
   };
 
   GlobeModel::GlobeModel(osgHelper::ioc::Injector& injector)
@@ -403,7 +404,7 @@ namespace onep
   {
   }
 
-  void GlobeModel::makeGlobeModel(bool isFp64Supported)
+  void GlobeModel::makeGlobeModel(bool isFp64Supported, const osg::ref_ptr<osg::Node>& screenQuadNode)
   {
     m->propSunDistance = m->configManager->getNumber<float>("sun.distance");
     m->propSunRadiusMp2 = m->configManager->getNumber<float>("sun.radius_pm2");
@@ -412,12 +413,7 @@ namespace onep
 
     m->makeEarthModel();
     m->makeCloudsModel();
-    m->makeAtmosphericScattering(isFp64Supported);
-  }
-
-  osgHelper::CameraAlignedQuad::Ptr GlobeModel::getScatteringQuad()
-  {
-    return m->scatteringQuad;
+    m->makeAtmosphericScattering(isFp64Supported, screenQuadNode);
   }
 
   void GlobeModel::updateLightDir(const osg::Vec3f& direction)

@@ -34,15 +34,9 @@ namespace onep
      * Creates all the meshes and loads textures and shaders
      * \param isFp64Supported Determines if the OpenGL implementation supports
      *                        64-bit floating point arithmetic
+     * \param screenQuadNode  The camera screen space quad required for atmospheric rendering
      */
-    void makeGlobeModel(bool isFp64Supported);
-
-    /**
-     * Returns a camera-aligned-quad which covers the whole screen space
-     * and uses a shader to render an atmospheric scattering effect.
-     * @return a osgHelper::CameraAlignedQuad::Ptr
-     */
-    osgHelper::CameraAlignedQuad::Ptr getScatteringQuad();
+    void makeGlobeModel(bool isFp64Supported, const osg::ref_ptr<osg::Node>& screenQuadNode);
 
     /**
      * Updates the light direction for the scattering shader

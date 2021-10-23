@@ -222,4 +222,5 @@ vec4 atmosphere()
 void main(void)
 {
 	gl_FragColor.rgba=atmosphere();
+    /*gl_FragColor = pixel_scr;*/
 }

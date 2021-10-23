@@ -74,9 +74,11 @@ namespace onep
     osg::ref_ptr<osgHelper::Camera>  camera;
     osg::ref_ptr<osgHelper::View>    view;
 
+    osg::ref_ptr<osg::Node> screenQuadNode;
+
     osg::ref_ptr<osgHelper::IResourceManager> resourceManager;
     osg::ref_ptr<Simulation>                  simulation;
-    osg::ref_ptr<luaHelper::ILuaStateManager>  lua;
+    osg::ref_ptr<luaHelper::ILuaStateManager> lua;
     osg::ref_ptr<ModelContainer>              model;
     osg::ref_ptr<LuaControl>                  luaControl;
 
@@ -101,6 +103,8 @@ namespace onep
   {
     m->view   = mainWindow->getViewWidget()->getView();
     m->camera = m->view->getCamera(osgHelper::View::CameraType::Scene);
+
+    m->screenQuadNode = m->camera->createScreenQuad();
 
     const auto state = m->camera->getGraphicsContext()->getState();
 
@@ -159,7 +163,7 @@ namespace onep
     m->globeOverviewWorld->initialize();
     m->backgroundModel->loadStars("./GameData/data/stars.bin");
 
-    m->globeModel->makeGlobeModel(m->isFp64Supported);
+    m->globeModel->makeGlobeModel(m->isFp64Supported, m->screenQuadNode);
 
     m->boundariesData->loadBoundaries("./GameData/data/boundaries.dat");
     m->countryOverlay->loadCountries("./GameData/data/countries.dat", "./GameData/textures/earth/distance.png");
@@ -217,7 +221,6 @@ namespace onep
   {
     QtOsgBridge::Helper::deleteWidget(m->overlay);
 
-    m->camera->addCameraAlignedQuad(m->globeModel->getScatteringQuad());
     m->view->getRootGroup()->addChild(m->globeOverviewWorld);
   }
 
