@@ -170,7 +170,7 @@ namespace onep
       osg::Vec3 screen = position * viewMat * projMat * win;
 
       countryMenuWidget->setCenterPosition(static_cast<int>(screen.x()),
-                                           static_cast<int>(view->getResolution().y() - screen.y()));
+                                           view->getResolution().y() - static_cast<int>(screen.y()));
 
       countryMenuWidget->updateFade(simData.time);
     }
@@ -523,7 +523,7 @@ namespace onep
     auto resolution = m->view->getResolution();
 
     m->mainFrameWidget = new MainFrameWidget(*m->pInjector);
-    m->mainFrameWidget->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
+    m->mainFrameWidget->setGeometry(0, 0, resolution.x(), resolution.y());
 
     QObject::connect(m->mainFrameWidget, &MainFrameWidget::clickedButtonDebug, [this]()
     {

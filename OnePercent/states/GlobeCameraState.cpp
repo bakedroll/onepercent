@@ -57,7 +57,7 @@ namespace onep
     m->cameraViewAngleAnimation =
             new osgHelper::Animation<osg::Vec2f>(m->cameraViewAngle, 0.5, osgHelper::AnimationEase::CIRCLE_OUT);
 
-    m->backgroundModel->updateResolutionHeight(m->view->getResolution().y());
+    m->backgroundModel->updateResolutionHeight(static_cast<float>(m->view->getResolution().y()));
   }
 
   void GlobeCameraState::onUpdate(const SimulationData& data)

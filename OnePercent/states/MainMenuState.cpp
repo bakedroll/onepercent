@@ -88,7 +88,7 @@ namespace onep
     auto resolution = mainWindow->getViewWidget()->getView()->getResolution();
 
     m->overlay = new QWidget();
-    m->overlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
+    m->overlay->setGeometry(0, 0, resolution.x(), resolution.y());
 
     auto layout = new QVBoxLayout();
     layout->addStretch(5);

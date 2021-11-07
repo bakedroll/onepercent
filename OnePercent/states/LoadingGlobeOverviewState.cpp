@@ -112,7 +112,7 @@ namespace onep
 
     m->view->setClampColorEnabled(true);
 
-    m->fxaa->setResolution(m->view->getResolution());
+    m->fxaa->setResolution(resolution);
     m->dof->setZNear(projNear);
     m->dof->setZFar(projFar);
 
@@ -126,7 +126,7 @@ namespace onep
 
     m->overlay = new QWidget();
 
-    m->overlay->setGeometry(0, 0, int(resolution.x()), int(resolution.y()));
+    m->overlay->setGeometry(0, 0, resolution.x(), resolution.y());
 
     QVBoxLayout* layout = new QVBoxLayout();
     layout->addStretch(1);
