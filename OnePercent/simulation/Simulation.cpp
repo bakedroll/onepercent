@@ -13,7 +13,7 @@
 
 #include <utilsLib/Utils.h>
 
-#include <QtUtilsLib/MultithreadedApplication.h>
+#include <QtUtilsLib/Multithreading.h>
 
 #include <QtUtilsLib/Macros.h>
 
@@ -128,7 +128,7 @@ namespace onep
             syncElapsed    = Helper::measureMsecs([&model](){ model->getSimulationStateTable()->updateObservables(); });
             visualsElapsed = Helper::measureMsecs([this](){  m->visuals->updateBindings(); });
 
-            QtUtilsLib::MultithreadedApplication::executeInUiAsync([this]()
+            QtUtilsLib::Multithreading::executeInUiAsync([this]()
             {
               m->oDay->set(m->oDay->get() + 1);
             });

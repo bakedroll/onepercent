@@ -2,7 +2,7 @@
 
 #include "simulation/Simulation.h"
 
-#include <QtUtilsLib/MultithreadedApplication.h>
+#include <QtUtilsLib/Multithreading.h>
 
 #include <QtUtilsLib/Macros.h>
 
@@ -42,36 +42,36 @@ namespace onep
 
   void LuaSimulation::lua_start(lua_State* state)
   {
-    QtUtilsLib::MultithreadedApplication::executeInUiAsync([this](){ m_simulation->start(); });
+    QtUtilsLib::Multithreading::executeInUiAsync([this](){ m_simulation->start(); });
   }
 
   void LuaSimulation::lua_stop(lua_State* state)
   {
-    QtUtilsLib::MultithreadedApplication::executeInUiAsync([this](){ m_simulation->stop(); });
+    QtUtilsLib::Multithreading::executeInUiAsync([this](){ m_simulation->stop(); });
   }
 
   void LuaSimulation::lua_set_skill_points(int points)
   {
     UTILS_QLOG_DEBUG(QString("Set skill points: %1").arg(points));
-    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=](){ m_oNumSkillPoints->set(points); });
+    QtUtilsLib::Multithreading::executeInUiAsync([=](){ m_oNumSkillPoints->set(points); });
   }
 
   void LuaSimulation::lua_add_skill_points(int points)
   {
     UTILS_QLOG_DEBUG(QString("Add skill points: %1").arg(points));
-    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=]() { m_simulation->addSkillPoints(points); });
+    QtUtilsLib::Multithreading::executeInUiAsync([=]() { m_simulation->addSkillPoints(points); });
   }
 
   void LuaSimulation::lua_set_day(int day)
   {
     UTILS_QLOG_DEBUG(QString("Set day: %1").arg(day));
-    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=](){ m_oDay->set(day); });
+    QtUtilsLib::Multithreading::executeInUiAsync([=](){ m_oDay->set(day); });
   }
 
   void LuaSimulation::lua_set_interval(int interval)
   {
     UTILS_QLOG_DEBUG(QString("Set interval: %1").arg(interval));
-    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=](){ m_simulation->setUpdateTimerInterval(interval); });
+    QtUtilsLib::Multithreading::executeInUiAsync([=](){ m_simulation->setUpdateTimerInterval(interval); });
   }
 
   void LuaSimulation::lua_set_tick_update_mode(int mode)

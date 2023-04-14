@@ -16,7 +16,7 @@
 
 #include <utilsLib/Utils.h>
 
-#include <QtUtilsLib/MultithreadedApplication.h>
+#include <QtUtilsLib/Multithreading.h>
 
 #include <osgHelper/ByteStream.h>
 #include <osgHelper/Helper.h>
@@ -409,7 +409,7 @@ int CountryOverlay::getCountryId(const osg::Vec2f& coord) const
 
 void CountryOverlay::setSelectedCountry(int countryId)
 {
-  QtUtilsLib::MultithreadedApplication::executeInUiAsync([this, countryId]() {
+  QtUtilsLib::Multithreading::executeInUiAsync([this, countryId]() {
     QMutexLocker lock(&m->selectedCountryMutex);
     m->oSelectedCountryId->set(countryId);
   });
@@ -434,7 +434,7 @@ std::string CountryOverlay::getCurrentOverlayBranchName() const
 
 void CountryOverlay::setCurrentOverlayBranchName(const std::string& branchName)
 {
-  QtUtilsLib::MultithreadedApplication::executeInUiAsync([this, branchName]() {
+  QtUtilsLib::Multithreading::executeInUiAsync([this, branchName]() {
     QMutexLocker lock(&m->currentBranchIdMutex);
     m->oCurrentOverlayBranchId->set(branchName);
   });

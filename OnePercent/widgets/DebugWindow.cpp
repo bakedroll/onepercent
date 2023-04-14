@@ -29,7 +29,7 @@
 #include <QScrollArea>
 #include <QPainter>
 
-#include <QtUtilsLib/MultithreadedApplication.h>
+#include <QtUtilsLib/Multithreading.h>
 
 #include <QtUtilsLib/Macros.h>
 
@@ -554,7 +554,7 @@ namespace onep
 
             skillBranchActivatedObservers.push_back(it.second->getBranchesActivatedTable()->getOBranchActivated(name)->connect([=](bool activated)
             {
-                QtUtilsLib::MultithreadedApplication::executeInUiAsync([=]()
+                QtUtilsLib::Multithreading::executeInUiAsync([=]()
               {
                 if (cid == countryOverlay->getSelectedCountryId())
                 {

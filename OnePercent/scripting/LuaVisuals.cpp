@@ -9,7 +9,7 @@
 
 #include <osgHelper/Helper.h>
 
-#include <QtUtilsLib/MultithreadedApplication.h>
+#include <QtUtilsLib/Multithreading.h>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -78,7 +78,7 @@ namespace onep
 
   void LuaVisuals::updateBindings()
   {
-    QtUtilsLib::MultithreadedApplication::executeInUiAsync([this]()
+    QtUtilsLib::Multithreading::executeInUiAsync([this]()
     {
       m->modelContainer->accessModel([this](const LuaModel::Ptr& model)
       {

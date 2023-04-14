@@ -3,7 +3,7 @@
 
 #include <utilsLib/Utils.h>
 
-#include <QtUtilsLib/MultithreadedApplication.h>
+#include <QtUtilsLib/Multithreading.h>
 
 #include <osgHelper/Helper.h>
 
@@ -101,7 +101,7 @@ namespace onep
 
   void LuaSkill::setIsActivated(bool activated)
   {
-    QtUtilsLib::MultithreadedApplication::executeInUiAsync([=](){ m->obActivated->set(activated); });
+    QtUtilsLib::Multithreading::executeInUiAsync([=](){ m->obActivated->set(activated); });
   }
 
   osgHelper::Observable<bool>::Ptr LuaSkill::getObActivated() const
