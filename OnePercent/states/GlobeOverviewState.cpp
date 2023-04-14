@@ -75,7 +75,7 @@ namespace onep
     {
     case Qt::Key_Escape:
     {
-      requestExitEventState(ExitEventStateMode::ExitAll);
+      requestExitEventState(ExitGameStateMode::ExitAll);
       return true;
     }
     case Qt::Key_Q:

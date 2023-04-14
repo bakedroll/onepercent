@@ -5,7 +5,7 @@ enable_autorcc()
 
 require_library(OpenSceneGraph MODULES osg osgViewer osgUtil osgGA osgDB osgText OpenThreads)
 require_library(osgPPU)
-require_library(Qt6 MODULES Core Gui Widgets OpenGL OpenGLWidgets)
+require_library(Qt MODULES Core Gui Widgets OpenGL OpenGLWidgets)
 require_library(Lua)
 require_library(LuaBridge)
 

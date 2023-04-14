@@ -10,6 +10,8 @@ endif()
 
 project(OnePercent)
 
+set(QT_USE_VERSION_5 ON)
+
 option(LUADOC_ENABLE "enable luadoc" OFF)
 
 add_subdirectory(VectorizerLib)

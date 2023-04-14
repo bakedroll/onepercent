@@ -224,7 +224,7 @@ namespace onep
   void LoadingGlobeOverviewState::onRequestNewStates()
   {
     requestNewEventState<GlobeOverviewState>();
-    requestNewEventState<MainMenuState>(NewEventStateMode::ExitCurrent);
+    requestNewEventState<MainMenuState>(NewGameStateMode::ExitCurrent);
   }
 
   void LoadingGlobeOverviewState::onResizeEvent(QResizeEvent* event)

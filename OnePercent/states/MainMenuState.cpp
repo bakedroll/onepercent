@@ -60,7 +60,7 @@ namespace onep
   {
     if ((event->type() == QKeyEvent::Type::KeyPress) && (event->key() == Qt::Key::Key_S))
     {
-      requestNewEventState<GlobeInteractionState>(NewEventStateMode::ExitCurrent);
+      requestNewEventState<GlobeInteractionState>(NewGameStateMode::ExitCurrent);
       return true;
     }
 
@@ -77,12 +77,12 @@ namespace onep
 
     connect(buttonStart, &QPushButton::clicked, [this]()
     {
-      requestNewEventState<GlobeInteractionState>(NewEventStateMode::ExitCurrent);
+      requestNewEventState<GlobeInteractionState>(NewGameStateMode::ExitCurrent);
     });
 
     connect(buttonEnd, &QPushButton::clicked, [this]()
     {
-      requestExitEventState(ExitEventStateMode::ExitAll);
+      requestExitEventState(ExitGameStateMode::ExitAll);
     });
 
     auto resolution = mainWindow->getViewWidget()->getView()->getResolution();
